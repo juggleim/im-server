@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"im-server/services/botmsg"
 	"im-server/services/broadcast"
-	"im-server/services/chatroommsg"
 	"im-server/services/logmanager"
 	sensitivemanager "im-server/services/sensitivemanager"
 	"im-server/services/subscriptions"
@@ -22,7 +21,6 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/admingateway"
 	"im-server/services/apigateway"
-	"im-server/services/chatroom"
 	"im-server/services/connectmanager"
 	"im-server/services/conversation"
 	"im-server/services/fileplugin"
@@ -96,8 +94,6 @@ func main() {
 	imstarters.Loaded(&navigator.Navigator{})
 	imstarters.Loaded(&message.MessageManager{})
 	imstarters.Loaded(&conversation.ConversationManager{})
-	imstarters.Loaded(&chatroom.ChatroomManager{})
-	imstarters.Loaded(&chatroommsg.ChatroomMsgManager{})
 	imstarters.Loaded(&usermanager.UserManager{})
 	imstarters.Loaded(&historymsg.HistoryMsgManager{})
 	imstarters.Loaded(&group.GroupManager{})
