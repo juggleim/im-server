@@ -26,6 +26,9 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("sendbox", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SendBoxActor{}, serviceName)
 	}, 32)
+	register.RegisterActor("pri_stream", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.PrivateStreamActor{}, serviceName)
+	}, 32)
 	register.RegisterActor("sync_msgs", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SyncMsgActor{}, serviceName)
 	}, 64)

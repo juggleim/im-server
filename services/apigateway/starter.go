@@ -45,6 +45,9 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.POST("/messages/groupcast/send", apis.SendGroupCastMsg)
 	group.POST("/messages/broadcast/send", apis.SendBroadCastMsg)
 	group.POST("/messages/markread", apis.MarkRead)
+	group.POST("/messages/private/stream/create", apis.CreatePrivateStreamMsg)
+	group.POST("/messages/private/stream/append", apis.AppendPrivateStreamMsg)
+	group.POST("/messages/private/stream/complete", apis.CompletePrivateStreamMsg)
 
 	group.GET("/hismsgs/query", apis.QryHisMsgs)
 	group.POST("/hismsgs/clean", apis.CleanHisMsgs)

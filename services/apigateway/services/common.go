@@ -7,6 +7,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/apigateway/models"
 	"im-server/services/commonservices"
 
 	"github.com/gin-gonic/gin"
@@ -37,6 +38,41 @@ func AsyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req prot
 		NoSendbox:    !isNotifySender,
 		ExtParams:    exts,
 	})
+}
+
+func SyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req proto.Message, isNotifySender bool) (errs.IMErrorCode, *models.SendMsgResp, error) {
+	dataBytes, _ := tools.PbMarshal(req)
+	exts := map[string]string{}
+	// exts[commonservices.RpcExtKey_RealMethod] = method
+	// method = "upstream"
+	if method == "p_msg" {
+		exts[commonservices.RpcExtKey_RealTargetId] = targetId
+		targetId = commonservices.GetConversationId(requestId, targetId, pbobjs.ChannelType_Private)
+	} else if method == "s_msg" {
+		exts[commonservices.RpcExtKey_RealTargetId] = targetId
+		targetId = commonservices.GetConversationId(requestId, targetId, pbobjs.ChannelType_System)
+	}
+	result, err := bases.SyncUnicastRoute(&pbobjs.RpcMessageWraper{
+		RpcMsgType:   pbobjs.RpcMsgType_ServerPub,
+		AppKey:       GetCtxString(ctx, CtxKey_AppKey),
+		Session:      GetCtxString(ctx, CtxKey_Session),
+		Method:       method,
+		RequesterId:  requestId,
+		Qos:          1,
+		TargetId:     targetId,
+		AppDataBytes: dataBytes,
+		IsFromApi:    true,
+		NoSendbox:    !isNotifySender,
+		ExtParams:    exts,
+	}, 5*time.Second)
+	if err != nil {
+		return errs.IMErrorCode_API_INTERNAL_RESP_FAIL, nil, err
+	}
+	return errs.IMErrorCode(result.ResultCode), &models.SendMsgResp{
+		MsgId:   result.MsgId,
+		MsgTime: result.MsgSendTime,
+		MsgSeq:  result.MsgSeqNo,
+	}, nil
 }
 
 func AsyncApiCall(ctx *gin.Context, method, requestId, targetId string, req proto.Message) {

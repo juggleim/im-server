@@ -19,6 +19,9 @@ func (manager *HistoryMsgManager) RegisterActors(register gmicro.IActorRegister)
 	register.RegisterActor("del_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.DelMsgActor{}, serviceName)
 	}, 32)
+	register.RegisterActor("upd_stream", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.UpdStreamActor{}, serviceName)
+	}, 32)
 	register.RegisterActor("qry_latest_hismsg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryLatestMsgActor{}, serviceName)
 	}, 32)

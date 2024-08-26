@@ -39,3 +39,8 @@ func OnDisconnect(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody) {
 	fmt.Println("*****************disconnect msg*************")
 	fmt.Println("disconnect_code:", code, "\tdisconnect_msg:", tools.ToJson(disMsg))
 }
+
+func OnStreamMsg(msg *pbobjs.StreamDownMsg) {
+	fmt.Println("***************received stream msg*************")
+	fmt.Println(tools.ToJson(msg))
+}

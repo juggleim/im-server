@@ -29,7 +29,7 @@ func TestGroupMsg(t *testing.T) {
 	//qry groupmembers
 
 	//user1 connect
-	wsClient1 := wsclients.NewWsImClient(WsAddr, Appkey, Token1, nil, nil)
+	wsClient1 := wsclients.NewWsImClient(WsAddr, Appkey, Token1, nil, nil, nil)
 	code, connectAck := wsClient1.Connect("", "")
 	Print("%s connecting... code[%d]", User1, code)
 	if assert.Equal(t, utils.ClientErrorCode_Success, code) {
@@ -40,7 +40,7 @@ func TestGroupMsg(t *testing.T) {
 	msgContainer2 := map[string]*pbobjs.DownMsg{}
 	wsClient2 := wsclients.NewWsImClient(WsAddr, Appkey, Token2, func(msg *pbobjs.DownMsg) {
 		msgContainer2[msg.MsgId] = msg
-	}, nil)
+	}, nil, nil)
 	code, connectAck = wsClient2.Connect("", "")
 	Print("%s connecting... code[%d]", User2, code)
 	if assert.Equal(t, utils.ClientErrorCode_Success, code) {
@@ -51,7 +51,7 @@ func TestGroupMsg(t *testing.T) {
 	msgContainer3 := map[string]*pbobjs.DownMsg{}
 	wsClient3 := wsclients.NewWsImClient(WsAddr, Appkey, Token3, func(msg *pbobjs.DownMsg) {
 		msgContainer3[msg.MsgId] = msg
-	}, nil)
+	}, nil, nil)
 	code, connectAck = wsClient3.Connect("", "")
 	Print("%s connecting... code[%d]", User3, code)
 	if assert.Equal(t, utils.ClientErrorCode_Success, code) {

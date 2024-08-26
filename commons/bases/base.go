@@ -259,8 +259,8 @@ func BroadcastRouteWithNoSender(msg IRoute) {
 	cluster.BroadcastWithNoSender(msg.GetMethod(), msg.(*pbobjs.RpcMessageWraper))
 }
 
-func UnicastRouteWithSenderActor(msg IRoute, sender actorsystem.ActorRef) {
-	cluster.UnicastRoute(msg.GetMethod(), msg.GetTargetId(), msg.(*pbobjs.RpcMessageWraper), sender)
+func UnicastRouteWithSenderActor(msg IRoute, sender actorsystem.ActorRef) bool {
+	return cluster.UnicastRoute(msg.GetMethod(), msg.GetTargetId(), msg.(*pbobjs.RpcMessageWraper), sender)
 }
 
 func GroupTargets(method string, targetIds []string) map[string][]string {

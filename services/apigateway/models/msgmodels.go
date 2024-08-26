@@ -53,7 +53,9 @@ MentionType mentionType = 1;
 	repeated UserInfo targetUsers = 2;
 */
 type SendMsgResp struct {
-	MsgId string `json:"msg_id"`
+	MsgId   string `json:"msg_id"`
+	MsgTime int64  `json:"msg_time"`
+	MsgSeq  int64  `json:"msg_seq"`
 }
 
 type HisMsgs struct {
@@ -100,4 +102,22 @@ type SimpleMsg struct {
 	MsgId        string `json:"msg_id"`
 	MsgTime      int64  `json:"msg_time"`
 	MsgReadIndex int64  `json:"msg_read_index"`
+}
+
+type AppendStreamMsgReq struct {
+	SenderId string           `json:"sender_id"`
+	TargetId string           `json:"target_id"`
+	MsgId    string           `json:"msg_id"`
+	Items    []*StreamMsgItem `json:"items"`
+}
+
+type StreamMsgItem struct {
+	SubSeq         int64  `json:"sub_seq"`
+	PartialContent string `json:"partial_content"`
+}
+
+type CompleteStreamMsgReq struct {
+	SenderId string `json:"sender_id"`
+	TargetId string `json:"target_id"`
+	MsgId    string `json:"msg_id"`
 }

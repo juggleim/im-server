@@ -28,8 +28,9 @@ type WsImClient struct {
 	DeviceOsVersion string
 	PushToken       string
 
-	DisconnectCallback func(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody)
-	OnMessageCallBack  func(msg *pbobjs.DownMsg)
+	DisconnectCallback  func(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody)
+	OnMessageCallBack   func(msg *pbobjs.DownMsg)
+	OnStreamMsgCallBack func(msg *pbobjs.StreamDownMsg)
 
 	UserId string
 
@@ -47,20 +48,21 @@ type WsImClient struct {
 	isEncrypt bool
 }
 
-func NewWsImClient(address, appkey, token string, onMessage func(msg *pbobjs.DownMsg), onDisconnect func(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody)) *WsImClient {
+func NewWsImClient(address, appkey, token string, onMessage func(msg *pbobjs.DownMsg), onStreamMsg func(*pbobjs.StreamDownMsg), onDisconnect func(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody)) *WsImClient {
 	return &WsImClient{
-		Address:            address,
-		Appkey:             appkey,
-		Token:              token,
-		accssorCache:       sync.Map{},
-		connAckAccessor:    tools.NewDataAccessor(),
-		pongAccessor:       tools.NewDataAccessorWithSize(100),
-		OnMessageCallBack:  onMessage,
-		DisconnectCallback: onDisconnect,
-		Platform:           "Web", // "Android",
-		DeviceId:           "testDevice",
-		obfCode:            [8]byte{1, 2, 3, 4, 5, 6, 7, 8},
-		isEncrypt:          true,
+		Address:             address,
+		Appkey:              appkey,
+		Token:               token,
+		accssorCache:        sync.Map{},
+		connAckAccessor:     tools.NewDataAccessor(),
+		pongAccessor:        tools.NewDataAccessorWithSize(100),
+		OnMessageCallBack:   onMessage,
+		OnStreamMsgCallBack: onStreamMsg,
+		DisconnectCallback:  onDisconnect,
+		Platform:            "Web", // "Android",
+		DeviceId:            "testDevice",
+		obfCode:             [8]byte{1, 2, 3, 4, 5, 6, 7, 8},
+		isEncrypt:           true,
 	}
 }
 
@@ -299,6 +301,12 @@ func (client *WsImClient) OnPublish(msg *codec.PublishMsgBody, needAck int) {
 			}
 		} else {
 			fmt.Println("error:", err)
+		}
+	} else if msg.Topic == "stream_msg" {
+		streamMsg := pbobjs.StreamDownMsg{}
+		err := tools.PbUnMarshal(msg.Data, &streamMsg)
+		if err == nil && client.OnStreamMsgCallBack != nil {
+			client.OnStreamMsgCallBack(&streamMsg)
 		}
 	} else {
 		fmt.Println(msg.Topic, msg.Data)

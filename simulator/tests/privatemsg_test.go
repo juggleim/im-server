@@ -12,7 +12,7 @@ import (
 )
 
 func TestPrivateMsg(t *testing.T) {
-	wsClient1 := wsclients.NewWsImClient(WsAddr, Appkey, Token1, nil, nil)
+	wsClient1 := wsclients.NewWsImClient(WsAddr, Appkey, Token1, nil, nil, nil)
 	code, connectAck := wsClient1.Connect("", "")
 	if assert.Equal(t, utils.ClientErrorCode_Success, code) {
 		assert.Equal(t, User1, connectAck.UserId)
@@ -22,7 +22,7 @@ func TestPrivateMsg(t *testing.T) {
 	msgContainer := map[string]*pbobjs.DownMsg{}
 	wsClient2 := wsclients.NewWsImClient(WsAddr, Appkey, Token2, func(msg *pbobjs.DownMsg) {
 		msgContainer[msg.MsgId] = msg
-	}, nil)
+	}, nil, nil)
 	code, connectAck = wsClient2.Connect("", "")
 	if assert.Equal(t, utils.ClientErrorCode_Success, code) {
 		assert.Equal(t, User2, connectAck.UserId)

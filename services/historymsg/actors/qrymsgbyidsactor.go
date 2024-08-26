@@ -7,7 +7,6 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
 	"im-server/services/commonservices/logs"
 	"im-server/services/historymsg/services"
 
@@ -19,7 +18,6 @@ type QryHistoryMsgByIdsActor struct {
 }
 
 func (actor *QryHistoryMsgByIdsActor) OnReceive(ctx context.Context, input proto.Message) {
-	fmt.Println("xxx:", tools.ToJson(actor.Sender))
 	if qryHisMsgsReq, ok := input.(*pbobjs.QryHisMsgByIdsReq); ok {
 		fmt.Printf("target_id:%s\tchannel_type:%v\tmsg_ids:%v", qryHisMsgsReq.TargetId, qryHisMsgsReq.ChannelType, qryHisMsgsReq.MsgIds)
 		fmt.Println()
