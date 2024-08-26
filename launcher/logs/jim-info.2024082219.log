@@ -1,0 +1,267 @@
+240822190926.261	session:cnxQtDa1RHy	action:connect	appkey:appkey	user_id:userid2	client_ip:127.0.0.1:54694	platform:Web	device_id:testDevice	push_token:	client_session:
+240822190934.080	2session:cnxQtDa1RHy	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822190936.768	session:Em1AD8bFpZW	action:connect	appkey:appkey	user_id:userid2	client_ip:127.0.0.1:54699	platform:Web	device_id:testDevice	push_token:	client_session:
+240822190955.950	session:NCI4Rdbw_Fb	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54711	platform:Web	device_id:testDevice	push_token:	client_session:
+240822190955.951	session:NCI4Rdbw_Fb	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822190955.958	service_name:message	session:NCI4Rdbw_Fb	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822190955.988	service_name:message	session:NCI4Rdbw_Fb	method:p_msg	expend:30	seq_index:1	code:0
+240822190955.989	service_name:historymsg	session:NCI4Rdbw_Fb	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822190955.989	session:NCI4Rdbw_Fb	action:u_pub_ack	index:1	code:0
+240822190955.989	service_name:message	session:NCI4Rdbw_Fb	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822190955.989	service_name:message	session:NCI4Rdbw_Fb	method:msg_dispatch	expend:0	seq_index:1	finish
+240822190955.989	service_name:conversation	session:NCI4Rdbw_Fb	method:qry_conver	expend:0	seq_index:1	user_id:userid2	target_id:userid1	channel_type:Private
+240822190956.018	service_name:message	session:NCI4Rdbw_Fb	method:msg_dispatch	expend:29	seq_index:1	msg target_id:userid2
+240822190956.019	service_name:conversation	session:NCI4Rdbw_Fb	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822190956.019	service_name:conversation	session:NCI4Rdbw_Fb	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822190956.019	Em1AD8bFpZW	s_pub	1	msg	106
+240822190956.019	session:Em1AD8bFpZW	action:s_pub	index:1	topic:msg	len:106
+240822190956.019	session:Em1AD8bFpZW	action:s_pub_ack	seq_index:1
+240822191001.494	2session:NCI4Rdbw_Fb	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191003.784	session:rrWQT-bC3Qx	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54719	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191003.784	session:rrWQT-bC3Qx	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191003.784	service_name:message	session:rrWQT-bC3Qx	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191003.785	service_name:message	session:rrWQT-bC3Qx	method:p_msg	expend:1	seq_index:1	code:0
+240822191003.785	service_name:historymsg	session:rrWQT-bC3Qx	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191003.785	session:rrWQT-bC3Qx	action:u_pub_ack	index:1	code:0
+240822191003.785	service_name:message	session:rrWQT-bC3Qx	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191003.785	service_name:message	session:rrWQT-bC3Qx	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191003.786	service_name:conversation	session:rrWQT-bC3Qx	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191003.787	service_name:message	session:rrWQT-bC3Qx	method:msg_dispatch	expend:2	seq_index:1	msg target_id:userid2
+240822191003.787	service_name:conversation	session:rrWQT-bC3Qx	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191003.787	Em1AD8bFpZW	s_pub	2	msg	106
+240822191003.787	session:Em1AD8bFpZW	action:s_pub	index:2	topic:msg	len:106
+240822191003.788	session:Em1AD8bFpZW	action:s_pub_ack	seq_index:2
+240822191004.925	2session:rrWQT-bC3Qx	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191006.297	2session:Em1AD8bFpZW	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191009.601	session:YgV4ZIa2rUp	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54722	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191009.602	session:YgV4ZIa2rUp	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191009.602	service_name:message	session:YgV4ZIa2rUp	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191009.602	service_name:message	session:YgV4ZIa2rUp	method:p_msg	expend:0	seq_index:1	code:0
+240822191009.602	session:YgV4ZIa2rUp	action:u_pub_ack	index:1	code:0
+240822191009.602	service_name:historymsg	session:YgV4ZIa2rUp	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191009.602	service_name:message	session:YgV4ZIa2rUp	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191009.602	service_name:message	session:YgV4ZIa2rUp	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191009.605	service_name:conversation	session:YgV4ZIa2rUp	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191009.610	service_name:message	session:YgV4ZIa2rUp	method:msg_dispatch	expend:8	seq_index:1	msg target_id:userid2
+240822191009.610	service_name:conversation	session:YgV4ZIa2rUp	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191009.610	service_name:pushmanager	session:YgV4ZIa2rUp	method:push	expend:0	seq_index:1	user_id:userid2	
+240822191031.745	2session:YgV4ZIa2rUp	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191238.959	session:AKhQ9e9Xt_5	action:connect	appkey:appkey	user_id:userid2	client_ip:127.0.0.1:54776	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191246.087	session:Qk0kvj93vv2	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54790	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191246.088	session:Qk0kvj93vv2	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191246.088	service_name:message	session:Qk0kvj93vv2	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191246.089	service_name:message	session:Qk0kvj93vv2	method:p_msg	expend:1	seq_index:1	code:0
+240822191246.089	service_name:historymsg	session:Qk0kvj93vv2	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191246.089	session:Qk0kvj93vv2	action:u_pub_ack	index:1	code:0
+240822191246.089	service_name:message	session:Qk0kvj93vv2	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191246.089	service_name:message	session:Qk0kvj93vv2	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191246.102	service_name:conversation	session:Qk0kvj93vv2	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191246.102	service_name:conversation	session:Qk0kvj93vv2	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191246.102	service_name:pushmanager	session:Qk0kvj93vv2	method:push	expend:0	seq_index:1	user_id:userid2	
+240822191254.123	2session:Qk0kvj93vv2	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191256.877	session:tmSkyt95D-D	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54796	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191256.877	session:tmSkyt95D-D	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191256.877	service_name:message	session:tmSkyt95D-D	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191256.878	service_name:message	session:tmSkyt95D-D	method:p_msg	expend:1	seq_index:1	code:0
+240822191256.878	service_name:historymsg	session:tmSkyt95D-D	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191256.878	session:tmSkyt95D-D	action:u_pub_ack	index:1	code:0
+240822191256.878	service_name:message	session:tmSkyt95D-D	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191256.878	service_name:message	session:tmSkyt95D-D	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191256.883	service_name:conversation	session:tmSkyt95D-D	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191256.884	service_name:conversation	session:tmSkyt95D-D	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191256.884	service_name:pushmanager	session:tmSkyt95D-D	method:push	expend:0	seq_index:1	user_id:userid2	
+240822191259.003	2session:tmSkyt95D-D	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191330.341	session:sGNkpRbvXj5	action:connect	appkey:appkey	user_id:userid2	client_ip:127.0.0.1:54819	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191339.218	session:92S4B2byCut	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54830	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191339.219	session:92S4B2byCut	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191339.222	service_name:message	session:92S4B2byCut	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191339.227	service_name:message	session:92S4B2byCut	method:p_msg	expend:5	seq_index:1	code:0
+240822191339.228	service_name:historymsg	session:92S4B2byCut	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191339.228	session:92S4B2byCut	action:u_pub_ack	index:1	code:0
+240822191339.228	service_name:message	session:92S4B2byCut	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191339.228	service_name:message	session:92S4B2byCut	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191339.228	service_name:conversation	session:92S4B2byCut	method:qry_conver	expend:0	seq_index:1	user_id:userid2	target_id:userid1	channel_type:Private
+240822191339.231	service_name:conversation	session:92S4B2byCut	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191339.234	service_name:message	session:92S4B2byCut	method:msg_dispatch	expend:6	seq_index:1	msg target_id:userid2
+240822191339.234	sGNkpRbvXj5	s_pub	1	msg	106
+240822191339.235	session:sGNkpRbvXj5	action:s_pub	index:1	topic:msg	len:106
+240822191339.234	service_name:conversation	session:92S4B2byCut	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191339.235	session:sGNkpRbvXj5	action:s_pub_ack	seq_index:1
+240822191340.388	2session:92S4B2byCut	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191342.562	session:qfxAYh8WPM4	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54833	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191342.563	session:qfxAYh8WPM4	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191342.563	service_name:message	session:qfxAYh8WPM4	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191342.563	service_name:message	session:qfxAYh8WPM4	method:p_msg	expend:0	seq_index:1	code:0
+240822191342.563	session:qfxAYh8WPM4	action:u_pub_ack	index:1	code:0
+240822191342.563	service_name:message	session:qfxAYh8WPM4	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191342.563	service_name:historymsg	session:qfxAYh8WPM4	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191342.563	service_name:message	session:qfxAYh8WPM4	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191342.565	service_name:message	session:qfxAYh8WPM4	method:msg_dispatch	expend:2	seq_index:1	msg target_id:userid2
+240822191342.565	service_name:conversation	session:qfxAYh8WPM4	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191342.565	sGNkpRbvXj5	s_pub	2	msg	106
+240822191342.565	session:sGNkpRbvXj5	action:s_pub	index:2	topic:msg	len:106
+240822191342.566	session:sGNkpRbvXj5	action:s_pub_ack	seq_index:2
+240822191342.566	service_name:conversation	session:qfxAYh8WPM4	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191343.617	2session:qfxAYh8WPM4	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191346.706	2session:sGNkpRbvXj5	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191351.618	session:hO-kOzavudd	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54837	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191351.619	session:hO-kOzavudd	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191351.619	service_name:message	session:hO-kOzavudd	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191351.620	service_name:message	session:hO-kOzavudd	method:p_msg	expend:1	seq_index:1	code:0
+240822191351.621	session:hO-kOzavudd	action:u_pub_ack	index:1	code:0
+240822191351.621	service_name:historymsg	session:hO-kOzavudd	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191351.621	service_name:message	session:hO-kOzavudd	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191351.621	service_name:message	session:hO-kOzavudd	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191351.631	service_name:message	session:hO-kOzavudd	method:msg_dispatch	expend:10	seq_index:1	msg target_id:userid2
+240822191351.631	service_name:conversation	session:hO-kOzavudd	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191351.631	service_name:conversation	session:hO-kOzavudd	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191351.631	service_name:pushmanager	session:hO-kOzavudd	method:push	expend:0	seq_index:1	user_id:userid2	
+240822191352.593	2session:hO-kOzavudd	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191355.168	session:fh-QA18U-8V	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54841	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191355.168	session:fh-QA18U-8V	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191355.168	service_name:message	session:fh-QA18U-8V	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191355.169	service_name:message	session:fh-QA18U-8V	method:p_msg	expend:1	seq_index:1	code:0
+240822191355.169	service_name:historymsg	session:fh-QA18U-8V	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191355.169	session:fh-QA18U-8V	action:u_pub_ack	index:1	code:0
+240822191355.169	service_name:message	session:fh-QA18U-8V	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191355.169	service_name:message	session:fh-QA18U-8V	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191355.173	service_name:conversation	session:fh-QA18U-8V	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191355.173	service_name:pushmanager	session:fh-QA18U-8V	method:push	expend:0	seq_index:1	user_id:userid2	
+240822191355.173	service_name:conversation	session:fh-QA18U-8V	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191355.998	2session:fh-QA18U-8V	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191501.394	session:cR3AGC978AP	action:connect	appkey:appkey	user_id:userid2	client_ip:127.0.0.1:54870	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191509.785	session:wNm4hY99hBd	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54874	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191509.786	session:wNm4hY99hBd	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191509.789	service_name:message	session:wNm4hY99hBd	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191509.800	service_name:message	session:wNm4hY99hBd	method:p_msg	expend:11	seq_index:1	code:0
+240822191509.800	service_name:historymsg	session:wNm4hY99hBd	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191509.800	service_name:message	session:wNm4hY99hBd	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191509.800	service_name:message	session:wNm4hY99hBd	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191509.800	session:wNm4hY99hBd	action:u_pub_ack	index:1	code:0
+240822191509.801	service_name:conversation	session:wNm4hY99hBd	method:qry_conver	expend:0	seq_index:1	user_id:userid2	target_id:userid1	channel_type:Private
+240822191509.809	service_name:conversation	session:wNm4hY99hBd	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191509.810	service_name:message	session:wNm4hY99hBd	method:msg_dispatch	expend:10	seq_index:1	msg target_id:userid2
+240822191509.810	service_name:conversation	session:wNm4hY99hBd	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191509.810	cR3AGC978AP	s_pub	1	msg	106
+240822191509.810	session:cR3AGC978AP	action:s_pub	index:1	topic:msg	len:106
+240822191509.811	session:cR3AGC978AP	action:s_pub_ack	seq_index:1
+240822191513.257	2session:wNm4hY99hBd	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191515.852	session:5XWAn6al-RY	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54894	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191515.852	session:5XWAn6al-RY	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191515.853	service_name:message	session:5XWAn6al-RY	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191515.853	service_name:message	session:5XWAn6al-RY	method:p_msg	expend:0	seq_index:1	code:0
+240822191515.853	service_name:message	session:5XWAn6al-RY	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191515.853	service_name:historymsg	session:5XWAn6al-RY	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191515.853	session:5XWAn6al-RY	action:u_pub_ack	index:1	code:0
+240822191515.853	service_name:message	session:5XWAn6al-RY	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191515.855	service_name:message	session:5XWAn6al-RY	method:msg_dispatch	expend:2	seq_index:1	msg target_id:userid2
+240822191515.855	service_name:conversation	session:5XWAn6al-RY	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191515.855	cR3AGC978AP	s_pub	2	msg	106
+240822191515.855	session:cR3AGC978AP	action:s_pub	index:2	topic:msg	len:106
+240822191515.855	session:cR3AGC978AP	action:s_pub_ack	seq_index:2
+240822191515.858	service_name:conversation	session:5XWAn6al-RY	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191516.846	2session:5XWAn6al-RY	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191518.666	2session:cR3AGC978AP	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191521.925	session:Jp6khP81W5s	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54898	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191521.925	session:Jp6khP81W5s	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191521.926	service_name:message	session:Jp6khP81W5s	method:p_msg	expend:1	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191521.926	service_name:message	session:Jp6khP81W5s	method:p_msg	expend:1	seq_index:1	code:0
+240822191521.926	session:Jp6khP81W5s	action:u_pub_ack	index:1	code:0
+240822191521.926	service_name:message	session:Jp6khP81W5s	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191521.926	service_name:message	session:Jp6khP81W5s	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191521.926	service_name:historymsg	session:Jp6khP81W5s	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191521.929	service_name:conversation	session:Jp6khP81W5s	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191521.930	service_name:message	session:Jp6khP81W5s	method:msg_dispatch	expend:4	seq_index:1	msg target_id:userid2
+240822191521.930	service_name:conversation	session:Jp6khP81W5s	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191521.930	service_name:pushmanager	session:Jp6khP81W5s	method:push	expend:0	seq_index:1	user_id:userid2	
+240822191630.585	session:dVGk3t9aZdR	action:connect	appkey:appkey	user_id:userid2	client_ip:127.0.0.1:54931	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191640.916	session:YnwA1781xko	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54934	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191640.918	session:YnwA1781xko	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191640.920	service_name:message	session:YnwA1781xko	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191640.928	service_name:message	session:YnwA1781xko	method:p_msg	expend:8	seq_index:1	code:0
+240822191640.928	session:YnwA1781xko	action:u_pub_ack	index:1	code:0
+240822191640.928	service_name:historymsg	session:YnwA1781xko	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191640.928	service_name:message	session:YnwA1781xko	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191640.928	service_name:message	session:YnwA1781xko	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191640.928	service_name:conversation	session:YnwA1781xko	method:qry_conver	expend:0	seq_index:1	user_id:userid2	target_id:userid1	channel_type:Private
+240822191640.931	service_name:conversation	session:YnwA1781xko	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191640.933	service_name:message	session:YnwA1781xko	method:msg_dispatch	expend:5	seq_index:1	msg target_id:userid2
+240822191640.933	service_name:conversation	session:YnwA1781xko	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191640.933	dVGk3t9aZdR	s_pub	1	msg	106
+240822191640.933	session:dVGk3t9aZdR	action:s_pub	index:1	topic:msg	len:106
+240822191640.933	session:dVGk3t9aZdR	action:s_pub_ack	seq_index:1
+240822191642.804	2session:YnwA1781xko	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191645.429	session:TRpAcDaXp0L	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54938	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191645.430	session:TRpAcDaXp0L	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191645.430	service_name:message	session:TRpAcDaXp0L	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191645.430	service_name:message	session:TRpAcDaXp0L	method:p_msg	expend:0	seq_index:1	code:0
+240822191645.430	service_name:historymsg	session:TRpAcDaXp0L	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191645.430	service_name:message	session:TRpAcDaXp0L	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191645.430	service_name:message	session:TRpAcDaXp0L	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191645.430	session:TRpAcDaXp0L	action:u_pub_ack	index:1	code:0
+240822191645.432	service_name:message	session:TRpAcDaXp0L	method:msg_dispatch	expend:2	seq_index:1	msg target_id:userid2
+240822191645.432	service_name:conversation	session:TRpAcDaXp0L	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191645.432	service_name:conversation	session:TRpAcDaXp0L	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191645.432	dVGk3t9aZdR	s_pub	2	msg	106
+240822191645.432	session:dVGk3t9aZdR	action:s_pub	index:2	topic:msg	len:106
+240822191645.432	session:dVGk3t9aZdR	action:s_pub_ack	seq_index:2
+240822191647.786	2session:TRpAcDaXp0L	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191648.911	2session:dVGk3t9aZdR	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191652.530	session:QuOAYUb83D7	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:54941	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191652.530	session:QuOAYUb83D7	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191652.531	service_name:message	session:QuOAYUb83D7	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191652.531	service_name:message	session:QuOAYUb83D7	method:p_msg	expend:0	seq_index:1	code:0
+240822191652.531	service_name:message	session:QuOAYUb83D7	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191652.531	service_name:message	session:QuOAYUb83D7	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191652.531	session:QuOAYUb83D7	action:u_pub_ack	index:1	code:0
+240822191652.531	service_name:historymsg	session:QuOAYUb83D7	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191652.534	service_name:message	session:QuOAYUb83D7	method:msg_dispatch	expend:3	seq_index:1	msg target_id:userid2
+240822191652.534	service_name:conversation	session:QuOAYUb83D7	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191652.534	service_name:conversation	session:QuOAYUb83D7	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191652.534	service_name:pushmanager	session:QuOAYUb83D7	method:push	expend:0	seq_index:1	user_id:userid2	
+240822191847.633	session:bel4avaOLIk	action:connect	appkey:appkey	user_id:userid2	client_ip:127.0.0.1:54997	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191855.337	session:Ykk4o9bkuWk	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:55001	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191855.337	session:Ykk4o9bkuWk	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191855.340	service_name:message	session:Ykk4o9bkuWk	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191855.344	service_name:message	session:Ykk4o9bkuWk	method:p_msg	expend:4	seq_index:1	code:0
+240822191855.344	session:Ykk4o9bkuWk	action:u_pub_ack	index:1	code:0
+240822191855.344	service_name:historymsg	session:Ykk4o9bkuWk	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191855.344	service_name:message	session:Ykk4o9bkuWk	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191855.345	service_name:message	session:Ykk4o9bkuWk	method:msg_dispatch	expend:1	seq_index:1	finish
+240822191855.345	service_name:conversation	session:Ykk4o9bkuWk	method:qry_conver	expend:0	seq_index:1	user_id:userid2	target_id:userid1	channel_type:Private
+240822191855.349	service_name:conversation	session:Ykk4o9bkuWk	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191855.351	service_name:message	session:Ykk4o9bkuWk	method:msg_dispatch	expend:7	seq_index:1	msg target_id:userid2
+240822191855.351	service_name:conversation	session:Ykk4o9bkuWk	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191855.352	bel4avaOLIk	s_pub	1	msg	106
+240822191855.352	session:bel4avaOLIk	action:s_pub	index:1	topic:msg	len:106
+240822191855.352	session:bel4avaOLIk	action:s_pub_ack	seq_index:1
+240822191857.044	2session:Ykk4o9bkuWk	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191859.440	session:nMRQzC88v_3	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:55006	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191859.440	session:nMRQzC88v_3	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191859.441	service_name:message	session:nMRQzC88v_3	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191859.441	service_name:message	session:nMRQzC88v_3	method:p_msg	expend:0	seq_index:1	code:0
+240822191859.441	service_name:historymsg	session:nMRQzC88v_3	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191859.441	session:nMRQzC88v_3	action:u_pub_ack	index:1	code:0
+240822191859.441	service_name:message	session:nMRQzC88v_3	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191859.441	service_name:message	session:nMRQzC88v_3	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191859.442	service_name:conversation	session:nMRQzC88v_3	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191859.445	service_name:message	session:nMRQzC88v_3	method:msg_dispatch	expend:4	seq_index:1	msg target_id:userid2
+240822191859.445	service_name:conversation	session:nMRQzC88v_3	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191859.445	bel4avaOLIk	s_pub	2	msg	106
+240822191859.445	session:bel4avaOLIk	action:s_pub	index:2	topic:msg	len:106
+240822191859.445	session:bel4avaOLIk	action:s_pub_ack	seq_index:2
+240822191900.179	2session:nMRQzC88v_3	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191901.747	2session:bel4avaOLIk	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822191906.076	session:eNxQaN9SsE9	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:55008	platform:Web	device_id:testDevice	push_token:	client_session:
+240822191906.077	session:eNxQaN9SsE9	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822191906.077	service_name:message	session:eNxQaN9SsE9	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822191906.077	service_name:message	session:eNxQaN9SsE9	method:p_msg	expend:0	seq_index:1	code:0
+240822191906.077	service_name:historymsg	session:eNxQaN9SsE9	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822191906.077	session:eNxQaN9SsE9	action:u_pub_ack	index:1	code:0
+240822191906.077	service_name:message	session:eNxQaN9SsE9	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822191906.077	service_name:message	session:eNxQaN9SsE9	method:msg_dispatch	expend:0	seq_index:1	finish
+240822191906.079	service_name:conversation	session:eNxQaN9SsE9	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822191906.083	service_name:message	session:eNxQaN9SsE9	method:msg_dispatch	expend:6	seq_index:1	msg target_id:userid2
+240822191906.083	service_name:conversation	session:eNxQaN9SsE9	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822191906.083	service_name:pushmanager	session:eNxQaN9SsE9	method:push	expend:0	seq_index:1	user_id:userid2	
+240822192315.224	2session:eNxQaN9SsE9	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF

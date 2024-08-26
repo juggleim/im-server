@@ -1,0 +1,103 @@
+package dbs
+
+import (
+	"im-server/commons/dbcommons"
+	"im-server/commons/pbdefines/pbobjs"
+	"im-server/services/conversation/storages/models"
+	"sort"
+)
+
+type MentionMsgDao struct {
+	ID          int64  `gorm:"primary_key"`
+	UserId      string `gorm:"user_id"`
+	TargetId    string `gorm:"target_id"`
+	ChannelType int    `gorm:"channel_type"`
+	SenderId    string `gorm:"sender_id"`
+	MentionType int    `gorm:"mention_type"`
+	MsgId       string `gorm:"msg_id"`
+	MsgTime     int64  `gorm:"msg_time"`
+	MsgIndex    int64  `gorm:"msg_index"`
+	AppKey      string `gorm:"app_key"`
+}
+
+func (mention *MentionMsgDao) TableName() string {
+	return "mentionmsgs"
+}
+func (mention *MentionMsgDao) SaveMentionMsg(item models.MentionMsg) error {
+	daoItem := MentionMsgDao{
+		UserId:      item.UserId,
+		TargetId:    item.TargetId,
+		ChannelType: int(item.ChannelType),
+		SenderId:    item.SenderId,
+		MentionType: int(item.MentionType),
+		MsgId:       item.MsgId,
+		MsgTime:     item.MsgTime,
+		MsgIndex:    item.MsgIndex,
+		AppKey:      item.AppKey,
+	}
+	err := dbcommons.GetDb().Create(&daoItem).Error
+	return err
+}
+func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64) ([]*models.MentionMsg, error) {
+	var items []MentionMsgDao
+
+	params := []interface{}{}
+	condition := "app_key=? and user_id=? and target_id=? and channel_type=?"
+	params = append(params, appkey)
+	params = append(params, userId)
+	params = append(params, targetId)
+	params = append(params, channelType)
+	orderStr := "msg_time desc"
+	if isPositiveOrder {
+		condition = condition + " and msg_time>?"
+		orderStr = "msg_time asc"
+	} else {
+		condition = condition + " and msg_time<?"
+	}
+	params = append(params, startTime)
+	if startIndex > 0 {
+		condition = condition + " and msg_index>?"
+		params = append(params, startIndex)
+	}
+	err := dbcommons.GetDb().Debug().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	if err != nil {
+		return []*models.MentionMsg{}, err
+	}
+	mentionMsgs := []*models.MentionMsg{}
+	for _, item := range items {
+		mentionMsgs = append(mentionMsgs, &models.MentionMsg{
+			UserId:      item.UserId,
+			TargetId:    item.TargetId,
+			ChannelType: pbobjs.ChannelType(item.ChannelType),
+			SenderId:    item.SenderId,
+			MentionType: pbobjs.MentionType(item.MentionType),
+			MsgId:       item.MsgId,
+			MsgTime:     item.MsgTime,
+			MsgIndex:    item.MsgIndex,
+			AppKey:      item.AppKey,
+		})
+	}
+	if !isPositiveOrder {
+		sort.Slice(items, func(i, j int) bool {
+			return items[i].MsgTime < items[j].MsgTime
+		})
+	}
+	return mentionMsgs, nil
+}
+
+func (mention *MentionMsgDao) QryMentionSenderIdsBaseIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, startIndex int64, count int) ([]*models.MentionMsg, error) {
+	var items []MentionMsgDao
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_index>?", appkey, userId, targetId, int(channelType), startIndex).Select("sender_id,msg_id,msg_time").Order("msg_index asc").Limit(count).Find(&items).Error
+	if err != nil {
+		return []*models.MentionMsg{}, err
+	}
+	mentionMsgs := []*models.MentionMsg{}
+	for _, item := range items {
+		mentionMsgs = append(mentionMsgs, &models.MentionMsg{
+			SenderId: item.SenderId,
+			MsgTime:  item.MsgTime,
+			MsgId:    item.MsgId,
+		})
+	}
+	return mentionMsgs, nil
+}

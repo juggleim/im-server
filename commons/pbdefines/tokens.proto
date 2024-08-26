@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "./pbobjs";
+
+message TokenWrap{
+    string appKey = 1;
+    int32 version = 2;
+    bytes tokenValue = 3;
+}
+message TokenValue {
+    string userId = 1;
+    string deviceId = 2;
+    int64 tokenTime = 3;
+}

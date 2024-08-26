@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "./pbobjs";
+
+message UserIds {
+  repeated string user_ids = 1;
+}
+
+message UserTag {
+  string user_id = 1;
+  repeated string tags = 2;
+}
+
+message UserTagList {
+  repeated UserTag user_tags = 1;
+}
+
+message PushNotificationWithTags {
+  string from_user_id = 1;
+  Condition condition = 2;
+  MsgBody msg_body = 3;
+  Notification notification = 4;
+  message MsgBody {
+    string msg_type = 1;
+    string msg_content = 2;
+  }
+  message Notification {
+    string title = 1;
+    string push_text = 2;
+  }
+  message Condition {
+    repeated string tags_and = 1;
+    repeated string tags_or = 2;
+  }
+}

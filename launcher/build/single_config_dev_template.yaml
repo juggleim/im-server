@@ -1,0 +1,34 @@
+clusterName: {{ CLUSTER_NAME }}
+nodeName: {{ POD_NAME }}
+clusterMod: single
+rpcHost: {{ POD_IP }}
+rpcPort: {{ RPC_PORT }}
+msgStoreEngine: {{ MSG_STORE_ENGINE }}
+
+log:
+  logPath: ./logs
+  logName: jim-info
+  visual: true
+
+mysql:
+  user: root
+  password: {{ MYSQL_ROOT_PASSWORD }}
+  address: mysql-primary:3306
+  name: jim_db
+
+mongodb:
+  address: root:{{ MONGODB_ROOT_PASSWORD }}@{{ MONGODB_ADDR }}:27017
+  name: jim_msgs
+
+connectManager:
+  wsPort: {{ WS_PORT }}
+  proxyPort: {{ PROXY_PORT }}
+
+apiGateway:
+  httpPort: {{ API_HTTP_PORT }}
+
+navGateway:
+  httpPort: {{ NAV_HTTP_PORT }}
+
+adminGateway:
+  httpPort: {{ ADMIN_HTTP_PORT }}

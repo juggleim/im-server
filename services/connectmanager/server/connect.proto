@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+option go_package = "./codec";
+
+message ConnectMsgBody{
+    string protoId = 1;
+    string sdkVersion = 2; //sdk 版本
+    string appkey = 3;
+    string token = 4;
+
+    //设备信息
+    string deviceId = 5;
+    string platform = 6;//iOS/Android/iPad
+    string deviceCompany = 7;//设备厂商, huawei/apple
+    string deviceModel = 8;//设备型号  例如: iPhone8
+    string deviceOsVersion = 9;//手机操作系统版本
+    string pushToken = 10;//厂商推送Token
+    //网络
+    string networkId = 11;//网络类型；4G/wifi
+    string isp_num = 12;//网络运营商编号
+    string clientIp = 13;
+    
+    string packageName = 14;
+    string pushChannel = 15;
+    string ext = 16;
+
+    string clientSession = 17;//客户端session标识
+}
+
+message ConnectAckMsgBody{
+    int32 code = 1;
+    string userId = 2;
+    string session = 3;
+    int64 timestamp = 4;
+    string ext = 5;
+}
+
+message DisconnectMsgBody{
+    int32 code = 1;
+    int64 timestamp = 2;
+    string ext = 3;
+}
+
+message PublishMsgBody{
+    int32 index = 1;
+    string topic = 2;
+    string targetId = 3;
+    int64 timestamp = 4;
+    bytes data = 5;
+}
+
+message PublishAckMsgBody{
+    int32 index = 1;
+    int32 code = 2;
+    string msgId = 3;
+    int64 timestamp = 4;
+    int64 msgSeqNo = 5;
+}
+
+message QueryMsgBody{
+    int32 index = 1;
+    string topic = 2;
+    string targetId = 3;
+    int64 timestamp = 4;
+    bytes data = 5;
+}
+
+message QueryAckMsgBody{
+    int32 index = 1;
+    int32 code = 2;
+    int64 timestamp = 3;
+    bytes data = 4;
+}
+
+message QueryConfirmMsgBody{
+    int32 index = 1;
+}
+
+message ImWebsocketMsg {
+    int32 version = 1;
+    int32 cmd = 2;
+    int32 qos  = 3;
+    bytes payload = 4;
+    oneof testof{
+        ConnectMsgBody connectMsgBody = 11;
+        ConnectAckMsgBody ConnectAckMsgBody = 12;
+        DisconnectMsgBody disconnectMsgBody = 13;
+        PublishMsgBody publishMsgBody = 14;
+        PublishAckMsgBody pubAckMsgBody = 15;
+        QueryMsgBody qryMsgBody = 16;
+        QueryAckMsgBody qryAckMsgBody = 17;
+        QueryConfirmMsgBody qryConfirmMsgBody = 18;
+    }
+}
+

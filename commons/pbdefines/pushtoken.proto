@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "./pbobjs";
+
+enum Platform{
+    DefaultPlatform = 0;
+    Android = 1;
+    iOS = 2;
+    Web = 3;
+    PC = 4;
+}
+
+enum PushChannel{
+    DefaultChannel = 0;
+    Apple = 1;
+    Huawei = 2;
+    Xiaomi = 3;
+    Oppo = 4;
+    Vivo = 5;
+    FCM = 6;
+    JPush = 7;
+}
+
+message RegPushTokenReq{
+    string deviceId = 1;
+    Platform platform = 2;
+    PushChannel pushChannel = 3;
+    string pushToken = 4;
+    string packageName = 5;
+}

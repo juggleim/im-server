@@ -1,0 +1,44 @@
+240822103254.100	session:lKHADz9WQL1	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:57345	platform:Web	device_id:testDevice	push_token:	client_session:
+240822103256.886	2session:lKHADz9WQL1	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822103307.183	session:qfHQkj8UddF	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:57351	platform:Web	device_id:testDevice	push_token:	client_session:
+240822103317.185	session:qfHQkj8UddF	action:disconnect	code:0
+240822103348.664	session:cOrQQ_98lKN	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:57470	platform:Web	device_id:testDevice	push_token:	client_session:
+240822103348.665	session:cOrQQ_98lKN	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822103348.729	service_name:message	session:cOrQQ_98lKN	method:p_msg	expend:1	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822103348.824	service_name:message	session:cOrQQ_98lKN	method:p_msg	expend:96	seq_index:1	code:0
+240822103348.825	session:cOrQQ_98lKN	action:u_pub_ack	index:1	code:0
+240822103348.825	service_name:message	session:cOrQQ_98lKN	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822103348.825	service_name:historymsg	session:cOrQQ_98lKN	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822103348.825	service_name:message	session:cOrQQ_98lKN	method:msg_dispatch	expend:0	seq_index:1	finish
+240822103348.825	service_name:conversation	session:cOrQQ_98lKN	method:qry_conver	expend:0	seq_index:1	user_id:userid2	target_id:userid1	channel_type:Private
+240822103348.852	service_name:message	session:cOrQQ_98lKN	method:msg_dispatch	expend:27	seq_index:1	msg target_id:userid2
+240822103348.853	service_name:conversation	session:cOrQQ_98lKN	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822103348.853	service_name:conversation	session:cOrQQ_98lKN	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822103348.853	service_name:pushmanager	session:cOrQQ_98lKN	method:push	expend:0	seq_index:1	user_id:userid2	
+240822103351.085	2session:cOrQQ_98lKN	action:disconnect	err:websocket: close 1006 (abnormal closure): unexpected EOF
+240822103356.967	session:2QYQFu931lt	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:57477	platform:Web	device_id:testDevice	push_token:	client_session:
+240822103356.967	session:2QYQFu931lt	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822103356.968	service_name:message	session:2QYQFu931lt	method:p_msg	expend:1	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822103356.968	service_name:message	session:2QYQFu931lt	method:p_msg	expend:1	seq_index:1	code:0
+240822103356.968	session:2QYQFu931lt	action:u_pub_ack	index:1	code:0
+240822103356.968	service_name:historymsg	session:2QYQFu931lt	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822103356.968	service_name:message	session:2QYQFu931lt	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822103356.968	service_name:message	session:2QYQFu931lt	method:msg_dispatch	expend:0	seq_index:1	finish
+240822103356.970	service_name:conversation	session:2QYQFu931lt	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822103356.971	service_name:pushmanager	session:2QYQFu931lt	method:push	expend:0	seq_index:1	user_id:userid2	
+240822103356.971	service_name:conversation	session:2QYQFu931lt	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822103406.969	session:2QYQFu931lt	action:disconnect	code:0
+240822103629.075	session:pfIQ8gaQHdw	action:connect	appkey:appkey	user_id:userid1	client_ip:127.0.0.1:57550	platform:Web	device_id:testDevice	push_token:	client_session:
+240822103629.077	session:pfIQ8gaQHdw	action:u_pub	seq_index:1	topic:p_msg	target_id:userid2	len:37
+240822103629.085	service_name:message	session:pfIQ8gaQHdw	method:p_msg	expend:0	seq_index:1	sender:userid1	receiver:userid2	flag:10
+240822103629.093	service_name:message	session:pfIQ8gaQHdw	method:p_msg	expend:8	seq_index:1	code:0
+240822103629.093	session:pfIQ8gaQHdw	action:u_pub_ack	index:1	code:0
+240822103629.093	service_name:message	session:pfIQ8gaQHdw	method:msg_dispatch	expend:0	seq_index:1	channel_type:Private	receiver:userid2	group_id:	targetids_len:0
+240822103629.093	service_name:historymsg	session:pfIQ8gaQHdw	method:add_hismsg	expend:0	seq_index:1	channel_type:Private	sender:userid1	receiver:userid2
+240822103629.093	service_name:message	session:pfIQ8gaQHdw	method:msg_dispatch	expend:0	seq_index:1	finish
+240822103629.093	service_name:conversation	session:pfIQ8gaQHdw	method:qry_conver	expend:0	seq_index:1	user_id:userid2	target_id:userid1	channel_type:Private
+240822103629.099	service_name:conversation	session:pfIQ8gaQHdw	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid2	channel_type:Private
+240822103629.107	service_name:message	session:pfIQ8gaQHdw	method:msg_dispatch	expend:14	seq_index:1	msg target_id:userid2
+240822103629.108	service_name:conversation	session:pfIQ8gaQHdw	method:add_conver	expend:0	seq_index:1	user_id:userid1	target_id:userid1	channel_type:Private
+240822103629.108	service_name:pushmanager	session:pfIQ8gaQHdw	method:push	expend:0	seq_index:1	user_id:userid2	
+240822103639.094	session:pfIQ8gaQHdw	action:disconnect	code:0

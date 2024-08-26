@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option go_package = "./pbobjs";
+
+message CommonReq{
+}
+
+message SensitiveFilterReq {
+  string text = 1;
+}
+
+message SensitiveFilterResp {
+  SensitiveHandlerType handler_type = 1;
+  string filtered_text = 2;
+}
+
+enum SensitiveHandlerType {
+  pass = 0;
+  deny = 1;
+  replace = 2;
+}
+
+message AddSensitiveWordsReq {
+  repeated SensitiveWord words = 1;
+}
+
+message DelSensitiveWordsReq {
+  repeated string words = 1;
+}
+
+message SensitiveFilterConfig {
+  SensitiveHandlerType handler_type = 1;
+  string replace_char = 2;
+}
+
+message QrySensitiveWordsReq {
+  int32 page = 1;
+  int32 size = 2;
+  int32 limit = 3;
+  string offset = 4;
+  string word = 5;
+}
+
+message QrySensitiveWordsResp {
+  int32 total = 1;
+  repeated SensitiveWord words = 2;
+}
+message SensitiveWord {
+  string Id = 1;
+  string word = 2;
+  SensitiveWordType wordType = 3;
+}
+
+enum SensitiveWordType {
+  invalid_word = 0;
+  deny_word = 1;
+  replace_word = 2;
+}

@@ -1,0 +1,30 @@
+nodeName: testNode
+nodeHost: 127.0.0.1
+msgStoreEngine: mysql
+
+log:
+  logPath: ./logs
+  logName: jim-info
+  visual: false
+
+mysql:
+  user: root
+  password: xiaoguang
+  address: 127.0.0.1:3306
+  name: im_db
+
+mongodb:
+  address: 127.0.0.1:27017
+  name: jim_msgs
+
+connectManager:
+  wsPort: 9002
+
+apiGateway:
+  httpPort: 8082
+
+navGateway:
+  httpPort: 8081
+
+adminGateway:
+  httpPort: 8090

@@ -1,0 +1,188 @@
+package commonservices
+
+import (
+	"encoding/json"
+	"reflect"
+	"strconv"
+	"strings"
+	"time"
+
+	"im-server/commons/caches"
+	"im-server/commons/tools"
+	"im-server/services/commonservices/dbs"
+)
+
+var appInfoCache *caches.LruCache
+
+type AppInfo struct {
+	AppKey       string    `default:"-"`
+	AppSecret    string    `default:"-"`
+	AppSecureKey string    `default:"-"`
+	AppStatus    int       `default:"-"`
+	CreatedTime  time.Time `default:"-"`
+
+	EventSubConfigObj *EventSubConfigObj `default:"-"`
+	EventSubSwitchObj *EventSubSwitchObj `default:"-"`
+
+	IsHideMsgBeforeJoinGroup bool   `default:"false"`
+	HideGrpMsg               bool   `default:"false"`
+	NotCheckGrpMember        bool   `default:"false"`
+	TokenEffectiveMinute     int    `default:"0"`
+	OfflineMsgSaveTime       int    `default:"1440"`
+	IsSubApiMsg              bool   `default:"false"`
+	MaxGrpMemberCount        int    `default:"1000"`
+	IsOpenPush               bool   `default:"true"`
+	PushLanguage             string `default:"en_US"`
+
+	EventSubConfig string `default:""`
+	EventSubSwitch string `default:""`
+
+	GrpMsgThreshold int `default:"100"`
+	MsgThreshold    int `default:"2000"`
+	KickMode        int `default:"0"`
+
+	ChrmMsgCacheMaxCount int `default:"50"`
+	ChrmAttMaxCount      int `default:"100"`
+
+	// TestItem  string
+	// TestInt   int
+	// TestBool  bool  `default:"true"`
+	// TestInt64 int64 `default:"10"`
+}
+
+var notExistAppInfo *AppInfo
+
+func init() {
+	notExistAppInfo = &AppInfo{}
+
+	appInfoCache = caches.NewLruCache(10000, nil)
+	appInfoCache.AddTimeoutAfterRead(5 * time.Minute)
+	appInfoCache.AddTimeoutAfterCreate(10 * time.Minute)
+	appInfoCache.SetValueCreator(func(key interface{}) interface{} {
+		appTable := dbs.AppInfoDao{}
+		app := appTable.FindByAppkey(key.(string))
+		if app != nil {
+			appInfo := &AppInfo{
+				AppKey:       app.AppKey,
+				AppSecret:    app.AppSecret,
+				AppSecureKey: app.AppSecureKey,
+				AppStatus:    app.AppStatus,
+				CreatedTime:  app.CreatedTime,
+			}
+
+			appExtTable := dbs.AppExtDao{}
+			appExtList := appExtTable.FindListByAppkey(key.(string))
+			extMap := make(map[string]string)
+			if len(appExtList) > 0 {
+				for _, appExt := range appExtList {
+					extMap[strings.ToLower(appExt.AppItemKey)] = appExt.AppItemValue
+				}
+			}
+			FillObjField(appInfo, extMap)
+
+			//event subscription config
+			if appInfo.EventSubConfigObj == nil && appInfo.EventSubConfig != "" {
+				eventSubConfig := &EventSubConfigObj{}
+				err := json.Unmarshal([]byte(appInfo.EventSubConfig), eventSubConfig)
+				if err == nil {
+					appInfo.EventSubConfigObj = eventSubConfig
+				}
+			}
+			if appInfo.EventSubSwitchObj == nil && appInfo.EventSubSwitch != "" {
+				eventSubSwitch := &EventSubSwitchObj{}
+				err := json.Unmarshal([]byte(appInfo.EventSubSwitch), eventSubSwitch)
+				if err == nil {
+					appInfo.EventSubSwitchObj = eventSubSwitch
+				}
+			}
+			return appInfo
+		}
+		return notExistAppInfo
+	})
+}
+
+func FillObjField(obj interface{}, valMap map[string]string) {
+	FillObjFieldWithIgnore(obj, valMap, false)
+}
+
+func FillObjFieldWithIgnore(obj interface{}, valMap map[string]string, ignoreDefault bool) {
+	objVal := reflect.ValueOf(obj).Elem()
+	for i := 0; i < objVal.NumField(); i++ {
+		fieldName := objVal.Type().Field(i).Name
+		if !strings.HasPrefix(fieldName, "HasField_") {
+			fieldType := objVal.Type().Field(i).Type
+			fieldTag := objVal.Type().Field(i).Tag
+			defaultStr := strings.TrimSpace(fieldTag.Get("default"))
+			if !ignoreDefault && defaultStr != "" && defaultStr != "-" {
+				setFieldValue(objVal.FieldByName(fieldName), fieldType, defaultStr)
+			}
+			lowerFieldName := tools.CamelToSnake(fieldName) //strings.ToLower(fieldName)
+			if mapVal, ok := valMap[lowerFieldName]; ok {
+				afterTrimMapVal := strings.TrimSpace(mapVal)
+				setFieldValue(objVal.FieldByName(fieldName), fieldType, afterTrimMapVal)
+
+				//Handle HasField_
+				hasField := objVal.FieldByName("HasField_" + fieldName)
+				if hasField.IsValid() {
+					hasField.SetBool(true)
+				}
+			}
+		}
+	}
+}
+
+func setFieldValue(field reflect.Value, typ reflect.Type, val string) {
+	typeStr := typ.String()
+	if typeStr == "string" {
+		field.Set(reflect.ValueOf(val))
+	} else {
+		if val != "" {
+			if typeStr == "int" {
+				intVal, err := strconv.Atoi(val)
+				if err == nil {
+					field.Set(reflect.ValueOf(intVal))
+				}
+			} else if typeStr == "int64" {
+				int64Val, err := strconv.ParseInt(val, 10, 64)
+				if err == nil {
+					field.Set(reflect.ValueOf(int64Val))
+				}
+			} else if typeStr == "bool" {
+				boolVal, err := strconv.ParseBool(val)
+				if err == nil {
+					field.Set(reflect.ValueOf(boolVal))
+				}
+			}
+		}
+	}
+}
+
+func GetAppInfo(appkey string) (*AppInfo, bool) {
+	val, ok := appInfoCache.GetByCreator(appkey)
+	if ok {
+		info := val.(*AppInfo)
+		if info == notExistAppInfo {
+			return nil, false
+		} else {
+			if info.AppStatus != 0 {
+				return info, false
+			}
+			return info, true
+		}
+	} else {
+		return nil, false
+	}
+}
+
+type EventSubConfigObj struct {
+	EventSubUrl  string `json:"event_sub_url"`
+	EventSubAuth string `json:"event_sub_auth"`
+}
+
+type EventSubSwitchObj struct {
+	PrivateMsgSubSwitch  int `json:"private_msg_sub_switch"`
+	GroupMsgSubSwitch    int `json:"group_msg_sub_switch"`
+	ChatroomMsgSubSwitch int `json:"chatroom_msg_sub_switch"`
+	OnlineSubSwitch      int `json:"online_sub_switch"`
+	OfflineSubSwitch     int `json:"offline_sub_switch"`
+}
