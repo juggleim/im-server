@@ -43,23 +43,16 @@ func AsyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req prot
 func SyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req proto.Message, isNotifySender bool) (errs.IMErrorCode, *models.SendMsgResp, error) {
 	dataBytes, _ := tools.PbMarshal(req)
 	exts := map[string]string{}
-	// exts[commonservices.RpcExtKey_RealMethod] = method
-	// method = "upstream"
-	if method == "p_msg" {
-		exts[commonservices.RpcExtKey_RealTargetId] = targetId
-		targetId = commonservices.GetConversationId(requestId, targetId, pbobjs.ChannelType_Private)
-	} else if method == "s_msg" {
-		exts[commonservices.RpcExtKey_RealTargetId] = targetId
-		targetId = commonservices.GetConversationId(requestId, targetId, pbobjs.ChannelType_System)
-	}
+	exts[commonservices.RpcExtKey_RealMethod] = method
+	method = "upstream"
 	result, err := bases.SyncUnicastRoute(&pbobjs.RpcMessageWraper{
 		RpcMsgType:   pbobjs.RpcMsgType_ServerPub,
 		AppKey:       GetCtxString(ctx, CtxKey_AppKey),
 		Session:      GetCtxString(ctx, CtxKey_Session),
 		Method:       method,
-		RequesterId:  requestId,
+		RequesterId:  targetId,
 		Qos:          1,
-		TargetId:     targetId,
+		TargetId:     requestId,
 		AppDataBytes: dataBytes,
 		IsFromApi:    true,
 		NoSendbox:    !isNotifySender,

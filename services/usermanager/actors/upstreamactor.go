@@ -45,7 +45,7 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 			targetId = commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_System)
 		}
 
-		isSucc := bases.UnicastRoute(&pbobjs.RpcMessageWraper{
+		isSucc := bases.UnicastRouteWithSenderActor(&pbobjs.RpcMessageWraper{
 			RpcMsgType:   pbobjs.RpcMsgType_UserPub,
 			AppKey:       appkey,
 			Session:      rpcMsg.Session,
@@ -60,7 +60,7 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 			IsFromApi:    rpcMsg.IsFromApi,
 			NoSendbox:    rpcMsg.NoSendbox,
 			OnlySendbox:  rpcMsg.OnlySendbox,
-		}, actor.Sender.GetMethod())
+		}, actor.Sender)
 		if !isSucc {
 			userPubAck := &pbobjs.RpcMessageWraper{
 				RpcMsgType:   pbobjs.RpcMsgType_UserPubAck,

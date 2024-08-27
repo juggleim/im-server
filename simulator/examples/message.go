@@ -20,7 +20,7 @@ func SendPrivateMsg(wsClient *wsclients.WsImClient, targetId string) {
 		}
 		code, sendAck := wsClient.SendPrivateMsg(targetId, &upMsg)
 		if code == utils.ClientErrorCode_Success {
-			fmt.Println(sendAck.Code, sendAck.MsgId, sendAck.Timestamp)
+			fmt.Println(sendAck.Code, sendAck.MsgId, sendAck.Timestamp, sendAck.MsgSeqNo)
 		} else {
 			fmt.Println("ResultCode:", sendAck.Code)
 		}
