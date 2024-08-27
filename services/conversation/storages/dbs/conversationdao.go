@@ -215,7 +215,7 @@ func (conver *ConversationDao) TotalUnreadCount(appkey, userId string, channelTy
 			params = append(params, conver.ChannelType)
 		}
 	}
-	sql = sql + " and is_deleted=0 and latest_read_msg_index!=latest_unread_msg_index"
+	sql = sql + " and is_deleted=0 and latest_read_msg_index!=latest_unread_msg_index and undisturb_type=0"
 	err := dbcommons.GetDb().Raw(sql, params...).Scan(&unreadCount).Error
 	if err != nil {
 		return 0
