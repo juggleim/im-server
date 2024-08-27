@@ -178,7 +178,7 @@ func (conver *ConversationDao) UpdateLatestReadMsgIndex(appkey, userId, targetId
 	upd["latest_read_msg_id"] = readMsgId
 	upd["latest_read_msg_time"] = readMsgTime
 	upd["unread_tag"] = 0
-	result := dbcommons.GetDb().Model(conver).Where("app_key=? and user_id=? and target_id=? and channel_type=? and latest_read_msg_index<=?", appkey, userId, targetId, channelType, msgIndex).Update(upd)
+	result := dbcommons.GetDb().Model(conver).Where("app_key=? and user_id=? and target_id=? and channel_type=? and latest_read_msg_index<=? and latest_unread_msg_index>=?", appkey, userId, targetId, channelType, msgIndex, msgIndex).Update(upd)
 	return result.RowsAffected, result.Error
 }
 
