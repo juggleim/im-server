@@ -39,6 +39,7 @@ message QrySensitiveWordsReq {
   int32 limit = 3;
   string offset = 4;
   string word = 5;
+  int32 wordType = 6;
 }
 
 message QrySensitiveWordsResp {

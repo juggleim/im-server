@@ -16,7 +16,7 @@ func QrySensitiveWords(ctx context.Context, req *pbobjs.QrySensitiveWordsReq) (e
 		Words: []*pbobjs.SensitiveWord{},
 	}
 	if req.Size > 0 { //page size
-		list, err := dao.QrySensitiveWordsWithPage(appkey, int64(req.Page), int64(req.Size), req.Word)
+		list, total, err := dao.QrySensitiveWordsWithPage(appkey, int64(req.Page), int64(req.Size), req.Word, req.WordType)
 		if err != nil {
 			return errs.IMErrorCode_API_INTERNAL_RESP_FAIL, resp
 		}
@@ -28,7 +28,7 @@ func QrySensitiveWords(ctx context.Context, req *pbobjs.QrySensitiveWordsReq) (e
 				WordType: pbobjs.SensitiveWordType(word.WordType),
 			})
 		}
-		resp.Total = int32(dao.Total(appkey))
+		resp.Total = int32(total)
 	} else { //limit offset
 		var startId int64 = 0
 		if req.Offset != "" {

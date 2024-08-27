@@ -16,14 +16,23 @@ func (i *LocalInterceptor) CheckMsgInterceptor(ctx context.Context, upMsg *pbobj
 
 func CheckSensitive(ctx context.Context, msg *pbobjs.UpMsg) bool {
 	if msg.MsgType == "jg:text" {
-		txtMsg := &struct {
-			Content string `json:"content"`
-		}{}
+		txtMsg := make(map[string]interface{})
 		err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
 		if err != nil {
 			return true
 		}
-		filterResp, code, err := sensitivecall.FilterCall(ctx, txtMsg.Content)
+		contentVal, ok := txtMsg["content"]
+		if !ok {
+			return true
+		}
+		content, ok := contentVal.(string)
+		if !ok {
+			return true
+		}
+		if content == "" {
+			return true
+		}
+		filterResp, code, err := sensitivecall.FilterCall(ctx, content)
 		if err != nil {
 			return false
 		}
@@ -34,7 +43,7 @@ func CheckSensitive(ctx context.Context, msg *pbobjs.UpMsg) bool {
 			return true
 		}
 		if filterResp.HandlerType == pbobjs.SensitiveHandlerType_replace {
-			txtMsg.Content = filterResp.FilteredText
+			txtMsg["content"] = filterResp.FilteredText
 			bs, _ := tools.JsonMarshal(txtMsg)
 			msg.MsgContent = bs
 			return false

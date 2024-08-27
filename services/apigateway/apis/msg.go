@@ -134,9 +134,9 @@ func SendGroupCastMsg(ctx *gin.Context) {
 		}
 		for _, conver := range req.TargetConvers {
 			if conver.ChannelType == int(pbobjs.ChannelType_Private) {
-				services.SyncApiCall(ctx, "p_msg", req.SenderId, conver.TargetId, upMsg, nil)
+				services.AsyncSendMsg(ctx, "p_msg", req.SenderId, conver.TargetId, upMsg, false)
 			} else if conver.ChannelType == int(pbobjs.ChannelType_Group) {
-				services.SyncApiCall(ctx, "g_msg", req.SenderId, conver.TargetId, upMsg, nil)
+				services.AsyncSendMsg(ctx, "g_msg", req.SenderId, conver.TargetId, upMsg, false)
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

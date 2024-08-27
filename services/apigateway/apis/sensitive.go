@@ -35,10 +35,17 @@ func QrySensitiveWords(ctx *gin.Context) {
 
 	word := ctx.Query("word")
 
+	var wordType int64
+	wordTypeStr := ctx.Query("word_type")
+	if wordTypeStr != "" {
+		wordType, _ = tools.String2Int64(wordTypeStr)
+	}
+
 	code, resp, err := services.SyncApiCall(ctx, "qry_sensitive_words", "", tools.RandStr(8), &pbobjs.QrySensitiveWordsReq{
-		Size: int32(size),
-		Page: int32(page),
-		Word: word,
+		Size:     int32(size),
+		Page:     int32(page),
+		Word:     word,
+		WordType: int32(wordType),
 	}, func() proto.Message {
 		return &pbobjs.QrySensitiveWordsResp{}
 	})
