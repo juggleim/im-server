@@ -285,19 +285,6 @@ func (client *WsImClient) OnPublish(msg *codec.PublishMsgBody, needAck int) {
 						isContinue = false
 					}
 				}
-			} else if ntf.Type == pbobjs.NotifyType_ChatroomMsg {
-				code, downSet := client.SyncChatroomMsgs(&pbobjs.SyncChatroomReq{
-					SyncTime:   0,
-					ChatroomId: ntf.ChatroomId,
-				})
-				if code == utils.ClientErrorCode(errs.IMErrorCode_SUCCESS) {
-					for _, downMsg := range downSet.Msgs {
-						client.OnMessageCallBack(downMsg)
-					}
-
-				} else {
-					fmt.Println("ntf pull msg error, code:", code)
-				}
 			}
 		} else {
 			fmt.Println("error:", err)
@@ -400,24 +387,6 @@ func (client *WsImClient) SendPrivateMsg(targetId string, upMsg *pbobjs.UpMsg) (
 func (client *WsImClient) SendGroupMsg(targetId string, upMsg *pbobjs.UpMsg) (utils.ClientErrorCode, *codec.PublishAckMsgBody) {
 	data, _ := tools.PbMarshal(upMsg)
 	code, pubAck := client.Publish("g_msg", targetId, data)
-	return code, pubAck
-}
-
-func (client *WsImClient) SendChatMsg(targetId string, upMsg *pbobjs.UpMsg) (utils.ClientErrorCode, *codec.PublishAckMsgBody) {
-	data, _ := tools.PbMarshal(upMsg)
-	code, pubAck := client.Publish("c_msg", targetId, data)
-	return code, pubAck
-}
-
-func (client *WsImClient) AddChatAtt(targetId string, att *pbobjs.ChatAttReq) (utils.ClientErrorCode, *codec.PublishAckMsgBody) {
-	data, _ := tools.PbMarshal(att)
-	code, pubAck := client.Publish("c_add_att", targetId, data)
-	return code, pubAck
-}
-
-func (client *WsImClient) DelChatAtt(targetId string, att *pbobjs.ChatAttReq) (utils.ClientErrorCode, *codec.PublishAckMsgBody) {
-	data, _ := tools.PbMarshal(att)
-	code, pubAck := client.Publish("c_del_att", targetId, data)
 	return code, pubAck
 }
 
@@ -545,49 +514,6 @@ func (client *WsImClient) MarkReadMsg(req *pbobjs.MarkReadReq) (utils.ClientErro
 func (client *WsImClient) QryHisMsgsByIds(targetId string, req *pbobjs.QryHisMsgByIdsReq) (utils.ClientErrorCode, *codec.QueryAckMsgBody) {
 	data, _ := tools.PbMarshal(req)
 	return client.Query("qry_hismsg_by_ids", targetId, data)
-}
-
-// chatroom
-func (client *WsImClient) JoinChatroom(chatroomId string) utils.ClientErrorCode {
-	data, _ := tools.PbMarshal(&pbobjs.ChatroomInfo{
-		ChatId: chatroomId,
-	})
-	code, _ := client.Query("c_join", chatroomId, data)
-	if code == utils.ClientErrorCode_Success {
-		return utils.ClientErrorCode_Success
-	} else {
-		return utils.ClientErrorCode(code)
-	}
-}
-func (client *WsImClient) QuitChatroom(chatroomId string) utils.ClientErrorCode {
-	data, _ := tools.PbMarshal(&pbobjs.ChatroomInfo{
-		ChatId: chatroomId,
-	})
-	code, _ := client.Query("c_quit", chatroomId, data)
-	if code == utils.ClientErrorCode_Success {
-		return utils.ClientErrorCode_Success
-	} else {
-		return utils.ClientErrorCode(code)
-	}
-}
-
-func (client *WsImClient) SendChatroomMsg(chatroomId string, upMsg *pbobjs.UpMsg) (utils.ClientErrorCode, *codec.PublishAckMsgBody) {
-	data, _ := tools.PbMarshal(upMsg)
-	code, pubAck := client.Publish("c_msg", chatroomId, data)
-	return code, pubAck
-}
-
-func (client *WsImClient) SyncChatroomMsgs(req *pbobjs.SyncChatroomReq) (utils.ClientErrorCode, *pbobjs.SyncChatroomMsgResp) {
-	data, _ := tools.PbMarshal(req)
-	code, qryAck := client.Query("c_sync_msgs", req.ChatroomId, data)
-	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
-		resp := &pbobjs.SyncChatroomMsgResp{}
-		tools.PbUnMarshal(qryAck.Data, resp)
-		return utils.ClientErrorCode_Success, resp
-	} else {
-		fmt.Println("server code:", code, qryAck)
-		return utils.ClientErrorCode_Unknown, nil
-	}
 }
 
 func (client *WsImClient) GetFileCred(req *pbobjs.QryFileCredReq) (utils.ClientErrorCode, *pbobjs.QryFileCredResp) {
