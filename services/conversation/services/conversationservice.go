@@ -668,6 +668,9 @@ func ClearUnread(ctx context.Context, userId string, convers []*pbobjs.Conversat
 			if msgIndex > 0 {
 				readMsgId := conver.LatestReadMsgId
 				readMsgTime := conver.LatestReadMsgTime
+				if conver.LatestReadMsgTime <= 0 {
+					readMsgTime = time.Now().UnixMilli()
+				}
 				rowsAffected, err := converStorage.UpdateLatestReadMsgIndex(appkey, userId, conver.TargetId, conver.ChannelType, msgIndex, readMsgId, readMsgTime)
 				if rowsAffected > 0 {
 					affected = true
