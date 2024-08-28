@@ -10,8 +10,8 @@ log:
 mysql:
   user: root
   password: {{ MYSQL_ROOT_PASSWORD }}
-  address: mysql-primary:3306
-  name: jim_db
+  address: {{ MYSQL_ADDR }}
+  name: {{ MYSQL_DB_NAME }}
 
 mongodb:
   address: root:{{ MONGODB_ROOT_PASSWORD }}@{{ MONGODB_ADDR }}:27017
