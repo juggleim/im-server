@@ -1,7 +1,6 @@
 package configures
 
 import (
-	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -61,19 +60,12 @@ type ImConfig struct {
 }
 
 var Config ImConfig
-var Env string
 
 func InitConfigures() error {
-	env := os.Getenv("JUGGLEIM_ENV")
-	if env == "" {
-		env = EnvDev
-		os.Setenv("JUGGLEIM_ENV", env)
-	}
-	cfBytes, err := os.ReadFile(fmt.Sprintf("conf/config_%s.yml", env))
+	cfBytes, err := os.ReadFile("conf/config.yml")
 	if err == nil {
 		var conf ImConfig
 		yaml.Unmarshal(cfBytes, &conf)
-		Env = env
 		Config = conf
 		return nil
 	} else {

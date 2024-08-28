@@ -2,7 +2,6 @@ nodeName: {{ POD_NAME }}
 nodeHost: {{ POD_IP }}
 msgStoreEngine: {{ MSG_STORE_ENGINE }}
 
-
 log:
   logPath: ./logs
   logName: jim-info
@@ -20,7 +19,6 @@ mongodb:
 
 connectManager:
   wsPort: {{ WS_PORT }}
-  proxyPort: {{ PROXY_PORT }}
 
 apiGateway:
   httpPort: {{ API_HTTP_PORT }}

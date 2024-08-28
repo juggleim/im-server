@@ -9,7 +9,7 @@ log:
 
 mysql:
   user: root
-  password: xiaoguang
+  password: 123456
   address: 127.0.0.1:3306
   name: im_db
 

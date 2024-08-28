@@ -21,10 +21,9 @@ CONF_DIR="/opt/conf"
 
 BASE_DIR="/opt"
 
-SINGLE_CONFIG_FILE_TEMPLATE="single_config_dev_template.yaml"
-CLUSTER_CONFIG_FILE_TEMPLATE="cluster_config_dev_template.yaml"
-CONFIG_FILE="config_dev.yml"
-CONFIG_FILE_TEMPLATE="config_dev_template.yaml"
+SINGLE_CONFIG_FILE_TEMPLATE="config_template.yaml"
+CONFIG_FILE="config.yml"
+CONFIG_FILE_TEMPLATE="config_template.yaml"
 
 
 env_vars=(
@@ -69,9 +68,6 @@ function replace_env_var() {
 
 function init_config() {
     local TEMPLATE="$SINGLE_CONFIG_FILE_TEMPLATE"
-    if [ "$CLUSTER" = "true" ]; then
-        TEMPLATE="$CLUSTER_CONFIG_FILE_TEMPLATE"
-    fi
 
     cp "$BASE_DIR/$TEMPLATE" "$BASE_DIR/$CONFIG_FILE_TEMPLATE"
     for var_name in "${env_vars[@]}"; do
