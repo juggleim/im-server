@@ -163,7 +163,7 @@ func SaveNilConversation(ctx context.Context, appkey string, userId string, targ
 	var grpInfo *GroupInfo
 	var targetUserInfo *UserInfo
 	if channelType == pbobjs.ChannelType_Private {
-		resp.TargetUserInfo = commonservices.GetUserInfoFromRpc(ctx, targetId)
+		resp.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, targetId)
 		targetUserInfo = &UserInfo{
 			UserId:       resp.TargetUserInfo.UserId,
 			Nickname:     resp.TargetUserInfo.Nickname,
@@ -380,7 +380,7 @@ func dbConver2Conversations(ctx context.Context, dbConver *models.Conversation) 
 		UnreadTag:         int32(dbConver.UnreadTag),
 	}
 	if conversation.ChannelType == pbobjs.ChannelType_Private {
-		conversation.TargetUserInfo = commonservices.GetUserInfoFromRpc(ctx, conversation.TargetId)
+		conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conversation.TargetId)
 	} else if conversation.ChannelType == pbobjs.ChannelType_Group {
 		conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conversation.TargetId)
 	}
@@ -403,7 +403,7 @@ func dbConver2Conversations(ctx context.Context, dbConver *models.Conversation) 
 			})
 			if _, exist := tmpMap[mentionMsg.SenderId]; !exist {
 				tmpMap[mentionMsg.SenderId] = 1
-				userInfo := commonservices.GetUserInfoFromRpc(ctx, mentionMsg.SenderId)
+				userInfo := commonservices.GetTargetDisplayUserInfo(ctx, mentionMsg.SenderId)
 				conversation.Mentions.Senders = append(conversation.Mentions.Senders, userInfo)
 			}
 		}
@@ -624,7 +624,7 @@ func QryTopConvers(ctx context.Context, userId string, req *pbobjs.QryTopConvers
 				LatestReadIndex:   dbConver.LatestReadMsgIndex,
 			}
 			if conversation.ChannelType == pbobjs.ChannelType_Private {
-				conversation.TargetUserInfo = commonservices.GetUserInfoFromRpc(ctx, conversation.TargetId)
+				conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conversation.TargetId)
 			} else if conversation.ChannelType == pbobjs.ChannelType_Group {
 				conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conversation.TargetId)
 			}

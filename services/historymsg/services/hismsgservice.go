@@ -274,7 +274,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 				}
 			}
 			//add userinfo
-			targetUserInfo := commonservices.GetUserInfoFromRpc(ctx, targetId)
+			targetUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, targetId)
 			resp.TargetUserInfo = targetUserInfo
 		}
 	} else if channelType == pbobjs.ChannelType_System {
@@ -302,7 +302,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 			}
 		}
 		//add userinfo
-		targetUserInfo := commonservices.GetUserInfoFromRpc(ctx, targetId)
+		targetUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, targetId)
 		resp.TargetUserInfo = targetUserInfo
 	} else if channelType == pbobjs.ChannelType_Group {
 		var cleanTime int64 = 0

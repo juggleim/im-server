@@ -37,7 +37,7 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg) {
 	msg.MsgTime = sendTime
 	//handle conversation check, such as undisturb, unread index
 	HandleDownMsgByConver(ctx, receiverId, msg.TargetId, msg.ChannelType, msg)
-	targetUserInfo := GetTargetUserInfo(ctx, receiverId)
+	targetUserInfo := commonservices.GetTargetUserInfo(ctx, receiverId)
 	if targetUserInfo.UserType == pbobjs.UserType_Bot {
 		botclient.SendMsg2Bot(ctx, receiverId, msg)
 	} else {

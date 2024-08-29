@@ -172,7 +172,7 @@ func UpdateMentionedUserInfo(ctx context.Context, upMsg *pbobjs.UpMsg) {
 	if upMsg != nil && upMsg.MentionInfo != nil {
 		if upMsg.MentionInfo.MentionType == pbobjs.MentionType_AllAndSomeone || upMsg.MentionInfo.MentionType == pbobjs.MentionType_Someone {
 			for _, userInfo := range upMsg.MentionInfo.TargetUsers {
-				uinfo := commonservices.GetUserInfoFromRpc(ctx, userInfo.UserId)
+				uinfo := commonservices.GetTargetDisplayUserInfo(ctx, userInfo.UserId)
 				if uinfo != nil {
 					userInfo.Nickname = uinfo.Nickname
 					userInfo.UpdatedTime = uinfo.UpdatedTime

@@ -56,7 +56,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		IsSend:         true,
 		MentionInfo:    upMsg.MentionInfo,
 		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
-		TargetUserInfo: GetTargetDisplayUserInfo(ctx, receiverId),
+		TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
 		MergedMsgs:     upMsg.MergedMsgs,
 	}
 	//send to sender's other device
@@ -175,7 +175,7 @@ func getPushLanguage(ctx context.Context, userId string) string {
 	if exist {
 		language = appinfo.PushLanguage
 	}
-	uSetting := GetTargetUserSettings(ctx, userId)
+	uSetting := commonservices.GetTargetUserSettings(ctx, userId)
 	if uSetting != nil && uSetting.Language != "" {
 		language = uSetting.Language
 	}

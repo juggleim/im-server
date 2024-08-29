@@ -33,7 +33,7 @@ func SendSystemMsg(ctx context.Context, senderId, receiverId string, upMsg *pbob
 		IsSend:         true,
 		MentionInfo:    upMsg.MentionInfo,
 		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
-		TargetUserInfo: GetTargetDisplayUserInfo(ctx, receiverId),
+		TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
 	}
 	//send to sender's other device
 	if !commonservices.IsStateMsg(upMsg.Flags) {

@@ -213,7 +213,7 @@ func QryReadDetail(ctx context.Context, req *pbobjs.QryReadDetailReq) (errs.IMEr
 			for _, info := range infos {
 				resp.ReadCount = resp.ReadCount + 1
 				resp.ReadMembers = append(resp.ReadMembers, &pbobjs.MemberReadDetailItem{
-					Member: commonservices.GetUserInfoFromRpc(ctx, info.MemberId),
+					Member: commonservices.GetTargetDisplayUserInfo(ctx, info.MemberId),
 					Time:   info.CreatedTime,
 				})
 				readMemberMap[info.MemberId] = true
@@ -242,7 +242,7 @@ func QryReadDetail(ctx context.Context, req *pbobjs.QryReadDetailReq) (errs.IMEr
 					memberCount++
 					if _, exist := readMemberMap[memberId]; !exist {
 						resp.UnreadMembers = append(resp.UnreadMembers, &pbobjs.MemberReadDetailItem{
-							Member: commonservices.GetUserInfoFromRpc(ctx, memberId),
+							Member: commonservices.GetTargetDisplayUserInfo(ctx, memberId),
 						})
 					}
 				}

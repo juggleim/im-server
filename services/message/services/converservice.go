@@ -98,7 +98,7 @@ func HandleDownMsgByConver(ctx context.Context, userId, targetId string, channel
 		downMsg.UndisturbType = UndisturbType_Normal
 		downMsg.Flags = commonservices.SetUndisturbMsg(downMsg.Flags)
 	} else {
-		userSettings := GetTargetUserSettings(ctx, userId)
+		userSettings := commonservices.GetTargetUserSettings(ctx, userId)
 		if userSettings != nil && userSettings.UndisturbObj != nil {
 			if userSettings.UndisturbObj.CheckUndisturb(ctx, userId) {
 				downMsg.Flags = commonservices.SetUndisturbMsg(downMsg.Flags)

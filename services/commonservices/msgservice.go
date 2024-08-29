@@ -122,7 +122,7 @@ var (
 func FillReferMsg(ctx context.Context, upMsg *pbobjs.UpMsg) *pbobjs.DownMsg {
 	if upMsg.ReferMsg != nil {
 		if upMsg.ReferMsg.SenderId != "" {
-			upMsg.ReferMsg.TargetUserInfo = GetUserInfoFromRpc(ctx, upMsg.ReferMsg.SenderId)
+			upMsg.ReferMsg.TargetUserInfo = GetTargetDisplayUserInfo(ctx, upMsg.ReferMsg.SenderId)
 		}
 		return upMsg.ReferMsg
 	}
