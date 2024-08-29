@@ -30,6 +30,8 @@ message RpcMessageWraper{
   bool noSendbox = 14;
   bool onlySendbox = 15;
   string deviceId = 16;
+  string instanceId = 17;
+  string platform = 18;
 
   int32 resultCode = 21;
   int64 msgSendTime = 22;

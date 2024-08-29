@@ -47,6 +47,14 @@ func GetDeviceId(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_DeviceID)
 }
 
+func GetInstanceId(ctx WsHandleContext) string {
+	return GetContextAttrString(ctx, StateKey_InstanceId)
+}
+
+func GetPlatform(ctx WsHandleContext) string {
+	return GetContextAttrString(ctx, StateKey_Platform)
+}
+
 func CheckConnected(ctx WsHandleContext) bool {
 	str := GetContextAttrString(ctx, StateKey_Connected)
 	return str == "1"
