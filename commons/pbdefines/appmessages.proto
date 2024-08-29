@@ -762,7 +762,7 @@ message OnlineOfflineMsg {
   string sessionId = 6;
   int64 timestamp = 7;
   string connectionExt = 8;
-  string clientSession = 9;
+  string instanceId = 9;
 }
 
 message LogEntity {

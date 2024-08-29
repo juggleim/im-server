@@ -56,17 +56,17 @@ func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, e
 	platform := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Platform)
 	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
 	appKey := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey)
-	clientSession := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientSession)
+	instanceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_InstanceId)
 
 	offlineMsg := &pbobjs.OnlineOfflineMsg{
-		Type:          pbobjs.OnlineType_Offline,
-		UserId:        userId,
-		DeviceId:      deviceId,
-		Platform:      platform,
-		ClientIp:      clientIp,
-		SessionId:     imcontext.GetConnSession(ctx),
-		Timestamp:     time.Now().UnixMilli(),
-		ClientSession: clientSession,
+		Type:       pbobjs.OnlineType_Offline,
+		UserId:     userId,
+		DeviceId:   deviceId,
+		Platform:   platform,
+		ClientIp:   clientIp,
+		SessionId:  imcontext.GetConnSession(ctx),
+		Timestamp:  time.Now().UnixMilli(),
+		InstanceId: instanceId,
 	}
 
 	newCtx := listener.context(ctx)
@@ -90,8 +90,8 @@ func (listener *ImListenerImpl) context(inboundCtx imcontext.WsHandleContext) co
 }
 
 func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imcontext.WsHandleContext) {
-	if msg.ClientSession != "" {
-		imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientSession, msg.ClientSession)
+	if msg.InstanceId != "" {
+		imcontext.SetContextAttr(ctx, imcontext.StateKey_InstanceId, msg.InstanceId)
 	}
 	clientIp := msg.ClientIp
 	if clientIp == "" {
@@ -115,7 +115,7 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Connected, "1")
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	//success
-	logs.Infof("session:%s\taction:%s\tappkey:%s\tuser_id:%s\tclient_ip:%s\tplatform:%s\tdevice_id:%s\tpush_token:%s\tclient_session:%s", imcontext.GetConnSession(ctx), imcontext.Action_Connect, msg.Appkey, userId, clientIp, msg.Platform, msg.DeviceId, msg.PushToken, msg.ClientSession)
+	logs.Infof("session:%s\taction:%s\tappkey:%s\tuser_id:%s\tclient_ip:%s\tplatform:%s\tdevice_id:%s\tpush_token:%s\tinstance_id:%s", imcontext.GetConnSession(ctx), imcontext.Action_Connect, msg.Appkey, userId, clientIp, msg.Platform, msg.DeviceId, msg.PushToken, msg.InstanceId)
 
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Appkey, msg.Appkey)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_DeviceID, msg.DeviceId)
@@ -136,6 +136,7 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 		SessionId:     imcontext.GetConnSession(ctx),
 		Timestamp:     time.Now().UnixMilli(),
 		ConnectionExt: msg.Ext,
+		InstanceId:    msg.InstanceId,
 	}
 
 	newCtx := listener.context(ctx)
@@ -169,17 +170,17 @@ func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx im
 	deviceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_DeviceID)
 	platform := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Platform)
 	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
-	clientSession := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientSession)
+	instanceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_InstanceId)
 
 	commonservices.SubOfflineEvent(listener.context(ctx), userId, &pbobjs.OnlineOfflineMsg{
-		Type:          pbobjs.OnlineType_Offline,
-		UserId:        userId,
-		DeviceId:      deviceId,
-		Platform:      platform,
-		ClientIp:      clientIp,
-		SessionId:     imcontext.GetConnSession(ctx),
-		Timestamp:     time.Now().UnixMilli(),
-		ClientSession: clientSession,
+		Type:       pbobjs.OnlineType_Offline,
+		UserId:     userId,
+		DeviceId:   deviceId,
+		Platform:   platform,
+		ClientIp:   clientIp,
+		SessionId:  imcontext.GetConnSession(ctx),
+		Timestamp:  time.Now().UnixMilli(),
+		InstanceId: instanceId,
 	})
 
 	services.RemoveFromContextCache(ctx)

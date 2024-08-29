@@ -24,7 +24,7 @@ message ConnectMsgBody{
     string pushChannel = 15;
     string ext = 16;
 
-    string clientSession = 17;//客户端session标识
+    string instanceId = 17;//客户端实例标识,用于多开时识别不同的实例，clientSession
 }
 
 message ConnectAckMsgBody{

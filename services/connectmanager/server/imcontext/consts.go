@@ -36,7 +36,7 @@ const (
 	StateKey_ClientIp             string = "state.client_ip"
 	StateKey_Limiter              string = "state.limiter"
 	// StateKey_Extra                string = "state.extra"
-	StateKey_ClientSession string = "state.client_session"
+	StateKey_InstanceId string = "state.instance_id"
 )
 
 type CloseReason int
