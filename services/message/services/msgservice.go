@@ -136,6 +136,16 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 			})
 			rpcNtf.Qos = 0
 			bases.UnicastRouteWithNoSender(rpcNtf)
+			bases.UnicastRouteWithCallback(rpcNtf, &SendMsgAckActor{
+				appkey:      appkey,
+				senderId:    bases.GetRequesterIdFromCtx(ctx),
+				targetId:    targetId,
+				channelType: downMsg.ChannelType,
+				Msg:         downMsg,
+				ctx:         ctx,
+				HasPush:     userStatus.OpenPushSwitch(),
+				IsNotify:    isNtf,
+			}, 5*time.Second)
 		} else {
 			logs.WithContext(ctx).Infof("msg target_id:%s", targetId)
 			rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "msg", downMsg)
@@ -147,6 +157,7 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 				Msg:         downMsg,
 				ctx:         ctx,
 				HasPush:     userStatus.OpenPushSwitch(),
+				IsNotify:    isNtf,
 			}, 5*time.Second)
 		}
 		if userStatus.OpenPushSwitch() {
@@ -178,9 +189,10 @@ type SendMsgAckActor struct {
 	targetId    string
 	channelType pbobjs.ChannelType
 	// pushData    *pbobjs.PushData
-	Msg     *pbobjs.DownMsg
-	ctx     context.Context
-	HasPush bool
+	Msg      *pbobjs.DownMsg
+	ctx      context.Context
+	HasPush  bool
+	IsNotify bool
 }
 
 func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message) {
@@ -196,12 +208,14 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 					SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg)
 				}
 			} else { //receiver is online, and response ack
-				us := GetUserStatus(actor.appkey, actor.targetId)
-				if us != nil {
-					us.SetNtfStatus(false)
+				if !actor.IsNotify {
+					us := GetUserStatus(actor.appkey, actor.targetId)
+					if us != nil {
+						us.SetNtfStatus(false)
+					}
+					//statistic
+					commonservices.ReportDownMsg(actor.appkey, actor.channelType, 1)
 				}
-				//statistic
-				commonservices.ReportDownMsg(actor.appkey, actor.channelType, 1)
 			}
 		}
 	}
