@@ -32,7 +32,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					notification := &apns2.Notification{}
 					notification.DeviceToken = pushToken.PushToken
 					notification.Topic = pushToken.PackageName
-					notification.Payload = []byte(fmt.Sprintf(`{"aps":{"alert":{"title":"%s","body":"%s"}}}`, req.Title, tools.PureStr(req.PushText)))
+					notification.Payload = []byte(fmt.Sprintf(`{"aps":{"alert":{"title":"%s","body":"%s"}},"conver_id":"%s","conver_type":"%d","exts":"%s"}`, req.Title, tools.PureStr(req.PushText), req.ConverId, req.ChannelType, req.PushExtraData))
 					_, err := iosPushConf.ApnsClient.Push(notification)
 					if err != nil {
 						logs.WithContext(ctx).Error(err.Error())
@@ -111,8 +111,9 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 							Notification: &jpush.Notification{
 								Alert: req.Title,
 								Android: &jpush.AndroidNotification{
-									Alert: req.PushText,
-									Title: req.Title,
+									Alert:  req.PushText,
+									Title:  req.Title,
+									Extras: transfer2Exts(req),
 								},
 							},
 						})
@@ -125,4 +126,14 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 			}
 		}
 	}
+}
+
+func transfer2Exts(pushData *pbobjs.PushData) map[string]interface{} {
+	exts := make(map[string]interface{})
+	exts["msg_id"] = pushData.MsgId
+	exts["sender_id"] = pushData.SenderId
+	exts["conver_id"] = pushData.ConverId
+	exts["conver_type"] = int32(pushData.ChannelType)
+	exts["exts"] = pushData.PushExtraData
+	return exts
 }

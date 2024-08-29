@@ -222,63 +222,59 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 }
 
 func GetPushDataForDefaultMsg(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
-	if msg != nil {
-		if msg.PushData != nil && msg.PushData.PushText != "" {
-			return msg.PushData
+	if msg == nil {
+		return nil
+	}
+	var retPushData *pbobjs.PushData
+	if msg.PushData != nil && msg.PushData.PushText != "" {
+		retPushData = msg.PushData
+	} else {
+		retPushData = &pbobjs.PushData{}
+		var (
+			title  string
+			prefix string
+		)
+		nickName := msg.TargetUserInfo.GetNickname()
+		if msg.ChannelType == pbobjs.ChannelType_Group {
+			title = msg.GroupInfo.GroupName
+			if nickName != "" {
+				prefix = nickName + ": "
+			}
 		} else {
-			var (
-				title  string
-				prefix string
-			)
-			if msg.ChannelType == pbobjs.ChannelType_Group {
-				title = msg.GroupInfo.GroupName
-				prefix = msg.TargetUserInfo.GetNickname() + ": "
-			} else {
-				title = msg.TargetUserInfo.GetNickname()
-			}
-			if msg.MsgType == "jg:text" {
-				txtMsg := &commonservices.TextMsg{}
-				err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
+			title = nickName
+		}
+		retPushData.Title = title
+		if msg.MsgType == "jg:text" {
+			txtMsg := &commonservices.TextMsg{}
+			err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
 
-				pushText := txtMsg.Content
-				if len(pushText) > 20 {
-					pushText = pushText[:20] + "..."
-				}
-				if err == nil {
-					return &pbobjs.PushData{
-						Title:    title,
-						PushText: prefix + pushText,
-					}
-				}
-			} else if msg.MsgType == "jg:img" {
-				return &pbobjs.PushData{
-					Title:    title,
-					PushText: prefix + "[Image]",
-				}
-			} else if msg.MsgType == "jg:voice" {
-				return &pbobjs.PushData{
-					Title:    title,
-					PushText: prefix + "[Voice]",
-				}
-			} else if msg.MsgType == "jg:file" {
-				return &pbobjs.PushData{
-					Title:    title,
-					PushText: prefix + "[File]",
-				}
-			} else if msg.MsgType == "jg:video" {
-				return &pbobjs.PushData{
-					Title:    title,
-					PushText: prefix + "[Video]",
-				}
-			} else if msg.MsgType == "jg:merge" {
-				return &pbobjs.PushData{
-					Title:    title,
-					PushText: prefix + "[Merge]",
-				}
+			pushText := txtMsg.Content
+			if len(pushText) > 20 {
+				pushText = pushText[:20] + "..."
 			}
+			if err == nil {
+				retPushData.PushText = prefix + pushText
+			} else {
+				retPushData.PushText = prefix + "[Text]"
+			}
+		} else if msg.MsgType == "jg:img" {
+			retPushData.PushText = prefix + "[Image]"
+		} else if msg.MsgType == "jg:voice" {
+			retPushData.PushText = prefix + "[Voice]"
+		} else if msg.MsgType == "jg:file" {
+			retPushData.PushText = prefix + "[File]"
+		} else if msg.MsgType == "jg:video" {
+			retPushData.PushText = prefix + "[Video]"
+		} else if msg.MsgType == "jg:merge" {
+			retPushData.PushText = prefix + "[Merge]"
 		}
 	}
-	return &pbobjs.PushData{}
+	//add internal fields
+	retPushData.MsgId = msg.MsgId
+	retPushData.SenderId = msg.SenderId
+	retPushData.ConverId = msg.TargetId
+	retPushData.ChannelType = msg.ChannelType
+	return retPushData
 }
 
 func (actor *SendMsgAckActor) CreateInputObj() proto.Message {
@@ -293,8 +289,11 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 	appInfo, exist := commonservices.GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.IsOpenPush {
 		if !commonservices.IsUndisturbMsg(msg.Flags) {
-			pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", GetPushDataForDefaultMsg(msg, getPushLanguage(ctx, receiverId)))
-			bases.UnicastRouteWithNoSender(pushRpc)
+			pushData := GetPushDataForDefaultMsg(msg, getPushLanguage(ctx, receiverId))
+			if pushData != nil {
+				pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
+				bases.UnicastRouteWithNoSender(pushRpc)
+			}
 		}
 	}
 }
