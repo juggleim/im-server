@@ -16,8 +16,13 @@ func SubPrivateMsg(ctx context.Context, targetId string, msg *pbobjs.DownMsg) {
 		if bases.GetIsFromApiFromCtx(ctx) && !appInfo.IsSubApiMsg {
 			return
 		}
-		bases.AsyncRpcCall(ctx, "msg_sub", targetId, &pbobjs.DownMsgSet{
-			Msgs: []*pbobjs.DownMsg{msg},
+		bases.AsyncRpcCall(ctx, "msg_sub", targetId, &pbobjs.SubMsgs{
+			SubMsgs: []*pbobjs.SubMsg{
+				{
+					Platform: bases.GetPlatformFromCtx(ctx),
+					Msg:      msg,
+				},
+			},
 		})
 	}
 }
@@ -32,8 +37,13 @@ func SubGroupMsg(ctx context.Context, targetId string, msg *pbobjs.DownMsg) {
 		if bases.GetIsFromApiFromCtx(ctx) && !appInfo.IsSubApiMsg {
 			return
 		}
-		bases.AsyncRpcCall(ctx, "msg_sub", targetId, &pbobjs.DownMsgSet{
-			Msgs: []*pbobjs.DownMsg{msg},
+		bases.AsyncRpcCall(ctx, "msg_sub", targetId, &pbobjs.SubMsgs{
+			SubMsgs: []*pbobjs.SubMsg{
+				{
+					Platform: bases.GetPlatformFromCtx(ctx),
+					Msg:      msg,
+				},
+			},
 		})
 	}
 }

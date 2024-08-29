@@ -14,9 +14,11 @@ type MsgSubActor struct {
 }
 
 func (actor *MsgSubActor) OnReceive(ctx context.Context, input proto.Message) {
-	services.MsgSubHandle(ctx, input.(*pbobjs.DownMsgSet))
+	if subMsgs, ok := input.(*pbobjs.SubMsgs); ok {
+		services.MsgSubHandle(ctx, subMsgs)
+	}
 }
 
 func (actor *MsgSubActor) CreateInputObj() proto.Message {
-	return &pbobjs.DownMsgSet{}
+	return &pbobjs.SubMsgs{}
 }

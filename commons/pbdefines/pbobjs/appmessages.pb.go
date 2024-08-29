@@ -7753,6 +7753,108 @@ func (x *PreSignResp) GetUrl() string {
 	return ""
 }
 
+type SubMsgs struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	SubMsgs []*SubMsg `protobuf:"bytes,1,rep,name=subMsgs,proto3" json:"subMsgs,omitempty"`
+}
+
+func (x *SubMsgs) Reset() {
+	*x = SubMsgs{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_appmessages_proto_msgTypes[105]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SubMsgs) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubMsgs) ProtoMessage() {}
+
+func (x *SubMsgs) ProtoReflect() protoreflect.Message {
+	mi := &file_appmessages_proto_msgTypes[105]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubMsgs.ProtoReflect.Descriptor instead.
+func (*SubMsgs) Descriptor() ([]byte, []int) {
+	return file_appmessages_proto_rawDescGZIP(), []int{105}
+}
+
+func (x *SubMsgs) GetSubMsgs() []*SubMsg {
+	if x != nil {
+		return x.SubMsgs
+	}
+	return nil
+}
+
+type SubMsg struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Msg      *DownMsg `protobuf:"bytes,1,opt,name=msg,proto3" json:"msg,omitempty"`
+	Platform string   `protobuf:"bytes,2,opt,name=platform,proto3" json:"platform,omitempty"`
+}
+
+func (x *SubMsg) Reset() {
+	*x = SubMsg{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_appmessages_proto_msgTypes[106]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SubMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubMsg) ProtoMessage() {}
+
+func (x *SubMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_appmessages_proto_msgTypes[106]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubMsg.ProtoReflect.Descriptor instead.
+func (*SubMsg) Descriptor() ([]byte, []int) {
+	return file_appmessages_proto_rawDescGZIP(), []int{106}
+}
+
+func (x *SubMsg) GetMsg() *DownMsg {
+	if x != nil {
+		return x.Msg
+	}
+	return nil
+}
+
+func (x *SubMsg) GetPlatform() string {
+	if x != nil {
+		return x.Platform
+	}
+	return ""
+}
+
 type OnlineOfflineMsg struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -7772,7 +7874,7 @@ type OnlineOfflineMsg struct {
 func (x *OnlineOfflineMsg) Reset() {
 	*x = OnlineOfflineMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_appmessages_proto_msgTypes[105]
+		mi := &file_appmessages_proto_msgTypes[107]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -7785,7 +7887,7 @@ func (x *OnlineOfflineMsg) String() string {
 func (*OnlineOfflineMsg) ProtoMessage() {}
 
 func (x *OnlineOfflineMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_appmessages_proto_msgTypes[105]
+	mi := &file_appmessages_proto_msgTypes[107]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7798,7 +7900,7 @@ func (x *OnlineOfflineMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OnlineOfflineMsg.ProtoReflect.Descriptor instead.
 func (*OnlineOfflineMsg) Descriptor() ([]byte, []int) {
-	return file_appmessages_proto_rawDescGZIP(), []int{105}
+	return file_appmessages_proto_rawDescGZIP(), []int{107}
 }
 
 func (x *OnlineOfflineMsg) GetType() OnlineType {
@@ -7882,7 +7984,7 @@ type LogEntity struct {
 func (x *LogEntity) Reset() {
 	*x = LogEntity{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_appmessages_proto_msgTypes[106]
+		mi := &file_appmessages_proto_msgTypes[108]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -7895,7 +7997,7 @@ func (x *LogEntity) String() string {
 func (*LogEntity) ProtoMessage() {}
 
 func (x *LogEntity) ProtoReflect() protoreflect.Message {
-	mi := &file_appmessages_proto_msgTypes[106]
+	mi := &file_appmessages_proto_msgTypes[108]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7908,7 +8010,7 @@ func (x *LogEntity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogEntity.ProtoReflect.Descriptor instead.
 func (*LogEntity) Descriptor() ([]byte, []int) {
-	return file_appmessages_proto_rawDescGZIP(), []int{106}
+	return file_appmessages_proto_rawDescGZIP(), []int{108}
 }
 
 func (m *LogEntity) GetLogOf() isLogEntity_LogOf {
@@ -8007,7 +8109,7 @@ type ConnectionLog struct {
 func (x *ConnectionLog) Reset() {
 	*x = ConnectionLog{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_appmessages_proto_msgTypes[107]
+		mi := &file_appmessages_proto_msgTypes[109]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -8020,7 +8122,7 @@ func (x *ConnectionLog) String() string {
 func (*ConnectionLog) ProtoMessage() {}
 
 func (x *ConnectionLog) ProtoReflect() protoreflect.Message {
-	mi := &file_appmessages_proto_msgTypes[107]
+	mi := &file_appmessages_proto_msgTypes[109]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8033,7 +8135,7 @@ func (x *ConnectionLog) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConnectionLog.ProtoReflect.Descriptor instead.
 func (*ConnectionLog) Descriptor() ([]byte, []int) {
-	return file_appmessages_proto_rawDescGZIP(), []int{107}
+	return file_appmessages_proto_rawDescGZIP(), []int{109}
 }
 
 func (x *ConnectionLog) GetTimestamp() string {
@@ -8124,7 +8226,7 @@ type DisconnectionLog struct {
 func (x *DisconnectionLog) Reset() {
 	*x = DisconnectionLog{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_appmessages_proto_msgTypes[108]
+		mi := &file_appmessages_proto_msgTypes[110]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -8137,7 +8239,7 @@ func (x *DisconnectionLog) String() string {
 func (*DisconnectionLog) ProtoMessage() {}
 
 func (x *DisconnectionLog) ProtoReflect() protoreflect.Message {
-	mi := &file_appmessages_proto_msgTypes[108]
+	mi := &file_appmessages_proto_msgTypes[110]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8150,7 +8252,7 @@ func (x *DisconnectionLog) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DisconnectionLog.ProtoReflect.Descriptor instead.
 func (*DisconnectionLog) Descriptor() ([]byte, []int) {
-	return file_appmessages_proto_rawDescGZIP(), []int{108}
+	return file_appmessages_proto_rawDescGZIP(), []int{110}
 }
 
 func (x *DisconnectionLog) GetTimestamp() string {
@@ -8228,7 +8330,7 @@ type SdkRequestLog struct {
 func (x *SdkRequestLog) Reset() {
 	*x = SdkRequestLog{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_appmessages_proto_msgTypes[109]
+		mi := &file_appmessages_proto_msgTypes[111]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -8241,7 +8343,7 @@ func (x *SdkRequestLog) String() string {
 func (*SdkRequestLog) ProtoMessage() {}
 
 func (x *SdkRequestLog) ProtoReflect() protoreflect.Message {
-	mi := &file_appmessages_proto_msgTypes[109]
+	mi := &file_appmessages_proto_msgTypes[111]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8254,7 +8356,7 @@ func (x *SdkRequestLog) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SdkRequestLog.ProtoReflect.Descriptor instead.
 func (*SdkRequestLog) Descriptor() ([]byte, []int) {
-	return file_appmessages_proto_rawDescGZIP(), []int{109}
+	return file_appmessages_proto_rawDescGZIP(), []int{111}
 }
 
 func (x *SdkRequestLog) GetTimestamp() string {
@@ -8338,7 +8440,7 @@ type SdkResponseLog struct {
 func (x *SdkResponseLog) Reset() {
 	*x = SdkResponseLog{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_appmessages_proto_msgTypes[110]
+		mi := &file_appmessages_proto_msgTypes[112]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -8351,7 +8453,7 @@ func (x *SdkResponseLog) String() string {
 func (*SdkResponseLog) ProtoMessage() {}
 
 func (x *SdkResponseLog) ProtoReflect() protoreflect.Message {
-	mi := &file_appmessages_proto_msgTypes[110]
+	mi := &file_appmessages_proto_msgTypes[112]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8364,7 +8466,7 @@ func (x *SdkResponseLog) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SdkResponseLog.ProtoReflect.Descriptor instead.
 func (*SdkResponseLog) Descriptor() ([]byte, []int) {
-	return file_appmessages_proto_rawDescGZIP(), []int{110}
+	return file_appmessages_proto_rawDescGZIP(), []int{112}
 }
 
 func (x *SdkResponseLog) GetTimestamp() string {
@@ -8440,7 +8542,7 @@ type BusinessLog struct {
 func (x *BusinessLog) Reset() {
 	*x = BusinessLog{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_appmessages_proto_msgTypes[111]
+		mi := &file_appmessages_proto_msgTypes[113]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -8453,7 +8555,7 @@ func (x *BusinessLog) String() string {
 func (*BusinessLog) ProtoMessage() {}
 
 func (x *BusinessLog) ProtoReflect() protoreflect.Message {
-	mi := &file_appmessages_proto_msgTypes[111]
+	mi := &file_appmessages_proto_msgTypes[113]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8466,7 +8568,7 @@ func (x *BusinessLog) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BusinessLog.ProtoReflect.Descriptor instead.
 func (*BusinessLog) Descriptor() ([]byte, []int) {
-	return file_appmessages_proto_rawDescGZIP(), []int{111}
+	return file_appmessages_proto_rawDescGZIP(), []int{113}
 }
 
 func (x *BusinessLog) GetTimestamp() string {
@@ -9448,7 +9550,14 @@ var file_appmessages_proto_rawDesc = []byte{
 	0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
 	0x22, 0x1f, 0x0a, 0x0b, 0x50, 0x72, 0x65, 0x53, 0x69, 0x67, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x12,
 	0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72,
-	0x6c, 0x22, 0xa1, 0x02, 0x0a, 0x10, 0x4f, 0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x4f, 0x66, 0x66, 0x6c,
+	0x6c, 0x22, 0x2c, 0x0a, 0x07, 0x53, 0x75, 0x62, 0x4d, 0x73, 0x67, 0x73, 0x12, 0x21, 0x0a, 0x07,
+	0x73, 0x75, 0x62, 0x4d, 0x73, 0x67, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x07, 0x2e,
+	0x53, 0x75, 0x62, 0x4d, 0x73, 0x67, 0x52, 0x07, 0x73, 0x75, 0x62, 0x4d, 0x73, 0x67, 0x73, 0x22,
+	0x40, 0x0a, 0x06, 0x53, 0x75, 0x62, 0x4d, 0x73, 0x67, 0x12, 0x1a, 0x0a, 0x03, 0x6d, 0x73, 0x67,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x44, 0x6f, 0x77, 0x6e, 0x4d, 0x73, 0x67,
+	0x52, 0x03, 0x6d, 0x73, 0x67, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72,
+	0x6d, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x6c, 0x61, 0x74, 0x66, 0x6f, 0x72,
+	0x6d, 0x22, 0xa1, 0x02, 0x0a, 0x10, 0x4f, 0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x4f, 0x66, 0x66, 0x6c,
 	0x69, 0x6e, 0x65, 0x4d, 0x73, 0x67, 0x12, 0x1f, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x0e, 0x32, 0x0b, 0x2e, 0x4f, 0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x54, 0x79, 0x70,
 	0x65, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49,
@@ -9622,7 +9731,7 @@ func file_appmessages_proto_rawDescGZIP() []byte {
 }
 
 var file_appmessages_proto_enumTypes = make([]protoimpl.EnumInfo, 11)
-var file_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 118)
+var file_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 120)
 var file_appmessages_proto_goTypes = []interface{}{
 	(RpcMsgType)(0),                  // 0: RpcMsgType
 	(MentionType)(0),                 // 1: MentionType
@@ -9740,23 +9849,25 @@ var file_appmessages_proto_goTypes = []interface{}{
 	(*QryFileCredResp)(nil),          // 113: QryFileCredResp
 	(*QiNiuCredResp)(nil),            // 114: QiNiuCredResp
 	(*PreSignResp)(nil),              // 115: PreSignResp
-	(*OnlineOfflineMsg)(nil),         // 116: OnlineOfflineMsg
-	(*LogEntity)(nil),                // 117: LogEntity
-	(*ConnectionLog)(nil),            // 118: ConnectionLog
-	(*DisconnectionLog)(nil),         // 119: DisconnectionLog
-	(*SdkRequestLog)(nil),            // 120: SdkRequestLog
-	(*SdkResponseLog)(nil),           // 121: SdkResponseLog
-	(*BusinessLog)(nil),              // 122: BusinessLog
-	nil,                              // 123: RpcMessageWraper.ExtParamsEntry
-	nil,                              // 124: UserInfosResp.UserInfoMapEntry
-	nil,                              // 125: GroupInfosResp.GroupInfoMapEntry
-	nil,                              // 126: CheckGroupMembersResp.MemberIdMapEntry
-	nil,                              // 127: QryGrpMemberSettingsResp.GroupSettingsEntry
-	nil,                              // 128: QryGrpMemberSettingsResp.MemberSettingsEntry
+	(*SubMsgs)(nil),                  // 116: SubMsgs
+	(*SubMsg)(nil),                   // 117: SubMsg
+	(*OnlineOfflineMsg)(nil),         // 118: OnlineOfflineMsg
+	(*LogEntity)(nil),                // 119: LogEntity
+	(*ConnectionLog)(nil),            // 120: ConnectionLog
+	(*DisconnectionLog)(nil),         // 121: DisconnectionLog
+	(*SdkRequestLog)(nil),            // 122: SdkRequestLog
+	(*SdkResponseLog)(nil),           // 123: SdkResponseLog
+	(*BusinessLog)(nil),              // 124: BusinessLog
+	nil,                              // 125: RpcMessageWraper.ExtParamsEntry
+	nil,                              // 126: UserInfosResp.UserInfoMapEntry
+	nil,                              // 127: GroupInfosResp.GroupInfoMapEntry
+	nil,                              // 128: CheckGroupMembersResp.MemberIdMapEntry
+	nil,                              // 129: QryGrpMemberSettingsResp.GroupSettingsEntry
+	nil,                              // 130: QryGrpMemberSettingsResp.MemberSettingsEntry
 }
 var file_appmessages_proto_depIdxs = []int32{
 	0,   // 0: RpcMessageWraper.rpcMsgType:type_name -> RpcMsgType
-	123, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
+	125, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
 	74,  // 2: RpcMessageWraper.senderInfo:type_name -> UserInfo
 	16,  // 3: UpMsg.pushData:type_name -> PushData
 	15,  // 4: UpMsg.mentionInfo:type_name -> MentionInfo
@@ -9841,7 +9952,7 @@ var file_appmessages_proto_depIdxs = []int32{
 	23,  // 83: UserInfo.statuses:type_name -> KvItem
 	6,   // 84: UserInfo.userType:type_name -> UserType
 	74,  // 85: UserInfos.userInfos:type_name -> UserInfo
-	124, // 86: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
+	126, // 86: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
 	82,  // 87: UserOnlineStatusResp.items:type_name -> UserOnlineItem
 	84,  // 88: BanUsersReq.banUsers:type_name -> BanUser
 	7,   // 89: BanUser.banType:type_name -> BanType
@@ -9852,28 +9963,30 @@ var file_appmessages_proto_depIdxs = []int32{
 	23,  // 94: GroupInfo.extFields:type_name -> KvItem
 	23,  // 95: GroupInfo.settings:type_name -> KvItem
 	23,  // 96: GroupMembersReq.extFields:type_name -> KvItem
-	125, // 97: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
+	127, // 97: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
 	104, // 98: GroupMembersResp.items:type_name -> GroupMember
-	126, // 99: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
-	127, // 100: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
-	128, // 101: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
+	128, // 99: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
+	129, // 100: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
+	130, // 101: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
 	9,   // 102: QryFileCredReq.fileType:type_name -> FileType
 	10,  // 103: QryFileCredResp.ossType:type_name -> OssType
 	114, // 104: QryFileCredResp.qiNiuCred:type_name -> QiNiuCredResp
 	115, // 105: QryFileCredResp.preSignResp:type_name -> PreSignResp
-	8,   // 106: OnlineOfflineMsg.type:type_name -> OnlineType
-	118, // 107: LogEntity.connectionLog:type_name -> ConnectionLog
-	119, // 108: LogEntity.disconnectionLog:type_name -> DisconnectionLog
-	120, // 109: LogEntity.sdkRequestLog:type_name -> SdkRequestLog
-	121, // 110: LogEntity.sdkResponseLog:type_name -> SdkResponseLog
-	122, // 111: LogEntity.businessLog:type_name -> BusinessLog
-	74,  // 112: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
-	95,  // 113: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
-	114, // [114:114] is the sub-list for method output_type
-	114, // [114:114] is the sub-list for method input_type
-	114, // [114:114] is the sub-list for extension type_name
-	114, // [114:114] is the sub-list for extension extendee
-	0,   // [0:114] is the sub-list for field type_name
+	117, // 106: SubMsgs.subMsgs:type_name -> SubMsg
+	17,  // 107: SubMsg.msg:type_name -> DownMsg
+	8,   // 108: OnlineOfflineMsg.type:type_name -> OnlineType
+	120, // 109: LogEntity.connectionLog:type_name -> ConnectionLog
+	121, // 110: LogEntity.disconnectionLog:type_name -> DisconnectionLog
+	122, // 111: LogEntity.sdkRequestLog:type_name -> SdkRequestLog
+	123, // 112: LogEntity.sdkResponseLog:type_name -> SdkResponseLog
+	124, // 113: LogEntity.businessLog:type_name -> BusinessLog
+	74,  // 114: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
+	95,  // 115: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
+	116, // [116:116] is the sub-list for method output_type
+	116, // [116:116] is the sub-list for method input_type
+	116, // [116:116] is the sub-list for extension type_name
+	116, // [116:116] is the sub-list for extension extendee
+	0,   // [0:116] is the sub-list for field type_name
 }
 
 func init() { file_appmessages_proto_init() }
@@ -11143,7 +11256,7 @@ func file_appmessages_proto_init() {
 			}
 		}
 		file_appmessages_proto_msgTypes[105].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*OnlineOfflineMsg); i {
+			switch v := v.(*SubMsgs); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -11155,7 +11268,7 @@ func file_appmessages_proto_init() {
 			}
 		}
 		file_appmessages_proto_msgTypes[106].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LogEntity); i {
+			switch v := v.(*SubMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -11167,7 +11280,7 @@ func file_appmessages_proto_init() {
 			}
 		}
 		file_appmessages_proto_msgTypes[107].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ConnectionLog); i {
+			switch v := v.(*OnlineOfflineMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -11179,7 +11292,7 @@ func file_appmessages_proto_init() {
 			}
 		}
 		file_appmessages_proto_msgTypes[108].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DisconnectionLog); i {
+			switch v := v.(*LogEntity); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -11191,7 +11304,7 @@ func file_appmessages_proto_init() {
 			}
 		}
 		file_appmessages_proto_msgTypes[109].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SdkRequestLog); i {
+			switch v := v.(*ConnectionLog); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -11203,7 +11316,7 @@ func file_appmessages_proto_init() {
 			}
 		}
 		file_appmessages_proto_msgTypes[110].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SdkResponseLog); i {
+			switch v := v.(*DisconnectionLog); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -11215,6 +11328,30 @@ func file_appmessages_proto_init() {
 			}
 		}
 		file_appmessages_proto_msgTypes[111].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SdkRequestLog); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_appmessages_proto_msgTypes[112].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SdkResponseLog); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_appmessages_proto_msgTypes[113].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BusinessLog); i {
 			case 0:
 				return &v.state
@@ -11231,7 +11368,7 @@ func file_appmessages_proto_init() {
 		(*QryFileCredResp_QiNiuCred)(nil),
 		(*QryFileCredResp_PreSignResp)(nil),
 	}
-	file_appmessages_proto_msgTypes[106].OneofWrappers = []interface{}{
+	file_appmessages_proto_msgTypes[108].OneofWrappers = []interface{}{
 		(*LogEntity_ConnectionLog)(nil),
 		(*LogEntity_DisconnectionLog)(nil),
 		(*LogEntity_SdkRequestLog)(nil),
@@ -11244,7 +11381,7 @@ func file_appmessages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_appmessages_proto_rawDesc,
 			NumEnums:      11,
-			NumMessages:   118,
+			NumMessages:   120,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

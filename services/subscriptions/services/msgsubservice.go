@@ -28,7 +28,7 @@ var retryStrategy = []retry.Option{
 	retry.DelayType(retry.BackOffDelay),
 }
 
-func MsgSubHandle(ctx context.Context, msgs *pbobjs.DownMsgSet) {
+func MsgSubHandle(ctx context.Context, msgs *pbobjs.SubMsgs) {
 	appKey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, ok := commonservices.GetAppInfo(appKey)
 	if ok {
@@ -42,8 +42,8 @@ func MsgSubHandle(ctx context.Context, msgs *pbobjs.DownMsgSet) {
 			return
 		}
 
-		msgIds := lo.Map(msgs.Msgs, func(msg *pbobjs.DownMsg, i int) string {
-			return msg.MsgId
+		msgIds := lo.Map(msgs.SubMsgs, func(msg *pbobjs.SubMsg, i int) string {
+			return msg.Msg.MsgId
 		})
 
 		nonce := tools.RandStr(8)
@@ -126,23 +126,24 @@ func notify(url string, headers map[string]string, body string) error {
 
 func createEvent(msg proto.Message) *SubEvent {
 	switch msg.(type) {
-	case *pbobjs.DownMsgSet:
-		msgs := msg.(*pbobjs.DownMsgSet)
+	case *pbobjs.SubMsgs:
+		msgs := msg.(*pbobjs.SubMsgs)
 		event := &SubEvent{
 			EventType: EventType_Message,
 			Timestamp: time.Now().UnixMilli(),
 			Payload:   []interface{}{},
 		}
-		for _, msg := range msgs.Msgs {
+		for _, msg := range msgs.SubMsgs {
 			event.Payload = append(event.Payload, &MsgEvent{
-				Sender:      msg.SenderId,
-				Receiver:    msg.TargetId,
-				ConverType:  int(msg.ChannelType),
-				MsgType:     msg.MsgType,
-				MsgContent:  string(msg.MsgContent),
-				MsgId:       msg.MsgId,
-				MsgTime:     msg.MsgTime,
-				MentionInfo: transMentionInfo(msg.MentionInfo),
+				Platform:    msg.Platform,
+				Sender:      msg.Msg.SenderId,
+				Receiver:    msg.Msg.TargetId,
+				ConverType:  int(msg.Msg.ChannelType),
+				MsgType:     msg.Msg.MsgType,
+				MsgContent:  string(msg.Msg.MsgContent),
+				MsgId:       msg.Msg.MsgId,
+				MsgTime:     msg.Msg.MsgTime,
+				MentionInfo: transMentionInfo(msg.Msg.MentionInfo),
 			})
 		}
 		return event

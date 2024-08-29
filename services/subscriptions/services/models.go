@@ -18,6 +18,7 @@ type SubEventResp struct {
 }
 
 type MsgEvent struct {
+	Platform    string       `json:"platform"`
 	Sender      string       `json:"sender"`
 	Receiver    string       `json:"receiver"`
 	ConverType  int          `json:"conver_type"`

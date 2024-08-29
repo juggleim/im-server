@@ -10,6 +10,7 @@ const (
 	Platform_IOS     Platform = "iOS"
 	Platform_Web     Platform = "Web"
 	Platform_PC      Platform = "PC"
+	Platform_Server  Platform = "Server"
 
 	PushChannel_Apple  PushChannel = "Apple"
 	PushChannel_Huawei PushChannel = "Huawei"

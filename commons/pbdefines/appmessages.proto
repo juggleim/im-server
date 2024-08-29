@@ -755,6 +755,14 @@ message PreSignResp {
   string url = 1;
 }
 
+message SubMsgs{
+  repeated SubMsg subMsgs = 1;
+}
+message SubMsg {
+  DownMsg msg = 1;
+  string platform = 2;
+}
+
 message OnlineOfflineMsg {
   OnlineType type = 1;
   string userId = 2;

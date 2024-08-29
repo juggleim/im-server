@@ -8,6 +8,7 @@ import (
 	"im-server/commons/dbcommons"
 	"im-server/commons/logs"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/services/commonservices"
 	"testing"
 	"time"
 )
@@ -27,32 +28,35 @@ func TestMsgSubHandle(t *testing.T) {
 	}
 
 	ctx := context.WithValue(context.Background(), bases.CtxKey_AppKey, "appkey")
-	MsgSubHandle(ctx, &pbobjs.DownMsgSet{
-		Msgs: []*pbobjs.DownMsg{
+	MsgSubHandle(ctx, &pbobjs.SubMsgs{
+		SubMsgs: []*pbobjs.SubMsg{
 			{
-				TargetId:       "1",
-				ChannelType:    pbobjs.ChannelType_Private,
-				MsgType:        "text",
-				SenderId:       "1",
-				MsgId:          "111",
-				MsgSeqNo:       0,
-				MsgContent:     []byte("hello, this is a test message"),
-				MsgTime:        time.Now().UnixMilli(),
-				Flags:          0,
-				IsSend:         false,
-				Platform:       "",
-				ClientUid:      "",
-				PushData:       nil,
-				MentionInfo:    nil,
-				IsRead:         false,
-				ReferMsg:       nil,
-				TargetUserInfo: nil,
-				GroupInfo:      nil,
-				MergedMsgs:     nil,
-				UndisturbType:  0,
-				MemberCount:    0,
-				ReadCount:      0,
-				UnreadIndex:    0,
+				Msg: &pbobjs.DownMsg{
+					TargetId:       "1",
+					ChannelType:    pbobjs.ChannelType_Private,
+					MsgType:        "text",
+					SenderId:       "1",
+					MsgId:          "111",
+					MsgSeqNo:       0,
+					MsgContent:     []byte("hello, this is a test message"),
+					MsgTime:        time.Now().UnixMilli(),
+					Flags:          0,
+					IsSend:         false,
+					Platform:       "",
+					ClientUid:      "",
+					PushData:       nil,
+					MentionInfo:    nil,
+					IsRead:         false,
+					ReferMsg:       nil,
+					TargetUserInfo: nil,
+					GroupInfo:      nil,
+					MergedMsgs:     nil,
+					UndisturbType:  0,
+					MemberCount:    0,
+					ReadCount:      0,
+					UnreadIndex:    0,
+				},
+				Platform: string(commonservices.Platform_IOS),
 			},
 		},
 	})
