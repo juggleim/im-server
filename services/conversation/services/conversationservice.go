@@ -606,28 +606,7 @@ func QryTopConvers(ctx context.Context, userId string, req *pbobjs.QryTopConvers
 	dbConvers, err := converStorage.QryTopConvers(appkey, userId, req.StartTime, 101)
 	if err == nil {
 		for _, dbConver := range dbConvers {
-			downMsg := QryHisMsgByIds(ctx, userId, dbConver.TargetId, dbConver.LatestMsgId, dbConver.ChannelType)
-			downMsg.TargetUserInfo = nil
-			downMsg.GroupInfo = nil
-			unreadCount := dbConver.LatestUnreadMsgIndex - dbConver.LatestReadMsgIndex
-
-			conversation := &pbobjs.Conversation{
-				UserId:            userId,
-				TargetId:          dbConver.TargetId,
-				ChannelType:       pbobjs.ChannelType(dbConver.ChannelType),
-				IsTop:             int32(dbConver.IsTop),
-				TopUpdatedTime:    dbConver.TopUpdatedTime,
-				UndisturbType:     dbConver.UndisturbType,
-				UnreadCount:       unreadCount,
-				Msg:               downMsg,
-				LatestUnreadIndex: dbConver.LatestUnreadMsgIndex,
-				LatestReadIndex:   dbConver.LatestReadMsgIndex,
-			}
-			if conversation.ChannelType == pbobjs.ChannelType_Private {
-				conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conversation.TargetId)
-			} else if conversation.ChannelType == pbobjs.ChannelType_Group {
-				conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conversation.TargetId)
-			}
+			conversation := dbConver2Conversations(ctx, dbConver)
 			resp.Conversations = append(resp.Conversations, conversation)
 		}
 		if len(dbConvers) > 100 {
