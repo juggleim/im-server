@@ -154,11 +154,27 @@ func createEvent(msg proto.Message) *SubEvent {
 		} else {
 			eventType = EventType_Offline
 		}
+		onlineEvent := &OnlineEvent{
+			Type:             int32(msg.Type),
+			DepUserId:        msg.UserId,
+			UserId:           msg.UserId,
+			DepDeviceId:      msg.DeviceId,
+			DeviceId:         msg.DeviceId,
+			Platform:         msg.Platform,
+			DepClientIp:      msg.ClientIp,
+			ClientIp:         msg.ClientIp,
+			DepSessionId:     msg.SessionId,
+			SessionId:        msg.SessionId,
+			Timestamp:        msg.Timestamp,
+			DepConnectionExt: msg.ConnectionExt,
+			ConnectionExt:    msg.ConnectionExt,
+			InstanceId:       msg.InstanceId,
+		}
 		event := &SubEvent{
 			EventType: eventType,
 			Timestamp: time.Now().UnixMilli(),
 			Payload: []interface{}{
-				msg,
+				onlineEvent,
 			},
 		}
 		return event

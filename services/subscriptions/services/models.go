@@ -5,7 +5,7 @@ type EventType string
 const (
 	EventType_Message EventType = "message"
 	EventType_Online  EventType = "online"
-	EventType_Offline EventType = "offline"
+	EventType_Offline EventType = "offline" //discarded
 )
 
 type SubEvent struct {
@@ -31,4 +31,29 @@ type MsgEvent struct {
 type MentionInfo struct {
 	MentionType   string   `json:"mention_type"`
 	TargetUserIds []string `json:"target_user_ids"`
+}
+
+type OnlineEvent struct {
+	Type int32 `json:"type"`
+
+	DepUserId string `json:"userId"`
+	UserId    string `json:"user_id"`
+
+	DepDeviceId string `json:"deviceId"`
+	DeviceId    string `json:"device_id"`
+
+	Platform string `json:"platform"`
+
+	DepClientIp string `json:"clientIp"`
+	ClientIp    string `json:"client_ip"`
+
+	DepSessionId string `json:"sessionId"`
+	SessionId    string `json:"session_id"`
+
+	Timestamp int64 `json:"timestamp"`
+
+	DepConnectionExt string `json:"connectionExt"`
+	ConnectionExt    string `json:"connection_ext"`
+
+	InstanceId string `json:"instance_id"`
 }
