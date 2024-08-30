@@ -2,11 +2,11 @@ package bases
 
 import (
 	"context"
-	"fmt"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/logs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"reflect"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -123,8 +123,7 @@ func (actor *baseProcessActor) OnReceive(ctx context.Context, input proto.Messag
 						receiveHandler.OnReceive(ctx, msg)
 					}
 				} else {
-					fmt.Println("decode input failed:", err, msg, ssRequest.Method, ssRequest.Session, ssRequest.ReqIndex)
-					//logs.Errorf("create input handler error:%+v", err)
+					logs.Errorf("decode input failed. err:%v\tmethod:%s\tsession:%s\tseq_index:%d\tinput_type:%v", err, ssRequest.Method, ssRequest.Session, ssRequest.ReqIndex, reflect.TypeOf(msg))
 				}
 			}
 			consume := time.Since(startTime)

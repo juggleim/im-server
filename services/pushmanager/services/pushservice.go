@@ -35,7 +35,9 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					notification.Payload = []byte(fmt.Sprintf(`{"aps":{"alert":{"title":"%s","body":"%s"}},"conver_id":"%s","conver_type":"%d","exts":"%s"}`, req.Title, tools.PureStr(req.PushText), req.ConverId, req.ChannelType, req.PushExtraData))
 					_, err := iosPushConf.ApnsClient.Push(notification)
 					if err != nil {
-						logs.WithContext(ctx).Error(err.Error())
+						logs.WithContext(ctx).Errorf("user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+					} else {
+						logs.WithContext(ctx).Infof("user_id:%s\tmsg_id:%s\tpush success", userId, req.MsgId)
 					}
 				}
 			}

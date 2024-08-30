@@ -247,10 +247,10 @@ func GetPushDataForDefaultMsg(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.
 		if msg.MsgType == "jg:text" {
 			txtMsg := &commonservices.TextMsg{}
 			err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
-
 			pushText := txtMsg.Content
-			if len(pushText) > 20 {
-				pushText = pushText[:20] + "..."
+			charArr := []rune(pushText)
+			if len(charArr) > 20 {
+				pushText = string(charArr[:20]) + "..."
 			}
 			if err == nil {
 				retPushData.PushText = prefix + pushText

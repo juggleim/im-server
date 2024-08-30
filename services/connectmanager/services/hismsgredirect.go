@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
@@ -71,7 +70,6 @@ func HisMsgRedirect(method string, data []byte, fromId, targetId string) (string
 	}
 	if typeGetter != nil && (typeGetter.GetChannelType() == pbobjs.ChannelType_Private || typeGetter.GetChannelType() == pbobjs.ChannelType_System) {
 		converId := commonservices.GetConversationId(fromId, targetId, typeGetter.GetChannelType())
-		fmt.Println("converId:", converId)
 		return converId, true
 	}
 	return "", false
