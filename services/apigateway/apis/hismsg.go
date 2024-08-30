@@ -79,7 +79,7 @@ func DelHisMsgs(ctx *gin.Context) {
 			MsgId: m.MsgId,
 		})
 	}
-	code, _, err := services.SyncApiCall(ctx, "del_hismsg", req.FromId, req.TargetId, &pbobjs.DelHisMsgsReq{
+	code, _, err := services.SyncApiCall(ctx, "del_msg", req.FromId, req.TargetId, &pbobjs.DelHisMsgsReq{
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
 		Msgs:        msgs,

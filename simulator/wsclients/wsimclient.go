@@ -417,7 +417,7 @@ func (client *WsImClient) QryFirstUnreadMsg(req *pbobjs.QryFirstUnreadMsgReq) (u
 
 func (client *WsImClient) DelHisMsgs(delHisMsgs *pbobjs.DelHisMsgsReq) utils.ClientErrorCode {
 	data, _ := tools.PbMarshal(delHisMsgs)
-	code, qryAck := client.Query("del_hismsg", delHisMsgs.TargetId, data)
+	code, qryAck := client.Query("del_msg", delHisMsgs.TargetId, data)
 	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
 		return utils.ClientErrorCode_Success
 	} else {
