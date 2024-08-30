@@ -14,7 +14,6 @@ CREATE TABLE `accounts` (
   KEY `idx_parent` (`parent_account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
 DROP TABLE IF EXISTS `androidpushconfs`;
 CREATE TABLE `androidpushconfs` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -669,3 +668,5 @@ CREATE TABLE `users` (
   UNIQUE KEY `uniq_userid` (`app_key`,`user_id`),
   KEY `idx_userid` (`app_key`,`user_type`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin1','7c4a8d09ca3762af61e59520943dc26494f8941b')ON DUPLICATE KEY;
