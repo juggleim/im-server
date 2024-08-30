@@ -49,8 +49,7 @@ func (user *UserStatus) IsOnline() bool {
 	return user.OnlineStatus
 }
 
-func SetPushSwitch(appkey, userId string, pushSwitch int32) {
-	user := GetUserStatus(appkey, userId)
+func (user *UserStatus) SetPushSwitch(pushSwitch int32) {
 	atomic.StoreInt32(&user.PushSwitch, pushSwitch)
 }
 

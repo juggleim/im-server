@@ -38,6 +38,8 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 	//关闭直发
 	userStatus := GetUserStatus(appKey, userId)
 	userStatus.CheckNtfWithSwitch()
+	//关闭强制推送
+	userStatus.SetPushSwitch(0)
 
 	ret := &pbobjs.DownMsgSet{
 		Msgs: []*pbobjs.DownMsg{},

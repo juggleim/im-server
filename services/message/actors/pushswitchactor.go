@@ -17,7 +17,8 @@ func (actor *PushSwitchActor) OnReceive(ctx context.Context, input proto.Message
 	if req, ok := input.(*pbobjs.PushSwitch); ok {
 		appkey := bases.GetAppKeyFromCtx(ctx)
 		userId := bases.GetTargetIdFromCtx(ctx)
-		services.SetPushSwitch(appkey, userId, req.Switch)
+		userStatus := services.GetUserStatus(appkey, userId)
+		userStatus.SetPushSwitch(req.Switch)
 	}
 }
 
