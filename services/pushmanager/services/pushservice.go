@@ -35,9 +35,13 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					notification.Payload = []byte(fmt.Sprintf(`{"aps":{"alert":{"title":"%s","body":"%s"}},"conver_id":"%s","conver_type":"%d","exts":"%s"}`, req.Title, tools.PureStr(req.PushText), req.ConverId, req.ChannelType, req.PushExtraData))
 					resp, err := iosPushConf.ApnsClient.Push(notification)
 					if err != nil {
-						logs.WithContext(ctx).Errorf("[IOS_FAIL]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						logs.WithContext(ctx).Errorf("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 					} else {
-						logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s\tapns_id:%s\treason:%s\tcode:%d\ttime:%v", userId, req.MsgId, resp.ApnsID, resp.Reason, resp.StatusCode, resp.Timestamp)
+						if resp.StatusCode == 200 {
+							logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+						} else {
+							logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
+						}
 					}
 				}
 			}
