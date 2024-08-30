@@ -33,11 +33,11 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					notification.DeviceToken = pushToken.PushToken
 					notification.Topic = pushToken.PackageName
 					notification.Payload = []byte(fmt.Sprintf(`{"aps":{"alert":{"title":"%s","body":"%s"}},"conver_id":"%s","conver_type":"%d","exts":"%s"}`, req.Title, tools.PureStr(req.PushText), req.ConverId, req.ChannelType, req.PushExtraData))
-					_, err := iosPushConf.ApnsClient.Push(notification)
+					resp, err := iosPushConf.ApnsClient.Push(notification)
 					if err != nil {
-						logs.WithContext(ctx).Errorf("user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						logs.WithContext(ctx).Errorf("[IOS_FAIL]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 					} else {
-						logs.WithContext(ctx).Infof("user_id:%s\tmsg_id:%s\tpush success", userId, req.MsgId)
+						logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s\tapns_id:%s\treason:%s\tcode:%d\ttime:%v", userId, req.MsgId, resp.ApnsID, resp.Reason, resp.StatusCode, resp.Timestamp)
 					}
 				}
 			}
