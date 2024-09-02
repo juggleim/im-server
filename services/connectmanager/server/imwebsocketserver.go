@@ -76,7 +76,7 @@ func (child *ImWebsocketChild) startWsListener() {
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ConnectSession, tools.GenerateUUIDShort11())
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ConnectCreateTime, time.Now().UnixMilli())
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_CtxLocker, &sync.Mutex{})
-	imcontext.SetContextAttr(ctx, imcontext.StateKey_Limiter, rate.NewLimiter(100, 10))
+	imcontext.SetContextAttr(ctx, imcontext.StateKey_Limiter, rate.NewLimiter(1000, 1000))
 
 	//start ticker
 	child.startTicker(ctx, handler)

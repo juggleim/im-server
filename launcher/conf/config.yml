@@ -9,9 +9,11 @@ log:
 
 mysql:
   user: root
-  password: 123456
+  password: root
   address: 127.0.0.1:3306
-  name: im_db
+  name: im_tmp
+  debug: false
+
 
 mongodb:
   address: 127.0.0.1:27017

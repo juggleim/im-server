@@ -1,0 +1,5 @@
+appKey: "appkey3"
+secret: "appsecret3"
+secureKey: "abcdefghijk1mn0p"
+apiUrl: "http://127.0.0.1:8082"
+wsUrl: "ws://127.0.0.1:9002"

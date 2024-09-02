@@ -170,7 +170,7 @@ func (client *WsImClient) startListener() {
 			client.state = utils.State_Disconnect
 		}
 	}
-	fmt.Println("Stop client listener.")
+	//fmt.Println("Stop client listener.")
 }
 
 func (client *WsImClient) Reconnect(network, ispNum string) (utils.ClientErrorCode, *codec.ConnectAckMsgBody) {
@@ -360,7 +360,10 @@ func (client *WsImClient) Query(method, targetId string, data []byte) (utils.Cli
 		wsMsg := protoMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		err := client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		if err != nil {
+			return utils.ClientErrorCode_SendTimeout, nil
+		}
 		obj, err := dataAccessor.GetWithTimeout(10 * time.Second)
 		if err == nil {
 			queryAck := obj.(*codec.QueryAckMsgBody)
@@ -483,13 +486,13 @@ func (client *WsImClient) SyncConversations(req *pbobjs.QryConversationsReq) (ut
 func (client *WsImClient) SyncMsgs(req *pbobjs.SyncMsgReq) (utils.ClientErrorCode, *pbobjs.DownMsgSet) {
 	data, _ := tools.PbMarshal(req)
 	code, qryAck := client.Query("sync_msgs", client.UserId, data)
-	fmt.Println(code)
+	//fmt.Println(code)
 	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
 		resp := &pbobjs.DownMsgSet{}
 		tools.PbUnMarshal(qryAck.Data, resp)
 		return utils.ClientErrorCode_Success, resp
 	} else {
-		return utils.ClientErrorCode_Unknown, nil
+		return code, nil
 	}
 }
 
