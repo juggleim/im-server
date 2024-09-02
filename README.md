@@ -16,6 +16,14 @@
 [![](https://img.shields.io/github/license/juggleim/im-server?color=yellow&style=flat-square)](./LICENSE)
 [![](https://img.shields.io/badge/go-%3E%3D1.20-30dff3?style=flat-square&logo=go)](https://github.com/juggleim/im-server)
 
+## 社群讨论
+
+如果对 IM 感兴趣、有集成问题讨论的朋友，非常欢迎加入社群讨论～
+
+[Telegram 中文群](https://t.me/juggleim_zh)、[Telegram English](https://t.me/juggleim_en)、[添加好友加入微信群](https://downloads.juggleim.com/xiaoshan.jpg)
+
+_备注：由于微信群二维码有时间限制，加入微信讨论可优先加 **小山** 微信好友，由 Ta 邀请进群组_
+
 ## 特性
 
 * 灵活的部署模式，支持公有云，私有云，托管云等部署形态。
