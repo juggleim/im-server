@@ -5,8 +5,6 @@
 <p align="center">
 <img align="left" height="110" src="./docs/logo.png">
 <ul>
-<!-- <li><strong>QQ群</strong>: <a href="#">750224611</a></li> -->
-<!-- <li><strong>微信</strong>: <a href="#">wukongimgo（备注进群）</a></li> -->
 <li><strong>官网</strong>: https://www.jugglechat.com</li>
 <li><strong>提问</strong>: https://github.com/juggleim/im-server/issues</li>
 <li><strong>文档</strong>: https://www.jugglechat.com/docs/guide/intro/</li>
