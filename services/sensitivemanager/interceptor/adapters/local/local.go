@@ -17,7 +17,7 @@ func (i *LocalInterceptor) CheckMsgInterceptor(ctx context.Context, upMsg *pbobj
 func CheckSensitive(ctx context.Context, msg *pbobjs.UpMsg) bool {
 	if msg.MsgType == "jg:text" {
 		txtMsg := make(map[string]interface{})
-		err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
+		err := tools.JsonUnMarshal(msg.MsgContent, &txtMsg)
 		if err != nil {
 			return true
 		}
