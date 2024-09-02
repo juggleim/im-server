@@ -26,7 +26,12 @@ func (handler IMWebsocketMsgHandler) HandleRead(ctx imcontext.WsHandleContext, m
 				if !imcontext.CheckConnected(ctx) {
 					ctx.Close(nil)
 				}
-				handler.listener.Diconnected(wsMsg.GetDisconnectMsgBody(), ctx)
+				//check disconnect msg body
+				disconnectMsg := wsMsg.GetDisconnectMsgBody()
+				if disconnectMsg == nil {
+					disconnectMsg = &codec.DisconnectMsgBody{}
+				}
+				handler.listener.Diconnected(disconnectMsg, ctx)
 			case int32(codec.Cmd_Ping):
 				if !imcontext.CheckConnected(ctx) {
 					ctx.Close(nil)
