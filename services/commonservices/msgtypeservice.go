@@ -8,4 +8,5 @@ const (
 
 type TextMsg struct {
 	Content string `json:"content"`
+	Extra   string `json:"extra"`
 }
