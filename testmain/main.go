@@ -6,7 +6,6 @@ import (
 	"im-server/commons/dbcommons"
 	"im-server/commons/logs"
 	"im-server/commons/mongocommons"
-	"im-server/services/botmsg/services"
 	hisMsgMongo "im-server/services/historymsg/storages/mongodbs"
 	msgMongo "im-server/services/message/storages/mongodbs"
 )
@@ -36,6 +35,4 @@ func main() {
 			mongocommons.InitMongoCollections()
 		}
 	}
-
-	services.TestDify()
 }

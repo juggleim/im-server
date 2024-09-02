@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"im-server/commons/gmicro/utils"
 	"im-server/commons/tools"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
@@ -51,7 +52,9 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 		messageListener:  server.MessageListener,
 		latestActiveTime: time.Now().UnixMilli(),
 	}
-	go child.startWsListener()
+	utils.SafeGo(func() {
+		child.startWsListener()
+	})
 }
 func (server *ImWebsocketServer) Stop() {
 
