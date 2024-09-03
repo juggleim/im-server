@@ -62,7 +62,7 @@ func GetLimiter(ctx context.Context) *rate.Limiter {
 		if limiterObj, exist := limiterCache.Get(key); exist {
 			return limiterObj.(*rate.Limiter)
 		} else {
-			limiter := rate.NewLimiter(100, 10)
+			limiter := rate.NewLimiter(1000, 1000)
 			limiterCache.Add(key, limiter)
 			return limiter
 		}

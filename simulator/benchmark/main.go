@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"go.uber.org/atomic"
 	"gopkg.in/yaml.v3"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
@@ -74,19 +73,25 @@ func generateUserTokenStr(userId string) string {
 	return tokenStr
 }
 
-func CreateGroup() {
+func createGroup(groupId string, memberCount int) {
 	sdk := serversdk.NewJuggleIMSdk(appKey, secret, apiUrl)
 	req := serversdk.GroupMembersReq{
-		GroupId:       "benchmark_group1",
-		GroupName:     "benchmark_group1",
+		GroupId:       groupId,
+		GroupName:     groupId,
 		GroupPortrait: "",
 		MemberIds:     nil,
 	}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < memberCount; i++ {
 		req.MemberIds = append(req.MemberIds, userPrefix+strconv.Itoa(i))
 	}
 	code, _, err := sdk.CreateGroup(req)
 	fmt.Printf("Create group, code: %d, err: %v\n", code, err)
+}
+
+func dissolveGroup(groupId string) {
+	sdk := serversdk.NewJuggleIMSdk(appKey, secret, apiUrl)
+	code, _, err := sdk.DissolveGroup(groupId)
+	fmt.Printf("Disolve group, code: %d, err: %v\n", code, err)
 }
 
 func RegisterUsers(prefix string, count int) error {
@@ -108,28 +113,38 @@ func privateSend() {
 	var sendClients = make(map[int]*wsclients.WsImClient, 1000)
 	var clientLocker sync.Mutex
 
-	var recvMsgs = make([]time.Duration, 0, 10000)
-	var recvLocker sync.Mutex
-
-	var sendCount = atomic.NewInt32(0)
-
 	var connectWg sync.WaitGroup
 	var sendWg sync.WaitGroup
-	var recvWg sync.WaitGroup
 
-	for i := 0; i < 500; i++ {
+	var (
+		msgMap     = make(map[string]*time.Duration, 10000)
+		msgMapLock sync.Mutex
+	)
+
+	var (
+		sendClientNum = 500
+		turnMsgCount  = 20
+	)
+
+	for i := 0; i < sendClientNum*2; i++ {
 		connectWg.Add(1)
 
 		go func(i int) {
 			time.Sleep(time.Duration(rand.Int31n(1000)) * time.Millisecond)
 			client := wsclients.NewWsImClient(wsUrl, appKey, generateUserTokenStr(userPrefix+strconv.Itoa(i)), func(msg *pbobjs.DownMsg) {
-				sendTime := bytesToTime(msg.MsgContent)
-				recvLocker.Lock()
-				recvMsgs = append(recvMsgs, time.Since(sendTime))
-				recvLocker.Unlock()
+				msgMapLock.Lock()
+				if _, ok := msgMap[msg.MsgId]; ok {
+					sendTime := bytesToTime(msg.MsgContent)
+					duration := time.Since(sendTime)
+					msgMap[msg.MsgId] = &duration
+				}
+				msgMapLock.Unlock()
 
-				recvWg.Done()
-			}, nil, nil)
+				//fmt.Printf("msgId:%s, senderId:%s, receiverId:%s, msgTime:%v, msgContent:%s\n", msg.MsgId, msg.SenderId, msg.TargetId, msg.MsgTime, msg.MsgContent)
+
+			}, func(msg *pbobjs.StreamDownMsg) {
+				fmt.Println("stream down msg:", msg)
+			}, nil)
 			code, _ := client.Connect("", "")
 			if code != 0 {
 				fmt.Printf("connect code: %d\n", code)
@@ -153,37 +168,57 @@ func privateSend() {
 
 	sendStart := time.Now()
 
-	lastSendNo := 50
-	for i := 0; i < lastSendNo; i++ {
-		var turnMsgCount = 300
+	for i := 0; i < sendClientNum; i++ {
 		sendWg.Add(1)
-		recvWg.Add(turnMsgCount)
 		go func(i int) {
 			client := sendClients[i]
 			flag := commonservices.SetStoreMsg(0)
-			flag = commonservices.SetStateMsg(flag)
 			flag = commonservices.SetCountMsg(flag)
 
-			for i := 0; i < turnMsgCount; i++ {
+			for j := 0; j < turnMsgCount; j++ {
 				upMsg := pbobjs.UpMsg{
 					MsgType:    "txtMsg",
 					MsgContent: timeToBytes(time.Now()),
 					Flags:      flag,
 				}
-				code, _ := client.SendPrivateMsg(userPrefix+strconv.Itoa(i+lastSendNo), &upMsg)
+				code, ack := client.SendPrivateMsg(userPrefix+strconv.Itoa(i+sendClientNum), &upMsg)
 				if code != 0 {
 					fmt.Printf("send upMsg failed, code: %d\n", code)
 				}
-				sendCount.Add(1)
+
+				msgMapLock.Lock()
+				msgMap[ack.MsgId] = nil
+				msgMapLock.Unlock()
 			}
 			sendWg.Done()
 		}(i)
 	}
 	WaitTimeout(&sendWg, 10*time.Second)
-	fmt.Printf("发送消息数量 %d, time used:%v\n", sendCount.Load(), time.Now().Sub(sendStart))
+	fmt.Printf("发送消息数量 %d, time used:%v\n", len(msgMap), time.Now().Sub(sendStart))
 
-	WaitTimeout(&recvWg, 10*time.Second)
-	fmt.Printf("收到消息数量 %d, max:%v, min:%v, avg:%v\n", len(recvMsgs), maxDuration(recvMsgs), minDuration(recvMsgs), avgDuration(recvMsgs))
+	s := time.Now()
+	ticker := time.NewTicker(time.Second)
+
+	prevTotal := 0
+	for {
+		select {
+		case t := <-ticker.C:
+			if t.Sub(s).Seconds() > 10 {
+				return
+			}
+
+			msgMapLock.Lock()
+			total, maxDelay, minDelay, avgDelay := statisticsMsgMap(msgMap)
+			if total > prevTotal {
+				fmt.Printf("收到消息数量 %d, 平均延迟 %v, 最大延迟 %v, 最小延迟 %v\n", total, avgDelay, maxDelay, minDelay)
+				prevTotal = total
+			}
+			if total >= len(msgMap) {
+				return
+			}
+			msgMapLock.Unlock()
+		}
+	}
 
 }
 
@@ -195,6 +230,25 @@ func timeToBytes(t time.Time) []byte {
 func bytesToTime(b []byte) time.Time {
 	milli, _ := strconv.ParseInt(string(b), 10, 64)
 	return time.UnixMilli(milli)
+}
+
+func statisticsMsgMap(msgMap map[string]*groupMessageData) (total int, maxDelay time.Duration, minDelay time.Duration, avgDelay time.Duration) {
+	var totalDuration time.Duration
+	for _, v := range msgMap {
+		if v == nil {
+			continue
+		}
+		total += 1
+		if *v > maxDelay {
+			maxDelay = *v
+		}
+		if *v < minDelay {
+			minDelay = *v
+		}
+		totalDuration += *v
+	}
+	avgDelay = totalDuration / time.Duration(total)
+	return
 }
 
 func maxDuration(durations []time.Duration) time.Duration {

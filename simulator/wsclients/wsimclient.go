@@ -46,6 +46,8 @@ type WsImClient struct {
 
 	obfCode   [8]byte
 	isEncrypt bool
+
+	writeCh chan []byte
 }
 
 func NewWsImClient(address, appkey, token string, onMessage func(msg *pbobjs.DownMsg), onStreamMsg func(*pbobjs.StreamDownMsg), onDisconnect func(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody)) *WsImClient {
@@ -63,6 +65,7 @@ func NewWsImClient(address, appkey, token string, onMessage func(msg *pbobjs.Dow
 		DeviceId:            "testDevice",
 		obfCode:             [8]byte{1, 2, 3, 4, 5, 6, 7, 8},
 		isEncrypt:           true,
+		writeCh:             make(chan []byte),
 	}
 }
 
@@ -123,6 +126,7 @@ func (client *WsImClient) Connect(network, ispNum string) (utils.ClientErrorCode
 		}
 		client.state = utils.State_Connecting
 		go client.startListener()
+		go client.listenWrite()
 
 		connAckObj, err := client.connAckAccessor.GetWithTimeout(10 * time.Second)
 		if err != nil {
@@ -140,6 +144,15 @@ func (client *WsImClient) Connect(network, ispNum string) (utils.ClientErrorCode
 		}
 	} else {
 		return utils.ClientErrorCode_ConnectExisted, nil
+	}
+}
+
+func (client *WsImClient) listenWrite() {
+	for bs := range client.writeCh {
+		err := client.conn.WriteMessage(websocket.BinaryMessage, bs)
+		if err != nil {
+			fmt.Printf("write conn message error:%v\n", err)
+		}
 	}
 }
 
@@ -168,6 +181,7 @@ func (client *WsImClient) startListener() {
 			}
 		} else {
 			client.state = utils.State_Disconnect
+			close(client.writeCh)
 		}
 	}
 	//fmt.Println("Stop client listener.")
@@ -249,7 +263,8 @@ func (client *WsImClient) OnPublish(msg *codec.PublishMsgBody, needAck int) {
 		wsMsg := ackMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		//client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.writeCh <- wsMsgBs
 	}
 	if msg.Topic == "msg" {
 		downMsg := pbobjs.DownMsg{}
@@ -315,7 +330,8 @@ func (client *WsImClient) Publish(method, targetId string, data []byte) (code ut
 		wsMsg := protoMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		//client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.writeCh <- wsMsgBs
 		obj, err := dataAccessor.GetWithTimeout(10 * time.Second)
 		if err == nil {
 			pubAck := obj.(*codec.PublishAckMsgBody)
@@ -360,10 +376,11 @@ func (client *WsImClient) Query(method, targetId string, data []byte) (utils.Cli
 		wsMsg := protoMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		err := client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
-		if err != nil {
-			return utils.ClientErrorCode_SendTimeout, nil
-		}
+		//err := client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.writeCh <- wsMsgBs
+		//if err != nil {
+		//	return utils.ClientErrorCode_SendTimeout, nil
+		//}
 		obj, err := dataAccessor.GetWithTimeout(10 * time.Second)
 		if err == nil {
 			queryAck := obj.(*codec.QueryAckMsgBody)
@@ -414,7 +431,7 @@ func (client *WsImClient) QryFirstUnreadMsg(req *pbobjs.QryFirstUnreadMsgReq) (u
 		tools.PbUnMarshal(qryAck.Data, msg)
 		return utils.ClientErrorCode_Success, msg
 	} else {
-		return utils.ClientErrorCode(code), nil
+		return code, nil
 	}
 }
 
