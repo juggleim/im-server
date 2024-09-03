@@ -2,6 +2,7 @@ package tokens
 
 import (
 	"encoding/base64"
+	"errors"
 
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -69,13 +70,15 @@ func ParseToken(tokenWrap *pbobjs.TokenWrap, secureKey []byte) (ImToken, error) 
 	if err == nil {
 		tokenValue := &pbobjs.TokenValue{}
 		err = tools.PbUnMarshal(tokenBs, tokenValue)
-		if err == nil {
-			token.UserId = tokenValue.UserId
-			token.DeviceId = tokenValue.DeviceId
-			token.TokenTime = tokenValue.TokenTime
-		} else {
+		if err != nil {
 			return token, err
 		}
+		if tokenValue.UserId == "" {
+			return token, errors.New("invalid token")
+		}
+		token.UserId = tokenValue.UserId
+		token.DeviceId = tokenValue.DeviceId
+		token.TokenTime = tokenValue.TokenTime
 	}
 	return token, err
 }

@@ -111,12 +111,12 @@ func SetStreamMsg(flag int32) int32 {
 	return flag | 0x400
 }
 
-type PublishType int
+type PublishType int32
 
 var (
-	PublishType_AllSession           = 0
-	PublishType_OnlineSelfSession    = 1
-	PublishType_AllSessionExceptSelf = 2
+	PublishType_AllSession           PublishType = 0
+	PublishType_OnlineSelfSession    PublishType = 1
+	PublishType_AllSessionExceptSelf PublishType = 2
 )
 
 func FillReferMsg(ctx context.Context, upMsg *pbobjs.UpMsg) *pbobjs.DownMsg {
