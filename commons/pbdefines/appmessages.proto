@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "./pbobjs";
+option go_package = "commons/pbdefines/pbobjs";
 
  message Nil{}
 
