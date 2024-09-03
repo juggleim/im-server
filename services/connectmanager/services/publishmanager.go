@@ -24,7 +24,7 @@ func init() {
 		callbackTimeoutTimer.Start()
 	}
 }
-func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec.PublishMsgBody, publishType int, callback func(), notOnlineCallback func()) {
+func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec.PublishMsgBody, publishType commonservices.PublishType, callback func(), notOnlineCallback func()) {
 	userCtxMap := GetConnectCtxByUser(appkey, userid)
 	if len(userCtxMap) > 0 { //target user is online
 		isSetCallback := false
@@ -49,7 +49,6 @@ func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec
 				Data:      serverPubMsg.Data,
 			}, qos)
 			vCtx.Write(tmpPubMsg)
-			logs.Info(imcontext.GetConnSession(vCtx), imcontext.Action_ServerPub, tmpPubMsg.MsgBody.Index, tmpPubMsg.MsgBody.Topic, len(tmpPubMsg.MsgBody.Data))
 			logs.Infof("session:%s\taction:%s\tindex:%d\ttopic:%s\tlen:%d", imcontext.GetConnSession(vCtx), imcontext.Action_ServerPub, tmpPubMsg.MsgBody.Index, tmpPubMsg.MsgBody.Topic, len(tmpPubMsg.MsgBody.Data))
 			logmanager.WriteSdkRequestLog(imcontext.SendCtxFromNettyCtx(vCtx), &pbobjs.SdkRequestLog{
 				Timestamp:   logmanager.LogTimestamp(),

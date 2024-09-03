@@ -5,6 +5,7 @@ import (
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/services"
 	"time"
@@ -61,7 +62,7 @@ func (actor *ConnectActor) OnReceive(ctx context.Context, input proto.Message) {
 				TargetId:  rpcMsg.TargetId,
 				Timestamp: rpcMsg.MsgSendTime,
 				Data:      rpcMsg.AppDataBytes,
-			}, int(rpcMsg.PublishType), onlineCallback, notOnlineCallback)
+			}, commonservices.PublishType(rpcMsg.PublishType), onlineCallback, notOnlineCallback)
 		}
 	}
 }
