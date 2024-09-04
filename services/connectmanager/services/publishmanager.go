@@ -123,6 +123,7 @@ func PublishUserPubAckMessage(appkey, userid, session string, pubAckMsg *codec.P
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
 			Index:   pubAckMsg.Index,
+			Action:  string(imcontext.Action_UserPubAck),
 			Code:    pubAckMsg.Code,
 		})
 	}
