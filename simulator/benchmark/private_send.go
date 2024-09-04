@@ -11,19 +11,7 @@ import (
 	"time"
 )
 
-type (
-	groupMessageData struct {
-		msgId       string
-		sendTime    time.Time
-		receiveList []receiveData
-	}
-	receiveData struct {
-		Time     time.Time
-		TargetId string
-	}
-)
-
-func groupSend() {
+func privateSend() {
 	var sendClients = make(map[int]*wsclients.WsImClient, 1000)
 	var clientLocker sync.Mutex
 
@@ -31,40 +19,26 @@ func groupSend() {
 	var sendWg sync.WaitGroup
 
 	var (
-		msgMap     = make(map[string]*groupMessageData, 10000)
+		msgMap     = make(map[string]*time.Duration, 10000)
 		msgMapLock sync.Mutex
 	)
 
 	var (
-		groupMemberNum = 1000
-		sendClientNum  = 10
-		turnMsgCount   = 200
+		sendClientNum = 500
+		turnMsgCount  = 20
 	)
-	//添加群组
-	groupId := "benchmark_group:" + strconv.Itoa(groupMemberNum)
-	dissolveGroup(groupId)
-	createGroup(groupId, groupMemberNum)
 
-	for i := 0; i < groupMemberNum; i++ {
+	for i := 0; i < sendClientNum*2; i++ {
 		connectWg.Add(1)
 
 		go func(i int) {
 			time.Sleep(time.Duration(rand.Int31n(1000)) * time.Millisecond)
 			client := wsclients.NewWsImClient(wsUrl, appKey, generateUserTokenStr(userPrefix+strconv.Itoa(i)), func(msg *pbobjs.DownMsg) {
-				sendTime := bytesToTime(msg.MsgContent)
 				msgMapLock.Lock()
 				if _, ok := msgMap[msg.MsgId]; ok {
-					data, ok := msgMap[msg.MsgId]
-					if !ok || data == nil {
-						data = &groupMessageData{
-							msgId:    msg.MsgId,
-							sendTime: sendTime,
-						}
-					}
-					data.receiveList = append(data.receiveList, receiveData{
-						Time:     time.Now(),
-						TargetId: userPrefix + strconv.Itoa(i),
-					})
+					sendTime := bytesToTime(msg.MsgContent)
+					duration := time.Since(sendTime)
+					msgMap[msg.MsgId] = &duration
 				}
 				msgMapLock.Unlock()
 
@@ -108,14 +82,12 @@ func groupSend() {
 				upMsg := pbobjs.UpMsg{
 					MsgType:    "txtMsg",
 					MsgContent: timeToBytes(time.Now()),
-					Flags:      commonservices.SetStoreMsg(0),
-					MentionInfo: &pbobjs.MentionInfo{
-						MentionType: pbobjs.MentionType_All,
-					},
+					Flags:      flag,
 				}
-				code, ack := client.SendGroupMsg(groupId, &upMsg)
+				code, ack := client.SendPrivateMsg(userPrefix+strconv.Itoa(i+sendClientNum), &upMsg)
 				if code != 0 {
 					fmt.Printf("send upMsg failed, code: %d\n", code)
+					return
 				}
 
 				msgMapLock.Lock()
@@ -140,7 +112,7 @@ func groupSend() {
 			}
 
 			msgMapLock.Lock()
-			total, maxDelay, minDelay, avgDelay := statisticsGroupMsgMap(msgMap)
+			total, maxDelay, minDelay, avgDelay := statisticsMsgMap(msgMap)
 			if total > prevTotal {
 				fmt.Printf("收到消息数量 %d, 平均延迟 %v, 最大延迟 %v, 最小延迟 %v\n", total, avgDelay, maxDelay, minDelay)
 				prevTotal = total
@@ -154,33 +126,34 @@ func groupSend() {
 
 }
 
-func statisticsGroupMsgMap(msgMap map[string]*groupMessageData) (total int, maxDelay time.Duration, minDelay time.Duration, avgDelay time.Duration) {
-	var (
-		totalReceiveCount int
-		totalDelay        time.Duration
-	)
-	for _, msg := range msgMap {
-		if msg == nil {
+func timeToBytes(t time.Time) []byte {
+	milli := t.UnixMilli()
+	return []byte(strconv.FormatInt(milli, 10))
+}
+
+func bytesToTime(b []byte) time.Time {
+	milli, _ := strconv.ParseInt(string(b), 10, 64)
+	return time.UnixMilli(milli)
+}
+
+func statisticsMsgMap(msgMap map[string]*time.Duration) (total int, maxDelay time.Duration, minDelay time.Duration, avgDelay time.Duration) {
+	var totalDuration time.Duration
+	for _, v := range msgMap {
+		if v == nil {
 			continue
 		}
-		total++
-		totalReceiveCount += len(msg.receiveList)
-
-		for _, data := range msg.receiveList {
-			duration := data.Time.Sub(msg.sendTime)
-
-			totalDelay += duration
-			if duration > maxDelay {
-				maxDelay = duration
-			}
-			if duration < minDelay {
-				minDelay = duration
-			}
+		total += 1
+		if *v > maxDelay {
+			maxDelay = *v
 		}
+		if *v < minDelay {
+			minDelay = *v
+		}
+		totalDuration += *v
 	}
-	if totalReceiveCount == 0 {
+	if total == 0 {
 		return
 	}
-	avgDelay = totalDelay / time.Duration(totalReceiveCount)
+	avgDelay = totalDuration / time.Duration(total)
 	return
 }
