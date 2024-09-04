@@ -46,12 +46,7 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	child := &ImWebsocketChild{
-		wsConn:           conn,
-		isActive:         true,
-		messageListener:  server.MessageListener,
-		latestActiveTime: time.Now().UnixMilli(),
-	}
+	child := NewImWebsocketChild(conn, server.MessageListener)
 	utils.SafeGo(func() {
 		child.startWsListener()
 	})
@@ -66,6 +61,17 @@ type ImWebsocketChild struct {
 	messageListener  ImListener
 	latestActiveTime int64
 	ticker           *time.Ticker
+	stopCh           chan struct{}
+}
+
+func NewImWebsocketChild(wsConn *websocket.Conn, messageListener ImListener) *ImWebsocketChild {
+	return &ImWebsocketChild{
+		wsConn:           wsConn,
+		isActive:         true,
+		messageListener:  messageListener,
+		latestActiveTime: time.Now().UnixMilli(),
+		stopCh:           make(chan struct{}),
+	}
 }
 
 func (child *ImWebsocketChild) startWsListener() {
@@ -125,13 +131,19 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 		child.ticker.Reset(5 * time.Second)
 	}
 	go func() {
-		for range child.ticker.C {
-			current := time.Now().UnixMilli()
-			interval := current - child.latestActiveTime
-			if interval > 300*1000 {
-				child.isActive = false
-				//	handler.HandleException(ctx, errors.New("user inactive more than 5min"))
-				ctx.Close(errors.New("user inactive more than 5min"))
+		for {
+			select {
+			case <-child.ticker.C:
+				current := time.Now().UnixMilli()
+				interval := current - child.latestActiveTime
+				if interval > 300*1000 {
+					child.isActive = false
+					//	handler.HandleException(ctx, errors.New("user inactive more than 5min"))
+					ctx.Close(errors.New("user inactive more than 5min"))
+					return
+				}
+			case <-child.stopCh:
+				return
 			}
 		}
 	}()
@@ -173,6 +185,7 @@ func (ctx *WsHandleContextImpl) Close(err error) {
 	}
 	if ctx.wsChild != nil && ctx.wsChild.ticker != nil {
 		ctx.wsChild.ticker.Stop()
+		close(ctx.wsChild.stopCh)
 	}
 }
 func (ctx *WsHandleContextImpl) Attachment() imcontext.Attachment {
