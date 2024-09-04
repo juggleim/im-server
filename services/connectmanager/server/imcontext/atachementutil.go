@@ -43,6 +43,10 @@ func GetConnSession(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_ConnectSession)
 }
 
+func GetAppkey(ctx WsHandleContext) string {
+	return GetContextAttrString(ctx, StateKey_Appkey)
+}
+
 func GetDeviceId(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_DeviceID)
 }

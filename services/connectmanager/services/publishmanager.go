@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/logmanager"
 	"time"
@@ -50,16 +51,14 @@ func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec
 			}, qos)
 			vCtx.Write(tmpPubMsg)
 			logs.Infof("session:%s\taction:%s\tindex:%d\ttopic:%s\tlen:%d", imcontext.GetConnSession(vCtx), imcontext.Action_ServerPub, tmpPubMsg.MsgBody.Index, tmpPubMsg.MsgBody.Topic, len(tmpPubMsg.MsgBody.Data))
-			logmanager.WriteSdkRequestLog(imcontext.SendCtxFromNettyCtx(vCtx), &pbobjs.SdkRequestLog{
-				Timestamp:   logmanager.LogTimestamp(),
-				ServiceName: "connect",
-				Session:     imcontext.GetConnSession(vCtx),
-				Index:       uint32(tmpPubMsg.MsgBody.Index),
-				Action:      string(imcontext.Action_ServerPub),
-				Method:      tmpPubMsg.MsgBody.Topic,
-				TargetId:    tmpPubMsg.MsgBody.TargetId,
-				Len:         uint32(len(tmpPubMsg.MsgBody.Data)),
-				AppKey:      appkey,
+			logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+				AppKey:   appkey,
+				Session:  imcontext.GetConnSession(vCtx),
+				Index:    tmpPubMsg.MsgBody.Index,
+				Action:   string(imcontext.Action_ServerPub),
+				Method:   tmpPubMsg.MsgBody.Topic,
+				TargetId: tmpPubMsg.MsgBody.TargetId,
+				DataLen:  int32(len(tmpPubMsg.MsgBody.Data)),
 			})
 			if callback != nil && !isSetCallback {
 				isSetCallback = true
@@ -99,15 +98,13 @@ func PublishQryAckMessage(session string, qryAckMsg *codec.QueryAckMsgBody, call
 		tmpQryAckMsg := codec.NewQueryAckMessage(qryAckMsg, qos)
 		ctx.Write(tmpQryAckMsg)
 		logs.Infof("session:%s\taction:%s\tindex:%d\tcode:%d\tlen:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, qryAckMsg.Index, qryAckMsg.Code, len(qryAckMsg.Data))
-		logmanager.WriteSdkResponseLog(imcontext.SendCtxFromNettyCtx(ctx), &pbobjs.SdkResponseLog{
-			Timestamp:   logmanager.LogTimestamp(),
-			ServiceName: "connect",
-			Session:     imcontext.GetConnSession(ctx),
-			Index:       uint32(qryAckMsg.Index),
-			Action:      string(imcontext.Action_QueryAck),
-			Code:        uint32(qryAckMsg.Code),
-			Len:         uint32(len(qryAckMsg.Data)),
-			AppKey:      imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey),
+		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+			AppKey:  imcontext.GetAppkey(ctx),
+			Session: imcontext.GetConnSession(ctx),
+			Index:   qryAckMsg.Index,
+			Action:  string(imcontext.Action_QueryAck),
+			DataLen: int32(len(qryAckMsg.Data)),
+			Code:    qryAckMsg.Code,
 		})
 	} else {
 		if notOnlineCallback != nil {
@@ -122,15 +119,11 @@ func PublishUserPubAckMessage(appkey, userid, session string, pubAckMsg *codec.P
 		tmpPubAckMsg := codec.NewUserPublishAckMessage(pubAckMsg)
 		ctx.Write(tmpPubAckMsg)
 		logs.Infof("session:%s\taction:%s\tindex:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, pubAckMsg.Index, pubAckMsg.Code)
-		logmanager.WriteSdkResponseLog(imcontext.SendCtxFromNettyCtx(ctx), &pbobjs.SdkResponseLog{
-			Timestamp:   logmanager.LogTimestamp(),
-			ServiceName: "connect",
-			Session:     imcontext.GetConnSession(ctx),
-			Index:       uint32(pubAckMsg.Index),
-			Action:      string(imcontext.Action_UserPubAck),
-			Code:        uint32(pubAckMsg.Code),
-			Len:         0,
-			AppKey:      imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey),
+		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+			AppKey:  imcontext.GetAppkey(ctx),
+			Session: imcontext.GetConnSession(ctx),
+			Index:   pubAckMsg.Index,
+			Code:    pubAckMsg.Code,
 		})
 	}
 }

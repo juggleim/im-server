@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/filter"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
-	"strconv"
-	"strings"
 )
 
 const maxLogCount = 10000
@@ -86,6 +87,32 @@ func writeLog(appKey, database string, table string, key string, value string) (
 	batch.Put([]byte(databaseRowsCountKey), int64ToBytes(databaseRowsCount))
 
 	return db.Write(batch, nil)
+}
+
+func qryLogs(appkey, database, table string, prefix, startKey string, count int) ([]LogEntity, error) {
+	tableName := tableName(appkey, database, table)
+	iter := db.NewIterator(util.BytesPrefix([]byte(tableName+":"+prefix)), nil)
+	iterCount := 0
+	logs := []LogEntity{}
+	if startKey == "" {
+		iter.First()
+	} else {
+		iter.Seek([]byte(tableName + ":" + startKey))
+	}
+	for ; iter.Valid(); iter.Next() {
+		logs = append(logs, LogEntity{
+			Key:   string(iter.Key()),
+			Value: string(iter.Value()),
+		})
+		iterCount++
+		if iterCount > maxLogCount {
+			break
+		}
+		if iterCount >= count {
+			break
+		}
+	}
+	return logs, nil
 }
 
 func fetchLogs(appKey, database string, table string, prefix string, lastKey string, count int) (logs []LogEntity, err error) {
@@ -199,9 +226,9 @@ func FetchAppServerLogs(options FetchLogOptions) (logs []LogEntity, err error) {
 	}
 
 	prefix := options.AppKey + ".server." + options.Table
-	if options.Table == connectionTable {
+	if options.Table == userConnectTable {
 		prefix = prefix + ":" + options.UserId
-	} else if options.Table == sessionTable {
+	} else if options.Table == connectTable {
 		prefix = prefix + ":" + options.Session
 	} else if options.Table == businessTable {
 		prefix = prefix + ":" + options.Session

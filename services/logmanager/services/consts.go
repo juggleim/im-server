@@ -23,7 +23,7 @@ func dbMetaName(appKey string, db string) string {
 const (
 	serverDb = "server"
 
-	connectionTable = "connect"
-	sessionTable    = "session"
-	businessTable   = "bus"
+	userConnectTable = "userconnect"
+	connectTable     = "connect"
+	businessTable    = "bus"
 )

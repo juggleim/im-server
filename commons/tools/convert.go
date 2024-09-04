@@ -59,7 +59,7 @@ func String2Int64(str string) (int64, error) {
 }
 
 func Int642String(i int64) string {
-	return strconv.FormatInt(i, 64)
+	return strconv.FormatInt(i, 10)
 }
 
 func Int64ToBytes(i int64) []byte {
