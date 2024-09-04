@@ -1,11 +1,14 @@
 package navigator
 
 import (
+	"compress/gzip"
 	"fmt"
 	"net/http"
 
 	"im-server/commons/configures"
+	"im-server/commons/errs"
 	"im-server/commons/gmicro"
+	"im-server/commons/tools"
 	"im-server/services/navigator/apis"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +28,11 @@ func (ser *Navigator) Startup(args map[string]interface{}) {
 		ctx.JSON(http.StatusOK, "ok")
 	})
 	group := ser.httpServer.Group("/navigator")
+	group.Use(apis.CheckToken)
 	group.GET("/general", apis.NaviGet)
+
+	group.POST("/upload-log", apis.UploadClientLog)
+	group.POST("/upload-log-plain", apis.UploadClientLogPlain, GzipDecompress())
 
 	httpPort := configures.Config.NavGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
@@ -50,4 +57,19 @@ func CorsHandler() gin.HandlerFunc {
 
 func (ser *Navigator) Shutdown() {
 
+}
+
+func GzipDecompress() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if ctx.GetHeader("Content-Encoding") == "gzip" {
+			reader, err := gzip.NewReader(ctx.Request.Body)
+			if err != nil {
+				tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_ILLEGAL)
+				ctx.Abort()
+				return
+			}
+			ctx.Request.Body = reader
+		}
+		ctx.Next()
+	}
 }

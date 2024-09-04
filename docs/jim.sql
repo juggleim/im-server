@@ -669,4 +669,27 @@ CREATE TABLE `users` (
   KEY `idx_userid` (`app_key`,`user_type`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `clientlogs`;
+CREATE TABLE `clientlogs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `app_key` VARCHAR(20) NULL,
+  `user_id` VARCHAR(32) NULL,
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `start` BIGINT NULL,
+  `end` BIGINT NULL,
+  `log` MEDIUMBLOB NULL,
+  `state` TINYINT NULL DEFAULT 0,
+   `platform` VARCHAR(20) NULL,
+  `device_id` VARCHAR(100) NULL,
+  `log_url` VARCHAR(200) NULL,
+  `trace_id` VARCHAR(50) NULL,
+   `msg_id` VARCHAR(20) NULL,
+  `fail_reason` VARCHAR(100) NULL,
+  `description` VARCHAR(100) NULL,
+  
+  PRIMARY KEY (`id`),
+  INDEX `idx_userid` (`app_key` ASC, `user_id` ASC),
+  UNIQUE KEY `uniq_msgid` (`app_key`,`msg_id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin1','7c4a8d09ca3762af61e59520943dc26494f8941b');

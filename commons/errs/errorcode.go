@@ -28,6 +28,7 @@ var (
 	IMErrorCode_API_INTERNAL_TIMEOUT   IMErrorCode = 10008
 	IMErrorCode_API_INTERNAL_RESP_FAIL IMErrorCode = 10009
 	IMErrorCode_API_PARAM_REQUIRED     IMErrorCode = 10010
+	IMErrorCode_API_PARAM_ILLEGAL      IMErrorCode = 10011
 )
 
 // user errorcode
@@ -100,6 +101,8 @@ var (
 	IMErrorCode_OTHER_DEFAULT IMErrorCode = 15000
 	IMErrorCode_OTHER_NOOSS   IMErrorCode = 15001
 	IMErrorCode_OTHER_SIGNERR IMErrorCode = 15002
+
+	IMErrorCode_OTHER_CLIENT_LOG_PARAM_ILLEGAL IMErrorCode = 15101
 )
 
 var imCode2ApiErrorMap map[IMErrorCode]*ApiErrorMsg = map[IMErrorCode]*ApiErrorMsg{

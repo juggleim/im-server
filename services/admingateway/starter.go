@@ -59,6 +59,9 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	group.GET("/apps/fileconf/switch/get", apis.GetFileConfs)
 	group.POST("/apps/fileconf/switch/set", apis.SetFileConfSwitch)
 
+	group.POST("/apps/clientlogs/notify", apis.ClientLogNtf)
+	group.GET("/apps/clientlogs/list", apis.ClientLogList)
+	group.GET("/apps/clientlogs/download", apis.ClientLogDownload)
 	group.GET("/apps/serverlogs/userconnect", apis.QryUserConnectLogs)
 	group.GET("/apps/serverlogs/connect", apis.QryConnectLogs)
 	group.GET("/apps/serverlogs/business", apis.QryUserConnectLogs)
