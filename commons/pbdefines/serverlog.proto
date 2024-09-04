@@ -2,6 +2,20 @@ syntax = "proto3";
 
 option go_package = "commons/pbdefines/pbobjs";
 
+message QryServerLogsReq{
+  string logType = 1;
+  string userId = 2;
+  string session = 3;
+  int32 index = 4;
+
+  int64 start = 5;
+  int64 count = 6;
+}
+
+message QryServerLogsResp{
+  repeated string logs = 1;
+}
+
 message LogEntities {
   repeated LogEntity entities = 1;
 }
@@ -15,33 +29,36 @@ message LogEntity {
 }
 message UserConnectLog{
   int64 timestamp = 1;
-  string app_key = 2;
-  string user_id = 3;
-  string session = 4;
-  int32 code = 5;
-  string platform = 6;
-  string version = 7;
-  string client_ip = 8;
+  int64 real_time = 2;
+  string app_key = 3;
+  string user_id = 4;
+  string session = 5;
+  int32 code = 6;
+  string platform = 7;
+  string version = 8;
+  string client_ip = 9;
 }
 
 message ConnectionLog {
   int64 timestamp = 1;
-  string app_key = 2;
-  string session = 3;
-  int32 index = 4;
-  string action = 5;
-  string method = 6;
-  string target_id = 7;
-  int32 data_len  = 8;
-  int32 code = 9;
+  int64 real_time = 2;
+  string app_key = 3;
+  string session = 4;
+  int32 index = 5;
+  string action = 6;
+  string method = 7;
+  string target_id = 8;
+  int32 data_len  = 9;
+  int32 code = 10;
 }
 
 message BusinessLog {
   string timestamp = 1;
-  string session = 2;
-  uint32 index = 3;
-  string service_name = 4;
-  string method = 5;
-  string message = 6;
-  string appKey = 9;
+  int64 real_time = 2;
+  string session = 3;
+  uint32 index = 4;
+  string service_name = 5;
+  string method = 6;
+  string message = 7;
+  string appKey = 8;
 }

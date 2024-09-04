@@ -1,11 +1,12 @@
 package apis
 
 import (
+	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/admingateway/services"
-	logService "im-server/services/logmanager/services"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/proto"
 )
 
 type ServerLogs struct {
@@ -40,26 +41,44 @@ func qryServerLogs(ctx *gin.Context, logType string) {
 			count = intVal
 		}
 	}
+
+	var targetId string
+	if logType == "user_connect" {
+		targetId = userId
+	} else if logType == "connect" {
+		targetId = session
+	} else {
+		services.FailHttpResp(ctx, services.AdminErrorCode_ParamError)
+		return
+	}
+	services.SetCtxString(ctx, services.CtxKey_AppKey, appkey)
+	code, resp, err := services.SyncApiCall(ctx, "qry_vlog", "", targetId, &pbobjs.QryServerLogsReq{
+		LogType: logType,
+		UserId:  userId,
+		Session: session,
+		Start:   start,
+		Count:   count,
+	}, func() proto.Message {
+		return &pbobjs.QryServerLogsResp{}
+	})
+	if err != nil {
+		services.FailHttpResp(ctx, services.AdminErrorCode_ServerErr, err.Error())
+		return
+	}
+	if code != services.AdminErrorCode_Success {
+		services.FailHttpResp(ctx, services.AdminErrorCode(code), "")
+		return
+	}
+	logsResp := resp.(*pbobjs.QryServerLogsResp)
+
 	ret := &ServerLogs{
 		Logs: []map[string]interface{}{},
 	}
-	var logs []logService.LogEntity
-	var err error
-	if logType == "user_connect" {
-		logs, err = logService.QryUserConnectLogs(appkey, userId, start, count)
-	} else if logType == "connect" {
-		logs, err = logService.QryConnectLogs(appkey, session, start, count)
-	} else {
-		services.SuccessHttpResp(ctx, ret)
-		return
-	}
-	if err == nil {
-		for _, log := range logs {
-			var item map[string]interface{}
-			err := tools.JsonUnMarshal([]byte(log.Value), &item)
-			if err == nil {
-				ret.Logs = append(ret.Logs, item)
-			}
+	for _, logStr := range logsResp.Logs {
+		var item map[string]interface{}
+		err := tools.JsonUnMarshal([]byte(logStr), &item)
+		if err == nil {
+			ret.Logs = append(ret.Logs, item)
 		}
 	}
 	services.SuccessHttpResp(ctx, ret)

@@ -16,17 +16,18 @@ type LogServiceActor struct {
 
 func (actor *LogServiceActor) OnReceive(ctx context.Context, input proto.Message) {
 	var err error
-	if req, ok := input.(*pbobjs.LogEntity); ok {
-		switch req.GetLogOf().(type) {
-		case *pbobjs.LogEntity_UserConnectLog:
-			err = services.WriteUserConnectLog(req.GetUserConnectLog())
-		case *pbobjs.LogEntity_ConnectionLog:
-			err = services.WriteConnectLog(req.GetConnectionLog())
-		default:
-		}
-
-		if err != nil {
-			logs.WithContext(ctx).Errorf("write log error: %+v", err)
+	if req, ok := input.(*pbobjs.LogEntities); ok {
+		for _, entity := range req.Entities {
+			switch entity.GetLogOf().(type) {
+			case *pbobjs.LogEntity_UserConnectLog:
+				err = services.WriteUserConnectLog(entity.GetUserConnectLog())
+			case *pbobjs.LogEntity_ConnectionLog:
+				err = services.WriteConnectLog(entity.GetConnectionLog())
+			default:
+			}
+			if err != nil {
+				logs.WithContext(ctx).Errorf("write log error: %+v", err)
+			}
 		}
 
 	} else {
@@ -35,5 +36,5 @@ func (actor *LogServiceActor) OnReceive(ctx context.Context, input proto.Message
 }
 
 func (actor *LogServiceActor) CreateInputObj() proto.Message {
-	return &pbobjs.LogEntity{}
+	return &pbobjs.LogEntities{}
 }

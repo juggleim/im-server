@@ -10,9 +10,14 @@ import (
 
 func WriteUserConnectLog(ctx context.Context, msg *pbobjs.UserConnectLog) {
 	msg.Timestamp = time.Now().UnixMilli()
-	data, _ := tools.PbMarshal(&pbobjs.LogEntity{
-		LogOf: &pbobjs.LogEntity_UserConnectLog{
-			UserConnectLog: msg,
+
+	data, _ := tools.PbMarshal(&pbobjs.LogEntities{
+		Entities: []*pbobjs.LogEntity{
+			{
+				LogOf: &pbobjs.LogEntity_UserConnectLog{
+					UserConnectLog: msg,
+				},
+			},
 		},
 	})
 	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
@@ -26,9 +31,13 @@ func WriteUserConnectLog(ctx context.Context, msg *pbobjs.UserConnectLog) {
 
 func WriteConnectionLog(ctx context.Context, msg *pbobjs.ConnectionLog) {
 	msg.Timestamp = time.Now().UnixMilli()
-	data, _ := tools.PbMarshal(&pbobjs.LogEntity{
-		LogOf: &pbobjs.LogEntity_ConnectionLog{
-			ConnectionLog: msg,
+	data, _ := tools.PbMarshal(&pbobjs.LogEntities{
+		Entities: []*pbobjs.LogEntity{
+			{
+				LogOf: &pbobjs.LogEntity_ConnectionLog{
+					ConnectionLog: msg,
+				},
+			},
 		},
 	})
 	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
