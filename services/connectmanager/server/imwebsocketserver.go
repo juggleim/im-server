@@ -95,7 +95,7 @@ func (child *ImWebsocketChild) startWsListener() {
 			} else {
 				fmt.Println("close err:", err)
 			}
-			child.isActive = false
+			child.Stop()
 			handler.HandleException(ctx, err)
 			break
 		}
@@ -105,8 +105,7 @@ func (child *ImWebsocketChild) startWsListener() {
 		err = tools.PbUnMarshal(message, wsMsg)
 		if err != nil {
 			fmt.Println("failed to decode pb data:", err)
-			child.isActive = false
-			child.wsConn.Close()
+			child.Stop()
 			handler.HandleException(ctx, err)
 			break
 		}
@@ -124,17 +123,26 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 	} else {
 		child.ticker.Reset(5 * time.Second)
 	}
-	go func() {
-		for range child.ticker.C {
+	go func(ticker *time.Ticker) {
+		defer ticker.Stop()
+		for range ticker.C {
 			current := time.Now().UnixMilli()
 			interval := current - child.latestActiveTime
 			if interval > 300*1000 {
-				child.isActive = false
+				child.Stop()
 				//	handler.HandleException(ctx, errors.New("user inactive more than 5min"))
 				ctx.Close(errors.New("user inactive more than 5min"))
+				break
 			}
 		}
-	}()
+	}(child.ticker)
+}
+
+func (child *ImWebsocketChild) Stop() {
+	child.isActive = false
+	if child.wsConn != nil {
+		child.wsConn.Close()
+	}
 }
 
 type WsHandleContextImpl struct {
@@ -167,12 +175,8 @@ func (ctx *WsHandleContextImpl) Write(message interface{}) {
 }
 
 func (ctx *WsHandleContextImpl) Close(err error) {
-	ctx.wsChild.isActive = false
-	if ctx.conn != nil {
-		ctx.conn.Close()
-	}
-	if ctx.wsChild != nil && ctx.wsChild.ticker != nil {
-		ctx.wsChild.ticker.Stop()
+	if ctx.wsChild != nil {
+		ctx.wsChild.Stop()
 	}
 }
 func (ctx *WsHandleContextImpl) Attachment() imcontext.Attachment {
