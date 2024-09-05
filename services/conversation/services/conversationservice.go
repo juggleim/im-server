@@ -362,8 +362,10 @@ func dbConver2Conversations(ctx context.Context, dbConver *models.Conversation) 
 			downMsg = downMsgs[0]
 		}
 	}
-	downMsg.TargetUserInfo = nil
-	downMsg.GroupInfo = nil
+	if downMsg != nil {
+		downMsg.TargetUserInfo = nil
+		downMsg.GroupInfo = nil
+	}
 
 	unreadCount := dbConver.LatestUnreadMsgIndex - dbConver.LatestReadMsgIndex
 	conversation := &pbobjs.Conversation{
