@@ -47,6 +47,7 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 	}
 
 	child := &ImWebsocketChild{
+		stopChan:         make(chan bool),
 		wsConn:           conn,
 		isActive:         true,
 		messageListener:  server.MessageListener,
@@ -61,6 +62,7 @@ func (server *ImWebsocketServer) Stop() {
 }
 
 type ImWebsocketChild struct {
+	stopChan         chan bool
 	wsConn           *websocket.Conn
 	isActive         bool
 	messageListener  ImListener
@@ -125,23 +127,31 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 	}
 	go func(ticker *time.Ticker) {
 		defer ticker.Stop()
-		for range ticker.C {
-			current := time.Now().UnixMilli()
-			interval := current - child.latestActiveTime
-			if interval > 300*1000 {
-				child.Stop()
-				//	handler.HandleException(ctx, errors.New("user inactive more than 5min"))
-				ctx.Close(errors.New("user inactive more than 5min"))
-				break
+		for {
+			select {
+			case <-ticker.C:
+				current := time.Now().UnixMilli()
+				interval := current - child.latestActiveTime
+				if interval > 300*1000 {
+					child.Stop()
+					handler.HandleException(ctx, errors.New("user inactive more than 5min"))
+					return
+				}
+			case <-child.stopChan:
+				return
 			}
 		}
 	}(child.ticker)
 }
 
 func (child *ImWebsocketChild) Stop() {
-	child.isActive = false
-	if child.wsConn != nil {
-		child.wsConn.Close()
+	if child.isActive {
+		child.isActive = false
+		child.stopChan <- true
+		if child.wsConn != nil {
+			child.wsConn.Close()
+		}
+		close(child.stopChan)
 	}
 }
 
