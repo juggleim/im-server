@@ -210,6 +210,18 @@ CREATE TABLE `msgstats` (
   UNIQUE INDEX `uniq_mark` (`app_key` ASC, `stat_type` ASC, `channel_type` ASC, `time_mark` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `useractivities`;
+CREATE TABLE `useractivities` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` VARCHAR(32) NULL,
+  `time_mark` BIGINT NULL,
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `count` INT NULL,
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_userid` (`app_key` ASC, `time_mark` ASC, `user_id` ASC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 DROP TABLE IF EXISTS `fileconfs`;
 CREATE TABLE `fileconfs` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,

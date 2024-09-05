@@ -129,6 +129,7 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	//success
 	logs.Infof("session:%s\taction:%s\tappkey:%s\tuser_id:%s\tclient_ip:%s\tplatform:%s\tdevice_id:%s\tpush_token:%s\tinstance_id:%s", imcontext.GetConnSession(ctx), imcontext.Action_Connect, msg.Appkey, userId, clientIp, msg.Platform, msg.DeviceId, msg.PushToken, msg.InstanceId)
+	commonservices.ReportUserLogin(msg.Appkey, userId)
 
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Appkey, msg.Appkey)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_DeviceID, msg.DeviceId)

@@ -6,15 +6,16 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
-	"sync"
+	"sync/atomic"
 	"time"
 )
 
 type StatType int
 
 var (
-	statCache *caches.LruCache
-	statLocks *tools.SegmentatedLocks
+	statCache           *caches.LruCache
+	userActivitiesCache *caches.LruCache
+	statLocks           *tools.SegmentatedLocks
 
 	StatType_Up       StatType = 1
 	StatType_Dispatch StatType = 2
@@ -22,8 +23,17 @@ var (
 )
 
 func init() {
-	statCache = caches.NewLruCacheWithReadTimeout(1000, nil, 30*time.Minute)
-	statLocks = tools.NewSegmentatedLocks(16)
+	statCache = caches.NewLruCacheWithAddReadTimeout(1000, func(key, value interface{}) {
+		counter := value.(*Counter)
+		dao := dbs.MsgStatDao{}
+		dao.IncrByStep(counter.Appkey, int(counter.StateType), int(counter.ChannelType), getDbTimeMark(), counter.Count)
+	}, 10*time.Minute, 10*time.Minute)
+	userActivitiesCache = caches.NewLruCacheWithAddReadTimeout(10000, func(key, value interface{}) {
+		counter := value.(*UserActivityCounter)
+		dao := dbs.UserActivityDao{}
+		dao.IncrByStep(counter.Appkey, counter.UserId, getDbTimeMark(), counter.Count)
+	}, 10*time.Minute, 10*time.Minute)
+	statLocks = tools.NewSegmentatedLocks(128)
 }
 
 type StatisticMsgs struct {
@@ -48,6 +58,11 @@ func QryMsgStatistic(appkey string, statType StatType, channelType pbobjs.Channe
 		})
 	}
 	return ret
+}
+
+func ReportUserLogin(appkey string, userId string) {
+	counter := getUserActivityCounter(appkey, userId)
+	counter.Incry()
 }
 
 func ReportUpMsg(appkey string, channelType pbobjs.ChannelType, step int64) {
@@ -79,30 +94,49 @@ func getCounter(appkey string, statType StatType, channelType pbobjs.ChannelType
 			counter := counterObj.(*Counter)
 			return counter
 		} else {
-			counter := NewCounter(func(count, timeMark int64) {
-				dao := dbs.MsgStatDao{}
-				dao.IncrByStep(appkey, int(statType), int(channelType), timeMark, count)
-			})
+			counter := NewCounter(appkey, int64(statType), int64(channelType))
 			statCache.Add(key, counter)
 			return counter
 		}
 	}
 }
 
-type Counter struct {
-	Count int64
+func getUserActivityCounter(appkey, userId string) *UserActivityCounter {
+	key := fmt.Sprintf("%s_%s", appkey, userId)
+	if obj, exist := userActivitiesCache.Get(key); exist {
+		return obj.(*UserActivityCounter)
+	} else {
+		lock := statLocks.GetLocks(key)
+		lock.Lock()
+		defer lock.Unlock()
 
-	interval int64 //second
-	timeMark int64
-	lock     sync.RWMutex
-	report   func(count, timeMark int64)
+		if obj, exist := userActivitiesCache.Get(key); exist {
+			return obj.(*UserActivityCounter)
+		} else {
+			counter := &UserActivityCounter{
+				Appkey: appkey,
+				UserId: userId,
+				Count:  0,
+			}
+			userActivitiesCache.Add(key, counter)
+			return counter
+		}
+	}
 }
 
-func NewCounter(report func(count, timeMark int64)) *Counter {
+type Counter struct {
+	Appkey      string
+	StateType   int64
+	ChannelType int64
+	Count       int64
+}
+
+func NewCounter(appkey string, stateType, channelType int64) *Counter {
 	return &Counter{
-		Count:    0,
-		interval: 60,
-		report:   report,
+		Appkey:      appkey,
+		StateType:   stateType,
+		ChannelType: channelType,
+		Count:       0,
 	}
 }
 
@@ -111,32 +145,21 @@ func (c *Counter) Incry() {
 }
 
 func (c *Counter) IncrByStep(step int64) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	if c.timeMark == 0 {
-		c.timeMark = c.getTimeMark()
-	} else {
-		newTimeMark := c.getTimeMark()
-		if newTimeMark > c.timeMark {
-			if c.report != nil {
-				go c.report(c.Count, c.getDbTimeMark())
-			}
-			c.timeMark = newTimeMark
-			c.Count = 0
-		}
-	}
-
-	c.Count = c.Count + step
+	atomic.AddInt64(&c.Count, step)
 }
 
-func (c *Counter) getTimeMark() int64 {
-	current := time.Now().Unix()
-	return current / c.interval * c.interval
-}
-
-func (c *Counter) getDbTimeMark() int64 {
+func getDbTimeMark() int64 {
 	current := time.Now().Unix()
 	var day int64 = 24 * 60 * 60
 	return current / day * day
+}
+
+type UserActivityCounter struct {
+	Appkey string
+	UserId string
+	Count  int64
+}
+
+func (c *UserActivityCounter) Incry() {
+	atomic.AddInt64(&c.Count, 1)
 }
