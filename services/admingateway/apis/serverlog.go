@@ -4,6 +4,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/admingateway/services"
+	logService "im-server/services/logmanager/services"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/proto"
@@ -14,11 +15,11 @@ type ServerLogs struct {
 }
 
 func QryUserConnectLogs(ctx *gin.Context) {
-	qryServerLogs(ctx, "user_connect")
+	qryServerLogs(ctx, string(logService.ServerLogType_UserConnect))
 }
 
 func QryConnectLogs(ctx *gin.Context) {
-	qryServerLogs(ctx, "connect")
+	qryServerLogs(ctx, string(logService.ServerLogType_Connect))
 }
 
 func qryServerLogs(ctx *gin.Context, logType string) {
@@ -43,9 +44,9 @@ func qryServerLogs(ctx *gin.Context, logType string) {
 	}
 
 	var targetId string
-	if logType == "user_connect" {
+	if logType == string(logService.ServerLogType_UserConnect) {
 		targetId = userId
-	} else if logType == "connect" {
+	} else if logType == string(logService.ServerLogType_Connect) {
 		targetId = session
 	} else {
 		services.FailHttpResp(ctx, services.AdminErrorCode_ParamError)

@@ -1,7 +1,9 @@
 package services
 
+type ServerLogType string
+
 const (
-	userConnectTable = "userconnect"
-	connectTable     = "connect"
-	businessTable    = "bus"
+	ServerLogType_UserConnect ServerLogType = "userconnect"
+	ServerLogType_Connect     ServerLogType = "connect"
+	ServerLogType_Business    ServerLogType = "business"
 )

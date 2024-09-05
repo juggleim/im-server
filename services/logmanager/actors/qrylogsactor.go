@@ -24,9 +24,9 @@ func (actor *QryLogsActor) OnReceive(ctx context.Context, input proto.Message) {
 		}
 		var logs []services.LogEntity
 		var err error
-		if req.LogType == "user_connect" {
+		if req.LogType == string(services.ServerLogType_UserConnect) {
 			logs, err = services.QryUserConnectLogs(appkey, req.UserId, req.Start, req.Count)
-		} else if req.LogType == "connect" {
+		} else if req.LogType == string(services.ServerLogType_Connect) {
 			logs, err = services.QryConnectLogs(appkey, req.Session, req.Start, req.Count)
 		}
 		if err == nil {

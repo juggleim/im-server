@@ -62,7 +62,7 @@ func WriteUserConnectLog(data *pbobjs.UserConnectLog) error {
 	data.Timestamp = logCache.GetLogTime(data.Timestamp)
 
 	key := strings.Join([]string{data.AppKey, data.UserId, tools.Int642String(data.Timestamp)}, "_")
-	return writeLog(userConnectTable, key, tools.ToJson(data))
+	return writeLog(string(ServerLogType_UserConnect), key, tools.ToJson(data))
 }
 
 func QryUserConnectLogs(appkey, userId string, start, count int64) ([]LogEntity, error) {
@@ -71,7 +71,7 @@ func QryUserConnectLogs(appkey, userId string, start, count int64) ([]LogEntity,
 	if start > 0 {
 		startKey = fmt.Sprintf("%s_%s_%d", appkey, userId, start)
 	}
-	return qryLogs(userConnectTable, prefix, startKey, int(count))
+	return qryLogs(string(ServerLogType_UserConnect), prefix, startKey, int(count))
 }
 
 func WriteConnectLog(data *pbobjs.ConnectionLog) error {
@@ -81,7 +81,7 @@ func WriteConnectLog(data *pbobjs.ConnectionLog) error {
 	data.Timestamp = logCache.GetLogTime(data.Timestamp)
 
 	key := strings.Join([]string{data.AppKey, data.Session, tools.Int642String(data.Timestamp)}, "_")
-	return writeLog(connectTable, key, tools.ToJson(data))
+	return writeLog(string(ServerLogType_Connect), key, tools.ToJson(data))
 }
 
 func QryConnectLogs(appkey, session string, start, count int64) ([]LogEntity, error) {
@@ -90,5 +90,5 @@ func QryConnectLogs(appkey, session string, start, count int64) ([]LogEntity, er
 	if start > 0 {
 		startKey = fmt.Sprintf("%s%d", prefix, start)
 	}
-	return qryLogs(connectTable, prefix, startKey, int(count))
+	return qryLogs(string(ServerLogType_Connect), prefix, startKey, int(count))
 }
