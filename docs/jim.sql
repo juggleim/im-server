@@ -465,9 +465,12 @@ CREATE TABLE `mentionmsgs` (
   `msg_id` varchar(20) DEFAULT NULL,
   `msg_time` bigint DEFAULT NULL,
   `msg_index` int DEFAULT NULL,
+  `is_read` tinyint DEFAULT NULL,
   `app_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_uid_tid_type` (`app_key`,`user_id`,`msg_index`)
+  KEY `idx_uid_tid_type` (`app_key`,`user_id`,`target_id`,`channel_type`,`msg_index`,`msg_time`),
+  KEY `idx_read` (`app_key`,`user_id`,`target_id`,`channel_type`,`is_read`,`msg_time`),
+  KEY `idx_msgid` (`app_key`,`user_id`,`target_id`,`channel_type`,`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `mergedmsgs`;
