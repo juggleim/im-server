@@ -198,26 +198,16 @@ CREATE TABLE `conversations` (
   KEY `idx_group` (`app_key`,`user_id`,`group`,`sort_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `dispstats`;
-CREATE TABLE `dispstats` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `channel_type` tinyint DEFAULT '0',
-  `time_mark` bigint DEFAULT NULL,
-  `count` int DEFAULT NULL,
-  `app_key` varchar(20) DEFAULT NULL,
+DROP TABLE IF EXISTS `msgstats`;
+CREATE TABLE `msgstats` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `stat_type` TINYINT NULL DEFAULT 0,
+  `channel_type` TINYINT NULL,
+  `time_mark` BIGINT NULL,
+  `count` INT NULL,
+  `app_key` VARCHAR(20) NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_mark` (`app_key`,`channel_type`,`time_mark`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-DROP TABLE IF EXISTS `downstats`;
-CREATE TABLE `downstats` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `channel_type` tinyint DEFAULT '0',
-  `time_mark` bigint DEFAULT NULL,
-  `count` int DEFAULT NULL,
-  `app_key` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_mark` (`app_key`,`channel_type`,`time_mark`)
+  UNIQUE INDEX `uniq_mark` (`app_key` ASC, `stat_type` ASC, `channel_type` ASC, `time_mark` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `fileconfs`;
@@ -616,17 +606,6 @@ CREATE TABLE `subrelations` (
   `app_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_sub` (`app_key`,`user_id`,`subscriber`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-DROP TABLE IF EXISTS `upstats`;
-CREATE TABLE `upstats` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `channel_type` tinyint DEFAULT '0',
-  `time_mark` bigint DEFAULT NULL,
-  `count` int DEFAULT NULL,
-  `app_key` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_mark` (`app_key`,`channel_type`,`time_mark`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `usercleantimes`;

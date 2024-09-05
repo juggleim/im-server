@@ -27,7 +27,7 @@ func init() {
 }
 
 type StatisticMsgs struct {
-	Items []*StatisticMsgItem
+	Items []*StatisticMsgItem `json:"items"`
 }
 
 type StatisticMsgItem struct {
@@ -39,33 +39,13 @@ func QryMsgStatistic(appkey string, statType StatType, channelType pbobjs.Channe
 	ret := &StatisticMsgs{
 		Items: []*StatisticMsgItem{},
 	}
-	if statType == StatType_Up {
-		dao := dbs.UpStatDao{}
-		list := dao.QryStats(appkey, int(channelType), start, end)
-		for _, item := range list {
-			ret.Items = append(ret.Items, &StatisticMsgItem{
-				Count:    item.Count,
-				TimeMark: item.TimeMark,
-			})
-		}
-	} else if statType == StatType_Down {
-		dao := dbs.DownStatDao{}
-		list := dao.QryStats(appkey, int(channelType), start, end)
-		for _, item := range list {
-			ret.Items = append(ret.Items, &StatisticMsgItem{
-				Count:    item.Count,
-				TimeMark: item.TimeMark,
-			})
-		}
-	} else if statType == StatType_Dispatch {
-		dao := dbs.DispStatDao{}
-		list := dao.QryStats(appkey, int(channelType), start, end)
-		for _, item := range list {
-			ret.Items = append(ret.Items, &StatisticMsgItem{
-				Count:    item.Count,
-				TimeMark: item.TimeMark,
-			})
-		}
+	dao := dbs.MsgStatDao{}
+	list := dao.QryStats(appkey, int(statType), int(channelType), start, end)
+	for _, item := range list {
+		ret.Items = append(ret.Items, &StatisticMsgItem{
+			Count:    item.Count,
+			TimeMark: item.TimeMark,
+		})
 	}
 	return ret
 }
@@ -100,16 +80,8 @@ func getCounter(appkey string, statType StatType, channelType pbobjs.ChannelType
 			return counter
 		} else {
 			counter := NewCounter(func(count, timeMark int64) {
-				if statType == StatType_Up {
-					dao := dbs.UpStatDao{}
-					dao.IncrByStep(appkey, int(channelType), timeMark, count)
-				} else if statType == StatType_Dispatch {
-					dao := dbs.DispStatDao{}
-					dao.IncrByStep(appkey, int(channelType), timeMark, count)
-				} else if statType == StatType_Down {
-					dao := dbs.DownStatDao{}
-					dao.IncrByStep(appkey, int(channelType), timeMark, count)
-				}
+				dao := dbs.MsgStatDao{}
+				dao.IncrByStep(appkey, int(statType), int(channelType), timeMark, count)
 			})
 			statCache.Add(key, counter)
 			return counter
