@@ -35,7 +35,9 @@ func NewLruCacheWithReadTimeout(size int, onEvict simplelru.EvictCallback, timeo
 }
 
 func NewLruCache(size int, onEvict simplelru.EvictCallback) *LruCache {
-	myLru, _ := simplelru.NewLRU(size, onEvict)
+	myLru, _ := simplelru.NewLRU(size, func(key, value interface{}) {
+		onEvict(key, value.(lruCacheItem).value)
+	})
 	cache := &LruCache{
 		lru: myLru,
 	}
