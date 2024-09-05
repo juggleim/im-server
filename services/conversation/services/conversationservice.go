@@ -357,7 +357,10 @@ func dbConver2Conversations(ctx context.Context, dbConver *models.Conversation) 
 		}
 	}
 	if downMsg == nil {
-		downMsg = QryHisMsgByIds(ctx, userId, dbConver.TargetId, dbConver.LatestMsgId, dbConver.ChannelType)
+		downMsgs := QryHisMsgByIds(ctx, userId, dbConver.TargetId, dbConver.ChannelType, []string{dbConver.LatestMsgId})
+		if len(downMsgs) > 0 {
+			downMsg = downMsgs[0]
+		}
 	}
 	downMsg.TargetUserInfo = nil
 	downMsg.GroupInfo = nil
@@ -467,26 +470,24 @@ func SyncConversations(ctx context.Context, appkey, userId string, startTime int
 	return resp
 }
 
-func QryHisMsgByIds(ctx context.Context, userId, targetId, msgId string, channelType pbobjs.ChannelType) *pbobjs.DownMsg {
-	if msgId != "" {
+func QryHisMsgByIds(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) []*pbobjs.DownMsg {
+	if len(msgIds) > 0 {
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
 		code, resp, err := bases.SyncRpcCall(ctx, "qry_hismsg_by_ids", converId, &pbobjs.QryHisMsgByIdsReq{
 			TargetId:    targetId,
 			ChannelType: channelType,
-			MsgIds:      []string{msgId},
+			MsgIds:      msgIds,
 		}, func() proto.Message {
 			return &pbobjs.DownMsgSet{}
 		})
 		if err == nil && code == errs.IMErrorCode_SUCCESS && resp != nil {
 			msgs, ok := resp.(*pbobjs.DownMsgSet)
 			if ok && len(msgs.Msgs) > 0 {
-				return msgs.Msgs[0]
+				return msgs.Msgs
 			}
 		}
 	}
-	return &pbobjs.DownMsg{
-		MsgId: msgId,
-	}
+	return []*pbobjs.DownMsg{}
 }
 
 func DelConversation(ctx context.Context, userId string, convers []*pbobjs.Conversation) errs.IMErrorCode {

@@ -27,10 +27,12 @@ func QryMentionedMsgs(ctx context.Context, userId string, req *pbobjs.QryMention
 	mentionMsgStorage := storages.NewMentionMsgStorage()
 	dbMentionMsgs, err := mentionMsgStorage.QryMentionMsgs(appkey, userId, req.TargetId, req.ChannelType, startTime, int(req.Count), isPositiveOrder, req.LatestReadIndex)
 	if err == nil {
+		msgIds := []string{}
 		for _, dbMentionMsg := range dbMentionMsgs {
-			downMsg := QryHisMsgByIds(ctx, dbMentionMsg.SenderId, dbMentionMsg.TargetId, dbMentionMsg.MsgId, dbMentionMsg.ChannelType)
-			ret.MentionMsgs = append(ret.MentionMsgs, downMsg)
+			msgIds = append(msgIds, dbMentionMsg.MsgId)
 		}
+		downMsgs := QryHisMsgByIds(ctx, userId, req.TargetId, req.ChannelType, msgIds)
+		ret.MentionMsgs = append(ret.MentionMsgs, downMsgs...)
 		if len(ret.MentionMsgs) >= int(req.Count) {
 			ret.IsFinished = false
 		}

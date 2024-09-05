@@ -85,11 +85,11 @@ func ImportSensitiveWords(ctx *gin.Context) {
 		return
 	}
 	f, err := file.Open()
-	defer f.Close()
 	if err != nil {
 		services.FailHttpResp(ctx, services.AdminErrorCode_ServerErr, err.Error())
 		return
 	}
+	defer f.Close()
 
 	var (
 		allWords []*pbobjs.SensitiveWord
