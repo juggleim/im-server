@@ -7,6 +7,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -168,7 +169,7 @@ func (ctx *WsHandleContextImpl) Write(message interface{}) {
 			defer ctx.lock.Unlock()
 			err = ctx.conn.WriteMessage(websocket.BinaryMessage, bs)
 			if err != nil {
-				fmt.Println("write result:", err)
+				log.Println("write result:", err)
 			}
 		} else {
 			fmt.Println(err)

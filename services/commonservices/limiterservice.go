@@ -24,6 +24,7 @@ func init() {
 	limiterLocks = tools.NewSegmentatedLocks(512)
 
 	bases.SetPreProcess(func(ctx context.Context, sender actorsystem.ActorRef) bool {
+		return true
 		limiter := GetLimiter(ctx)
 		if limiter != nil {
 			if limiter.Allow() {

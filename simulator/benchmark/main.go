@@ -5,9 +5,12 @@ import (
 	"gopkg.in/yaml.v3"
 	"im-server/services/commonservices/tokens"
 	"im-server/simulator/serversdk"
+	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/urfave/cli/v2"
 )
 
 const userPrefix = "benchmark_user_"
@@ -44,11 +47,103 @@ func init() {
 }
 
 func main() {
+	app := &cli.App{
+		Name:  "benchmark",
+		Usage: "sdk压测",
+		Commands: []*cli.Command{
+			{
+				Name:  "registerUsers",
+				Usage: "注册压测用户",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:     "userNum",
+						Usage:    "用户数量",
+						Required: true,
+					},
+				},
+				Action: func(c *cli.Context) error {
+					userNum := c.Int("userNum")
+					_ = registerUsers(userPrefix, userNum)
+					return nil
+				},
+			},
+			{
+				Name:  "sendPrivateMsg",
+				Usage: "发送私聊消息",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:     "connNum",
+						Usage:    "在线连接数",
+						Required: true,
+					},
+					&cli.IntFlag{
+						Name:     "sendNum",
+						Usage:    "发送用户数量",
+						Required: true,
+					},
+					&cli.IntFlag{
+						Name:     "turnCount",
+						Usage:    "每个用户发送消息数量",
+						Required: true,
+					},
+					&cli.IntFlag{
+						Name:     "timeout",
+						Usage:    "超时时间",
+						Value:    10,
+						Required: false,
+					},
+				},
+				Action: func(c *cli.Context) error {
+					connNum := c.Int("connNum")
+					sendNum := c.Int("sendNum")
+					turnCount := c.Int("turnCount")
+					timeout := c.Int("timeout")
+					privateSend(connNum, sendNum, turnCount, timeout)
+					return nil
+				},
+			},
+			{
+				Name:  "sendGroupMsg",
+				Usage: "发送群组消息",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:     "groupMemberCount",
+						Usage:    "群组成员数量",
+						Required: true,
+					},
+					&cli.IntFlag{
+						Name:     "sendNum",
+						Usage:    "发送用户数量",
+						Required: true,
+					},
+					&cli.IntFlag{
+						Name:     "turnCount",
+						Usage:    "每个用户发送消息数量",
+						Required: true,
+					},
+					&cli.IntFlag{
+						Name:     "timeout",
+						Usage:    "超时时间",
+						Value:    30,
+						Required: false,
+					},
+				},
+				Action: func(c *cli.Context) error {
+					groupMemberCount := c.Int("groupMemberCount")
+					sendNum := c.Int("sendNum")
+					turnCount := c.Int("turnCount")
+					timeout := c.Int("timeout")
+					groupSend(groupMemberCount, sendNum, turnCount, timeout)
+					return nil
+				},
+			},
+		},
+	}
 
-	//RegisterUsers(userPrefix, 1)
-	privateSend()
-	//groupSend()
-	//CreateGroup()
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func calcTimeUsed(fn func()) {

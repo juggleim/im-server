@@ -5,13 +5,17 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
 	"im-server/simulator/wsclients"
+	"log"
 	"math/rand"
 	"strconv"
 	"sync"
 	"time"
 )
 
-func privateSend() {
+func privateSend(connNum int, sendClientNum int, turnMsgCount int, timeout int) {
+	if sendClientNum > connNum {
+		log.Fatalln("sendClientNum should be less than or equal to connNum")
+	}
 	var sendClients = make(map[int]*wsclients.WsImClient, 1000)
 	var clientLocker sync.Mutex
 
@@ -23,12 +27,7 @@ func privateSend() {
 		msgMapLock sync.Mutex
 	)
 
-	var (
-		sendClientNum = 500
-		turnMsgCount  = 20
-	)
-
-	for i := 0; i < sendClientNum*2; i++ {
+	for i := 0; i < connNum; i++ {
 		connectWg.Add(1)
 
 		go func(i int) {
@@ -49,7 +48,8 @@ func privateSend() {
 			}, nil)
 			code, _ := client.Connect("", "")
 			if code != 0 {
-				fmt.Printf("connect code: %d\n", code)
+				log.Fatalf("connect code: %d\n", code)
+				return
 			}
 			clientLocker.Lock()
 			if _, ok := sendClients[i]; ok {
@@ -84,7 +84,13 @@ func privateSend() {
 					MsgContent: timeToBytes(time.Now()),
 					Flags:      flag,
 				}
-				code, ack := client.SendPrivateMsg(userPrefix+strconv.Itoa(i+sendClientNum), &upMsg)
+
+				targetId := rand.Intn(connNum)
+				if targetId == i {
+					targetId = (i + 1) % connNum
+				}
+				code, ack := client.SendPrivateMsg(userPrefix+strconv.Itoa(targetId), &upMsg)
+				//fmt.Printf("sendId:%d, targetId:%d, code:%d, ack:%v\n", i, targetId, code, ack)
 				if code != 0 {
 					fmt.Printf("send upMsg failed, code: %d\n", code)
 					return
@@ -97,7 +103,8 @@ func privateSend() {
 			sendWg.Done()
 		}(i)
 	}
-	WaitTimeout(&sendWg, 10*time.Second)
+	//WaitTimeout(&sendWg, 10*time.Second)
+	sendWg.Wait()
 	fmt.Printf("发送消息数量 %d, time used:%v\n", len(msgMap), time.Now().Sub(sendStart))
 
 	s := time.Now()
@@ -107,7 +114,7 @@ func privateSend() {
 	for {
 		select {
 		case t := <-ticker.C:
-			if t.Sub(s).Seconds() > 10 {
+			if t.Sub(s).Seconds() > float64(timeout) {
 				return
 			}
 

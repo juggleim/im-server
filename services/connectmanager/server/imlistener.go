@@ -220,28 +220,28 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 		return
 	}
 	//check limiter
-	limiter := imcontext.GetLimiter(ctx)
-	if limiter != nil && !limiter.Allow() {
-		ack := codec.NewUserPublishAckMessage(&codec.PublishAckMsgBody{
-			Index:     msg.Index,
-			Code:      int32(errs.IMErrorCode_CONNECT_EXCEEDLIMITED),
-			MsgId:     "",
-			Timestamp: time.Now().UnixMilli(),
-		})
-		ctx.Write(ack)
-		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, msg.Index, errs.IMErrorCode_CONNECT_EXCEEDLIMITED)
-		logmanager.WriteSdkResponseLog(imcontext.SendCtxFromNettyCtx(ctx), &pbobjs.SdkResponseLog{
-			Timestamp:   logmanager.LogTimestamp(),
-			ServiceName: "connect",
-			Session:     imcontext.GetConnSession(ctx),
-			Index:       uint32(msg.Index),
-			Action:      string(imcontext.Action_UserPubAck),
-			Code:        uint32(errs.IMErrorCode_CONNECT_EXCEEDLIMITED),
-			Len:         0,
-			AppKey:      imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey),
-		})
-		return
-	}
+	//limiter := imcontext.GetLimiter(ctx)
+	//if limiter != nil && !limiter.Allow() {
+	//	ack := codec.NewUserPublishAckMessage(&codec.PublishAckMsgBody{
+	//		Index:     msg.Index,
+	//		Code:      int32(errs.IMErrorCode_CONNECT_EXCEEDLIMITED),
+	//		MsgId:     "",
+	//		Timestamp: time.Now().UnixMilli(),
+	//	})
+	//	ctx.Write(ack)
+	//	logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, msg.Index, errs.IMErrorCode_CONNECT_EXCEEDLIMITED)
+	//	logmanager.WriteSdkResponseLog(imcontext.SendCtxFromNettyCtx(ctx), &pbobjs.SdkResponseLog{
+	//		Timestamp:   logmanager.LogTimestamp(),
+	//		ServiceName: "connect",
+	//		Session:     imcontext.GetConnSession(ctx),
+	//		Index:       uint32(msg.Index),
+	//		Action:      string(imcontext.Action_UserPubAck),
+	//		Code:        uint32(errs.IMErrorCode_CONNECT_EXCEEDLIMITED),
+	//		Len:         0,
+	//		AppKey:      imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey),
+	//	})
+	//	return
+	//}
 
 	isSucc := bases.UnicastRoute(&pbobjs.RpcMessageWraper{
 		RpcMsgType:   pbobjs.RpcMsgType_UserPub,
@@ -324,27 +324,27 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 		return
 	}
 	//check limiter
-	limiter := imcontext.GetLimiter(ctx)
-	if limiter != nil && !limiter.Allow() {
-		ack := codec.NewQueryAckMessage(&codec.QueryAckMsgBody{
-			Index:     msg.Index,
-			Code:      int32(errs.IMErrorCode_CONNECT_EXCEEDLIMITED),
-			Timestamp: time.Now().UnixMilli(),
-		}, codec.QoS_NoAck)
-		ctx.Write(ack)
-		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, msg.Index, errs.IMErrorCode_CONNECT_EXCEEDLIMITED)
-		logmanager.WriteSdkResponseLog(listener.context(ctx), &pbobjs.SdkResponseLog{
-			Timestamp:   logmanager.LogTimestamp(),
-			ServiceName: "connect",
-			Session:     imcontext.GetConnSession(ctx),
-			Index:       uint32(msg.Index),
-			Action:      string(imcontext.Action_QueryAck),
-			Code:        uint32(errs.IMErrorCode_CONNECT_EXCEEDLIMITED),
-			Len:         uint32(len(msg.Data)),
-			AppKey:      imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey),
-		})
-		return
-	}
+	//limiter := imcontext.GetLimiter(ctx)
+	//if limiter != nil && !limiter.Allow() {
+	//	ack := codec.NewQueryAckMessage(&codec.QueryAckMsgBody{
+	//		Index:     msg.Index,
+	//		Code:      int32(errs.IMErrorCode_CONNECT_EXCEEDLIMITED),
+	//		Timestamp: time.Now().UnixMilli(),
+	//	}, codec.QoS_NoAck)
+	//	ctx.Write(ack)
+	//	logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, msg.Index, errs.IMErrorCode_CONNECT_EXCEEDLIMITED)
+	//	logmanager.WriteSdkResponseLog(listener.context(ctx), &pbobjs.SdkResponseLog{
+	//		Timestamp:   logmanager.LogTimestamp(),
+	//		ServiceName: "connect",
+	//		Session:     imcontext.GetConnSession(ctx),
+	//		Index:       uint32(msg.Index),
+	//		Action:      string(imcontext.Action_QueryAck),
+	//		Code:        uint32(errs.IMErrorCode_CONNECT_EXCEEDLIMITED),
+	//		Len:         uint32(len(msg.Data)),
+	//		AppKey:      imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey),
+	//	})
+	//	return
+	//}
 
 	appkey := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey)
 	userid := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)

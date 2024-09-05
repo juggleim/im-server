@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
 	"im-server/simulator/wsclients"
+	"log"
 	"math/rand"
 	"strconv"
 	"sync"
@@ -23,7 +25,10 @@ type (
 	}
 )
 
-func groupSend() {
+func groupSend(groupMemberNum int, sendClientNum int, turnMsgCount int, timeout int) {
+	if sendClientNum > groupMemberNum {
+		log.Fatalln(errors.New("sendClientNum less than groupMemberNum"))
+	}
 	var sendClients = make(map[int]*wsclients.WsImClient, 1000)
 	var clientLocker sync.Mutex
 
@@ -33,12 +38,6 @@ func groupSend() {
 	var (
 		msgMap     = make(map[string]*groupMessageData, 10000)
 		msgMapLock sync.Mutex
-	)
-
-	var (
-		groupMemberNum = 1000
-		sendClientNum  = 10
-		turnMsgCount   = 200
 	)
 	//添加群组
 	groupId := "benchmark_group:" + strconv.Itoa(groupMemberNum)
@@ -65,6 +64,7 @@ func groupSend() {
 						Time:     time.Now(),
 						TargetId: userPrefix + strconv.Itoa(i),
 					})
+					msgMap[msg.MsgId] = data
 				}
 				msgMapLock.Unlock()
 
@@ -75,7 +75,8 @@ func groupSend() {
 			}, nil)
 			code, _ := client.Connect("", "")
 			if code != 0 {
-				fmt.Printf("connect code: %d\n", code)
+				log.Fatalf("connect code: %d\n", code)
+				return
 			}
 			clientLocker.Lock()
 			if _, ok := sendClients[i]; ok {
@@ -96,7 +97,7 @@ func groupSend() {
 
 	sendStart := time.Now()
 
-	fmt.Printf("开始发送消息, 发送客户端数量 %d, 发送消息数量 %d\n", sendClientNum, turnMsgCount)
+	fmt.Printf("开始发送消息, 群成员数量 %d, 发送客户端数量 %d, 每个发送消息数量 %d\n", groupMemberNum, sendClientNum, turnMsgCount)
 	for i := 0; i < sendClientNum; i++ {
 		sendWg.Add(1)
 		go func(i int) {
@@ -109,13 +110,11 @@ func groupSend() {
 					MsgType:    "txtMsg",
 					MsgContent: timeToBytes(time.Now()),
 					Flags:      commonservices.SetStoreMsg(0),
-					MentionInfo: &pbobjs.MentionInfo{
-						MentionType: pbobjs.MentionType_All,
-					},
 				}
 				code, ack := client.SendGroupMsg(groupId, &upMsg)
 				if code != 0 {
 					fmt.Printf("send upMsg failed, code: %d\n", code)
+					return
 				}
 
 				msgMapLock.Lock()
@@ -135,7 +134,7 @@ func groupSend() {
 	for {
 		select {
 		case t := <-ticker.C:
-			if t.Sub(s).Seconds() > 10 {
+			if t.Sub(s).Seconds() > float64(timeout) {
 				return
 			}
 
