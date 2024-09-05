@@ -2,6 +2,7 @@ package commonservices
 
 import (
 	"fmt"
+	"im-server/commons/caches"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
@@ -12,7 +13,7 @@ import (
 type StatType int
 
 var (
-	statCache *sync.Map
+	statCache *caches.LruCache
 	statLocks *tools.SegmentatedLocks
 
 	StatType_Up       StatType = 1
@@ -21,28 +22,72 @@ var (
 )
 
 func init() {
-	statCache = &sync.Map{}
-	statLocks = tools.NewSegmentatedLocks(8)
+	statCache = caches.NewLruCacheWithReadTimeout(1000, nil, 30*time.Minute)
+	statLocks = tools.NewSegmentatedLocks(16)
+}
+
+type StatisticMsgs struct {
+	Items []*StatisticMsgItem
+}
+
+type StatisticMsgItem struct {
+	Count    int64 `json:"count"`
+	TimeMark int64 `json:"time_mark"`
+}
+
+func QryMsgStatistic(appkey string, statType StatType, channelType pbobjs.ChannelType, start, end int64) *StatisticMsgs {
+	ret := &StatisticMsgs{
+		Items: []*StatisticMsgItem{},
+	}
+	if statType == StatType_Up {
+		dao := dbs.UpStatDao{}
+		list := dao.QryStats(appkey, int(channelType), start, end)
+		for _, item := range list {
+			ret.Items = append(ret.Items, &StatisticMsgItem{
+				Count:    item.Count,
+				TimeMark: item.TimeMark,
+			})
+		}
+	} else if statType == StatType_Down {
+		dao := dbs.DownStatDao{}
+		list := dao.QryStats(appkey, int(channelType), start, end)
+		for _, item := range list {
+			ret.Items = append(ret.Items, &StatisticMsgItem{
+				Count:    item.Count,
+				TimeMark: item.TimeMark,
+			})
+		}
+	} else if statType == StatType_Dispatch {
+		dao := dbs.DispStatDao{}
+		list := dao.QryStats(appkey, int(channelType), start, end)
+		for _, item := range list {
+			ret.Items = append(ret.Items, &StatisticMsgItem{
+				Count:    item.Count,
+				TimeMark: item.TimeMark,
+			})
+		}
+	}
+	return ret
 }
 
 func ReportUpMsg(appkey string, channelType pbobjs.ChannelType, step int64) {
-	// counter := getCounter(appkey, StatType_Up, channelType)
-	// counter.IncrByStep(step)
+	counter := getCounter(appkey, StatType_Up, channelType)
+	counter.IncrByStep(step)
 }
 
 func ReportDispatchMsg(appkey string, channelType pbobjs.ChannelType, step int64) {
-	// counter := getCounter(appkey, StatType_Dispatch, channelType)
-	// counter.IncrByStep(step)
+	counter := getCounter(appkey, StatType_Dispatch, channelType)
+	counter.IncrByStep(step)
 }
 
 func ReportDownMsg(appkey string, channelType pbobjs.ChannelType, step int64) {
-	// counter := getCounter(appkey, StatType_Down, channelType)
-	// counter.IncrByStep(step)
+	counter := getCounter(appkey, StatType_Down, channelType)
+	counter.IncrByStep(step)
 }
 
 func getCounter(appkey string, statType StatType, channelType pbobjs.ChannelType) *Counter {
 	key := fmt.Sprintf("%s_%d_%d", appkey, channelType, statType)
-	if counterObj, exist := statCache.Load(key); exist {
+	if counterObj, exist := statCache.Get(key); exist {
 		counter := counterObj.(*Counter)
 		return counter
 	} else {
@@ -50,7 +95,7 @@ func getCounter(appkey string, statType StatType, channelType pbobjs.ChannelType
 		lock.Lock()
 		defer lock.Unlock()
 
-		if counterObj, exist := statCache.Load(key); exist {
+		if counterObj, exist := statCache.Get(key); exist {
 			counter := counterObj.(*Counter)
 			return counter
 		} else {
@@ -66,7 +111,7 @@ func getCounter(appkey string, statType StatType, channelType pbobjs.ChannelType
 					dao.IncrByStep(appkey, int(channelType), timeMark, count)
 				}
 			})
-			statCache.Store(key, counter)
+			statCache.Add(key, counter)
 			return counter
 		}
 	}
@@ -84,7 +129,7 @@ type Counter struct {
 func NewCounter(report func(count, timeMark int64)) *Counter {
 	return &Counter{
 		Count:    0,
-		interval: 30,
+		interval: 60,
 		report:   report,
 	}
 }
@@ -103,7 +148,7 @@ func (c *Counter) IncrByStep(step int64) {
 		newTimeMark := c.getTimeMark()
 		if newTimeMark > c.timeMark {
 			if c.report != nil {
-				go c.report(c.Count, c.timeMark)
+				go c.report(c.Count, c.getDbTimeMark())
 			}
 			c.timeMark = newTimeMark
 			c.Count = 0
@@ -116,4 +161,10 @@ func (c *Counter) IncrByStep(step int64) {
 func (c *Counter) getTimeMark() int64 {
 	current := time.Now().Unix()
 	return current / c.interval * c.interval
+}
+
+func (c *Counter) getDbTimeMark() int64 {
+	current := time.Now().Unix()
+	var day int64 = 24 * 60 * 60
+	return current / day * day
 }

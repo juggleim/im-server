@@ -26,3 +26,12 @@ func (stat UpStatDao) IncrByStep(appkey string, channelType int, timeMark, step 
 	err := dbcommons.GetDb().Exec(sql, channelType, timeMark, step, appkey, step).Error
 	return err
 }
+
+func (stat UpStatDao) QryStats(appkey string, channelType int, start int64, end int64) []*DownStatDao {
+	var items []*DownStatDao
+	err := dbcommons.GetDb().Where("app_key=? and channel_type=? and time_mark>=? and time_mark<=?", appkey, channelType, start, end).Limit(1000).Find(&items).Error
+	if err == nil {
+		return items
+	}
+	return []*DownStatDao{}
+}
