@@ -47,7 +47,7 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 	}
 
 	child := &ImWebsocketChild{
-		stopChan:         make(chan bool),
+		stopChan:         make(chan bool, 1),
 		wsConn:           conn,
 		isActive:         true,
 		messageListener:  server.MessageListener,
@@ -92,13 +92,10 @@ func (child *ImWebsocketChild) startWsListener() {
 		child.latestActiveTime = time.Now().UnixMilli()
 
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				fmt.Println("unexpected error: ", err)
-			} else {
-				fmt.Println("close err:", err)
+			if child.isActive {
+				child.Stop()
+				handler.HandleException(ctx, err)
 			}
-			child.Stop()
-			handler.HandleException(ctx, err)
 			break
 		}
 
@@ -204,7 +201,4 @@ func (ctx *WsHandleContextImpl) RemoteAddr() string {
 	} else {
 		return ""
 	}
-}
-func (ctx *WsHandleContextImpl) HandleException(ex error) {
-	ctx.Close(ex)
 }

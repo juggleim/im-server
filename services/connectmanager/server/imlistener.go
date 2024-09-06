@@ -18,8 +18,6 @@ import (
 )
 
 type ImListener interface {
-	Create(ctx imcontext.WsHandleContext)
-	Close(ctx imcontext.WsHandleContext)
 	ExceptionCaught(ctx imcontext.WsHandleContext, e error)
 
 	Connected(msg *codec.ConnectMsgBody, ctx imcontext.WsHandleContext)
@@ -33,24 +31,8 @@ type ImListener interface {
 
 type ImListenerImpl struct{}
 
-func (*ImListenerImpl) Create(ctx imcontext.WsHandleContext) {
-}
-func (listener *ImListenerImpl) Close(ctx imcontext.WsHandleContext) {
-	logs.Infof("1session:%s\taction:%s", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect)
-	services.RemoveFromContextCache(ctx)
-
-	//subscriptions.PublishOnlineOfflineMsg(listener.context(ctx), userId, &pbobjs.OnlineOfflineMsg{
-	//	Type:      pbobjs.OnlineType_Online,
-	//	UserId:    userId,
-	//	DeviceId:  msg.DeviceId,
-	//	Platform:  msg.Platform,
-	//	ClientIp:  msg.ClientIp,
-	//	SessionId: utils.GetConnSession(ctx),
-	//	Timestamp: time.Now().UnixMilli(),
-	//})
-}
 func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, e error) {
-	logs.Infof("2session:%s\taction:%s\terr:%v", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, e)
+	logs.Infof("session:%s\taction:%s\terr:%v", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, e)
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	deviceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_DeviceID)
 	platform := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Platform)

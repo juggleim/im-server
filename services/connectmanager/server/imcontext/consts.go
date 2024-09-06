@@ -54,5 +54,4 @@ type WsHandleContext interface {
 	SetAttachment(attachment Attachment)
 	IsActive() bool
 	RemoteAddr() string
-	HandleException(ex error)
 }

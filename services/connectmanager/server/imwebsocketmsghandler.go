@@ -9,12 +9,6 @@ type IMWebsocketMsgHandler struct {
 	listener ImListener
 }
 
-func (handler IMWebsocketMsgHandler) HandleActive(ctx imcontext.WsHandleContext) {
-	if handler.listener != nil {
-		handler.listener.Create(ctx)
-	}
-}
-
 func (handler IMWebsocketMsgHandler) HandleRead(ctx imcontext.WsHandleContext, message interface{}) {
 	if handler.listener != nil {
 		wsMsg, ok := message.(*codec.ImWebsocketMsg)
@@ -62,13 +56,6 @@ func (handler IMWebsocketMsgHandler) HandleRead(ctx imcontext.WsHandleContext, m
 			}
 		}
 	}
-}
-
-func (handler IMWebsocketMsgHandler) HandleInactive(ctx imcontext.WsHandleContext, ex error) {
-	if handler.listener != nil {
-		handler.listener.Close(ctx)
-	}
-	ctx.Close(ex)
 }
 
 func (handler IMWebsocketMsgHandler) HandleException(ctx imcontext.WsHandleContext, ex error) {
