@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"im-server/services/commonservices"
@@ -51,10 +50,10 @@ func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, e
 		InstanceId: instanceId,
 	}
 
-	newCtx := listener.context(ctx)
+	newCtx := imcontext.GetRpcContext(ctx)
 	commonservices.SubOfflineEvent(newCtx, userId, offlineMsg)
 
-	logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+	logmanager.WriteConnectionLog(newCtx, &pbobjs.ConnectionLog{
 		AppKey:  appKey,
 		Session: imcontext.GetConnSession(ctx),
 		Action:  string(imcontext.Action_Disconnect),
@@ -62,10 +61,6 @@ func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, e
 	})
 
 	services.RemoveFromContextCache(ctx)
-}
-
-func (listener *ImListenerImpl) context(inboundCtx imcontext.WsHandleContext) context.Context {
-	return imcontext.SendCtxFromNettyCtx(inboundCtx)
 }
 
 func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imcontext.WsHandleContext) {
@@ -76,7 +71,6 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 	if clientIp == "" {
 		clientIp = GetRemoteAddr(ctx)
 	}
-	rpcCtx := listener.context(ctx)
 	ucLog := &pbobjs.UserConnectLog{
 		AppKey:   msg.Appkey,
 		UserId:   msg.Token,
@@ -93,7 +87,7 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 			ucLog.UserId = uId
 		}
 		ucLog.Code = code
-		logmanager.WriteUserConnectLog(rpcCtx, ucLog)
+		logmanager.WriteUserConnectLog(imcontext.GetRpcContext(ctx), ucLog)
 		msgAck := codec.NewConnectAckMessage(&codec.ConnectAckMsgBody{
 			Code:      code,
 			Session:   imcontext.GetConnSession(ctx),
@@ -135,11 +129,11 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 		ConnectionExt: msg.Ext,
 		InstanceId:    msg.InstanceId,
 	}
-	commonservices.SubOnlineEvent(rpcCtx, userId, onlineMsg)
+	commonservices.SubOnlineEvent(imcontext.GetRpcContext(ctx), userId, onlineMsg)
 	//connect log
 	ucLog.UserId = userId
 	ucLog.Code = int32(errs.IMErrorCode_SUCCESS)
-	logmanager.WriteUserConnectLog(rpcCtx, ucLog)
+	logmanager.WriteUserConnectLog(imcontext.GetRpcContext(ctx), ucLog)
 	msgAck := codec.NewConnectAckMessage(&codec.ConnectAckMsgBody{
 		Code:      int32(errs.IMErrorCode_SUCCESS),
 		UserId:    userId,
@@ -151,7 +145,7 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 
 func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx imcontext.WsHandleContext) {
 	logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, msg.Code)
-	logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:  imcontext.GetAppkey(ctx),
 		Session: imcontext.GetConnSession(ctx),
 		Action:  string(imcontext.Action_Disconnect),
@@ -165,7 +159,7 @@ func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx im
 	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
 	instanceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_InstanceId)
 
-	commonservices.SubOfflineEvent(listener.context(ctx), userId, &pbobjs.OnlineOfflineMsg{
+	commonservices.SubOfflineEvent(imcontext.GetRpcContext(ctx), userId, &pbobjs.OnlineOfflineMsg{
 		Type:       pbobjs.OnlineType_Offline,
 		UserId:     userId,
 		DeviceId:   deviceId,
@@ -180,7 +174,7 @@ func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx im
 }
 func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx imcontext.WsHandleContext) {
 	logs.Infof("session:%s\taction:%s\tseq_index:%d\ttopic:%s\ttarget_id:%s\tlen:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPub, msg.Index, msg.Topic, msg.TargetId, len(msg.Data))
-	logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:   imcontext.GetAppkey(ctx),
 		Session:  imcontext.GetConnSession(ctx),
 		Index:    msg.Index,
@@ -198,7 +192,7 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 		})
 		ctx.Write(ack)
 		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, msg.Index, errs.IMErrorCode_CONNECT_PARAM_REQUIRED)
-		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:   imcontext.GetAppkey(ctx),
 			Session:  imcontext.GetConnSession(ctx),
 			Index:    msg.Index,
@@ -220,7 +214,7 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 		})
 		ctx.Write(ack)
 		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, msg.Index, errs.IMErrorCode_CONNECT_EXCEEDLIMITED)
-		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:   imcontext.GetAppkey(ctx),
 			Session:  imcontext.GetConnSession(ctx),
 			Index:    msg.Index,
@@ -267,7 +261,7 @@ func (*ImListenerImpl) PubAckArrived(msg *codec.PublishAckMsgBody, ctx imcontext
 		callback()
 	}
 	logs.Infof("session:%s\taction:%s\tseq_index:%d", imcontext.GetConnSession(ctx), imcontext.Action_ServerPubAck, msg.Index)
-	logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:  imcontext.GetAppkey(ctx),
 		Session: imcontext.GetConnSession(ctx),
 		Index:   msg.Index,
@@ -276,7 +270,7 @@ func (*ImListenerImpl) PubAckArrived(msg *codec.PublishAckMsgBody, ctx imcontext
 }
 func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcontext.WsHandleContext) {
 	logs.Infof("session:%s\taction:%s\tseq_index:%d\ttopic:%s\ttarget_id:%s\tlen:%d", imcontext.GetConnSession(ctx), imcontext.Action_Query, msg.Index, msg.Topic, msg.TargetId, len(msg.Data))
-	logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:   imcontext.GetAppkey(ctx),
 		Session:  imcontext.GetConnSession(ctx),
 		Index:    msg.Index,
@@ -294,7 +288,7 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 		}, codec.QoS_NoAck)
 		ctx.Write(ack)
 		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, msg.Index, errs.IMErrorCode_CONNECT_PARAM_REQUIRED)
-		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
 			Index:   msg.Index,
@@ -313,7 +307,7 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 		}, codec.QoS_NoAck)
 		ctx.Write(ack)
 		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, msg.Index, errs.IMErrorCode_CONNECT_EXCEEDLIMITED)
-		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
 			Index:   msg.Index,
@@ -361,7 +355,7 @@ func (*ImListenerImpl) QueryConfirmArrived(msg *codec.QueryConfirmMsgBody, ctx i
 		callback()
 	}
 	logs.Infof("session:%s\taction:%s\tseq_index:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryConfirm, msg.Index)
-	logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
+	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:  imcontext.GetAppkey(ctx),
 		Session: imcontext.GetConnSession(ctx),
 		Index:   msg.Index,

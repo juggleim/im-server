@@ -168,11 +168,10 @@ func RemoveQueryAckCallback(ctx WsHandleContext, index int32) {
 	}
 }
 
-func SendCtxFromNettyCtx(inboundCtx WsHandleContext) context.Context {
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, bases.CtxKey_AppKey, GetContextAttrString(inboundCtx, StateKey_Appkey))
-	ctx = context.WithValue(ctx, bases.CtxKey_Session, GetConnSession(inboundCtx))
-	ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, 0)
-	ctx = context.WithValue(ctx, bases.CtxKey_Qos, 0)
-	return ctx
+func GetRpcContext(ctx WsHandleContext) context.Context {
+	newCtx := context.Background()
+	newCtx = context.WithValue(newCtx, bases.CtxKey_AppKey, GetAppkey(ctx))
+	newCtx = context.WithValue(newCtx, bases.CtxKey_Session, GetConnSession(ctx))
+	newCtx = context.WithValue(newCtx, bases.CtxKey_RequesterId, GetContextAttrString(ctx, StateKey_UserID))
+	return newCtx
 }
