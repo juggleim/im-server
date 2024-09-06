@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"im-server/commons/errs"
+	"im-server/commons/logs"
 	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
@@ -88,6 +89,7 @@ func PutInContextCache(ctx imcontext.WsHandleContext) {
 							Timestamp: time.Now().UnixMilli(),
 						})
 						kickCtx.Write(disconnectMsg)
+						logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(kickCtx), imcontext.Action_Disconnect, disconnectMsg.MsgBody.Code)
 						time.Sleep(time.Millisecond * 50)
 						kickCtx.Close(errors.New("kick off by other login"))
 					}()

@@ -17,7 +17,7 @@ import (
 )
 
 type ImListener interface {
-	ExceptionCaught(ctx imcontext.WsHandleContext, e error)
+	ExceptionCaught(ctx imcontext.WsHandleContext, code errs.IMErrorCode, e error)
 
 	Connected(msg *codec.ConnectMsgBody, ctx imcontext.WsHandleContext)
 	Diconnected(msg *codec.DisconnectMsgBody, ctx imcontext.WsHandleContext)
@@ -30,8 +30,8 @@ type ImListener interface {
 
 type ImListenerImpl struct{}
 
-func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, e error) {
-	logs.Infof("session:%s\taction:%s\terr:%v", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, e)
+func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, code errs.IMErrorCode, e error) {
+	logs.Infof("session:%s\taction:%s\tcode:%d\terr:%v", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, code, e)
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	deviceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_DeviceID)
 	platform := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Platform)
@@ -57,7 +57,7 @@ func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, e
 		AppKey:  appKey,
 		Session: imcontext.GetConnSession(ctx),
 		Action:  string(imcontext.Action_Disconnect),
-		Code:    0,
+		Code:    int32(code),
 	})
 
 	services.RemoveFromContextCache(ctx)
@@ -97,8 +97,9 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 		ctx.Write(msgAck)
 		go func() {
 			time.Sleep(50 * time.Millisecond)
-			ctx.Close(errors.New("Failed to Login"))
+			ctx.Close(errors.New("failed to login"))
 		}()
+		logs.Infof("session:%s\taction:%s\tappkey:%s\tuser_id:%s\tclient_ip:%s\tplatform:%s\tdevice_id:%s\tpush_token:%s\tinstance_id:%s\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_Connect, msg.Appkey, ucLog.UserId, clientIp, msg.Platform, msg.DeviceId, msg.PushToken, msg.InstanceId, ucLog.Code)
 		return
 	}
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Connected, "1")

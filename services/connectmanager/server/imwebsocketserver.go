@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
 	"im-server/commons/tools"
 	"im-server/services/connectmanager/server/codec"
@@ -94,7 +95,7 @@ func (child *ImWebsocketChild) startWsListener() {
 		if err != nil {
 			if child.isActive {
 				child.Stop()
-				handler.HandleException(ctx, err)
+				handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_NET_ERR, err)
 			}
 			break
 		}
@@ -105,7 +106,7 @@ func (child *ImWebsocketChild) startWsListener() {
 		if err != nil {
 			fmt.Println("failed to decode pb data:", err)
 			child.Stop()
-			handler.HandleException(ctx, err)
+			handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_PB_DECODE_FAIL, err)
 			break
 		}
 
@@ -131,7 +132,7 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 				interval := current - child.latestActiveTime
 				if interval > 300*1000 {
 					child.Stop()
-					handler.HandleException(ctx, errors.New("user inactive more than 5min"))
+					handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT, errors.New("user inactive more than 5min"))
 					return
 				}
 			case <-child.stopChan:

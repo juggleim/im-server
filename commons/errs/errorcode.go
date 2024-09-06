@@ -42,22 +42,26 @@ var (
 
 // connect errorcode
 var (
-	IMErrorCode_CONNECT_DEFAULT             IMErrorCode = 11000
-	IMErrorCode_CONNECT_APPKEY_REQUIRED     IMErrorCode = 11001
-	IMErrorCode_CONNECT_TOKEN_REQUIRED      IMErrorCode = 11002
-	IMErrorCode_CONNECT_APP_NOT_EXISTED     IMErrorCode = 11003
-	IMErrorCode_CONNECT_TOKEN_ILLEGAL       IMErrorCode = 11004
-	IMErrorCode_CONNECT_TOKEN_AUTHFAIL      IMErrorCode = 11005
-	IMErrorCode_CONNECT_TOKEN_EXPIRED       IMErrorCode = 11006
-	IMErrorCode_CONNECT_NEED_REDIRECT       IMErrorCode = 11007
-	IMErrorCode_CONNECT_UNSUPPROTEDPLATFORM IMErrorCode = 11008
-	IMErrorCode_CONNECT_APP_BLOCK           IMErrorCode = 11009
-	IMErrorCode_CONNECT_USER_BLOCK          IMErrorCode = 11010
-	IMErrorCode_CONNECT_KICKED_OFF          IMErrorCode = 11011 //被踢下线
-	IMErrorCode_CONNECT_LOGOUT              IMErrorCode = 11012 //注销
-	IMErrorCode_CONNECT_UNSUPPORTEDTOPIC    IMErrorCode = 11013
-	IMErrorCode_CONNECT_EXCEEDLIMITED       IMErrorCode = 11014
-	IMErrorCode_CONNECT_PARAM_REQUIRED      IMErrorCode = 11015
+	IMErrorCode_CONNECT_DEFAULT                 IMErrorCode = 11000
+	IMErrorCode_CONNECT_APPKEY_REQUIRED         IMErrorCode = 11001
+	IMErrorCode_CONNECT_TOKEN_REQUIRED          IMErrorCode = 11002
+	IMErrorCode_CONNECT_APP_NOT_EXISTED         IMErrorCode = 11003
+	IMErrorCode_CONNECT_TOKEN_ILLEGAL           IMErrorCode = 11004
+	IMErrorCode_CONNECT_TOKEN_AUTHFAIL          IMErrorCode = 11005
+	IMErrorCode_CONNECT_TOKEN_EXPIRED           IMErrorCode = 11006
+	IMErrorCode_CONNECT_NEED_REDIRECT           IMErrorCode = 11007
+	IMErrorCode_CONNECT_UNSUPPROTEDPLATFORM     IMErrorCode = 11008
+	IMErrorCode_CONNECT_APP_BLOCK               IMErrorCode = 11009
+	IMErrorCode_CONNECT_USER_BLOCK              IMErrorCode = 11010
+	IMErrorCode_CONNECT_KICKED_OFF              IMErrorCode = 11011 //被踢下线
+	IMErrorCode_CONNECT_LOGOUT                  IMErrorCode = 11012 //注销
+	IMErrorCode_CONNECT_UNSUPPORTEDTOPIC        IMErrorCode = 11013
+	IMErrorCode_CONNECT_EXCEEDLIMITED           IMErrorCode = 11014
+	IMErrorCode_CONNECT_PARAM_REQUIRED          IMErrorCode = 11015
+	IMErrorCode_CONNECT_CLOSE_NET_ERR           IMErrorCode = 11016
+	IMErrorCode_CONNECT_CLOSE_PB_DECODE_FAIL    IMErrorCode = 11017
+	IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT IMErrorCode = 11018
+	IMErrorCode_CONNECT_CLOSE_DATA_ILLEGAL      IMErrorCode = 11019
 )
 
 // msg errorcode

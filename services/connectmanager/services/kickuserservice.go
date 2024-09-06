@@ -5,6 +5,7 @@ import (
 	"errors"
 	"im-server/commons/bases"
 	"im-server/commons/errs"
+	"im-server/commons/logs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
@@ -55,9 +56,10 @@ func KickUser(ctx context.Context, req *pbobjs.KickUserReq) {
 			Ext:       req.Ext,
 		})
 		tmpCtx.Write(msgAck)
+		logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(tmpCtx), imcontext.Action_Disconnect, msgAck.MsgBody.Code)
 		go func() {
 			time.Sleep(time.Millisecond * 50)
-			tmpCtx.Close(errors.New("Kick off."))
+			tmpCtx.Close(errors.New("kick off"))
 		}()
 	}
 }

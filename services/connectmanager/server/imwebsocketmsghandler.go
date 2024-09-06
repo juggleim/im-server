@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+	"im-server/commons/errs"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 )
@@ -19,6 +21,7 @@ func (handler IMWebsocketMsgHandler) HandleRead(ctx imcontext.WsHandleContext, m
 			case int32(codec.Cmd_Disconnect):
 				if !imcontext.CheckConnected(ctx) {
 					ctx.Close(nil)
+					return
 				}
 				//check disconnect msg body
 				disconnectMsg := wsMsg.GetDisconnectMsgBody()
@@ -29,38 +32,46 @@ func (handler IMWebsocketMsgHandler) HandleRead(ctx imcontext.WsHandleContext, m
 			case int32(codec.Cmd_Ping):
 				if !imcontext.CheckConnected(ctx) {
 					ctx.Close(nil)
+					return
 				}
 				handler.listener.PingArrived(ctx)
 			case int32(codec.Cmd_Publish):
 				if !imcontext.CheckConnected(ctx) {
 					ctx.Close(nil)
+					return
 				}
 				handler.listener.PublishArrived(wsMsg.GetPublishMsgBody(), int(wsMsg.GetQos()), ctx)
 			case int32(codec.Cmd_PublishAck):
 				if !imcontext.CheckConnected(ctx) {
 					ctx.Close(nil)
+					return
 				}
 				handler.listener.PubAckArrived(wsMsg.GetPubAckMsgBody(), ctx)
 			case int32(codec.Cmd_Query):
 				if !imcontext.CheckConnected(ctx) {
 					ctx.Close(nil)
+					return
 				}
 				handler.listener.QueryArrived(wsMsg.GetQryMsgBody(), ctx)
 			case int32(codec.Cmd_QueryConfirm):
 				if !imcontext.CheckConnected(ctx) {
 					ctx.Close(nil)
+					return
 				}
 				handler.listener.QueryConfirmArrived(wsMsg.GetQryConfirmMsgBody(), ctx)
 			default:
-				break
+				ctx.Close(nil)
+				if imcontext.CheckConnected(ctx) {
+					handler.listener.ExceptionCaught(ctx, errs.IMErrorCode_CONNECT_CLOSE_DATA_ILLEGAL, fmt.Errorf("not support cmd:%d", codec.Cmd_QueryConfirm))
+				}
+				return
 			}
 		}
 	}
 }
 
-func (handler IMWebsocketMsgHandler) HandleException(ctx imcontext.WsHandleContext, ex error) {
+func (handler IMWebsocketMsgHandler) HandleException(ctx imcontext.WsHandleContext, code errs.IMErrorCode, ex error) {
 	if handler.listener != nil {
-		handler.listener.ExceptionCaught(ctx, ex)
+		handler.listener.ExceptionCaught(ctx, code, ex)
 	}
-	ctx.Close(ex)
 }
