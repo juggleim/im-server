@@ -25,3 +25,12 @@ func (stat UserActivityDao) IncrByStep(appkey, userId string, timeMark, step int
 	err := dbcommons.GetDb().Exec(sql, userId, timeMark, step, appkey, step).Error
 	return err
 }
+
+func (stat UserActivityDao) CountUserActivities(appkey string, timeMark int64) int64 {
+	var count int64
+	err := dbcommons.GetDb().Model(&UserActivityDao{}).Where("app_key=? and time_mark=?", appkey, timeMark).Count(&count).Error
+	if err != nil {
+		return count
+	}
+	return count
+}

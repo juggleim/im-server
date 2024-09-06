@@ -6,6 +6,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
+	userDbs "im-server/services/usermanager/dbs"
 	"sync/atomic"
 	"time"
 )
@@ -36,8 +37,9 @@ func init() {
 	statLocks = tools.NewSegmentatedLocks(128)
 }
 
-type StatisticMsgs struct {
-	Items []*StatisticMsgItem `json:"items"`
+type Statistics struct {
+	Items          []interface{} `json:"items"`
+	TotalUserCount *int64        `json:"total_user_count,omitempty"`
 }
 
 type StatisticMsgItem struct {
@@ -45,9 +47,9 @@ type StatisticMsgItem struct {
 	TimeMark int64 `json:"time_mark"`
 }
 
-func QryMsgStatistic(appkey string, statType StatType, channelType pbobjs.ChannelType, start, end int64) *StatisticMsgs {
-	ret := &StatisticMsgs{
-		Items: []*StatisticMsgItem{},
+func QryMsgStatistic(appkey string, statType StatType, channelType pbobjs.ChannelType, start, end int64) *Statistics {
+	ret := &Statistics{
+		Items: []interface{}{},
 	}
 	dao := dbs.MsgStatDao{}
 	list := dao.QryStats(appkey, int(statType), int(channelType), start, end)
@@ -56,6 +58,57 @@ func QryMsgStatistic(appkey string, statType StatType, channelType pbobjs.Channe
 			Count:    item.Count,
 			TimeMark: item.TimeMark,
 		})
+	}
+	return ret
+}
+
+var oneDay int64 = 24 * 60 * 60 * 1000
+
+type UserActivityItem struct {
+	Count    int64 `json:"count"`
+	TimeMark int64 `json:"time_mark"`
+}
+
+func QryUserActivities(appkey string, start, end int64) *Statistics {
+	ret := &Statistics{
+		Items: []interface{}{},
+	}
+	timeMarks := []int64{}
+	for s := start / oneDay * oneDay; s <= end; {
+		if s >= start {
+			timeMarks = append(timeMarks, s)
+		}
+		s = s + oneDay
+	}
+	dao := dbs.UserActivityDao{}
+	for _, timemark := range timeMarks {
+		ret.Items = append(ret.Items, &UserActivityItem{
+			TimeMark: timemark,
+			Count:    dao.CountUserActivities(appkey, timemark),
+		})
+	}
+	return ret
+}
+
+func QryUserRegiste(appkey string, start, end int64) *Statistics {
+	ret := &Statistics{
+		Items: []interface{}{},
+	}
+	timeMarks := []int64{}
+	for s := start / oneDay * oneDay; s <= end; {
+		timeMarks = append(timeMarks, s)
+		s = s + oneDay
+	}
+	dao := userDbs.UserDao{}
+	for _, timemark := range timeMarks {
+		ret.Items = append(ret.Items, &UserActivityItem{
+			TimeMark: timemark,
+			Count:    dao.CountByTime(appkey, timemark, timemark+oneDay),
+		})
+	}
+	totalCount := dao.Count(appkey)
+	if totalCount > 0 {
+		ret.TotalUserCount = tools.Int64Ptr(int64(totalCount))
 	}
 	return ret
 }
