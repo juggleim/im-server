@@ -29,6 +29,7 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	group := ser.httpServer.Group("/admingateway")
 	group.Use(apis.Validate)
 
+	group.POST("/imapiagent", apis.ApiAgent)
 	group.GET("/common/address", apis.GetAccessAddress)
 
 	group.POST("/login", apis.Login)
