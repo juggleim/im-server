@@ -3,50 +3,54 @@ package logmanager
 import (
 	"context"
 	"im-server/commons/bases"
+	"im-server/commons/configures"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"time"
 )
 
 func WriteUserConnectLog(ctx context.Context, msg *pbobjs.UserConnectLog) {
-	msg.Timestamp = time.Now().UnixMilli()
-
-	data, _ := tools.PbMarshal(&pbobjs.LogEntities{
-		Entities: []*pbobjs.LogEntity{
-			{
-				LogOf: &pbobjs.LogEntity_UserConnectLog{
-					UserConnectLog: msg,
+	if configures.Config.Log.Visual {
+		msg.Timestamp = time.Now().UnixMilli()
+		data, _ := tools.PbMarshal(&pbobjs.LogEntities{
+			Entities: []*pbobjs.LogEntity{
+				{
+					LogOf: &pbobjs.LogEntity_UserConnectLog{
+						UserConnectLog: msg,
+					},
 				},
 			},
-		},
-	})
-	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
-		AppKey:       msg.AppKey,
-		Session:      msg.Session,
-		Method:       "vlog",
-		TargetId:     msg.UserId,
-		AppDataBytes: data,
-	})
+		})
+		bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
+			AppKey:       msg.AppKey,
+			Session:      msg.Session,
+			Method:       "vlog",
+			TargetId:     msg.UserId,
+			AppDataBytes: data,
+		})
+	}
 }
 
 func WriteConnectionLog(ctx context.Context, msg *pbobjs.ConnectionLog) {
-	msg.Timestamp = time.Now().UnixMilli()
-	data, _ := tools.PbMarshal(&pbobjs.LogEntities{
-		Entities: []*pbobjs.LogEntity{
-			{
-				LogOf: &pbobjs.LogEntity_ConnectionLog{
-					ConnectionLog: msg,
+	if configures.Config.Log.Visual {
+		msg.Timestamp = time.Now().UnixMilli()
+		data, _ := tools.PbMarshal(&pbobjs.LogEntities{
+			Entities: []*pbobjs.LogEntity{
+				{
+					LogOf: &pbobjs.LogEntity_ConnectionLog{
+						ConnectionLog: msg,
+					},
 				},
 			},
-		},
-	})
-	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
-		AppKey:       msg.AppKey,
-		Session:      msg.Session,
-		Method:       "vlog",
-		TargetId:     msg.Session,
-		AppDataBytes: data,
-	})
+		})
+		bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
+			AppKey:       msg.AppKey,
+			Session:      msg.Session,
+			Method:       "vlog",
+			TargetId:     msg.Session,
+			AppDataBytes: data,
+		})
+	}
 }
 
 func WriteBusinessLog(ctx context.Context, msg *pbobjs.BusinessLog) {
