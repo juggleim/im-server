@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper-c27b6911.js";import{c,o}from"./index-e9cb22d4.js";const r={};function t(n,s){return o(),c("div",null," 用户通知 ")}const f=e(r,[["render",t]]);export{f as default};

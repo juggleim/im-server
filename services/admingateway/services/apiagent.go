@@ -14,7 +14,7 @@ func init() {
 }
 
 func ApiAgent(method, path, body, appkey, secret string) (int, string) {
-	ImApiUrl := fmt.Sprintf("http://127.0.0.1:%d", configures.Config.ApiGateway.HttpPort)
+	ImApiUrl := fmt.Sprintf("http://127.0.0.1:%d/apigateway", configures.Config.ApiGateway.HttpPort)
 	respBs, code, err := tools.HttpDoBytes(method, fmt.Sprintf("%s%s", ImApiUrl, path), getSignatureHeaders(appkey, secret), body)
 	if err == nil {
 		return code, string(respBs)
