@@ -19,5 +19,5 @@ func main() {
 		wsClient.Disconnect()
 	} else {
 		fmt.Println("result:", code)
-	} //CYXf6GNeM
+	}
 }

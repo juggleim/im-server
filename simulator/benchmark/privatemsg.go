@@ -23,24 +23,9 @@ func OnMessage(msg *pbobjs.DownMsg) {
 	fmt.Println("Received_Msg sender:", msg.SenderId, "msg_id:", msg.MsgId, "cost:", time.Since(msgTime))
 }
 
-var connectMap map[string]*wsclients.WsImClient
-
-func init() {
-	connectMap = make(map[string]*wsclients.WsImClient)
-}
-
-func Tes() {
-	userId := fmt.Sprintf("userid%d", 1)
-	token := createToken(Appkey, SecureKey, userId)
-	client := wsclients.NewWsImClient(WsAddress, Appkey, token, OnMessage, nil, nil)
-	code, ack := client.Connect("", "")
-	if code != utils.ClientErrorCode_Success {
-		fmt.Println("Failed to connect. user_id:", userId, "code:", code, "msg:", tools.ToJson(ack))
-	}
-}
-
-func PrivateMsg1000() {
-	for i := 1; i <= 1000; i++ {
+func Connecting(count int) map[string]*wsclients.WsImClient {
+	connectMap := make(map[string]*wsclients.WsImClient)
+	for i := 1; i <= count; i++ {
 		userId := fmt.Sprintf("userid%d", i)
 		token := createToken(Appkey, SecureKey, userId)
 		client := wsclients.NewWsImClient(WsAddress, Appkey, token, OnMessage, nil, nil)
@@ -51,6 +36,11 @@ func PrivateMsg1000() {
 		}
 		connectMap[userId] = client
 	}
+	return connectMap
+}
+
+func PrivateMsg1000() {
+	connectMap := Connecting(1000)
 	for i := 1; i <= 1000; i++ {
 		index := i
 		go func() {
@@ -76,21 +66,14 @@ func PrivateMsg1000() {
 			}
 		}()
 	}
-	time.Sleep(10 * time.Minute)
+	time.Sleep(2 * time.Minute)
+	for _, v := range connectMap {
+		v.Disconnect()
+	}
 }
 
 func PrivateMsg3000() {
-	for i := 1; i <= 3000; i++ {
-		userId := fmt.Sprintf("userid%d", i)
-		token := createToken(Appkey, SecureKey, userId)
-		client := wsclients.NewWsImClient(WsAddress, Appkey, token, OnMessage, nil, nil)
-		code, ack := client.Connect("", "")
-		if code != utils.ClientErrorCode_Success {
-			fmt.Println("Failed to connect. user_id:", userId, "code:", code, "msg:", tools.ToJson(ack))
-			continue
-		}
-		connectMap[userId] = client
-	}
+	connectMap := Connecting(3000)
 	for i := 1; i <= 3000; i++ {
 		index := i
 		go func() {
@@ -117,20 +100,13 @@ func PrivateMsg3000() {
 		}()
 	}
 	time.Sleep(10 * time.Minute)
+	for _, v := range connectMap {
+		v.Disconnect()
+	}
 }
 
 func PrivateMsg3000_5() {
-	for i := 1; i <= 3000; i++ {
-		userId := fmt.Sprintf("userid%d", i)
-		token := createToken(Appkey, SecureKey, userId)
-		client := wsclients.NewWsImClient(WsAddress, Appkey, token, OnMessage, nil, nil)
-		code, ack := client.Connect("", "")
-		if code != utils.ClientErrorCode_Success {
-			fmt.Println("Failed to connect. user_id:", userId, "code:", code, "msg:", tools.ToJson(ack))
-			continue
-		}
-		connectMap[userId] = client
-	}
+	connectMap := Connecting(3000)
 	for i := 1; i <= 3000; i++ {
 		index := i
 		go func() {
@@ -162,4 +138,7 @@ func PrivateMsg3000_5() {
 		}()
 	}
 	time.Sleep(30 * time.Minute)
+	for _, v := range connectMap {
+		v.Disconnect()
+	}
 }

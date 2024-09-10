@@ -33,7 +33,7 @@ func NewActorDispatcher(sender *MsgSender) *ActorDispatcher {
 	dispatcher := &ActorDispatcher{
 		msgSender:          sender,
 		timer:              timer,
-		callbackPool:       tunny.NewCallback(10240),
+		callbackPool:       tunny.NewCallback(buffersize),
 		callbackWraperChan: make(chan wraper, buffersize),
 	}
 	timer.Start()
