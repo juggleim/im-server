@@ -50,7 +50,7 @@ func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec
 				Data:      serverPubMsg.Data,
 			}, qos)
 			vCtx.Write(tmpPubMsg)
-			logs.Infof("session:%s\taction:%s\tindex:%d\ttopic:%s\tlen:%d", imcontext.GetConnSession(vCtx), imcontext.Action_ServerPub, tmpPubMsg.MsgBody.Index, tmpPubMsg.MsgBody.Topic, len(tmpPubMsg.MsgBody.Data))
+			logs.Infof("session:%s\taction:%s\tseq_index:%d\ttopic:%s\tlen:%d", imcontext.GetConnSession(vCtx), imcontext.Action_ServerPub, tmpPubMsg.MsgBody.Index, tmpPubMsg.MsgBody.Topic, len(tmpPubMsg.MsgBody.Data))
 			logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 				AppKey:   appkey,
 				Session:  imcontext.GetConnSession(vCtx),
@@ -97,7 +97,7 @@ func PublishQryAckMessage(session string, qryAckMsg *codec.QueryAckMsgBody, call
 		}
 		tmpQryAckMsg := codec.NewQueryAckMessage(qryAckMsg, qos)
 		ctx.Write(tmpQryAckMsg)
-		logs.Infof("session:%s\taction:%s\tindex:%d\tcode:%d\tlen:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, qryAckMsg.Index, qryAckMsg.Code, len(qryAckMsg.Data))
+		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d\tlen:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, qryAckMsg.Index, qryAckMsg.Code, len(qryAckMsg.Data))
 		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
@@ -118,7 +118,7 @@ func PublishUserPubAckMessage(appkey, userid, session string, pubAckMsg *codec.P
 	if ctx != nil {
 		tmpPubAckMsg := codec.NewUserPublishAckMessage(pubAckMsg)
 		ctx.Write(tmpPubAckMsg)
-		logs.Infof("session:%s\taction:%s\tindex:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, pubAckMsg.Index, pubAckMsg.Code)
+		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, pubAckMsg.Index, pubAckMsg.Code)
 		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),

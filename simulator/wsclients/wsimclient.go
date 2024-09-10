@@ -40,6 +40,7 @@ type WsImClient struct {
 	myIndex         uint16
 	connAckAccessor *tools.DataAccessor
 	pongAccessor    *tools.DataAccessor
+	lock            *sync.RWMutex
 
 	inboxTime   int64
 	sendboxTime int64
@@ -63,6 +64,7 @@ func NewWsImClient(address, appkey, token string, onMessage func(msg *pbobjs.Dow
 		DeviceId:            "testDevice",
 		obfCode:             [8]byte{1, 2, 3, 4, 5, 6, 7, 8},
 		isEncrypt:           true,
+		lock:                &sync.RWMutex{},
 	}
 }
 
@@ -134,6 +136,7 @@ func (client *WsImClient) Connect(network, ispNum string) (utils.ClientErrorCode
 		if connAck.Code == int32(errs.IMErrorCode_SUCCESS) { //链接成功
 			client.UserId = connAck.UserId
 			client.state = utils.State_Connected
+			go client.startPing()
 			return clientCode, connAck
 		} else {
 			return clientCode, connAck
@@ -141,6 +144,15 @@ func (client *WsImClient) Connect(network, ispNum string) (utils.ClientErrorCode
 	} else {
 		return utils.ClientErrorCode_ConnectExisted, nil
 	}
+}
+
+func (client *WsImClient) WriteMessage(data []byte) error {
+	if client.state == utils.State_Connected {
+		client.lock.Lock()
+		defer client.lock.Unlock()
+		return client.conn.WriteMessage(websocket.BinaryMessage, data)
+	}
+	return fmt.Errorf("not connected")
 }
 
 func (client *WsImClient) startListener() {
@@ -173,6 +185,13 @@ func (client *WsImClient) startListener() {
 	fmt.Println("Stop client listener.")
 }
 
+func (client *WsImClient) startPing() {
+	for client.state != utils.State_Disconnect {
+		client.Ping()
+		time.Sleep(30 * time.Second)
+	}
+}
+
 func (client *WsImClient) Reconnect(network, ispNum string) (utils.ClientErrorCode, *codec.ConnectAckMsgBody) {
 	if client.state != utils.State_Connecting {
 		if client.conn != nil {
@@ -192,7 +211,7 @@ func (client *WsImClient) Disconnect() {
 		wsMsg := disMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.WriteMessage(wsMsgBs)
 		client.conn.Close()
 		client.conn = nil
 	}
@@ -207,7 +226,7 @@ func (client *WsImClient) Logout() {
 		wsMsg := disMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.WriteMessage(wsMsgBs)
 		client.conn.Close()
 		client.conn = nil
 	}
@@ -249,7 +268,7 @@ func (client *WsImClient) OnPublish(msg *codec.PublishMsgBody, needAck int) {
 		wsMsg := ackMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.WriteMessage(wsMsgBs)
 	}
 	if msg.Topic == "msg" {
 		downMsg := pbobjs.DownMsg{}
@@ -315,7 +334,7 @@ func (client *WsImClient) Publish(method, targetId string, data []byte) (code ut
 		wsMsg := protoMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.WriteMessage(wsMsgBs)
 		obj, err := dataAccessor.GetWithTimeout(10 * time.Second)
 		if err == nil {
 			pubAck := obj.(*codec.PublishAckMsgBody)
@@ -333,7 +352,7 @@ func (client *WsImClient) Ping() utils.ClientErrorCode {
 		pingMsg := codec.NewPingMessage()
 		wsMsg := pingMsg.ToImWebsocketMsg()
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.WriteMessage(wsMsgBs)
 		_, err := client.pongAccessor.GetWithTimeout(15 * time.Second)
 		if err == nil {
 			return utils.ClientErrorCode_Success
@@ -360,7 +379,7 @@ func (client *WsImClient) Query(method, targetId string, data []byte) (utils.Cli
 		wsMsg := protoMsg.ToImWebsocketMsg()
 		Encrypt(wsMsg, client)
 		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.conn.WriteMessage(websocket.BinaryMessage, wsMsgBs)
+		client.WriteMessage(wsMsgBs)
 		obj, err := dataAccessor.GetWithTimeout(10 * time.Second)
 		if err == nil {
 			queryAck := obj.(*codec.QueryAckMsgBody)

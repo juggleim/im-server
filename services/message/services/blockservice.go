@@ -19,7 +19,7 @@ var (
 
 func init() {
 	blockUserCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 10*time.Minute, 10*time.Minute)
-	blockUserLock = tools.NewSegmentatedLocks(32)
+	blockUserLock = tools.NewSegmentatedLocks(128)
 }
 
 func AddBlockUsers(ctx context.Context, blockUserIds []string) errs.IMErrorCode {

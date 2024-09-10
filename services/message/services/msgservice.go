@@ -18,7 +18,7 @@ import (
 var MsgSinglePools *tools.SinglePools
 
 func init() {
-	MsgSinglePools = tools.NewSinglePools(512)
+	MsgSinglePools = tools.NewSinglePools(102400)
 }
 
 func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, string, int64, int64) {
@@ -64,7 +64,10 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		//save msg to sendbox for sender
 		//record conversation for sender
 		commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
+	} else {
+		MsgDirect(ctx, senderId, downMsg4Sendbox)
 	}
+
 	if bases.GetOnlySendboxFromCtx(ctx) {
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq
 	}

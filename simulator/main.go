@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"time"
-
 	"im-server/commons/errs"
 	"im-server/simulator/examples"
 	"im-server/simulator/utils"
 	"im-server/simulator/wsclients"
+	"time"
 )
 
 func main() {
