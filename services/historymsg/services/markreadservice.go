@@ -9,6 +9,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/conversation/convercallers"
+	mentionStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 )
 
@@ -98,6 +99,9 @@ func markReadGroupMsgs(ctx context.Context, req *pbobjs.MarkReadReq) errs.IMErro
 			Flags:      flag,
 		}, &bases.OnlySendboxOption{})
 
+		//update mention msg's read state
+		mentionStorage := mentionStorages.NewMentionMsgStorage()
+		mentionStorage.MarkRead(appkey, userId, req.TargetId, req.ChannelType, msgIds)
 	}
 	return errs.IMErrorCode_SUCCESS
 }

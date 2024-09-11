@@ -19,18 +19,15 @@ func CheckSensitive(ctx context.Context, msg *pbobjs.UpMsg) bool {
 		txtMsg := make(map[string]interface{})
 		err := tools.JsonUnMarshal(msg.MsgContent, &txtMsg)
 		if err != nil {
-			return true
+			return false
 		}
 		contentVal, ok := txtMsg["content"]
 		if !ok {
-			return true
+			return false
 		}
 		content, ok := contentVal.(string)
-		if !ok {
-			return true
-		}
-		if content == "" {
-			return true
+		if !ok || content == "" {
+			return false
 		}
 		filterResp, code, err := sensitivecall.FilterCall(ctx, content)
 		if err != nil {
