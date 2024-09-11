@@ -13,7 +13,7 @@ import (
 var (
 	Appkey    string = "appkey"
 	SecureKey string = "abcdefghijklmnop"
-	WsAddress string = "ws://8.140.225.215:9002"
+	WsAddress string = "ws://172.25.149.199:9002"
 )
 
 func OnDisconnect(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody) {
@@ -32,9 +32,8 @@ func createToken(appkey, secureKey, userid string) string {
 	}
 	return tokenStr
 }
-
-func Connect4000() {
-	for i := 1; i <= 4000; i++ {
+func connect(count int) {
+	for i := 1; i <= count; i++ {
 		userId := fmt.Sprintf("userid%d", i)
 		token := createToken(Appkey, SecureKey, userId)
 		if token != "" {
@@ -50,5 +49,29 @@ func Connect4000() {
 			fmt.Println("Failed to create connect token. user_id:", userId)
 		}
 	}
-	time.Sleep(50 * time.Minute)
+}
+
+func Connect4000() {
+	connect(4000)
+	time.Sleep(10 * time.Minute)
+}
+
+func Connect1000() {
+	connect(1000)
+	time.Sleep(1 * time.Minute)
+}
+
+func Connect5000() {
+	connect(5000)
+	time.Sleep(10 * time.Minute)
+}
+
+func Connect10000() {
+	connect(10000)
+	time.Sleep(10 * time.Minute)
+}
+
+func Connect50000() {
+	connect(50000)
+	time.Sleep(10 * time.Minute)
 }
