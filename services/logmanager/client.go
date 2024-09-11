@@ -6,11 +6,23 @@ import (
 	"im-server/commons/configures"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"time"
 )
 
+func checkSwitch(appkey string) bool {
+	if !configures.Config.Log.Visual {
+		return false
+	}
+	appInfo, exist := commonservices.GetAppInfo(appkey)
+	if exist && appInfo != nil {
+		return appInfo.OpenVisualLog
+	}
+	return false
+}
+
 func WriteUserConnectLog(ctx context.Context, msg *pbobjs.UserConnectLog) {
-	if configures.Config.Log.Visual {
+	if checkSwitch(msg.AppKey) {
 		msg.Timestamp = time.Now().UnixMilli()
 		data, _ := tools.PbMarshal(&pbobjs.LogEntities{
 			Entities: []*pbobjs.LogEntity{
@@ -32,7 +44,7 @@ func WriteUserConnectLog(ctx context.Context, msg *pbobjs.UserConnectLog) {
 }
 
 func WriteConnectionLog(ctx context.Context, msg *pbobjs.ConnectionLog) {
-	if configures.Config.Log.Visual {
+	if checkSwitch(msg.AppKey) {
 		msg.Timestamp = time.Now().UnixMilli()
 		data, _ := tools.PbMarshal(&pbobjs.LogEntities{
 			Entities: []*pbobjs.LogEntity{

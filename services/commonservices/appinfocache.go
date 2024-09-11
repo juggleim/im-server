@@ -24,25 +24,24 @@ type AppInfo struct {
 	EventSubConfigObj *EventSubConfigObj `default:"-"`
 	EventSubSwitchObj *EventSubSwitchObj `default:"-"`
 
-	IsHideMsgBeforeJoinGroup bool   `default:"false"`
-	HideGrpMsg               bool   `default:"false"`
-	NotCheckGrpMember        bool   `default:"false"`
-	TokenEffectiveMinute     int    `default:"0"`
-	OfflineMsgSaveTime       int    `default:"1440"`
-	IsSubApiMsg              bool   `default:"false"`
-	MaxGrpMemberCount        int    `default:"1000"`
-	IsOpenPush               bool   `default:"true"`
-	PushLanguage             string `default:"en_US"`
+	TokenEffectiveMinute int    `default:"0"`
+	OfflineMsgSaveTime   int    `default:"1440"`
+	IsSubApiMsg          bool   `default:"false"`
+	IsOpenPush           bool   `default:"true"`
+	PushLanguage         string `default:"en_US"`
+	KickMode             int    `default:"0"`
+	OpenVisualLog        bool   `default:"false"`
+
+	//group
+	IsHideMsgBeforeJoinGroup bool `default:"false"`
+	HideGrpMsg               bool `default:"false"`
+	NotCheckGrpMember        bool `default:"false"`
+	MaxGrpMemberCount        int  `default:"1000"`
+	GrpMsgThreshold          int  `default:"100"`
+	MsgThreshold             int  `default:"2000"`
 
 	EventSubConfig string `default:""`
 	EventSubSwitch string `default:""`
-
-	GrpMsgThreshold int `default:"100"`
-	MsgThreshold    int `default:"2000"`
-	KickMode        int `default:"0"`
-
-	ChrmMsgCacheMaxCount int `default:"50"`
-	ChrmAttMaxCount      int `default:"100"`
 
 	// TestItem  string
 	// TestInt   int
