@@ -76,7 +76,7 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 	sort.Slice(ret.Msgs, func(i, j int) bool {
 		return ret.Msgs[i].MsgTime < ret.Msgs[j].MsgTime
 	})
-	if len(ret.Msgs) > msgSyncBatchCount {
+	if len(ret.Msgs) >= msgSyncBatchCount {
 		ret.Msgs = ret.Msgs[:msgSyncBatchCount]
 	} else {
 		ret.IsFinished = true
