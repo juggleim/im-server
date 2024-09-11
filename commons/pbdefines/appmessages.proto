@@ -37,6 +37,7 @@ message RpcMessageWraper{
   int64 msgSendTime = 22;
   string msgId = 23;
   int64 msgSeqNo = 24;
+  int32 memberCount = 25;
 
   string groupId = 31;
   repeated string targetIds = 32;

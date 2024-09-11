@@ -21,11 +21,12 @@ func (actor *ConnectActor) OnReceive(ctx context.Context, input proto.Message) {
 	if rpcMsg, ok := input.(*pbobjs.RpcMessageWraper); ok {
 		if rpcMsg.RpcMsgType == pbobjs.RpcMsgType_UserPubAck {
 			services.PublishUserPubAckMessage(rpcMsg.AppKey, rpcMsg.RequesterId, rpcMsg.Session, &codec.PublishAckMsgBody{
-				Index:     rpcMsg.ReqIndex,
-				Code:      rpcMsg.ResultCode,
-				MsgId:     rpcMsg.MsgId,
-				Timestamp: rpcMsg.MsgSendTime,
-				MsgSeqNo:  rpcMsg.MsgSeqNo,
+				Index:       rpcMsg.ReqIndex,
+				Code:        rpcMsg.ResultCode,
+				MsgId:       rpcMsg.MsgId,
+				Timestamp:   rpcMsg.MsgSendTime,
+				MsgSeqNo:    rpcMsg.MsgSeqNo,
+				MemberCount: rpcMsg.MemberCount,
 			})
 		} else if rpcMsg.RpcMsgType == pbobjs.RpcMsgType_QueryAck {
 			var callback func()
