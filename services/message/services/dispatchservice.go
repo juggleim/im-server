@@ -4,10 +4,17 @@ import (
 	"context"
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/botmsg/botclient"
 	"im-server/services/commonservices"
 	"strings"
 )
+
+var MsgSinglePools *tools.SinglePools
+
+func init() {
+	MsgSinglePools = tools.NewSinglePools(8192)
+}
 
 func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)

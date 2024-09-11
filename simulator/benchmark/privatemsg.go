@@ -72,6 +72,38 @@ func PrivateMsg1000() {
 	}
 }
 
+func PrivateMsg2000() {
+	connectMap := Connecting(2000)
+	for i := 1; i <= 2000; i++ {
+		index := i
+		go func() {
+			senderId := fmt.Sprintf("userid%d", index)
+			tarInt := index + 1
+			if tarInt > 2000 {
+				tarInt = tarInt % 2000
+			}
+			targetId := fmt.Sprintf("userid%d", tarInt)
+			client := connectMap[senderId]
+			if client != nil {
+				flag := commonservices.SetStoreMsg(0)
+				flag = commonservices.SetCountMsg(flag)
+				start := time.Now()
+				code, resp := client.SendPrivateMsg(targetId, &pbobjs.UpMsg{
+					MsgType:    "jg:text",
+					MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
+					Flags:      flag,
+				})
+
+				fmt.Println("sender:", senderId, "target:", targetId, "code:", code, "resp:", tools.ToJson(resp), "cost:", time.Since(start))
+			}
+		}()
+	}
+	time.Sleep(30 * time.Second)
+	for _, v := range connectMap {
+		v.Disconnect()
+	}
+}
+
 func PrivateMsg3000() {
 	connectMap := Connecting(3000)
 	for i := 1; i <= 3000; i++ {
@@ -99,7 +131,7 @@ func PrivateMsg3000() {
 			}
 		}()
 	}
-	time.Sleep(10 * time.Minute)
+	time.Sleep(30 * time.Second)
 	for _, v := range connectMap {
 		v.Disconnect()
 	}

@@ -16,7 +16,7 @@ type UserManager struct{}
 func (manager *UserManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("upstream", func() actorsystem.IUntypedActor {
 		return &actors.UpstreamActor{}
-	}, 64)
+	}, 6144)
 	register.RegisterActor("reg_user", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.UserRegistActor{}, serviceName)
 	}, 64)

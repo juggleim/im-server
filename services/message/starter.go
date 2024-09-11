@@ -16,13 +16,13 @@ type MessageManager struct{}
 func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("p_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.PrivateMsgActor{}, serviceName)
-	}, 64)
+	}, 6144)
 	register.RegisterActor("s_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SystemMsgActor{}, serviceName)
 	}, 64)
 	register.RegisterActor("msg_dispatch", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.MsgDispatchActor{}, serviceName)
-	}, 64)
+	}, 6144)
 	register.RegisterActor("sendbox", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SendBoxActor{}, serviceName)
 	}, 32)

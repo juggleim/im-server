@@ -15,12 +15,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var MsgSinglePools *tools.SinglePools
-
-func init() {
-	MsgSinglePools = tools.NewSinglePools(102400)
-}
-
 func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, string, int64, int64) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	converId := commonservices.GetConversationId(senderId, receiverId, pbobjs.ChannelType_Private)

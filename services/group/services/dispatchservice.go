@@ -119,8 +119,8 @@ func (dis *Dispatcher) Put(item *GrpMsgDispatchItem) {
 }
 
 func init() {
-	dispatchQueues = make([]*Dispatcher, 9)
-	for i := 0; i < 9; i++ {
+	dispatchQueues = make([]*Dispatcher, 10)
+	for i := 0; i < 10; i++ {
 		dispatchQueues[i] = NewDispatcher(10000)
 	}
 }
