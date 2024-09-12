@@ -105,7 +105,7 @@ func OnlineOfflineHandle(ctx context.Context, msgs *pbobjs.OnlineOfflineMsg) {
 			}, retryStrategy...)
 		})
 
-		logs.WithContext(ctx).Infof("msg sub result, userId:%v, eventType:%v, err:%v", msgs.UserId, msgs.Type, err)
+		logs.WithContext(ctx).Infof("online sub result, userId:%v, eventType:%v, err:%v", msgs.UserId, msgs.Type, err)
 	}
 }
 

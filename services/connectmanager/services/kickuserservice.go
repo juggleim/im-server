@@ -58,6 +58,7 @@ func KickUser(ctx context.Context, req *pbobjs.KickUserReq) {
 		tmpCtx.Write(msgAck)
 		logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(tmpCtx), imcontext.Action_Disconnect, msgAck.MsgBody.Code)
 		go func() {
+			Offline(tmpCtx, errs.IMErrorCode_CONNECT_KICKED_OFF)
 			time.Sleep(time.Millisecond * 50)
 			tmpCtx.Close(errors.New("kick off"))
 		}()

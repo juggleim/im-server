@@ -32,33 +32,8 @@ type ImListenerImpl struct{}
 
 func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, code errs.IMErrorCode, e error) {
 	logs.Infof("session:%s\taction:%s\tcode:%d\terr:%v", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, code, e)
-	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
-	deviceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_DeviceID)
-	platform := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Platform)
-	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
-	appKey := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey)
-	instanceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_InstanceId)
 
-	offlineMsg := &pbobjs.OnlineOfflineMsg{
-		Type:       pbobjs.OnlineType_Offline,
-		UserId:     userId,
-		DeviceId:   deviceId,
-		Platform:   platform,
-		ClientIp:   clientIp,
-		SessionId:  imcontext.GetConnSession(ctx),
-		Timestamp:  time.Now().UnixMilli(),
-		InstanceId: instanceId,
-	}
-
-	newCtx := imcontext.GetRpcContext(ctx)
-	commonservices.SubOfflineEvent(newCtx, userId, offlineMsg)
-
-	logmanager.WriteConnectionLog(newCtx, &pbobjs.ConnectionLog{
-		AppKey:  appKey,
-		Session: imcontext.GetConnSession(ctx),
-		Action:  string(imcontext.Action_Disconnect),
-		Code:    int32(code),
-	})
+	services.Offline(ctx, code)
 
 	services.RemoveFromContextCache(ctx)
 }
@@ -118,19 +93,8 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 	//reg push token
 	services.RegPushToken(ctx, msg.Appkey, userId, msg.DeviceId, msg.Platform, msg.PushChannel, msg.PackageName, msg.PushToken)
 
-	//online subscription
-	onlineMsg := &pbobjs.OnlineOfflineMsg{
-		Type:          pbobjs.OnlineType_Online,
-		UserId:        userId,
-		DeviceId:      msg.DeviceId,
-		Platform:      msg.Platform,
-		ClientIp:      clientIp,
-		SessionId:     imcontext.GetConnSession(ctx),
-		Timestamp:     time.Now().UnixMilli(),
-		ConnectionExt: msg.Ext,
-		InstanceId:    msg.InstanceId,
-	}
-	commonservices.SubOnlineEvent(imcontext.GetRpcContext(ctx), userId, onlineMsg)
+	services.Online(ctx, msg.Ext)
+
 	//connect log
 	ucLog.UserId = userId
 	ucLog.Code = int32(errs.IMErrorCode_SUCCESS)
@@ -146,31 +110,10 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 
 func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx imcontext.WsHandleContext) {
 	logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, msg.Code)
-	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
-		AppKey:  imcontext.GetAppkey(ctx),
-		Session: imcontext.GetConnSession(ctx),
-		Action:  string(imcontext.Action_Disconnect),
-		Code:    msg.Code,
-	})
+
+	services.Offline(ctx, errs.IMErrorCode(msg.Code))
+
 	ctx.Close(fmt.Errorf("dissconnect"))
-
-	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
-	deviceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_DeviceID)
-	platform := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Platform)
-	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
-	instanceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_InstanceId)
-
-	commonservices.SubOfflineEvent(imcontext.GetRpcContext(ctx), userId, &pbobjs.OnlineOfflineMsg{
-		Type:       pbobjs.OnlineType_Offline,
-		UserId:     userId,
-		DeviceId:   deviceId,
-		Platform:   platform,
-		ClientIp:   clientIp,
-		SessionId:  imcontext.GetConnSession(ctx),
-		Timestamp:  time.Now().UnixMilli(),
-		InstanceId: instanceId,
-	})
-
 	services.RemoveFromContextCache(ctx)
 }
 func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx imcontext.WsHandleContext) {

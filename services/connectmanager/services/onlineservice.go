@@ -2,11 +2,14 @@ package services
 
 import (
 	"im-server/commons/bases"
+	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
+	"im-server/services/logmanager"
+	"time"
 )
 
 func RegPushToken(ctx imcontext.WsHandleContext, appkey, userId, deviceId, platformStr, pushChannelStr, packageName, pushToken string) {
@@ -37,4 +40,52 @@ func RegPushToken(ctx imcontext.WsHandleContext, appkey, userId, deviceId, platf
 			})
 		}
 	}
+}
+
+func Online(ctx imcontext.WsHandleContext, ext string) {
+	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
+	deviceId := imcontext.GetDeviceId(ctx)
+	platform := imcontext.GetPlatform(ctx)
+	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
+	instanceId := imcontext.GetInstanceId(ctx)
+	//online subscription
+	onlineMsg := &pbobjs.OnlineOfflineMsg{
+		Type:          pbobjs.OnlineType_Online,
+		UserId:        userId,
+		DeviceId:      deviceId,
+		Platform:      platform,
+		ClientIp:      clientIp,
+		SessionId:     imcontext.GetConnSession(ctx),
+		Timestamp:     time.Now().UnixMilli(),
+		ConnectionExt: ext,
+		InstanceId:    instanceId,
+	}
+	commonservices.SubOnlineEvent(imcontext.GetRpcContext(ctx), userId, onlineMsg)
+}
+
+func Offline(ctx imcontext.WsHandleContext, code errs.IMErrorCode) {
+	rpcCtx := imcontext.GetRpcContext(ctx)
+	//offline event
+	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
+	deviceId := imcontext.GetDeviceId(ctx)
+	platform := imcontext.GetPlatform(ctx)
+	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
+	instanceId := imcontext.GetInstanceId(ctx)
+	commonservices.SubOfflineEvent(rpcCtx, userId, &pbobjs.OnlineOfflineMsg{
+		Type:       pbobjs.OnlineType_Offline,
+		UserId:     userId,
+		DeviceId:   deviceId,
+		Platform:   platform,
+		ClientIp:   clientIp,
+		SessionId:  imcontext.GetConnSession(ctx),
+		Timestamp:  time.Now().UnixMilli(),
+		InstanceId: instanceId,
+	})
+	//visual log
+	logmanager.WriteConnectionLog(rpcCtx, &pbobjs.ConnectionLog{
+		AppKey:  imcontext.GetAppkey(ctx),
+		Session: imcontext.GetConnSession(ctx),
+		Action:  string(imcontext.Action_Disconnect),
+		Code:    int32(code),
+	})
 }
