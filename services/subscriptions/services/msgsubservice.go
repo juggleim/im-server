@@ -105,11 +105,7 @@ func OnlineOfflineHandle(ctx context.Context, msgs *pbobjs.OnlineOfflineMsg) {
 			}, retryStrategy...)
 		})
 
-		if err == nil { //success
-			logs.WithContext(ctx).Infof("msg sub success:%v", err)
-		} else { //failed
-			logs.WithContext(ctx).Errorf("msg sub failed:%v", err)
-		}
+		logs.WithContext(ctx).Infof("msg sub result, userId:%v, eventType:%v, err:%v", msgs.UserId, msgs.Type, err)
 	}
 }
 
