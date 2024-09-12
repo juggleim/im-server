@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
+	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 	"net/http"
@@ -186,6 +188,21 @@ func (ctx *WsHandleContextImpl) Close(err error) {
 	if ctx.wsChild != nil {
 		ctx.wsChild.Stop()
 	}
+	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
+	deviceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_DeviceID)
+	platform := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Platform)
+	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
+	instanceId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_InstanceId)
+	commonservices.SubOfflineEvent(imcontext.GetRpcContext(ctx), userId, &pbobjs.OnlineOfflineMsg{
+		Type:       pbobjs.OnlineType_Offline,
+		UserId:     userId,
+		DeviceId:   deviceId,
+		Platform:   platform,
+		ClientIp:   clientIp,
+		SessionId:  imcontext.GetConnSession(ctx),
+		Timestamp:  time.Now().UnixMilli(),
+		InstanceId: instanceId,
+	})
 }
 func (ctx *WsHandleContextImpl) Attachment() imcontext.Attachment {
 	return ctx.attachment
