@@ -63,3 +63,20 @@ func UploadClientLogPlain(ctx *gin.Context) {
 	}
 	tools.SuccessHttpResp(ctx, nil)
 }
+
+type UploadLogStatusReq struct {
+	MsgId  string `json:"msg_id"`
+	LogUrl string `json:"log_url"`
+	State  int    `json:"state"`
+}
+
+func UploadLogStatus(ctx *gin.Context) {
+	var req UploadLogStatusReq
+	if err := ctx.ShouldBindJSON(&req); err != nil || req.MsgId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_OTHER_CLIENT_LOG_PARAM_ILLEGAL)
+		return
+	}
+	dao := dbs.ClientLogDao{}
+	dao.UpdateLogUrl(ctx.GetString(CtxKey_AppKey), req.MsgId, req.LogUrl, dbs.ClientLogState(req.State))
+	tools.SuccessHttpResp(ctx, nil)
+}

@@ -47,7 +47,7 @@ func qryServerLogs(ctx *gin.Context, logType string) {
 	if logType == string(logService.ServerLogType_UserConnect) {
 		targetId = userId
 	} else if logType == string(logService.ServerLogType_Connect) {
-		targetId = session
+		targetId = userId
 	} else {
 		services.FailHttpResp(ctx, services.AdminErrorCode_ParamError)
 		return

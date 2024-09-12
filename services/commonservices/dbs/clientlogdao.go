@@ -8,10 +8,11 @@ import (
 type ClientLogState int
 
 var (
-	ClientLogState_Default  ClientLogState = 0
-	ClientLogState_SendOK   ClientLogState = 1
-	ClientLogState_SendFail ClientLogState = 2
-	ClientLogState_Uploaded ClientLogState = 3
+	ClientLogState_Default      ClientLogState = 0
+	ClientLogState_SendOK       ClientLogState = 1
+	ClientLogState_SendFail     ClientLogState = 2
+	ClientLogState_Uploaded     ClientLogState = 3
+	ClientLogState_UploadFailed ClientLogState = 4
 )
 
 type ClientLogDao struct {
@@ -84,6 +85,13 @@ func (log *ClientLogDao) QryLogs(appkey, userId string, start, end, startId, lim
 func (log *ClientLogDao) Update(appkey, msgId string, data []byte, state ClientLogState) error {
 	upd := map[string]interface{}{}
 	upd["log"] = data
+	upd["state"] = state
+	return dbcommons.GetDb().Model(&ClientLogDao{}).Where("app_key=? and msg_id=?", appkey, msgId).Update(upd).Error
+}
+
+func (log *ClientLogDao) UpdateLogUrl(appkey, msgId string, logUrl string, state ClientLogState) error {
+	upd := map[string]interface{}{}
+	upd["log_url"] = logUrl
 	upd["state"] = state
 	return dbcommons.GetDb().Model(&ClientLogDao{}).Where("app_key=? and msg_id=?", appkey, msgId).Update(upd).Error
 }

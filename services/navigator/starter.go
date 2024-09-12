@@ -33,6 +33,7 @@ func (ser *Navigator) Startup(args map[string]interface{}) {
 
 	group.POST("/upload-log", apis.UploadClientLog)
 	group.POST("/upload-log-plain", apis.UploadClientLogPlain, GzipDecompress())
+	group.POST("/log-status", apis.UploadLogStatus)
 
 	httpPort := configures.Config.NavGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
