@@ -15,10 +15,25 @@ type IExecutor interface {
 }
 
 type ActorExecutor struct {
-	wraperChan     chan wraper
-	executePool    *tunny.Pool
-	actorPool      sync.Pool
-	actorCreateFun func() IUntypedActor
+	wraperChan  chan wraper
+	executePool *tunny.Pool
+	actorPool   sync.Pool
+	// actorCreateFun func() IUntypedActor
+}
+
+func NewActorExecutorWithDefaultPool(pool *tunny.Pool, actorCreateFun func() IUntypedActor) *ActorExecutor {
+	executor := &ActorExecutor{
+		wraperChan:  make(chan wraper, buffersize),
+		executePool: pool,
+		actorPool: sync.Pool{
+			New: func() any {
+				return actorCreateFun()
+			},
+		},
+		// actorCreateFun: actorCreateFun,
+	}
+	go actorExecute(executor)
+	return executor
 }
 
 func NewActorExecutor(concurrentCount int, actorCreateFun func() IUntypedActor) *ActorExecutor {
@@ -30,14 +45,16 @@ func NewActorExecutor(concurrentCount int, actorCreateFun func() IUntypedActor) 
 				return actorCreateFun()
 			},
 		},
-		actorCreateFun: actorCreateFun,
+		// actorCreateFun: actorCreateFun,
 	}
 	go actorExecute(executor)
 	return executor
 }
 
 func (executor *ActorExecutor) Execute(req *rpc.RpcMessageRequest, msgSender *MsgSender) {
-	executor.wraperChan <- commonExecute(req, msgSender, executor.actorCreateFun())
+	actorObj := executor.actorPool.Get()
+	executor.wraperChan <- commonExecute(req, msgSender, actorObj)
+	executor.actorPool.Put(actorObj)
 }
 
 func actorExecute(executor *ActorExecutor) {

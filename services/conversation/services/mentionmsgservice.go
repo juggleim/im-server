@@ -35,11 +35,7 @@ func QryMentionedMsgs(ctx context.Context, userId string, req *pbobjs.QryMention
 			msgIds = append(msgIds, dbMentionMsg.MsgId)
 		}
 		downMsgs := QryHisMsgByIds(ctx, userId, req.TargetId, req.ChannelType, msgIds)
-		for _, downMsg := range downMsgs {
-			if downMsg.MsgType != hisService.RecallInfoType {
-				ret.MentionMsgs = append(ret.MentionMsgs, downMsg)
-			}
-		}
+		ret.MentionMsgs = append(ret.MentionMsgs, downMsgs...)
 		if len(ret.MentionMsgs) >= int(req.Count) {
 			ret.IsFinished = false
 		}

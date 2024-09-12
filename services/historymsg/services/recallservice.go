@@ -9,6 +9,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/conversation/convercallers"
+	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 )
 
@@ -98,6 +99,9 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 				Msg:         replaceMsg,
 			})
 		}
+		//delete mention msg
+		mentionStorage := converStorages.NewMentionMsgStorage()
+		mentionStorage.DelOnlyByMsgIds(appkey, []string{recallMsg.MsgId})
 		return errs.IMErrorCode_SUCCESS
 	}
 

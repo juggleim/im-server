@@ -23,6 +23,8 @@ type ActorDispatcher struct {
 	timer              *timewheel.TimeWheel
 	callbackPool       *tunny.Pool
 	callbackWraperChan chan wraper
+
+	executorCommonPool *tunny.Pool
 }
 
 func NewActorDispatcher(sender *MsgSender) *ActorDispatcher {
@@ -35,6 +37,7 @@ func NewActorDispatcher(sender *MsgSender) *ActorDispatcher {
 		timer:              timer,
 		callbackPool:       tunny.NewCallback(buffersize),
 		callbackWraperChan: make(chan wraper, buffersize),
+		executorCommonPool: tunny.NewCallback(2 * buffersize),
 	}
 	timer.Start()
 	go callbackActorExecute(dispatcher.callbackPool, dispatcher.callbackWraperChan)
@@ -67,17 +70,38 @@ func (dispatcher *ActorDispatcher) Dispatch(req *rpc.RpcMessageRequest) {
 		executor.Execute(req, dispatcher.msgSender)
 	}
 }
+
 func (dispatcher *ActorDispatcher) Destroy() {
 	if dispatcher.timer != nil {
 		dispatcher.timer.Stop()
 	}
 }
+
+func (dispatcher *ActorDispatcher) RegisterActorWithCommonPool(method string, actorCreateFun func() IUntypedActor) {
+	dispatcher.RegisterActor(method, actorCreateFun, 0)
+}
+
 func (dispatcher *ActorDispatcher) RegisterActor(method string, actorCreateFun func() IUntypedActor, concurrentCount int) {
-	executor := NewActorExecutor(concurrentCount, actorCreateFun)
+	var executor *ActorExecutor
+	if concurrentCount > 0 {
+		executor = NewActorExecutor(concurrentCount, actorCreateFun)
+	} else {
+		executor = NewActorExecutorWithDefaultPool(dispatcher.executorCommonPool, actorCreateFun)
+	}
 	dispatcher.dispatchMap.Store(method, executor)
 }
+
+func (dispatcher *ActorDispatcher) RegisterMultiMethodActorWithCommonPool(methods []string, actorCreateFun func() IUntypedActor) {
+	dispatcher.RegisterMultiMethodActor(methods, actorCreateFun, 0)
+}
+
 func (dispatcher *ActorDispatcher) RegisterMultiMethodActor(methods []string, actorCreateFun func() IUntypedActor, concurrentCount int) {
-	executor := NewActorExecutor(concurrentCount, actorCreateFun)
+	var executor *ActorExecutor
+	if concurrentCount > 0 {
+		executor = NewActorExecutor(concurrentCount, actorCreateFun)
+	} else {
+		executor = NewActorExecutorWithDefaultPool(dispatcher.executorCommonPool, actorCreateFun)
+	}
 	for _, method := range methods {
 		dispatcher.dispatchMap.Store(method, executor)
 	}
