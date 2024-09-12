@@ -21,4 +21,6 @@ type IMentionMsgStorage interface {
 	QryUnreadMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool) ([]*MentionMsg, error)
 	QryMentionSenderIdsBaseIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, startIndex int64, count int) ([]*MentionMsg, error)
 	MarkRead(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) error
+	DelMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) error
+	DelMentionMsg(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgId string) error
 }

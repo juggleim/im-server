@@ -5,6 +5,7 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/conversation/storages"
+	hisService "im-server/services/historymsg/services"
 	"time"
 )
 
@@ -33,7 +34,11 @@ func QryMentionedMsgs(ctx context.Context, userId string, req *pbobjs.QryMention
 			msgIds = append(msgIds, dbMentionMsg.MsgId)
 		}
 		downMsgs := QryHisMsgByIds(ctx, userId, req.TargetId, req.ChannelType, msgIds)
-		ret.MentionMsgs = append(ret.MentionMsgs, downMsgs...)
+		for _, downMsg := range downMsgs {
+			if downMsg.MsgType != hisService.RecallInfoType {
+				ret.MentionMsgs = append(ret.MentionMsgs, downMsg)
+			}
+		}
 		if len(ret.MentionMsgs) >= int(req.Count) {
 			ret.IsFinished = false
 		}

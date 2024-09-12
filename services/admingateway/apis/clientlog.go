@@ -21,11 +21,13 @@ type ClientLogNtfReq struct {
 	Start       int64  `json:"start"`
 	End         int64  `json:"end"`
 	Description string `json:"description"`
+	Platform    string `json:"platform"`
 }
 
 type LogCmd struct {
-	Start int64 `json:"start"`
-	End   int64 `json:"end"`
+	Start    int64  `json:"start"`
+	End      int64  `json:"end"`
+	Platform string `json:"platform"`
 }
 
 func ClientLogNtf(ctx *gin.Context) {
@@ -47,13 +49,15 @@ func ClientLogNtf(ctx *gin.Context) {
 		State:       dbs.ClientLogState_Default,
 		TraceId:     traceId,
 		Description: req.Description,
+		Platform:    req.Platform,
 	}
 	ctx.Set(apiService.CtxKey_AppKey, req.AppKey)
 	ctx.Set(apiService.CtxKey_Session, traceId)
 
 	logCmd := &LogCmd{
-		Start: req.Start,
-		End:   req.End,
+		Start:    req.Start,
+		End:      req.End,
+		Platform: req.Platform,
 	}
 	code, resp, err := apiService.SyncSendMsg(ctx, "s_msg", "clientlog", req.UserId, &pbobjs.UpMsg{
 		MsgType:    "jg:logcmd",

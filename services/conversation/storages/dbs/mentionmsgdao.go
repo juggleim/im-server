@@ -153,3 +153,11 @@ func (mention *MentionMsgDao) QryMentionSenderIdsBaseIndex(appkey, userId, targe
 func (mention *MentionMsgDao) MarkRead(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) error {
 	return dbcommons.GetDb().Model(&MentionMsgDao{}).Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_id in (?)", appkey, userId, targetId, channelType, msgIds).Update("is_read", 1).Error
 }
+
+func (mention *MentionMsgDao) DelMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_id in (?)", appkey, userId, targetId, channelType, msgIds).Delete(&MentionMsgDao{}).Error
+}
+
+func (mention *MentionMsgDao) DelMentionMsg(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgId string) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_id=?", appkey, userId, targetId, channelType, msgId).Delete(&MentionMsgDao{}).Error
+}
