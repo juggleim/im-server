@@ -40,7 +40,7 @@ func (mention *MentionMsgDao) SaveMentionMsg(item models.MentionMsg) error {
 	return err
 }
 
-func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64) ([]*models.MentionMsg, error) {
+func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64, cleanTime int64) ([]*models.MentionMsg, error) {
 	var items []MentionMsgDao
 
 	params := []interface{}{}
@@ -55,12 +55,13 @@ func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, ch
 	}
 	orderStr := "msg_time desc"
 	if isPositiveOrder {
-		condition = condition + " and msg_time>?"
+		condition = condition + " and msg_time>? and msg_time>?"
 		orderStr = "msg_time asc"
 	} else {
-		condition = condition + " and msg_time<?"
+		condition = condition + " and msg_time<? and msg_time>?"
 	}
 	params = append(params, startTime)
+	params = append(params, cleanTime)
 
 	err := dbcommons.GetDb().Debug().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if err != nil {
@@ -89,7 +90,7 @@ func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, ch
 	return mentionMsgs, nil
 }
 
-func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool) ([]*models.MentionMsg, error) {
+func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, cleanTime int64) ([]*models.MentionMsg, error) {
 	var items []MentionMsgDao
 	params := []interface{}{}
 	condition := "app_key=? and user_id=? and target_id=? and channel_type=? and is_read=0"
@@ -99,12 +100,13 @@ func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId stri
 	params = append(params, channelType)
 	orderStr := "msg_time desc"
 	if isPositiveOrder {
-		condition = condition + " and msg_time>?"
+		condition = condition + " and msg_time>? and msg_time>?"
 		orderStr = "msg_time asc"
 	} else {
-		condition = condition + " and msg_time<?"
+		condition = condition + " and msg_time<? and msg_time>?"
 	}
 	params = append(params, startTime)
+	params = append(params, cleanTime)
 
 	err := dbcommons.GetDb().Debug().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if err != nil {
@@ -160,4 +162,12 @@ func (mention *MentionMsgDao) DelMentionMsgs(appkey, userId, targetId string, ch
 
 func (mention *MentionMsgDao) DelMentionMsg(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgId string) error {
 	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_id=?", appkey, userId, targetId, channelType, msgId).Delete(&MentionMsgDao{}).Error
+}
+
+func (mention *MentionMsgDao) CleanMentionMsgsBaseTime(appkey, userId, targetId string, channelType pbobjs.ChannelType, cleanTime int64) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_time<=?", appkey, userId, targetId, channelType, cleanTime).Delete(&MentionMsgDao{}).Error
+}
+
+func (mention *MentionMsgDao) DelOnlyByMsgIds(appkey string, msgIds []string) error {
+	return dbcommons.GetDb().Where("app_key=? and msg_id in (?)", appkey, msgIds).Delete(&MentionMsgDao{}).Error
 }

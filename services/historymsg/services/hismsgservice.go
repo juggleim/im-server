@@ -9,6 +9,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/conversation/convercallers"
+	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 	"im-server/services/historymsg/storages/dbs"
 	"im-server/services/historymsg/storages/models"
@@ -617,6 +618,7 @@ func GetCleanTime(appkey, userId, targetId string, channelType pbobjs.ChannelTyp
 		return cleanTime
 	}
 }
+
 func GetExcludeMsgIds(appkey, userId, targetId string, channelType pbobjs.ChannelType, isPositive bool, startTime int64, count int32) []string {
 	delMsgIds := []string{}
 	if channelType == pbobjs.ChannelType_Private {
@@ -760,6 +762,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
+	delMsgIds := []string{}
 	delMsgs := &DelMsgs{
 		TargetId:    req.TargetId,
 		ChannelType: int32(req.ChannelType),
@@ -783,10 +786,10 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 				delMsgs.Msgs = append(delMsgs.Msgs, &DelMsg{
 					MsgId: msg.MsgId,
 				})
+				delMsgIds = append(delMsgIds, msg.MsgId)
 			}
 			if len(items) > 0 {
 				pDelStorage.BatchCreate(items)
-
 			}
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
 			gDelStorage := storages.NewGroupDelHisMsgStorage()
@@ -831,6 +834,9 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					break
 				}
 			}
+			//delete mention msg
+			mentionStorage := converStorages.NewMentionMsgStorage()
+			mentionStorage.DelMentionMsgs(appkey, userId, req.TargetId, req.ChannelType, delMsgIds)
 		}
 	} else if req.DelScope == 1 { //two-way
 		if req.ChannelType == pbobjs.ChannelType_Private {
@@ -890,6 +896,9 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					break
 				}
 			}
+			//delete mention msg
+			mentionStorage := converStorages.NewMentionMsgStorage()
+			mentionStorage.DelOnlyByMsgIds(appkey, delMsgIds)
 		}
 	}
 	return errs.IMErrorCode_SUCCESS

@@ -17,10 +17,12 @@ type MentionMsg struct {
 
 type IMentionMsgStorage interface {
 	SaveMentionMsg(msg MentionMsg) error
-	QryMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64) ([]*MentionMsg, error)
-	QryUnreadMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool) ([]*MentionMsg, error)
+	QryMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64, cleanTime int64) ([]*MentionMsg, error)
+	QryUnreadMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, cleanTime int64) ([]*MentionMsg, error)
 	QryMentionSenderIdsBaseIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, startIndex int64, count int) ([]*MentionMsg, error)
 	MarkRead(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) error
 	DelMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) error
 	DelMentionMsg(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgId string) error
+	CleanMentionMsgsBaseTime(appkey, userId, targetId string, channelType pbobjs.ChannelType, cleanTime int64) error
+	DelOnlyByMsgIds(appkey string, msgIds []string) error
 }

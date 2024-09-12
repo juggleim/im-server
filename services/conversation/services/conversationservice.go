@@ -436,14 +436,16 @@ func QryConversations(ctx context.Context, req *pbobjs.QryConversationsReq) *pbo
 		Conversations: []*pbobjs.Conversation{},
 	}
 	converStorage := storages.NewConversationStorage()
-	dbConvers, err := converStorage.QryConversations(appkey, userId, targetId, channelType, startTime, count, isPositiveOrder)
+	dbConvers, err := converStorage.QryConversations(appkey, userId, targetId, channelType, startTime, count+1, isPositiveOrder)
 	if err == nil {
+		if len(dbConvers) > int(count) {
+			dbConvers = dbConvers[:count]
+		} else {
+			resp.IsFinished = true
+		}
 		for _, dbConver := range dbConvers {
 			conversation := dbConver2Conversations(ctx, dbConver)
 			resp.Conversations = append(resp.Conversations, conversation)
-		}
-		if len(resp.Conversations) < int(count) {
-			resp.IsFinished = true
 		}
 		if isPositiveOrder {
 			sort.Slice(resp.Conversations, func(i, j int) bool {
@@ -459,14 +461,16 @@ func SyncConversations(ctx context.Context, appkey, userId string, startTime int
 		Conversations: []*pbobjs.Conversation{},
 	}
 	converStorage := storages.NewConversationStorage()
-	dbConvers, err := converStorage.SyncConversations(appkey, userId, startTime, count)
+	dbConvers, err := converStorage.SyncConversations(appkey, userId, startTime, count+1)
 	if err == nil {
+		if len(dbConvers) > int(count) {
+			dbConvers = dbConvers[:count]
+		} else {
+			resp.IsFinished = true
+		}
 		for _, dbConver := range dbConvers {
 			conversation := dbConver2Conversations(ctx, dbConver)
 			resp.Conversations = append(resp.Conversations, conversation)
-		}
-		if len(resp.Conversations) < int(count) {
-			resp.IsFinished = true
 		}
 	}
 	return resp
