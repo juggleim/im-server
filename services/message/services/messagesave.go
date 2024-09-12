@@ -8,6 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
 	"im-server/services/message/storages"
 	"im-server/services/message/storages/models"
 	"time"
@@ -44,6 +45,9 @@ func SaveMsg2Inbox(appkey, receiverId string, msg *pbobjs.DownMsg) error {
 		purgeMsgs(appkey+"2", msg.MsgTime, func() {
 			msgStorage.DelMsgsBaseTime(appkey, msg.MsgTime-configures.MsgExpired)
 		})
+	}
+	if err != nil {
+		logs.NewLogEntity().Errorf("failed to store inbox. err:%v", err)
 	}
 	return err
 }
@@ -85,7 +89,9 @@ func SaveMsg2Sendbox(ctx context.Context, appkey, senderId string, msg *pbobjs.D
 			storage.DelMsgsBaseTime(appkey, msg.MsgTime-configures.MsgExpired)
 		})
 	}
-
+	if err != nil {
+		logs.NewLogEntity().Errorf("failed to store inbox. err:%v", err)
+	}
 	return err
 }
 

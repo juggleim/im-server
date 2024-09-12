@@ -15,6 +15,12 @@ type LogEntity struct {
 	fields []string
 }
 
+func NewLogEntity() *LogEntity {
+	return &LogEntity{
+		fields: []string{},
+	}
+}
+
 func WithContext(ctx context.Context) *LogEntity {
 	log := &LogEntity{
 		fields: []string{},

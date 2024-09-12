@@ -87,23 +87,31 @@ func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFiel
 				for _, ext := range extFields {
 					itemKey := ext.Key
 					itemValue := ext.Value
-					extDao.Upsert(dbs.UserExtDao{
+					err = extDao.Upsert(dbs.UserExtDao{
 						AppKey:    appkey,
 						UserId:    userId,
 						ItemKey:   itemKey,
 						ItemValue: itemValue,
 						ItemType:  int(commonservices.AttItemType_Att),
 					})
+					if err != nil {
+						logs.NewLogEntity().Error(err.Error())
+					}
 				}
 				for _, set := range settings {
-					extDao.Upsert(dbs.UserExtDao{
+					err = extDao.Upsert(dbs.UserExtDao{
 						AppKey:    appkey,
 						UserId:    userId,
 						ItemKey:   set.Key,
 						ItemValue: set.Value,
 						ItemType:  int(commonservices.AttItemType_Setting),
 					})
+					if err != nil {
+						logs.NewLogEntity().Error(err.Error())
+					}
 				}
+			} else {
+				logs.NewLogEntity().Error(err.Error())
 			}
 			userCache.Remove(key)
 		}
@@ -122,23 +130,31 @@ func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFiel
 			for _, ext := range extFields {
 				itemKey := ext.Key
 				itemValue := ext.Value
-				extDao.Upsert(dbs.UserExtDao{
+				err = extDao.Upsert(dbs.UserExtDao{
 					AppKey:    appkey,
 					UserId:    userId,
 					ItemKey:   itemKey,
 					ItemValue: itemValue,
 					ItemType:  int(commonservices.AttItemType_Att),
 				})
+				if err != nil {
+					logs.NewLogEntity().Error(err.Error())
+				}
 			}
 			for _, set := range settings {
-				extDao.Upsert(dbs.UserExtDao{
+				err = extDao.Upsert(dbs.UserExtDao{
 					AppKey:    appkey,
 					UserId:    userId,
 					ItemKey:   set.Key,
 					ItemValue: set.Value,
 					ItemType:  int(commonservices.AttItemType_Setting),
 				})
+				if err != nil {
+					logs.NewLogEntity().Error(err.Error())
+				}
 			}
+		} else {
+			logs.NewLogEntity().Error(err.Error())
 		}
 		userCache.Remove(key)
 	}
@@ -199,6 +215,8 @@ func GetUserInfo(appkey, userId string) (*UserInfo, bool) {
 							}
 						}
 					}
+				} else {
+					logs.NewLogEntity().Error(err.Error())
 				}
 				userCache.Add(key, userInfo)
 				return userInfo, true

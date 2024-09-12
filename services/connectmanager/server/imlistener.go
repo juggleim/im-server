@@ -77,7 +77,7 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 		Session:  imcontext.GetConnSession(ctx),
 		Platform: msg.Platform,
 		ClientIp: clientIp,
-		Version:  "",
+		Version:  msg.SdkVersion,
 	}
 	//check something
 	if code, ext := services.CheckLogin(ctx, msg); code > 0 {
