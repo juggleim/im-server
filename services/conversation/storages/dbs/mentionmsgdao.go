@@ -35,6 +35,7 @@ func (mention *MentionMsgDao) SaveMentionMsg(item models.MentionMsg) error {
 		MsgTime:     item.MsgTime,
 		MsgIndex:    item.MsgIndex,
 		AppKey:      item.AppKey,
+		IsRead:      item.IsRead,
 	}
 	err := dbcommons.GetDb().Create(&daoItem).Error
 	return err

@@ -236,8 +236,8 @@ func SaveConversation(appkey string, userId string, msg *pbobjs.DownMsg) error {
 			})
 		} else {
 			unreadIndex = msg.UnreadIndex
-			HandleMentionedMsg(appkey, userId, msg)
 		}
+		HandleMentionedMsg(appkey, userId, msg)
 		saveConversationByCache(&ConversationCacheItem{
 			Appkey:      appkey,
 			UserId:      userId,
@@ -258,6 +258,10 @@ func SaveConversation(appkey string, userId string, msg *pbobjs.DownMsg) error {
 
 func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg) {
 	if isMentionedMe(userId, msg) {
+		isRead := 0
+		if msg.IsSend {
+			isRead = 1
+		}
 		//save mentioned msg
 		mentionMsgStorage := storages.NewMentionMsgStorage()
 		mentionMsgStorage.SaveMentionMsg(models.MentionMsg{
@@ -270,6 +274,7 @@ func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg) {
 			MsgTime:     msg.MsgTime,
 			MsgIndex:    msg.UnreadIndex,
 			AppKey:      appkey,
+			IsRead:      isRead,
 		})
 	}
 }

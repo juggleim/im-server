@@ -39,6 +39,10 @@ func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, c
 }
 
 func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imcontext.WsHandleContext) {
+	if msg == nil {
+		logs.Error("connect body is nil")
+		return
+	}
 	if msg.InstanceId != "" {
 		imcontext.SetContextAttr(ctx, imcontext.StateKey_InstanceId, msg.InstanceId)
 	}
@@ -109,6 +113,10 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 }
 
 func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx imcontext.WsHandleContext) {
+	if msg == nil {
+		logs.Error("disconnect body is nil")
+		return
+	}
 	logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, msg.Code)
 
 	services.Offline(ctx, errs.IMErrorCode(msg.Code))
@@ -117,6 +125,10 @@ func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx im
 	services.RemoveFromContextCache(ctx)
 }
 func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx imcontext.WsHandleContext) {
+	if msg == nil {
+		logs.Error("pub body is nil")
+		return
+	}
 	logs.Infof("session:%s\taction:%s\tseq_index:%d\ttopic:%s\ttarget_id:%s\tlen:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPub, msg.Index, msg.Topic, msg.TargetId, len(msg.Data))
 	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:   imcontext.GetAppkey(ctx),
@@ -199,6 +211,10 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 	}
 }
 func (*ImListenerImpl) PubAckArrived(msg *codec.PublishAckMsgBody, ctx imcontext.WsHandleContext) {
+	if msg == nil {
+		logs.Error("pub_ack body is nil")
+		return
+	}
 	index := msg.GetIndex()
 	callback := imcontext.GetAndDeleteServerPubCallback(ctx, index)
 	if callback != nil {
@@ -213,6 +229,10 @@ func (*ImListenerImpl) PubAckArrived(msg *codec.PublishAckMsgBody, ctx imcontext
 	})
 }
 func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcontext.WsHandleContext) {
+	if msg == nil {
+		logs.Error("qry body is nil")
+		return
+	}
 	logs.Infof("session:%s\taction:%s\tseq_index:%d\ttopic:%s\ttarget_id:%s\tlen:%d", imcontext.GetConnSession(ctx), imcontext.Action_Query, msg.Index, msg.Topic, msg.TargetId, len(msg.Data))
 	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:   imcontext.GetAppkey(ctx),
@@ -293,6 +313,10 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 	}
 }
 func (*ImListenerImpl) QueryConfirmArrived(msg *codec.QueryConfirmMsgBody, ctx imcontext.WsHandleContext) {
+	if msg == nil {
+		logs.Error("qry_confirm body is nil")
+		return
+	}
 	index := msg.GetIndex()
 	callback := imcontext.GetAndDeleteQueryAckCallback(ctx, index)
 	if callback != nil {

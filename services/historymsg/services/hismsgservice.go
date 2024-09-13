@@ -841,7 +841,6 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 	} else if req.DelScope == 1 { //two-way
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			pStorage := storages.NewPrivateHisMsgStorage()
-			delMsgIds := []string{}
 			for _, msg := range req.Msgs {
 				delMsgIds = append(delMsgIds, msg.MsgId)
 				delMsgs.Msgs = append(delMsgs.Msgs, &DelMsg{
@@ -852,7 +851,6 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 			pStorage.DelMsgs(appkey, converId, delMsgIds)
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
 			gStorage := storages.NewGroupHisMsgStorage()
-			delMsgIds := []string{}
 			for _, msg := range req.Msgs {
 				delMsgIds = append(delMsgIds, msg.MsgId)
 				delMsgs.Msgs = append(delMsgs.Msgs, &DelMsg{

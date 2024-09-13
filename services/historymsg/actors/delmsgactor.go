@@ -22,7 +22,7 @@ func (actor *DelMsgActor) OnReceive(ctx context.Context, input proto.Message) {
 		for _, msg := range delMsg.Msgs {
 			msgIds = append(msgIds, msg.MsgId)
 		}
-		logs.WithContext(ctx).Infof("user_id:%s\ttargetId=%s\tchannel_type=%v\tmsg_id=%v", userId, delMsg.TargetId, delMsg.ChannelType, msgIds)
+		logs.WithContext(ctx).Infof("user_id:%s\ttargetId=%s\tchannel_type=%v\tscope:%d\tmsg_id=%v", userId, delMsg.TargetId, delMsg.ChannelType, delMsg.DelScope, msgIds)
 		code := services.DelHisMsg(ctx, delMsg)
 		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
