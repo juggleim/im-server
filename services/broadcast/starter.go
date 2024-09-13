@@ -15,10 +15,10 @@ type BroadcastManager struct{}
 func (manager *BroadcastManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("bc_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.BroadcastMsgActor{}, serviceName)
-	}, 8)
+	})
 	register.RegisterActor("gc_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.GroupCastMsgActor{}, serviceName)
-	}, 16)
+	})
 }
 
 func (manager *BroadcastManager) Startup(args map[string]interface{}) {

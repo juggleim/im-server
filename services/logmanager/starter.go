@@ -18,7 +18,7 @@ type LogManager struct {
 func (manager *LogManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("qry_vlog", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryLogsActor{}, serviceName)
-	}, 8)
+	})
 }
 
 func (manager *LogManager) Startup(args map[string]interface{}) {

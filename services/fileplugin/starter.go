@@ -15,7 +15,7 @@ type FilePlugin struct{}
 func (manager *FilePlugin) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("file_cred", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryUploadTokenActor{}, serviceName)
-	}, 16)
+	})
 }
 
 func (manager *FilePlugin) Startup(args map[string]interface{}) {

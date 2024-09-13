@@ -15,10 +15,10 @@ type SubscriptionManager struct{}
 func (manager *SubscriptionManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("msg_sub", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.MsgSubActor{}, serviceName)
-	}, 64)
+	})
 	register.RegisterActor("online_offline_sub", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.OnlineOfflineSubActor{}, serviceName)
-	}, 64)
+	})
 }
 
 func (manager *SubscriptionManager) Startup(args map[string]interface{}) {

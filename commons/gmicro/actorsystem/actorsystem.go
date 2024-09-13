@@ -58,10 +58,18 @@ func (system *ActorSystem) CallbackActerOf(ttl time.Duration, actor ICallbackUnt
 	return ref
 }
 
-func (system *ActorSystem) RegisterActor(method string, actorCreateFun func() IUntypedActor, concurrentCount int) {
-	system.dispatcher.RegisterActor(method, actorCreateFun, concurrentCount)
+func (system *ActorSystem) RegisterActor(method string, actorCreateFun func() IUntypedActor) {
+	system.dispatcher.RegisterActor(method, actorCreateFun)
 }
 
-func (system *ActorSystem) RegisterMultiMethodActor(methods []string, actorCreateFun func() IUntypedActor, concurrentCount int) {
-	system.dispatcher.RegisterMultiMethodActor(methods, actorCreateFun, concurrentCount)
+func (system *ActorSystem) RegisterMultiMethodActor(methods []string, actorCreateFun func() IUntypedActor) {
+	system.dispatcher.RegisterMultiMethodActor(methods, actorCreateFun)
+}
+
+func (system *ActorSystem) RegisterStandaloneActor(method string, actorCreateFun func() IUntypedActor, concurrentCount int) {
+	system.dispatcher.RegisterStandaloneActor(method, actorCreateFun, concurrentCount)
+}
+
+func (system *ActorSystem) RegisterStandaloneMultiMethodActor(methods []string, actorCreateFun func() IUntypedActor, concurrentCount int) {
+	system.dispatcher.RegisterStandaloneMultiMethodActor(methods, actorCreateFun, concurrentCount)
 }

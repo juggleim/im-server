@@ -20,19 +20,19 @@ type ConnectManager struct {
 func (ser *ConnectManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterMultiMethodActor([]string{"connect", "msg", "ntf", "ustatus", "stream_msg"}, func() actorsystem.IUntypedActor {
 		return &actors.ConnectActor{}
-	}, 64)
+	})
 	register.RegisterActor("qry_online_status", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.UserOnlineStatusActor{}, serviceName)
-	}, 32)
+	})
 	register.RegisterActor("ban_users", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.BanUsersActor{}, serviceName)
-	}, 8)
+	})
 	register.RegisterActor("qry_ban_users", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryBanUsersActor{}, serviceName)
-	}, 8)
+	})
 	register.RegisterActor("kick_user", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.KickUserActor{}, serviceName)
-	}, 8)
+	})
 }
 func (ser *ConnectManager) Startup(args map[string]interface{}) {
 	wsPort := configures.Config.ConnectManager.WsPort

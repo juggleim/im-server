@@ -14,8 +14,11 @@ type Cluster struct {
 }
 
 type IActorRegister interface {
-	RegisterActor(method string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int)
-	RegisterMultiMethodActor(methods []string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int)
+	RegisterActor(method string, actorCreateFun func() actorsystem.IUntypedActor)
+	RegisterStandaloneActor(method string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int)
+
+	RegisterMultiMethodActor(methods []string, actorCreateFun func() actorsystem.IUntypedActor)
+	RegisterStandaloneMultiMethodActor(methods []string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int)
 }
 
 func NewCluster(nodename string, exts map[string]string) *Cluster {
@@ -38,12 +41,25 @@ func (cluster *Cluster) GetAllNodes() []*Node {
 	return ret
 }
 
-func (cluster *Cluster) RegisterActor(method string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int) {
-	cluster.actorSystem.RegisterActor(method, actorCreateFun, concurrentCount)
+func (cluster *Cluster) RegisterActor(method string, actorCreateFun func() actorsystem.IUntypedActor) {
+	cluster.actorSystem.RegisterActor(method, actorCreateFun)
 	cluster.currentNode.AddMethod(method)
 }
-func (cluster *Cluster) RegisterMultiMethodActor(methods []string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int) {
-	cluster.actorSystem.RegisterMultiMethodActor(methods, actorCreateFun, concurrentCount)
+
+func (cluster *Cluster) RegisterStandaloneActor(method string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int) {
+	cluster.actorSystem.RegisterStandaloneActor(method, actorCreateFun, concurrentCount)
+	cluster.currentNode.AddMethod(method)
+}
+
+func (cluster *Cluster) RegisterMultiMethodActor(methods []string, actorCreateFun func() actorsystem.IUntypedActor) {
+	cluster.actorSystem.RegisterMultiMethodActor(methods, actorCreateFun)
+	for _, method := range methods {
+		cluster.currentNode.AddMethod(method)
+	}
+}
+
+func (cluster *Cluster) RegisterStandaloneMultiMethodActor(methods []string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int) {
+	cluster.actorSystem.RegisterStandaloneMultiMethodActor(methods, actorCreateFun, concurrentCount)
 	for _, method := range methods {
 		cluster.currentNode.AddMethod(method)
 	}

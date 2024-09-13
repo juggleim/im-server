@@ -14,7 +14,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-const buffersize int = 10240
+const buffersize int = 8192
 
 type ActorDispatcher struct {
 	dispatchMap        sync.Map
@@ -77,11 +77,12 @@ func (dispatcher *ActorDispatcher) Destroy() {
 	}
 }
 
-func (dispatcher *ActorDispatcher) RegisterActorWithCommonPool(method string, actorCreateFun func() IUntypedActor) {
-	dispatcher.RegisterActor(method, actorCreateFun, 0)
+func (dispatcher *ActorDispatcher) RegisterActor(method string, actorCreateFun func() IUntypedActor) {
+	executor := NewActorExecutorWithDefaultPool(dispatcher.executorCommonPool, actorCreateFun)
+	dispatcher.dispatchMap.Store(method, executor)
 }
 
-func (dispatcher *ActorDispatcher) RegisterActor(method string, actorCreateFun func() IUntypedActor, concurrentCount int) {
+func (dispatcher *ActorDispatcher) RegisterStandaloneActor(method string, actorCreateFun func() IUntypedActor, concurrentCount int) {
 	var executor *ActorExecutor
 	if concurrentCount > 0 {
 		executor = NewActorExecutor(concurrentCount, actorCreateFun)
@@ -91,11 +92,14 @@ func (dispatcher *ActorDispatcher) RegisterActor(method string, actorCreateFun f
 	dispatcher.dispatchMap.Store(method, executor)
 }
 
-func (dispatcher *ActorDispatcher) RegisterMultiMethodActorWithCommonPool(methods []string, actorCreateFun func() IUntypedActor) {
-	dispatcher.RegisterMultiMethodActor(methods, actorCreateFun, 0)
+func (dispatcher *ActorDispatcher) RegisterMultiMethodActor(methods []string, actorCreateFun func() IUntypedActor) {
+	executor := NewActorExecutorWithDefaultPool(dispatcher.executorCommonPool, actorCreateFun)
+	for _, method := range methods {
+		dispatcher.dispatchMap.Store(method, executor)
+	}
 }
 
-func (dispatcher *ActorDispatcher) RegisterMultiMethodActor(methods []string, actorCreateFun func() IUntypedActor, concurrentCount int) {
+func (dispatcher *ActorDispatcher) RegisterStandaloneMultiMethodActor(methods []string, actorCreateFun func() IUntypedActor, concurrentCount int) {
 	var executor *ActorExecutor
 	if concurrentCount > 0 {
 		executor = NewActorExecutor(concurrentCount, actorCreateFun)

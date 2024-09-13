@@ -15,7 +15,7 @@ var serviceName string = "botmsgmanager"
 func (manager *BotMsgManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("bot_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.BotMsgActor{}, serviceName)
-	}, 64)
+	})
 }
 
 func (manager *BotMsgManager) Startup(args map[string]interface{}) {
