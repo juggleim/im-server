@@ -264,6 +264,7 @@ func SetUserUndisturb(ctx context.Context, userId string, req *pbobjs.UserUndist
 	if req.Timezone != "" {
 		_, err := time.LoadLocation(req.Timezone)
 		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
 			return errs.IMErrorCode_USER_TIMEZONE_ILLGAL
 		}
 	}

@@ -77,10 +77,9 @@ func (conver *ConversationDao) UpsertConversation(item models.Conversation) erro
 func (conver *ConversationDao) SyncConversations(appkey, userId string, startTime int64, count int32) ([]*models.Conversation, error) {
 	var items []*ConversationDao
 	var conditionTail string = ""
-	if startTime == 0 {
-		conditionTail = " and is_deleted=0"
-	}
-
+	// if startTime == 0 {
+	// 	conditionTail = " and is_deleted=0"
+	// }
 	err := dbcommons.GetDb().Where("app_key=? and user_id=? and sync_time>?"+conditionTail, appkey, userId, startTime).Order("sync_time asc").Limit(count).Find(&items).Error
 	if err != nil {
 		return []*models.Conversation{}, err
