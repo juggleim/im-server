@@ -64,7 +64,7 @@ func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, ch
 	params = append(params, startTime)
 	params = append(params, cleanTime)
 
-	err := dbcommons.GetDb().Debug().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if err != nil {
 		return []*models.MentionMsg{}, err
 	}
@@ -109,7 +109,7 @@ func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId stri
 	params = append(params, startTime)
 	params = append(params, cleanTime)
 
-	err := dbcommons.GetDb().Debug().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if err != nil {
 		return []*models.MentionMsg{}, err
 	}
