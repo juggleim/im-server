@@ -72,6 +72,16 @@ func AddPushToken(appkey, userId string, userPushToken *UserPushToken) {
 	}
 }
 
+func RemovePushToken(appkey, userId string) {
+	key := getUserPushTokenKey(appkey, userId)
+	_, exist := GetPushToken(appkey, userId)
+	if exist {
+		dao := dbs.PushTokenDao{}
+		dao.DeleteByUserId(appkey, userId)
+		pushConfCache.Remove(key)
+	}
+}
+
 func GetPushToken(appkey, userId string) (*UserPushToken, bool) {
 	key := getUserPushTokenKey(appkey, userId)
 	if obj, exist := pushTokenCache.Get(key); exist {

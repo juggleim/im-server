@@ -123,6 +123,9 @@ func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx im
 
 	ctx.Close(fmt.Errorf("dissconnect"))
 	services.RemoveFromContextCache(ctx)
+	if msg.Code == 1 || msg.Code == int32(errs.IMErrorCode_CONNECT_LOGOUT) {
+		services.RemovePushToken(ctx)
+	}
 }
 func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx imcontext.WsHandleContext) {
 	if msg == nil {

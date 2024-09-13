@@ -27,7 +27,7 @@ func RegPushToken(ctx imcontext.WsHandleContext, appkey, userId, deviceId, platf
 			}
 			data, _ := tools.PbMarshal(req)
 			bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
-				RpcMsgType:   pbobjs.RpcMsgType_QueryAck,
+				RpcMsgType:   pbobjs.RpcMsgType_QueryMsg,
 				AppKey:       appkey,
 				Session:      imcontext.GetConnSession(ctx),
 				Method:       "reg_push_token",
@@ -40,6 +40,24 @@ func RegPushToken(ctx imcontext.WsHandleContext, appkey, userId, deviceId, platf
 			})
 		}
 	}
+}
+
+func RemovePushToken(ctx imcontext.WsHandleContext) {
+	appkey := imcontext.GetAppkey(ctx)
+	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
+	req := &pbobjs.Nil{}
+	data, _ := tools.PbMarshal(req)
+	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
+		RpcMsgType:   pbobjs.RpcMsgType_QueryMsg,
+		AppKey:       appkey,
+		Session:      imcontext.GetConnSession(ctx),
+		Method:       "remove_push_token",
+		RequesterId:  userId,
+		ReqIndex:     0,
+		Qos:          int32(codec.QoS_NoAck),
+		AppDataBytes: data,
+		TargetId:     userId,
+	})
 }
 
 func Online(ctx imcontext.WsHandleContext, ext string) {

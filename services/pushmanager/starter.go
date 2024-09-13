@@ -19,6 +19,9 @@ func (manager *PushManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("reg_push_token", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.RegPushTokenActor{}, serviceName)
 	})
+	register.RegisterActor("remove_push_token", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.RemovePushTokenActor{}, serviceName)
+	})
 	register.RegisterActor("qry_user_tags", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryUserTagsActor{}, serviceName)
 	})

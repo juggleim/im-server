@@ -47,3 +47,7 @@ func (token PushTokenDao) GetUserWithToken(appkey string, pushToken string) (*Pu
 	}
 	return &item, nil
 }
+
+func (token PushTokenDao) DeleteByUserId(appkey, userId string) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=?", appkey, userId).Delete(&PushTokenDao{}).Error
+}
