@@ -120,13 +120,14 @@ func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx im
 	logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_Disconnect, msg.Code)
 
 	services.Offline(ctx, errs.IMErrorCode(msg.Code))
-
-	ctx.Close(fmt.Errorf("dissconnect"))
-	services.RemoveFromContextCache(ctx)
 	if msg.Code == 1 || msg.Code == int32(errs.IMErrorCode_CONNECT_LOGOUT) {
 		services.RemovePushToken(ctx)
 	}
+
+	ctx.Close(fmt.Errorf("dissconnect"))
+	services.RemoveFromContextCache(ctx)
 }
+
 func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx imcontext.WsHandleContext) {
 	if msg == nil {
 		logs.Error("pub body is nil")
@@ -213,6 +214,7 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 		ctx.Write(ack)
 	}
 }
+
 func (*ImListenerImpl) PubAckArrived(msg *codec.PublishAckMsgBody, ctx imcontext.WsHandleContext) {
 	if msg == nil {
 		logs.Error("pub_ack body is nil")
@@ -231,6 +233,7 @@ func (*ImListenerImpl) PubAckArrived(msg *codec.PublishAckMsgBody, ctx imcontext
 		Action:  string(imcontext.Action_ServerPubAck),
 	})
 }
+
 func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcontext.WsHandleContext) {
 	if msg == nil {
 		logs.Error("qry body is nil")
@@ -315,6 +318,7 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 		ctx.Write(ack)
 	}
 }
+
 func (*ImListenerImpl) QueryConfirmArrived(msg *codec.QueryConfirmMsgBody, ctx imcontext.WsHandleContext) {
 	if msg == nil {
 		logs.Error("qry_confirm body is nil")
@@ -333,6 +337,7 @@ func (*ImListenerImpl) QueryConfirmArrived(msg *codec.QueryConfirmMsgBody, ctx i
 		Action:  string(imcontext.Action_QueryConfirm),
 	})
 }
+
 func (*ImListenerImpl) PingArrived(ctx imcontext.WsHandleContext) {
 	ctx.Write(codec.NewPongMessage())
 }
