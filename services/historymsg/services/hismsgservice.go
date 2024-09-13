@@ -8,10 +8,10 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
 	"im-server/services/conversation/convercallers"
 	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
-	"im-server/services/historymsg/storages/dbs"
 	"im-server/services/historymsg/storages/models"
 	"time"
 
@@ -601,14 +601,14 @@ func GetCleanTime(appkey, userId, targetId string, channelType pbobjs.ChannelTyp
 	converId := commonservices.GetConversationId(userId, targetId, channelType)
 	var destroyTime, cleanTime int64 = 0, 0
 	//conver clean time
-	destroyDao := dbs.HisMsgConverCleanTimeDao{}
-	destroy, err := destroyDao.FindOne(appkey, converId, channelType)
+	converCleanStorage := storages.NewHisMsgConverCleanTimeStorage()
+	destroy, err := converCleanStorage.FindOne(appkey, converId, channelType)
 	if err == nil && destroy != nil && destroy.CleanTime > 0 {
 		destroyTime = destroy.CleanTime
 	}
 	//user clean time
-	dao := dbs.HisMsgUserCleanTimeDao{}
-	clean, err := dao.FindOne(appkey, userId, targetId, channelType)
+	userCleanStorage := storages.NewHisMsgUserCleanTimeStorage()
+	clean, err := userCleanStorage.FindOne(appkey, userId, targetId, channelType)
 	if err == nil && clean != nil && clean.CleanTime > 0 {
 		cleanTime = clean.CleanTime
 	}
@@ -622,16 +622,16 @@ func GetCleanTime(appkey, userId, targetId string, channelType pbobjs.ChannelTyp
 func GetExcludeMsgIds(appkey, userId, targetId string, channelType pbobjs.ChannelType, isPositive bool, startTime int64, count int32) []string {
 	delMsgIds := []string{}
 	if channelType == pbobjs.ChannelType_Private {
-		dao := dbs.PrivateDelHisMsgDao{}
-		delMsgs, err := dao.QryDelHisMsgs(appkey, userId, targetId, startTime, count, isPositive)
+		priDelStorage := storages.NewPrivateDelHisMsgStorage()
+		delMsgs, err := priDelStorage.QryDelHisMsgs(appkey, userId, targetId, startTime, count, isPositive)
 		if err == nil && len(delMsgs) > 0 {
 			for _, delMsg := range delMsgs {
 				delMsgIds = append(delMsgIds, delMsg.MsgId)
 			}
 		}
 	} else if channelType == pbobjs.ChannelType_Group {
-		dao := dbs.GroupDelHisMsgDao{}
-		delMsgs, err := dao.QryDelHisMsgs(appkey, userId, targetId, startTime, count, isPositive)
+		grpDelStorage := storages.NewGroupDelHisMsgStorage()
+		delMsgs, err := grpDelStorage.QryDelHisMsgs(appkey, userId, targetId, startTime, count, isPositive)
 		if err == nil && len(delMsgs) > 0 {
 			for _, delMsg := range delMsgs {
 				delMsgIds = append(delMsgIds, delMsg.MsgId)
@@ -673,13 +673,16 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 		if err == nil && dbClean.CleanTime >= cleanTime {
 			return errs.IMErrorCode_SUCCESS
 		}
-		storage.UpsertCleanTime(models.HisMsgUserCleanTime{
+		err = storage.UpsertCleanTime(models.HisMsgUserCleanTime{
 			AppKey:      appkey,
 			UserId:      userId,
 			TargetId:    targetId,
 			ChannelType: req.ChannelType,
 			CleanTime:   cleanTime,
 		})
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
 
 		//notify other device to clean msgs
 		if channelType == pbobjs.ChannelType_Private {
@@ -699,12 +702,15 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 			if err == nil && dbDestroy != nil && dbDestroy.CleanTime >= cleanTime {
 				return errs.IMErrorCode_SUCCESS
 			}
-			storage.UpsertDestroyTime(models.HisMsgConverCleanTime{
+			err = storage.UpsertDestroyTime(models.HisMsgConverCleanTime{
 				AppKey:      appkey,
 				ConverId:    converId,
 				ChannelType: req.ChannelType,
 				CleanTime:   cleanTime,
 			})
+			if err != nil {
+				logs.WithContext(ctx).Error(err.Error())
+			}
 		} else {
 			if channelType == pbobjs.ChannelType_Private {
 				storage := storages.NewPrivateHisMsgStorage()

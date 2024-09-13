@@ -261,10 +261,10 @@ func UpdUserInfo(ctx context.Context, userinfo *pbobjs.UserInfo) errs.IMErrorCod
 }
 
 func SetUserUndisturb(ctx context.Context, userId string, req *pbobjs.UserUndisturb) errs.IMErrorCode {
-	if req.Timezone != "" {
+	if req.Switch && req.Timezone != "" {
 		_, err := time.LoadLocation(req.Timezone)
 		if err != nil {
-			logs.WithContext(ctx).Error(err.Error())
+			logs.WithContext(ctx).Errorf("err:%v\treq:%s", err, tools.ToJson(req))
 			return errs.IMErrorCode_USER_TIMEZONE_ILLGAL
 		}
 	}
