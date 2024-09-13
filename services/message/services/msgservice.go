@@ -222,11 +222,28 @@ func GetPushDataForDefaultMsg(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.
 	if msg == nil {
 		return nil
 	}
-	var retPushData *pbobjs.PushData
-	if msg.PushData != nil && msg.PushData.PushText != "" {
-		retPushData = msg.PushData
+	var (
+		title  string
+		prefix string
+	)
+	nickName := msg.TargetUserInfo.GetNickname()
+	if msg.ChannelType == pbobjs.ChannelType_Group {
+		title = msg.GroupInfo.GroupName
+		if nickName != "" {
+			prefix = nickName + ": "
+		}
 	} else {
-		retPushData = &pbobjs.PushData{}
+		title = nickName
+	}
+	retPushData := &pbobjs.PushData{}
+	if msg.PushData != nil && msg.PushData.PushText != "" {
+		if msg.PushData.Title == "" {
+			retPushData.Title = title
+		} else {
+			retPushData.Title = msg.PushData.Title
+		}
+		retPushData.PushText = prefix + msg.PushData.PushText
+	} else {
 		var (
 			title  string
 			prefix string
