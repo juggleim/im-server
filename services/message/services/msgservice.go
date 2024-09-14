@@ -140,8 +140,8 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 				channelType: downMsg.ChannelType,
 				Msg:         downMsg,
 				ctx:         ctx,
-				HasPush:     userStatus.OpenPushSwitch(),
 				IsNotify:    isNtf,
+				userStatus:  userStatus,
 			}, 5*time.Second)
 		} else {
 			logs.WithContext(ctx).Infof("msg target_id:%s", targetId)
@@ -153,15 +153,12 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 				channelType: downMsg.ChannelType,
 				Msg:         downMsg,
 				ctx:         ctx,
-				HasPush:     userStatus.OpenPushSwitch(),
 				IsNotify:    isNtf,
+				userStatus:  userStatus,
 			}, 5*time.Second)
 		}
-		if userStatus.OpenPushSwitch() {
-			SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg)
-		}
 	} else { //for push
-		SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg)
+		SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg, userStatus.BadgeIncr())
 	}
 }
 
@@ -186,10 +183,10 @@ type SendMsgAckActor struct {
 	targetId    string
 	channelType pbobjs.ChannelType
 	// pushData    *pbobjs.PushData
-	Msg      *pbobjs.DownMsg
-	ctx      context.Context
-	HasPush  bool
-	IsNotify bool
+	Msg        *pbobjs.DownMsg
+	ctx        context.Context
+	IsNotify   bool
+	userStatus *UserStatus
 }
 
 func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message) {
@@ -201,9 +198,7 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 			logs.WithContext(actor.ctx).Infof("target_id:%s\tonline_type:%d", actor.targetId, onlineStatus.Type)
 			if onlineStatus.Type == pbobjs.OnlineType_Offline { //receiver is offline
 				RecordUserOnlineStatus(actor.appkey, actor.targetId, false, 0)
-				if !actor.HasPush {
-					SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg)
-				}
+				SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg, actor.userStatus.BadgeIncr())
 			} else { //receiver is online, and response ack
 				if !actor.IsNotify {
 					us := GetUserStatus(actor.appkey, actor.targetId)
@@ -213,12 +208,15 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 					//statistic
 					commonservices.ReportDownMsg(actor.appkey, actor.channelType, 1)
 				}
+				if actor.userStatus.OpenPushSwitch() {
+					SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg, actor.userStatus.BadgeIncr())
+				}
 			}
 		}
 	}
 }
 
-func GetPushDataForDefaultMsg(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
+func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 	if msg == nil {
 		return nil
 	}
@@ -298,13 +296,15 @@ func (actor *SendMsgAckActor) OnTimeout() {
 
 }
 
-func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.DownMsg) {
+func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.DownMsg, badge int32) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, exist := commonservices.GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.IsOpenPush {
 		if !commonservices.IsUndisturbMsg(msg.Flags) {
-			pushData := GetPushDataForDefaultMsg(msg, getPushLanguage(ctx, receiverId))
+			pushData := GetPushData(msg, getPushLanguage(ctx, receiverId))
 			if pushData != nil {
+				//badge
+				pushData.Badge = badge
 				pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
 				bases.UnicastRouteWithNoSender(pushRpc)
 			}

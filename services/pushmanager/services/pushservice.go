@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/sideshow/apns2"
+	"github.com/sideshow/apns2/payload"
 )
 
 func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
@@ -32,7 +33,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					notification := &apns2.Notification{}
 					notification.DeviceToken = pushToken.PushToken
 					notification.Topic = pushToken.PackageName
-					notification.Payload = []byte(fmt.Sprintf(`{"aps":{"alert":{"title":"%s","body":"%s"}},"conver_id":"%s","conver_type":"%d","exts":"%s"}`, req.Title, tools.PureStr(req.PushText), req.ConverId, req.ChannelType, req.PushExtraData))
+					notification.Payload = iosPushPayload(req)
 					resp, err := iosPushConf.ApnsClient.Push(notification)
 					if err != nil {
 						logs.WithContext(ctx).Errorf("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
@@ -142,4 +143,15 @@ func transfer2Exts(pushData *pbobjs.PushData) map[string]interface{} {
 	exts["conver_type"] = int32(pushData.ChannelType)
 	exts["exts"] = pushData.PushExtraData
 	return exts
+}
+
+func iosPushPayload(req *pbobjs.PushData) interface{} {
+	iosPayload := payload.NewPayload()
+	iosPayload.AlertTitle(req.Title)
+	iosPayload.AlertBody(tools.PureStr(req.PushText))
+	iosPayload.Custom("conver_id", req.ConverId)
+	iosPayload.Custom("conver_type", int32(req.ChannelType))
+	iosPayload.Custom("exts", req.PushExtraData)
+	iosPayload.Badge(int(req.Badge))
+	return iosPayload
 }

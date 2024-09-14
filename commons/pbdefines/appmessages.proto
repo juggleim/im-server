@@ -86,6 +86,7 @@ message PushData{
   string pushExtraData = 4;
 
   //internal fields
+  int32 badge = 50;
   string msgId = 51;
   string senderId = 52;
   string ConverId = 53;

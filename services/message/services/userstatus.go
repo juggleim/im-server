@@ -22,6 +22,7 @@ type UserStatus struct {
 	isNtf bool //is ntf
 
 	PushSwitch int32
+	PushBadge  int32
 }
 
 var userOnlineStatusCache *caches.LruCache
@@ -55,6 +56,15 @@ func (user *UserStatus) SetPushSwitch(pushSwitch int32) {
 
 func (user *UserStatus) OpenPushSwitch() bool {
 	return user.PushSwitch > 0
+}
+
+func (user *UserStatus) SetBadge(badge int32) {
+	atomic.StoreInt32(&user.PushBadge, badge)
+}
+
+func (user *UserStatus) BadgeIncr() int32 {
+	atomic.AddInt32(&user.PushBadge, 1)
+	return user.PushBadge
 }
 
 func (user *UserStatus) CheckNtfWithSwitch() bool {

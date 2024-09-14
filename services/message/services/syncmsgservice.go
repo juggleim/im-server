@@ -40,6 +40,8 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 	userStatus.CheckNtfWithSwitch()
 	//关闭强制推送
 	userStatus.SetPushSwitch(0)
+	//clear badge
+	userStatus.SetBadge(0)
 
 	ret := &pbobjs.DownMsgSet{
 		Msgs: []*pbobjs.DownMsg{},
