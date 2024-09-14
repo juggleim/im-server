@@ -1,0 +1,6 @@
+placeholder_text: "[文本消息]"
+placeholder_image: "[图片消息]"
+placeholder_voice: "[语音消息]"
+placeholder_file: "[文件消息]"
+placeholder_video: "[视频消息]"
+placeholder_merge: "[合并消息]"

@@ -267,18 +267,18 @@ func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 			if err == nil {
 				retPushData.PushText = prefix + pushText
 			} else {
-				retPushData.PushText = prefix + "[Text]"
+				retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Text, "[Text]")
 			}
 		} else if msg.MsgType == "jg:img" {
-			retPushData.PushText = prefix + "[Image]"
+			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Image, "[Image]")
 		} else if msg.MsgType == "jg:voice" {
-			retPushData.PushText = prefix + "[Voice]"
+			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Voice, "[Voice]")
 		} else if msg.MsgType == "jg:file" {
-			retPushData.PushText = prefix + "[File]"
+			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_File, "[File]")
 		} else if msg.MsgType == "jg:video" {
-			retPushData.PushText = prefix + "[Video]"
+			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Video, "[Video]")
 		} else if msg.MsgType == "jg:merge" {
-			retPushData.PushText = prefix + "[Merge]"
+			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Merge, "[Merge]")
 		}
 	}
 	//add internal fields

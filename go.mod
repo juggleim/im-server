@@ -35,6 +35,7 @@ require (
 	cloud.google.com/go/longrunning v0.5.7 // indirect
 	cloud.google.com/go/storage v1.41.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -127,6 +128,7 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/jinzhu/gorm v1.9.16
+	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/stretchr/testify v1.9.0
 	github.com/tsuna/gohbase v0.0.0-20240604184322-67d205cb2079
