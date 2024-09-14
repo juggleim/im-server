@@ -70,6 +70,20 @@ func SyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req proto
 	}, nil
 }
 
+func Broadcast(ctx *gin.Context, method, requestId string, req proto.Message) {
+	dataBytes, _ := tools.PbMarshal(req)
+	bases.BroadcastRouteWithNoSender(&pbobjs.RpcMessageWraper{
+		RpcMsgType:   pbobjs.RpcMsgType_ServerPub,
+		AppKey:       GetCtxString(ctx, CtxKey_AppKey),
+		Session:      GetCtxString(ctx, CtxKey_Session),
+		Method:       method,
+		RequesterId:  requestId,
+		Qos:          0,
+		AppDataBytes: dataBytes,
+		IsFromApi:    true,
+	})
+}
+
 func AsyncApiCall(ctx *gin.Context, method, requestId, targetId string, req proto.Message) {
 	dataBytes, _ := tools.PbMarshal(req)
 	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
