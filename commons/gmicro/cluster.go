@@ -21,10 +21,10 @@ type IActorRegister interface {
 	RegisterStandaloneMultiMethodActor(methods []string, actorCreateFun func() actorsystem.IUntypedActor, concurrentCount int)
 }
 
-func NewCluster(nodename string, exts map[string]string) *Cluster {
-	actorSystem := actorsystem.NewActorSystemNoRpc(nodename)
+func NewCluster(nodename, host string, exts map[string]string) *Cluster {
+	actorSystem := actorsystem.NewActorSystem(nodename)
 	//current Node
-	curNode := NewNode(nodename, actorSystem.Host, actorSystem.Prot, exts)
+	curNode := NewNode(nodename, host, exts)
 	cluster := &Cluster{
 		currentNode: curNode,
 		actorSystem: actorSystem,
@@ -95,8 +95,8 @@ func (cluster *Cluster) LocalActorOf(method string) actorsystem.ActorRef {
 	return cluster.actorSystem.LocalActorOf(method)
 }
 
-func (cluster *Cluster) ActorOf(host string, port int, method string) actorsystem.ActorRef {
-	return cluster.actorSystem.ActerOf(host, port, method)
+func (cluster *Cluster) ActorOf(method string) actorsystem.ActorRef {
+	return cluster.actorSystem.ActerOf(method)
 }
 
 func (cluster *Cluster) CallbackActorOf(ttl time.Duration, actor actorsystem.ICallbackUntypedActor) actorsystem.ActorRef {
@@ -110,14 +110,14 @@ func (cluster *Cluster) UnicastRouteWithNoSender(method, targetId string, obj pr
 func (cluster *Cluster) UnicastRoute(method, targetId string, obj proto.Message, sender actorsystem.ActorRef) bool {
 	nod := cluster.GetTargetNode(method, targetId)
 	if nod != nil {
-		cluster.baseRoute(method, nod.Ip, nod.Port, obj, sender)
+		cluster.baseRoute(method, obj, sender)
 		return true
 	}
 	return false
 }
 
-func (cluster *Cluster) baseRoute(method string, host string, port int, obj proto.Message, sender actorsystem.ActorRef) {
-	actor := cluster.actorSystem.ActerOf(host, port, method)
+func (cluster *Cluster) baseRoute(method string, obj proto.Message, sender actorsystem.ActorRef) {
+	actor := cluster.actorSystem.ActerOf(method)
 	actor.Tell(obj, sender)
 }
 
@@ -135,24 +135,22 @@ func (cluster *Cluster) BroadcastRoute(method string, obj proto.Message, sender 
 		if _, exist := excludeNode[node.Name]; exist {
 			continue
 		}
-		cluster.baseRoute(method, node.Ip, node.Port, obj, sender)
+		cluster.baseRoute(method, obj, sender)
 	}
 }
 
 type Node struct {
 	Name      string            `json:"name"`
 	Ip        string            `json:"ip"`
-	Port      int               `json:"port"`
 	Methods   []string          `json:"methods"`
 	methodMap map[string]bool   `json:"-"`
 	Exts      map[string]string `json:"exts"`
 }
 
-func NewNode(name, ip string, port int, exts map[string]string) *Node {
+func NewNode(name, ip string, exts map[string]string) *Node {
 	node := &Node{
 		Name:      name,
 		Ip:        ip,
-		Port:      port,
 		Methods:   []string{},
 		methodMap: make(map[string]bool),
 		Exts:      exts,

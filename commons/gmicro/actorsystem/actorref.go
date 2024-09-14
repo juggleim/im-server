@@ -3,8 +3,6 @@ package actorsystem
 import (
 	"time"
 
-	"im-server/commons/gmicro/actorsystem/rpc"
-
 	"google.golang.org/protobuf/proto"
 )
 
@@ -12,16 +10,13 @@ type ActorRef interface {
 	Tell(proto.Message, ActorRef)
 	TellAndNoSender(proto.Message)
 	GetMethod() string
-	GetHost() string
-	GetPort() int
+	isNoSender() bool
 	isCallback() bool
 	startCallbackActor(session []byte)
 	getSession() []byte
 }
 
 type DefaultActorRef struct {
-	Host          string
-	Port          int
 	Method        string
 	Session       []byte
 	Sender        *MsgSender
@@ -45,42 +40,31 @@ func (ref *DeadLetterActorRef) Tell(message proto.Message, sender ActorRef) {
 func (ref *DeadLetterActorRef) GetMethod() string {
 	return ref.Method
 }
-func (ref *DeadLetterActorRef) GetHost() string {
-	return ref.Host
-}
-func (ref *DeadLetterActorRef) GetPort() int {
-	return ref.Port
-}
+
 func (ref *DeadLetterActorRef) getSession() []byte {
 	return nil
+}
+
+func (ref *DeadLetterActorRef) isNoSender() bool {
+	return true
 }
 
 var NoSender *DeadLetterActorRef
 
 func init() {
 	NoSender = &DeadLetterActorRef{}
-	NoSender.Host = "0.0.0.0"
-	NoSender.Port = 0
 }
 
-func IsNoSender(req *rpc.RpcMessageRequest) bool {
+func IsNoSender(req *MessageRequest) bool {
 	if req != nil {
-		srcHost := req.SrcHost
-		srcPort := req.SrcPort
-		if srcHost == "0.0.0.0" && srcPort == 0 {
-			return true
-		} else {
-			return false
-		}
+		return req.IsNoSender
 	} else {
 		return true
 	}
 }
 
-func NewActorRef(host string, port int, method string, session []byte, sender *MsgSender) ActorRef {
+func NewActorRef(method string, session []byte, sender *MsgSender) ActorRef {
 	ref := &DefaultActorRef{
-		Host:    host,
-		Port:    port,
 		Method:  method,
 		Session: session,
 		Sender:  sender,
@@ -88,10 +72,8 @@ func NewActorRef(host string, port int, method string, session []byte, sender *M
 	return ref
 }
 
-func NewCallbackActorRef(ttl time.Duration, host string, port int, session []byte, callbackActor ICallbackUntypedActor, sender *MsgSender, dispatcher *ActorDispatcher) ActorRef {
+func NewCallbackActorRef(ttl time.Duration, session []byte, callbackActor ICallbackUntypedActor, sender *MsgSender, dispatcher *ActorDispatcher) ActorRef {
 	ref := &DefaultActorRef{
-		Host:          host,
-		Port:          port,
 		Session:       session,
 		Sender:        sender,
 		is_Callback:   true,
@@ -113,15 +95,12 @@ func (ref *DefaultActorRef) Tell(message proto.Message, sender ActorRef) {
 		if len(session) <= 0 {
 			session = ref.Session
 		}
-		rpcReq := &rpc.RpcMessageRequest{
+		rpcReq := &MessageRequest{
 			Session:   session,
 			TarMethod: ref.Method,
-			TarHost:   ref.Host,
-			TarPort:   int32(ref.Port),
 
-			SrcMethod: sender.GetMethod(),
-			SrcHost:   sender.GetHost(),
-			SrcPort:   int32(sender.GetPort()),
+			SrcMethod:  sender.GetMethod(),
+			IsNoSender: sender.isNoSender(),
 
 			Data: bytes,
 		}
@@ -144,11 +123,8 @@ func (ref *DefaultActorRef) startCallbackActor(session []byte) {
 func (ref *DefaultActorRef) GetMethod() string {
 	return ref.Method
 }
-func (ref *DefaultActorRef) GetHost() string {
-	return ref.Host
-}
-func (ref *DefaultActorRef) GetPort() int {
-	return ref.Port
+func (ref *DefaultActorRef) isNoSender() bool {
+	return false
 }
 func (ref *DefaultActorRef) isCallback() bool {
 	return ref.is_Callback

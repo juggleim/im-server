@@ -6,35 +6,33 @@ import (
 	"im-server/commons/gmicro/utils"
 )
 
-const (
-	NoRpcHost string = "-"
-	NoRpcPort int    = 0
-)
-
 type ActorSystem struct {
 	Name        string
-	Host        string
-	Prot        int
 	sender      *MsgSender
 	receiver    *MsgReceiver
 	RecvDecoder func([]byte, interface{})
 	dispatcher  *ActorDispatcher
 }
 
-func NewActorSystemNoRpc(name string) *ActorSystem {
-	return NewActorSystem(name, NoRpcHost, NoRpcPort)
+type MessageRequest struct {
+	Type       int32
+	Session    []byte
+	TarMethod  string
+	SrcMethod  string
+	Data       []byte
+	Extra      []byte
+	TraceId    string
+	IsNoSender bool
 }
 
-func NewActorSystem(name, host string, port int) *ActorSystem {
+func NewActorSystem(name string) *ActorSystem {
 	sender := NewMsgSender()
 	dispatcher := NewActorDispatcher(sender)
-	receiver := NewMsgReceiver(host, port, dispatcher)
+	receiver := NewMsgReceiver(dispatcher)
 
 	sender.SetMsgReceiver(receiver)
 	system := &ActorSystem{
 		Name:       name,
-		Host:       host,
-		Prot:       port,
 		sender:     sender,
 		receiver:   receiver,
 		dispatcher: dispatcher,
@@ -43,18 +41,18 @@ func NewActorSystem(name, host string, port int) *ActorSystem {
 }
 
 func (system *ActorSystem) LocalActorOf(method string) ActorRef {
-	return system.ActerOf(system.Host, system.Prot, method)
+	return system.ActerOf(method)
 }
 
-func (system *ActorSystem) ActerOf(host string, port int, method string) ActorRef {
+func (system *ActorSystem) ActerOf(method string) ActorRef {
 	uid := utils.GenerateUUIDBytes()
-	ref := NewActorRef(host, port, method, uid, system.sender)
+	ref := NewActorRef(method, uid, system.sender)
 	return ref
 }
 
 func (system *ActorSystem) CallbackActerOf(ttl time.Duration, actor ICallbackUntypedActor) ActorRef {
 	uid := utils.GenerateUUIDBytes()
-	ref := NewCallbackActorRef(ttl, system.Host, system.Prot, uid, actor, system.sender, system.dispatcher)
+	ref := NewCallbackActorRef(ttl, uid, actor, system.sender, system.dispatcher)
 	return ref
 }
 

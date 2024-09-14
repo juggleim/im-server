@@ -1,8 +1,6 @@
 package actorsystem
 
 import (
-	"im-server/commons/gmicro/actorsystem/rpc"
-
 	"github.com/Jeffail/tunny"
 	"github.com/rfyiamcool/go-timewheel"
 )
@@ -23,7 +21,7 @@ func NewCallbackActorExecutor(callbackPool *tunny.Pool, wraperChan chan wraper, 
 	return executor
 }
 
-func (executor *CallbackActorExecutor) Execute(req *rpc.RpcMessageRequest, msgSender *MsgSender) {
+func (executor *CallbackActorExecutor) Execute(req *MessageRequest, msgSender *MsgSender) {
 	executor.wraperChan <- commonExecute(req, msgSender, executor.actor)
 }
 

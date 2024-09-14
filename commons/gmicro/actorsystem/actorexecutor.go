@@ -4,21 +4,19 @@ import (
 	"context"
 	"sync"
 
-	"im-server/commons/gmicro/actorsystem/rpc"
 	"im-server/commons/gmicro/utils"
 
 	"github.com/Jeffail/tunny"
 )
 
 type IExecutor interface {
-	Execute(req *rpc.RpcMessageRequest, msgSender *MsgSender)
+	Execute(req *MessageRequest, msgSender *MsgSender)
 }
 
 type ActorExecutor struct {
 	wraperChan  chan wraper
 	executePool *tunny.Pool
 	actorPool   sync.Pool
-	// actorCreateFun func() IUntypedActor
 }
 
 func NewActorExecutorWithDefaultPool(pool *tunny.Pool, actorCreateFun func() IUntypedActor) *ActorExecutor {
@@ -30,7 +28,6 @@ func NewActorExecutorWithDefaultPool(pool *tunny.Pool, actorCreateFun func() IUn
 				return actorCreateFun()
 			},
 		},
-		// actorCreateFun: actorCreateFun,
 	}
 	go actorExecute(executor)
 	return executor
@@ -45,13 +42,12 @@ func NewActorExecutor(concurrentCount int, actorCreateFun func() IUntypedActor) 
 				return actorCreateFun()
 			},
 		},
-		// actorCreateFun: actorCreateFun,
 	}
 	go actorExecute(executor)
 	return executor
 }
 
-func (executor *ActorExecutor) Execute(req *rpc.RpcMessageRequest, msgSender *MsgSender) {
+func (executor *ActorExecutor) Execute(req *MessageRequest, msgSender *MsgSender) {
 	actorObj := executor.actorPool.Get()
 	executor.wraperChan <- commonExecute(req, msgSender, actorObj)
 	executor.actorPool.Put(actorObj)

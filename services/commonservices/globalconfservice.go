@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
-	"im-server/commons/configures"
-	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
 	"time"
@@ -162,8 +160,5 @@ func GetConnectAddress() *AddressConf {
 }
 
 func purifyNodeIp(ip string) string {
-	if ip == actorsystem.NoRpcHost {
-		return configures.Config.NodeHost
-	}
 	return ip
 }

@@ -5,7 +5,6 @@ import (
 	"sync"
 	"time"
 
-	"im-server/commons/gmicro/actorsystem/rpc"
 	"im-server/commons/gmicro/logs"
 	"im-server/commons/gmicro/utils"
 
@@ -44,8 +43,8 @@ func NewActorDispatcher(sender *MsgSender) *ActorDispatcher {
 	return dispatcher
 }
 
-func (dispatcher *ActorDispatcher) Dispatch(req *rpc.RpcMessageRequest) {
-	targetMethod := req.GetTarMethod()
+func (dispatcher *ActorDispatcher) Dispatch(req *MessageRequest) {
+	targetMethod := req.TarMethod
 	var executor IExecutor
 
 	if targetMethod == "" { //callback actor
@@ -125,11 +124,11 @@ func (dispatcher *ActorDispatcher) AddCallbackActor(session []byte, actor ICallb
 	executor.Task = task
 }
 
-func commonExecute(req *rpc.RpcMessageRequest, msgSender *MsgSender, actor IUntypedActor) wraper {
+func commonExecute(req *MessageRequest, msgSender *MsgSender, actor IUntypedActor) wraper {
 	var sender ActorRef
 
-	srcHost := req.SrcHost
-	srcPort := req.SrcPort
+	// srcHost := req.SrcHost
+	// srcPort := req.SrcPort
 	srcMethod := req.SrcMethod
 	srcSession := req.Session
 
@@ -137,8 +136,8 @@ func commonExecute(req *rpc.RpcMessageRequest, msgSender *MsgSender, actor IUnty
 		sender = NoSender
 	} else {
 		sender = &DefaultActorRef{
-			Host:    srcHost,
-			Port:    int(srcPort),
+			// Host:    srcHost,
+			// Port:    int(srcPort),
 			Method:  srcMethod,
 			Session: srcSession,
 			Sender:  msgSender,

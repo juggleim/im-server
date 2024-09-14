@@ -33,7 +33,7 @@ type ConnectNodeExt struct {
 var cluster *gmicro.Cluster
 
 func InitImServer(exts map[string]string) error {
-	cluster = gmicro.NewCluster(configures.Config.NodeName, exts)
+	cluster = gmicro.NewCluster(configures.Config.NodeName, configures.Config.NodeHost, exts)
 	return nil
 }
 
