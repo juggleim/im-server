@@ -27,7 +27,7 @@ func Connecting(count int) map[string]*wsclients.WsImClient {
 	connectMap := make(map[string]*wsclients.WsImClient)
 	for i := 1; i <= count; i++ {
 		userId := fmt.Sprintf("userid%d", i)
-		token := createToken(Appkey, SecureKey, userId)
+		token := CreateToken(Appkey, SecureKey, userId)
 		client := wsclients.NewWsImClient(WsAddress, Appkey, token, OnMessage, nil, nil)
 		code, ack := client.Connect("", "")
 		if code != utils.ClientErrorCode_Success {

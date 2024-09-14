@@ -245,7 +245,8 @@ CREATE TABLE `g_delhismsgs` (
   `msg_seq` int DEFAULT NULL,
   `app_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_msgid` (`app_key`,`msg_id`)
+  UNIQUE KEY `uniq_msgid` (`app_key`,`user_id`,`target_id`,`msg_id`),
+  KEY `idx_target` (`app_key`,`user_id`,`target_id`,`msg_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `g_hismsgs`;
@@ -267,7 +268,8 @@ CREATE TABLE `g_hismsgs` (
   `is_ext` tinyint DEFAULT '0',
   `is_reaction` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `idx_appkey_converid` (`app_key`,`conver_id`,`channel_type`,`send_time`)
+  KEY `idx_appkey_converid` (`app_key`,`conver_id`,`send_time`),
+  KEY `idx_msgid` (`app_key`,`conver_id`,`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `gc_hismsgs`;
@@ -533,7 +535,8 @@ CREATE TABLE `p_hismsgs` (
   `is_ext` tinyint DEFAULT '0',
   `is_reaction` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`send_time`)
+  KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`send_time`),
+  KEY `idx_msgid` (`app_key`,`conver_id`,`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `pushtokens`;
@@ -562,7 +565,9 @@ CREATE TABLE `readinfos` (
   `member_id` varchar(32) DEFAULT NULL,
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_member` (`app_key`,`channel_type`,`group_id`,`msg_id`,`member_id`)
+  UNIQUE KEY `uniq_member` (`app_key`,`channel_type`,`group_id`,`msg_id`,`member_id`),
+  KEY `idx_memberid` (`app_key`,`channel_type`,`group_id`,`member_id`,`msg_id`),
+  KEY `idx_msgid` (`app_key`,`channel_type`,`group_id`,`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `s_hismsgs`;

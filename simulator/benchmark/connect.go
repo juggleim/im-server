@@ -20,7 +20,7 @@ func OnDisconnect(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody) {
 	fmt.Println("disconnect:", tools.ToJson(disMsg))
 }
 
-func createToken(appkey, secureKey, userid string) string {
+func CreateToken(appkey, secureKey, userid string) string {
 	imToken := &tokens.ImToken{
 		AppKey:    appkey,
 		UserId:    userid,
@@ -35,7 +35,7 @@ func createToken(appkey, secureKey, userid string) string {
 func connect(count int) {
 	for i := 1; i <= count; i++ {
 		userId := fmt.Sprintf("userid%d", i)
-		token := createToken(Appkey, SecureKey, userId)
+		token := CreateToken(Appkey, SecureKey, userId)
 		if token != "" {
 			client := wsclients.NewWsImClient(WsAddress, Appkey, token, nil, nil, OnDisconnect)
 			start := time.Now()
