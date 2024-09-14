@@ -212,6 +212,16 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 			Timestamp: time.Now().UnixMilli(),
 		})
 		ctx.Write(ack)
+		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, msg.Index, errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC)
+		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
+			AppKey:   imcontext.GetAppkey(ctx),
+			Session:  imcontext.GetConnSession(ctx),
+			Index:    msg.Index,
+			Action:   string(imcontext.Action_UserPubAck),
+			Method:   msg.Topic,
+			TargetId: msg.TargetId,
+			Code:     int32(errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC),
+		})
 	}
 }
 
@@ -316,6 +326,14 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 			Timestamp: time.Now().UnixMilli(),
 		}, codec.QoS_NoAck)
 		ctx.Write(ack)
+		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, msg.Index, errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC)
+		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
+			AppKey:  imcontext.GetAppkey(ctx),
+			Session: imcontext.GetConnSession(ctx),
+			Index:   msg.Index,
+			Action:  string(imcontext.Action_QueryAck),
+			Code:    int32(errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC),
+		})
 	}
 }
 

@@ -25,6 +25,12 @@ func HisMsgRedirect(method string, data []byte, fromId, targetId string) (string
 		if err == nil {
 			typeGetter = &req
 		}
+	case "del_hismsg":
+		var req pbobjs.DelHisMsgsReq
+		err := tools.PbUnMarshal(data, &req)
+		if err == nil {
+			typeGetter = &req
+		}
 	case "mark_read":
 		var req pbobjs.MarkReadReq
 		err := tools.PbUnMarshal(data, &req)
