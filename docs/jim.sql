@@ -514,7 +514,8 @@ CREATE TABLE `p_delhismsgs` (
   `msg_seq` int DEFAULT NULL,
   `app_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_msgid` (`app_key`,`msg_id`)
+  UNIQUE KEY `uniq_msgid` (`app_key`,`user_id`,`target_id`,`msg_id`),
+  KEY `idx_target` (`app_key`,`user_id`,`target_id`,`msg_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `p_hismsgs`;
