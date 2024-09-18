@@ -90,6 +90,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		GroupInfo:      groupInfo,
 		MergedMsgs:     upMsg.MergedMsgs,
 		MemberCount:    int32(memberCount),
+		PushData:       upMsg.PushData,
 	}
 	if !commonservices.IsStateMsg(upMsg.Flags) {
 		// save msg to sendbox for sender
@@ -118,6 +119,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		GroupInfo:      groupInfo,
 		MergedMsgs:     upMsg.MergedMsgs,
 		MemberCount:    int32(memberCount),
+		PushData:       upMsg.PushData,
 	}
 
 	commonservices.SubGroupMsg(ctx, msgId, downMsg4Sendbox)

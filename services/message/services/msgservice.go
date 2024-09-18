@@ -52,6 +52,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
 		TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
 		MergedMsgs:     upMsg.MergedMsgs,
+		PushData:       upMsg.PushData,
 	}
 	//send to sender's other device
 	if !commonservices.IsStateMsg(upMsg.Flags) {
@@ -82,6 +83,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
 		TargetUserInfo: commonservices.GetSenderUserInfo(ctx),
 		MergedMsgs:     upMsg.MergedMsgs,
+		PushData:       upMsg.PushData,
 	}
 
 	//check merged msg
@@ -125,6 +127,11 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 	userStatus := GetUserStatus(appkey, targetId)
 	if userStatus.IsOnline() {
 		isNtf := GetUserStatus(appkey, targetId).CheckNtfWithSwitch()
+		hasPush := false
+		if userStatus.OpenPushSwitch() {
+			hasPush = true
+			SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg, userStatus.BadgeIncr())
+		}
 		if isNtf { //发送通知
 			logs.WithContext(ctx).Infof("ntf target_id:%s", targetId)
 			rpcNtf := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "ntf", &pbobjs.Notify{
@@ -142,6 +149,7 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 				ctx:         ctx,
 				IsNotify:    isNtf,
 				userStatus:  userStatus,
+				HasPush:     hasPush,
 			}, 5*time.Second)
 		} else {
 			logs.WithContext(ctx).Infof("msg target_id:%s", targetId)
@@ -155,6 +163,7 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 				ctx:         ctx,
 				IsNotify:    isNtf,
 				userStatus:  userStatus,
+				HasPush:     hasPush,
 			}, 5*time.Second)
 		}
 	} else { //for push
@@ -186,6 +195,7 @@ type SendMsgAckActor struct {
 	Msg        *pbobjs.DownMsg
 	ctx        context.Context
 	IsNotify   bool
+	HasPush    bool
 	userStatus *UserStatus
 }
 
@@ -198,7 +208,9 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 			logs.WithContext(actor.ctx).Infof("target_id:%s\tonline_type:%d", actor.targetId, onlineStatus.Type)
 			if onlineStatus.Type == pbobjs.OnlineType_Offline { //receiver is offline
 				RecordUserOnlineStatus(actor.appkey, actor.targetId, false, 0)
-				SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg, actor.userStatus.BadgeIncr())
+				if !actor.HasPush {
+					SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg, actor.userStatus.BadgeIncr())
+				}
 			} else { //receiver is online, and response ack
 				if !actor.IsNotify {
 					us := GetUserStatus(actor.appkey, actor.targetId)
@@ -207,9 +219,6 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 					}
 					//statistic
 					commonservices.ReportDownMsg(actor.appkey, actor.channelType, 1)
-				}
-				if actor.userStatus.OpenPushSwitch() {
-					SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg, actor.userStatus.BadgeIncr())
 				}
 			}
 		}

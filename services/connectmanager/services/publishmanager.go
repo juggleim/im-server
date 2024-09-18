@@ -62,14 +62,18 @@ func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec
 			})
 			if callback != nil && !isSetCallback {
 				isSetCallback = true
-				task := callbackTimeoutTimer.Add(5*time.Second, func() {
-					//do timeout
-					imcontext.RemoveServerPubCallback(vCtx, tmpPubMsg.MsgBody.Index)
-				})
-				imcontext.PutServerPubCallback(vCtx, tmpPubMsg.MsgBody.Index, func() {
-					callbackTimeoutTimer.Remove(task) //remove from timeout timer
-					callback()                        //execute
-				})
+				if serverPubMsg.Topic == "msg" {
+					task := callbackTimeoutTimer.Add(5*time.Second, func() {
+						//do timeout
+						imcontext.RemoveServerPubCallback(vCtx, tmpPubMsg.MsgBody.Index)
+					})
+					imcontext.PutServerPubCallback(vCtx, tmpPubMsg.MsgBody.Index, func() {
+						callbackTimeoutTimer.Remove(task) //remove from timeout timer
+						callback()                        //execute
+					})
+				} else {
+					callback()
+				}
 			}
 			// }
 		}
