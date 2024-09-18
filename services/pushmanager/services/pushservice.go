@@ -151,7 +151,11 @@ func iosPushPayload(req *pbobjs.PushData) interface{} {
 	iosPayload.AlertBody(tools.PureStr(req.PushText))
 	iosPayload.Custom("conver_id", req.ConverId)
 	iosPayload.Custom("conver_type", int32(req.ChannelType))
-	iosPayload.Custom("exts", req.PushExtraData)
-	iosPayload.Badge(int(req.Badge))
+	if req.PushExtraData != "" {
+		iosPayload.Custom("exts", req.PushExtraData)
+	}
+	if req.Badge > 0 {
+		iosPayload.Badge(int(req.Badge))
+	}
 	return iosPayload
 }

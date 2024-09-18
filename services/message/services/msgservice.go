@@ -130,7 +130,7 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 		hasPush := false
 		if userStatus.OpenPushSwitch() {
 			hasPush = true
-			SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg, userStatus.BadgeIncr())
+			SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg)
 		}
 		if isNtf { //发送通知
 			logs.WithContext(ctx).Infof("ntf target_id:%s", targetId)
@@ -148,7 +148,6 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 				Msg:         downMsg,
 				ctx:         ctx,
 				IsNotify:    isNtf,
-				userStatus:  userStatus,
 				HasPush:     hasPush,
 			}, 5*time.Second)
 		} else {
@@ -162,12 +161,11 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 				Msg:         downMsg,
 				ctx:         ctx,
 				IsNotify:    isNtf,
-				userStatus:  userStatus,
 				HasPush:     hasPush,
 			}, 5*time.Second)
 		}
 	} else { //for push
-		SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg, userStatus.BadgeIncr())
+		SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg)
 	}
 }
 
@@ -192,11 +190,10 @@ type SendMsgAckActor struct {
 	targetId    string
 	channelType pbobjs.ChannelType
 	// pushData    *pbobjs.PushData
-	Msg        *pbobjs.DownMsg
-	ctx        context.Context
-	IsNotify   bool
-	HasPush    bool
-	userStatus *UserStatus
+	Msg      *pbobjs.DownMsg
+	ctx      context.Context
+	IsNotify bool
+	HasPush  bool
 }
 
 func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message) {
@@ -209,7 +206,7 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 			if onlineStatus.Type == pbobjs.OnlineType_Offline { //receiver is offline
 				RecordUserOnlineStatus(actor.appkey, actor.targetId, false, 0)
 				if !actor.HasPush {
-					SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg, actor.userStatus.BadgeIncr())
+					SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg)
 				}
 			} else { //receiver is online, and response ack
 				if !actor.IsNotify {
@@ -243,28 +240,15 @@ func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 		title = nickName
 	}
 	retPushData := &pbobjs.PushData{}
-	if msg.PushData != nil && msg.PushData.PushText != "" {
-		if msg.PushData.Title == "" {
-			retPushData.Title = title
-		} else {
-			retPushData.Title = msg.PushData.Title
-		}
-		retPushData.PushText = prefix + msg.PushData.PushText
-	} else {
-		var (
-			title  string
-			prefix string
-		)
-		nickName := msg.TargetUserInfo.GetNickname()
-		if msg.ChannelType == pbobjs.ChannelType_Group {
-			title = msg.GroupInfo.GroupName
-			if nickName != "" {
-				prefix = nickName + ": "
-			}
-		} else {
-			title = nickName
-		}
+	if msg.PushData != nil {
+		retPushData = msg.PushData
+	}
+	if retPushData.Title == "" {
 		retPushData.Title = title
+	}
+	if retPushData.PushText != "" {
+		retPushData.PushText = prefix + retPushData.PushText
+	} else {
 		if msg.MsgType == "jg:text" {
 			txtMsg := &commonservices.TextMsg{}
 			err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
@@ -288,8 +272,11 @@ func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Video, "[Video]")
 		} else if msg.MsgType == "jg:merge" {
 			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Merge, "[Merge]")
+		} else {
+			return nil
 		}
 	}
+
 	//add internal fields
 	retPushData.MsgId = msg.MsgId
 	retPushData.SenderId = msg.SenderId
@@ -305,7 +292,7 @@ func (actor *SendMsgAckActor) OnTimeout() {
 
 }
 
-func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.DownMsg, badge int32) {
+func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.DownMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, exist := commonservices.GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.IsOpenPush {
@@ -313,7 +300,8 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 			pushData := GetPushData(msg, getPushLanguage(ctx, receiverId))
 			if pushData != nil {
 				//badge
-				pushData.Badge = badge
+				userStatus := GetUserStatus(appkey, receiverId)
+				pushData.Badge = userStatus.BadgeIncr()
 				pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
 				bases.UnicastRouteWithNoSender(pushRpc)
 			}
