@@ -14,6 +14,13 @@ type SendMsgReq struct {
 	IsCmd          *bool        `json:"is_cmd"`
 	MentionInfo    *MentionInfo `json:"mention_info"`
 	ReferMsg       *ReferMsg    `json:"refer_msg"`
+	PushData       *PushData    `json:"push_data"`
+}
+
+type PushData struct {
+	PushTitle string `json:"push_title"`
+	PushText  string `json:"push_text"`
+	PushExtra string `json:"push_extra"`
 }
 
 type MentionInfo struct {

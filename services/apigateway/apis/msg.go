@@ -43,6 +43,7 @@ func SendPrivateMsg(ctx *gin.Context) {
 				Flags:       handleFlag(sendMsgReq),
 				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
+				PushData:    handlePushData(sendMsgReq.PushData),
 			}, isNotifySender(sendMsgReq))
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -71,6 +72,7 @@ func SendSystemMsg(ctx *gin.Context) {
 				MsgType:    sendMsgReq.MsgType,
 				MsgContent: []byte(sendMsgReq.MsgContent),
 				Flags:      handleFlag(sendMsgReq),
+				PushData:   handlePushData(sendMsgReq.PushData),
 			}, false)
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -101,6 +103,7 @@ func SendGroupMsg(ctx *gin.Context) {
 				Flags:       handleFlag(sendMsgReq),
 				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
+				PushData:    handlePushData(sendMsgReq.PushData),
 			}, isNotifySender(sendMsgReq))
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -221,6 +224,17 @@ func handleReferMsg(referMsg *models.ReferMsg) *pbobjs.DownMsg {
 			MsgContent:  []byte(referMsg.MsgContent),
 		}
 		return downMsg
+	}
+	return nil
+}
+
+func handlePushData(data *models.PushData) *pbobjs.PushData {
+	if data != nil {
+		return &pbobjs.PushData{
+			Title:         data.PushTitle,
+			PushText:      data.PushText,
+			PushExtraData: data.PushExtra,
+		}
 	}
 	return nil
 }
