@@ -30,7 +30,7 @@ var (
 
 func OnMessage(msg *pbobjs.DownMsg) {
 	fmt.Println("***************received msg*******************")
-	fmt.Println("channel_type:", msg.ChannelType, "sender:", msg.SenderId, "\ttarget:", msg.TargetId, "\tmsg_type:", msg.MsgType, "\tmsg_content:", string(msg.MsgContent))
+	fmt.Println("msg_id:", msg.MsgId, "channel_type:", msg.ChannelType, "sender:", msg.SenderId, "\ttarget:", msg.TargetId, "\tmsg_type:", msg.MsgType, "\tmsg_content:", string(msg.MsgContent))
 	bs, _ := json.Marshal(msg.TargetUserInfo)
 	fmt.Println("sender_info:", string(bs))
 }

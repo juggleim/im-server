@@ -35,8 +35,19 @@ func SendPrivateMsg(ctx *gin.Context) {
 	}
 	targetIds = append(targetIds, sendMsgReq.TargetIds...)
 	targetIds = purgeTargetIds(targetIds)
+	ret := []*models.SendMsgRespItem{}
+	msgIdMap := map[string]string{}
+	for _, targetId := range targetIds {
+		msgId := tools.GenerateMsgId(time.Now().UnixMilli(), int32(pbobjs.ChannelType_Private), targetId)
+		ret = append(ret, &models.SendMsgRespItem{
+			TargetId: targetId,
+			MsgId:    msgId,
+		})
+		msgIdMap[targetId] = msgId
+	}
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
+			msgId := msgIdMap[targetId]
 			services.AsyncSendMsg(ctx, "p_msg", sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:     sendMsgReq.MsgType,
 				MsgContent:  []byte(sendMsgReq.MsgContent),
@@ -44,11 +55,11 @@ func SendPrivateMsg(ctx *gin.Context) {
 				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
 				PushData:    handlePushData(sendMsgReq.PushData),
-			}, isNotifySender(sendMsgReq))
+			}, isNotifySender(sendMsgReq), msgId)
 			time.Sleep(10 * time.Millisecond)
 		}
 	})
-	tools.SuccessHttpResp(ctx, models.SendMsgResp{})
+	tools.SuccessHttpResp(ctx, ret)
 }
 
 func SendSystemMsg(ctx *gin.Context) {
@@ -66,18 +77,29 @@ func SendSystemMsg(ctx *gin.Context) {
 	}
 	targetIds = append(targetIds, sendMsgReq.TargetIds...)
 	targetIds = purgeTargetIds(targetIds)
+	ret := []*models.SendMsgRespItem{}
+	msgIdMap := map[string]string{}
+	for _, targetId := range targetIds {
+		msgId := tools.GenerateMsgId(time.Now().UnixMilli(), int32(pbobjs.ChannelType_System), targetId)
+		ret = append(ret, &models.SendMsgRespItem{
+			TargetId: targetId,
+			MsgId:    msgId,
+		})
+		msgIdMap[targetId] = msgId
+	}
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
+			msgId := msgIdMap[targetId]
 			services.AsyncSendMsg(ctx, "s_msg", sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:    sendMsgReq.MsgType,
 				MsgContent: []byte(sendMsgReq.MsgContent),
 				Flags:      handleFlag(sendMsgReq),
 				PushData:   handlePushData(sendMsgReq.PushData),
-			}, false)
+			}, false, msgId)
 			time.Sleep(10 * time.Millisecond)
 		}
 	})
-	tools.SuccessHttpResp(ctx, models.SendMsgResp{})
+	tools.SuccessHttpResp(ctx, ret)
 }
 
 func SendGroupMsg(ctx *gin.Context) {
@@ -95,8 +117,19 @@ func SendGroupMsg(ctx *gin.Context) {
 	}
 	targetIds = append(targetIds, sendMsgReq.TargetIds...)
 	targetIds = purgeTargetIds(targetIds)
+	ret := []*models.SendMsgRespItem{}
+	msgIdMap := map[string]string{}
+	for _, targetId := range targetIds {
+		msgId := tools.GenerateMsgId(time.Now().UnixMilli(), int32(pbobjs.ChannelType_Group), targetId)
+		ret = append(ret, &models.SendMsgRespItem{
+			TargetId: targetId,
+			MsgId:    msgId,
+		})
+		msgIdMap[targetId] = msgId
+	}
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
+			msgId := msgIdMap[targetId]
 			services.AsyncSendMsg(ctx, "g_msg", sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:     sendMsgReq.MsgType,
 				MsgContent:  []byte(sendMsgReq.MsgContent),
@@ -104,11 +137,11 @@ func SendGroupMsg(ctx *gin.Context) {
 				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
 				PushData:    handlePushData(sendMsgReq.PushData),
-			}, isNotifySender(sendMsgReq))
+			}, isNotifySender(sendMsgReq), msgId)
 			time.Sleep(10 * time.Millisecond)
 		}
 	})
-	tools.SuccessHttpResp(ctx, models.SendMsgResp{})
+	tools.SuccessHttpResp(ctx, ret)
 }
 
 func SendGroupCastMsg(ctx *gin.Context) {
@@ -137,9 +170,9 @@ func SendGroupCastMsg(ctx *gin.Context) {
 		}
 		for _, conver := range req.TargetConvers {
 			if conver.ChannelType == int(pbobjs.ChannelType_Private) {
-				services.AsyncSendMsg(ctx, "p_msg", req.SenderId, conver.TargetId, upMsg, false)
+				services.AsyncSendMsg(ctx, "p_msg", req.SenderId, conver.TargetId, upMsg, false, "")
 			} else if conver.ChannelType == int(pbobjs.ChannelType_Group) {
-				services.AsyncSendMsg(ctx, "g_msg", req.SenderId, conver.TargetId, upMsg, false)
+				services.AsyncSendMsg(ctx, "g_msg", req.SenderId, conver.TargetId, upMsg, false, "")
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

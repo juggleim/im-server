@@ -36,6 +36,10 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	}
 	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
+	preMsgId := bases.GetMsgIdFromCtx(ctx)
+	if preMsgId != "" {
+		msgId = preMsgId
+	}
 	downMsg4Sendbox := &pbobjs.DownMsg{
 		SenderId:       senderId,
 		TargetId:       receiverId,

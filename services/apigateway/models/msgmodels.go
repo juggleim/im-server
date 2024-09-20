@@ -65,6 +65,11 @@ type SendMsgResp struct {
 	MsgSeq  int64  `json:"msg_seq"`
 }
 
+type SendMsgRespItem struct {
+	TargetId string `json:"target_id"`
+	MsgId    string `json:"msg_id"`
+}
+
 type HisMsgs struct {
 	Msgs       []*HisMsg `json:"msgs"`
 	IsFinished bool      `json:"is_finished"`

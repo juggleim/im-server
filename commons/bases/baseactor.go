@@ -63,6 +63,7 @@ const (
 	CtxKey_NoSendbox     CtxKey = "CtxKey_NoSendbox"
 	CtxKey_OnlySendbox   CtxKey = "CtxKey_OnlySendbox"
 	CtxKey_Exts          CtxKey = "CtxKey_Exts"
+	CtxKey_MsgId         CtxKey = "CtxKey_MsgId"
 
 	CtxKey_StartTime CtxKey = "CtxKey_StartTime"
 )
@@ -103,6 +104,7 @@ func (actor *baseProcessActor) OnReceive(ctx context.Context, input proto.Messag
 				exts = map[string]string{}
 			}
 			ctx = setCtxValue(ctx, CtxKey_Exts, exts)
+			ctx = setCtxValue(ctx, CtxKey_MsgId, ssRequest.MsgId)
 			ctx = setCtxValue(ctx, CtxKey_StartTime, time.Now().UnixMilli())
 
 			ctx = setCtxValue(ctx, CtxKey_SenderInfo, ssRequest.SenderInfo)
@@ -339,4 +341,11 @@ func GetExtsFromCtx(ctx context.Context) map[string]string {
 		return exts
 	}
 	return map[string]string{}
+}
+
+func GetMsgIdFromCtx(ctx context.Context) string {
+	if msgId, ok := ctx.Value(CtxKey_MsgId).(string); ok {
+		return msgId
+	}
+	return ""
 }

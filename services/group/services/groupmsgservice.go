@@ -51,6 +51,10 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 	}
 	msgConverCache := commonservices.GetMsgConverCache(ctx, groupId, pbobjs.ChannelType_Group)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(groupId, pbobjs.ChannelType_Group, time.Now().UnixMilli(), upMsg.Flags)
+	preMsgId := bases.GetMsgIdFromCtx(ctx)
+	if preMsgId != "" {
+		msgId = preMsgId
+	}
 
 	groupInfo := GetGroupInfo4Msg(ctx, groupId)
 

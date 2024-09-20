@@ -18,6 +18,10 @@ func SendSystemMsg(ctx context.Context, senderId, receiverId string, upMsg *pbob
 
 	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_System)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_System, time.Now().UnixMilli(), upMsg.Flags)
+	preMsgId := bases.GetMsgIdFromCtx(ctx)
+	if preMsgId != "" {
+		msgId = preMsgId
+	}
 
 	downMsg4Sendbox := &pbobjs.DownMsg{
 		SenderId:       senderId,

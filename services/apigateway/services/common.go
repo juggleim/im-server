@@ -19,7 +19,7 @@ const (
 	CtxKey_Session string = "CtxKey_Session"
 )
 
-func AsyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req proto.Message, isNotifySender bool) {
+func AsyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req proto.Message, isNotifySender bool, msgId string) {
 	dataBytes, _ := tools.PbMarshal(req)
 	exts := map[string]string{}
 	exts[commonservices.RpcExtKey_RealMethod] = method
@@ -38,6 +38,7 @@ func AsyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req prot
 		IsFromApi:    true,
 		NoSendbox:    !isNotifySender,
 		ExtParams:    exts,
+		MsgId:        msgId,
 	})
 }
 
@@ -70,7 +71,7 @@ func SyncSendMsg(ctx *gin.Context, method, requestId, targetId string, req proto
 	}, nil
 }
 
-func Broadcast(ctx *gin.Context, method, requestId string, req proto.Message) {
+func Broadcast(ctx *gin.Context, method, requestId string, req proto.Message, msgId string) {
 	dataBytes, _ := tools.PbMarshal(req)
 	bases.BroadcastRouteWithNoSender(&pbobjs.RpcMessageWraper{
 		RpcMsgType:   pbobjs.RpcMsgType_ServerPub,
@@ -81,6 +82,7 @@ func Broadcast(ctx *gin.Context, method, requestId string, req proto.Message) {
 		Qos:          0,
 		AppDataBytes: dataBytes,
 		IsFromApi:    true,
+		MsgId:        msgId,
 	})
 }
 
