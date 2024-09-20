@@ -3,10 +3,11 @@ package dbs
 import "im-server/commons/dbcommons"
 
 type AndroidPushConfDao struct {
-	AppKey      string `gorm:"app_key"`
-	PushChannel string `gorm:"push_channel"`
-	Package     string `gorm:"package"`
-	PushConf    string `gorm:"push_conf"`
+	AppKey      string `gorm:"app_key" json:"app_key"`
+	PushChannel string `gorm:"push_channel" json:"push_channel"`
+	Package     string `gorm:"package" json:"package"`
+	PushConf    string `gorm:"push_conf" json:"conf_path"`
+	PushExt     []byte `gorm:"push_ext" json:"-"`
 }
 
 func (conf AndroidPushConfDao) TableName() string {
@@ -14,8 +15,8 @@ func (conf AndroidPushConfDao) TableName() string {
 }
 
 func (conf AndroidPushConfDao) Upsert(item AndroidPushConfDao) error {
-	err := dbcommons.GetDb().Exec("INSERT INTO androidpushconfs (app_key,push_channel,package,push_conf)VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE package=?,push_conf=?",
-		item.AppKey, item.PushChannel, item.Package, item.PushConf, item.Package, item.PushConf).Error
+	err := dbcommons.GetDb().Exec("INSERT INTO androidpushconfs (app_key,push_channel,package,push_conf,push_ext)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE package=?,push_conf=?,push_ext=?",
+		item.AppKey, item.PushChannel, item.Package, item.PushConf, item.PushExt, item.Package, item.PushConf, item.PushExt).Error
 	return err
 }
 

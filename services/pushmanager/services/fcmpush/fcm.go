@@ -2,37 +2,36 @@ package fcmpush
 
 import (
 	"context"
-	"firebase.google.com/go"
+
+	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
 )
 
-type FcmPush struct {
-	credential string // json string of firebase credentials
+type FcmPushClient struct {
+	fcmClient *messaging.Client
 }
 
-func (f *FcmPush) client() (client *messaging.Client, err error) {
-	var app *firebase.App
-
-	opts := []option.ClientOption{option.WithCredentialsJSON([]byte(f.credential))}
-
-	// Initialize firebase app
-	app, err = firebase.NewApp(context.Background(), nil, opts...)
-
+func NewFcmPushClient(jsonBs []byte) (*FcmPushClient, error) {
+	opts := []option.ClientOption{option.WithCredentialsJSON(jsonBs)}
+	app, err := firebase.NewApp(context.Background(), nil, opts...)
 	if err != nil {
-		err = errors.Wrap(err, "error in initializing firebase app")
-		return
+		return nil, errors.Wrap(err, "error in initializing firebase app")
 	}
-	client, err = app.Messaging(context.Background())
-
-	return
+	client, err := app.Messaging(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return &FcmPushClient{
+		fcmClient: client,
+	}, nil
 }
 
-func (f *FcmPush) SendPush(title, body, token string) (err error) {
-	client, err := f.client()
-	if err != nil {
-		return
+func (f *FcmPushClient) SendPush(title, body, token string) error {
+	client := f.fcmClient
+	if client == nil {
+		return errors.New("not initialized")
 	}
 
 	message := &messaging.Message{
@@ -43,20 +42,18 @@ func (f *FcmPush) SendPush(title, body, token string) (err error) {
 		Token: token,
 	}
 
-	_, err = client.Send(context.Background(), message)
+	_, err := client.Send(context.Background(), message)
 	if err != nil {
-		err = errors.Wrap(err, "error in sending push notification")
-		return
+		return errors.Wrap(err, "error in sending push notification")
 	}
 
-	return
+	return nil
 }
 
-func (f *FcmPush) MultipleSendPush(
-	title string, body string, tokens []string) (err error) {
-	client, err := f.client()
-	if err != nil {
-		return
+func (f *FcmPushClient) MultipleSendPush(title string, body string, tokens []string) error {
+	client := f.fcmClient
+	if client == nil {
+		return errors.New("not initialized")
 	}
 
 	message := &messaging.MulticastMessage{
@@ -69,16 +66,14 @@ func (f *FcmPush) MultipleSendPush(
 
 	response, err := client.SendMulticast(context.Background(), message)
 	if err != nil {
-		err = errors.Wrap(err, "error in sending push notification")
-		return
+		return errors.Wrap(err, "error in sending push notification")
 	}
 
 	for _, result := range response.Responses {
 		if result.Error != nil {
-			err = errors.Wrap(err, "error in sending push notification")
-			return
+			return errors.Wrap(err, "error in sending push notification")
 		}
 	}
 
-	return
+	return nil
 }

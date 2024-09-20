@@ -52,6 +52,8 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	group.POST("/apps/iospushcer/set", apis.SetIosPushConf)
 	group.POST("/apps/iospushcer/upload", apis.UploadIosCer)
 	group.GET("/apps/iospushcer/get", apis.GetIosCer)
+	group.POST("/apps/fcmpushconf/upload", apis.UploadFcmPushConf)
+	group.GET("/apps/fcmpushconf/get", apis.GetFcmPushConf)
 	group.POST("/apps/androidpushconf/set", apis.SetAndroidPushConf)
 	group.GET("/apps/androidpushconf/get", apis.GetAndroidPushConf)
 

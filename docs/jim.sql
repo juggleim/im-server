@@ -21,6 +21,7 @@ CREATE TABLE `androidpushconfs` (
   `push_channel` varchar(10) DEFAULT NULL,
   `package` varchar(100) DEFAULT NULL,
   `push_conf` varchar(500) DEFAULT NULL,
+  `push_ext` MEDIUMBLOB DEFAULT NULL,
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),

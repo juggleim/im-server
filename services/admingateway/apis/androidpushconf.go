@@ -6,6 +6,7 @@ import (
 	"im-server/services/admingateway/services"
 	"im-server/services/commonservices"
 	"im-server/services/pushmanager/storages/dbs"
+	"io"
 	"net/http"
 	"strings"
 
@@ -67,5 +68,69 @@ func SetAndroidPushConf(ctx *gin.Context) {
 		Package:     req.Package,
 		PushConf:    pushConf,
 	})
+	services.SuccessHttpResp(ctx, nil)
+}
+
+func GetFcmPushConf(ctx *gin.Context) {
+	appkey := ctx.Query("app_key")
+	if appkey == "" {
+		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+			Code: services.AdminErrorCode_Default,
+		})
+		return
+	}
+	dao := dbs.AndroidPushConfDao{}
+	fcmConf, err := dao.Find(appkey, string(commonservices.PushChannel_FCM))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+			Code: services.AdminErrorCode_Default,
+		})
+		return
+	}
+	fcmConf.PushExt = []byte{}
+	services.SuccessHttpResp(ctx, fcmConf)
+}
+
+func UploadFcmPushConf(ctx *gin.Context) {
+	appkey := ctx.PostForm("app_key")
+	confPath := ctx.PostForm("conf_path")
+	fmcPackage := ctx.PostForm("package")
+	fileHeader, err := ctx.FormFile("fcm_conf")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+			Code: services.AdminErrorCode_Default,
+		})
+		return
+	}
+	file, err := fileHeader.Open()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+			Code: services.AdminErrorCode_Default,
+		})
+		return
+	}
+	defer file.Close()
+	fcmConfBs, err := io.ReadAll(file)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+			Code: services.AdminErrorCode_Default,
+		})
+		return
+	}
+	//save to db
+	dao := dbs.AndroidPushConfDao{}
+	err = dao.Upsert(dbs.AndroidPushConfDao{
+		AppKey:      appkey,
+		PushChannel: string(commonservices.PushChannel_FCM),
+		PushExt:     fcmConfBs,
+		PushConf:    confPath,
+		Package:     fmcPackage,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+			Code: services.AdminErrorCode_Default,
+		})
+		return
+	}
 	services.SuccessHttpResp(ctx, nil)
 }

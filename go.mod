@@ -35,7 +35,9 @@ require (
 	cloud.google.com/go/longrunning v0.5.7 // indirect
 	cloud.google.com/go/storage v1.41.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
+	firebase.google.com/go/v4 v4.14.1 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/MicahParks/keyfunc v1.9.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -74,6 +76,7 @@ require (
 	golang.org/x/exp v0.0.0-20221205204356-47842c84f3db // indirect
 	golang.org/x/oauth2 v0.20.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
+	google.golang.org/appengine/v2 v2.0.2 // indirect
 	google.golang.org/genproto v0.0.0-20240401170217-c3f982113cda // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240506185236-b8a5c65736ae // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

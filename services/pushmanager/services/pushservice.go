@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -36,7 +35,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					notification.Payload = iosPushPayload(req)
 					resp, err := iosPushConf.ApnsClient.Push(notification)
 					if err != nil {
-						logs.WithContext(ctx).Errorf("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 					} else {
 						if resp.StatusCode == 200 {
 							logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
@@ -125,11 +124,18 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 							},
 						})
 					}
+				case pbobjs.PushChannel_FCM:
+					if androidPushConf.FcmPushClient != nil {
+						err := androidPushConf.FcmPushClient.SendPush(req.Title, req.PushText, pushToken.PushToken)
+						if err != nil {
+							logs.WithContext(ctx).Infof("[FCM_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						}
+					}
 				default:
-					fmt.Println("unknown push type", pushToken.PushChannel)
+					logs.WithContext(ctx).Errorf("unknown push type %s", pushToken.PushChannel)
 				}
 			} else {
-				fmt.Println("androidPushConf is nil")
+				logs.WithContext(ctx).Errorf("admroid_push_conf is nil")
 			}
 		}
 	}

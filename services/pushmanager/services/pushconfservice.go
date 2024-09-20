@@ -7,6 +7,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/pushmanager/services/fcmpush"
 	"im-server/services/pushmanager/services/hwpush"
 	"im-server/services/pushmanager/services/jpush"
 	"im-server/services/pushmanager/services/oppopush"
@@ -45,6 +46,7 @@ type AndroidPushConf struct {
 	OppoPushClient   *oppopush.OppoPushClient
 	VivoPushClient   *vivopush.VivoPushClient
 	JpushClient      *jpush.JpushClient
+	FcmPushClient    *fcmpush.FcmPushClient
 }
 
 func GetIosPushConf(ctx context.Context, appkey, packageName string) *IosPushConf {
@@ -174,7 +176,7 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 						logs.WithContext(ctx).Errorf("init huawei push client failed. %v", err)
 					}
 				} else {
-					logs.WithContext(ctx).Errorf("huawei push conf is not legal %v", err)
+					logs.WithContext(ctx).Errorf("huawei push conf is illegal %v", err)
 				}
 			case string(commonservices.PushChannel_Xiaomi):
 				var pushConf = &commonservices.XiaomiPushConf{}
@@ -182,7 +184,7 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 				if err == nil && pushConf.Valid() {
 					androidPushConf.XiaomiPushClient = xiaomipush.NewXiaomiPushClient(pushConf.AppSecret)
 				} else {
-					logs.WithContext(ctx).Errorf("xiaomi push conf is not legal %v", err)
+					logs.WithContext(ctx).Errorf("xiaomi push conf is illegal %v", err)
 				}
 			case string(commonservices.PushChannel_OPPO):
 				var pushConf = &commonservices.OppoPushConf{}
@@ -190,7 +192,7 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 				if err == nil && pushConf.Valid() {
 					androidPushConf.OppoPushClient = oppopush.NewOppoPushClient(pushConf.AppKey, pushConf.MasterSecret)
 				} else {
-					logs.WithContext(ctx).Errorf("oppo push conf is not legal %v", err)
+					logs.WithContext(ctx).Errorf("oppo push conf is illegal %v", err)
 				}
 			case string(commonservices.PushChannel_VIVO):
 				var pushConf = &commonservices.VivoPushConf{}
@@ -198,7 +200,7 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 				if err == nil && pushConf.Valid() {
 					androidPushConf.VivoPushClient = vivopush.NewVivoPushClient(pushConf.AppId, pushConf.AppKey, pushConf.AppSecret)
 				} else {
-					logs.WithContext(ctx).Errorf("vivo push conf is not legal %v", err)
+					logs.WithContext(ctx).Errorf("vivo push conf is illegal %v", err)
 				}
 			case string(commonservices.PushChannel_Jpush):
 				var pushConf = &commonservices.JPushConf{}
@@ -206,7 +208,16 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 				if err == nil && pushConf.Valid() {
 					androidPushConf.JpushClient = jpush.NewJpushClient(pushConf.AppKey, pushConf.MasterSecret)
 				} else {
-					logs.WithContext(ctx).Errorf("jiguang push conf is not legal %v", err)
+					logs.WithContext(ctx).Errorf("jiguang push conf is illegal %v", err)
+				}
+			case string(commonservices.PushChannel_FCM):
+				if len(dbPushConf.PushExt) > 0 {
+					fcmClient, err := fcmpush.NewFcmPushClient(dbPushConf.PushExt)
+					if err == nil {
+						androidPushConf.FcmPushClient = fcmClient
+					} else {
+						logs.WithContext(ctx).Errorf("fcm conf is illegal %v", err)
+					}
 				}
 			default:
 			}
