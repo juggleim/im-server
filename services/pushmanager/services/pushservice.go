@@ -135,7 +135,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					logs.WithContext(ctx).Errorf("unknown push type %s", pushToken.PushChannel)
 				}
 			} else {
-				logs.WithContext(ctx).Errorf("admroid_push_conf is nil")
+				logs.WithContext(ctx).Errorf("android_push_conf is nil")
 			}
 		}
 	}
