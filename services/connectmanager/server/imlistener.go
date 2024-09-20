@@ -97,7 +97,7 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 	//reg push token
 	services.RegPushToken(ctx, msg.Appkey, userId, msg.DeviceId, msg.Platform, msg.PushChannel, msg.PackageName, msg.PushToken)
 
-	services.Online(ctx, msg.Ext)
+	services.Online(ctx, msg.Ext, msg.Language)
 
 	//connect log
 	ucLog.UserId = userId

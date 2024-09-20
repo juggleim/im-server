@@ -25,6 +25,7 @@ message ConnectMsgBody{
     string ext = 16;
 
     string instanceId = 17;//客户端实例标识,用于多开时识别不同的实例，clientSession
+    string language = 18; //语言设置
 }
 
 message ConnectAckMsgBody{

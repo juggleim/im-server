@@ -60,7 +60,36 @@ func RemovePushToken(ctx imcontext.WsHandleContext) {
 	})
 }
 
-func Online(ctx imcontext.WsHandleContext, ext string) {
+func SetLanguage(ctx imcontext.WsHandleContext, language string) {
+	if language == "" {
+		return
+	}
+	appkey := imcontext.GetAppkey(ctx)
+	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
+	req := &pbobjs.UserInfo{
+		UserId: userId,
+		Settings: []*pbobjs.KvItem{
+			{
+				Key:   string(commonservices.AttItemKey_Language),
+				Value: language,
+			},
+		},
+	}
+	data, _ := tools.PbMarshal(req)
+	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
+		RpcMsgType:   pbobjs.RpcMsgType_QueryMsg,
+		AppKey:       appkey,
+		Session:      imcontext.GetConnSession(ctx),
+		Method:       "set_user_settings",
+		RequesterId:  userId,
+		TargetId:     userId,
+		ReqIndex:     0,
+		Qos:          int32(codec.QoS_NoAck),
+		AppDataBytes: data,
+	})
+}
+
+func Online(ctx imcontext.WsHandleContext, ext, language string) {
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	deviceId := imcontext.GetDeviceId(ctx)
 	platform := imcontext.GetPlatform(ctx)
@@ -79,6 +108,8 @@ func Online(ctx imcontext.WsHandleContext, ext string) {
 		InstanceId:    instanceId,
 	}
 	commonservices.SubOnlineEvent(imcontext.GetRpcContext(ctx), userId, onlineMsg)
+	//set language for user
+	SetLanguage(ctx, language)
 }
 
 func Offline(ctx imcontext.WsHandleContext, code errs.IMErrorCode) {
