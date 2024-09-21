@@ -16,7 +16,7 @@ type MessageManager struct{}
 func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterStandaloneActor("p_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.PrivateMsgActor{}, serviceName)
-	}, 6144)
+	}, 3072)
 	register.RegisterActor("s_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SystemMsgActor{}, serviceName)
 	})
@@ -49,6 +49,9 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	})
 	register.RegisterActor("del_conver_cache", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.DelConverCacheActor{}, serviceName)
+	})
+	register.RegisterActor("msg_ack", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.MsgAckActor{}, serviceName)
 	})
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"hash/crc32"
+	"im-server/commons/pbdefines/pbobjs"
 	"sync/atomic"
 )
 
@@ -130,4 +131,21 @@ func ParseTimeFromMsgId(msgId string) int64 {
 	t = t << 2
 	t = t | intVal
 	return t
+}
+
+func ParseChannelTypeFromMsgId(msgId string) pbobjs.ChannelType {
+	if len(msgId) < 12 {
+		return pbobjs.ChannelType_Unknown
+	}
+	var channelType int64 = 0
+	a := msgId[10:11]
+	intVal := base32DecodeChars[a]
+	intVal = intVal & 0b1
+	channelType = intVal
+	channelType = channelType << 3
+	b := msgId[11:12]
+	intVal = base32DecodeChars[b]
+	intVal = intVal >> 2
+	channelType = channelType | intVal
+	return pbobjs.ChannelType(channelType)
 }

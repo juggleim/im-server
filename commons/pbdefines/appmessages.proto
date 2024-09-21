@@ -121,6 +121,11 @@ message DownMsg{
   repeated StreamMsgItem msgItems = 24;
 }
 
+message MsgAck{
+  string msgId = 1;
+  int64 msgTime = 2;
+}
+
 message StreamMsgItem{
   StreamEvent event = 1;
   int64 subSeq = 2;
@@ -616,8 +621,9 @@ enum OnlineType{
 }
 message OnlineStatus{
   OnlineType type = 1;
-
-  bytes extraData = 11;
+  string targetSession = 2;
+  int32 targetIndex = 3;
+  repeated string platforms = 4;
 }
 message KickUserReq {
   string userId = 1;

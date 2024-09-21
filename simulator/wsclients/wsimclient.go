@@ -261,15 +261,6 @@ func (client *WsImClient) OnPong(msg *codec.ImWebsocketMsg) {
 	client.pongAccessor.Put(msg)
 }
 func (client *WsImClient) OnPublish(msg *codec.PublishMsgBody, needAck int) {
-	if needAck > 0 {
-		ackMsg := codec.NewServerPublishAckMessage(&codec.PublishAckMsgBody{
-			Index: msg.Index,
-		})
-		wsMsg := ackMsg.ToImWebsocketMsg()
-		Encrypt(wsMsg, client)
-		wsMsgBs, _ := tools.PbMarshal(wsMsg)
-		client.WriteMessage(wsMsgBs)
-	}
 	if msg.Topic == "msg" {
 		downMsg := pbobjs.DownMsg{}
 		err := tools.PbUnMarshal(msg.Data, &downMsg)
@@ -280,6 +271,15 @@ func (client *WsImClient) OnPublish(msg *codec.PublishMsgBody, needAck int) {
 			} else {
 				client.inboxTime = downMsg.MsgTime
 			}
+		}
+		if needAck > 0 {
+			ackMsg := codec.NewServerPublishAckMessage(&codec.PublishAckMsgBody{
+				Index: msg.Index,
+			})
+			wsMsg := ackMsg.ToImWebsocketMsg()
+			Encrypt(wsMsg, client)
+			wsMsgBs, _ := tools.PbMarshal(wsMsg)
+			client.WriteMessage(wsMsgBs)
 		}
 	} else if msg.Topic == "ntf" {
 		ntf := pbobjs.Notify{}

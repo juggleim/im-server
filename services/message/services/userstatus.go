@@ -87,6 +87,7 @@ func (user *UserStatus) CheckNtfWithSwitch() bool {
 		}
 	}
 }
+
 func (user *UserStatus) SetNtfStatus(isNtf bool) {
 	key := getKey(user.appkey, user.userId)
 	lock := userLocks.GetLocks(key)
@@ -94,6 +95,17 @@ func (user *UserStatus) SetNtfStatus(isNtf bool) {
 	defer lock.Unlock()
 	user.isNtf = isNtf
 }
+
+func (user *UserStatus) CloseNtf(ackTime int64) {
+	key := getKey(user.appkey, user.userId)
+	lock := userLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	if user.LatestMsgTime != nil && *user.LatestMsgTime == ackTime {
+		user.isNtf = false
+	}
+}
+
 func (user *UserStatus) SetLatestMsgTime(time int64) {
 	key := getKey(user.appkey, user.userId)
 	lock := userLocks.GetLocks(key)

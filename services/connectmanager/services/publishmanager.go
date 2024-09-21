@@ -2,7 +2,9 @@ package services
 
 import (
 	"context"
+	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/logmanager"
 	"time"
 
@@ -25,9 +27,14 @@ func init() {
 		callbackTimeoutTimer.Start()
 	}
 }
-func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec.PublishMsgBody, publishType commonservices.PublishType, callback func(), notOnlineCallback func()) {
+func PublishServerPubMessage(appkey, userid, session string, msgId string, msgTime int64, serverPubMsg *codec.PublishMsgBody, publishType commonservices.PublishType, callback func(*pbobjs.OnlineStatus)) {
 	userCtxMap := GetConnectCtxByUser(appkey, userid)
+	onlineStatus := &pbobjs.OnlineStatus{
+		Type:      pbobjs.OnlineType_Offline,
+		Platforms: []string{},
+	}
 	if len(userCtxMap) > 0 { //target user is online
+		onlineStatus.Type = pbobjs.OnlineType_Online
 		isSetCallback := false
 		for kSess, vCtx := range userCtxMap {
 			if publishType == commonservices.PublishType_OnlineSelfSession && kSess != session { //publishType:1, 只给指定的session发送
@@ -36,7 +43,6 @@ func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec
 			if publishType == commonservices.PublishType_AllSessionExceptSelf && kSess == session { //publishType:2, 除了指定session以外，给该用户其他登录端发送
 				continue
 			}
-			// if vCtx.Channel().IsActive() {
 			qos := codec.QoS_NoAck
 			if callback != nil {
 				qos = codec.QoS_NeedAck
@@ -49,6 +55,36 @@ func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec
 				Timestamp: time.Now().UnixMilli(),
 				Data:      serverPubMsg.Data,
 			}, qos)
+			if callback != nil && !isSetCallback {
+				isSetCallback = true
+				if serverPubMsg.Topic == "msg" {
+					task := callbackTimeoutTimer.Add(5*time.Second, func() {
+						//do timeout
+						imcontext.RemoveServerPubCallback(vCtx, tmpPubMsg.MsgBody.Index)
+					})
+					targetSession := imcontext.GetConnSession(vCtx)
+					targetIndex := tmpPubMsg.MsgBody.Index
+					imcontext.PutServerPubCallback(vCtx, tmpPubMsg.MsgBody.Index, func() {
+						callbackTimeoutTimer.Remove(task)
+						data, _ := tools.PbMarshal(&pbobjs.MsgAck{
+							MsgId:   msgId,
+							MsgTime: msgTime,
+						})
+						bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
+							RpcMsgType:   pbobjs.RpcMsgType_UserPubAck,
+							AppKey:       appkey,
+							Session:      targetSession,
+							ReqIndex:     targetIndex,
+							Method:       "msg_ack",
+							RequesterId:  userid,
+							TargetId:     userid,
+							AppDataBytes: data,
+						})
+					})
+					onlineStatus.TargetSession = targetSession
+					onlineStatus.TargetIndex = targetIndex
+				}
+			}
 			vCtx.Write(tmpPubMsg)
 			logs.Infof("session:%s\taction:%s\tseq_index:%d\ttopic:%s\tlen:%d", imcontext.GetConnSession(vCtx), imcontext.Action_ServerPub, tmpPubMsg.MsgBody.Index, tmpPubMsg.MsgBody.Topic, len(tmpPubMsg.MsgBody.Data))
 			logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
@@ -60,27 +96,11 @@ func PublishServerPubMessage(appkey, userid, session string, serverPubMsg *codec
 				TargetId: tmpPubMsg.MsgBody.TargetId,
 				DataLen:  int32(len(tmpPubMsg.MsgBody.Data)),
 			})
-			if callback != nil && !isSetCallback {
-				isSetCallback = true
-				if serverPubMsg.Topic == "msg" {
-					task := callbackTimeoutTimer.Add(5*time.Second, func() {
-						//do timeout
-						imcontext.RemoveServerPubCallback(vCtx, tmpPubMsg.MsgBody.Index)
-					})
-					imcontext.PutServerPubCallback(vCtx, tmpPubMsg.MsgBody.Index, func() {
-						callbackTimeoutTimer.Remove(task) //remove from timeout timer
-						callback()                        //execute
-					})
-				} else {
-					callback()
-				}
-			}
-			// }
+			onlineStatus.Platforms = append(onlineStatus.Platforms, imcontext.GetPlatform(vCtx))
 		}
-	} else { //target user is not online
-		if notOnlineCallback != nil {
-			notOnlineCallback()
-		}
+	}
+	if callback != nil {
+		callback(onlineStatus)
 	}
 }
 

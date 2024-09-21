@@ -157,6 +157,8 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 		} else {
 			logs.WithContext(ctx).Infof("msg target_id:%s", targetId)
 			rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "msg", downMsg)
+			rpcMsg.MsgId = downMsg.MsgId
+			rpcMsg.MsgSendTime = downMsg.MsgTime
 			bases.UnicastRouteWithCallback(rpcMsg, &SendMsgAckActor{
 				appkey:      appkey,
 				senderId:    bases.GetRequesterIdFromCtx(ctx),
@@ -211,15 +213,6 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 				RecordUserOnlineStatus(actor.appkey, actor.targetId, false, 0)
 				if !actor.HasPush {
 					SendPush(actor.ctx, actor.senderId, actor.targetId, actor.Msg)
-				}
-			} else { //receiver is online, and response ack
-				if !actor.IsNotify {
-					us := GetUserStatus(actor.appkey, actor.targetId)
-					if us != nil {
-						us.SetNtfStatus(false)
-					}
-					//statistic
-					commonservices.ReportDownMsg(actor.appkey, actor.channelType, 1)
 				}
 			}
 		}

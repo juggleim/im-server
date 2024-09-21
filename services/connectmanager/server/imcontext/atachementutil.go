@@ -39,6 +39,10 @@ func GetContextAttrString(ctx WsHandleContext, key string) string {
 	return ""
 }
 
+func GetUserId(ctx WsHandleContext) string {
+	return GetContextAttrString(ctx, StateKey_UserID)
+}
+
 func GetConnSession(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_ConnectSession)
 }

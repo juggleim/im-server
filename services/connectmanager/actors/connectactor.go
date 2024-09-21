@@ -46,24 +46,19 @@ func (actor *ConnectActor) OnReceive(ctx context.Context, input proto.Message) {
 				Data:      rpcMsg.AppDataBytes,
 			}, callback, ontOnlineCallback)
 		} else if rpcMsg.RpcMsgType == pbobjs.RpcMsgType_ServerPub {
-			var onlineCallback func()
-			var notOnlineCallback func()
+			var onlineCallback func(*pbobjs.OnlineStatus)
 			if int(rpcMsg.Qos) == codec.QoS_NeedAck || actor.Sender != actorsystem.NoSender {
 				pubAckCallback := &PublishAckCallback{
-					sender:  actor.Sender,
-					appkey:  rpcMsg.AppKey,
-					session: rpcMsg.Session,
-					msgId:   rpcMsg.MsgId,
+					sender: actor.Sender,
 				}
 				onlineCallback = pubAckCallback.OnlineCallback
-				notOnlineCallback = pubAckCallback.NotOnlineCallback
 			}
-			services.PublishServerPubMessage(rpcMsg.AppKey, rpcMsg.TargetId, rpcMsg.Session, &codec.PublishMsgBody{
+			services.PublishServerPubMessage(rpcMsg.AppKey, rpcMsg.TargetId, rpcMsg.Session, rpcMsg.MsgId, rpcMsg.MsgSendTime, &codec.PublishMsgBody{
 				Topic:     rpcMsg.Method,
 				TargetId:  rpcMsg.TargetId,
 				Timestamp: rpcMsg.MsgSendTime,
 				Data:      rpcMsg.AppDataBytes,
-			}, commonservices.PublishType(rpcMsg.PublishType), onlineCallback, notOnlineCallback)
+			}, commonservices.PublishType(rpcMsg.PublishType), onlineCallback)
 		}
 	}
 }
@@ -73,31 +68,15 @@ func (actor *ConnectActor) CreateInputObj() proto.Message {
 }
 
 type PublishAckCallback struct {
-	sender  actorsystem.ActorRef
-	appkey  string
-	session string
-	msgId   string
+	sender actorsystem.ActorRef
 }
 
-func (callback *PublishAckCallback) OnlineCallback() {
-	data, _ := tools.PbMarshal(&pbobjs.OnlineStatus{
-		Type: pbobjs.OnlineType_Online,
-	})
-	callback.sender.TellAndNoSender(&pbobjs.RpcMessageWraper{
-		RpcMsgType:   pbobjs.RpcMsgType_ServerPubAck,
-		AppKey:       callback.appkey,
-		MsgId:        callback.msgId,
-		AppDataBytes: data,
-	})
-}
-func (callback *PublishAckCallback) NotOnlineCallback() {
-	data, _ := tools.PbMarshal(&pbobjs.OnlineStatus{
-		Type: pbobjs.OnlineType_Offline,
-	})
-	callback.sender.TellAndNoSender(&pbobjs.RpcMessageWraper{
-		RpcMsgType:   pbobjs.RpcMsgType_ServerPubAck,
-		AppKey:       callback.appkey,
-		MsgId:        callback.msgId,
-		AppDataBytes: data,
-	})
+func (callback *PublishAckCallback) OnlineCallback(onlineStatus *pbobjs.OnlineStatus) {
+	if onlineStatus != nil {
+		data, _ := tools.PbMarshal(onlineStatus)
+		callback.sender.TellAndNoSender(&pbobjs.RpcMessageWraper{
+			RpcMsgType:   pbobjs.RpcMsgType_ServerPubAck,
+			AppDataBytes: data,
+		})
+	}
 }
