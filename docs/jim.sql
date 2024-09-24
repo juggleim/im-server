@@ -269,8 +269,7 @@ CREATE TABLE `g_hismsgs` (
   `is_ext` tinyint DEFAULT '0',
   `is_reaction` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `idx_appkey_converid` (`app_key`,`conver_id`,`send_time`),
-  KEY `idx_msgid` (`app_key`,`conver_id`,`msg_id`)
+  KEY `idx_appkey_converid` (`app_key`,`conver_id`,`msg_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `gc_hismsgs`;
@@ -537,8 +536,7 @@ CREATE TABLE `p_hismsgs` (
   `is_ext` tinyint DEFAULT '0',
   `is_reaction` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`send_time`),
-  KEY `idx_msgid` (`app_key`,`conver_id`,`msg_id`)
+  KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`msg_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `pushtokens`;

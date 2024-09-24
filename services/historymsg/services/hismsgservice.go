@@ -159,7 +159,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 
 	if channelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
-		msgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, true, 0, []string{}, []string{})
+		msgs, err := storage.QryHisMsgs(appkey, converId, startTime, 0, count, true, 0, []string{}, []string{})
 		if err == nil {
 			for _, msg := range msgs {
 				downMsg := &pbobjs.DownMsg{}
@@ -209,7 +209,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 		}
 	} else if channelType == pbobjs.ChannelType_Group {
 		storage := storages.NewGroupHisMsgStorage()
-		dbMsgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, true, 0, []string{}, []string{})
+		dbMsgs, err := storage.QryHisMsgs(appkey, converId, startTime, 0, count, true, 0, []string{}, []string{})
 		if err == nil {
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
@@ -247,7 +247,9 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 	}
 	if channelType == pbobjs.ChannelType_Private {
 		cleanTime := GetCleanTime(appkey, userId, targetId, channelType)
-		dbMsgs, err := QryPrivateHisMsgsExcludeDel(appkey, userId, targetId, channelType, msgTypes, isPositive, startTime, cleanTime, count)
+		storage := storages.NewPrivateHisMsgStorage()
+		converId := commonservices.GetConversationId(userId, targetId, channelType)
+		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
 		if err == nil {
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
@@ -325,7 +327,9 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		if dbCleanTime > cleanTime {
 			cleanTime = dbCleanTime
 		}
-		dbMsgs, err := QryGroupHisMsgsExcludeDel(appkey, userId, targetId, channelType, msgTypes, isPositive, startTime, cleanTime, count)
+		storage := storages.NewGroupHisMsgStorage()
+		converId := commonservices.GetConversationId(userId, targetId, channelType)
+		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
 		if err == nil {
 			msgMap := map[string]*pbobjs.DownMsg{}
 			msgIds := []string{}
@@ -412,93 +416,6 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, resp
-}
-
-func QryGroupHisMsgsExcludeDel(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgTypes []string, isPositive bool, startTime, cleanTime int64, count int32) ([]*models.GroupHisMsg, error) {
-	storage := storages.NewGroupHisMsgStorage()
-	converId := commonservices.GetConversationId(userId, targetId, channelType)
-	excludeMsgIds := GetExcludeMsgIds(appkey, userId, targetId, channelType, isPositive, startTime, count)
-	if len(excludeMsgIds) < int(count) {
-		return storage.QryHisMsgs(appkey, converId, startTime, count, isPositive, cleanTime, msgTypes, excludeMsgIds)
-	} else {
-		retMsgs := []*models.GroupHisMsg{}
-		for {
-			dbMsgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, isPositive, cleanTime, msgTypes, []string{})
-			if err != nil {
-				return retMsgs, err
-			}
-
-			excludeMsgMap := array2map(excludeMsgIds)
-			for _, dbMsg := range dbMsgs {
-				if _, exist := excludeMsgMap[dbMsg.MsgId]; !exist {
-					retMsgs = append(retMsgs, dbMsg)
-				}
-				if !isPositive {
-					if dbMsg.SendTime < startTime {
-						startTime = dbMsg.SendTime
-					}
-				} else {
-					if dbMsg.SendTime > startTime {
-						startTime = dbMsg.SendTime
-					}
-				}
-			}
-
-			if len(retMsgs) >= int(count) || len(dbMsgs) < int(count) {
-				break
-			}
-			excludeMsgIds = GetExcludeMsgIds(appkey, userId, targetId, channelType, isPositive, startTime, count)
-			time.Sleep(5 * time.Millisecond)
-		}
-		return retMsgs, nil
-	}
-}
-func array2map(ids []string) map[string]bool {
-	ret := make(map[string]bool)
-	for _, id := range ids {
-		ret[id] = true
-	}
-	return ret
-}
-
-func QryPrivateHisMsgsExcludeDel(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgTypes []string, isPositive bool, startTime, cleanTime int64, count int32) ([]*models.PrivateHisMsg, error) {
-	storage := storages.NewPrivateHisMsgStorage()
-	converId := commonservices.GetConversationId(userId, targetId, channelType)
-	excludeMsgIds := GetExcludeMsgIds(appkey, userId, targetId, channelType, isPositive, startTime, count)
-	if len(excludeMsgIds) < int(count) {
-		return storage.QryHisMsgs(appkey, converId, startTime, count, isPositive, cleanTime, msgTypes, excludeMsgIds)
-	} else {
-		retMsgs := []*models.PrivateHisMsg{}
-		for {
-			dbMsgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, isPositive, cleanTime, msgTypes, []string{})
-			if err != nil {
-				return retMsgs, err
-			}
-
-			excludeMsgMap := array2map(excludeMsgIds)
-			for _, dbMsg := range dbMsgs {
-				if _, exist := excludeMsgMap[dbMsg.MsgId]; !exist {
-					retMsgs = append(retMsgs, dbMsg)
-				}
-				if !isPositive {
-					if dbMsg.SendTime < startTime {
-						startTime = dbMsg.SendTime
-					}
-				} else {
-					if dbMsg.SendTime > startTime {
-						startTime = dbMsg.SendTime
-					}
-				}
-			}
-
-			if len(retMsgs) >= int(count) || len(dbMsgs) < int(count) {
-				break
-			}
-			excludeMsgIds = GetExcludeMsgIds(appkey, userId, targetId, channelType, isPositive, startTime, count)
-			time.Sleep(5 * time.Millisecond)
-		}
-		return retMsgs, nil
-	}
 }
 
 type GrpMemberSettings struct {
@@ -617,28 +534,6 @@ func GetCleanTime(appkey, userId, targetId string, channelType pbobjs.ChannelTyp
 	} else {
 		return cleanTime
 	}
-}
-
-func GetExcludeMsgIds(appkey, userId, targetId string, channelType pbobjs.ChannelType, isPositive bool, startTime int64, count int32) []string {
-	delMsgIds := []string{}
-	if channelType == pbobjs.ChannelType_Private {
-		priDelStorage := storages.NewPrivateDelHisMsgStorage()
-		delMsgs, err := priDelStorage.QryDelHisMsgs(appkey, userId, targetId, startTime, count, isPositive)
-		if err == nil && len(delMsgs) > 0 {
-			for _, delMsg := range delMsgs {
-				delMsgIds = append(delMsgIds, delMsg.MsgId)
-			}
-		}
-	} else if channelType == pbobjs.ChannelType_Group {
-		grpDelStorage := storages.NewGroupDelHisMsgStorage()
-		delMsgs, err := grpDelStorage.QryDelHisMsgs(appkey, userId, targetId, startTime, count, isPositive)
-		if err == nil && len(delMsgs) > 0 {
-			for _, delMsg := range delMsgs {
-				delMsgIds = append(delMsgIds, delMsg.MsgId)
-			}
-		}
-	}
-	return delMsgIds
 }
 
 func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCode {

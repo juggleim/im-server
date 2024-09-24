@@ -30,6 +30,7 @@ type PrivateHisMsgDao struct {
 	IsDelete    int       `bson:"is_delete"`
 	IsExt       int       `bson:"is_ext"`
 	IsReaction  int       `bson:"is_reaction"`
+	DelUserIds  []string  `bson:"del_user_ids"`
 	AddTime     time.Time `bson:"add_time"`
 }
 
@@ -66,6 +67,9 @@ func (msg *PrivateHisMsgDao) IndexCreator() func(colName string) {
 				},
 				{
 					Keys: bson.M{"sender_id": 1},
+				},
+				{
+					Keys: bson.M{"del_user_ids": 1},
 				},
 			})
 		}
@@ -158,29 +162,100 @@ func (msg *PrivateHisMsgDao) QryLatestMsg(appkey, converId string) (*models.Priv
 	return nil, errors.New("no mongo client")
 }
 
-func (msg *PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
+func (msg *PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.PrivateHisMsg, error) {
+	collection := msg.getCollection()
+	retItems := []*models.PrivateHisMsg{}
+	if collection == nil {
+		return nil, errors.New("no mongo client")
+	}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "del_user_ids": bson.M{"$nin": []string{userId}}}
+	dbSort := -1
+	start := startTime
+	if isPositiveOrder {
+		dbSort = 1
+		if start < cleanTime {
+			start = cleanTime
+		}
+		filter["send_time"] = bson.M{
+			"$gt": start,
+		}
+	} else {
+		if start <= 0 {
+			start = time.Now().UnixMilli()
+		}
+		filter["send_time"] = bson.M{
+			"$lt": start,
+			"$gt": cleanTime,
+		}
+	}
+	if len(msgTypes) > 0 {
+		filter["msg_type"] = bson.M{"$in": msgTypes}
+	}
+
+	cur, err := collection.Find(context.TODO(), filter, options.Find().SetSort(bson.D{{"send_time", dbSort}}), options.Find().SetLimit(int64(count)))
+	defer func() {
+		if cur != nil {
+			cur.Close(context.TODO())
+		}
+	}()
+	if err != nil {
+		return nil, err
+	}
+	for cur.Next(context.TODO()) {
+		var item PrivateHisMsgDao
+		err = cur.Decode(&item)
+		if err == nil {
+			retItems = append(retItems, dbMsg2PrivateMsg(&item))
+		}
+	}
+	if !isPositiveOrder {
+		sort.Slice(retItems, func(i, j int) bool {
+			return retItems[i].SendTime < retItems[j].SendTime
+		})
+	}
+	return retItems, nil
+}
+
+func (msg *PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime, endTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
 	collection := msg.getCollection()
 	retItems := []*models.PrivateHisMsg{}
 	if collection == nil {
 		return nil, errors.New("no mongo client")
 	}
 	filter := bson.M{"app_key": appkey, "conver_id": converId}
+
 	dbSort := -1
+	start := startTime
+	end := endTime
 	if isPositiveOrder {
 		dbSort = 1
-		begin := startTime
-		if begin < cleanTime {
-			begin = cleanTime
+
+		if start < cleanTime {
+			start = cleanTime
 		}
-		filter["send_time"] = bson.M{
-			"$gt": begin,
+		if end > 0 {
+			filter["send_time"] = bson.M{
+				"$gt": start,
+				"$lt": end,
+			}
+		} else {
+			filter["send_time"] = bson.M{
+				"$gt": start,
+			}
 		}
 	} else {
+		if start <= 0 {
+			start = time.Now().UnixMilli()
+		}
+		if end < cleanTime {
+			end = cleanTime
+		}
 		filter["send_time"] = bson.M{
-			"$lt": startTime,
-			"$gt": cleanTime,
+			"$lt": start,
+			"$gt": end,
 		}
 	}
+
 	if len(msgTypes) > 0 {
 		filter["msg_type"] = bson.M{"$in": msgTypes}
 	}

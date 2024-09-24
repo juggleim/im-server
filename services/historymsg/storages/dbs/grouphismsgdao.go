@@ -1,10 +1,12 @@
 package dbs
 
 import (
+	"fmt"
 	"im-server/commons/dbcommons"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/historymsg/storages/models"
 	"sort"
+	"time"
 )
 
 type GroupHisMsgDao struct {
@@ -70,7 +72,57 @@ func (msg GroupHisMsgDao) QryLatestMsg(appkey, converId string) (*models.GroupHi
 	return nil, err
 }
 
-func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.GroupHisMsg, error) {
+func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.GroupHisMsg, error) {
+	var items []*GroupHisMsgDao
+	params := []interface{}{}
+	condition := "app_key=? and conver_id=?"
+	params = append(params, appkey)
+	params = append(params, converId)
+
+	condition = condition + fmt.Sprintf(" and msg_id not in (select msg_id from %s where app_key=? and user_id=? and target_id=?)", (&GroupDelHisMsgDao{}).TableName())
+	params = append(params, appkey)
+	params = append(params, userId)
+	params = append(params, targetId)
+
+	orderStr := "send_time desc"
+	start := startTime
+	if isPositiveOrder {
+		orderStr = "send_time asc"
+		if start < cleanTime {
+			start = cleanTime
+		}
+		condition = condition + " and send_time>?"
+		params = append(params, start)
+	} else {
+		if start <= 0 {
+			start = time.Now().UnixMilli()
+		}
+		condition = condition + " and send_time<?"
+		params = append(params, start)
+		if cleanTime > 0 {
+			condition = condition + " and send_time>?"
+			params = append(params, cleanTime)
+		}
+	}
+	if len(msgTypes) > 0 {
+		condition = condition + " and msg_type in (?)"
+		params = append(params, msgTypes)
+	}
+	condition = condition + " and is_delete=0"
+	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	if !isPositiveOrder {
+		sort.Slice(items, func(i, j int) bool {
+			return items[i].SendTime < items[j].SendTime
+		})
+	}
+	retItems := []*models.GroupHisMsg{}
+	for _, dbMsg := range items {
+		retItems = append(retItems, dbMsg2GrpMsg(dbMsg))
+	}
+	return retItems, err
+}
+
+func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId string, startTime, endTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.GroupHisMsg, error) {
 	var items []*GroupHisMsgDao
 
 	params := []interface{}{}
@@ -79,14 +131,31 @@ func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, c
 	params = append(params, converId)
 
 	orderStr := "send_time desc"
+	start := startTime
+	end := endTime
 	if isPositiveOrder {
-		condition = condition + " and send_time>? and send_time>?"
 		orderStr = "send_time asc"
+		if start < cleanTime {
+			start = cleanTime
+		}
+		condition = condition + " and send_time>?"
+		params = append(params, start)
+		if end > 0 {
+			condition = condition + " and send_time<?"
+			params = append(params, end)
+		}
 	} else {
+		if start <= 0 {
+			start = time.Now().UnixMilli()
+		}
+		if end < cleanTime {
+			end = cleanTime
+		}
 		condition = condition + " and send_time<? and send_time>?"
+		params = append(params, start)
+		params = append(params, end)
 	}
-	params = append(params, startTime)
-	params = append(params, cleanTime)
+
 	if len(excludeMsgIds) > 0 {
 		condition = condition + " and msg_id not in (?)"
 		params = append(params, excludeMsgIds)
