@@ -125,8 +125,8 @@ func NewMsgExtStorage() models.IMsgExtStorage {
 	switch configures.Config.MsgStoreEngine {
 	case configures.MsgStoreEngine_MySQL:
 		return &dbs.MsgExtDao{}
-	// case configures.MsgStoreEngine_Mongo:
-	// 	return &mongodbs.MsgExtDao{}
+	case configures.MsgStoreEngine_Mongo:
+		return &mongodbs.MsgExtDao{}
 	default:
 		return &dbs.MsgExtDao{}
 	}
@@ -136,8 +136,8 @@ func NewMsgExSetStorage() models.IMsgExSetStorage {
 	switch configures.Config.MsgStoreEngine {
 	case configures.MsgStoreEngine_MySQL:
 		return &dbs.MsgExSetDao{}
-	// case configures.MsgStoreEngine_Mongo:
-	// 	return &mongodbs.MsgExSetDao{}
+	case configures.MsgStoreEngine_Mongo:
+		return &mongodbs.MsgExSetDao{}
 	default:
 		return &dbs.MsgExSetDao{}
 	}
