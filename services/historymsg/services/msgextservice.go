@@ -53,7 +53,7 @@ func SetMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		upMsg := &pbobjs.UpMsg{
 			MsgType:    MsgExtCmdType,
 			MsgContent: bs,
-			Flags:      commonservices.SetCmdMsg(0),
+			Flags:      commonservices.SetStateMsg(0),
 		}
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			commonservices.AsyncPrivateMsg(ctx, userId, targetId, upMsg)
@@ -114,7 +114,7 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		upMsg := &pbobjs.UpMsg{
 			MsgType:    MsgExSetCmdType,
 			MsgContent: bs,
-			Flags:      commonservices.SetCmdMsg(0),
+			Flags:      commonservices.SetStateMsg(0),
 		}
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)
@@ -151,7 +151,7 @@ func DelMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		upMsg := &pbobjs.UpMsg{
 			MsgType:    MsgExSetCmdType,
 			MsgContent: bs,
-			Flags:      commonservices.SetCmdMsg(0),
+			Flags:      commonservices.SetStateMsg(0),
 		}
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)
