@@ -32,3 +32,16 @@ func (client *WsImClient) SyncMsgs(req *pbobjs.SyncMsgReq) (utils.ClientErrorCod
 		return utils.ClientErrorCode_Unknown, nil
 	}
 }
+
+func (client *WsImClient) AddMsgExset(req *pbobjs.MsgExt) utils.ClientErrorCode {
+	data, _ := tools.PbMarshal(req)
+	code, qryAck := client.Query("msg_exset", req.MsgId, data)
+	if code == utils.ClientErrorCode_Success {
+		if qryAck.Code == 0 {
+			return utils.ClientErrorCode_Success
+		} else {
+			return utils.ClientErrorCode(qryAck.Code)
+		}
+	}
+	return code
+}

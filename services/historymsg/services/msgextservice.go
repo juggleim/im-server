@@ -94,10 +94,10 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			storage := storages.NewPrivateHisMsgStorage()
-			storage.UpdateMsgExtState(appkey, converId, req.MsgId, 1)
+			storage.UpdateMsgExsetState(appkey, converId, req.MsgId, 1)
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
 			storage := storages.NewGroupHisMsgStorage()
-			storage.UpdateMsgExtState(appkey, converId, req.MsgId, 1)
+			storage.UpdateMsgExsetState(appkey, converId, req.MsgId, 1)
 		}
 		msgExSet := &MsgExt{
 			MsgId:       msgId,
