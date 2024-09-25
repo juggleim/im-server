@@ -251,6 +251,10 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
 		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
 		if err == nil {
+			extMsgMap := map[string]*pbobjs.DownMsg{}
+			extMsgIds := []string{}
+			exsetMsgMap := map[string]*pbobjs.DownMsg{}
+			exsetMsgIds := []string{}
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
@@ -272,8 +276,47 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 					downMsg.IsRead = dbMsg.IsRead > 0
 					if dbMsg.IsExt > 0 {
 						downMsg.Flags = commonservices.SetExtMsg(downMsg.Flags)
+						downMsg.MsgExts = []*pbobjs.MsgExtItem{}
+						extMsgMap[dbMsg.MsgId] = downMsg
+						extMsgIds = append(extMsgIds, dbMsg.MsgId)
+					}
+					if dbMsg.IsExSet > 0 {
+						downMsg.MsgExSet = []*pbobjs.MsgExtItem{}
+						exsetMsgMap[dbMsg.MsgId] = downMsg
+						exsetMsgIds = append(exsetMsgIds, dbMsg.MsgId)
 					}
 					resp.Msgs = append(resp.Msgs, downMsg)
+				}
+			}
+			//add ext of msg
+			if len(extMsgIds) > 0 {
+				extStorage := storages.NewMsgExtStorage()
+				exts, err := extStorage.QryExtsByMsgIds(appkey, extMsgIds)
+				if err == nil {
+					for _, ext := range exts {
+						if msg, exist := extMsgMap[ext.MsgId]; exist {
+							msg.MsgExts = append(msg.MsgExts, &pbobjs.MsgExtItem{
+								Key:       ext.Key,
+								Value:     ext.Value,
+								Timestamp: ext.CreatedTime,
+							})
+						}
+					}
+				}
+			}
+			if len(exsetMsgIds) > 0 {
+				exsetStorage := storages.NewMsgExSetStorage()
+				exts, err := exsetStorage.QryExtsByMsgIds(appkey, exsetMsgIds)
+				if err == nil {
+					for _, ext := range exts {
+						if msg, exist := exsetMsgMap[ext.MsgId]; exist {
+							msg.MsgExSet = append(msg.MsgExSet, &pbobjs.MsgExtItem{
+								Key:       ext.Key,
+								Value:     ext.Item,
+								Timestamp: ext.CreatedTime,
+							})
+						}
+					}
 				}
 			}
 			//add userinfo
@@ -333,6 +376,10 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		if err == nil {
 			msgMap := map[string]*pbobjs.DownMsg{}
 			msgIds := []string{}
+			extMsgMap := map[string]*pbobjs.DownMsg{}
+			extMsgIds := []string{}
+			exsetMsgMap := map[string]*pbobjs.DownMsg{}
+			exsetMsgIds := []string{}
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
@@ -357,8 +404,47 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 					downMsg.ReadCount = int32(dbMsg.ReadCount)
 					if dbMsg.IsExt > 0 {
 						downMsg.Flags = commonservices.SetExtMsg(downMsg.Flags)
+						downMsg.MsgExts = []*pbobjs.MsgExtItem{}
+						extMsgMap[dbMsg.MsgId] = downMsg
+						extMsgIds = append(extMsgIds, dbMsg.MsgId)
+					}
+					if dbMsg.IsExSet > 0 {
+						downMsg.MsgExSet = []*pbobjs.MsgExtItem{}
+						exsetMsgMap[dbMsg.MsgId] = downMsg
+						exsetMsgIds = append(exsetMsgIds, dbMsg.MsgId)
 					}
 					resp.Msgs = append(resp.Msgs, downMsg)
+				}
+			}
+			//add ext of msg
+			if len(extMsgIds) > 0 {
+				extStorage := storages.NewMsgExtStorage()
+				exts, err := extStorage.QryExtsByMsgIds(appkey, extMsgIds)
+				if err == nil {
+					for _, ext := range exts {
+						if msg, exist := extMsgMap[ext.MsgId]; exist {
+							msg.MsgExts = append(msg.MsgExts, &pbobjs.MsgExtItem{
+								Key:       ext.Key,
+								Value:     ext.Value,
+								Timestamp: ext.CreatedTime,
+							})
+						}
+					}
+				}
+			}
+			if len(exsetMsgIds) > 0 {
+				exsetStorage := storages.NewMsgExSetStorage()
+				exts, err := exsetStorage.QryExtsByMsgIds(appkey, exsetMsgIds)
+				if err == nil {
+					for _, ext := range exts {
+						if msg, exist := exsetMsgMap[ext.MsgId]; exist {
+							msg.MsgExSet = append(msg.MsgExSet, &pbobjs.MsgExtItem{
+								Key:       ext.Key,
+								Value:     ext.Item,
+								Timestamp: ext.CreatedTime,
+							})
+						}
+					}
 				}
 			}
 			//readed status of group msg

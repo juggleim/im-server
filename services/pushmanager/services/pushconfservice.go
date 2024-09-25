@@ -158,7 +158,7 @@ var noExistAndroidPushConf *AndroidPushConf = &AndroidPushConf{}
 
 func initAndroidPushConf(ctx context.Context, appkey, packageName string) *AndroidPushConf {
 	androidPushDao := dbs.AndroidPushConfDao{}
-	pushConfs, err := androidPushDao.FindByChannels(appkey, packageName)
+	pushConfs, err := androidPushDao.FindByPackage(appkey, packageName)
 	if err == nil && len(pushConfs) > 0 {
 		androidPushConf := &AndroidPushConf{
 			Package: packageName,

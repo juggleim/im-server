@@ -42,13 +42,17 @@ func (conver *ConversationDao) FindOne(appkey, userId, targetId string, channelT
 		TargetId:             item.TargetId,
 		SortTime:             item.SortTime,
 		ChannelType:          pbobjs.ChannelType(item.ChannelType),
+		AppKey:               item.AppKey,
 		LatestMsgId:          item.LatestMsgId,
 		LatestMsg:            item.LatestMsg,
 		LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
-		AppKey:               item.AppKey,
-		LatestReadMsgIndex:   item.LatestReadMsgIndex,
-		LatestReadMsgId:      item.LatestReadMsgId,
-		LatestReadMsgTime:    item.LatestReadMsgTime,
+
+		LatestReadMsgIndex: item.LatestReadMsgIndex,
+		LatestReadMsgId:    item.LatestReadMsgId,
+		LatestReadMsgTime:  item.LatestReadMsgTime,
+		IsTop:              item.IsTop,
+		TopUpdatedTime:     item.TopUpdatedTime,
+		UndisturbType:      item.UndisturbType,
 	}, nil
 }
 

@@ -29,7 +29,7 @@ type PrivateHisMsgDao struct {
 	AppKey      string    `bson:"app_key"`
 	IsDelete    int       `bson:"is_delete"`
 	IsExt       int       `bson:"is_ext"`
-	IsReaction  int       `bson:"is_reaction"`
+	IsExSet     int       `bson:"is_exset"`
 	DelUserIds  []string  `bson:"del_user_ids"`
 	AddTime     time.Time `bson:"add_time"`
 }
@@ -89,7 +89,7 @@ func (msg *PrivateHisMsgDao) SavePrivateHisMsg(item models.PrivateHisMsg) error 
 		MsgBody:     item.MsgBody,
 		AppKey:      item.AppKey,
 		IsExt:       item.IsExt,
-		IsReaction:  item.IsReaction,
+		IsExSet:     item.IsExSet,
 		IsDelete:    item.IsDelete,
 		IsRead:      item.IsRead,
 	}
@@ -382,7 +382,7 @@ func (msg *PrivateHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, i
 	return err
 }
 
-func (msg PrivateHisMsgDao) UpdateMsgReactionState(appkey, converId, msgId string, isReaction int) error {
+func (msg PrivateHisMsgDao) UpdateMsgExSetState(appkey, converId, msgId string, isExSet int) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
@@ -390,7 +390,7 @@ func (msg PrivateHisMsgDao) UpdateMsgReactionState(appkey, converId, msgId strin
 	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
 	update := bson.M{
 		"$set": bson.M{
-			"is_reaction": isReaction,
+			"is_exset": isExSet,
 		},
 	}
 	_, err := collection.UpdateOne(context.TODO(), filter, update)
@@ -425,7 +425,7 @@ func dbMsg2PrivateMsg(dbMsg *PrivateHisMsgDao) *models.PrivateHisMsg {
 			MsgBody:     dbMsg.MsgBody,
 			AppKey:      dbMsg.AppKey,
 			IsExt:       dbMsg.IsExt,
-			IsReaction:  dbMsg.IsReaction,
+			IsExSet:     dbMsg.IsExSet,
 			IsDelete:    dbMsg.IsDelete,
 		},
 		IsRead: dbMsg.IsRead,

@@ -14,7 +14,7 @@ type HisMsg struct {
 	MsgBody     []byte
 	AppKey      string
 	IsExt       int
-	IsReaction  int
+	IsExSet     int
 	IsDelete    int
 }
 
@@ -45,7 +45,7 @@ type IGroupHisMsgStorage interface {
 	FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*GroupHisMsg, error)
 	DelMsgs(appkey, converId string, msgIds []string) error
 	UpdateMsgExtState(appkey, converId, msgId string, isExt int) error
-	UpdateMsgReactionState(appkey, converId, msgId string, isReaction int) error
+	UpdateMsgExSetState(appkey, converId, msgId string, isExSet int) error
 	DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error
 
 	UpdateReadCount(appkey, converId, msgId string, readCount int) error
@@ -62,7 +62,7 @@ type IPrivateHisMsgStorage interface {
 	FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*PrivateHisMsg, error)
 	DelMsgs(appkey, converId string, msgIds []string) error
 	UpdateMsgExtState(appkey, converId, msgId string, isExt int) error
-	UpdateMsgReactionState(appkey, converId, msgId string, isReaction int) error
+	UpdateMsgExSetState(appkey, converId, msgId string, isExSet int) error
 	DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error
 
 	MarkReadByMsgIds(appkey, converId string, msgIds []string) error
@@ -206,12 +206,29 @@ type IReadInfoStorage interface {
 }
 
 type MsgExt struct {
-	AppKey string
-	MsgId  string
-	Key    string
-	Value  string
+	AppKey      string
+	MsgId       string
+	Key         string
+	Value       string
+	CreatedTime int64
 }
 
 type IMsgExtStorage interface {
 	Upsert(item MsgExt) error
+	Delete(appkey, msgId, key string) error
+	QryExtsByMsgIds(appkey string, msgIds []string) ([]*MsgExt, error)
+}
+
+type MsgExSet struct {
+	AppKey      string
+	MsgId       string
+	Key         string
+	Item        string
+	CreatedTime int64
+}
+
+type IMsgExSetStorage interface {
+	Create(item MsgExSet) error
+	Delete(appkey, msgId, key, item string) error
+	QryExtsByMsgIds(appkey string, msgIds []string) ([]*MsgExSet, error)
 }

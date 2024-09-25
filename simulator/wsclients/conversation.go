@@ -7,11 +7,11 @@ import (
 	"im-server/simulator/utils"
 )
 
-func (client *WsImClient) QryConversation(req *pbobjs.QryConverReq) (utils.ClientErrorCode, *pbobjs.QryConverResp) {
+func (client *WsImClient) QryConversation(req *pbobjs.QryConverReq) (utils.ClientErrorCode, *pbobjs.Conversation) {
 	data, _ := tools.PbMarshal(req)
 	code, ack := client.Query("qry_conver", client.UserId, data)
 	if code == utils.ClientErrorCode_Success && ack.Code == 0 {
-		resp := &pbobjs.QryConverResp{}
+		resp := &pbobjs.Conversation{}
 		tools.PbUnMarshal(ack.Data, resp)
 		return utils.ClientErrorCode_Success, resp
 	}

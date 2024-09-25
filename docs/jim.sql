@@ -267,7 +267,7 @@ CREATE TABLE `g_hismsgs` (
   `read_count` int DEFAULT '0',
   `is_delete` tinyint DEFAULT '0',
   `is_ext` tinyint DEFAULT '0',
-  `is_reaction` tinyint DEFAULT '0',
+  `is_exset` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx_appkey_converid` (`app_key`,`conver_id`,`msg_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -504,6 +504,18 @@ CREATE TABLE `msgexts` (
   UNIQUE KEY `uniq_msgid` (`app_key`,`msg_id`,`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `msgexsets`;
+CREATE TABLE `msgexsets` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `msg_id` VARCHAR(20) NULL,
+  `key` VARCHAR(50) NULL,
+  `item` VARCHAR(100) NULL,
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_item` (`app_key`, `msg_id`, `key`, `item`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 DROP TABLE IF EXISTS `p_delhismsgs`;
 CREATE TABLE `p_delhismsgs` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -534,7 +546,7 @@ CREATE TABLE `p_hismsgs` (
   `is_read` tinyint DEFAULT '0',
   `is_delete` tinyint DEFAULT '0',
   `is_ext` tinyint DEFAULT '0',
-  `is_reaction` tinyint DEFAULT '0',
+  `is_exset` tinyint DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`msg_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

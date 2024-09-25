@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "commons/pbdefines/pbobjs";
 
- message Nil{}
+message Nil{}
 
 enum RpcMsgType{
   UserPub = 0;
@@ -93,7 +93,6 @@ message PushData{
   ChannelType channelType = 54;
   
 }
-
 message DownMsg{
   string targetId = 1;
   ChannelType channelType = 2;
@@ -119,6 +118,8 @@ message DownMsg{
   int32 readCount = 22;
   int64 unreadIndex = 23;
   repeated StreamMsgItem msgItems = 24;
+  repeated MsgExtItem msgExSet = 25;
+  repeated MsgExtItem msgExts = 26;
 }
 
 message MsgAck{
@@ -157,7 +158,6 @@ enum ChannelType {
 message Notify{
   NotifyType type = 1;
   int64 syncTime = 2;
-  string chatroomId = 3;
 }
 enum NotifyType {
   Default = 0;
@@ -316,12 +316,17 @@ message QryMergedMsgsReq{
   int32 order = 3;
 }
 
-message MsgExtItem {
+message MsgExt {
   string targetId = 1;
   ChannelType channelType = 2;
   string msgId = 3;
-  string key = 4;
-  string value = 5;
+  MsgExtItem ext = 4;
+}
+
+message MsgExtItem {
+  string key = 1;
+  string value = 2;
+  int64 timestamp = 3;
 }
 
 //conversation

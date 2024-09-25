@@ -61,8 +61,17 @@ func (manager *HistoryMsgManager) RegisterActors(register gmicro.IActorRegister)
 	register.RegisterActor("qry_merged_msgs", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryMergedMsgsActor{}, serviceName)
 	})
-	register.RegisterActor("msg_ext", func() actorsystem.IUntypedActor { //TODO
+	register.RegisterActor("msg_ext", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SetMsgExtActor{}, serviceName)
+	})
+	register.RegisterActor("del_msg_ext", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.DelMsgExtActor{}, serviceName)
+	})
+	register.RegisterActor("msg_exset", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.AddMsgExSetActor{}, serviceName)
+	})
+	register.RegisterActor("del_msg_exset", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.DelMsgExSetActor{}, serviceName)
 	})
 }
 

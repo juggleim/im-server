@@ -34,7 +34,7 @@ func (conf AndroidPushConfDao) Find(appkey, pushChannel string) (*AndroidPushCon
 	return &item, nil
 }
 
-func (conf AndroidPushConfDao) FindByChannels(appkey, packageName string) ([]*AndroidPushConfDao, error) {
+func (conf AndroidPushConfDao) FindByPackage(appkey, packageName string) ([]*AndroidPushConfDao, error) {
 	var list []*AndroidPushConfDao
 	err := dbcommons.GetDb().Where("app_key=? and package=?", appkey, packageName).Find(&list).Error
 	return list, err
