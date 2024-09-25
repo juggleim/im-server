@@ -24,7 +24,7 @@ type PrivateHisMsgDao struct {
 	AppKey      string `gorm:"app_key"`
 	IsDelete    int    `gorm:"is_delete"`
 	IsExt       int    `gorm:"is_ext"`
-	IsExSet     int    `gorm:"is_exset"`
+	IsExset     int    `gorm:"is_exset"`
 }
 
 func (msg PrivateHisMsgDao) TableName() string {
@@ -44,7 +44,7 @@ func (msg PrivateHisMsgDao) SavePrivateHisMsg(item models.PrivateHisMsg) error {
 		MsgBody:     item.MsgBody,
 		AppKey:      item.AppKey,
 		IsExt:       item.IsExt,
-		IsExSet:     item.IsExSet,
+		IsExset:     item.IsExset,
 		IsDelete:    item.IsDelete,
 		IsRead:      item.IsRead,
 	}
@@ -220,8 +220,8 @@ func (msg PrivateHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, is
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("is_ext", isExt).Error
 }
 
-func (msg PrivateHisMsgDao) UpdateMsgExSetState(appkey, converId, msgId string, isExSet int) error {
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("is_exset", isExSet).Error
+func (msg PrivateHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error {
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("is_exset", isExset).Error
 }
 
 // TODO need batch delete
@@ -243,7 +243,7 @@ func dbMsg2PrivateMsg(dbMsg *PrivateHisMsgDao) *models.PrivateHisMsg {
 			MsgBody:     dbMsg.MsgBody,
 			AppKey:      dbMsg.AppKey,
 			IsExt:       dbMsg.IsExt,
-			IsExSet:     dbMsg.IsExSet,
+			IsExset:     dbMsg.IsExset,
 			IsDelete:    dbMsg.IsDelete,
 		},
 		IsRead: dbMsg.IsRead,

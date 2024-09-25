@@ -129,6 +129,8 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 						err := androidPushConf.FcmPushClient.SendPush(req.Title, req.PushText, pushToken.PushToken)
 						if err != nil {
 							logs.WithContext(ctx).Infof("[FCM_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						} else {
+							logs.WithContext(ctx).Infof("[FCM_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
 						}
 					}
 				default:

@@ -14,7 +14,7 @@ type HisMsg struct {
 	MsgBody     []byte
 	AppKey      string
 	IsExt       int
-	IsExSet     int
+	IsExset     int
 	IsDelete    int
 }
 
@@ -45,7 +45,7 @@ type IGroupHisMsgStorage interface {
 	FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*GroupHisMsg, error)
 	DelMsgs(appkey, converId string, msgIds []string) error
 	UpdateMsgExtState(appkey, converId, msgId string, isExt int) error
-	UpdateMsgExSetState(appkey, converId, msgId string, isExSet int) error
+	UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error
 	DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error
 
 	UpdateReadCount(appkey, converId, msgId string, readCount int) error
@@ -62,7 +62,7 @@ type IPrivateHisMsgStorage interface {
 	FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*PrivateHisMsg, error)
 	DelMsgs(appkey, converId string, msgIds []string) error
 	UpdateMsgExtState(appkey, converId, msgId string, isExt int) error
-	UpdateMsgExSetState(appkey, converId, msgId string, isExSet int) error
+	UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error
 	DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error
 
 	MarkReadByMsgIds(appkey, converId string, msgIds []string) error

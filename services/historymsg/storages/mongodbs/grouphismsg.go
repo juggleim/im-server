@@ -27,7 +27,7 @@ type GroupHisMsgDao struct {
 	MsgBody     []byte   `bson:"msg_body"`
 	AppKey      string   `bson:"app_key"`
 	IsExt       int      `bson:"is_ext"`
-	IsExSet     int      `bson:"is_exset"`
+	IsExset     int      `bson:"is_exset"`
 	MemberCount int      `bson:"member_count"`
 	ReadCount   int      `bson:"read_count"`
 	IsDelete    int      `bson:"is_delete"`
@@ -88,7 +88,7 @@ func (msg *GroupHisMsgDao) SaveGroupHisMsg(item models.GroupHisMsg) error {
 		MsgBody:     item.MsgBody,
 		AppKey:      item.AppKey,
 		IsExt:       item.IsExt,
-		IsExSet:     item.IsExSet,
+		IsExset:     item.IsExset,
 		MemberCount: item.MemberCount,
 		ReadCount:   item.ReadCount,
 		IsDelete:    item.IsDelete,
@@ -365,7 +365,7 @@ func (msg *GroupHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, isE
 	return err
 }
 
-func (msg *GroupHisMsgDao) UpdateMsgExSetState(appkey, converId, msgId string, isExSet int) error {
+func (msg *GroupHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
@@ -373,7 +373,7 @@ func (msg *GroupHisMsgDao) UpdateMsgExSetState(appkey, converId, msgId string, i
 	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
 	update := bson.M{
 		"$set": bson.M{
-			"is_exset": isExSet,
+			"is_exset": isExset,
 		},
 	}
 	_, err := collection.UpdateOne(context.TODO(), filter, update)
@@ -408,7 +408,7 @@ func dbMsg2GrpMsg(dbMsg *GroupHisMsgDao) *models.GroupHisMsg {
 			MsgBody:     dbMsg.MsgBody,
 			AppKey:      dbMsg.AppKey,
 			IsExt:       dbMsg.IsExt,
-			IsExSet:     dbMsg.IsExSet,
+			IsExset:     dbMsg.IsExset,
 			IsDelete:    dbMsg.IsDelete,
 		},
 		MemberCount: dbMsg.MemberCount,

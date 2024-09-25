@@ -31,7 +31,7 @@ func (exset MsgExSetDao) Create(item models.MsgExSet) error {
 }
 
 func (exset MsgExSetDao) Delete(appkey, msgId, key, item string) error {
-	return dbcommons.GetDb().Where("app_key=? and msg_id=? and key=? and item=?", appkey, msgId, key, item).Delete(&MsgExSetDao{}).Error
+	return dbcommons.GetDb().Where("app_key=? and msg_id=? and `key`=? and item=?", appkey, msgId, key, item).Delete(&MsgExSetDao{}).Error
 }
 
 func (exset MsgExSetDao) QryExtsByMsgIds(appkey string, msgIds []string) ([]*models.MsgExSet, error) {

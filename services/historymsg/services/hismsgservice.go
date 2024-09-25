@@ -43,7 +43,7 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 	grpHisMsgStorage := storages.NewGroupHisMsgStorage()
 	msgBs, _ := tools.PbMarshal(downMsg)
 
-	grpHisMsgStorage.SaveGroupHisMsg(models.GroupHisMsg{
+	err := grpHisMsgStorage.SaveGroupHisMsg(models.GroupHisMsg{
 		HisMsg: models.HisMsg{
 			ConverId:    converId,
 			SenderId:    bases.GetRequesterIdFromCtx(ctx),
@@ -58,6 +58,9 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 		},
 		MemberCount: groupMemberCount,
 	})
+	if err != nil {
+		logs.WithContext(ctx).Errorf("msg_id:%s\terr:%v", downMsg.MsgId, err)
+	}
 }
 
 func SaveSystemHisMsg(ctx context.Context, converId, senderId, receiverId string, downMsg *pbobjs.DownMsg) {
@@ -280,7 +283,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 						extMsgMap[dbMsg.MsgId] = downMsg
 						extMsgIds = append(extMsgIds, dbMsg.MsgId)
 					}
-					if dbMsg.IsExSet > 0 {
+					if dbMsg.IsExset > 0 {
 						downMsg.MsgExSet = []*pbobjs.MsgExtItem{}
 						exsetMsgMap[dbMsg.MsgId] = downMsg
 						exsetMsgIds = append(exsetMsgIds, dbMsg.MsgId)
@@ -408,7 +411,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 						extMsgMap[dbMsg.MsgId] = downMsg
 						extMsgIds = append(extMsgIds, dbMsg.MsgId)
 					}
-					if dbMsg.IsExSet > 0 {
+					if dbMsg.IsExset > 0 {
 						downMsg.MsgExSet = []*pbobjs.MsgExtItem{}
 						exsetMsgMap[dbMsg.MsgId] = downMsg
 						exsetMsgIds = append(exsetMsgIds, dbMsg.MsgId)

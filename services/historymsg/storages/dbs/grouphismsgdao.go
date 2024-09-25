@@ -22,7 +22,7 @@ type GroupHisMsgDao struct {
 	MsgBody     []byte `gorm:"msg_body"`
 	AppKey      string `gorm:"app_key"`
 	IsExt       int    `gorm:"is_ext"`
-	IsExSet     int    `gorm:"is_exset"`
+	IsExset     int    `gorm:"is_exset"`
 
 	MemberCount int `gorm:"member_count"`
 	ReadCount   int `gorm:"read_count"`
@@ -45,7 +45,7 @@ func (msg GroupHisMsgDao) SaveGroupHisMsg(item models.GroupHisMsg) error {
 		MsgBody:     item.MsgBody,
 		AppKey:      item.AppKey,
 		IsExt:       item.IsExt,
-		IsExSet:     item.IsExSet,
+		IsExset:     item.IsExset,
 		MemberCount: item.MemberCount,
 		ReadCount:   item.ReadCount,
 		IsDelete:    item.IsDelete,
@@ -218,8 +218,8 @@ func (msg GroupHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, isEx
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("is_ext", isExt).Error
 }
 
-func (msg GroupHisMsgDao) UpdateMsgExSetState(appkey, converId, msgId string, isExSet int) error {
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("is_exset", isExSet).Error
+func (msg GroupHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error {
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("is_exset", isExset).Error
 }
 
 // TODO need batch delete
@@ -241,7 +241,7 @@ func dbMsg2GrpMsg(dbMsg *GroupHisMsgDao) *models.GroupHisMsg {
 			MsgBody:     dbMsg.MsgBody,
 			AppKey:      dbMsg.AppKey,
 			IsExt:       dbMsg.IsExt,
-			IsExSet:     dbMsg.IsExSet,
+			IsExset:     dbMsg.IsExset,
 			IsDelete:    dbMsg.IsDelete,
 		},
 		MemberCount: dbMsg.MemberCount,
