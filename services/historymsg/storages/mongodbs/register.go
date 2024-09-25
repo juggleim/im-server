@@ -10,6 +10,7 @@ func RegistCollections() {
 	mongocommons.Register(&GrpCastHisMsgDao{})
 	mongocommons.Register(&MergedMsgDao{})
 	mongocommons.Register(&MsgExtDao{})
+	mongocommons.Register(&MsgExSetDao{})
 	// mongocommons.Register(&PrivateDelHisMsgDao{})
 	mongocommons.Register(&PrivateHisMsgDao{})
 	mongocommons.Register(&ReadInfoDao{})
