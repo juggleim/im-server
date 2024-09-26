@@ -210,6 +210,7 @@ type MsgExt struct {
 	MsgId       string
 	Key         string
 	Value       string
+	UserId      string
 	CreatedTime int64
 }
 
@@ -224,6 +225,7 @@ type MsgExSet struct {
 	MsgId       string
 	Key         string
 	Item        string
+	UserId      string
 	CreatedTime int64
 }
 

@@ -327,6 +327,7 @@ message MsgExtItem {
   string key = 1;
   string value = 2;
   int64 timestamp = 3;
+  UserInfo userInfo = 4;
 }
 
 //conversation

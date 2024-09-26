@@ -12,6 +12,7 @@ type MsgExSetDao struct {
 	MsgId       string    `gorm:"msg_id"`
 	Key         string    `gorm:"key"`
 	Item        string    `gorm:"item"`
+	UserId      string    `gorm:"user_id"`
 	CreatedTime time.Time `gorm:"created_time"`
 }
 
@@ -25,6 +26,7 @@ func (exset MsgExSetDao) Create(item models.MsgExSet) error {
 		MsgId:       item.MsgId,
 		Key:         item.Key,
 		Item:        item.Item,
+		UserId:      item.UserId,
 		CreatedTime: time.UnixMilli(item.CreatedTime),
 	}
 	return dbcommons.GetDb().Create(&add).Error
@@ -44,6 +46,7 @@ func (exset MsgExSetDao) QryExtsByMsgIds(appkey string, msgIds []string) ([]*mod
 			MsgId:       ext.MsgId,
 			Key:         ext.Key,
 			Item:        ext.Item,
+			UserId:      ext.UserId,
 			CreatedTime: ext.CreatedTime.UnixMilli(),
 		})
 	}

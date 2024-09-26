@@ -12,6 +12,7 @@ type MsgExtDao struct {
 	MsgId       string    `gorm:"msg_id"`
 	Key         string    `gorm:"key"`
 	Value       string    `gorm:"value"`
+	UserId      string    `gorm:"user_id"`
 	CreatedTime time.Time `gorm:"created_time"`
 }
 
@@ -20,8 +21,8 @@ func (ext MsgExtDao) TableName() string {
 }
 
 func (ext MsgExtDao) Upsert(item models.MsgExt) error {
-	return dbcommons.GetDb().Exec("INSERT INTO msgexts (app_key,msg_id,key,value,created_time)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE value=?,created_time=?",
-		item.AppKey, item.MsgId, item.Key, item.Value, time.UnixMilli(item.CreatedTime), item.Value, time.UnixMilli(item.CreatedTime)).Error
+	return dbcommons.GetDb().Exec("INSERT INTO msgexts (app_key,msg_id,`key`,value,user_id,created_time)VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE value=?,user_id=?,created_time=?",
+		item.AppKey, item.MsgId, item.Key, item.Value, item.UserId, time.UnixMilli(item.CreatedTime), item.Value, item.UserId, time.UnixMilli(item.CreatedTime)).Error
 }
 
 func (exset MsgExtDao) Delete(appkey, msgId, key string) error {
@@ -38,6 +39,7 @@ func (ext MsgExtDao) QryExtsByMsgIds(appkey string, msgIds []string) ([]*models.
 			MsgId:       ext.MsgId,
 			Key:         ext.Key,
 			Value:       ext.Value,
+			UserId:      ext.UserId,
 			CreatedTime: ext.CreatedTime.UnixMilli(),
 		})
 	}

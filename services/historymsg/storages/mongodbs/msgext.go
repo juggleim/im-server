@@ -18,6 +18,7 @@ type MsgExtDao struct {
 	MsgId       string    `bson:"msg_id"`
 	Key         string    `bson:"key"`
 	Value       string    `bson:"value"`
+	UserId      string    `bson:"user_id"`
 	CreatedTime time.Time `bson:"created_time"`
 
 	AddTime time.Time `bson:"add_time"`
@@ -71,6 +72,7 @@ func (msg *MsgExtDao) Upsert(item models.MsgExt) error {
 			"msg_id":  item.MsgId,
 			"key":     item.Key,
 			"value":   item.Value,
+			"user_id": item.UserId,
 		},
 	}
 	_, err := collection.UpdateOne(context.TODO(), filter, update, &options.UpdateOptions{Upsert: tools.BoolPtr(true)})
@@ -115,6 +117,7 @@ func (msg *MsgExtDao) QryExtsByMsgIds(appkey string, msgIds []string) ([]*models
 				MsgId:       item.MsgId,
 				Key:         item.Key,
 				Value:       item.Value,
+				UserId:      item.UserId,
 				CreatedTime: item.CreatedTime.UnixMilli(),
 			})
 		}

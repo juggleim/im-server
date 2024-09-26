@@ -17,6 +17,7 @@ type MsgExSetDao struct {
 	MsgId       string    `bson:"msg_id"`
 	Key         string    `bson:"key"`
 	Item        string    `bson:"item"`
+	UserId      string    `bson:"user_id"`
 	CreatedTime time.Time `bson:"created_time"`
 
 	AddTime time.Time `bson:"add_time"`
@@ -68,6 +69,7 @@ func (ext *MsgExSetDao) Create(item models.MsgExSet) error {
 		MsgId:       item.MsgId,
 		Key:         item.Key,
 		Item:        item.Item,
+		UserId:      item.UserId,
 		CreatedTime: time.UnixMilli(item.CreatedTime),
 
 		AddTime: time.Now(),
@@ -118,6 +120,7 @@ func (ext *MsgExSetDao) QryExtsByMsgIds(appkey string, msgIds []string) ([]*mode
 				MsgId:       item.MsgId,
 				Key:         item.Key,
 				Item:        item.Item,
+				UserId:      item.UserId,
 				CreatedTime: item.CreatedTime.UnixMilli(),
 			})
 		}
