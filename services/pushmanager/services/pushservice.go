@@ -132,14 +132,20 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 						} else {
 							logs.WithContext(ctx).Infof("[FCM_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
 						}
+					} else {
+						logs.WithContext(ctx).Infof("[FCM_FAIL]have no init fcm push client")
 					}
 				default:
-					logs.WithContext(ctx).Errorf("unknown push type %s", pushToken.PushChannel)
+					logs.WithContext(ctx).Infof("unknown push type %s", pushToken.PushChannel)
 				}
 			} else {
-				logs.WithContext(ctx).Errorf("android_push_conf is nil")
+				logs.WithContext(ctx).Info("android_push_conf is nil")
 			}
+		} else {
+			logs.WithContext(ctx).Info("not support platform")
 		}
+	} else {
+		logs.WithContext(ctx).Info("have no push token")
 	}
 }
 
