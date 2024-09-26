@@ -579,12 +579,16 @@ func SetTopConvers(ctx context.Context, req *pbobjs.ConversationsReq) (errs.IMEr
 	if len(req.Conversations) > 0 {
 		converStorage := storages.NewConversationStorage()
 		for _, conver := range req.Conversations {
-			converStorage.UpdateIsTopState(appkey, userId, conver.TargetId, conver.ChannelType, int(conver.IsTop), currTime)
+			var t int64 = 0
+			if conver.IsTop > 0 {
+				t = currTime
+			}
+			converStorage.UpdateIsTopState(appkey, userId, conver.TargetId, conver.ChannelType, int(conver.IsTop), t)
 			topConvers.Conversations = append(topConvers.Conversations, &Conversation{
 				TargetId:      conver.TargetId,
 				ChannelType:   int32(conver.ChannelType),
 				IsTop:         conver.IsTop,
-				TopUpdateTime: currTime,
+				TopUpdateTime: t,
 			})
 		}
 		//notify other device
