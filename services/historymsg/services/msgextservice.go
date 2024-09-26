@@ -39,15 +39,16 @@ func SetMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 			storage.UpdateMsgExtState(appkey, converId, req.MsgId, 1)
 		}
 		msgExt := &MsgExt{
-			MsgId:       req.MsgId,
-			TargetId:    req.TargetId,
-			ChannelType: int(req.ChannelType),
-			Exts:        []*ExtItem{},
+			MsgId: req.MsgId,
+			Exts:  []*ExtItem{},
 		}
 		msgExt.Exts = append(msgExt.Exts, &ExtItem{
 			Key:       req.Ext.Key,
 			Value:     req.Ext.Value,
 			Timestamp: optTime,
+			User: &UserInfo{
+				UserId: userId,
+			},
 		})
 		bs, _ := json.Marshal(msgExt)
 		upMsg := &pbobjs.UpMsg{
@@ -100,15 +101,16 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 			storage.UpdateMsgExsetState(appkey, converId, req.MsgId, 1)
 		}
 		msgExSet := &MsgExt{
-			MsgId:       msgId,
-			TargetId:    req.TargetId,
-			ChannelType: int(req.ChannelType),
-			Exts:        []*ExtItem{},
+			MsgId: msgId,
+			Exts:  []*ExtItem{},
 		}
 		msgExSet.Exts = append(msgExSet.Exts, &ExtItem{
 			Key:       req.Ext.Key,
 			Value:     req.Ext.Value,
 			Timestamp: optTime,
+			User: &UserInfo{
+				UserId: userId,
+			},
 		})
 		bs, _ := json.Marshal(msgExSet)
 		upMsg := &pbobjs.UpMsg{
@@ -136,16 +138,17 @@ func DelMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	err := exsetStorage.Delete(appkey, msgId, req.Ext.Key, req.Ext.Value)
 	if err == nil {
 		msgExSet := &MsgExt{
-			MsgId:       msgId,
-			TargetId:    req.TargetId,
-			ChannelType: int(req.ChannelType),
-			Exts:        []*ExtItem{},
+			MsgId: msgId,
+			Exts:  []*ExtItem{},
 		}
 		msgExSet.Exts = append(msgExSet.Exts, &ExtItem{
 			IsDel:     1,
 			Key:       req.Ext.Key,
 			Value:     req.Ext.Value,
 			Timestamp: time.Now().UnixMilli(),
+			User: &UserInfo{
+				UserId: userId,
+			},
 		})
 		bs, _ := json.Marshal(msgExSet)
 		upMsg := &pbobjs.UpMsg{
@@ -166,14 +169,19 @@ var MsgExtCmdType string = "jg:msgext"
 var MsgExSetCmdType string = "jg:msgexset"
 
 type MsgExt struct {
-	MsgId       string     `json:"msg_id"`
-	TargetId    string     `json:"target_id"`
-	ChannelType int        `json:"channel_type"`
-	Exts        []*ExtItem `json:"exts"`
+	MsgId string     `json:"msg_id"`
+	Exts  []*ExtItem `json:"exts"`
 }
+
 type ExtItem struct {
-	IsDel     int    `json:"is_del"`
-	Key       string `json:"key"`
-	Value     string `json:"value"`
-	Timestamp int64  `json:"timestamp"`
+	IsDel     int       `json:"is_del"`
+	Key       string    `json:"key"`
+	Value     string    `json:"value"`
+	Timestamp int64     `json:"timestamp"`
+	User      *UserInfo `json:"user,omitempty"`
+}
+
+type UserInfo struct {
+	UserId   string `json:"user_id"`
+	Nickname string `json:"nickname"`
 }
