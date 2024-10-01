@@ -40,3 +40,154 @@ _备注：由于微信群二维码有时间限制，加入微信讨论可优先�
 ## 快速部署体验
 
 部署文档(https://www.jugglechat.com/docs/download/deploy/)
+
+## 手动部署
+
+### 1. 安装并初始化 MySQL
+
+#### 安装 MySQL
+略
+
+#### 创建DB实例
+```
+CREATE SCHEMA `jim_db` ;
+```
+
+#### 初始化表结构
+初始化表结构的sql文件在  im-server/docs/jim.sql , 导入命令如下：
+```
+mysql -u{db_user} -p{db_password} jim_db < jim.sql
+```
+
+### 2. 安装MongoDB(可选)
+略
+
+### 3. 启动im-server
+
+#### 运行目录
+运行目录为 im-server/launcher，其中 conf 目录下存放的是配置文件，logs目录下是服务的运行日志目录。
+
+#### 编辑配置文件
+
+配置文件位置：im-server/launcher/conf/config.yml
+```
+nodeName: testNode      # im-server 的节点名称
+nodeHost: 127.0.0.1     # im-server 的节点IP
+msgStoreEngine: mysql   # 配置用什么存储来存消息数据，有两种存储引擎可选。mysql：使用mysql存储消息数据(默认)；mongo：使用MongoDB存储消息数据
+
+log:
+  logPath: ./logs       # 运行日志所在目录
+  logName: jim-info     # 运行日志的前缀名
+  visual: false         # 是否开启可视化日志。开启后，会同步将日志数据写入一个 KV 数据库，在管理后台”开发工具->连接排查“处，可界面化查询日志；
+
+mysql:                  # im-server 所用的MySQL相关配置
+  user: root
+  password: 123456
+  address: 127.0.0.1:3306
+  name: im_db
+
+mongodb:                # im-server 所用的MongoDB相关配置，用于存储消息数据。该配置为可选，在 msgStoreEngine 配置为 "mongo" 时生效；
+  address: 127.0.0.1:27017
+  name: jim_msgs        # mongodb 表空间名称，im-server启动后，会自动在这个空间下初始化collection；
+
+connectManager:         # im-server 长连接端口
+  wsPort: 9002
+
+apiGateway:             # im-server 的服务端 API 端口, 供业务APP的服务端调用；
+  httpPort: 8082
+
+navGateway:             # im-server 的导航端口，客户端SDK初始化时，需要到导航地址；
+  httpPort: 8081
+
+adminGateway:           # im-server 自带的管理后台地址，默认账号密码是：admin/123456
+  httpPort: 8090
+```
+
+#### 启动im-server
+
+在 im-server/launcher 目录下，执行如下命令：
+```
+go run main.go
+```
+
+#### 配置外网访问地址(域名/IP)
+
+需要配置外网地址的端口列表：
+| 端口 | 协议类型 | 说明 | 
+| ----:|:-----:|:----|
+| 8081| http | 导航服务的监听端口，用于客户端 SDK，SDK 初始化时需要传入这个地址；|
+| 8082| http | 服务端 API 服务监听端口，用于业务服务器，例如 jugglechat-server 配置文件中需要配置这个地址；|
+| 8090| http | IM 服务的管理后台监听端口，默认账号和密码：admin/123456 |
+| 9002| websocket | IM 长连接监听端口，用于客户端SDK与IM 服务建立长连接(websocket) |
+
+配置外网地址的方法，这里不详细描述，大家可以根据自身环境来灵活配置(常用方式: 挂公网ip，nginx反向代理，负载均衡等).
+
+注： 如果仅内网调试使用，可以不配置外网IP/域名，仅使用内网IP即可
+
+#### 将长连接地址配置到IM系统中
+
+配置方式很简单，在数据库中插入一条配置数据即可：
+
+```
+insert into globalconfs (conf_key, conf_value)values('connect_address', '{"default":["127.0.0.1:9002"]}')
+```
+其中，将 127.0.0.1 替换成该机器的内网IP，或对外的公网IP/域名，这个是客户端SDK的长连接地址，将有导航服务(8081)下发给客户端SDK；
+
+### 4. 创建应用(租户)
+JuggleIM 本身是一套多租户的系统，可以在一套服务中创建多个appkey(租户)，租户之间的数据相互隔离，互不影响。
+
+#### 方式一：登录管理后台，创建租户
+待完善
+
+#### 方式二：通过管理API，创建租户
+
+其中，app_key 用于指定租户的标识，可自定义，要求在系统内唯一；app_name为租户的名称，可自定义； 
+注：这里用的是IM服务管理后台(8090)的地址，127.0.0.1 替换成im服务的内网IP，或公网IP/域名。
+
+```
+curl --request POST \
+  --url http://127.0.0.1:8090/admingateway/apps/create \
+  --data '{
+    "app_key":"appkey",
+    "app_name":"appname"
+}'
+```
+
+响应数据示例：
+
+```
+{
+	"code": 0,
+	"msg": "success",
+	"data": {
+		"app_name": "appname",
+		"app_key": "appkey",
+		"app_secret": "hciKcc6sXRDjYUQp"
+	}
+}
+```
+### 5. 登入管理后台
+
+管理后台地址：http://127.0.0.1:8090    默认账号/密码： admin/123456
+
+登入管理后台后，即可看到创建的应用列表，点击其中一个应用，可以对其配置进行修改和维护。
+
+### 6. 业务服务器/客户端集成
+
+这里汇总下业务集成所需的各项配置：
+
+1) 业务服务器集成
+
+| 配置项 | 示例|备注 | 
+| ----: |:-----:|:----|
+|IM 服务端 API 地址 |  http://127.0.0.1:8082 | 供业务服务器访问IM服务的API接口地址，使用该接口可以注册IM用户，创建群，发送系统消息等，接口文档参考：https://www.jugglechat.com/docs/server/api/|
+|app_key | appkey1 |应用的租户标识，在第4步中创建，可自定义，但要保证在系统内唯一 |
+|app_secret| hciKcc6sXRDjYUQp | 应用对应的鉴权秘钥，创建应用时自动生成。如果想自定义的话，确保配置为16位的字符串。注意：确保该秘钥仅在业务服务器端使用，不要泄露到客户端。 |
+
+2) 客户端SDK集成
+
+| 配置项 | 示例|备注 | 
+| ----: |:-----:|:----|
+|IM 服务的导航地址 |  http://127.0.0.1:8081 | 客户端SDK初始化时需要传入，参考文档：https://www.jugglechat.com/docs/client/quickstart/android/ |
+|IM 服务的长连接地址| ws://127.0.0.1:9002| IM 的长连接地址，不需要配置到客户端，将有导航服务负责下发到SDK |
+|app_key|appkey1|应用的租户标识，确保与业务服务器端配置的保持一致。|

@@ -1,6 +1,6 @@
 nodeName: testNode
 nodeHost: 127.0.0.1
-msgStoreEngine: mysql
+msgStoreEngine: mysql 
 
 log:
   logPath: ./logs

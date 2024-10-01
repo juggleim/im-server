@@ -23,7 +23,7 @@ func Validate(ctx *gin.Context) {
 	ctx.Set(services.CtxKey_Session, session)
 
 	urlPath := ctx.Request.URL.Path
-	if strings.HasSuffix(urlPath, "/login") || strings.HasSuffix(urlPath, "/apps/active") || strings.HasSuffix(urlPath, "/apps/add") {
+	if strings.HasSuffix(urlPath, "/login") || strings.HasSuffix(urlPath, "/apps/active") || strings.HasSuffix(urlPath, "/apps/create") {
 		return
 	}
 	authStr := ctx.Request.Header.Get(Header_Authorization)
