@@ -45,15 +45,15 @@ _备注：由于微信群二维码有时间限制，加入微信讨论可优先�
 
 ### 1. 安装并初始化 MySQL
 
-#### 安装 MySQL
+#### 1) 安装 MySQL
 略
 
-#### 创建DB实例
+#### 2) 创建DB实例
 ```
 CREATE SCHEMA `jim_db` ;
 ```
 
-#### 初始化表结构
+#### 3) 初始化表结构
 初始化表结构的sql文件在  im-server/docs/jim.sql , 导入命令如下：
 ```
 mysql -u{db_user} -p{db_password} jim_db < jim.sql
@@ -64,10 +64,10 @@ mysql -u{db_user} -p{db_password} jim_db < jim.sql
 
 ### 3. 启动im-server
 
-#### 运行目录
+#### 1) 运行目录
 运行目录为 im-server/launcher，其中 conf 目录下存放的是配置文件，logs目录下是服务的运行日志目录。
 
-#### 编辑配置文件
+#### 2) 编辑配置文件
 
 配置文件位置：im-server/launcher/conf/config.yml
 ```
@@ -103,14 +103,14 @@ adminGateway:           # im-server 自带的管理后台地址，默认账号�
   httpPort: 8090
 ```
 
-#### 启动im-server
+#### 3) 启动im-server
 
 在 im-server/launcher 目录下，执行如下命令：
 ```
 go run main.go
 ```
 
-#### 配置外网访问地址(域名/IP)
+#### 4) 配置外网访问地址(域名/IP)
 
 需要配置外网地址的端口列表：
 | 端口 | 协议类型 | 说明 | 
@@ -124,7 +124,7 @@ go run main.go
 
 注： 如果仅内网调试使用，可以不配置外网IP/域名，仅使用内网IP即可
 
-#### 将长连接地址配置到IM系统中
+#### 5) 将长连接地址配置到IM系统中
 
 配置方式很简单，在数据库中插入一条配置数据即可：
 
