@@ -28,7 +28,7 @@ func (utag *UserConverTagDao) Upsert(item models.UserConverTag) error {
 		return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.Tag, item.TagName, item.TagName).Error
 	} else {
 		sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,tag) VALUES (?,?,?)", utag.TableName())
-		return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.Tag, item.TagName, item.TagName).Error
+		return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.Tag).Error
 	}
 }
 
