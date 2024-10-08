@@ -37,7 +37,7 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 		}
 
 		exts := map[string]string{}
-		if realMethod == "p_msg" {
+		if realMethod == "p_msg" || realMethod == "imp_pri_msg" {
 			exts[commonservices.RpcExtKey_RealTargetId] = targetId
 			targetId = commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_Private)
 		} else if realMethod == "s_msg" {

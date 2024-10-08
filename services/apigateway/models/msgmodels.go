@@ -76,12 +76,16 @@ type HisMsgs struct {
 }
 type HisMsg struct {
 	SenderId    string `json:"sender_id"`
+	TargetId    string `json:"target_id"`
 	ReceiverId  string `json:"receiver_id"`
 	ChannelType int32  `json:"channel_type"`
 	MsgId       string `json:"msg_id"`
 	MsgTime     int64  `json:"msg_time"`
 	MsgType     string `json:"msg_type"`
 	MsgContent  string `json:"msg_content"`
+
+	IsStorage *bool `json:"is_storage,omitempty"`
+	IsCount   *bool `json:"is_count,omitempty"`
 }
 
 type CleanHisMsgsReq struct {

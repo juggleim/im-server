@@ -53,6 +53,9 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("msg_ack", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.MsgAckActor{}, serviceName)
 	})
+	register.RegisterActor("imp_pri_msg", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.ImportPrivateHisMsgActor{}, serviceName)
+	})
 }
 
 func (manager *MessageManager) Startup(args map[string]interface{}) {

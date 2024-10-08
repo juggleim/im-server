@@ -25,7 +25,14 @@ func (actor *AddConversationActor) OnReceive(ctx context.Context, input proto.Me
 			qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 			actor.Sender.Tell(qryAck, actorsystem.NoSender)
 		} else {
-			services.SaveConversation(bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.Msg)
+			uIds := bases.GetTargetIdsFromCtx(ctx)
+			if len(uIds) > 0 {
+				for _, uId := range uIds {
+					services.SaveConversation(bases.GetAppKeyFromCtx(ctx), uId, conver.Msg)
+				}
+			} else {
+				services.SaveConversation(bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.Msg)
+			}
 		}
 	} else {
 		logs.WithContext(ctx).Error("input is illigal.")

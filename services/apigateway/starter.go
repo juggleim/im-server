@@ -53,6 +53,7 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.POST("/hismsgs/clean", apis.CleanHisMsgs)
 	group.POST("/hismsgs/recall", apis.RecallHisMsgs)
 	group.POST("/hismsgs/del", apis.DelHisMsgs)
+	group.POST("/hismsgs/import", apis.ImportHisMsg)
 
 	group.POST("/groups/add", apis.GroupAddMembers)
 	group.GET("/groups/info", apis.QryGroupInfo)

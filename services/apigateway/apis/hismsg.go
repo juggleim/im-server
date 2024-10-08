@@ -202,3 +202,49 @@ type MarkReadReq struct {
 	ChannelType int32    `json:"channel_type"`
 	MsgIds      []string `json:"msg_ids"`
 }
+
+func ImportHisMsg(ctx *gin.Context) {
+	var msg models.HisMsg
+	if err := ctx.BindJSON(&msg); err != nil || msg.SenderId == "" || msg.MsgType == "" || msg.MsgContent == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	if msg.ReceiverId == "" {
+		msg.ReceiverId = msg.TargetId
+	}
+	if msg.ReceiverId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	if msg.ChannelType == int32(pbobjs.ChannelType_Private) {
+		services.AsyncSendMsg(ctx, "imp_pri_msg", msg.SenderId, msg.ReceiverId, &pbobjs.UpMsg{
+			MsgType:    msg.MsgType,
+			MsgContent: []byte(msg.MsgContent),
+			Flags:      handleHisMsgFlag(msg),
+			MsgTime:    msg.MsgTime,
+		}, false, "")
+	} else if msg.ChannelType == int32(pbobjs.ChannelType_Group) {
+		services.AsyncSendMsg(ctx, "imp_grp_msg", msg.SenderId, msg.ReceiverId, &pbobjs.UpMsg{
+			MsgType:    msg.MsgType,
+			MsgContent: []byte(msg.MsgContent),
+			Flags:      handleHisMsgFlag(msg),
+			MsgTime:    msg.MsgTime,
+		}, false, "")
+	} else {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_ILLEGAL)
+		return
+	}
+	services.AsyncApiCall(ctx, "", msg.SenderId, msg.ReceiverId, &pbobjs.DownMsg{})
+	tools.SuccessHttpResp(ctx, nil)
+}
+
+func handleHisMsgFlag(msg models.HisMsg) int32 {
+	var flag int32 = 0
+	if msg.IsStorage == nil || *msg.IsStorage {
+		flag = commonservices.SetStoreMsg(flag)
+	}
+	if msg.IsCount == nil || *msg.IsCount {
+		flag = commonservices.SetCountMsg(flag)
+	}
+	return flag
+}
