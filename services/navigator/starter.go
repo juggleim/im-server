@@ -40,7 +40,7 @@ func (ser *Navigator) Startup(args map[string]interface{}) {
 
 	httpPort := configures.Config.NavGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
-	fmt.Println("start Navitor with port :", httpPort)
+	fmt.Println("Start navitor with port:", httpPort)
 }
 
 func CorsHandler() gin.HandlerFunc {

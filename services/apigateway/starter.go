@@ -92,7 +92,7 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 
 	httpPort := configures.Config.ApiGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
-	fmt.Println("start ApiGateway with port :", httpPort)
+	fmt.Println("Start apigateway with port:", httpPort)
 }
 
 func (ser *ApiGateway) Shutdown() {

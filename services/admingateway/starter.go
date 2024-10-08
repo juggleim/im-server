@@ -83,7 +83,7 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 
 	httpPort := configures.Config.AdminGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
-	fmt.Println("start AdminGateway with port :", httpPort)
+	fmt.Println("Start admingateway with port:", httpPort)
 }
 
 func (ser *AdminGateway) Shutdown() {

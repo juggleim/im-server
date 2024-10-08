@@ -40,7 +40,7 @@ func (ser *ConnectManager) Startup(args map[string]interface{}) {
 		MessageListener: &server.ImListenerImpl{},
 	}
 	go ser.wsServer.SyncStart(wsPort)
-	fmt.Println("start with gorilla ws port:", wsPort)
+	fmt.Println("Start connectmanager with port:", wsPort)
 }
 
 func (ser *ConnectManager) Shutdown() {
