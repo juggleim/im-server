@@ -301,11 +301,13 @@ func QryTotalUnreadCount(ctx context.Context, userId string, req *pbobjs.QryTota
 
 	channelTypes := []pbobjs.ChannelType{}
 	excludeConvers := []*pbobjs.SimpleConversation{}
+	tag := ""
 	if req.Filter != nil {
 		channelTypes = append(channelTypes, req.Filter.ChannelTypes...)
 		excludeConvers = append(excludeConvers, req.Filter.ExcludeConvers...)
+		tag = req.Filter.Tag
 	}
-	var totoalCount int64 = storage.TotalUnreadCount(appkey, userId, channelTypes, excludeConvers)
+	var totoalCount int64 = storage.TotalUnreadCount(appkey, userId, channelTypes, excludeConvers, tag)
 	return &pbobjs.QryTotalUnreadCountResp{
 		TotalCount: totoalCount,
 	}
@@ -418,6 +420,21 @@ func dbConver2Conversations(ctx context.Context, dbConver *models.Conversation) 
 			}
 		}
 	}
+	//conver tags
+	tagStorage := storages.NewUserConverTagStorage()
+	tags, err := tagStorage.QryTagsByConver(appkey, userId, dbConver.TargetId, dbConver.ChannelType)
+	if err == nil {
+		converTags := []*pbobjs.ConverTag{}
+		for _, tag := range tags {
+			converTags = append(converTags, &pbobjs.ConverTag{
+				Tag:     tag.Tag,
+				TagName: tag.TagName,
+				TagType: pbobjs.ConverTagType_UserConverTag,
+			})
+		}
+		conversation.ConverTags = append(conversation.ConverTags, converTags...)
+	}
+
 	return conversation
 }
 
@@ -441,7 +458,7 @@ func QryConversations(ctx context.Context, req *pbobjs.QryConversationsReq) *pbo
 		Conversations: []*pbobjs.Conversation{},
 	}
 	converStorage := storages.NewConversationStorage()
-	dbConvers, err := converStorage.QryConversations(appkey, userId, targetId, channelType, startTime, count+1, isPositiveOrder)
+	dbConvers, err := converStorage.QryConversations(appkey, userId, targetId, channelType, startTime, count+1, isPositiveOrder, req.Tag)
 	if err == nil {
 		if len(dbConvers) > int(count) {
 			dbConvers = dbConvers[:count]
@@ -792,6 +809,19 @@ func QryConver(ctx context.Context, userId string, req *pbobjs.QryConverReq) (er
 	conver, err := storage.FindOne(appkey, userId, req.TargetId, req.ChannelType)
 	if err == nil && conver != nil {
 		if req.IsInner {
+			converTags := []*pbobjs.ConverTag{}
+			//conver tag
+			tagStorage := storages.NewUserConverTagStorage()
+			tags, err := tagStorage.QryTagsByConver(appkey, userId, req.TargetId, req.ChannelType)
+			if err == nil {
+				for _, tag := range tags {
+					converTags = append(converTags, &pbobjs.ConverTag{
+						Tag:     tag.Tag,
+						TagName: tag.TagName,
+						TagType: pbobjs.ConverTagType_UserConverTag,
+					})
+				}
+			}
 			return errs.IMErrorCode_SUCCESS, &pbobjs.Conversation{
 				TargetId:          req.TargetId,
 				ChannelType:       req.ChannelType,
@@ -800,6 +830,7 @@ func QryConver(ctx context.Context, userId string, req *pbobjs.QryConverReq) (er
 				LatestReadIndex:   conver.LatestReadMsgIndex,
 				LatestReadMsgId:   conver.LatestReadMsgId,
 				LatestReadMsgTime: conver.LatestReadMsgTime,
+				ConverTags:        converTags,
 			}
 		} else {
 			return errs.IMErrorCode_SUCCESS, dbConver2Conversations(ctx, conver)

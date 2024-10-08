@@ -28,6 +28,7 @@ type UserConversationItem struct {
 	key           string
 	UndisturbType int32
 	UnreadIndex   int64
+	ConverTags    []*pbobjs.ConverTag
 }
 
 func (conver *UserConversationItem) GetUnreadIndex() int64 {
@@ -81,6 +82,7 @@ func QryConversation(ctx context.Context, userId, targetId string, channelType p
 			return &UserConversationItem{
 				UndisturbType: conver.UndisturbType,
 				UnreadIndex:   conver.LatestUnreadIndex,
+				ConverTags:    conver.ConverTags,
 			}
 		}
 	}
@@ -108,4 +110,5 @@ func HandleDownMsgByConver(ctx context.Context, userId, targetId string, channel
 	if commonservices.IsCountMsg(downMsg.Flags) {
 		downMsg.UnreadIndex = conver.GetUnreadIndex()
 	}
+	downMsg.ConverTags = append(downMsg.ConverTags, conver.ConverTags...)
 }

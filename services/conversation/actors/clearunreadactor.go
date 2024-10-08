@@ -20,7 +20,7 @@ func (actor *ClearUnReadActor) OnReceive(ctx context.Context, input proto.Messag
 	if req, ok := input.(*pbobjs.ClearUnreadReq); ok {
 		userId := bases.GetRequesterIdFromCtx(ctx)
 		targetId := bases.GetTargetIdFromCtx(ctx)
-		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tconversations=%v", userId, targetId, req.Conversations)
+		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tconversations:%v", userId, targetId, req.Conversations)
 		code := services.ClearUnread(ctx, targetId, req.Conversations, req.NoCmdMsg)
 		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)

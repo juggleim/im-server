@@ -199,6 +199,34 @@ CREATE TABLE `conversations` (
   KEY `idx_group` (`app_key`,`user_id`,`group`,`sort_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `userconvertags`;
+CREATE TABLE `userconvertags` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` VARCHAR(32) NULL,
+  `tag` VARCHAR(50) NULL,
+  `tag_name` VARCHAR(50) NULL,
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_tag` (`app_key`, `user_id`, `tag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+DROP TABLE IF EXISTS `convertagrels`;
+CREATE TABLE `convertagrels` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` VARCHAR(32) NULL,
+  `tag` VARCHAR(50) NULL,
+  `target_id` VARCHAR(32) NULL,
+  `channel_type` TINYINT NULL,
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_tag_target` (`app_key`, `user_id`, `tag`, `target_id`, `channel_type`),
+  KEY `idx_target` (`app_key`, `user_id`, `target_id`, `channel_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 DROP TABLE IF EXISTS `msgstats`;
 CREATE TABLE `msgstats` (
   `id` INT NOT NULL AUTO_INCREMENT,

@@ -16,3 +16,11 @@ func NewMentionMsgStorage() models.IMentionMsgStorage {
 func NewGlobalConversationStorage() models.IGlobalConverStorage {
 	return &dbs.GlobalConverDao{}
 }
+
+func NewUserConverTagStorage() models.IUserConverTagStorage {
+	return &dbs.UserConverTagDao{}
+}
+
+func NewConverTagRelStorage() models.IConverTagRelStorage {
+	return &dbs.ConverTagRelDao{}
+}

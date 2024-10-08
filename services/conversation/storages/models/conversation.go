@@ -27,11 +27,11 @@ type Conversation struct {
 type IConversationStorage interface {
 	FindOne(appkey, userId, targetId string, channelType pbobjs.ChannelType) (*Conversation, error)
 	UpsertConversation(conversation Conversation) error
-	QryConversations(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int32, isPositiveOrder bool) ([]*Conversation, error)
+	QryConversations(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int32, isPositiveOrder bool, tag string) ([]*Conversation, error)
 	DelConversation(appkey, userId, targetId string, channelType pbobjs.ChannelType) error
 	UpdateLatestReadMsgIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIndex int64, readMsgId string, readMsgTime int64) (int64, error)
 	UpdateIsTopState(appkey, userId, targetId string, channelType pbobjs.ChannelType, isTop int, optTime int64) (int64, error)
-	TotalUnreadCount(appkey, userId string, channelTypes []pbobjs.ChannelType, excludeConvers []*pbobjs.SimpleConversation) int64
+	TotalUnreadCount(appkey, userId string, channelTypes []pbobjs.ChannelType, excludeConvers []*pbobjs.SimpleConversation, tag string) int64
 	ClearTotalUnreadCount(appkey, userId string) error
 	QryTopConvers(appkey, userId string, startTime, limit int64) ([]*Conversation, error)
 	SyncConversations(appkey, userId string, startTime int64, count int32) ([]*Conversation, error)

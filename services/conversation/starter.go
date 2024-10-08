@@ -58,9 +58,20 @@ func (manager *ConversationManager) RegisterActors(register gmicro.IActorRegiste
 	register.RegisterActor("upd_latest_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.UpdLatestMsgActor{}, serviceName)
 	})
-
 	register.RegisterActor("qry_mention_msgs", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryMentionMsgsActor{}, serviceName)
+	})
+	register.RegisterActor("tag_add_convers", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.TagAddConversActor{}, serviceName)
+	})
+	register.RegisterActor("tag_del_convers", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.TagDelConversActor{}, serviceName)
+	})
+	register.RegisterActor("qry_user_conver_tags", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryUserConverTagsActor{}, serviceName)
+	})
+	register.RegisterActor("del_user_conver_tags", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.DelUserConverTagsActor{}, serviceName)
 	})
 }
 

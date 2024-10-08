@@ -122,6 +122,7 @@ message DownMsg{
   repeated StreamMsgItem msgItems = 24;
   repeated MsgExtItem msgExSet = 25;
   repeated MsgExtItem msgExts = 26;
+  repeated ConverTag converTags = 27;
 }
 
 message MsgAck{
@@ -360,6 +361,7 @@ message QryConversationsReq{
   // string userId = 4;
   string targetId = 5;
   ChannelType channelType = 6;
+  string tag = 7;
 }
 message QryConversationsResp{
   repeated Conversation conversations = 1;
@@ -385,6 +387,7 @@ message Conversation{
   int32 unreadTag = 17;
   string latestReadMsgId = 18;
   int64 latestReadMsgTime = 19;
+  repeated ConverTag converTags = 20;
 }
 
 enum UpdLatestMsgAction{
@@ -442,6 +445,7 @@ message ConverFilter{
   repeated ChannelType channelTypes = 1;
   repeated SimpleConversation excludeConvers = 2;
   repeated SimpleConversation includeConvers = 3;
+  string tag = 4;
 }
 
 message QryTotalUnreadCountResp{
@@ -521,6 +525,28 @@ message QryConverResp{
   ChannelType channelType = 2;
   int64 unreadIndex = 3;
   int32 undisturbType = 4;
+}
+
+message TagConvers{
+  string tag = 1;
+  string tagName = 2;
+  repeated SimpleConversation convers = 11;
+}
+
+message UserConverTags{
+  repeated ConverTag tags = 1;
+}
+
+message ConverTag{
+  string tag = 1;
+  string tagName = 2;
+  ConverTagType tagType = 3;
+}
+
+enum ConverTagType{
+  UserConverTag = 0;
+  SystemConverTag = 1;
+  GlobalConverTag = 2;
 }
 
 //user

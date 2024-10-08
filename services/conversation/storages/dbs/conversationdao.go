@@ -4,6 +4,7 @@ import (
 	"im-server/commons/dbcommons"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/conversation/storages/models"
+	"strings"
 )
 
 type ConversationDao struct {
@@ -112,35 +113,80 @@ func (conver *ConversationDao) SyncConversations(appkey, userId string, startTim
 	return conversations, nil
 }
 
-func (conver *ConversationDao) QryConversations(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int32, isPositiveOrder bool) ([]*models.Conversation, error) {
+func (conver *ConversationDao) QryConversations(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int32, isPositiveOrder bool, tag string) ([]*models.Conversation, error) {
+	var sqlBuilder strings.Builder
+	var conditionBuilder strings.Builder
 	var items []*ConversationDao
+	//sql := fmt.Sprintf("select %s.* from %s", conver.TableName(), conver.TableName())
+	sqlBuilder.WriteString("select ")
+	sqlBuilder.WriteString(conver.TableName())
+	sqlBuilder.WriteString(".* from ")
+	sqlBuilder.WriteString(conver.TableName())
 	params := []interface{}{}
-	condition := "app_key=?"
+	//condition := fmt.Sprintf("%s.app_key=?", conver.TableName())
+	conditionBuilder.WriteString(conver.TableName())
+	conditionBuilder.WriteString(".app_key=?")
 	params = append(params, appkey)
 	if userId != "" {
-		condition = condition + " and user_id=?"
+		// condition = condition + fmt.Sprintf(" and %s.user_id=?", conver.TableName())
+		conditionBuilder.WriteString(" and ")
+		conditionBuilder.WriteString(conver.TableName())
+		conditionBuilder.WriteString(".user_id=?")
 		params = append(params, userId)
 	}
 	if targetId != "" {
-		condition = condition + " and target_id=?"
+		// condition = condition + fmt.Sprintf(" and %s.target_id=?", conver.TableName())
+		conditionBuilder.WriteString(" and ")
+		conditionBuilder.WriteString(conver.TableName())
+		conditionBuilder.WriteString(".target_id=?")
 		params = append(params, targetId)
 	}
 	if channelType != pbobjs.ChannelType_Unknown {
-		condition = condition + " and channel_type=?"
+		// condition = condition + fmt.Sprintf(" and %s.channel_type=?", conver.TableName())
+		conditionBuilder.WriteString(" and ")
+		conditionBuilder.WriteString(conver.TableName())
+		conditionBuilder.WriteString(".channel_type=?")
 		params = append(params, int(channelType))
 	}
-	condition = condition + " and is_deleted=?"
+	if tag != "" {
+		rel := &ConverTagRelDao{}
+		// sql = sql + fmt.Sprintf(" inner join %s on (%s.target_id=%s.target_id and %s.channel_type=%s.channel_type)", rel.TableName(), conver.TableName(), rel.TableName(), conver.TableName(), rel.TableName())
+		sqlBuilder.WriteString(" inner join ")
+		sqlBuilder.WriteString(rel.TableName())
+		sqlBuilder.WriteString(" on (")
+		sqlBuilder.WriteString(conver.TableName())
+		sqlBuilder.WriteString(".target_id=")
+		sqlBuilder.WriteString(rel.TableName())
+		sqlBuilder.WriteString(".target_id and ")
+		sqlBuilder.WriteString(conver.TableName())
+		sqlBuilder.WriteString(".channel_type=")
+		sqlBuilder.WriteString(rel.TableName())
+		sqlBuilder.WriteString(".channel_type)")
+		// condition = condition + fmt.Sprintf(" and %s.tag = ?", rel.TableName())
+		conditionBuilder.WriteString(" and ")
+		conditionBuilder.WriteString(rel.TableName())
+		conditionBuilder.WriteString(".tag=?")
+		params = append(params, tag)
+	}
+	// condition = condition + " and is_deleted=?"
+	conditionBuilder.WriteString(" and is_deleted=?")
 	params = append(params, 0)
 	orderStr := "sort_time desc"
 	if isPositiveOrder {
-		condition = condition + " and sort_time>?"
+		// condition = condition + " and sort_time>?"
+		conditionBuilder.WriteString(" and sort_time>?")
 		params = append(params, startTime)
 		orderStr = "sort_time asc"
 	} else {
-		condition = condition + " and sort_time<?"
+		// condition = condition + " and sort_time<?"
+		conditionBuilder.WriteString(" and sort_time<?")
 		params = append(params, startTime)
 	}
-	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	// sql = sql + " where " + condition
+	sqlBuilder.WriteString(" where ")
+	sqlBuilder.WriteString(conditionBuilder.String())
+	//err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Raw(sqlBuilder.String(), params...).Order(orderStr).Limit(count).Find(&items).Error
 	if err != nil {
 		return []*models.Conversation{}, err
 	}
@@ -202,29 +248,74 @@ type UnreadCount struct {
 	UnreadCount int64 `gorm:"unread_count"`
 }
 
-func (conver *ConversationDao) TotalUnreadCount(appkey, userId string, channelTypes []pbobjs.ChannelType, excludeConvers []*pbobjs.SimpleConversation) int64 {
+func (conver *ConversationDao) TotalUnreadCount(appkey, userId string, channelTypes []pbobjs.ChannelType, excludeConvers []*pbobjs.SimpleConversation, tag string) int64 {
 	var unreadCount UnreadCount
 	params := []interface{}{}
-	sql := "SELECT SUM(CASE WHEN latest_unread_msg_index=latest_read_msg_index AND unread_tag=1 THEN 1 ELSE latest_unread_msg_index-latest_read_msg_index END) AS unread_count FROM conversations WHERE app_key=? and user_id=?"
+	var sqlBuilder strings.Builder
+	var conditionBuilder strings.Builder
+	// sql := "SELECT SUM(CASE WHEN latest_unread_msg_index=latest_read_msg_index AND unread_tag=1 THEN 1 ELSE latest_unread_msg_index-latest_read_msg_index END) AS unread_count FROM conversations WHERE app_key=? and user_id=?"
+	sqlBuilder.WriteString("SELECT SUM(CASE WHEN latest_unread_msg_index=latest_read_msg_index AND unread_tag=1 THEN 1 ELSE latest_unread_msg_index-latest_read_msg_index END) AS unread_count FROM ")
+	sqlBuilder.WriteString(conver.TableName())
+
+	conditionBuilder.WriteString(conver.TableName())
+	conditionBuilder.WriteString(".app_key=?")
 	params = append(params, appkey)
+	conditionBuilder.WriteString(" AND ")
+	conditionBuilder.WriteString(conver.TableName())
+	conditionBuilder.WriteString(".user_id=?")
 	params = append(params, userId)
+	// params = append(params, userId)
+	if tag != "" {
+		rel := &ConverTagRelDao{}
+		sqlBuilder.WriteString(" INNER JOIN ")
+		sqlBuilder.WriteString(rel.TableName())
+		sqlBuilder.WriteString(" ON (")
+		sqlBuilder.WriteString(conver.TableName())
+		sqlBuilder.WriteString(".target_id=")
+		sqlBuilder.WriteString(rel.TableName())
+		sqlBuilder.WriteString(".target_id and ")
+		sqlBuilder.WriteString(conver.TableName())
+		sqlBuilder.WriteString(".channel_type=")
+		sqlBuilder.WriteString(rel.TableName())
+		sqlBuilder.WriteString(".channel_type)")
+
+		conditionBuilder.WriteString(" AND ")
+		conditionBuilder.WriteString(rel.TableName())
+		conditionBuilder.WriteString(".tag=?")
+		params = append(params, tag)
+	}
+
 	if len(channelTypes) > 0 {
 		channels := []int{}
 		for _, c := range channelTypes {
 			channels = append(channels, int(c))
 		}
-		sql = sql + " and channel_type in (?)"
+		conditionBuilder.WriteString(" AND ")
+		conditionBuilder.WriteString(conver.TableName())
+		conditionBuilder.WriteString(".channel_type in (?)")
+		// sql = sql + " and channel_type in (?)"
 		params = append(params, channels)
 	}
 	if len(excludeConvers) > 0 {
+		tableName := conver.TableName()
 		for _, conver := range excludeConvers {
-			sql = sql + " and (target_id!=? or channel_type!=?)"
+			// sql = sql + " and (target_id!=? or channel_type!=?)"
+			conditionBuilder.WriteString(" AND ")
+			conditionBuilder.WriteString("(")
+			conditionBuilder.WriteString(tableName)
+			conditionBuilder.WriteString(".target_id!=? OR ")
+			conditionBuilder.WriteString(tableName)
+			conditionBuilder.WriteString(".channel_type!=?)")
 			params = append(params, conver.TargetId)
-			params = append(params, conver.ChannelType)
+			params = append(params, int(conver.ChannelType))
 		}
 	}
-	sql = sql + " and is_deleted=0 and latest_read_msg_index!=latest_unread_msg_index and undisturb_type=0"
-	err := dbcommons.GetDb().Raw(sql, params...).Scan(&unreadCount).Error
+	conditionBuilder.WriteString(" AND is_deleted=0")
+	conditionBuilder.WriteString(" AND latest_read_msg_index!=latest_unread_msg_index and undisturb_type=0")
+	// sql = sql + " and is_deleted=0 and latest_read_msg_index!=latest_unread_msg_index and undisturb_type=0"
+	sqlBuilder.WriteString(" WHERE ")
+	sqlBuilder.WriteString(conditionBuilder.String())
+	err := dbcommons.GetDb().Raw(sqlBuilder.String(), params...).Scan(&unreadCount).Error
 	if err != nil {
 		return 0
 	} else {

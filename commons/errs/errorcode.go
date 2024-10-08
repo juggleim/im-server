@@ -76,6 +76,12 @@ var (
 	IMErrorCode_MSG_Hit_Sensitive   IMErrorCode = 12007
 )
 
+// conversation
+var (
+	IMErrorCode_CONVER_ADDTAGFAIL       IMErrorCode = 12101
+	IMErrorCode_CONVER_TAGADDCONVERFAIL IMErrorCode = 12102
+)
+
 // group errorcode
 var (
 	IMErrorCode_GROUP_DEFAULT                IMErrorCode = 13000
