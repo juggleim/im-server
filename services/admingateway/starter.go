@@ -24,6 +24,9 @@ func (ser *AdminGateway) RegisterActors(register gmicro.IActorRegister) {
 
 func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	ser.httpServer = gin.Default()
+	ser.httpServer.HEAD("/", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, nil)
+	})
 	loadAdminWeb(ser.httpServer)
 	ser.httpServer.Use(CorsHandler(), InjectCtx())
 	group := ser.httpServer.Group("/admingateway")

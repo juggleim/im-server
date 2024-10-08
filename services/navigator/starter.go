@@ -27,6 +27,9 @@ func (ser *Navigator) Startup(args map[string]interface{}) {
 	ser.httpServer.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, "ok")
 	})
+	ser.httpServer.HEAD("/", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, nil)
+	})
 	group := ser.httpServer.Group("/navigator")
 	group.Use(apis.CheckToken)
 	group.GET("/general", apis.NaviGet)
