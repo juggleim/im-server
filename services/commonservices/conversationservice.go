@@ -30,7 +30,7 @@ func GetConversationId(fromId, targetId string, channelType pbobjs.ChannelType) 
 	}
 }
 
-func ImportConversation(ctx context.Context, userIds []string, msg *pbobjs.DownMsg) {
+func BatchSaveConversations(ctx context.Context, userIds []string, msg *pbobjs.DownMsg) {
 	if IsStoreMsg(msg.Flags) {
 		if len(userIds) <= 0 {
 			return

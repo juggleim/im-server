@@ -129,7 +129,7 @@ func (actor *baseProcessActor) OnReceive(ctx context.Context, input proto.Messag
 				}
 			}
 			consume := time.Since(startTime)
-			if consume > 5*time.Second {
+			if consume > 1*time.Second {
 				logs.Errorf("RPC_Timeout:%v\tsession:%s\tseq_index:%d\tmethod:%s\trequest_id:%s\ttarget_id:%s", consume, ssRequest.Session, ssRequest.ReqIndex, ssRequest.Method, ssRequest.RequesterId, ssRequest.TargetId)
 			}
 		}

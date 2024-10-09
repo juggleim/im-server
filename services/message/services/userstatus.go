@@ -158,8 +158,9 @@ func getKey(appkey, userId string) string {
 
 func initUserInfo(appkey, userId string) *UserStatus {
 	return &UserStatus{
-		appkey:       appkey,
-		userId:       userId,
-		OnlineStatus: true,
+		appkey: appkey,
+		userId: userId,
+		// OnlineStatus: true,
+		OnlineStatus: false,
 	}
 }

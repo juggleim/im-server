@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"im-server/services/group/dbs"
 	"time"
 )
@@ -21,20 +22,39 @@ func QrySnapshot(ctx context.Context, req *pbobjs.QryGrpSnapshotReq) (errs.IMErr
 		return errs.IMErrorCode_GROUP_NOSNAPSHOT, nil
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	dao := dbs.GrpSnapshotDao{}
-	snapshotDb, err := dao.FindNearlySnapshot(appkey, req.GroupId, req.NearlyTime)
-	if err == nil && snapshotDb != nil {
-		snapshot := &pbobjs.GroupSnapshot{}
-		err = tools.PbUnMarshal(snapshotDb.Snapshot, snapshot)
-		if err == nil {
-			return errs.IMErrorCode_SUCCESS, snapshot
+	appinfo, exist := commonservices.GetAppInfo(appkey)
+	if exist && appinfo != nil && appinfo.OpenGrpSnapshot {
+		dao := dbs.GrpSnapshotDao{}
+		snapshotDb, err := dao.FindNearlySnapshot(appkey, req.GroupId, req.NearlyTime)
+		if err == nil && snapshotDb != nil {
+			snapshot := &pbobjs.GroupSnapshot{}
+			err = tools.PbUnMarshal(snapshotDb.Snapshot, snapshot)
+			if err == nil {
+				return errs.IMErrorCode_SUCCESS, snapshot
+			}
 		}
+		go RegenerateGroupSnapshot(appkey, req.GroupId)
+		return errs.IMErrorCode_GROUP_NOSNAPSHOT, nil
+	} else {
+		container, exist := GetGroupMembersFromCache(ctx, appkey, req.GroupId)
+		snapshot := &pbobjs.GroupSnapshot{
+			GroupId:   req.GroupId,
+			MemberIds: []string{},
+		}
+		if exist && container != nil {
+			memberMap := container.GetMemberMap()
+			for memberId := range memberMap {
+				snapshot.MemberIds = append(snapshot.MemberIds, memberId)
+			}
+		}
+		return errs.IMErrorCode_SUCCESS, snapshot
 	}
-	go RegenerateGroupSnapshot(appkey, req.GroupId)
-	return errs.IMErrorCode_GROUP_NOSNAPSHOT, nil
 }
 func GenerateGroupSnapshot(appkey, groupId string, memberIds []string) {
-	innerGenerateGroupSnapshot(appkey, groupId, memberIds, time.Now().UnixMilli())
+	appinfo, exist := commonservices.GetAppInfo(appkey)
+	if exist && appinfo != nil && appinfo.OpenGrpSnapshot {
+		innerGenerateGroupSnapshot(appkey, groupId, memberIds, time.Now().UnixMilli())
+	}
 }
 func innerGenerateGroupSnapshot(appkey, groupId string, memberIds []string, createdTime int64) {
 	dao := dbs.GrpSnapshotDao{}

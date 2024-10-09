@@ -282,7 +282,7 @@ func ImportGroupHisMsg(ctx context.Context, msg *pbobjs.UpMsg) {
 	}
 	if commonservices.IsStoreMsg(msg.Flags) {
 		//add conver for sender
-		commonservices.ImportConversation(ctx, []string{senderId}, downMsg4Sendbox)
+		commonservices.BatchSaveConversations(ctx, []string{senderId}, downMsg4Sendbox)
 	}
 	downMsg := &pbobjs.DownMsg{
 		SenderId:       senderId,
@@ -302,7 +302,7 @@ func ImportGroupHisMsg(ctx context.Context, msg *pbobjs.UpMsg) {
 		//add hismsg
 		commonservices.SaveHistoryMsg(ctx, senderId, groupId, pbobjs.ChannelType_Group, downMsg, memberCount)
 		//add conver for receivers
-		commonservices.ImportConversation(ctx, memberIds, downMsg)
+		commonservices.BatchSaveConversations(ctx, memberIds, downMsg)
 	}
 
 }

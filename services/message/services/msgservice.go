@@ -323,7 +323,7 @@ func ImportPrivateHisMsg(ctx context.Context, senderId, targetId string, msg *pb
 	}
 	// add conver for sender
 	if commonservices.IsStoreMsg(msg.Flags) {
-		commonservices.ImportConversation(ctx, []string{senderId}, downMsg4Sendbox)
+		commonservices.BatchSaveConversations(ctx, []string{senderId}, downMsg4Sendbox)
 	}
 
 	downMsg := &pbobjs.DownMsg{
@@ -343,6 +343,6 @@ func ImportPrivateHisMsg(ctx context.Context, senderId, targetId string, msg *pb
 		commonservices.SaveHistoryMsg(ctx, senderId, targetId, pbobjs.ChannelType_Private, downMsg, 0)
 
 		//add conver for receiver
-		commonservices.ImportConversation(ctx, []string{targetId}, downMsg)
+		commonservices.BatchSaveConversations(ctx, []string{targetId}, downMsg)
 	}
 }

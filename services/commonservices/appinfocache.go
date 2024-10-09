@@ -39,6 +39,8 @@ type AppInfo struct {
 	MaxGrpMemberCount        int  `default:"1000"`
 	GrpMsgThreshold          int  `default:"100"`
 	MsgThreshold             int  `default:"2000"`
+	OpenGrpSnapshot          bool `default:"false"`
+	BigGrpThreshold          int  `default:"1000"`
 
 	EventSubConfig string `default:""`
 	EventSubSwitch string `default:""`

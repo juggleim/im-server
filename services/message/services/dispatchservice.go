@@ -25,13 +25,39 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 		})
 	} else if downMsg.ChannelType == pbobjs.ChannelType_Group {
 		memberIds := bases.GetTargetIdsFromCtx(ctx)
-		//save msg to inbox and record conversation for each member
-		for _, receiverId := range memberIds {
-			newDownMsg := copyDownMsg(downMsg)
-			recvId := receiverId
-			MsgSinglePools.GetPool(strings.Join([]string{appkey, recvId}, "_")).Submit(func() {
-				doDispatch(ctx, recvId, newDownMsg)
-			})
+		threadhold := 1000
+		appinfo, exist := commonservices.GetAppInfo(appkey)
+		if exist && appinfo != nil {
+			threadhold = appinfo.BigGrpThreshold
+		}
+		if downMsg.MemberCount < int32(threadhold) {
+			//save msg to inbox and record conversation for each member
+			for _, receiverId := range memberIds {
+				newDownMsg := copyDownMsg(downMsg)
+				recvId := receiverId
+				MsgSinglePools.GetPool(strings.Join([]string{appkey, recvId}, "_")).Submit(func() {
+					doDispatch(ctx, recvId, newDownMsg)
+				})
+			}
+		} else {
+			offlineMemberIds := []string{}
+			for _, receiverId := range memberIds {
+				userStatus := GetUserStatus(appkey, receiverId)
+				if userStatus.IsOnline() {
+					newDownMsg := copyDownMsg(downMsg)
+					recvId := receiverId
+					MsgSinglePools.GetPool(strings.Join([]string{appkey, recvId}, "_")).Submit(func() {
+						doDispatch(ctx, recvId, newDownMsg)
+					})
+				} else {
+					offlineMemberIds = append(offlineMemberIds, receiverId)
+				}
+			}
+			if len(offlineMemberIds) > 0 {
+				if !commonservices.IsStateMsg(downMsg.Flags) {
+					commonservices.BatchSaveConversations(ctx, offlineMemberIds, downMsg)
+				}
+			}
 		}
 	}
 }
@@ -49,9 +75,9 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg) {
 		botclient.SendMsg2Bot(ctx, receiverId, msg)
 	} else {
 		if !commonservices.IsStateMsg(msg.Flags) {
-			SaveMsg2Inbox(appkey, receiverId, msg)
 			//record conversation
 			commonservices.SaveConversation(ctx, receiverId, msg)
+			SaveMsg2Inbox(appkey, receiverId, msg)
 			//send to client
 			MsgOrNtf(ctx, receiverId, msg)
 		} else {

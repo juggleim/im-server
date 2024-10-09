@@ -88,6 +88,9 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 		memberContainer.AddMember(GroupMember{
 			MemberId:    memberId,
 			CreatedTime: time.Now().UnixMilli(),
+		})
+		AddGrpMemberAtts2Cache(ctx, appKey, groupId, memberId, MemberAtts{
+			MemberId: memberId,
 			Settings: &commonservices.GrpMemberSettings{
 				HideGrpMsg: grpHideGrpMsg,
 			},
@@ -187,15 +190,15 @@ func GetGroupMembersFromCache(ctx context.Context, appkey, groupId string) (*Gro
 func GetGroupMembersFromDb(ctx context.Context, appkey, groupId string) map[string]*GroupMember {
 	memberDao := dbs.GroupMemberDao{}
 	var startId int64 = 0
-	var limit int64 = 1000
+	var limit int64 = 10000
 	members := map[string]*GroupMember{}
-	grpInfo := getGroupInfoFromDb(ctx, appkey, groupId)
-	hideGrpMsg := "0"
-	if grpInfo != nil && grpInfo.Settings != nil {
-		if grpInfo.Settings.HideGrpMsg {
-			hideGrpMsg = "1"
-		}
-	}
+	// grpInfo := getGroupInfoFromDb(ctx, appkey, groupId)
+	// hideGrpMsg := "0"
+	// if grpInfo != nil && grpInfo.Settings != nil {
+	// 	if grpInfo.Settings.HideGrpMsg {
+	// 		hideGrpMsg = "1"
+	// 	}
+	// }
 	for {
 		dbMembers, err := memberDao.QueryMembers(appkey, groupId, startId, limit)
 		if err == nil {
@@ -205,20 +208,20 @@ func GetGroupMembersFromDb(ctx context.Context, appkey, groupId string) map[stri
 					IsMute:      dbMember.IsMute,
 					IsAllow:     dbMember.IsAllow,
 					CreatedTime: dbMember.CreatedTime.UnixMilli(),
-					Settings:    &commonservices.GrpMemberSettings{},
+					// Settings:    &commonservices.GrpMemberSettings{},
 				}
-				valMap := make(map[string]string)
-				valMap[string(commonservices.AttItemKey_HideGrpMsg)] = hideGrpMsg
-				memberExtDao := dbs.GroupMemberExtDao{}
-				exts, err := memberExtDao.QryExtFields(appkey, groupId, grpMember.MemberId)
-				if err == nil {
-					for _, ext := range exts {
-						if ext.ItemType == int(commonservices.AttItemType_Setting) {
-							valMap[ext.ItemKey] = ext.ItemValue
-						}
-					}
-				}
-				commonservices.FillObjField(grpMember.Settings, valMap)
+				// valMap := make(map[string]string)
+				// valMap[string(commonservices.AttItemKey_HideGrpMsg)] = hideGrpMsg
+				// memberExtDao := dbs.GroupMemberExtDao{}
+				// exts, err := memberExtDao.QryExtFields(appkey, groupId, grpMember.MemberId)
+				// if err == nil {
+				// 	for _, ext := range exts {
+				// 		if ext.ItemType == int(commonservices.AttItemType_Setting) {
+				// 			valMap[ext.ItemKey] = ext.ItemValue
+				// 		}
+				// 	}
+				// }
+				// commonservices.FillObjField(grpMember.Settings, valMap)
 				members[dbMember.MemberId] = grpMember
 				if startId < dbMember.ID {
 					startId = dbMember.ID
@@ -232,16 +235,6 @@ func GetGroupMembersFromDb(ctx context.Context, appkey, groupId string) map[stri
 		}
 	}
 	return members
-}
-
-func ForeachGroupMemberAttsFromDb(ctx context.Context, appkey, groupId, memberId string, f func(ext *dbs.GroupMemberExtDao)) {
-	dao := dbs.GroupMemberExtDao{}
-	exts, err := dao.QryExtFields(appkey, groupId, memberId)
-	if err == nil {
-		for _, ext := range exts {
-			f(ext)
-		}
-	}
 }
 
 func SetGroupMemberMute(ctx context.Context, req *pbobjs.GroupMemberMuteReq) errs.IMErrorCode {
@@ -347,7 +340,10 @@ func QryMemberSettings(ctx context.Context, groupId string, memberId string) (er
 		if member != nil {
 			resp.IsMember = true
 			resp.JoinTime = member.CreatedTime
-			resp.MemberSettings = commonservices.Obj2Map(member.Settings)
+			memberAtts, exist := GetGrpMemberAttsFromCache(ctx, appkey, groupId, memberId)
+			if exist {
+				resp.MemberSettings = commonservices.Obj2Map(memberAtts.Settings)
+			}
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, resp
@@ -358,11 +354,6 @@ type GroupMember struct {
 	IsMute      int
 	IsAllow     int
 	CreatedTime int64 //join time
-
-	ExtFields map[string]string
-	// SettingFields map[string]string
-	Settings    *commonservices.GrpMemberSettings
-	UpdatedTime int64
 }
 
 type GroupMemberContainer struct {

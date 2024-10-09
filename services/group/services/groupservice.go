@@ -87,7 +87,7 @@ func GetGroupInfoFromCache(ctx context.Context, appkey, groupId string) (*GroupI
 				return groupInfo, true
 			}
 		} else {
-			groupInfo := getGroupInfoFromDb(ctx, appkey, groupId)
+			groupInfo := getGroupInfoFromDb(appkey, groupId)
 			if groupInfo != nil {
 				groupInfoCache.Add(key, groupInfo)
 				if groupInfo == &notExistGroup {
@@ -101,7 +101,7 @@ func GetGroupInfoFromCache(ctx context.Context, appkey, groupId string) (*GroupI
 	}
 }
 
-func getGroupInfoFromDb(ctx context.Context, appkey, groupId string) *GroupInfo {
+func getGroupInfoFromDb(appkey, groupId string) *GroupInfo {
 	dao := dbs.GroupDao{}
 	dbGroup, err := dao.FindById(appkey, groupId)
 	if err != nil {
@@ -227,7 +227,7 @@ func UpdGroupInfo(ctx context.Context, groupInfo *pbobjs.GroupInfo) errs.IMError
 		rvCache = rvCache || true
 	}
 	if rvCache { //remove cache
-		grpInfo := getGroupInfoFromDb(ctx, appkey, groupId)
+		grpInfo := getGroupInfoFromDb(appkey, groupId)
 		if grpInfo != nil {
 			key := getGroupKey(appkey, groupId)
 			l := groupLocks.GetLocks(key)
