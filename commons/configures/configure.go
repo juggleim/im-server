@@ -67,6 +67,9 @@ func InitConfigures() error {
 		var conf ImConfig
 		yaml.Unmarshal(cfBytes, &conf)
 		Config = conf
+		if Config.MsgStoreEngine == "" {
+			Config.MsgStoreEngine = MsgStoreEngine_MySQL
+		}
 		return nil
 	} else {
 		return err

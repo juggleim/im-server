@@ -37,13 +37,23 @@ func SaveMsg2Inbox(appkey, receiverId string, msg *pbobjs.DownMsg) error {
 		msgStorage := storages.NewCmdInboxMsgStorage()
 		err = msgStorage.SaveMsg(message)
 		purgeMsgs(appkey+"1", msg.MsgTime, func() {
-			msgStorage.DelMsgsBaseTime(appkey, msg.MsgTime-configures.CmdMsgExpired)
+			cmdMsgExpired := configures.CmdMsgExpired
+			appinfo, exist := commonservices.GetAppInfo(appkey)
+			if exist && appinfo != nil {
+				cmdMsgExpired = int64(appinfo.OfflineCmdMsgSaveTime) * 60 * 1000
+			}
+			msgStorage.DelMsgsBaseTime(appkey, msg.MsgTime-cmdMsgExpired)
 		})
 	} else {
 		msgStorage := storages.NewInboxMsgStorage()
 		err = msgStorage.SaveMsg(message)
 		purgeMsgs(appkey+"2", msg.MsgTime, func() {
-			msgStorage.DelMsgsBaseTime(appkey, msg.MsgTime-configures.MsgExpired)
+			msgExpired := configures.MsgExpired
+			appinfo, exist := commonservices.GetAppInfo(appkey)
+			if exist && appinfo != nil {
+				msgExpired = int64(appinfo.OfflineMsgSaveTime) * 60 * 1000
+			}
+			msgStorage.DelMsgsBaseTime(appkey, msg.MsgTime-msgExpired)
 		})
 	}
 	if err != nil {
@@ -80,13 +90,23 @@ func SaveMsg2Sendbox(ctx context.Context, appkey, senderId string, msg *pbobjs.D
 			err = storage.SaveMsg(message)
 		}
 		purgeMsgs(appkey+"3", msg.MsgTime, func() {
-			storage.DelMsgsBaseTime(appkey, msg.MsgTime-configures.CmdMsgExpired)
+			cmdMsgExpired := configures.CmdMsgExpired
+			appinfo, exist := commonservices.GetAppInfo(appkey)
+			if exist && appinfo != nil {
+				cmdMsgExpired = int64(appinfo.OfflineCmdMsgSaveTime) * 60 * 1000
+			}
+			storage.DelMsgsBaseTime(appkey, msg.MsgTime-cmdMsgExpired)
 		})
 	} else {
 		storage := storages.NewSendboxMsgStorage()
 		err = storage.SaveMsg(message)
 		purgeMsgs(appkey+"4", msg.MsgTime, func() {
-			storage.DelMsgsBaseTime(appkey, msg.MsgTime-configures.MsgExpired)
+			msgExpired := configures.MsgExpired
+			appinfo, exist := commonservices.GetAppInfo(appkey)
+			if exist && appinfo != nil {
+				msgExpired = int64(appinfo.OfflineMsgSaveTime) * 60 * 1000
+			}
+			storage.DelMsgsBaseTime(appkey, msg.MsgTime-msgExpired)
 		})
 	}
 	if err != nil {
@@ -105,7 +125,7 @@ func MsgDirect(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 }
 
 func purgeMsgs(key string, currentTime int64, f func()) {
-	if configures.Config.MsgStoreEngine == configures.MsgStoreEngine_MySQL {
+	if configures.Config.MsgStoreEngine == "" || configures.Config.MsgStoreEngine == configures.MsgStoreEngine_MySQL {
 		if pool == nil || taskCache == nil {
 			pool = tunny.NewCallback(64)
 			taskCache = caches.NewLruCacheWithReadTimeout(10000, nil, 30*time.Minute)

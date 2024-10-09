@@ -24,13 +24,15 @@ type AppInfo struct {
 	EventSubConfigObj *EventSubConfigObj `default:"-"`
 	EventSubSwitchObj *EventSubSwitchObj `default:"-"`
 
-	TokenEffectiveMinute int    `default:"0"`
-	OfflineMsgSaveTime   int    `default:"1440"`
-	IsSubApiMsg          bool   `default:"false"`
-	IsOpenPush           bool   `default:"true"`
-	PushLanguage         string `default:"en_US"`
-	KickMode             int    `default:"0"`
-	OpenVisualLog        bool   `default:"false"`
+	TokenEffectiveMinute  int    `default:"0"`
+	OfflineMsgSaveTime    int    `default:"1440"`
+	OfflineCmdMsgSaveTime int    `default:"10080"`
+	IsSubApiMsg           bool   `default:"false"`
+	IsOpenPush            bool   `default:"true"`
+	PushLanguage          string `default:"en_US"`
+	KickMode              int    `default:"0"`
+	OpenVisualLog         bool   `default:"false"`
+	RecordGlobalConvers   bool   `default:"false"`
 
 	//group
 	IsHideMsgBeforeJoinGroup bool `default:"false"`

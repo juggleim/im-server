@@ -224,16 +224,23 @@ func SaveConversation(appkey string, userId string, msg *pbobjs.DownMsg) error {
 			if commonservices.IsNoAffectSenderConver(msg.Flags) {
 				sortTime = 0
 			}
-			//record global conversation
-			converId := GetGlobalConverId(userId, msg.TargetId, msg.ChannelType)
-			saveGlobalConversationByCache(&GlobalConversationCacheItem{
-				Appkey:      appkey,
-				ConverId:    converId,
-				SenderId:    userId,
-				TargetId:    msg.TargetId,
-				ChannelType: msg.ChannelType,
-				MsgTime:     msg.MsgTime,
-			})
+			isRecordGlobalConvers := false
+			appinfo, exist := commonservices.GetAppInfo(appkey)
+			if exist && appinfo != nil {
+				isRecordGlobalConvers = appinfo.RecordGlobalConvers
+			}
+			if isRecordGlobalConvers {
+				//record global conversation
+				converId := GetGlobalConverId(userId, msg.TargetId, msg.ChannelType)
+				saveGlobalConversationByCache(&GlobalConversationCacheItem{
+					Appkey:      appkey,
+					ConverId:    converId,
+					SenderId:    userId,
+					TargetId:    msg.TargetId,
+					ChannelType: msg.ChannelType,
+					MsgTime:     msg.MsgTime,
+				})
+			}
 		} else {
 			unreadIndex = msg.UnreadIndex
 		}
