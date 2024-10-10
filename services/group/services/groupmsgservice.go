@@ -265,25 +265,25 @@ func ImportGroupHisMsg(ctx context.Context, msg *pbobjs.UpMsg) {
 	memberIds := getMembersExceptMe(ctx, groupId)
 	memberCount := len(memberIds)
 	msgId := tools.GenerateMsgId(msg.MsgTime, int32(pbobjs.ChannelType_Group), groupId)
-	downMsg4Sendbox := &pbobjs.DownMsg{
-		SenderId:       senderId,
-		TargetId:       groupId,
-		ChannelType:    pbobjs.ChannelType_Group,
-		MsgType:        msg.MsgType,
-		MsgContent:     msg.MsgContent,
-		MsgId:          msgId,
-		MsgSeqNo:       -1,
-		MsgTime:        msg.MsgTime,
-		Flags:          msg.Flags,
-		IsSend:         true,
-		TargetUserInfo: commonservices.GetSenderUserInfo(ctx),
-		GroupInfo:      groupInfo,
-		MemberCount:    int32(memberCount),
-	}
-	if commonservices.IsStoreMsg(msg.Flags) {
-		//add conver for sender
-		commonservices.BatchSaveConversations(ctx, []string{senderId}, downMsg4Sendbox)
-	}
+	// downMsg4Sendbox := &pbobjs.DownMsg{
+	// 	SenderId:       senderId,
+	// 	TargetId:       groupId,
+	// 	ChannelType:    pbobjs.ChannelType_Group,
+	// 	MsgType:        msg.MsgType,
+	// 	MsgContent:     msg.MsgContent,
+	// 	MsgId:          msgId,
+	// 	MsgSeqNo:       -1,
+	// 	MsgTime:        msg.MsgTime,
+	// 	Flags:          msg.Flags,
+	// 	IsSend:         true,
+	// 	TargetUserInfo: commonservices.GetSenderUserInfo(ctx),
+	// 	GroupInfo:      groupInfo,
+	// 	MemberCount:    int32(memberCount),
+	// }
+	// if commonservices.IsStoreMsg(msg.Flags) {
+	// 	//add conver for sender
+	// 	commonservices.BatchSaveConversations(ctx, []string{senderId}, downMsg4Sendbox)
+	// }
 	downMsg := &pbobjs.DownMsg{
 		SenderId:       senderId,
 		TargetId:       groupId,
@@ -302,7 +302,7 @@ func ImportGroupHisMsg(ctx context.Context, msg *pbobjs.UpMsg) {
 		//add hismsg
 		commonservices.SaveHistoryMsg(ctx, senderId, groupId, pbobjs.ChannelType_Group, downMsg, memberCount)
 		//add conver for receivers
-		commonservices.BatchSaveConversations(ctx, memberIds, downMsg)
+		// commonservices.BatchSaveConversations(ctx, memberIds, downMsg)
 	}
 
 }

@@ -308,23 +308,24 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 
 func ImportPrivateHisMsg(ctx context.Context, senderId, targetId string, msg *pbobjs.UpMsg) {
 	msgId := tools.GenerateMsgId(msg.MsgTime, int32(pbobjs.ChannelType_Private), targetId)
-	downMsg4Sendbox := &pbobjs.DownMsg{
-		SenderId:    senderId,
-		TargetId:    targetId,
-		ChannelType: pbobjs.ChannelType_Private,
-		MsgType:     msg.MsgType,
-		MsgContent:  msg.MsgContent,
-		MsgId:       msgId,
-		MsgSeqNo:    -1,
-		MsgTime:     msg.MsgTime,
-		Flags:       msg.Flags,
-		IsSend:      true,
-		//TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, targetId),
-	}
+	/*
+		downMsg4Sendbox := &pbobjs.DownMsg{
+			SenderId:    senderId,
+			TargetId:    targetId,
+			ChannelType: pbobjs.ChannelType_Private,
+			MsgType:     msg.MsgType,
+			MsgContent:  msg.MsgContent,
+			MsgId:       msgId,
+			MsgSeqNo:    -1,
+			MsgTime:     msg.MsgTime,
+			Flags:       msg.Flags,
+			IsSend:      true,
+			//TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, targetId),
+		}*/
 	// add conver for sender
-	if commonservices.IsStoreMsg(msg.Flags) {
-		commonservices.BatchSaveConversations(ctx, []string{senderId}, downMsg4Sendbox)
-	}
+	// if commonservices.IsStoreMsg(msg.Flags) {
+	// 	commonservices.BatchSaveConversations(ctx, []string{senderId}, downMsg4Sendbox)
+	// }
 
 	downMsg := &pbobjs.DownMsg{
 		SenderId:       senderId,
@@ -343,6 +344,6 @@ func ImportPrivateHisMsg(ctx context.Context, senderId, targetId string, msg *pb
 		commonservices.SaveHistoryMsg(ctx, senderId, targetId, pbobjs.ChannelType_Private, downMsg, 0)
 
 		//add conver for receiver
-		commonservices.BatchSaveConversations(ctx, []string{targetId}, downMsg)
+		//commonservices.BatchSaveConversations(ctx, []string{targetId}, downMsg)
 	}
 }
