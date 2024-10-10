@@ -322,6 +322,10 @@ func GetTargetIdsFromCtx(ctx context.Context) []string {
 	return []string{}
 }
 
+func SetTargetIds2Ctx(ctx context.Context, ids []string) context.Context {
+	return setCtxValue(ctx, CtxKey_TargetIds, ids)
+}
+
 func GetSenderInfoFromCtx(ctx context.Context) *pbobjs.UserInfo {
 	if senderInfo, ok := ctx.Value(CtxKey_SenderInfo).(*pbobjs.UserInfo); ok {
 		return senderInfo

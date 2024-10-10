@@ -25,6 +25,7 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 		})
 	} else if downMsg.ChannelType == pbobjs.ChannelType_Group {
 		memberIds := bases.GetTargetIdsFromCtx(ctx)
+		bases.SetTargetIds2Ctx(ctx, []string{})
 		threadhold := 1000
 		appinfo, exist := commonservices.GetAppInfo(appkey)
 		if exist && appinfo != nil {

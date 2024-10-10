@@ -270,8 +270,8 @@ func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg) {
 			isRead = 1
 		}
 		//save mentioned msg
-		mentionMsgStorage := storages.NewMentionMsgStorage()
-		mentionMsgStorage.SaveMentionMsg(models.MentionMsg{
+		storage := storages.NewMentionMsgStorage()
+		storage.SaveMentionMsg(models.MentionMsg{
 			UserId:      userId,
 			TargetId:    msg.TargetId,
 			ChannelType: msg.ChannelType,
