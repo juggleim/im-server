@@ -26,9 +26,9 @@ func (stat MsgStatDao) IncrByStep(appkey string, statType int, channelType int, 
 	err := dbcommons.GetDb().Exec(sql, statType, channelType, timeMark, step, appkey, step).Error
 	return err
 }
-func (stat MsgStatDao) QryStats(appkey string, statType int, channelType int, start int64, end int64) []*MsgStatDao {
+func (stat MsgStatDao) QryStats(appkey string, statTypes []int, channelType int, start int64, end int64) []*MsgStatDao {
 	var items []*MsgStatDao
-	err := dbcommons.GetDb().Where("app_key=? and stat_type=? and channel_type=? and time_mark>=? and time_mark<=?", appkey, statType, channelType, start, end).Limit(1000).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and stat_type in (?) and channel_type=? and time_mark>=? and time_mark<=?", appkey, statTypes, channelType, start, end).Limit(1000).Find(&items).Error
 	if err == nil {
 		return items
 	}

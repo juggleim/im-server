@@ -12,7 +12,6 @@ import (
 
 func QryMsgStatistic(ctx *gin.Context) {
 	appkey := ctx.Query("app_key")
-	statTypeStr := ctx.Query("stat_type")
 	if appkey == "" {
 		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
 			Code: services.AdminErrorCode_ParamError,
@@ -20,13 +19,20 @@ func QryMsgStatistic(ctx *gin.Context) {
 		})
 		return
 	}
-	var statType int64 = 0
-	if statTypeStr != "" {
+	statTypeStrArr := ctx.QueryArray("stat_type")
+	statTypes := []commonservices.StatType{}
+	for _, statTypeStr := range statTypeStrArr {
 		intVal, err := tools.String2Int64(statTypeStr)
 		if err == nil && intVal > 0 {
-			statType = intVal
+			statTypes = append(statTypes, commonservices.StatType(intVal))
 		}
 	}
+	if len(statTypes) <= 0 {
+		statTypes = append(statTypes, commonservices.StatType_Up)
+		statTypes = append(statTypes, commonservices.StatType_Down)
+		statTypes = append(statTypes, commonservices.StatType_Dispatch)
+	}
+
 	channelTypeStr := ctx.Query("channel_type")
 	var channelType int64 = 0
 	if channelTypeStr != "" {
@@ -51,7 +57,7 @@ func QryMsgStatistic(ctx *gin.Context) {
 			end = intVal
 		}
 	}
-	items := commonservices.QryMsgStatistic(appkey, commonservices.StatType(statType), pbobjs.ChannelType(channelType), start, end)
+	items := commonservices.QryMsgStatistic(appkey, statTypes, pbobjs.ChannelType(channelType), start, end)
 	services.SuccessHttpResp(ctx, items)
 }
 

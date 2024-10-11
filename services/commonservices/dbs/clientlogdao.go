@@ -13,6 +13,7 @@ var (
 	ClientLogState_SendFail     ClientLogState = 2
 	ClientLogState_Uploaded     ClientLogState = 3
 	ClientLogState_UploadFailed ClientLogState = 4
+	ClientLogState_NoLog        ClientLogState = 5
 )
 
 type ClientLogDao struct {

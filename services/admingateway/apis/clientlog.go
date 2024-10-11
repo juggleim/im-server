@@ -92,6 +92,8 @@ type ClientLogItem struct {
 	TraceId     string `json:"trace_id"`
 	MsgId       string `json:"msg_id"`
 	FailReason  string `json:"fail_reason"`
+	LogUrl      string `json:"log_url"`
+	Description string `json:"description"`
 }
 type ClientLogItems struct {
 	Items  []*ClientLogItem `json:"items"`
@@ -164,6 +166,8 @@ func ClientLogList(ctx *gin.Context) {
 				TraceId:     item.TraceId,
 				MsgId:       item.MsgId,
 				FailReason:  item.FailReason,
+				LogUrl:      item.LogUrl,
+				Description: item.Description,
 			})
 		}
 	}

@@ -47,17 +47,52 @@ type StatisticMsgItem struct {
 	TimeMark int64 `json:"time_mark"`
 }
 
-func QryMsgStatistic(appkey string, statType StatType, channelType pbobjs.ChannelType, start, end int64) *Statistics {
-	ret := &Statistics{
-		Items: []interface{}{},
+type MsgStatistics struct {
+	MsgUp       *Statistics `json:"msg_up,omitempty"`
+	MsgDown     *Statistics `json:"msg_down,omitempty"`
+	MsgDispatch *Statistics `json:"msg_dispatch,omitempty"`
+}
+
+func QryMsgStatistic(appkey string, statTypes []StatType, channelType pbobjs.ChannelType, start, end int64) *MsgStatistics {
+	ret := &MsgStatistics{}
+	intStateTypes := []int{}
+	for _, stateType := range statTypes {
+		intStateTypes = append(intStateTypes, int(stateType))
+		switch stateType {
+		case StatType_Up:
+			ret.MsgUp = &Statistics{
+				Items: []interface{}{},
+			}
+		case StatType_Down:
+			ret.MsgDown = &Statistics{
+				Items: []interface{}{},
+			}
+		case StatType_Dispatch:
+			ret.MsgDispatch = &Statistics{
+				Items: []interface{}{},
+			}
+		}
 	}
 	dao := dbs.MsgStatDao{}
-	list := dao.QryStats(appkey, int(statType), int(channelType), start, end)
+	list := dao.QryStats(appkey, intStateTypes, int(channelType), start, end)
 	for _, item := range list {
-		ret.Items = append(ret.Items, &StatisticMsgItem{
-			Count:    item.Count,
-			TimeMark: item.TimeMark,
-		})
+		switch item.StatType {
+		case int(StatType_Up):
+			ret.MsgUp.Items = append(ret.MsgUp.Items, &StatisticMsgItem{
+				Count:    item.Count,
+				TimeMark: item.TimeMark,
+			})
+		case int(StatType_Down):
+			ret.MsgDown.Items = append(ret.MsgDown.Items, &StatisticMsgItem{
+				Count:    item.Count,
+				TimeMark: item.TimeMark,
+			})
+		case int(StatType_Dispatch):
+			ret.MsgDispatch.Items = append(ret.MsgDispatch.Items, &StatisticMsgItem{
+				Count:    item.Count,
+				TimeMark: item.TimeMark,
+			})
+		}
 	}
 	return ret
 }
