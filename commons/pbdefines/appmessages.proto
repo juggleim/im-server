@@ -781,6 +781,7 @@ enum FileType {
   Audio = 2;
   Video = 3;
   File = 4;
+  Log = 5;
 }
 message QryFileCredResp{
   OssType ossType = 1;
@@ -805,6 +806,13 @@ message PreSignResp {
   string url = 1;
 }
 
+message UploadLogStatusReq{
+  string msgId = 1;
+  string logUrl = 2;
+  int32 state = 3;
+}
+
+//others
 message SubMsgs{
   repeated SubMsg subMsgs = 1;
 }

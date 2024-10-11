@@ -162,6 +162,8 @@ func fileTypeToDir(fileType pbobjs.FileType) string {
 		return "audios"
 	case pbobjs.FileType_File:
 		return "files"
+	case pbobjs.FileType_Log:
+		return "logs"
 	default:
 		return "files"
 	}

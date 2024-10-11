@@ -16,6 +16,9 @@ func (manager *FilePlugin) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("file_cred", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryUploadTokenActor{}, serviceName)
 	})
+	register.RegisterActor("upd_log_state", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.ReportClientLogStateActor{}, serviceName)
+	})
 }
 
 func (manager *FilePlugin) Startup(args map[string]interface{}) {
