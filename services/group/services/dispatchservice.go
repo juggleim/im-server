@@ -54,7 +54,7 @@ func (dis *Dispatcher) start() {
 				memberCount := len(item.MemberIds)
 				maxDisCount := dis.getMaxDisCount()
 				ratio := memberCount / getGrpThresholdFromCtx(item.Ctx)
-				if ratio <= 0 { //dispatch directly
+				if ratio <= 0 || maxDisCount <= 0 { //dispatch directly
 					groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
 				} else if memberCount > maxDisCount {
 					groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
