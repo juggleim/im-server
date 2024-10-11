@@ -21,7 +21,7 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 	if downMsg.ChannelType == pbobjs.ChannelType_Private || downMsg.ChannelType == pbobjs.ChannelType_System {
 		receiverId := bases.GetTargetIdFromCtx(ctx)
 		MsgSinglePools.GetPool(strings.Join([]string{appkey, receiverId}, "_")).Submit(func() {
-			doDispatch(ctx, receiverId, downMsg)
+			doDispatch(ctx, receiverId, downMsg, false)
 		})
 	} else if downMsg.ChannelType == pbobjs.ChannelType_Group {
 		memberIds := bases.GetTargetIdsFromCtx(ctx)
@@ -31,39 +31,23 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 		if exist && appinfo != nil {
 			threadhold = appinfo.BigGrpThreshold
 		}
+		closeOffline := false
 		if downMsg.MemberCount < int32(threadhold) {
-			//save msg to inbox and record conversation for each member
-			for _, receiverId := range memberIds {
-				newDownMsg := copyDownMsg(downMsg)
-				recvId := receiverId
-				MsgSinglePools.GetPool(strings.Join([]string{appkey, recvId}, "_")).Submit(func() {
-					doDispatch(ctx, recvId, newDownMsg)
-				})
-			}
-		} else {
-			offlineMemberIds := []string{}
-			for _, receiverId := range memberIds {
-				userStatus := GetUserStatus(appkey, receiverId)
-				if userStatus.IsOnline() {
-					newDownMsg := copyDownMsg(downMsg)
-					recvId := receiverId
-					MsgSinglePools.GetPool(strings.Join([]string{appkey, recvId}, "_")).Submit(func() {
-						doDispatch(ctx, recvId, newDownMsg)
-					})
-				} else {
-					offlineMemberIds = append(offlineMemberIds, receiverId)
-				}
-			}
-			if len(offlineMemberIds) > 0 {
-				if !commonservices.IsStateMsg(downMsg.Flags) {
-					commonservices.BatchSaveConversations(ctx, offlineMemberIds, downMsg)
-				}
-			}
+			closeOffline = true
+		}
+		for _, receiverId := range memberIds {
+			newDownMsg := copyDownMsg(downMsg)
+			receId := receiverId
+			userStatus := GetUserStatus(appkey, receId)
+			closeOffline = closeOffline && (!userStatus.IsOnline())
+			MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
+				doDispatch(ctx, receId, newDownMsg, closeOffline)
+			})
 		}
 	}
 }
 
-func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg) {
+func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, closeOffline bool) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	//TODO save imediately when user online, other wise, user async queue.
 	//TODO batch insert & regenate msg time.
@@ -78,11 +62,15 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg) {
 		if !commonservices.IsStateMsg(msg.Flags) {
 			//record conversation
 			commonservices.SaveConversation(ctx, receiverId, msg)
-			SaveMsg2Inbox(appkey, receiverId, msg)
-			//send to client
-			MsgOrNtf(ctx, receiverId, msg)
+			if !closeOffline {
+				SaveMsg2Inbox(appkey, receiverId, msg)
+				//send to client
+				MsgOrNtf(ctx, receiverId, msg)
+			}
 		} else {
-			MsgDirect(ctx, receiverId, msg)
+			if !closeOffline {
+				MsgDirect(ctx, receiverId, msg)
+			}
 		}
 	}
 }
