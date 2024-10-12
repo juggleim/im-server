@@ -29,7 +29,7 @@ var userOnlineStatusCache *caches.LruCache
 var userLocks *tools.SegmentatedLocks
 
 func init() {
-	userOnlineStatusCache = caches.NewLruCacheWithReadTimeout(100000, func(key, value interface{}) {}, 10*time.Minute)
+	userOnlineStatusCache = caches.NewLruCacheWithReadTimeout(100000, func(key, value interface{}) {}, time.Hour)
 	userLocks = tools.NewSegmentatedLocks(512)
 }
 
@@ -158,9 +158,8 @@ func getKey(appkey, userId string) string {
 
 func initUserInfo(appkey, userId string) *UserStatus {
 	return &UserStatus{
-		appkey: appkey,
-		userId: userId,
-		// OnlineStatus: true,
-		OnlineStatus: false,
+		appkey:       appkey,
+		userId:       userId,
+		OnlineStatus: true,
 	}
 }
