@@ -299,8 +299,10 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 				//badge
 				userStatus := GetUserStatus(appkey, receiverId)
 				pushData.Badge = userStatus.BadgeIncr()
-				pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
-				bases.UnicastRouteWithNoSender(pushRpc)
+				if userStatus.CanPush > 0 {
+					pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
+					bases.UnicastRouteWithNoSender(pushRpc)
+				}
 			}
 		}
 	}

@@ -29,6 +29,7 @@ type UserStatus struct {
 
 	PushSwitch int32
 	PushBadge  int32
+	CanPush    int32
 }
 
 var userOnlineStatusCache *caches.LruCache
@@ -54,6 +55,10 @@ func RecordUserOnlineStatus(appKey, userId string, onlineStatus bool, terminalNu
 
 func (user *UserStatus) IsOnline() bool {
 	return user.OnlineStatus
+}
+
+func (user *UserStatus) SetPushStatus(canPush int32) {
+	atomic.StoreInt32(&user.CanPush, canPush)
 }
 
 func (user *UserStatus) SetPushSwitch(pushSwitch int32) {
@@ -204,5 +209,6 @@ func initUserStatus(appkey, userId string) *UserStatus {
 		appkey:       appkey,
 		userId:       userId,
 		OnlineStatus: true,
+		CanPush:      1,
 	}
 }

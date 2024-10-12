@@ -124,5 +124,9 @@ func RegPushToken(ctx context.Context, userId string, req *pbobjs.RegPushTokenRe
 		PushToken:   req.PushToken,
 		PackageName: req.PackageName,
 	})
+	//ntf open push
+	bases.AsyncRpcCall(ctx, "upd_push_status", userId, &pbobjs.UserPushStatus{
+		CanPush: true,
+	})
 	return errs.IMErrorCode_SUCCESS
 }

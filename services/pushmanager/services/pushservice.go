@@ -146,6 +146,10 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 		}
 	} else {
 		logs.WithContext(ctx).Info("have no push token")
+		//ntf close push
+		bases.AsyncRpcCall(ctx, "upd_push_status", userId, &pbobjs.UserPushStatus{
+			CanPush: false,
+		})
 	}
 }
 

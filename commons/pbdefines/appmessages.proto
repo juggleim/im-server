@@ -676,6 +676,10 @@ message UserUndisturbItem {
   string end = 2;
 }
 
+message UserPushStatus{
+  bool canPush = 1;
+}
+
 //group
 message GroupInfo{
   string groupId = 1;
