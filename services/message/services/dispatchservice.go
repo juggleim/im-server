@@ -34,6 +34,16 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 		closeOffline := false
 		if downMsg.MemberCount < int32(threadhold) {
 			closeOffline = true
+			//preheat user status
+			noCacheUids := []string{}
+			for _, receiverId := range memberIds {
+				if !UserStatusCacheContains(appkey, receiverId) {
+					noCacheUids = append(noCacheUids, receiverId)
+				}
+			}
+			if len(noCacheUids) > 0 {
+				BatchInitUserStatus(ctx, appkey, noCacheUids)
+			}
 		}
 		for _, receiverId := range memberIds {
 			newDownMsg := copyDownMsg(downMsg)

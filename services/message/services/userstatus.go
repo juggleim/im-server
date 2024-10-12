@@ -1,12 +1,18 @@
 package services
 
 import (
+	"context"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
+	"im-server/commons/bases"
 	"im-server/commons/caches"
+	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+
+	"google.golang.org/protobuf/proto"
 )
 
 type UserStatus struct {
@@ -116,6 +122,11 @@ func (user *UserStatus) SetLatestMsgTime(time int64) {
 	}
 }
 
+func UserStatusCacheContains(appkey, userId string) bool {
+	key := getKey(appkey, userId)
+	return userOnlineStatusCache.Contains(key)
+}
+
 func GetUserStatus(appKey, userId string) *UserStatus {
 	key := getKey(appKey, userId)
 	if val, exist := userOnlineStatusCache.Get(key); exist {
@@ -127,11 +138,43 @@ func GetUserStatus(appKey, userId string) *UserStatus {
 		if val, exist := userOnlineStatusCache.Get(key); exist {
 			return val.(*UserStatus)
 		} else {
-			userInfo := initUserInfo(appKey, userId)
+			userInfo := initUserStatus(appKey, userId)
 			userOnlineStatusCache.Add(key, userInfo)
 			return userInfo
 		}
 	}
+}
+
+func BatchInitUserStatus(ctx context.Context, appkey string, userIds []string) {
+	//check status from connect manager
+	groups := bases.GroupTargets("qry_online_status", userIds)
+	wg := sync.WaitGroup{}
+	for _, ids := range groups {
+		wg.Add(1)
+		uIds := ids
+		go func() {
+			defer wg.Done()
+			_, resp, err := bases.SyncRpcCall(ctx, "qry_online_status", uIds[0], &pbobjs.UserOnlineStatusReq{
+				UserIds: uIds,
+			}, func() proto.Message {
+				return &pbobjs.UserOnlineStatusResp{}
+			})
+			if err == nil {
+				onlineResp, ok := resp.(*pbobjs.UserOnlineStatusResp)
+				if ok && len(onlineResp.Items) > 0 {
+					for _, item := range onlineResp.Items {
+						cacheKey := getKey(appkey, item.UserId)
+						userOnlineStatusCache.Add(cacheKey, &UserStatus{
+							appkey:       appkey,
+							userId:       item.UserId,
+							OnlineStatus: item.IsOnline,
+						})
+					}
+				}
+			}
+		}()
+	}
+	wg.Wait()
 }
 
 func RegenateSendTime(appkey, userId string, currentTime int64) int64 {
@@ -156,7 +199,7 @@ func getKey(appkey, userId string) string {
 	return strings.Join([]string{appkey, userId}, "_")
 }
 
-func initUserInfo(appkey, userId string) *UserStatus {
+func initUserStatus(appkey, userId string) *UserStatus {
 	return &UserStatus{
 		appkey:       appkey,
 		userId:       userId,
