@@ -94,5 +94,5 @@ func (log *ClientLogDao) UpdateLogUrl(appkey, msgId string, logUrl string, state
 	upd := map[string]interface{}{}
 	upd["log_url"] = logUrl
 	upd["state"] = state
-	return dbcommons.GetDb().Model(&ClientLogDao{}).Where("app_key=? and msg_id=?", appkey, msgId).Update(upd).Error
+	return dbcommons.GetDb().Model(&ClientLogDao{}).Where("app_key=? and msg_id=? and state!=?", appkey, msgId, ClientLogState_Uploaded).Update(upd).Error
 }

@@ -132,7 +132,7 @@ func purgeMsgs(key string, currentTime int64, f func()) {
 		}
 		if val, exist := taskCache.Get(key); exist {
 			time := val.(int64)
-			if currentTime-time > 10*60*1000 {
+			if currentTime-time > 60*1000 {
 				go pool.Process(f)
 				taskCache.Add(key, currentTime)
 			}
