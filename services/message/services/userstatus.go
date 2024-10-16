@@ -150,6 +150,16 @@ func GetUserStatus(appKey, userId string) *UserStatus {
 	}
 }
 
+func CacheUserStatus(appkey, userId string, status *UserStatus) {
+	key := getKey(appkey, userId)
+	l := userLocks.GetLocks(key)
+	l.Lock()
+	defer l.Unlock()
+	if !UserStatusCacheContains(appkey, userId) {
+		userOnlineStatusCache.Add(key, status)
+	}
+}
+
 func BatchInitUserStatus(ctx context.Context, appkey string, userIds []string) {
 	//check status from connect manager
 	groups := bases.GroupTargets("qry_online_status", userIds)
@@ -168,11 +178,11 @@ func BatchInitUserStatus(ctx context.Context, appkey string, userIds []string) {
 				onlineResp, ok := resp.(*pbobjs.UserOnlineStatusResp)
 				if ok && len(onlineResp.Items) > 0 {
 					for _, item := range onlineResp.Items {
-						cacheKey := getKey(appkey, item.UserId)
-						userOnlineStatusCache.Add(cacheKey, &UserStatus{
+						CacheUserStatus(appkey, item.UserId, &UserStatus{
 							appkey:       appkey,
 							userId:       item.UserId,
 							OnlineStatus: item.IsOnline,
+							CanPush:      1,
 						})
 					}
 				}

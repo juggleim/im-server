@@ -68,6 +68,16 @@ func GetConversation(ctx context.Context, userId, targetId string, channelType p
 	}
 }
 
+func CacheUserConver(appkey, userId, targetId string, channelType pbobjs.ChannelType, conver *UserConversationItem) {
+	key := fmt.Sprintf("%s_%s_%s_%d", appkey, userId, targetId, channelType)
+	l := userLocks.GetLocks(key)
+	l.Lock()
+	defer l.Unlock()
+	if !UserConverCacheContains(appkey, userId, targetId, channelType) {
+		converCache.Add(key, conver)
+	}
+}
+
 func BatchInitUserConvers(ctx context.Context, targetId string, channelType pbobjs.ChannelType, userIds []string) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	groups := bases.GroupTargets("qry_conver", userIds)
@@ -90,12 +100,12 @@ func BatchInitUserConvers(ctx context.Context, targetId string, channelType pbob
 				if ok && convers != nil {
 					for _, conver := range convers.Conversations {
 						key := fmt.Sprintf("%s_%s_%s_%d", appkey, conver.UserId, targetId, channelType)
-						item := &UserConversationItem{
+						CacheUserConver(appkey, conver.UserId, targetId, channelType, &UserConversationItem{
+							key:           key,
 							UndisturbType: conver.UndisturbType,
 							UnreadIndex:   conver.LatestUnreadIndex,
 							ConverTags:    conver.ConverTags,
-						}
-						converCache.Add(key, item)
+						})
 					}
 				}
 			}
