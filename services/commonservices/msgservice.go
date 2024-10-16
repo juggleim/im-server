@@ -143,6 +143,7 @@ func Save2Sendbox(ctx context.Context, downMsg *pbobjs.DownMsg) {
 			Qos:          bases.GetQosFromCtx(ctx),
 			AppDataBytes: data,
 			TargetId:     bases.GetRequesterIdFromCtx(ctx),
+			IsFromApi:    bases.GetIsFromApiFromCtx(ctx),
 		})
 	}
 }

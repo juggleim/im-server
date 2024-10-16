@@ -96,11 +96,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		MemberCount:    int32(memberCount),
 		PushData:       upMsg.PushData,
 	}
-	if !commonservices.IsStateMsg(upMsg.Flags) {
-		// save msg to sendbox for sender
-		// record conversation for sender
-		commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
-	}
+	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 
 	if bases.GetOnlySendboxFromCtx(ctx) {
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, int32(memberCount)

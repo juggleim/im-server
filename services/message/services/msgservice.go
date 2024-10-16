@@ -58,14 +58,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		MergedMsgs:     upMsg.MergedMsgs,
 		PushData:       upMsg.PushData,
 	}
-	//send to sender's other device
-	if !commonservices.IsStateMsg(upMsg.Flags) {
-		//save msg to sendbox for sender
-		//record conversation for sender
-		commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
-	} else {
-		MsgDirect(ctx, senderId, downMsg4Sendbox)
-	}
+	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 
 	if bases.GetOnlySendboxFromCtx(ctx) {
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq

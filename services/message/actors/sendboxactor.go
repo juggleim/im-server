@@ -2,11 +2,11 @@ package actors
 
 import (
 	"context"
-	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
 	"im-server/services/message/services"
 	"time"
 
@@ -38,7 +38,7 @@ func (actor *SendBoxActor) OnReceive(ctx context.Context, input proto.Message) {
 			commonservices.SaveConversation(ctx, bases.GetRequesterIdFromCtx(ctx), downMsg)
 		}
 	} else {
-		fmt.Println("sendbox, downMsg is illigal.")
+		logs.WithContext(ctx).Error("input is illigal")
 	}
 }
 
