@@ -518,13 +518,7 @@ message QryConverReq{
   string targetId = 1;
   ChannelType channelType = 2;
   bool isInner = 3;
-}
-
-message QryConverResp{
-  string targetId = 1;
-  ChannelType channelType = 2;
-  int64 unreadIndex = 3;
-  int32 undisturbType = 4;
+  repeated string userIds = 4;
 }
 
 message TagConvers{

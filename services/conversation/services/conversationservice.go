@@ -851,6 +851,35 @@ func QryConver(ctx context.Context, userId string, req *pbobjs.QryConverReq) (er
 	}
 }
 
+func BatchQryConvers(ctx context.Context, req *pbobjs.QryConverReq) (errs.IMErrorCode, *pbobjs.QryConversationsResp) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	storage := storages.NewConversationStorage()
+	reqConvers := []models.Conversation{}
+	for _, uId := range req.UserIds {
+		reqConvers = append(reqConvers, models.Conversation{
+			UserId:      uId,
+			TargetId:    req.TargetId,
+			ChannelType: req.ChannelType,
+		})
+	}
+	ret := &pbobjs.QryConversationsResp{
+		Conversations: []*pbobjs.Conversation{},
+	}
+	convers, err := storage.BatchFind(appkey, reqConvers)
+	if err == nil {
+		for _, conver := range convers {
+			ret.Conversations = append(ret.Conversations, &pbobjs.Conversation{
+				UserId:            conver.UserId,
+				TargetId:          conver.TargetId,
+				ChannelType:       conver.ChannelType,
+				LatestUnreadIndex: conver.LatestUnreadMsgIndex,
+				UndisturbType:     conver.UndisturbType,
+			})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
 func GetGlobalConverId(senderId, targetId string, channelType pbobjs.ChannelType) string {
 	converId := commonservices.GetConversationId(senderId, targetId, channelType)
 	return tools.SHA1(converId)

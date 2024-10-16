@@ -57,6 +57,54 @@ func (conver *ConversationDao) FindOne(appkey, userId, targetId string, channelT
 	}, nil
 }
 
+func (conver *ConversationDao) BatchFind(appkey string, reqConvers []models.Conversation) ([]*models.Conversation, error) {
+	if len(reqConvers) <= 0 {
+		return []*models.Conversation{}, nil
+	}
+	var items []*ConversationDao
+	var conditionBuilder strings.Builder
+	params := []interface{}{}
+	conditionBuilder.WriteString("app_key=? and (")
+	params = append(params, appkey)
+	l := len(reqConvers)
+	for i, req := range reqConvers {
+		if i == l-1 {
+			conditionBuilder.WriteString("(user_id=? and target_id=? and channel_type=?))")
+		} else {
+			conditionBuilder.WriteString("(user_id=? and target_id=? and channel_type=?) or ")
+		}
+		params = append(params, req.UserId)
+		params = append(params, req.TargetId)
+		params = append(params, req.ChannelType)
+	}
+	err := dbcommons.GetDb().Where(conditionBuilder.String(), params...).Select("user_id,target_id,channel_type,undisturb_type,latest_unread_msg_index").Find(&items).Error
+	if err != nil {
+		return []*models.Conversation{}, err
+	}
+	ret := []*models.Conversation{}
+	for _, item := range items {
+		ret = append(ret, &models.Conversation{
+			UserId:               item.UserId,
+			TargetId:             item.TargetId,
+			SortTime:             item.SortTime,
+			ChannelType:          pbobjs.ChannelType(item.ChannelType),
+			LatestMsgId:          item.LatestMsgId,
+			LatestMsg:            item.LatestMsg,
+			LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
+			LatestReadMsgIndex:   item.LatestReadMsgIndex,
+			LatestReadMsgId:      item.LatestReadMsgId,
+			LatestReadMsgTime:    item.LatestReadMsgTime,
+			IsTop:                item.IsTop,
+			TopUpdatedTime:       item.TopUpdatedTime,
+			UndisturbType:        item.UndisturbType,
+			IsDeleted:            item.IsDeleted,
+			AppKey:               item.AppKey,
+			SyncTime:             item.SyncTime,
+		})
+	}
+	return ret, nil
+}
+
 func (conver *ConversationDao) UpsertConversation(item models.Conversation) error {
 	var err error
 	if item.SortTime > 0 {

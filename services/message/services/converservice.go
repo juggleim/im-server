@@ -8,6 +8,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"sync"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -39,6 +40,11 @@ func (conver *UserConversationItem) GetUnreadIndex() int64 {
 	return conver.UnreadIndex
 }
 
+func UserConverCacheContains(appkey, userId, targetId string, channelType pbobjs.ChannelType) bool {
+	key := fmt.Sprintf("%s_%s_%s_%d", appkey, userId, targetId, channelType)
+	return converCache.Contains(key)
+}
+
 func GetConversation(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType) *UserConversationItem {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	key := fmt.Sprintf("%s_%s_%s_%d", appkey, userId, targetId, channelType)
@@ -60,6 +66,42 @@ func GetConversation(ctx context.Context, userId, targetId string, channelType p
 			return undisturbItem
 		}
 	}
+}
+
+func BatchInitUserConvers(ctx context.Context, targetId string, channelType pbobjs.ChannelType, userIds []string) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	groups := bases.GroupTargets("qry_conver", userIds)
+	wg := sync.WaitGroup{}
+	for _, ids := range groups {
+		wg.Add(1)
+		uIds := ids
+		go func() {
+			defer wg.Done()
+			_, resp, err := bases.SyncRpcCall(ctx, "qry_conver", uIds[0], &pbobjs.QryConverReq{
+				TargetId:    targetId,
+				ChannelType: channelType,
+				IsInner:     true,
+				UserIds:     uIds,
+			}, func() proto.Message {
+				return &pbobjs.QryConversationsResp{}
+			})
+			if err == nil {
+				convers, ok := resp.(*pbobjs.QryConversationsResp)
+				if ok && convers != nil {
+					for _, conver := range convers.Conversations {
+						key := fmt.Sprintf("%s_%s_%s_%d", appkey, conver.UserId, targetId, channelType)
+						item := &UserConversationItem{
+							UndisturbType: conver.UndisturbType,
+							UnreadIndex:   conver.LatestUnreadIndex,
+							ConverTags:    conver.ConverTags,
+						}
+						converCache.Add(key, item)
+					}
+				}
+			}
+		}()
+	}
+	wg.Wait()
 }
 
 func ClearConversation(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType) {

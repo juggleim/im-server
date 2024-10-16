@@ -19,8 +19,16 @@ type QryConversationActor struct {
 func (actor *QryConversationActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.QryConverReq); ok {
 		userId := bases.GetTargetIdFromCtx(ctx)
-		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tchannel_type:%v", userId, req.TargetId, req.ChannelType)
-		code, resp := services.QryConver(ctx, userId, req)
+		if !req.IsInner {
+			logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tchannel_type:%v", userId, req.TargetId, req.ChannelType)
+		}
+		var code errs.IMErrorCode
+		var resp proto.Message
+		if len(req.UserIds) > 0 {
+			code, resp = services.BatchQryConvers(ctx, req)
+		} else {
+			code, resp = services.QryConver(ctx, userId, req)
+		}
 		qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 	} else {

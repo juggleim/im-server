@@ -26,6 +26,7 @@ type Conversation struct {
 
 type IConversationStorage interface {
 	FindOne(appkey, userId, targetId string, channelType pbobjs.ChannelType) (*Conversation, error)
+	BatchFind(appkey string, reqConvers []Conversation) ([]*Conversation, error)
 	UpsertConversation(conversation Conversation) error
 	QryConversations(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int32, isPositiveOrder bool, tag string) ([]*Conversation, error)
 	DelConversation(appkey, userId, targetId string, channelType pbobjs.ChannelType) error

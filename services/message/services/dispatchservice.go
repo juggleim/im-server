@@ -35,14 +35,21 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 		if downMsg.MemberCount < int32(threadhold) {
 			closeOffline = true
 			//preheat user status
-			noCacheUids := []string{}
+			noStatusCacheUids := []string{}
+			noConverCacheUids := []string{}
 			for _, receiverId := range memberIds {
 				if !UserStatusCacheContains(appkey, receiverId) {
-					noCacheUids = append(noCacheUids, receiverId)
+					noStatusCacheUids = append(noStatusCacheUids, receiverId)
+				}
+				if !UserConverCacheContains(appkey, receiverId, downMsg.TargetId, downMsg.ChannelType) {
+					noConverCacheUids = append(noConverCacheUids, receiverId)
 				}
 			}
-			if len(noCacheUids) > 0 {
-				BatchInitUserStatus(ctx, appkey, noCacheUids)
+			if len(noStatusCacheUids) > 0 {
+				BatchInitUserStatus(ctx, appkey, noStatusCacheUids)
+			}
+			if len(noConverCacheUids) > 0 {
+				BatchInitUserConvers(ctx, downMsg.TargetId, downMsg.ChannelType, noConverCacheUids)
 			}
 		}
 		for _, receiverId := range memberIds {
