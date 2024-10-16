@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/historymsg/services"
 	"time"
@@ -36,6 +37,9 @@ func (actor *QryHistoryMsgsActor) OnReceive(ctx context.Context, input proto.Mes
 		msgCount := 0
 		if resp != nil {
 			msgCount = len(resp.Msgs)
+			if msgCount > 0 {
+				commonservices.ReportDownMsg(appkey, qryHisMsgsReq.ChannelType, int64(msgCount))
+			}
 		}
 		logs.WithContext(ctx).Infof("result_code:%d\tlen:%d", code, msgCount)
 	} else {
