@@ -643,7 +643,7 @@ func QryTopConvers(ctx context.Context, userId string, req *pbobjs.QryTopConvers
 		IsFinished:    true,
 	}
 	converStorage := storages.NewConversationStorage()
-	dbConvers, err := converStorage.QryTopConvers(appkey, userId, req.StartTime, 101)
+	dbConvers, err := converStorage.QryTopConvers(appkey, userId, req.StartTime, 101, req.SortType, req.Order > 0)
 	if err == nil {
 		for _, dbConver := range dbConvers {
 			conversation := dbConver2Conversations(ctx, dbConver)

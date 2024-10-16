@@ -19,7 +19,7 @@ type QryTopConversActor struct {
 func (actor *QryTopConversActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.QryTopConversReq); ok {
 		userId := bases.GetRequesterIdFromCtx(ctx)
-		logs.WithContext(ctx).Infof("user_id:%s\tstart:%d", userId, req.StartTime)
+		logs.WithContext(ctx).Infof("user_id:%s\tstart:%d\tsort_type:%v\torder:%d", userId, req.StartTime, req.SortType, req.Order)
 		code, resp := services.QryTopConvers(ctx, userId, req)
 		qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)

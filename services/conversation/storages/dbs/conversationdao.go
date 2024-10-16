@@ -375,14 +375,44 @@ func (conver *ConversationDao) ClearTotalUnreadCount(appkey, userId string) erro
 	return dbcommons.GetDb().Exec("UPDATE conversations set latest_read_msg_index=latest_unread_msg_index, latest_read_msg_time =(UNIX_TIMESTAMP(NOW(3)) * 1000), unread_tag=0 where app_key=? and user_id=?", appkey, userId).Error
 }
 
-func (conver *ConversationDao) QryTopConvers(appkey, userId string, startTime, limit int64) ([]*models.Conversation, error) {
+func (conver *ConversationDao) QryTopConvers(appkey, userId string, startTime, limit int64, sortType pbobjs.TopConverSortType, isPositive bool) ([]*models.Conversation, error) {
 	var items []*ConversationDao
 	var err error
-	if startTime > 0 {
-		err = dbcommons.GetDb().Where("app_key=? and user_id=? and and is_top=? and top_updated_time>?", appkey, userId, 1, startTime).Order("top_updated_time asc").Limit(limit).Find(&items).Error
+	params := []interface{}{}
+	condition := "app_key=? and user_id=? and is_top=1"
+	params = append(params, appkey)
+	params = append(params, userId)
+	var orderBy string
+	if sortType == pbobjs.TopConverSortType_BySortTime {
+		if isPositive {
+			orderBy = "sort_time asc"
+			if startTime > 0 {
+				condition = condition + " and sort_time>?"
+				params = append(params, startTime)
+			}
+		} else {
+			orderBy = "sort_time desc"
+			if startTime > 0 {
+				condition = condition + " and sort_time<?"
+				params = append(params, startTime)
+			}
+		}
 	} else {
-		err = dbcommons.GetDb().Where("app_key=? and user_id=? and is_top=?", appkey, userId, 1).Order("top_updated_time asc").Limit(limit).Find(&items).Error
+		if isPositive {
+			orderBy = "top_updated_time asc"
+			if startTime > 0 {
+				condition = condition + " and top_updated_time>?"
+				params = append(params, startTime)
+			}
+		} else {
+			orderBy = "top_updated_time desc"
+			if startTime > 0 {
+				condition = condition + " and top_updated_time<?"
+				params = append(params, startTime)
+			}
+		}
 	}
+	err = dbcommons.GetDb().Where(condition, params...).Order(orderBy).Limit(limit).Find(&items).Error
 	if err != nil {
 		return []*models.Conversation{}, err
 	}

@@ -474,6 +474,13 @@ message UndisturbConverItem {
 
 message QryTopConversReq{
   int64 startTime = 1;
+  TopConverSortType sortType = 2;
+  int32 order = 3;
+}
+
+enum TopConverSortType{
+  ByTopTime = 0;
+  BySortTime = 1;
 }
 
 message TopConversResp{
