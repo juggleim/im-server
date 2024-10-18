@@ -19,8 +19,11 @@ type AddConversationActor struct {
 func (actor *AddConversationActor) OnReceive(ctx context.Context, input proto.Message) {
 	if conver, ok := input.(*pbobjs.Conversation); ok {
 		userId := bases.GetRequesterIdFromCtx(ctx)
-		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tchannel_type:%v", userId, conver.TargetId, conver.ChannelType)
-		if conver.Msg == nil {
+		targetId := bases.GetTargetIdFromCtx(ctx)
+		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tconver_target_id:%s\tchannel_type:%v", userId, targetId, conver.TargetId, conver.ChannelType)
+		if conver.TargetId == "" || conver.ChannelType == pbobjs.ChannelType_Unknown {
+			logs.WithContext(ctx).Errorf("unknown conversation. user_id:%s\ttarget_id:%s", userId, targetId)
+		} else if conver.Msg == nil {
 			code, resp := services.SaveNilConversation(ctx, bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.TargetId, conver.ChannelType)
 			qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 			actor.Sender.Tell(qryAck, actorsystem.NoSender)
