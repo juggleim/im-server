@@ -62,7 +62,7 @@ var notExistUser *UserInfo
 func init() {
 	notExistUser = &UserInfo{}
 	userCache = caches.NewLruCacheWithAddReadTimeout(100000, nil, 10*time.Minute, 10*time.Minute)
-	userLocks = tools.NewSegmentatedLocks(256)
+	userLocks = tools.NewSegmentatedLocks(512)
 }
 
 func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFields []*pbobjs.KvItem, settings []*pbobjs.KvItem, userType pbobjs.UserType) {

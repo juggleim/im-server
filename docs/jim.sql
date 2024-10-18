@@ -58,7 +58,6 @@ DROP TABLE IF EXISTS `banusers`;
 CREATE TABLE `banusers` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` varchar(32) NOT NULL,
-  `ban_type` tinyint DEFAULT '0',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
   `end_time` bigint DEFAULT '0',
   `scope_key` varchar(20) NOT NULL DEFAULT 'default',
