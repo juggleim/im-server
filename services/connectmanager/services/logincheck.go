@@ -2,7 +2,6 @@ package services
 
 import (
 	"im-server/commons/errs"
-	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/tokens"
 	"im-server/services/connectmanager/dbs"
@@ -54,22 +53,22 @@ func CheckLogin(ctx imcontext.WsHandleContext, msg *codec.ConnectMsgBody) (int32
 	if exist {
 		currentTime := time.Now().UnixMilli()
 		if ban, exist := banUser.Items[string(dbs.UserBanScopeDefault)]; exist {
-			if ban.BanType == pbobjs.BanType_Permanent || (ban.BanType == pbobjs.BanType_Temporary && ban.EndTime > currentTime) {
+			if ban.EndTime == 0 || ban.EndTime > currentTime {
 				return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
 			}
 		}
 		if ban, exist := banUser.Items[string(dbs.UserBanScopePlatform)]; exist && strings.Contains(ban.ScopeValue, msg.Platform) {
-			if ban.BanType == pbobjs.BanType_Permanent || (ban.BanType == pbobjs.BanType_Temporary && ban.EndTime > currentTime) {
+			if ban.EndTime == 0 || ban.EndTime > currentTime {
 				return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
 			}
 		}
 		if ban, exist := banUser.Items[string(dbs.UserBanScopeDevice)]; exist && strings.Contains(ban.ScopeValue, msg.DeviceId) {
-			if ban.BanType == pbobjs.BanType_Permanent || (ban.BanType == pbobjs.BanType_Temporary && ban.EndTime > currentTime) {
+			if ban.EndTime == 0 || ban.EndTime > currentTime {
 				return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
 			}
 		}
 		if ban, exist := banUser.Items[string(dbs.UserBanScopeIp)]; exist && strings.Contains(ban.ScopeValue, msg.ClientIp) {
-			if ban.BanType == pbobjs.BanType_Permanent || (ban.BanType == pbobjs.BanType_Temporary && ban.EndTime > currentTime) {
+			if ban.EndTime == 0 || ban.EndTime > currentTime {
 				return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
 			}
 		}

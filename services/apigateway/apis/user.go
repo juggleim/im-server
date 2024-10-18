@@ -191,14 +191,11 @@ func UserBan(ctx *gin.Context) {
 			var arr []*pbobjs.BanUser
 			var ok bool
 			endTime := user.EndTime
-			if user.BanType == int(pbobjs.BanType_Temporary) && endTime <= 0 {
-				if user.EndTimeOffset > 0 {
-					endTime = time.Now().UnixMilli() + user.EndTimeOffset
-				}
+			if endTime <= 0 && user.EndTimeOffset > 0 {
+				endTime = time.Now().UnixMilli() + user.EndTimeOffset
 			}
 			pbBanUser := &pbobjs.BanUser{
 				UserId:     user.UserId,
-				BanType:    pbobjs.BanType(user.BanType),
 				EndTime:    endTime,
 				ScopeKey:   user.ScopeKey,
 				ScopeValue: user.ScopeValue,
@@ -246,7 +243,6 @@ func UserUnBan(ctx *gin.Context) {
 			var ok bool
 			pbBanUser := &pbobjs.BanUser{
 				UserId:     user.UserId,
-				BanType:    pbobjs.BanType(user.BanType),
 				EndTime:    user.EndTime,
 				ScopeKey:   user.ScopeKey,
 				ScopeValue: user.ScopeValue,
@@ -309,7 +305,6 @@ func QryBanUsers(ctx *gin.Context) {
 	for _, u := range banUsers.Items {
 		ret.Items = append(ret.Items, &models.BanUser{
 			UserId:      u.UserId,
-			BanType:     int(u.BanType),
 			CreatedTime: u.CreatedTime,
 			EndTime:     u.EndTime,
 			ScopeKey:    u.ScopeKey,

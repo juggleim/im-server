@@ -17,7 +17,6 @@ const (
 type BanUserDao struct {
 	ID          int64     `gorm:"primary_key"`
 	UserId      string    `gorm:"user_id"`
-	BanType     int       `gorm:"ban_type"`
 	CreatedTime time.Time `gorm:"created_time"`
 	EndTime     int64     `gorm:"end_time"`
 	ScopeKey    string    `gorm:"scope_key"`
@@ -31,8 +30,8 @@ func (user BanUserDao) TableName() string {
 }
 
 func (user BanUserDao) Upsert(item BanUserDao) error {
-	err := dbcommons.GetDb().Exec("INSERT INTO banusers (user_id, ban_type, end_time, scope_key, scope_value, ext, app_key)VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE end_time=?, ban_type=?, scope_value=?, ext=?",
-		item.UserId, item.BanType, item.EndTime, item.ScopeKey, item.ScopeValue, item.Ext, item.AppKey, item.EndTime, item.BanType, item.ScopeValue, item.Ext).Error
+	err := dbcommons.GetDb().Exec("INSERT INTO banusers (user_id, end_time, scope_key, scope_value, ext, app_key)VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE end_time=?, scope_value=?, ext=?",
+		item.UserId, item.EndTime, item.ScopeKey, item.ScopeValue, item.Ext, item.AppKey, item.EndTime, item.ScopeValue, item.Ext).Error
 	return err
 }
 
@@ -52,8 +51,12 @@ func (user BanUserDao) DelBanUser(appkey, userId, scopeKey string) error {
 	return dbcommons.GetDb().Where("app_key=? and user_id=? and scope_key=?", appkey, userId, scopeKey).Delete(&BanUserDao{}).Error
 }
 
+func (user BanUserDao) CleanBaseTime(appkey, userId string, endTime int64) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and end_time>0 and end_time<?", appkey, user, endTime).Delete(&BanUserDao{}).Error
+}
+
 func (user BanUserDao) QryBanUsers(appkey string, limit, startId int64) ([]*BanUserDao, error) {
 	var items []*BanUserDao
-	err := dbcommons.GetDb().Where("app_key=? and (ban_type=0 or (ban_type=1 and end_time>?)) and id>?", appkey, time.Now().UnixMilli(), startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and (end_time=0 or end_time>?) and id>?", appkey, time.Now().UnixMilli(), startId).Order("id asc").Limit(limit).Find(&items).Error
 	return items, err
 }

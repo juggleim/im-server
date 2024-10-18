@@ -49,7 +49,6 @@ type QryBanUsersResp struct {
 
 type BanUser struct {
 	UserId        string `json:"user_id"`
-	BanType       int    `json:"ban_type"`
 	CreatedTime   int64  `json:"created_time"`
 	EndTime       int64  `json:"end_time"`
 	EndTimeOffset int64  `json:"end_time_offset"`

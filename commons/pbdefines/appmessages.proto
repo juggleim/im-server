@@ -607,19 +607,13 @@ message BanUsersReq{
   bool isAdd = 2;
 }
 
-enum BanType {
-  Permanent = 0;
-  Temporary = 1;
-}
-
 message BanUser {
   string userId = 1;
-  BanType banType = 2;
-  int64 endTime = 3;
-  int64 createdTime = 4;
-  string scopeKey = 5;
-  string scopeValue = 6;
-  string ext = 7;
+  int64 endTime = 2;
+  int64 createdTime = 3;
+  string scopeKey = 4;
+  string scopeValue = 5;
+  string ext = 6;
 }
 
 message QryBanUsersReq{

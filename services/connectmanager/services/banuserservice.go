@@ -54,14 +54,23 @@ func GetBanUserFromCache(appkey, userId string) (*BanUserItem, bool) {
 					UserId: userId,
 					Items:  make(map[string]*BanItem),
 				}
+				needClean := false
+				curr := time.Now().UnixMilli()
 				for _, dbBanUser := range dbBanUsers {
 					banUser.Items[dbBanUser.ScopeKey] = &BanItem{
-						BanType:    pbobjs.BanType(dbBanUser.BanType),
 						EndTime:    dbBanUser.EndTime,
 						ScopeKey:   dbBanUser.ScopeKey,
 						ScopeValue: dbBanUser.ScopeValue,
 						Ext:        dbBanUser.Ext,
 					}
+					if dbBanUser.EndTime > 0 && dbBanUser.EndTime < curr {
+						needClean = true
+					}
+				}
+				if needClean {
+					go func() {
+						banUserDao.CleanBaseTime(appkey, userId, curr)
+					}()
 				}
 				exist = true
 			}
@@ -77,7 +86,6 @@ type BanUserItem struct {
 }
 
 type BanItem struct {
-	BanType    pbobjs.BanType
 	EndTime    int64
 	ScopeKey   string
 	ScopeValue string
@@ -93,7 +101,6 @@ func BanUsers(ctx context.Context, banUsers []*pbobjs.BanUser) {
 			ScopeKey:    user.ScopeKey,
 			ScopeValue:  user.ScopeValue,
 			Ext:         user.Ext,
-			BanType:     int(user.BanType),
 			CreatedTime: time.Now(),
 			EndTime:     user.EndTime,
 			AppKey:      appkey,
@@ -160,16 +167,13 @@ func QryBanUsers(ctx context.Context, limit int64, startIdStr string) (errs.IMEr
 		for _, dbBanUser := range dbBanUsers {
 			user := &pbobjs.BanUser{
 				UserId:      dbBanUser.UserId,
-				BanType:     pbobjs.BanType(dbBanUser.BanType),
 				EndTime:     0,
 				CreatedTime: dbBanUser.CreatedTime.UnixMilli(),
 				ScopeKey:    dbBanUser.ScopeKey,
 				ScopeValue:  dbBanUser.ScopeValue,
 				Ext:         dbBanUser.Ext,
 			}
-			if user.BanType == pbobjs.BanType_Temporary {
-				user.EndTime = dbBanUser.EndTime
-			}
+			user.EndTime = dbBanUser.EndTime
 			banUsers = append(banUsers, user)
 
 			offset, err = tools.EncodeInt(dbBanUser.ID)
