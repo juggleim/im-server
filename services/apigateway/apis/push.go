@@ -33,7 +33,19 @@ func QryUserTags(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
-	tools.SuccessHttpResp(ctx, msg.(*pbobjs.UserTagList))
+	ret := &models.UserTagsPayload{
+		UserTags: []models.UserTag{},
+	}
+	utagList, ok := msg.(*pbobjs.UserTagList)
+	if ok {
+		for _, uTags := range utagList.UserTags {
+			ret.UserTags = append(ret.UserTags, models.UserTag{
+				UserID: uTags.UserId,
+				Tags:   uTags.Tags,
+			})
+		}
+	}
+	tools.SuccessHttpResp(ctx, ret)
 }
 
 func AddUserTags(ctx *gin.Context) {
