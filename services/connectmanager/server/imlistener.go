@@ -299,11 +299,15 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 
 	appkey := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey)
 	userid := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
-	targetId := msg.TargetId
 
+	// preprocess rtc room creation
+	services.PreProcessRtcCreate(msg)
+
+	targetId := msg.TargetId
 	if tId, ok := services.HisMsgRedirect(msg.Topic, msg.Data, userid, msg.TargetId); ok {
 		targetId = tId
 	}
+
 	isSucc := bases.UnicastRoute(&pbobjs.RpcMessageWraper{
 		RpcMsgType:   pbobjs.RpcMsgType_QueryMsg,
 		AppKey:       appkey,

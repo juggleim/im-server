@@ -5,6 +5,7 @@ import (
 	"im-server/services/botmsg"
 	"im-server/services/broadcast"
 	"im-server/services/logmanager"
+	"im-server/services/rtcroom"
 	sensitivemanager "im-server/services/sensitivemanager"
 	"im-server/services/subscriptions"
 	"im-server/services/userstatussub"
@@ -105,6 +106,7 @@ func main() {
 	imstarters.Loaded(&sensitivemanager.SensitiveManager{})
 	imstarters.Loaded(&userstatussub.UserStatusSubManager{})
 	imstarters.Loaded(&botmsg.BotMsgManager{})
+	imstarters.Loaded(&rtcroom.RtcRoomManager{})
 
 	imstarters.Startup()
 

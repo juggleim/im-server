@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+option go_package = "commons/pbdefines/pbobjs";
+import "commons/pbdefines/appmessages.proto";
+
+message RtcRoomReq{
+    RtcRoomType roomType = 1;
+    string roomId = 2;
+    RtcMember joinMember = 3;
+}
+
+message RtcRoom{
+    RtcRoomType roomType = 1;
+    string roomId = 2;
+    UserInfo owner = 3;
+    
+    repeated RtcMember members = 51;
+}
+
+message RtcRooms{
+    repeated RtcRoom rooms = 1;
+}
+
+enum RtcRoomType{
+    OneOne = 0;
+    OneMore = 1;
+}
+
+message RtcMember{
+    UserInfo member = 1;
+    RtcState rtcState = 2;
+    int32 cameraEnable = 3;
+    int32 micEnable = 4;
+    int64 callTime = 5;
+    int64 connectTime = 6;
+    int64 hangupTime = 7;
+    UserInfo inviter = 8;
+}
+
+enum RtcState{
+    RtcStateDefault = 0;
+    RtcIncoming = 1;
+    RtcOutgoing = 2;
+    RtcConnecting = 3;
+    RtcConnected = 4;
+}
+
+message RtcRoomEvent{
+    RtcRoomEventType roomEventType = 1;
+    RtcMember member = 2;
+}
+
+enum RtcRoomEventType{
+    DefaultRtcRoomEvent = 0;
+    RtcJoin = 1;
+    RtcQuit = 2;
+    RtcDestroy = 3;
+    RtcStateChg = 4;
+}
+
+message RtcInviteReq{
+    InviteType inviteType = 1;
+    repeated string targetIds = 2;
+    RtcRoomType roomType = 3;
+    string roomId = 4;
+}
+
+message RtcInviteEvent{
+    InviteType inviteType = 1;
+    UserInfo targetUser = 2;
+    RtcRoom room = 3;
+}
+
+enum InviteType{
+    DefaultInviteType = 0;
+    RtcInvite = 1;
+    RtcAccept = 2;
+    RtcReject = 3;
+    RtcCancel = 4;
+    RtcTimeout = 5;
+}

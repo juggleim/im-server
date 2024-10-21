@@ -115,6 +115,16 @@ var (
 	IMErrorCode_OTHER_CLIENT_LOG_PARAM_ILLEGAL IMErrorCode = 15101
 )
 
+// rtcroom errorcode
+var (
+	IMErrorCode_RTCROOM_DEFAULT    IMErrorCode = 16000
+	IMErrorCode_RTCROOM_NOTEXIST   IMErrorCode = 16001
+	IMErrorCode_RTCROOM_HASEXIST   IMErrorCode = 16002
+	IMErrorCode_RTCROOM_HASDELETED IMErrorCode = 16003
+	IMErrorCode_RTCROOM_NOTMEMBER  IMErrorCode = 16004
+	IMErrorCode_RTCROOM_HAVEINVITE IMErrorCode = 16005
+)
+
 var imCode2ApiErrorMap map[IMErrorCode]*ApiErrorMsg = map[IMErrorCode]*ApiErrorMsg{
 	//api
 	IMErrorCode_SUCCESS:                newApiErrorMsg(200, IMErrorCode_SUCCESS, "success"),

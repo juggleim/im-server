@@ -18,7 +18,7 @@ type ConnectManager struct {
 }
 
 func (ser *ConnectManager) RegisterActors(register gmicro.IActorRegister) {
-	register.RegisterMultiMethodActor([]string{"connect", "msg", "ntf", "ustatus", "stream_msg"}, func() actorsystem.IUntypedActor {
+	register.RegisterMultiMethodActor([]string{"connect", "msg", "ntf", "ustatus", "stream_msg", "rtc_invite_event", "rtc_room_event"}, func() actorsystem.IUntypedActor {
 		return &actors.ConnectActor{}
 	})
 	register.RegisterActor("qry_online_status", func() actorsystem.IUntypedActor {

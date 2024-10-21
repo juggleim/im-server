@@ -735,4 +735,37 @@ CREATE TABLE `clientlogs` (
   UNIQUE KEY `uniq_msgid` (`app_key`,`msg_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `rtcrooms`;
+CREATE TABLE `rtcrooms` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `room_id` varchar(32) DEFAULT NULL,
+  `room_type` tinyint DEFAULT '0',
+  `owner_id` varchar(32) DEFAULT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+DROP TABLE IF EXISTS `rtcmembers`;
+CREATE TABLE `rtcmembers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `room_id` varchar(32) DEFAULT NULL,
+  `member_id` varchar(32) DEFAULT NULL,
+  `device_id` varchar(50) DEFAULT NULL,
+  `rtc_state` tinyint DEFAULT '0',
+  `inviter_id` varchar(32) DEFAULT NULL,
+  `camera_enable` tinyint DEFAULT '0',
+  `mic_enable` tinyint DEFAULT '0',
+  `call_time` bigint DEFAULT '0',
+  `connect_time` bigint DEFAULT '0',
+  `hangup_time` bigint DEFAULT '0',
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_member` (`app_key`,`room_id`,`member_id`),
+  KEY `idx_room` (`app_key`,`member_id`,`room_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin1','7c4a8d09ca3762af61e59520943dc26494f8941b');
