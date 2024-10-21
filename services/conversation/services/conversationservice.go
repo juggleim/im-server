@@ -873,6 +873,7 @@ func BatchQryConvers(ctx context.Context, req *pbobjs.QryConverReq) (errs.IMErro
 				TargetId:          conver.TargetId,
 				ChannelType:       conver.ChannelType,
 				LatestUnreadIndex: conver.LatestUnreadMsgIndex,
+				LatestReadMsgTime: conver.LatestReadMsgTime,
 				UndisturbType:     conver.UndisturbType,
 			})
 		}

@@ -77,7 +77,7 @@ func (conver *ConversationDao) BatchFind(appkey string, reqConvers []models.Conv
 		params = append(params, req.TargetId)
 		params = append(params, req.ChannelType)
 	}
-	err := dbcommons.GetDb().Where(conditionBuilder.String(), params...).Select("user_id,target_id,channel_type,undisturb_type,latest_unread_msg_index").Find(&items).Error
+	err := dbcommons.GetDb().Where(conditionBuilder.String(), params...).Select("user_id,target_id,channel_type,undisturb_type,latest_unread_msg_index,latest_read_msg_time").Find(&items).Error
 	if err != nil {
 		return []*models.Conversation{}, err
 	}

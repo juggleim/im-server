@@ -26,10 +26,11 @@ func init() {
 }
 
 type UserConversationItem struct {
-	key           string
-	UndisturbType int32
-	UnreadIndex   int64
-	ConverTags    []*pbobjs.ConverTag
+	key               string
+	UndisturbType     int32
+	UnreadIndex       int64
+	LatestReadMsgTime int64
+	ConverTags        []*pbobjs.ConverTag
 }
 
 func (conver *UserConversationItem) GetUnreadIndex() int64 {
@@ -101,10 +102,11 @@ func BatchInitUserConvers(ctx context.Context, targetId string, channelType pbob
 					for _, conver := range convers.Conversations {
 						key := fmt.Sprintf("%s_%s_%s_%d", appkey, conver.UserId, targetId, channelType)
 						CacheUserConver(appkey, conver.UserId, targetId, channelType, &UserConversationItem{
-							key:           key,
-							UndisturbType: conver.UndisturbType,
-							UnreadIndex:   conver.LatestUnreadIndex,
-							ConverTags:    conver.ConverTags,
+							key:               key,
+							UndisturbType:     conver.UndisturbType,
+							UnreadIndex:       conver.LatestUnreadIndex,
+							LatestReadMsgTime: conver.LatestReadMsgTime,
+							ConverTags:        conver.ConverTags,
 						})
 					}
 				}
@@ -132,9 +134,10 @@ func QryConversation(ctx context.Context, userId, targetId string, channelType p
 		conver, ok := resp.(*pbobjs.Conversation)
 		if ok {
 			return &UserConversationItem{
-				UndisturbType: conver.UndisturbType,
-				UnreadIndex:   conver.LatestUnreadIndex,
-				ConverTags:    conver.ConverTags,
+				UndisturbType:     conver.UndisturbType,
+				UnreadIndex:       conver.LatestUnreadIndex,
+				ConverTags:        conver.ConverTags,
+				LatestReadMsgTime: conver.LatestReadMsgTime,
 			}
 		}
 	}
