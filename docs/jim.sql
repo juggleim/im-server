@@ -738,7 +738,7 @@ CREATE TABLE `clientlogs` (
 DROP TABLE IF EXISTS `rtcrooms`;
 CREATE TABLE `rtcrooms` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `room_id` varchar(32) DEFAULT NULL,
+  `room_id` varchar(50) DEFAULT NULL,
   `room_type` tinyint DEFAULT '0',
   `owner_id` varchar(32) DEFAULT NULL,
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
@@ -750,7 +750,7 @@ CREATE TABLE `rtcrooms` (
 DROP TABLE IF EXISTS `rtcmembers`;
 CREATE TABLE `rtcmembers` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `room_id` varchar(32) DEFAULT NULL,
+  `room_id` varchar(50) DEFAULT NULL,
   `member_id` varchar(32) DEFAULT NULL,
   `device_id` varchar(50) DEFAULT NULL,
   `rtc_state` tinyint DEFAULT '0',
