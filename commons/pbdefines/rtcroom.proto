@@ -17,10 +17,6 @@ message RtcRoom{
     repeated RtcMember members = 51;
 }
 
-message RtcRooms{
-    repeated RtcRoom rooms = 1;
-}
-
 enum RtcRoomType{
     OneOne = 0;
     OneMore = 1;
@@ -82,4 +78,15 @@ enum InviteType{
     RtcDecline = 3;
     RtcCancel = 4;
     RtcTimeout = 5;
+}
+
+message RtcMemberRooms{
+    repeated RtcMemberRoom rooms = 1;
+}
+
+message RtcMemberRoom{
+    RtcRoomType roomType = 1;
+    string roomId = 2;
+    UserInfo owner = 3;
+    RtcState rtcState = 4;
 }

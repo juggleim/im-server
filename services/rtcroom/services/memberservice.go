@@ -9,10 +9,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/rtcroom/storages"
 	"strings"
-	"sync"
 	"time"
-
-	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -35,8 +32,6 @@ type RtcMemberRoom struct {
 	RoomId   string
 	RtcState pbobjs.RtcState
 }
-
-var notExistRtcMember = &RtcMemberContainer{}
 
 func GetRtcMemberContainer(appkey, memberId string) *RtcMemberContainer {
 	key := getRtcMemberKey(appkey, memberId)
@@ -76,28 +71,31 @@ func getRtcMemberKey(appkey, memberId string) string {
 	return strings.Join([]string{appkey, memberId}, "_")
 }
 
-func QryRtcMemberRooms(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcRooms) {
+func QryRtcMemberRooms(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcMemberRooms) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	ret := &pbobjs.RtcRooms{
-		Rooms: []*pbobjs.RtcRoom{},
+	ret := &pbobjs.RtcMemberRooms{
+		Rooms: []*pbobjs.RtcMemberRoom{},
 	}
+	roomStorage := storages.NewRtcRoomStorage()
 	storage := storages.NewRtcRoomMemberStorage()
 	roomMembers, err := storage.QueryRoomsByMember(appkey, userId, 10)
 	if err == nil && len(roomMembers) > 0 {
-		wg := sync.WaitGroup{}
 		for _, roomMember := range roomMembers {
-			wg.Add(1)
-			rId := roomMember.RoomId
-			go func() {
-				defer wg.Done()
-				_, resp, err := bases.SyncRpcCall(ctx, "rtc_qry", rId, &pbobjs.Nil{}, func() proto.Message {
-					return &pbobjs.RtcRoom{}
-				})
-				if err == nil && resp != nil {
-					ret.Rooms = append(ret.Rooms, resp.(*pbobjs.RtcRoom))
+			memberRoom := &pbobjs.RtcMemberRoom{
+				RoomType: pbobjs.RtcRoomType_OneOne,
+				RoomId:   roomMember.RoomId,
+				Owner:    &pbobjs.UserInfo{},
+				RtcState: roomMember.RtcState,
+			}
+			room, err := roomStorage.FindById(appkey, roomMember.RoomId)
+			if err == nil && room != nil {
+				memberRoom.RoomType = room.RoomType
+				memberRoom.Owner = &pbobjs.UserInfo{
+					UserId: room.OwnerId,
 				}
-			}()
+			}
+			ret.Rooms = append(ret.Rooms, memberRoom)
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, ret
