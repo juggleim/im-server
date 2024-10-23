@@ -117,12 +117,20 @@ var (
 
 // rtcroom errorcode
 var (
-	IMErrorCode_RTCROOM_DEFAULT    IMErrorCode = 16000
-	IMErrorCode_RTCROOM_NOTEXIST   IMErrorCode = 16001
-	IMErrorCode_RTCROOM_HASEXIST   IMErrorCode = 16002
-	IMErrorCode_RTCROOM_HASDELETED IMErrorCode = 16003
-	IMErrorCode_RTCROOM_NOTMEMBER  IMErrorCode = 16004
-	IMErrorCode_RTCROOM_HAVEINVITE IMErrorCode = 16005
+	IMErrorCode_RTCROOM_DEFAULT          IMErrorCode = 16000
+	IMErrorCode_RTCROOM_ROOMNOTEXIST     IMErrorCode = 16001
+	IMErrorCode_RTCROOM_ROOMHASEXIST     IMErrorCode = 16002
+	IMErrorCode_RTCROOM_ROOMHASDELETED   IMErrorCode = 16003
+	IMErrorCode_RTCROOM_NOTMEMBER        IMErrorCode = 16004
+	IMErrorCode_RTCROOM_HASMEMBER        IMErrorCode = 16005
+	IMErrorCode_RTCROOM_CREATEROOMFAILED IMErrorCode = 16006
+	IMErrorCode_RTCROOM_UPDATEFAILED     IMErrorCode = 16007
+
+	IMErrorCode_RTCINVITE_HASACCEPT  IMErrorCode = 16100
+	IMErrorCode_RTCINVITE_REJECT     IMErrorCode = 16101
+	IMErrorCode_RTCINVITE_PEERHANGUP IMErrorCode = 16102
+	IMErrorCode_RTCINVITE_BUSY       IMErrorCode = 16103
+	IMErrorCode_RTCINVITE_CANCEL     IMErrorCode = 16104
 )
 
 var imCode2ApiErrorMap map[IMErrorCode]*ApiErrorMsg = map[IMErrorCode]*ApiErrorMsg{

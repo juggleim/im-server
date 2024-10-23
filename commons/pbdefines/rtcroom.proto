@@ -59,10 +59,14 @@ enum RtcRoomEventType{
 }
 
 message RtcInviteReq{
-    InviteType inviteType = 1;
-    repeated string targetIds = 2;
-    RtcRoomType roomType = 3;
-    string roomId = 4;
+    repeated string targetIds = 1;
+    RtcRoomType roomType = 2;
+    string roomId = 3;
+}
+
+message RtcAnswerReq{
+    string targetId = 1;
+    string roomId = 2;
 }
 
 message RtcInviteEvent{
@@ -75,7 +79,7 @@ enum InviteType{
     DefaultInviteType = 0;
     RtcInvite = 1;
     RtcAccept = 2;
-    RtcReject = 3;
+    RtcDecline = 3;
     RtcCancel = 4;
     RtcTimeout = 5;
 }

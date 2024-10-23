@@ -755,6 +755,7 @@ CREATE TABLE `rtcmembers` (
   `device_id` varchar(50) DEFAULT NULL,
   `rtc_state` tinyint DEFAULT '0',
   `inviter_id` varchar(32) DEFAULT NULL,
+  `latest_ping_time` bigint DEFAULT '0',
   `camera_enable` tinyint DEFAULT '0',
   `mic_enable` tinyint DEFAULT '0',
   `call_time` bigint DEFAULT '0',

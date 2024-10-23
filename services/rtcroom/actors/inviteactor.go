@@ -11,11 +11,11 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type InviteEventActor struct {
+type InviteActor struct {
 	bases.BaseActor
 }
 
-func (actor *InviteEventActor) OnReceive(ctx context.Context, input proto.Message) {
+func (actor *InviteActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.RtcInviteReq); ok {
 		logs.WithContext(ctx).Infof("room_id:%s\troom_type:%v\tuser_id:%s\ttargets:%v", req.RoomId, req.RoomType, bases.GetRequesterIdFromCtx(ctx), req.TargetIds)
 		code := services.RtcInvite(ctx, req)
@@ -26,6 +26,6 @@ func (actor *InviteEventActor) OnReceive(ctx context.Context, input proto.Messag
 	}
 }
 
-func (actor *InviteEventActor) CreateInputObj() proto.Message {
+func (actor *InviteActor) CreateInputObj() proto.Message {
 	return &pbobjs.RtcInviteReq{}
 }

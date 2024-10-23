@@ -44,10 +44,11 @@ const (
 )
 
 type RtcRoomContainer struct {
-	Appkey string
-	RoomId string
-	Owner  *pbobjs.UserInfo
-	Status RtcRoomStatus // 0:normal; 1: destroy; 2: not exist;
+	Appkey   string
+	RoomId   string
+	RoomType pbobjs.RtcRoomType
+	Owner    *pbobjs.UserInfo
+	Status   RtcRoomStatus // 0:normal; 1: destroy; 2: not exist;
 
 	Members map[string]*models.RtcRoomMember
 }
@@ -66,22 +67,26 @@ func (container *RtcRoomContainer) UpdPingTime(memberId string) errs.IMErrorCode
 }
 
 func (container *RtcRoomContainer) ForceJoinRoom(member *models.RtcRoomMember) {
-	container.innerJoinRoom(member, true)
-}
-
-func (container *RtcRoomContainer) JoinRoom(member *models.RtcRoomMember) errs.IMErrorCode {
-	return container.innerJoinRoom(member, false)
-}
-
-func (container *RtcRoomContainer) innerJoinRoom(member *models.RtcRoomMember, isForce bool) errs.IMErrorCode {
 	key := getRoomKey(container.Appkey, container.RoomId)
 	lock := rtcroomLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
+	container.innerJoinRoom(member, true)
+}
+
+func (container *RtcRoomContainer) JoinRoom(member *models.RtcRoomMember) errs.IMErrorCode {
+	key := getRoomKey(container.Appkey, container.RoomId)
+	lock := rtcroomLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	return container.innerJoinRoom(member, false)
+}
+
+func (container *RtcRoomContainer) innerJoinRoom(member *models.RtcRoomMember, isForce bool) errs.IMErrorCode {
 	if !isForce {
 		if oldMember, exist := container.Members[member.MemberId]; exist {
 			oldMember.LatestPingTime = time.Now().UnixMilli()
-			return errs.IMErrorCode_RTCROOM_HASEXIST
+			return errs.IMErrorCode_RTCROOM_HASMEMBER
 		}
 	}
 	member.LatestPingTime = time.Now().UnixMilli()
@@ -121,7 +126,7 @@ func (container *RtcRoomContainer) QuitRoom(memberId string) (errs.IMErrorCode, 
 		delete(container.Members, memberId)
 		return errs.IMErrorCode_SUCCESS, member
 	} else {
-		return errs.IMErrorCode_RTCROOM_NOTEXIST, nil
+		return errs.IMErrorCode_RTCROOM_NOTMEMBER, nil
 	}
 }
 
@@ -153,6 +158,31 @@ func (container *RtcRoomContainer) GetMember(memberId string) (*models.RtcRoomMe
 	return member, exist
 }
 
+func (container *RtcRoomContainer) ExistAndChgState(memberId string, state pbobjs.RtcState) bool {
+	key := getRoomKey(container.Appkey, container.RoomId)
+	lock := rtcroomLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+	member, exist := container.Members[memberId]
+	if exist {
+		member.RtcState = state
+	}
+	return exist
+}
+
+func (container *RtcRoomContainer) CompareAndSetState(memberId string, except pbobjs.RtcState, state pbobjs.RtcState) bool {
+	key := getRoomKey(container.Appkey, container.RoomId)
+	lock := rtcroomLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+	member, exist := container.Members[memberId]
+	if exist && member.RtcState == except {
+		member.RtcState = state
+		return true
+	}
+	return false
+}
+
 func (container *RtcRoomContainer) UpdMemberState(memberId string, newMember *pbobjs.RtcMember) errs.IMErrorCode {
 	key := getRoomKey(container.Appkey, container.RoomId)
 	lock := rtcroomLocks.GetLocks(key)
@@ -167,7 +197,7 @@ func (container *RtcRoomContainer) UpdMemberState(memberId string, newMember *pb
 		member.LatestPingTime = time.Now().UnixMilli()
 		return errs.IMErrorCode_SUCCESS
 	} else {
-		return errs.IMErrorCode_RTCROOM_NOTEXIST
+		return errs.IMErrorCode_RTCROOM_NOTMEMBER
 	}
 }
 
@@ -242,33 +272,35 @@ func CreateRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCod
 	//add to cache
 	container, exist := getRtcRoomContainer(appkey, req.RoomId)
 	if exist {
-		return errs.IMErrorCode_RTCROOM_HASEXIST, generatePbRtcRoom(container)
+		return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, generatePbRtcRoom(container)
 	}
-	initRtcRoomContainer(appkey, req.RoomId, userId)
-	container, exist = getRtcRoomContainer(appkey, req.RoomId)
-	if exist && container != nil {
-		container.JoinRoom(&models.RtcRoomMember{
-			RoomId:       req.RoomId,
-			MemberId:     userId,
-			DeviceId:     deviceId,
-			RtcState:     req.JoinMember.RtcState,
-			CameraEnable: req.JoinMember.CameraEnable,
-			MicEnable:    req.JoinMember.MicEnable,
-			AppKey:       appkey,
+	container, succ := initRtcRoomContainer(appkey, req.RoomId, userId)
+	if succ {
+		// add to db
+		storage := storages.NewRtcRoomStorage()
+		err := storage.Create(models.RtcRoom{
+			RoomId:   req.RoomId,
+			RoomType: req.RoomType,
+			OwnerId:  userId,
+			AppKey:   appkey,
 		})
+		if err != nil {
+			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
+		}
+	} else {
+		return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, generatePbRtcRoom(container)
 	}
-	//add to db
-	storage := storages.NewRtcRoomStorage()
-	err := storage.Create(models.RtcRoom{
-		RoomId:  req.RoomId,
-		OwnerId: userId,
-		AppKey:  appkey,
+	container.JoinRoom(&models.RtcRoomMember{
+		RoomId:       req.RoomId,
+		MemberId:     userId,
+		DeviceId:     deviceId,
+		RtcState:     req.JoinMember.RtcState,
+		CameraEnable: req.JoinMember.CameraEnable,
+		MicEnable:    req.JoinMember.MicEnable,
+		AppKey:       appkey,
 	})
-	if err != nil {
-		logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
-	}
 	memberStorage := storages.NewRtcRoomMemberStorage()
-	err = memberStorage.Upsert(models.RtcRoomMember{
+	err := memberStorage.Upsert(models.RtcRoomMember{
 		RoomId:       req.RoomId,
 		MemberId:     userId,
 		DeviceId:     deviceId,
@@ -288,7 +320,7 @@ func DestroyRtcRoom(ctx context.Context) errs.IMErrorCode {
 	roomId := bases.GetTargetIdFromCtx(ctx)
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
-		return errs.IMErrorCode_RTCROOM_NOTEXIST
+		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST
 	}
 	storage := storages.NewRtcRoomStorage()
 	err := storage.Delete(appkey, roomId)
@@ -335,7 +367,7 @@ func generatePbRtcRoom(container *RtcRoomContainer) *pbobjs.RtcRoom {
 	}
 }
 
-func initRtcRoomContainer(appkey, roomId, ownerId string) {
+func initRtcRoomContainer(appkey, roomId, ownerId string) (*RtcRoomContainer, bool) {
 	key := getRoomKey(appkey, roomId)
 	lock := rtcroomLocks.GetLocks(key)
 	lock.Lock()
@@ -345,14 +377,18 @@ func initRtcRoomContainer(appkey, roomId, ownerId string) {
 		container = cacheContainer.(*RtcRoomContainer)
 	}
 	if container == nil || container.Status != RtcRoomStatus_Normal {
-		rtcroomCache.Add(key, &RtcRoomContainer{
+		container = &RtcRoomContainer{
 			Appkey: appkey,
 			RoomId: roomId,
 			Owner: &pbobjs.UserInfo{
 				UserId: ownerId,
 			},
 			Members: make(map[string]*models.RtcRoomMember),
-		})
+		}
+		rtcroomCache.Add(key, container)
+		return container, true
+	} else {
+		return container, false
 	}
 }
 
@@ -363,10 +399,10 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 	deviceId := bases.GetDeviceIdFromCtx(ctx)
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
-		return errs.IMErrorCode_RTCROOM_NOTEXIST, nil
+		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST, nil
 	}
 	if container.MemberExist(userId) {
-		return errs.IMErrorCode_RTCROOM_HASEXIST, generatePbRtcRoom(container)
+		return errs.IMErrorCode_RTCROOM_HASMEMBER, generatePbRtcRoom(container)
 	}
 	member := &models.RtcRoomMember{
 		RoomId:         roomId,
@@ -402,7 +438,7 @@ func QuitRtcRoom(ctx context.Context) errs.IMErrorCode {
 func innerQuitRtcRoom(appkey, roomId, userId string) errs.IMErrorCode {
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
-		return errs.IMErrorCode_RTCROOM_NOTEXIST
+		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST
 	}
 	code, _ := container.QuitRoom(userId)
 	storage := storages.NewRtcRoomMemberStorage()
@@ -417,18 +453,20 @@ func RtcPing(ctx context.Context) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	roomId := bases.GetTargetIdFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	container, exist := getRtcRoomContainer(appkey, roomId)
-	if !exist {
-		return errs.IMErrorCode_RTCROOM_NOTEXIST
+	storage := storages.NewRtcRoomMemberStorage()
+	member, err := storage.Find(appkey, roomId, userId)
+	if err != nil || member == nil {
+		return errs.IMErrorCode_RTCROOM_NOTMEMBER
 	}
-	return container.UpdPingTime(userId)
+	storage.RefreshPingTime(appkey, roomId, userId)
+	return errs.IMErrorCode_SUCCESS
 }
 
 func QryRtcRoom(ctx context.Context, roomId string) (errs.IMErrorCode, *pbobjs.RtcRoom) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
-		return errs.IMErrorCode_RTCROOM_NOTEXIST, nil
+		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST, nil
 	}
 	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(container)
 }
@@ -437,9 +475,14 @@ func UpdRtcMemberState(ctx context.Context, req *pbobjs.RtcMember) errs.IMErrorC
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	roomId := bases.GetTargetIdFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	container, exist := getRtcRoomContainer(appkey, roomId)
-	if !exist {
-		return errs.IMErrorCode_RTCROOM_NOTEXIST
+	storage := storages.NewRtcRoomMemberStorage()
+	member, err := storage.Find(appkey, roomId, userId)
+	if err != nil || member == nil {
+		return errs.IMErrorCode_RTCROOM_NOTMEMBER
 	}
-	return container.UpdMemberState(userId, req)
+	err = storage.UpdateState(appkey, roomId, userId, req.RtcState, "")
+	if err != nil {
+		return errs.IMErrorCode_RTCROOM_UPDATEFAILED
+	}
+	return errs.IMErrorCode_SUCCESS
 }

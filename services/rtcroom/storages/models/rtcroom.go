@@ -12,7 +12,7 @@ type RtcRoom struct {
 type IRtcRoomStorage interface {
 	Create(item RtcRoom) error
 	FindById(appkey, roomId string) (*RtcRoom, error)
-	Delete(appkey, chatId string) error
+	Delete(appkey, roomId string) error
 }
 
 type RtcRoomMember struct {
@@ -34,6 +34,10 @@ type RtcRoomMember struct {
 
 type IRtcRoomMemberStorage interface {
 	Upsert(item RtcRoomMember) error
+	Insert(item RtcRoomMember) (int64, error)
+	Find(appkey, roomId, memberId string) (*RtcRoomMember, error)
+	RefreshPingTime(appkey, roomId, memberId string) error
+	UpdateState(appkey, roomId, memberId string, state pbobjs.RtcState, deviceId string) error
 	Delete(appkey, roomId, memberId string) error
 	DeleteByRoomId(appkey, roomId string) error
 	QueryMembers(appkey, roomId string, startId, limit int64) ([]*RtcRoomMember, error)
