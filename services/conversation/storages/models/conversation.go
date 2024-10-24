@@ -34,6 +34,7 @@ type IConversationStorage interface {
 	UpdateIsTopState(appkey, userId, targetId string, channelType pbobjs.ChannelType, isTop int, optTime int64) (int64, error)
 	TotalUnreadCount(appkey, userId string, channelTypes []pbobjs.ChannelType, excludeConvers []*pbobjs.SimpleConversation, tag string) int64
 	ClearTotalUnreadCount(appkey, userId string) error
+	ClearUnread(appkey, userId, targetId string, channelType pbobjs.ChannelType) error
 	QryTopConvers(appkey, userId string, startTime, limit int64, sortType pbobjs.TopConverSortType, isPositive bool) ([]*Conversation, error)
 	SyncConversations(appkey, userId string, startTime int64, count int32) ([]*Conversation, error)
 	FindUndisturb(appkey, userId, targetId string, channelType pbobjs.ChannelType) (*Conversation, error)

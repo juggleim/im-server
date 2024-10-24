@@ -51,6 +51,31 @@ func DelConversation(ctx *gin.Context) {
 	tools.SuccessHttpResp(ctx, nil)
 }
 
+func ClearConverUnread(ctx *gin.Context) {
+	var req models.Conversations
+	if err := ctx.BindJSON(&req); err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	if len(req.Items) <= 0 || req.UserId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	convers := []*pbobjs.Conversation{}
+	for _, c := range req.Items {
+		convers = append(convers, &pbobjs.Conversation{
+			UserId:      req.UserId,
+			TargetId:    c.TargetId,
+			ChannelType: pbobjs.ChannelType(c.ChannelType),
+		})
+	}
+	services.AsyncApiCall(ctx, "clear_unread", req.UserId, req.UserId, &pbobjs.ClearUnreadReq{
+		Conversations: convers,
+		NoCmdMsg:      true,
+	})
+	tools.SuccessHttpResp(ctx, nil)
+}
+
 // undisturb_convers
 func UndisturbConvers(ctx *gin.Context) {
 	var undisturbConversReq models.UndisturbConversReq

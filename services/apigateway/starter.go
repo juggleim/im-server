@@ -80,6 +80,7 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.POST("/convers/undisturb", apis.UndisturbConvers)
 	group.POST("/convers/del", apis.DelConversation)
 	group.POST("/convers/add", apis.AddConversation)
+	group.POST("/convers/clearunread", apis.ClearConverUnread)
 
 	group.GET("/globalconvers/query", apis.QryGlobalConvers)
 

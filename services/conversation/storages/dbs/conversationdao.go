@@ -375,6 +375,10 @@ func (conver *ConversationDao) ClearTotalUnreadCount(appkey, userId string) erro
 	return dbcommons.GetDb().Exec("UPDATE conversations set latest_read_msg_index=latest_unread_msg_index, latest_read_msg_time =(UNIX_TIMESTAMP(NOW(3)) * 1000), unread_tag=0 where app_key=? and user_id=?", appkey, userId).Error
 }
 
+func (conver *ConversationDao) ClearUnread(appkey, userId, targetId string, channelType pbobjs.ChannelType) error {
+	return dbcommons.GetDb().Exec("update conversations set latest_read_msg_index=latest_unread_msg_index,latest_read_msg_time=(UNIX_TIMESTAMP(NOW(3))*1000) where app_key=? and user_id=? and target_id=? and channel_type=?", appkey, userId, targetId, channelType).Error
+}
+
 func (conver *ConversationDao) QryTopConvers(appkey, userId string, startTime, limit int64, sortType pbobjs.TopConverSortType, isPositive bool) ([]*models.Conversation, error) {
 	var items []*ConversationDao
 	var err error

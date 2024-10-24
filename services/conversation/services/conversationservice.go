@@ -697,6 +697,8 @@ func ClearUnread(ctx context.Context, userId string, convers []*pbobjs.Conversat
 				if err != nil {
 					continue
 				}
+			} else {
+				converStorage.ClearUnread(appkey, userId, conver.TargetId, conver.ChannelType)
 			}
 		}
 		if affected && !noCmdMsg {
