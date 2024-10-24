@@ -28,6 +28,23 @@ func CheckLogin(ctx imcontext.WsHandleContext, msg *codec.ConnectMsgBody) (int32
 	if _, exist := supportPlatforms[msg.Platform]; !exist {
 		return int32(errs.IMErrorCode_CONNECT_UNSUPPROTEDPLATFORM), ""
 	}
+	//check security domain
+	if msg.Platform == string(commonservices.Platform_Web) {
+		referer := imcontext.GetReferer(ctx)
+		appInfo, exist := commonservices.GetAppInfo(appkey)
+		if exist && appInfo != nil && appInfo.SecurityDomainsObj != nil && len(appInfo.SecurityDomainsObj.Domains) > 0 {
+			isContains := false
+			for _, domain := range appInfo.SecurityDomainsObj.Domains {
+				if domain == referer {
+					isContains = true
+					break
+				}
+			}
+			if !isContains {
+				return int32(errs.IMErrorCode_CONNECT_UNSECURITYDOMAIN), ""
+			}
+		}
+	}
 	//check token
 	tokenWrap, err := tokens.ParseTokenString(tokenStr)
 	if err != nil {

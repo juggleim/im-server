@@ -21,8 +21,9 @@ type AppInfo struct {
 	AppStatus    int       `default:"-"`
 	CreatedTime  time.Time `default:"-"`
 
-	EventSubConfigObj *EventSubConfigObj `default:"-"`
-	EventSubSwitchObj *EventSubSwitchObj `default:"-"`
+	EventSubConfigObj  *EventSubConfigObj `default:"-"`
+	EventSubSwitchObj  *EventSubSwitchObj `default:"-"`
+	SecurityDomainsObj *SecurityDomains   `default:"-"`
 
 	TokenEffectiveMinute  int    `default:"0"`
 	OfflineMsgSaveTime    int    `default:"1440"`
@@ -44,8 +45,9 @@ type AppInfo struct {
 	OpenGrpSnapshot          bool `default:"false"`
 	BigGrpThreshold          int  `default:"1000"`
 
-	EventSubConfig string `default:""`
-	EventSubSwitch string `default:""`
+	EventSubConfig  string `default:""`
+	EventSubSwitch  string `default:""`
+	SecurityDomains string `default:""`
 
 	// TestItem  string
 	// TestInt   int
@@ -96,6 +98,13 @@ func init() {
 				err := json.Unmarshal([]byte(appInfo.EventSubSwitch), eventSubSwitch)
 				if err == nil {
 					appInfo.EventSubSwitchObj = eventSubSwitch
+				}
+			}
+			if appInfo.SecurityDomainsObj == nil && appInfo.SecurityDomains != "" {
+				domains := &SecurityDomains{}
+				err := json.Unmarshal([]byte(appInfo.SecurityDomains), domains)
+				if err == nil {
+					appInfo.SecurityDomainsObj = domains
 				}
 			}
 			return appInfo
@@ -188,4 +197,8 @@ type EventSubSwitchObj struct {
 	ChatroomMsgSubSwitch int `json:"chatroom_msg_sub_switch"`
 	OnlineSubSwitch      int `json:"online_sub_switch"`
 	OfflineSubSwitch     int `json:"offline_sub_switch"`
+}
+
+type SecurityDomains struct {
+	Domains []string `json:"domains"`
 }

@@ -35,6 +35,7 @@ const (
 	StateKey_Version              string = "state.version"
 	StateKey_ClientIp             string = "state.client_ip"
 	StateKey_Limiter              string = "state.limiter"
+	StateKey_Referer              string = "state.referer"
 	// StateKey_Extra                string = "state.extra"
 	StateKey_InstanceId string = "state.instance_id"
 )

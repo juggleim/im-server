@@ -9,6 +9,7 @@ import (
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -46,7 +47,10 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 		fmt.Println("Error during connect upgrade:", err)
 		return
 	}
-
+	referer := strings.TrimSpace(r.Header.Get("Origin"))
+	if referer == "" {
+		referer = strings.TrimSpace(r.Header.Get("Referer"))
+	}
 	child := &ImWebsocketChild{
 		stopChan:         make(chan bool, 1),
 		wsConn:           conn,
@@ -55,7 +59,7 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 		latestActiveTime: time.Now().UnixMilli(),
 	}
 	utils.SafeGo(func() {
-		child.startWsListener()
+		child.startWsListener(referer)
 	})
 }
 func (server *ImWebsocketServer) Stop() {
@@ -71,7 +75,7 @@ type ImWebsocketChild struct {
 	ticker           *time.Ticker
 }
 
-func (child *ImWebsocketChild) startWsListener() {
+func (child *ImWebsocketChild) startWsListener(referer string) {
 	handler := IMWebsocketMsgHandler{child.messageListener}
 	ctx := &WsHandleContextImpl{
 		conn:       child.wsConn,
@@ -83,6 +87,7 @@ func (child *ImWebsocketChild) startWsListener() {
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ConnectCreateTime, time.Now().UnixMilli())
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_CtxLocker, &sync.Mutex{})
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Limiter, rate.NewLimiter(100, 10))
+	imcontext.SetContextAttr(ctx, imcontext.StateKey_Referer, referer)
 
 	//start ticker
 	child.startTicker(ctx, handler)

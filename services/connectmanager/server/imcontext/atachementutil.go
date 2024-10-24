@@ -55,6 +55,10 @@ func GetDeviceId(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_DeviceID)
 }
 
+func GetReferer(ctx WsHandleContext) string {
+	return GetContextAttrString(ctx, StateKey_Referer)
+}
+
 func GetInstanceId(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_InstanceId)
 }
