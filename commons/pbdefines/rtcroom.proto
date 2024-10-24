@@ -25,12 +25,10 @@ enum RtcRoomType{
 message RtcMember{
     UserInfo member = 1;
     RtcState rtcState = 2;
-    int32 cameraEnable = 3;
-    int32 micEnable = 4;
-    int64 callTime = 5;
-    int64 connectTime = 6;
-    int64 hangupTime = 7;
-    UserInfo inviter = 8;
+    int64 callTime = 3;
+    int64 connectTime = 4;
+    int64 hangupTime = 5;
+    UserInfo inviter = 6;
 }
 
 enum RtcState{
@@ -76,7 +74,7 @@ enum InviteType{
     RtcInvite = 1;
     RtcAccept = 2;
     RtcDecline = 3;
-    RtcCancel = 4;
+    RtcHangup = 4;
     RtcTimeout = 5;
 }
 

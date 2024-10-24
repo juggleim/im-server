@@ -77,23 +77,33 @@ func QryRtcMemberRooms(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcMember
 	ret := &pbobjs.RtcMemberRooms{
 		Rooms: []*pbobjs.RtcMemberRoom{},
 	}
-	roomStorage := storages.NewRtcRoomStorage()
+	currTime := time.Now().UnixMilli()
 	storage := storages.NewRtcRoomMemberStorage()
-	roomMembers, err := storage.QueryRoomsByMember(appkey, userId, 10)
+	roomMembers, err := storage.QueryRoomsByMember(appkey, userId, 100)
 	if err == nil && len(roomMembers) > 0 {
 		for _, roomMember := range roomMembers {
-			memberRoom := &pbobjs.RtcMemberRoom{
-				RoomType: pbobjs.RtcRoomType_OneOne,
-				RoomId:   roomMember.RoomId,
-				Owner:    &pbobjs.UserInfo{},
-				RtcState: roomMember.RtcState,
+			if currTime-roomMember.LatestPingTime > RtcPingTimeOut {
+				roomType := roomMember.RoomType
+				roomId := roomMember.RoomId
+				memberId := roomMember.MemberId
+				go func() {
+					if roomType == pbobjs.RtcRoomType_OneOne {
+						storage.DeleteByRoomId(appkey, roomId)
+						roomStorage := storages.NewRtcRoomStorage()
+						roomStorage.Delete(appkey, roomId)
+					} else {
+						storage.Delete(appkey, roomId, memberId)
+					}
+				}()
+				continue
 			}
-			room, err := roomStorage.FindById(appkey, roomMember.RoomId)
-			if err == nil && room != nil {
-				memberRoom.RoomType = room.RoomType
-				memberRoom.Owner = &pbobjs.UserInfo{
-					UserId: room.OwnerId,
-				}
+			memberRoom := &pbobjs.RtcMemberRoom{
+				RoomType: roomMember.RoomType,
+				RoomId:   roomMember.RoomId,
+				Owner: &pbobjs.UserInfo{
+					UserId: roomMember.OwnerId,
+				},
+				RtcState: roomMember.RtcState,
 			}
 			ret.Rooms = append(ret.Rooms, memberRoom)
 		}

@@ -192,8 +192,6 @@ func (container *RtcRoomContainer) UpdMemberState(memberId string, newMember *pb
 		if newMember.RtcState != pbobjs.RtcState_RtcStateDefault {
 			member.RtcState = newMember.RtcState
 		}
-		member.CameraEnable = newMember.CameraEnable
-		member.MicEnable = newMember.MicEnable
 		member.LatestPingTime = time.Now().UnixMilli()
 		return errs.IMErrorCode_SUCCESS
 	} else {
@@ -220,45 +218,50 @@ func getRtcRoomContainer(appkey, roomId string) (*RtcRoomContainer, bool) {
 			}
 			return container, false
 		} else {
-			storage := storages.NewRtcRoomStorage()
-			room, err := storage.FindById(appkey, roomId)
-			container := &RtcRoomContainer{
-				Appkey:  appkey,
-				RoomId:  roomId,
-				Members: make(map[string]*models.RtcRoomMember),
-			}
-			if err == nil && room != nil {
-				container.Status = RtcRoomStatus_Normal
-				//init rtc member relations
-				memberStorage := storages.NewRtcRoomMemberStorage()
-				var startId int64 = 0
-				var limit int64 = 1000
-				curr := time.Now().UnixMilli()
-				for {
-					members, err := memberStorage.QueryMembers(appkey, roomId, startId, limit)
-					if err != nil {
-						break
-					}
-					for _, member := range members {
-						member.LatestPingTime = curr
-						container.Members[member.MemberId] = member
-						startId = member.ID
-						memberId := member.MemberId
-						checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
-							checkRtcMemberTimeout(appkey, roomId, memberId)
-						})
-					}
-					if len(members) < int(limit) {
-						break
-					}
-				}
-			} else {
-				container.Status = RtcRoomStatus_NotExist
-			}
+			container := getRtcRoomContainerFromDb(appkey, roomId)
 			rtcroomCache.Add(key, container)
 			return container, container.Status == RtcRoomStatus_Normal
 		}
 	}
+}
+
+func getRtcRoomContainerFromDb(appkey, roomId string) *RtcRoomContainer {
+	container := &RtcRoomContainer{
+		Appkey:  appkey,
+		RoomId:  roomId,
+		Members: make(map[string]*models.RtcRoomMember),
+	}
+	storage := storages.NewRtcRoomStorage()
+	room, err := storage.FindById(appkey, roomId)
+	if err == nil && room != nil {
+		container.Status = RtcRoomStatus_Normal
+		//init rtc member relations
+		memberStorage := storages.NewRtcRoomMemberStorage()
+		var startId int64 = 0
+		var limit int64 = 1000
+		curr := time.Now().UnixMilli()
+		for {
+			members, err := memberStorage.QueryMembers(appkey, roomId, startId, limit)
+			if err != nil {
+				break
+			}
+			for _, member := range members {
+				member.LatestPingTime = curr
+				container.Members[member.MemberId] = member
+				startId = member.ID
+				memberId := member.MemberId
+				checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
+					checkRtcMemberTimeout(appkey, roomId, memberId)
+				})
+			}
+			if len(members) < int(limit) {
+				break
+			}
+		}
+	} else {
+		container.Status = RtcRoomStatus_NotExist
+	}
+	return container
 }
 
 func getRoomKey(appkey, roomId string) string {
@@ -291,23 +294,19 @@ func CreateRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCod
 		return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, generatePbRtcRoom(container)
 	}
 	container.JoinRoom(&models.RtcRoomMember{
-		RoomId:       req.RoomId,
-		MemberId:     userId,
-		DeviceId:     deviceId,
-		RtcState:     req.JoinMember.RtcState,
-		CameraEnable: req.JoinMember.CameraEnable,
-		MicEnable:    req.JoinMember.MicEnable,
-		AppKey:       appkey,
+		RoomId:   req.RoomId,
+		MemberId: userId,
+		DeviceId: deviceId,
+		RtcState: req.JoinMember.RtcState,
+		AppKey:   appkey,
 	})
 	memberStorage := storages.NewRtcRoomMemberStorage()
 	err := memberStorage.Upsert(models.RtcRoomMember{
-		RoomId:       req.RoomId,
-		MemberId:     userId,
-		DeviceId:     deviceId,
-		RtcState:     req.JoinMember.RtcState,
-		CameraEnable: req.JoinMember.CameraEnable,
-		MicEnable:    req.JoinMember.MicEnable,
-		AppKey:       appkey,
+		RoomId:   req.RoomId,
+		MemberId: userId,
+		DeviceId: deviceId,
+		RtcState: req.JoinMember.RtcState,
+		AppKey:   appkey,
 	})
 	if err != nil {
 		logs.WithContext(ctx).Errorf("join rtc room failed:%v", err)
@@ -349,12 +348,10 @@ func generatePbRtcRoom(container *RtcRoomContainer) *pbobjs.RtcRoom {
 			Member: &pbobjs.UserInfo{
 				UserId: member.MemberId,
 			},
-			RtcState:     member.RtcState,
-			CameraEnable: member.CameraEnable,
-			MicEnable:    member.MicEnable,
-			CallTime:     member.CallTime,
-			ConnectTime:  member.ConnectTime,
-			HangupTime:   member.HangupTime,
+			RtcState:    member.RtcState,
+			CallTime:    member.CallTime,
+			ConnectTime: member.ConnectTime,
+			HangupTime:  member.HangupTime,
 			Inviter: &pbobjs.UserInfo{
 				UserId: member.InviterId,
 			},
@@ -409,8 +406,6 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 		MemberId:       userId,
 		DeviceId:       deviceId,
 		RtcState:       req.JoinMember.RtcState,
-		CameraEnable:   req.JoinMember.CameraEnable,
-		MicEnable:      req.JoinMember.MicEnable,
 		AppKey:         appkey,
 		LatestPingTime: time.Now().UnixMilli(),
 	}
@@ -464,8 +459,8 @@ func RtcPing(ctx context.Context) errs.IMErrorCode {
 
 func QryRtcRoom(ctx context.Context, roomId string) (errs.IMErrorCode, *pbobjs.RtcRoom) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	container, exist := getRtcRoomContainer(appkey, roomId)
-	if !exist {
+	container := getRtcRoomContainerFromDb(appkey, roomId)
+	if container.Status != RtcRoomStatus_Normal {
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST, nil
 	}
 	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(container)

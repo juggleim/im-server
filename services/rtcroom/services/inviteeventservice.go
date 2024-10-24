@@ -7,6 +7,11 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/rtcroom/storages"
 	"im-server/services/rtcroom/storages/models"
+	"time"
+)
+
+var (
+	RtcPingTimeOut int64 = 30 * 1000
 )
 
 func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) errs.IMErrorCode {
@@ -14,6 +19,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) errs.IMErrorCode {
 	roomId := req.RoomId
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	deviceId := bases.GetDeviceIdFromCtx(ctx)
+	currTime := time.Now().UnixMilli()
 
 	memberKey := getRtcMemberKey(appkey, userId)
 	lock := memberLocks.GetLocks(memberKey)
@@ -21,10 +27,23 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) errs.IMErrorCode {
 	defer lock.Unlock()
 
 	memberStorage := storages.NewRtcRoomMemberStorage()
-	memberRooms, err := memberStorage.QueryRoomsByMember(appkey, userId, 10)
+	memberRooms, err := memberStorage.QueryRoomsByMember(appkey, userId, 100)
 	if err == nil {
+		hasInRoom := false
+		hasExpire := false
+		for _, memberRoom := range memberRooms {
+			if currTime-memberRoom.LatestPingTime < RtcPingTimeOut {
+				hasInRoom = true
+			} else {
+				hasExpire = true
+			}
+		}
+		if hasExpire {
+			//del expire item
+			go delExpireRtcMember(appkey, roomId, currTime-RtcPingTimeOut)
+		}
 		if req.RoomType == pbobjs.RtcRoomType_OneOne {
-			if len(memberRooms) > 0 {
+			if hasInRoom {
 				return errs.IMErrorCode_RTCINVITE_BUSY
 			}
 		}
@@ -40,19 +59,21 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) errs.IMErrorCode {
 		return errs.IMErrorCode_RTCROOM_CREATEROOMFAILED
 	}
 	memberStorage.Insert(models.RtcRoomMember{
-		RoomId:   roomId,
-		MemberId: userId,
-		DeviceId: deviceId,
-		RtcState: pbobjs.RtcState_RtcOutgoing,
-		AppKey:   appkey,
+		RoomId:         roomId,
+		MemberId:       userId,
+		DeviceId:       deviceId,
+		RtcState:       pbobjs.RtcState_RtcOutgoing,
+		LatestPingTime: currTime,
+		AppKey:         appkey,
 	})
 	for _, targetId := range req.TargetIds {
 		memberStorage.Insert(models.RtcRoomMember{
-			RoomId:    roomId,
-			MemberId:  targetId,
-			InviterId: userId,
-			RtcState:  pbobjs.RtcState_RtcIncoming,
-			AppKey:    appkey,
+			RoomId:         roomId,
+			MemberId:       targetId,
+			InviterId:      userId,
+			RtcState:       pbobjs.RtcState_RtcIncoming,
+			LatestPingTime: currTime,
+			AppKey:         appkey,
 		})
 		//send event
 		SendInviteEvent(ctx, targetId, &pbobjs.RtcInviteEvent{
@@ -96,7 +117,8 @@ func RtcDecline(ctx context.Context, req *pbobjs.RtcAnswerReq) errs.IMErrorCode 
 			UserId: userId,
 		},
 		Room: &pbobjs.RtcRoom{
-			RoomId: roomId,
+			RoomId:   roomId,
+			RoomType: room.RoomType,
 		},
 	})
 	return errs.IMErrorCode_SUCCESS
@@ -145,7 +167,35 @@ func RtcAccept(ctx context.Context, req *pbobjs.RtcAnswerReq) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }
 
-func RtcCancel(ctx context.Context, req *pbobjs.RtcInviteReq) errs.IMErrorCode {
+func RtcHangup(ctx context.Context, req *pbobjs.RtcAnswerReq) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	roomId := req.RoomId
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	memberKey := getRtcMemberKey(appkey, userId)
+	lock := memberLocks.GetLocks(memberKey)
+	lock.Lock()
+	defer lock.Unlock()
+
+	roomStorage := storages.NewRtcRoomStorage()
+	room, err := roomStorage.FindById(appkey, roomId)
+	if err != nil || room == nil {
+		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST
+	}
+	memberStorage := storages.NewRtcRoomMemberStorage()
+	if room.RoomType == pbobjs.RtcRoomType_OneOne {
+		memberStorage.DeleteByRoomId(appkey, roomId)
+		roomStorage.Delete(appkey, roomId)
+		SendInviteEvent(ctx, req.TargetId, &pbobjs.RtcInviteEvent{
+			InviteType: pbobjs.InviteType_RtcHangup,
+			TargetUser: &pbobjs.UserInfo{
+				UserId: userId,
+			},
+			Room: &pbobjs.RtcRoom{
+				RoomType: pbobjs.RtcRoomType_OneOne,
+				RoomId:   roomId,
+			},
+		})
+	}
 	return errs.IMErrorCode_SUCCESS
 }
 
@@ -161,4 +211,9 @@ func BatchSendInviteEvent(ctx context.Context, targetIds []string, event *pbobjs
 		msg.Qos = 0
 		bases.UnicastRouteWithNoSender(msg)
 	}
+}
+
+func delExpireRtcMember(appkey, roomId string, baseTime int64) {
+	storage := storages.NewRtcRoomMemberStorage()
+	storage.DelteByRoomIdBaseTime(appkey, roomId, baseTime)
 }

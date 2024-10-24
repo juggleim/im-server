@@ -16,18 +16,18 @@ type IRtcRoomStorage interface {
 }
 
 type RtcRoomMember struct {
-	ID           int64
-	RoomId       string
-	MemberId     string
-	DeviceId     string
-	RtcState     pbobjs.RtcState
-	InviterId    string
-	CameraEnable int32
-	MicEnable    int32
-	CallTime     int64
-	ConnectTime  int64
-	HangupTime   int64
-	AppKey       string
+	ID          int64
+	RoomId      string
+	RoomType    pbobjs.RtcRoomType
+	OwnerId     string
+	MemberId    string
+	DeviceId    string
+	RtcState    pbobjs.RtcState
+	InviterId   string
+	CallTime    int64
+	ConnectTime int64
+	HangupTime  int64
+	AppKey      string
 
 	LatestPingTime int64
 }
@@ -40,6 +40,7 @@ type IRtcRoomMemberStorage interface {
 	UpdateState(appkey, roomId, memberId string, state pbobjs.RtcState, deviceId string) error
 	Delete(appkey, roomId, memberId string) error
 	DeleteByRoomId(appkey, roomId string) error
+	DelteByRoomIdBaseTime(appkey, roomId string, baseTime int64) error
 	QueryMembers(appkey, roomId string, startId, limit int64) ([]*RtcRoomMember, error)
 	QueryRoomsByMember(appkey, memberId string, limit int64) ([]*RtcRoomMember, error)
 }
