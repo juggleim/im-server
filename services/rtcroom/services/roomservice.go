@@ -92,36 +92,45 @@ func (container *RtcRoomContainer) innerJoinRoom(member *models.RtcRoomMember, i
 	}
 	member.LatestPingTime = time.Now().UnixMilli()
 	container.Members[member.MemberId] = member
-	appkey := container.Appkey
-	roomId := container.RoomId
-	memberId := member.MemberId
-	checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
-		checkRtcMemberTimeout(appkey, roomId, memberId)
-	})
 	return errs.IMErrorCode_SUCCESS
 }
 
-func checkRtcMemberTimeout(appkey, roomId, memberId string) {
+func checkRtcMemberTimeout(appkey, roomId string) {
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if exist && container != nil {
-		member, exist := container.GetMember(memberId)
-		if exist {
-			curr := time.Now().UnixMilli()
+		if container.MemberCount() <= 0 {
+			rtcroomCache.Remove(getRoomKey(appkey, roomId))
+			return
+		}
+		curr := time.Now().UnixMilli()
+		pingTimeoutMemberIds := []string{}
+		callTimeOutMemberIds := []string{}
+		container.ForeachMembers(func(member *models.RtcRoomMember) {
 			if member.RtcState == pbobjs.RtcState_RtcIncoming || member.RtcState == pbobjs.RtcState_RtcOutgoing {
 				if curr-member.LatestPingTime > (CallTimeout * 1000) {
-					innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, true)
-					return
+					callTimeOutMemberIds = append(callTimeOutMemberIds, member.MemberId)
 				}
 			} else {
 				if curr-member.LatestPingTime > (PingTimeout * 1000) {
-					innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, true)
-					return
+					pingTimeoutMemberIds = append(pingTimeoutMemberIds, member.MemberId)
 				}
 			}
-			checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
-				checkRtcMemberTimeout(appkey, roomId, memberId)
-			})
+		})
+		for _, memberId := range callTimeOutMemberIds {
+			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, true, pbobjs.RtcRoomQuitReason_CallTimeout)
+			if container.RoomType == pbobjs.RtcRoomType_OneOne {
+				break
+			}
 		}
+		for _, memberId := range pingTimeoutMemberIds {
+			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, true, pbobjs.RtcRoomQuitReason_PingTimeout)
+			if container.RoomType == pbobjs.RtcRoomType_OneOne {
+				break
+			}
+		}
+		checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
+			checkRtcMemberTimeout(appkey, roomId)
+		})
 	}
 }
 
@@ -146,6 +155,14 @@ func (container *RtcRoomContainer) ForeachMembers(f func(member *models.RtcRoomM
 	for _, member := range container.Members {
 		f(member)
 	}
+}
+
+func (container *RtcRoomContainer) MemberCount() int {
+	key := getRoomKey(container.Appkey, container.RoomId)
+	lock := rtcroomLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+	return len(container.Members)
 }
 
 func (container *RtcRoomContainer) MemberExist(memberId string) bool {
@@ -227,6 +244,11 @@ func getRtcRoomContainer(appkey, roomId string) (*RtcRoomContainer, bool) {
 		} else {
 			container := getRtcRoomContainerFromDb(appkey, roomId)
 			rtcroomCache.Add(key, container)
+			if container.Status == RtcRoomStatus_Normal {
+				checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
+					checkRtcMemberTimeout(appkey, roomId)
+				})
+			}
 			return container, container.Status == RtcRoomStatus_Normal
 		}
 	}
@@ -252,6 +274,9 @@ func getRtcRoomContainerWithInit(appkey, roomId, ownerId string, roomType pbobjs
 	container := getRtcRoomContainerFromDb(appkey, roomId)
 	if container.Status == RtcRoomStatus_Normal {
 		rtcroomCache.Add(key, container)
+		checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
+			checkRtcMemberTimeout(appkey, roomId)
+		})
 		return container, false
 	}
 	container = &RtcRoomContainer{
@@ -265,8 +290,12 @@ func getRtcRoomContainerWithInit(appkey, roomId, ownerId string, roomType pbobjs
 		Members: make(map[string]*models.RtcRoomMember),
 	}
 	rtcroomCache.Add(key, container)
+	checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
+		checkRtcMemberTimeout(appkey, roomId)
+	})
 	return container, true
 }
+
 func getRtcRoomContainerFromDb(appkey, roomId string) *RtcRoomContainer {
 	container := &RtcRoomContainer{
 		Appkey:  appkey,
@@ -291,10 +320,6 @@ func getRtcRoomContainerFromDb(appkey, roomId string) *RtcRoomContainer {
 				member.LatestPingTime = curr
 				container.Members[member.MemberId] = member
 				startId = member.ID
-				memberId := member.MemberId
-				checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
-					checkRtcMemberTimeout(appkey, roomId, memberId)
-				})
 			}
 			if len(members) < int(limit) {
 				break
@@ -441,10 +466,10 @@ func QuitRtcRoom(ctx context.Context) errs.IMErrorCode {
 	roomId := bases.GetTargetIdFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 
-	return innerQuitRtcRoom(ctx, appkey, roomId, userId, true)
+	return innerQuitRtcRoom(ctx, appkey, roomId, userId, true, pbobjs.RtcRoomQuitReason_Active)
 }
 
-func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSendEvent bool) errs.IMErrorCode {
+func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSendEvent bool, quitReason pbobjs.RtcRoomQuitReason) errs.IMErrorCode {
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST
@@ -483,6 +508,7 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 							RoomType: container.RoomType,
 							RoomId:   container.RoomId,
 						},
+						Reason: quitReason,
 					})
 				}
 			})
@@ -490,6 +516,7 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 			storage.DeleteByRoomId(appkey, roomId)
 			roomStorage := storages.NewRtcRoomStorage()
 			roomStorage.Delete(appkey, roomId)
+			rtcroomCache.Remove(getRoomKey(appkey, roomId))
 		} else {
 			container.ForeachMembers(func(member *models.RtcRoomMember) {
 				if isSendEvent {
@@ -504,6 +531,7 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 							RoomType: container.RoomType,
 							RoomId:   container.RoomId,
 						},
+						Reason: quitReason,
 					})
 				}
 			})

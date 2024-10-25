@@ -56,6 +56,7 @@ message RtcRoomEvent{
     RtcRoomEventType roomEventType = 1;
     RtcMember member = 2;
     RtcRoom room = 3;
+    RtcRoomQuitReason reason = 4;
 }
 
 enum RtcRoomEventType{
@@ -64,6 +65,12 @@ enum RtcRoomEventType{
     RtcQuit = 2;
     RtcDestroy = 3;
     RtcStateChg = 4;
+}
+
+enum RtcRoomQuitReason{
+    Active = 0;
+    CallTimeout = 1;
+    PingTimeout = 2;
 }
 
 message RtcInviteReq{
