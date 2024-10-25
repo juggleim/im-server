@@ -8,6 +8,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/rtcroom/storages"
 	"im-server/services/rtcroom/storages/models"
@@ -491,6 +492,14 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 		})
 
 		if container.RoomType == pbobjs.RtcRoomType_OneOne {
+			SendRoomEvent(ctx, userId, &pbobjs.RtcRoomEvent{
+				RoomEventType: pbobjs.RtcRoomEventType_RtcDestroy,
+				Room: &pbobjs.RtcRoom{
+					RoomType: container.RoomType,
+					RoomId:   container.RoomId,
+				},
+				Reason: quitReason,
+			})
 			container.ForeachMembers(func(member *models.RtcRoomMember) {
 				MemberSyncState(ctx, member.MemberId, &pbobjs.SyncMemberStateReq{
 					IsDelete: true,
@@ -518,6 +527,19 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 			roomStorage.Delete(appkey, roomId)
 			rtcroomCache.Remove(getRoomKey(appkey, roomId))
 		} else {
+			SendRoomEvent(ctx, userId, &pbobjs.RtcRoomEvent{
+				RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
+				Member: &pbobjs.RtcMember{
+					Member: &pbobjs.UserInfo{
+						UserId: userId,
+					},
+				},
+				Room: &pbobjs.RtcRoom{
+					RoomType: container.RoomType,
+					RoomId:   container.RoomId,
+				},
+				Reason: quitReason,
+			})
 			container.ForeachMembers(func(member *models.RtcRoomMember) {
 				if isSendEvent {
 					SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
@@ -623,5 +645,6 @@ func UpdRtcMemberState(ctx context.Context, req *pbobjs.RtcMember) errs.IMErrorC
 func SendRoomEvent(ctx context.Context, targetId string, event *pbobjs.RtcRoomEvent) {
 	msg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "rtc_room_event", event)
 	msg.Qos = 0
+	msg.PublishType = int32(commonservices.PublishType_AllSessionExceptSelf)
 	bases.UnicastRouteWithNoSender(msg)
 }
