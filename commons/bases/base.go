@@ -97,7 +97,7 @@ func SyncRpcCall(ctx context.Context, method, targetId string, req proto.Message
 	}
 
 	code := errs.IMErrorCode(result.ResultCode)
-	if code != errs.IMErrorCode_SUCCESS {
+	if respFactory == nil || code != errs.IMErrorCode_SUCCESS {
 		return code, nil, nil
 	}
 

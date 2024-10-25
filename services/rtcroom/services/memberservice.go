@@ -25,12 +25,45 @@ func init() {
 type RtcMemberContainer struct {
 	Appkey   string
 	MemberId string
-	Rooms    []*RtcMemberRoom
+	Rooms    map[string]*RtcMemberRoom
 }
 
 type RtcMemberRoom struct {
 	RoomId   string
+	RoomType pbobjs.RtcRoomType
 	RtcState pbobjs.RtcState
+	DeviceId string
+}
+
+func (container *RtcMemberContainer) Add(memberRoom RtcMemberRoom) {
+	key := getRtcMemberKey(container.Appkey, container.MemberId)
+	lock := memberLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	container.Rooms[memberRoom.RoomId] = &RtcMemberRoom{
+		RoomId:   memberRoom.RoomId,
+		RoomType: memberRoom.RoomType,
+		RtcState: memberRoom.RtcState,
+		DeviceId: memberRoom.DeviceId,
+	}
+}
+
+func (container *RtcMemberContainer) Del(memberRoom RtcMemberRoom) {
+	key := getRtcMemberKey(container.Appkey, container.MemberId)
+	lock := memberLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	delete(container.Rooms, memberRoom.RoomId)
+}
+
+func (container *RtcMemberContainer) ForeachRooms(f func(room *RtcMemberRoom)) {
+	key := getRtcMemberKey(container.Appkey, container.MemberId)
+	lock := memberLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+	for _, room := range container.Rooms {
+		f(room)
+	}
 }
 
 func GetRtcMemberContainer(appkey, memberId string) *RtcMemberContainer {
@@ -49,16 +82,18 @@ func GetRtcMemberContainer(appkey, memberId string) *RtcMemberContainer {
 			container := &RtcMemberContainer{
 				Appkey:   appkey,
 				MemberId: memberId,
-				Rooms:    []*RtcMemberRoom{},
+				Rooms:    make(map[string]*RtcMemberRoom),
 			}
 			storage := storages.NewRtcRoomMemberStorage()
-			roomMembers, err := storage.QueryRoomsByMember(appkey, memberId, 10)
+			roomMembers, err := storage.QueryRoomsByMember(appkey, memberId, 100)
 			if err == nil && len(roomMembers) > 0 {
 				for _, roomMember := range roomMembers {
-					container.Rooms = append(container.Rooms, &RtcMemberRoom{
+					container.Rooms[roomMember.RoomId] = &RtcMemberRoom{
 						RoomId:   roomMember.RoomId,
+						RoomType: roomMember.RoomType,
 						RtcState: roomMember.RtcState,
-					})
+						DeviceId: roomMember.DeviceId,
+					}
 				}
 			}
 			memberCache.Add(key, container)
@@ -77,36 +112,62 @@ func QryRtcMemberRooms(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcMember
 	ret := &pbobjs.RtcMemberRooms{
 		Rooms: []*pbobjs.RtcMemberRoom{},
 	}
-	currTime := time.Now().UnixMilli()
-	storage := storages.NewRtcRoomMemberStorage()
-	roomMembers, err := storage.QueryRoomsByMember(appkey, userId, 100)
-	if err == nil && len(roomMembers) > 0 {
-		for _, roomMember := range roomMembers {
-			if currTime-roomMember.LatestPingTime > RtcPingTimeOut {
-				roomType := roomMember.RoomType
-				roomId := roomMember.RoomId
-				memberId := roomMember.MemberId
-				go func() {
-					if roomType == pbobjs.RtcRoomType_OneOne {
-						storage.DeleteByRoomId(appkey, roomId)
-						roomStorage := storages.NewRtcRoomStorage()
-						roomStorage.Delete(appkey, roomId)
-					} else {
-						storage.Delete(appkey, roomId, memberId)
-					}
-				}()
+
+	container := GetRtcMemberContainer(appkey, userId)
+	container.ForeachRooms(func(room *RtcMemberRoom) {
+		ret.Rooms = append(ret.Rooms, &pbobjs.RtcMemberRoom{
+			RoomType: room.RoomType,
+			RoomId:   room.RoomId,
+			RtcState: room.RtcState,
+		})
+	})
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func GrabMemberState(ctx context.Context, req *pbobjs.MemberState) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetTargetIdFromCtx(ctx)
+
+	container := GetRtcMemberContainer(appkey, userId)
+	key := getRtcMemberKey(appkey, userId)
+	lock := memberLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+
+	if req.RoomType == pbobjs.RtcRoomType_OneOne {
+		for _, room := range container.Rooms {
+			if room.RoomId == req.RoomId {
 				continue
 			}
-			memberRoom := &pbobjs.RtcMemberRoom{
-				RoomType: roomMember.RoomType,
-				RoomId:   roomMember.RoomId,
-				Owner: &pbobjs.UserInfo{
-					UserId: roomMember.OwnerId,
-				},
-				RtcState: roomMember.RtcState,
+			if room.RtcState == pbobjs.RtcState_RtcOutgoing || room.RtcState == pbobjs.RtcState_RtcConnecting || room.RtcState == pbobjs.RtcState_RtcConnected {
+				return errs.IMErrorCode_RTCINVITE_BUSY
 			}
-			ret.Rooms = append(ret.Rooms, memberRoom)
 		}
 	}
-	return errs.IMErrorCode_SUCCESS, ret
+	container.Add(RtcMemberRoom{
+		RoomId:   req.RoomId,
+		RoomType: req.RoomType,
+		RtcState: req.RtcState,
+		DeviceId: req.DeviceId,
+	})
+	return errs.IMErrorCode_SUCCESS
+}
+
+func SyncMemberState(ctx context.Context, req *pbobjs.SyncMemberStateReq) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetTargetIdFromCtx(ctx)
+	container := GetRtcMemberContainer(appkey, userId)
+	if req.IsDelete {
+		container.Del(RtcMemberRoom{
+			RoomId: req.Member.RoomId,
+		})
+	} else {
+		container.Add(RtcMemberRoom{
+			RoomId:   req.Member.RoomId,
+			RoomType: req.Member.RoomType,
+			RtcState: req.Member.RtcState,
+			DeviceId: req.Member.DeviceId,
+		})
+	}
+	return errs.IMErrorCode_SUCCESS
 }

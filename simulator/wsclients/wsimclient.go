@@ -314,6 +314,14 @@ func (client *WsImClient) OnPublish(msg *codec.PublishMsgBody, needAck int) {
 		if err == nil && client.OnStreamMsgCallBack != nil {
 			client.OnStreamMsgCallBack(&streamMsg)
 		}
+	} else if msg.Topic == "rtc_room_event" {
+		var event pbobjs.RtcRoomEvent
+		err := tools.PbUnMarshal(msg.Data, &event)
+		if err != nil {
+			fmt.Println("err:", err)
+		} else {
+			fmt.Println(tools.ToJson(&event))
+		}
 	} else {
 		fmt.Println(msg.Topic, msg.Data)
 	}

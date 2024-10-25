@@ -31,6 +31,19 @@ message RtcMember{
     UserInfo inviter = 6;
 }
 
+message MemberState{
+    string roomId = 1;
+    RtcRoomType roomType = 2;
+    string memberId = 3;
+    string deviceId = 4;
+    RtcState rtcState = 5;
+}
+
+message SyncMemberStateReq{
+    bool isDelete = 1;
+    MemberState member = 2;
+}
+
 enum RtcState{
     RtcStateDefault = 0;
     RtcIncoming = 1;
@@ -42,6 +55,7 @@ enum RtcState{
 message RtcRoomEvent{
     RtcRoomEventType roomEventType = 1;
     RtcMember member = 2;
+    RtcRoom room = 3;
 }
 
 enum RtcRoomEventType{
@@ -56,26 +70,6 @@ message RtcInviteReq{
     repeated string targetIds = 1;
     RtcRoomType roomType = 2;
     string roomId = 3;
-}
-
-message RtcAnswerReq{
-    string targetId = 1;
-    string roomId = 2;
-}
-
-message RtcInviteEvent{
-    InviteType inviteType = 1;
-    UserInfo targetUser = 2;
-    RtcRoom room = 3;
-}
-
-enum InviteType{
-    DefaultInviteType = 0;
-    RtcInvite = 1;
-    RtcAccept = 2;
-    RtcDecline = 3;
-    RtcHangup = 4;
-    RtcTimeout = 5;
 }
 
 message RtcMemberRooms{

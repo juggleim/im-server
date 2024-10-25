@@ -66,22 +66,13 @@ func (client *WsImClient) RtcInvite(req *pbobjs.RtcInviteReq) utils.ClientErrorC
 	}
 }
 
-func (client *WsImClient) RtcDecline(req *pbobjs.RtcAnswerReq) utils.ClientErrorCode {
-	data, _ := tools.PbMarshal(req)
-	code, qryAck := client.Query("rtc_decline", client.UserId, data)
-	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
-		return utils.ClientErrorCode_Success
+func (client *WsImClient) QryRtcMemberRooms() (utils.ClientErrorCode, *pbobjs.RtcMemberRooms) {
+	code, qryAck := client.Query("rtc_member_rooms", client.UserId, []byte{})
+	if code == utils.ClientErrorCode_Success {
+		resp := &pbobjs.RtcMemberRooms{}
+		tools.PbUnMarshal(qryAck.Data, resp)
+		return code, resp
 	} else {
-		return utils.ClientErrorCode(code)
-	}
-}
-
-func (client *WsImClient) RtcAccept(req *pbobjs.RtcAnswerReq) utils.ClientErrorCode {
-	data, _ := tools.PbMarshal(req)
-	code, qryAck := client.Query("rtc_accept", client.UserId, data)
-	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
-		return utils.ClientErrorCode_Success
-	} else {
-		return utils.ClientErrorCode(code)
+		return utils.ClientErrorCode(code), nil
 	}
 }
