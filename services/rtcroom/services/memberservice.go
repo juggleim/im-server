@@ -40,6 +40,10 @@ func (container *RtcMemberContainer) Add(memberRoom RtcMemberRoom) {
 	lock := memberLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
+	container.InnerAdd(memberRoom)
+}
+
+func (container *RtcMemberContainer) InnerAdd(memberRoom RtcMemberRoom) {
 	container.Rooms[memberRoom.RoomId] = &RtcMemberRoom{
 		RoomId:   memberRoom.RoomId,
 		RoomType: memberRoom.RoomType,
@@ -87,7 +91,17 @@ func GetRtcMemberContainer(appkey, memberId string) *RtcMemberContainer {
 			storage := storages.NewRtcRoomMemberStorage()
 			roomMembers, err := storage.QueryRoomsByMember(appkey, memberId, 100)
 			if err == nil && len(roomMembers) > 0 {
+				curr := time.Now().UnixMilli()
 				for _, roomMember := range roomMembers {
+					if roomMember.RtcState == pbobjs.RtcState_RtcIncoming || roomMember.RtcState == pbobjs.RtcState_RtcOutgoing {
+						if curr-roomMember.LatestPingTime > (CallTimeout * 1000) {
+							continue
+						}
+					} else {
+						if curr-roomMember.LatestPingTime > (PingTimeout * 1000) {
+							continue
+						}
+					}
 					container.Rooms[roomMember.RoomId] = &RtcMemberRoom{
 						RoomId:   roomMember.RoomId,
 						RoomType: roomMember.RoomType,
@@ -131,8 +145,8 @@ func GrabMemberState(ctx context.Context, req *pbobjs.MemberState) errs.IMErrorC
 	container := GetRtcMemberContainer(appkey, userId)
 	key := getRtcMemberKey(appkey, userId)
 	lock := memberLocks.GetLocks(key)
-	lock.RLock()
-	defer lock.RUnlock()
+	lock.Lock()
+	defer lock.Unlock()
 
 	if req.RoomType == pbobjs.RtcRoomType_OneOne {
 		for _, room := range container.Rooms {
@@ -144,7 +158,7 @@ func GrabMemberState(ctx context.Context, req *pbobjs.MemberState) errs.IMErrorC
 			}
 		}
 	}
-	container.Add(RtcMemberRoom{
+	container.InnerAdd(RtcMemberRoom{
 		RoomId:   req.RoomId,
 		RoomType: req.RoomType,
 		RtcState: req.RtcState,

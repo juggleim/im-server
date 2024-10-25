@@ -111,7 +111,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) errs.IMErrorCode {
 func MemberGrabState(ctx context.Context, targetId string, req *pbobjs.MemberState) errs.IMErrorCode {
 	code, _, err := bases.SyncRpcCall(ctx, "rtc_grab_member", targetId, req, nil)
 	if err != nil {
-		return errs.IMErrorCode_DEFAULT
+		return errs.IMErrorCode_RTCINVITE_BUSY
 	}
 	return code
 }

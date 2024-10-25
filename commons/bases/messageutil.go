@@ -111,3 +111,11 @@ func Redirect(ctx context.Context, method, targetId string, data proto.Message, 
 	msg.AppDataBytes = appdata
 	UnicastRouteWithSenderActor(msg, sender)
 }
+
+func CreateRpcCtx(appkey, requesterId string) context.Context {
+	ctx := context.Background()
+	ctx = setCtxValue(ctx, CtxKey_AppKey, appkey)
+	ctx = setCtxValue(ctx, CtxKey_RequesterId, requesterId)
+	ctx = setCtxValue(ctx, CtxKey_Session, tools.GenerateUUIDShort11())
+	return ctx
+}
