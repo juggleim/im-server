@@ -40,6 +40,17 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	if preMsgId != "" {
 		msgId = preMsgId
 	}
+
+	if upMsg.ClientUid != "" {
+		if oldAck, filter := commonservices.FilterDuplicateMsg(upMsg.ClientUid, commonservices.MsgAck{
+			MsgId:   msgId,
+			MsgTime: sendTime,
+			MsgSeq:  msgSeq,
+		}); filter {
+			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq
+		}
+	}
+
 	downMsg4Sendbox := &pbobjs.DownMsg{
 		SenderId:       senderId,
 		TargetId:       receiverId,

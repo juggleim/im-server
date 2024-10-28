@@ -56,6 +56,16 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		msgId = preMsgId
 	}
 
+	if upMsg.ClientUid != "" {
+		if oldAck, filter := commonservices.FilterDuplicateMsg(upMsg.ClientUid, commonservices.MsgAck{
+			MsgId:   msgId,
+			MsgTime: sendTime,
+			MsgSeq:  msgSeq,
+		}); filter {
+			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq, 0
+		}
+	}
+
 	groupInfo := GetGroupInfo4Msg(ctx, groupId)
 
 	//update mentioned user's info
@@ -63,7 +73,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 
 	var memberIds []string
 	//oriented msgs
-	if upMsg.ToUserIds != nil && len(upMsg.ToUserIds) > 0 {
+	if len(upMsg.ToUserIds) > 0 {
 		newMemberIds := []string{}
 		for _, id := range upMsg.ToUserIds {
 			if id != senderId && checkIsMember(ctx, groupId, id) {
