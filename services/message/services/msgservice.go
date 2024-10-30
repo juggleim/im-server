@@ -242,7 +242,10 @@ func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 	}
 	retPushData := &pbobjs.PushData{}
 	if msg.PushData != nil {
-		retPushData = msg.PushData
+		retPushData.Title = msg.PushData.Title
+		retPushData.PushId = msg.PushData.PushId
+		retPushData.PushText = msg.PushData.PushText
+		retPushData.PushExtraData = msg.PushData.PushExtraData
 	}
 	if retPushData.Title == "" {
 		retPushData.Title = title
