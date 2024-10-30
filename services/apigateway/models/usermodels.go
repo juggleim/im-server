@@ -78,6 +78,16 @@ type BlockUser struct {
 	CreatedTime int64  `json:"createed_time"`
 }
 
+// private mute
+type MuteUser struct {
+	UserId      string `json:"user_id"`
+	CreatedTime int64  `json:"created_time"`
+}
+type QryMuteUsersResp struct {
+	Items  []*MuteUser `json:"items"`
+	Offset string      `json:"offset"`
+}
+
 // undisturb convers
 type UndisturbConversReq struct {
 	UserId string                 `json:"user_id"`

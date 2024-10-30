@@ -694,7 +694,8 @@ CREATE TABLE `userexts` (
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   `app_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_item_key` (`app_key`,`user_id`,`item_key`)
+  UNIQUE KEY `uniq_item_key` (`app_key`,`user_id`,`item_key`),
+  KEY `idx_item_key` (`app_key`,`item_key`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `users`;

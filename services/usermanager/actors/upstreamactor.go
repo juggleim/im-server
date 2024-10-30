@@ -34,6 +34,27 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 			userInfo.UserPortrait = user.UserPortrait
 			userInfo.UpdatedTime = user.UpdatedTime
 			userInfo.ExtFields = commonservices.Map2KvItems(user.ExtFields)
+			//check private global mute
+			if realMethod == "p_msg" && user.CheckPrivateGlobalMute() {
+				userPubAck := &pbobjs.RpcMessageWraper{
+					RpcMsgType:   pbobjs.RpcMsgType_UserPubAck,
+					ResultCode:   int32(errs.IMErrorCode_MSG_BLOCK),
+					MsgId:        "",
+					MsgSendTime:  0,
+					MsgSeqNo:     0,
+					ReqIndex:     rpcMsg.ReqIndex,
+					AppKey:       appkey,
+					Qos:          rpcMsg.Qos,
+					Session:      rpcMsg.Session,
+					Method:       rpcMsg.Method,
+					SourceMethod: rpcMsg.SourceMethod,
+					RequesterId:  rpcMsg.RequesterId,
+					TargetId:     rpcMsg.TargetId,
+					PublishType:  rpcMsg.PublishType,
+				}
+				actor.Sender.Tell(userPubAck, actorsystem.NoSender)
+				return
+			}
 		}
 
 		exts := map[string]string{}

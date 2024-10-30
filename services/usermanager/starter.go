@@ -50,6 +50,12 @@ func (manager *UserManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("inner_qry_user_status", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.InnerQryUserStatusActor{}, serviceName)
 	})
+	register.RegisterActor("pri_global_mute", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.PriGlobalMuteActor{}, serviceName)
+	})
+	register.RegisterActor("qry_pri_global_mute", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryPriGlobalMuteActor{}, serviceName)
+	})
 }
 
 func (manager *UserManager) Startup(args map[string]interface{}) {

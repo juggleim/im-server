@@ -676,6 +676,11 @@ message UserPushStatus{
   bool canPush = 1;
 }
 
+message BatchMuteUsersReq{
+  repeated string userIds = 1;
+  bool isDelete = 2;
+}
+
 //group
 message GroupInfo{
   string groupId = 1;

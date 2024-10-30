@@ -26,8 +26,9 @@ const (
 	AttItemKey_HideGrpMsg AttItemKey = "hide_grp_msg"
 
 	//setting keys of users
-	AttItemKey_Language  AttItemKey = "language"
-	AttItemKey_Undisturb AttItemKey = "undisturb"
+	AttItemKey_Language      AttItemKey = "language"
+	AttItemKey_Undisturb     AttItemKey = "undisturb"
+	AttItemKey_PriGlobalMute AttItemKey = "pri_global_mute"
 
 	//setting keys of bots
 	AttItemKey_Bot_Type    AttItemKey = "bot_type"
