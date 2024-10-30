@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, string, int64, int64) {
+func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, string, int64, int64, string) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	converId := commonservices.GetConversationId(senderId, receiverId, pbobjs.ChannelType_Private)
 	//statistic
@@ -26,13 +26,13 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	if blockUsers.CheckBlockUser(senderId) {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
-		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0
+		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid
 	}
 	//check msg interceptor
 	if code := commonservices.CheckMsgInterceptor(ctx, senderId, receiverId, pbobjs.ChannelType_Private, upMsg); code != errs.IMErrorCode_SUCCESS {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
-		return code, msgId, sendTime, 0
+		return code, msgId, sendTime, 0, upMsg.ClientUid
 	}
 	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
@@ -47,7 +47,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 			MsgTime: sendTime,
 			MsgSeq:  msgSeq,
 		}); filter {
-			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq
+			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq, upMsg.ClientUid
 		}
 	}
 
@@ -72,7 +72,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 
 	if bases.GetOnlySendboxFromCtx(ctx) {
-		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq
+		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid
 	}
 	commonservices.SubPrivateMsg(ctx, msgId, downMsg4Sendbox)
 
@@ -112,7 +112,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		dispatchMsg(ctx, receiverId, downMsg)
 	}
 
-	return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq
+	return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid
 }
 
 func dispatchMsg(ctx context.Context, receiverId string, msg *pbobjs.DownMsg) {

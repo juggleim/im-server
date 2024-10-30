@@ -57,6 +57,7 @@ message PublishAckMsgBody{
     int64 timestamp = 4;
     int64 msgSeqNo = 5;
     int32 memberCount = 6;
+    string clientMsgId = 7;
 }
 
 message QueryMsgBody{

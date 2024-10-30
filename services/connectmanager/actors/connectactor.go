@@ -27,6 +27,7 @@ func (actor *ConnectActor) OnReceive(ctx context.Context, input proto.Message) {
 				Timestamp:   rpcMsg.MsgSendTime,
 				MsgSeqNo:    rpcMsg.MsgSeqNo,
 				MemberCount: rpcMsg.MemberCount,
+				ClientMsgId: rpcMsg.ClientMsgId,
 			})
 		} else if rpcMsg.RpcMsgType == pbobjs.RpcMsgType_QueryAck {
 			var callback func()

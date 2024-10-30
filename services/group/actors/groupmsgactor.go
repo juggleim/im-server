@@ -20,12 +20,12 @@ type GroupMsgActor struct {
 func (actor *GroupMsgActor) OnReceive(ctx context.Context, input proto.Message) {
 	if upMsg, ok := input.(*pbobjs.UpMsg); ok {
 		logs.WithContext(ctx).Infof("group_id:%s\tmsg_type:%s\tflag:%d", bases.GetTargetIdFromCtx(ctx), upMsg.MsgType, upMsg.Flags)
-		code, msgId, sendTime, msgSeq, memberCount := services.SendGroupMsg(ctx, upMsg)
-		userPubAck := bases.CreateGrpPubAckWraper(ctx, code, msgId, sendTime, msgSeq, memberCount)
+		code, msgId, sendTime, msgSeq, clientMsgId, memberCount := services.SendGroupMsg(ctx, upMsg)
+		userPubAck := bases.CreateGrpPubAckWraper(ctx, code, msgId, sendTime, msgSeq, clientMsgId, memberCount)
 		actor.Sender.Tell(userPubAck, actorsystem.NoSender)
 		logs.WithContext(ctx).Infof("code:%d\tmsg_id:%s", code, msgId)
 	} else {
-		userPubAck := bases.CreateUserPubAckWraper(ctx, errs.IMErrorCode_PBILLEGAL, "", time.Now().UnixMilli(), 0)
+		userPubAck := bases.CreateGrpPubAckWraper(ctx, errs.IMErrorCode_PBILLEGAL, "", time.Now().UnixMilli(), 0, "", 0)
 		actor.Sender.Tell(userPubAck, actorsystem.NoSender)
 		logs.WithContext(ctx).Errorf("upMsg is illigal. upMsg:%v", upMsg)
 	}

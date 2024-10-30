@@ -3,12 +3,10 @@ package actors
 import (
 	"context"
 	"im-server/commons/bases"
-	"im-server/commons/errs"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices/logs"
 	"im-server/services/historymsg/services"
-	"time"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -25,8 +23,6 @@ func (actor *SetMsgExtActor) OnReceive(ctx context.Context, input proto.Message)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 	} else {
 		logs.WithContext(ctx).Errorf("input is illigal. input:%v", input)
-		userPubAck := bases.CreateUserPubAckWraper(ctx, errs.IMErrorCode_PBILLEGAL, "", time.Now().UnixMilli(), 0)
-		actor.Sender.Tell(userPubAck, actorsystem.NoSender)
 	}
 }
 
@@ -46,8 +42,6 @@ func (actor *DelMsgExtActor) OnReceive(ctx context.Context, input proto.Message)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 	} else {
 		logs.WithContext(ctx).Errorf("input is illigal. input:%v", input)
-		userPubAck := bases.CreateUserPubAckWraper(ctx, errs.IMErrorCode_PBILLEGAL, "", time.Now().UnixMilli(), 0)
-		actor.Sender.Tell(userPubAck, actorsystem.NoSender)
 	}
 }
 

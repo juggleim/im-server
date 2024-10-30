@@ -64,19 +64,20 @@ func CreateServerPubWraper(ctx context.Context, requesterId, targetId, method st
 	return serverPub
 }
 
-func CreateUserPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId string, msgSendTime, msgSeqNo int64) *pbobjs.RpcMessageWraper {
+func CreateUserPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId string, msgSendTime, msgSeqNo int64, clientMsgId string) *pbobjs.RpcMessageWraper {
 	userPubAck := &pbobjs.RpcMessageWraper{
 		RpcMsgType:  pbobjs.RpcMsgType_UserPubAck,
 		ResultCode:  int32(code),
 		MsgId:       msgId,
 		MsgSendTime: msgSendTime,
 		MsgSeqNo:    msgSeqNo,
+		ClientMsgId: clientMsgId,
 	}
 	handleBaseContext(ctx, userPubAck)
 	return userPubAck
 }
 
-func CreateGrpPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId string, msgSendTime, msgSeqNo int64, memberCount int32) *pbobjs.RpcMessageWraper {
+func CreateGrpPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId string, msgSendTime, msgSeqNo int64, clientMsgId string, memberCount int32) *pbobjs.RpcMessageWraper {
 	userPubAck := &pbobjs.RpcMessageWraper{
 		RpcMsgType:  pbobjs.RpcMsgType_UserPubAck,
 		ResultCode:  int32(code),
@@ -84,6 +85,7 @@ func CreateGrpPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId str
 		MsgSendTime: msgSendTime,
 		MsgSeqNo:    msgSeqNo,
 		MemberCount: memberCount,
+		ClientMsgId: clientMsgId,
 	}
 	handleBaseContext(ctx, userPubAck)
 	return userPubAck
