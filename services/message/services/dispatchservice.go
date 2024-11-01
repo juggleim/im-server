@@ -34,18 +34,18 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 			threadhold = appinfo.BigGrpThreshold
 		}
 		if downMsg.MemberCount > int32(threadhold) {
-			GrpSinglePools.GetPool(strings.Join([]string{appkey, downMsg.TargetId}, "_")).Submit(func() {
-				preheat(ctx, appkey, memberIds, downMsg)
-				for _, receiverId := range memberIds {
-					newDownMsg := copyDownMsg(downMsg)
-					receId := receiverId
-					userStatus := GetUserStatus(appkey, receId)
-					closeOffline := (!userStatus.IsOnline())
-					MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
-						doDispatch(ctx, receId, newDownMsg, closeOffline)
-					})
-				}
-			})
+			//GrpSinglePools.GetPool(strings.Join([]string{appkey, downMsg.TargetId}, "_")).Submit(func() {
+			preheat(ctx, appkey, memberIds, downMsg)
+			for _, receiverId := range memberIds {
+				newDownMsg := copyDownMsg(downMsg)
+				receId := receiverId
+				userStatus := GetUserStatus(appkey, receId)
+				closeOffline := (!userStatus.IsOnline())
+				MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
+					doDispatch(ctx, receId, newDownMsg, closeOffline)
+				})
+			}
+			//})
 		} else {
 			for _, receiverId := range memberIds {
 				newDownMsg := copyDownMsg(downMsg)
@@ -61,21 +61,21 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 func preheat(ctx context.Context, appkey string, memberIds []string, downMsg *pbobjs.DownMsg) {
 	//preheat user status
 	noStatusCacheUids := []string{}
-	noConverCacheUids := []string{}
+	//noConverCacheUids := []string{}
 	for _, receiverId := range memberIds {
 		if !UserStatusCacheContains(appkey, receiverId) {
 			noStatusCacheUids = append(noStatusCacheUids, receiverId)
 		}
-		if !UserConverCacheContains(appkey, receiverId, downMsg.TargetId, downMsg.ChannelType) {
-			noConverCacheUids = append(noConverCacheUids, receiverId)
-		}
+		// if !UserConverCacheContains(appkey, receiverId, downMsg.TargetId, downMsg.ChannelType) {
+		// 	noConverCacheUids = append(noConverCacheUids, receiverId)
+		// }
 	}
 	if len(noStatusCacheUids) > 0 {
 		BatchInitUserStatus(ctx, appkey, noStatusCacheUids)
 	}
-	if len(noConverCacheUids) > 0 {
-		BatchInitUserConvers(ctx, downMsg.TargetId, downMsg.ChannelType, noConverCacheUids)
-	}
+	// if len(noConverCacheUids) > 0 {
+	// 	BatchInitUserConvers(ctx, downMsg.TargetId, downMsg.ChannelType, noConverCacheUids)
+	// }
 }
 
 func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, closeOffline bool) {
@@ -95,9 +95,9 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 			commonservices.SaveConversation(ctx, receiverId, msg)
 			if !closeOffline {
 				SaveMsg2Inbox(appkey, receiverId, msg)
-				//send to client
-				MsgOrNtf(ctx, receiverId, msg)
 			}
+			//send to client
+			MsgOrNtf(ctx, receiverId, msg)
 		} else {
 			if !closeOffline {
 				MsgDirect(ctx, receiverId, msg)
