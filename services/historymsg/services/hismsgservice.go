@@ -262,6 +262,9 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
 				if err == nil {
+					if downMsg.ClientUid == "" {
+						downMsg.ClientUid = tools.GenerateUUIDShort22()
+					}
 					if downMsg.MsgSeqNo <= 0 {
 						downMsg.MsgSeqNo = dbMsg.MsgSeqNo
 					}
@@ -336,6 +339,9 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
 				if err == nil {
+					if downMsg.ClientUid == "" {
+						downMsg.ClientUid = tools.GenerateUUIDShort22()
+					}
 					if downMsg.MsgSeqNo <= 0 {
 						downMsg.MsgSeqNo = dbMsg.MsgSeqNo
 					}
@@ -390,6 +396,9 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 					msgMap[dbMsg.MsgId] = downMsg
 					msgIds = append(msgIds, dbMsg.MsgId)
 
+					if downMsg.ClientUid == "" {
+						downMsg.ClientUid = tools.GenerateUUIDShort22()
+					}
 					if downMsg.MsgSeqNo <= 0 {
 						downMsg.MsgSeqNo = dbMsg.MsgSeqNo
 					}
@@ -477,6 +486,9 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 					if userId == dbMsg.SenderId {
 						downMsg.IsSend = true
 					}
+					if downMsg.ClientUid == "" {
+						downMsg.ClientUid = tools.GenerateUUIDShort22()
+					}
 					resp.Msgs = append(resp.Msgs, downMsg)
 				}
 			}
@@ -490,6 +502,9 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
 				if err == nil {
+					if downMsg.ClientUid == "" {
+						downMsg.ClientUid = tools.GenerateUUIDShort22()
+					}
 					resp.Msgs = append(resp.Msgs, downMsg)
 				}
 			}

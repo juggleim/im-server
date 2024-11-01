@@ -55,7 +55,6 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 	if preMsgId != "" {
 		msgId = preMsgId
 	}
-
 	if upMsg.ClientUid != "" {
 		if oldAck, filter := commonservices.FilterDuplicateMsg(upMsg.ClientUid, commonservices.MsgAck{
 			MsgId:   msgId,
@@ -64,6 +63,8 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		}); filter {
 			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq, upMsg.ClientUid, 0
 		}
+	} else {
+		upMsg.ClientUid = tools.GenerateUUIDShort22()
 	}
 
 	groupInfo := GetGroupInfo4Msg(ctx, groupId)

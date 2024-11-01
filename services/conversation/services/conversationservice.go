@@ -379,6 +379,9 @@ func dbConver2Conversations(ctx context.Context, dbConver *models.Conversation) 
 	if downMsg != nil {
 		downMsg.TargetUserInfo = nil
 		downMsg.GroupInfo = nil
+		if downMsg.ClientUid == "" {
+			downMsg.ClientUid = tools.GenerateUUIDShort22()
+		}
 	}
 
 	unreadCount := dbConver.LatestUnreadMsgIndex - dbConver.LatestReadMsgIndex

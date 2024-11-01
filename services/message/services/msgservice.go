@@ -49,6 +49,8 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		}); filter {
 			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq, upMsg.ClientUid
 		}
+	} else {
+		upMsg.ClientUid = tools.GenerateUUIDShort22()
 	}
 
 	downMsg4Sendbox := &pbobjs.DownMsg{
