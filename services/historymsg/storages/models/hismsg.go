@@ -34,6 +34,11 @@ type SystemHisMsg struct {
 	IsRead int
 }
 
+type ConverItem struct {
+	ConverId string
+	MsgId    string
+}
+
 type IGroupHisMsgStorage interface {
 	SaveGroupHisMsg(msg GroupHisMsg) error
 	//QryLatestMsgSeqNo(appkey, converId string) int64

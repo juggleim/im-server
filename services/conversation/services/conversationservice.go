@@ -18,32 +18,9 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var converCache *caches.EphemeralCache
 var globalConverCache *caches.EphemeralCache
 
 func init() {
-	converCache = caches.NewEphemeralCache(time.Millisecond*50, time.Second, func(key, value interface{}) {
-		conver, ok := value.(*ConversationCacheItem)
-		if ok && conver != nil {
-			converStorage := storages.NewConversationStorage()
-			latestMsgBs, _ := tools.PbMarshal(conver.LatestMsg)
-			if conver.OnlyUpdMsg {
-				converStorage.UpdateLatestMsgBody(conver.Appkey, conver.UserId, conver.TargetId, conver.ChannelType, conver.LatestMsgId, latestMsgBs)
-			} else {
-				converStorage.UpsertConversation(models.Conversation{
-					UserId:               conver.UserId,
-					TargetId:             conver.TargetId,
-					ChannelType:          conver.ChannelType,
-					SortTime:             conver.SortTime,
-					LatestMsgId:          conver.LatestMsgId,
-					LatestMsg:            latestMsgBs,
-					LatestUnreadMsgIndex: conver.UnReadIndex,
-					SyncTime:             conver.SyncTime,
-					AppKey:               conver.Appkey,
-				})
-			}
-		}
-	})
 	globalConverCache = caches.NewEphemeralCache(time.Millisecond*100, 5*time.Second, func(key, value interface{}) {
 		conver, ok := value.(*GlobalConversationCacheItem)
 		if ok && conver != nil {
@@ -74,9 +51,6 @@ type ConversationCacheItem struct {
 	OnlyUpdMsg  bool
 }
 
-func getConverCacheKey(appkey, userId, targetId string, channelType pbobjs.ChannelType) string {
-	return fmt.Sprintf("%s_%s_%s_%d", appkey, userId, targetId, channelType)
-}
 func getGlobalConverCacheKey(appkey, converId string, channelType pbobjs.ChannelType) string {
 	return fmt.Sprintf("%s_%s_%d", appkey, converId, channelType)
 }
@@ -85,34 +59,6 @@ func saveConversationByCache(item *ConversationCacheItem) {
 	if item == nil {
 		return
 	}
-	key := getConverCacheKey(item.Appkey, item.UserId, item.TargetId, item.ChannelType)
-	converCache.Upsert(key, func(oldVal interface{}) interface{} {
-		var converItem *ConversationCacheItem
-		if oldVal != nil {
-			converItem = oldVal.(*ConversationCacheItem)
-			if item.OnlyUpdMsg {
-				if converItem.LatestMsgId == item.LatestMsgId {
-					converItem.LatestMsg = item.LatestMsg
-				}
-			} else {
-				converItem.LatestMsgId = item.LatestMsgId
-				converItem.LatestMsg = item.LatestMsg
-				if item.SortTime > converItem.SortTime {
-					converItem.SortTime = item.SortTime
-				}
-				if item.UnReadIndex > converItem.UnReadIndex {
-					converItem.UnReadIndex = item.UnReadIndex
-				}
-				if item.SyncTime > converItem.SyncTime {
-					converItem.SyncTime = item.SyncTime
-				}
-				converItem.OnlyUpdMsg = false
-			}
-		} else {
-			converItem = item
-		}
-		return converItem
-	})
 }
 
 type GlobalConversationCacheItem struct {

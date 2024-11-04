@@ -19,6 +19,14 @@ type LruCache struct {
 	readTimeoutChecker *time.Ticker
 	MaxLifeCycle       time.Duration
 	valueCreator       func(key interface{}) interface{}
+
+	batchEvict func(items []CacheItem)
+	batchSize  int
+}
+
+type CacheItem struct {
+	Key   interface{}
+	Value interface{}
 }
 
 func NewLruCacheWithAddReadTimeout(size int, onEvict simplelru.EvictCallback, timeoutAfterRead time.Duration, timeoutAfterCreate time.Duration) *LruCache {
@@ -47,6 +55,15 @@ func NewLruCache(size int, onEvict simplelru.EvictCallback) *LruCache {
 		lru: myLru,
 	}
 	return cache
+}
+
+func (c *LruCache) SetBatchEvict(batchSize int, f func(items []CacheItem)) *LruCache {
+	if batchSize <= 0 {
+		return c
+	}
+	c.batchSize = batchSize
+	c.batchEvict = f
+	return c
 }
 
 func (c *LruCache) SetValueCreator(creator func(interface{}) interface{}) *LruCache {
@@ -78,18 +95,33 @@ func (c *LruCache) AddTimeoutAfterRead(timeout time.Duration) *LruCache {
 }
 
 func (c *LruCache) cleanOldestByReadTime(timeLine int64) {
+	cacheItems := []CacheItem{}
 	for {
 		itemKey, itemValue, ok := c.lru.GetOldest()
 		if ok {
-			lastReadTime := itemValue.(lruCacheItem).lastReadTime
+			valObj := itemValue.(lruCacheItem)
+			lastReadTime := valObj.lastReadTime
 			if lastReadTime < timeLine {
 				c.Remove(itemKey)
+				if c.batchEvict != nil {
+					cacheItems = append(cacheItems, CacheItem{
+						Key:   itemKey,
+						Value: valObj.value,
+					})
+					if len(cacheItems) >= c.batchSize {
+						c.batchEvict(cacheItems)
+						cacheItems = []CacheItem{}
+					}
+				}
 			} else {
 				break
 			}
 		} else {
 			break
 		}
+	}
+	if c.batchEvict != nil && len(cacheItems) > 0 {
+		c.batchEvict(cacheItems)
 	}
 }
 

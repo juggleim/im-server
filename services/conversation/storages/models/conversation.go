@@ -5,29 +5,38 @@ import (
 )
 
 type Conversation struct {
-	UserId               string
-	TargetId             string
-	SortTime             int64
-	ChannelType          pbobjs.ChannelType
+	AppKey      string
+	UserId      string
+	TargetId    string
+	ChannelType pbobjs.ChannelType
+
+	SortTime int64
+	SyncTime int64
+
 	LatestMsgId          string
 	LatestMsg            []byte
 	LatestUnreadMsgIndex int64
-	LatestReadMsgIndex   int64
-	LatestReadMsgId      string
-	LatestReadMsgTime    int64
-	IsTop                int
-	TopUpdatedTime       int64
-	UndisturbType        int32
-	IsDeleted            int
-	SyncTime             int64
-	UnreadTag            int
-	AppKey               string
+
+	LatestReadMsgIndex int64
+	LatestReadMsgId    string
+	LatestReadMsgTime  int64
+
+	IsTop          int
+	TopUpdatedTime int64
+	UndisturbType  int32
+
+	UnreadTag int
+
+	IsDeleted int
 }
 
 type IConversationStorage interface {
 	FindOne(appkey, userId, targetId string, channelType pbobjs.ChannelType) (*Conversation, error)
 	BatchFind(appkey string, reqConvers []Conversation) ([]*Conversation, error)
 	UpsertConversation(conversation Conversation) error
+	Upsert(item Conversation) error
+	BatchUpsert(items []Conversation) error
+	QryConvers(appkey, userId string, startTime int64, count int32) ([]*Conversation, error)
 	QryConversations(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int32, isPositiveOrder bool, tag string) ([]*Conversation, error)
 	DelConversation(appkey, userId, targetId string, channelType pbobjs.ChannelType) error
 	UpdateLatestReadMsgIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIndex int64, readMsgId string, readMsgTime int64) (int64, error)

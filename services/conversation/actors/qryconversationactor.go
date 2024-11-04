@@ -25,9 +25,9 @@ func (actor *QryConversationActor) OnReceive(ctx context.Context, input proto.Me
 		var code errs.IMErrorCode
 		var resp proto.Message
 		if len(req.UserIds) > 0 {
-			code, resp = services.BatchQryConvers(ctx, req)
+			code, resp = services.BatchQryConversV2(ctx, req)
 		} else {
-			code, resp = services.QryConver(ctx, userId, req)
+			code, resp = services.QryConverV2(ctx, userId, req)
 		}
 		qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)

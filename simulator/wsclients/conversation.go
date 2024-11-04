@@ -21,7 +21,18 @@ func (client *WsImClient) QryConversation(req *pbobjs.QryConverReq) (utils.Clien
 func (client *WsImClient) QryConversations(req *pbobjs.QryConversationsReq) (utils.ClientErrorCode, *pbobjs.QryConversationsResp) {
 	data, _ := tools.PbMarshal(req)
 	code, qryAck := client.Query("qry_convers", client.UserId, data)
-	fmt.Println(code)
+	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
+		resp := &pbobjs.QryConversationsResp{}
+		tools.PbUnMarshal(qryAck.Data, resp)
+		return utils.ClientErrorCode_Success, resp
+	} else {
+		return utils.ClientErrorCode(code), nil
+	}
+}
+
+func (client *WsImClient) QryTopConvers(req *pbobjs.QryTopConversReq) (utils.ClientErrorCode, *pbobjs.QryConversationsResp) {
+	data, _ := tools.PbMarshal(req)
+	code, qryAck := client.Query("qry_top_convers", client.UserId, data)
 	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
 		resp := &pbobjs.QryConversationsResp{}
 		tools.PbUnMarshal(qryAck.Data, resp)
@@ -77,5 +88,11 @@ func (client *WsImClient) SetTopConvers(req *pbobjs.ConversationsReq) utils.Clie
 func (client *WsImClient) DelConvers(req *pbobjs.ConversationsReq) utils.ClientErrorCode {
 	data, _ := tools.PbMarshal(req)
 	code, _ := client.Query("del_convers", client.UserId, data)
+	return code
+}
+
+func (client *WsImClient) MarkUnRead(req *pbobjs.ConversationsReq) utils.ClientErrorCode {
+	data, _ := tools.PbMarshal(req)
+	code, _ := client.Query("mark_unread", client.UserId, data)
 	return code
 }

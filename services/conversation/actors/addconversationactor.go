@@ -24,17 +24,17 @@ func (actor *AddConversationActor) OnReceive(ctx context.Context, input proto.Me
 		if conver.TargetId == "" || conver.ChannelType == pbobjs.ChannelType_Unknown {
 			logs.WithContext(ctx).Errorf("unknown conversation. user_id:%s\ttarget_id:%s", userId, targetId)
 		} else if conver.Msg == nil {
-			code, resp := services.SaveNilConversation(ctx, bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.TargetId, conver.ChannelType)
+			code, resp := services.SaveNilConversationV2(ctx, bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.TargetId, conver.ChannelType)
 			qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 			actor.Sender.Tell(qryAck, actorsystem.NoSender)
 		} else {
 			uIds := bases.GetTargetIdsFromCtx(ctx)
 			if len(uIds) > 0 {
 				for _, uId := range uIds {
-					services.SaveConversation(bases.GetAppKeyFromCtx(ctx), uId, conver.Msg)
+					services.SaveConversationV2(bases.GetAppKeyFromCtx(ctx), uId, conver.Msg)
 				}
 			} else {
-				services.SaveConversation(bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.Msg)
+				services.SaveConversationV2(bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.Msg)
 			}
 		}
 	} else {

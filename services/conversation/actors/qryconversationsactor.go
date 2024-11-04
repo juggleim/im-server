@@ -22,7 +22,7 @@ func (actor *QryConversationsActor) OnReceive(ctx context.Context, input proto.M
 		requesterId := bases.GetRequesterIdFromCtx(ctx)
 		logs.WithContext(ctx).Infof("user_id:%s\tstart:%d\tcount:%d\ttarget_id:%s\tchannel_type:%d\ttag:%s", requesterId, qryConverReq.StartTime, qryConverReq.Count, qryConverReq.TargetId, qryConverReq.ChannelType, qryConverReq.Tag)
 
-		resp := services.QryConversations(ctx, qryConverReq)
+		resp := services.QryConversationsV2(ctx, qryConverReq)
 		qryAck := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_SUCCESS, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 		logs.WithContext(ctx).Infof("code:%d\tlen:%d", errs.IMErrorCode_SUCCESS, len(resp.Conversations))

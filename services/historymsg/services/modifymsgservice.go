@@ -8,7 +8,6 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
-	"im-server/services/conversation/convercallers"
 	"im-server/services/historymsg/storages"
 )
 
@@ -56,12 +55,6 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 				newDownMsg.Flags = commonservices.SetModifiedMsg(newDownMsg.Flags)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
 				storage.UpdateMsgBody(appkey, converId, modifyReq.MsgId, newDownMsg.MsgType, newDownMsgBs)
-				//upd latest msg for conversation
-				if IsLatestMsg(ctx, converId, modifyReq.ChannelType, modifyReq.MsgId, modifyReq.MsgTime, modifyReq.MsgSeqNo) {
-					//get latest msg
-					convercallers.UpdLatestMsgBody(ctx, fromUserId, targetId, modifyReq.ChannelType, modifyReq.MsgId, newDownMsg)
-					convercallers.UpdLatestMsgBody(ctx, targetId, fromUserId, modifyReq.ChannelType, modifyReq.MsgId, newDownMsg)
-				}
 			}
 		}
 		//send cmd msg
@@ -79,16 +72,6 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 				newDownMsg.Flags = commonservices.SetModifiedMsg(newDownMsg.Flags)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
 				storage.UpdateMsgBody(appkey, converId, modifyReq.MsgId, newDownMsg.MsgType, newDownMsgBs)
-				//upd latest msg for conversation
-				if IsLatestMsg(ctx, converId, modifyReq.ChannelType, modifyReq.MsgId, modifyReq.MsgTime, modifyReq.MsgSeqNo) {
-					bases.AsyncRpcCall(ctx, "upd_grp_conver", targetId, &pbobjs.UpdLatestMsgReq{
-						TargetId:    targetId,
-						ChannelType: modifyReq.ChannelType,
-						LatestMsgId: modifyReq.MsgId,
-						Action:      pbobjs.UpdLatestMsgAction_UpdMsg,
-						Msg:         newDownMsg,
-					})
-				}
 			}
 		}
 		//send cmd msg
