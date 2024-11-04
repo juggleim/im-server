@@ -88,21 +88,14 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				RtcState: pbobjs.RtcState_RtcIncoming,
 			},
 		})
-		//send room event
-		SendRoomEvent(ctx, targetId, &pbobjs.RtcRoomEvent{
-			RoomEventType: pbobjs.RtcRoomEventType_RtcJoin,
-			Member: &pbobjs.RtcMember{
-				Member: &pbobjs.UserInfo{
-					UserId: targetId,
-				},
-				RtcState: pbobjs.RtcState_RtcIncoming,
-				Inviter: &pbobjs.UserInfo{
-					UserId: userId,
-				},
-			},
+		//send invite event
+		SendInviteEvent(ctx, targetId, &pbobjs.RtcInviteEvent{
+			InviteType: pbobjs.InviteType_RtcInvite,
+			User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
 			Room: &pbobjs.RtcRoom{
-				RoomId:   roomId,
-				RoomType: req.RoomType,
+				RoomType: container.RoomType,
+				RoomId:   container.RoomId,
+				Owner:    container.Owner,
 			},
 		})
 	}
