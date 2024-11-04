@@ -11,6 +11,12 @@ func GenerateUUID() uuid.UUID {
 	return uid
 }
 
+func GenerateUUIDString() string {
+	uid := GenerateUUID()
+	str := strings.ReplaceAll(uid.String(), "-", "")
+	return str
+}
+
 func GenerateUUIDBytes() []byte {
 	uid, _ := uuid.NewUUID()
 	return []byte(uid.String())
@@ -50,7 +56,7 @@ func UUID2ShortString(uuid uuid.UUID) string {
 var DIGITS64 []byte = []byte("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_")
 
 func toIdString(l uint64) string {
-	buf := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	buf := []byte{'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'}
 
 	var length int = 11
 	var least uint64 = 63 //0x3f
