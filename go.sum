@@ -405,6 +405,8 @@ github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5t
 github.com/yuin/gopher-lua v0.0.0-20171031051903-609c9cd26973/go.mod h1:aEV29XrmTYFr3CiRxZeGHpkvbwq+prZduBqMaascyCU=
 github.com/yuwnloyblog/commonutils v0.0.2 h1:pd/rnyKeFcFoIiG9d6uJG9S5lebiBF6Xe4ZQFkUvwgU=
 github.com/yuwnloyblog/commonutils v0.0.2/go.mod h1:Dmvyc6I9j33b2uNsMKYGepU3JQp3++X1hHcX1oACse4=
+github.com/zegoim/zego_server_assistant/token/go/src v0.0.0-20231013093807-4e80bab42ec3 h1:QXXpwemvOrbTOBdYn92JsXs8pSA0+Y/TmaFZ2yOJCPQ=
+github.com/zegoim/zego_server_assistant/token/go/src v0.0.0-20231013093807-4e80bab42ec3/go.mod h1:COVkqtaP/U6lRME/1Etd8rwwWmBT1u4YgBKvsM4BawY=
 github.com/zeromicro/go-zero v1.6.4 h1:GvZXxxwl1Lby/gIHxHwN/ZNmXl1WFJa1DvoVgqgttUs=
 github.com/zeromicro/go-zero v1.6.4/go.mod h1:dQ39Zoz20/6x/SUhFXyEEg8lWjl+CO3dzg8Je2xG63Q=
 go.mongodb.org/mongo-driver v1.13.1 h1:YIc7HTYsKndGK4RFzJ3covLz1byri52x0IoMB0Pt/vk=

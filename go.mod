@@ -135,9 +135,8 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/stretchr/testify v1.9.0
 	github.com/tsuna/gohbase v0.0.0-20240604184322-67d205cb2079
+	github.com/zegoim/zego_server_assistant/token/go/src v0.0.0-20231013093807-4e80bab42ec3
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/time v0.5.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-//replace github.com/yuwnloyblog/gmicro v1.0.4 => ../gmicro

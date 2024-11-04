@@ -18,8 +18,8 @@ type InviteActor struct {
 func (actor *InviteActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.RtcInviteReq); ok {
 		logs.WithContext(ctx).Infof("room_id:%s\troom_type:%v\tuser_id:%s\ttargets:%v", req.RoomId, req.RoomType, bases.GetRequesterIdFromCtx(ctx), req.TargetIds)
-		code := services.RtcInvite(ctx, req)
-		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
+		code, resp := services.RtcInvite(ctx, req)
+		qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 	} else {
 		logs.WithContext(ctx).Error("input is illigal.")

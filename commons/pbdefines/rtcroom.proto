@@ -7,6 +7,7 @@ message RtcRoomReq{
     RtcRoomType roomType = 1;
     string roomId = 2;
     RtcMember joinMember = 3;
+    RtcChannel rtcChannel = 4;
 }
 
 message RtcRoom{
@@ -15,6 +16,10 @@ message RtcRoom{
     UserInfo owner = 3;
     
     repeated RtcMember members = 51;
+}
+
+enum RtcChannel {
+    Zego = 0;
 }
 
 enum RtcRoomType{
@@ -77,6 +82,7 @@ message RtcInviteReq{
     repeated string targetIds = 1;
     RtcRoomType roomType = 2;
     string roomId = 3;
+    RtcChannel rtcChannel = 4;
 }
 
 message RtcMemberRooms{
@@ -88,4 +94,30 @@ message RtcMemberRoom{
     string roomId = 2;
     UserInfo owner = 3;
     RtcState rtcState = 4;
+    RtcChannel rtcChannel = 5;
+}
+
+message RtcAuth{
+    ZegoAuth zegoAuth = 1;
+}
+
+message ZegoAuth{
+    string token = 1;
+}
+
+message RtcInviteEvent{
+    InviteType inviteType = 1;
+    UserInfo user = 2;
+    RtcRoom room = 3;
+    repeated UserInfo targetUsers = 4;
+}
+
+enum InviteType{
+    RtcInvite = 0;
+    RtcAccept = 1;
+    RtcHangup = 2;
+}
+
+message RtcAnswer{
+    string roomId = 1;
 }
