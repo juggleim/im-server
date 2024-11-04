@@ -38,6 +38,12 @@ func (manager *RtcRoomManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("rtc_invite", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.InviteActor{}, serviceName)
 	})
+	register.RegisterActor("rtc_accept", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.AcceptActor{}, serviceName)
+	})
+	register.RegisterActor("rtc_hangup", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.HangupActor{}, serviceName)
+	})
 	register.RegisterActor("rtc_member_rooms", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryRtcMemberRoomsActor{}, serviceName)
 	})
