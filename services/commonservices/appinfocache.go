@@ -24,6 +24,7 @@ type AppInfo struct {
 	EventSubConfigObj  *EventSubConfigObj `default:"-"`
 	EventSubSwitchObj  *EventSubSwitchObj `default:"-"`
 	SecurityDomainsObj *SecurityDomains   `default:"-"`
+	ZegoConfigObj      *ZegoConfigObj     `default:"-"`
 
 	TokenEffectiveMinute  int    `default:"0"`
 	OfflineMsgSaveTime    int    `default:"1440"`
@@ -48,6 +49,7 @@ type AppInfo struct {
 	EventSubConfig  string `default:""`
 	EventSubSwitch  string `default:""`
 	SecurityDomains string `default:""`
+	ZegoConfig      string `default:""`
 
 	// TestItem  string
 	// TestInt   int
@@ -105,6 +107,13 @@ func init() {
 				err := json.Unmarshal([]byte(appInfo.SecurityDomains), domains)
 				if err == nil {
 					appInfo.SecurityDomainsObj = domains
+				}
+			}
+			if appInfo.ZegoConfigObj == nil && appInfo.ZegoConfig != "" {
+				zegoConfig := &ZegoConfigObj{}
+				err := json.Unmarshal([]byte(appInfo.ZegoConfig), zegoConfig)
+				if err == nil {
+					appInfo.ZegoConfigObj = zegoConfig
 				}
 			}
 			return appInfo
@@ -201,4 +210,9 @@ type EventSubSwitchObj struct {
 
 type SecurityDomains struct {
 	Domains []string `json:"domains"`
+}
+
+type ZegoConfigObj struct {
+	AppId  int64  `json:"app_id"`
+	Secret string `json:"secret"`
 }
