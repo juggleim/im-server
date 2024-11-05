@@ -56,13 +56,15 @@ func (client *WsImClient) RtcRoomPing(roomId string) utils.ClientErrorCode {
 	return utils.ClientErrorCode(code)
 }
 
-func (client *WsImClient) RtcInvite(req *pbobjs.RtcInviteReq) utils.ClientErrorCode {
+func (client *WsImClient) RtcInvite(req *pbobjs.RtcInviteReq) (utils.ClientErrorCode, *pbobjs.RtcAuth) {
 	data, _ := tools.PbMarshal(req)
 	code, qryAck := client.Query("rtc_invite", client.UserId, data)
 	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
-		return utils.ClientErrorCode_Success
+		resp := &pbobjs.RtcAuth{}
+		tools.PbUnMarshal(qryAck.Data, resp)
+		return utils.ClientErrorCode_Success, resp
 	} else {
-		return utils.ClientErrorCode(code)
+		return utils.ClientErrorCode(code), nil
 	}
 }
 

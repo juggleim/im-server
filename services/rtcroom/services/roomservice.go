@@ -46,11 +46,12 @@ const (
 )
 
 type RtcRoomContainer struct {
-	Appkey   string
-	RoomId   string
-	RoomType pbobjs.RtcRoomType
-	Owner    *pbobjs.UserInfo
-	Status   RtcRoomStatus // 0:normal; 1: destroy; 2: not exist;
+	Appkey     string
+	RoomId     string
+	RoomType   pbobjs.RtcRoomType
+	RtcChannel pbobjs.RtcChannel
+	Owner      *pbobjs.UserInfo
+	Status     RtcRoomStatus // 0:normal; 1: destroy; 2: not exist;
 
 	Members map[string]*models.RtcRoomMember
 }

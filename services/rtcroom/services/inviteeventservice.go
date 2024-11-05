@@ -21,6 +21,9 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 	roomId := req.RoomId
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	deviceId := bases.GetDeviceIdFromCtx(ctx)
+	if roomId == "" || len(req.TargetIds) <= 0 {
+		return errs.IMErrorCode_RTCROOM_PARAMILLIGAL, nil
+	}
 
 	container, succ := getRtcRoomContainerWithInit(appkey, roomId, userId, req.RoomType)
 	if succ {
@@ -93,9 +96,10 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			InviteType: pbobjs.InviteType_RtcInvite,
 			User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
 			Room: &pbobjs.RtcRoom{
-				RoomType: container.RoomType,
-				RoomId:   container.RoomId,
-				Owner:    container.Owner,
+				RoomType:   container.RoomType,
+				RoomId:     container.RoomId,
+				Owner:      container.Owner,
+				RtcChannel: container.RtcChannel,
 			},
 		})
 	}
@@ -104,7 +108,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 	return code, auth
 }
 
-func RtcAccept(ctx context.Context) errs.IMErrorCode {
+func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	roomId := bases.GetTargetIdFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
@@ -112,10 +116,10 @@ func RtcAccept(ctx context.Context) errs.IMErrorCode {
 
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
-		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST
+		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST, nil
 	}
 	if !container.MemberExist(userId) {
-		return errs.IMErrorCode_RTCROOM_NOTMEMBER
+		return errs.IMErrorCode_RTCROOM_NOTMEMBER, nil
 	}
 	code := MemberGrabState(ctx, userId, &pbobjs.MemberState{
 		RoomId:   roomId,
@@ -125,16 +129,16 @@ func RtcAccept(ctx context.Context) errs.IMErrorCode {
 		RtcState: pbobjs.RtcState_RtcConnecting,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
-		return code
+		return code, nil
 	}
 	code = container.UpdMemberState(userId, pbobjs.RtcState_RtcConnecting, deviceId)
 	if code != errs.IMErrorCode_SUCCESS {
-		return code
+		return code, nil
 	}
 	storage := storages.NewRtcRoomMemberStorage()
 	err := storage.UpdateState(appkey, roomId, userId, pbobjs.RtcState_RtcConnecting, deviceId)
 	if err != nil {
-		return errs.IMErrorCode_RTCROOM_UPDATEFAILED
+		return errs.IMErrorCode_RTCROOM_UPDATEFAILED, nil
 	}
 	container.ForeachMembers(func(member *models.RtcRoomMember) {
 		if member.MemberId != userId && member.RtcState != pbobjs.RtcState_RtcIncoming {
@@ -149,7 +153,9 @@ func RtcAccept(ctx context.Context) errs.IMErrorCode {
 			})
 		}
 	})
-	return errs.IMErrorCode_SUCCESS
+	//auth
+	code, auth := GenerateAuth(appkey, userId, container.RtcChannel)
+	return code, auth
 }
 
 func RtcHangup(ctx context.Context) errs.IMErrorCode {

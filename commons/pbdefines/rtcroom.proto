@@ -14,6 +14,7 @@ message RtcRoom{
     RtcRoomType roomType = 1;
     string roomId = 2;
     UserInfo owner = 3;
+    RtcChannel rtcChannel = 4;
     
     repeated RtcMember members = 51;
 }

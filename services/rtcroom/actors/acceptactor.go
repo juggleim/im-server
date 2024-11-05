@@ -17,8 +17,8 @@ type AcceptActor struct {
 
 func (actor *AcceptActor) OnReceive(ctx context.Context, input proto.Message) {
 	logs.WithContext(ctx).Infof("room_id:%s\tuser_id:%s", bases.GetTargetIdFromCtx(ctx), bases.GetRequesterIdFromCtx(ctx))
-	code := services.RtcAccept(ctx)
-	qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
+	code, resp := services.RtcAccept(ctx)
+	qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 	actor.Sender.Tell(qryAck, actorsystem.NoSender)
 }
 

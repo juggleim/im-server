@@ -3,10 +3,11 @@ package models
 import "im-server/commons/pbdefines/pbobjs"
 
 type RtcRoom struct {
-	RoomId   string
-	RoomType pbobjs.RtcRoomType
-	OwnerId  string
-	AppKey   string
+	RoomId     string
+	RoomType   pbobjs.RtcRoomType
+	RtcChannel pbobjs.RtcChannel
+	OwnerId    string
+	AppKey     string
 }
 
 type IRtcRoomStorage interface {

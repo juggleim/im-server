@@ -7,11 +7,12 @@ import (
 )
 
 type RtcRoomDao struct {
-	ID       int64  `gorm:"primary_key"`
-	RoomId   string `gorm:"room_id"`
-	RoomType int    `gorm:"room_type"`
-	OwnerId  string `gorm:"owner_id"`
-	AppKey   string `gorm:"app_key"`
+	ID         int64  `gorm:"primary_key"`
+	RoomId     string `gorm:"room_id"`
+	RoomType   int    `gorm:"room_type"`
+	RtcChannel int    `gorm:"rtc_channel"`
+	OwnerId    string `gorm:"owner_id"`
+	AppKey     string `gorm:"app_key"`
 }
 
 func (room *RtcRoomDao) TableName() string {
@@ -20,10 +21,11 @@ func (room *RtcRoomDao) TableName() string {
 
 func (room *RtcRoomDao) Create(item models.RtcRoom) error {
 	add := RtcRoomDao{
-		RoomId:   item.RoomId,
-		RoomType: int(item.RoomType),
-		OwnerId:  item.OwnerId,
-		AppKey:   item.AppKey,
+		RoomId:     item.RoomId,
+		RoomType:   int(item.RoomType),
+		RtcChannel: int(item.RtcChannel),
+		OwnerId:    item.OwnerId,
+		AppKey:     item.AppKey,
 	}
 	return dbcommons.GetDb().Create(&add).Error
 }
@@ -35,10 +37,11 @@ func (room *RtcRoomDao) FindById(appkey, roomId string) (*models.RtcRoom, error)
 		return nil, err
 	}
 	return &models.RtcRoom{
-		RoomId:   item.RoomId,
-		RoomType: pbobjs.RtcRoomType(item.RoomType),
-		OwnerId:  item.OwnerId,
-		AppKey:   item.AppKey,
+		RoomId:     item.RoomId,
+		RoomType:   pbobjs.RtcRoomType(item.RoomType),
+		RtcChannel: pbobjs.RtcChannel(item.RtcChannel),
+		OwnerId:    item.OwnerId,
+		AppKey:     item.AppKey,
 	}, nil
 }
 
