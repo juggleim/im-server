@@ -5,6 +5,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/conversation/storages/models"
 	"sort"
+	"strings"
 )
 
 type MentionMsgDao struct {
@@ -138,7 +139,7 @@ func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId stri
 
 func (mention *MentionMsgDao) QryMentionSenderIdsBaseIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, startIndex int64, count int) ([]*models.MentionMsg, error) {
 	var items []MentionMsgDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_index>?", appkey, userId, targetId, int(channelType), startIndex).Select("sender_id,msg_id,msg_time").Order("msg_index asc").Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_index>?", appkey, userId, targetId, int(channelType), startIndex).Select("sender_id,msg_id,msg_time,msg_index").Order("msg_index desc").Limit(count).Find(&items).Error
 	if err != nil {
 		return []*models.MentionMsg{}, err
 	}
@@ -148,6 +149,49 @@ func (mention *MentionMsgDao) QryMentionSenderIdsBaseIndex(appkey, userId, targe
 			SenderId: item.SenderId,
 			MsgTime:  item.MsgTime,
 			MsgId:    item.MsgId,
+			MsgIndex: item.MsgIndex,
+		})
+	}
+	sort.Slice(mentionMsgs, func(i, j int) bool {
+		return mentionMsgs[i].MsgIndex < mentionMsgs[j].MsgIndex
+	})
+	return mentionMsgs, nil
+}
+
+func (mention *MentionMsgDao) BatchQryMentionSenderIdsBaseIndex(appkey, userId string, convers []models.ConverItem) ([]*models.MentionMsg, error) {
+	length := len(convers)
+	if length <= 0 {
+		return []*models.MentionMsg{}, nil
+	}
+	var items []MentionMsgDao
+	var sqlBuilder strings.Builder
+	params := []interface{}{}
+	sqlBuilder.WriteString("app_key=? and user_id=? and (")
+	params = append(params, appkey)
+	params = append(params, userId)
+	for i, conver := range convers {
+		if i == length-1 {
+			sqlBuilder.WriteString("(target_id=? and channel_type=? and msg_index>?)")
+		} else {
+			sqlBuilder.WriteString("(target_id=? and channel_type=? and msg_index>?) or ")
+		}
+		params = append(params, conver.TargetId)
+		params = append(params, conver.ChannelType)
+		params = append(params, conver.MsgIndex)
+	}
+	sqlBuilder.WriteString(")")
+	err := dbcommons.GetDb().Where(sqlBuilder.String(), params...).Select("target_id,channel_type,sender_id,msg_id,msg_time").Order("msg_index asc").Find(&items).Error
+	if err != nil {
+		return []*models.MentionMsg{}, err
+	}
+	mentionMsgs := []*models.MentionMsg{}
+	for _, item := range items {
+		mentionMsgs = append(mentionMsgs, &models.MentionMsg{
+			TargetId:    item.TargetId,
+			ChannelType: pbobjs.ChannelType(item.ChannelType),
+			SenderId:    item.SenderId,
+			MsgTime:     item.MsgTime,
+			MsgId:       item.MsgId,
 		})
 	}
 	return mentionMsgs, nil
@@ -165,8 +209,12 @@ func (mention *MentionMsgDao) DelMentionMsg(appkey, userId, targetId string, cha
 	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_id=?", appkey, userId, targetId, channelType, msgId).Delete(&MentionMsgDao{}).Error
 }
 
-func (mention *MentionMsgDao) CleanMentionMsgsBaseTime(appkey, userId, targetId string, channelType pbobjs.ChannelType, cleanTime int64) error {
-	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_time<=?", appkey, userId, targetId, channelType, cleanTime).Delete(&MentionMsgDao{}).Error
+func (mention *MentionMsgDao) CleanMentionMsgsBaseIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIndex int64) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_index<=?", appkey, userId, targetId, channelType, msgIndex).Delete(&MentionMsgDao{}).Error
+}
+
+func (mention *MentionMsgDao) CleanMentionMsgsBaseUserId(appkey, userId string) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=?", appkey, userId).Delete(&MentionMsgDao{}).Error
 }
 
 func (mention *MentionMsgDao) DelOnlyByMsgIds(appkey string, msgIds []string) error {

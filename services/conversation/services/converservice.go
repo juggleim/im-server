@@ -31,7 +31,6 @@ func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg) {
 		} else {
 			unreadIndex = msg.UnreadIndex
 		}
-		HandleMentionedMsg(appkey, userId, msg) //TODO
 		userConvers := getUserConvers(appkey, userId)
 		userConvers.UpsertCovner(models.Conversation{
 			AppKey:      appkey,
@@ -44,6 +43,9 @@ func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg) {
 			SyncTime:             msg.MsgTime,
 			LatestUnreadMsgIndex: unreadIndex,
 		})
+		if !msg.IsSend {
+			HandleMentionedMsg(appkey, userId, msg)
+		}
 		//save to db
 		userConvers.PersistConver(msg.TargetId, msg.ChannelType)
 	}
@@ -120,7 +122,7 @@ func SyncConversationsV2(ctx context.Context, appkey, userId string, startTime i
 	} else {
 		resp.IsFinished = true
 	}
-	conversations := fillConvers(ctx, userId, convers)
+	conversations := fillConvers(ctx, userId, convers, userConvers)
 	resp.Conversations = append(resp.Conversations, conversations...)
 	return resp
 }
@@ -160,7 +162,7 @@ func QryConverV2(ctx context.Context, userId string, req *pbobjs.QryConverReq) (
 			ConverTags:        converTags,
 		}
 	} else {
-		conversations := fillConvers(ctx, userId, []*models.Conversation{conver})
+		conversations := fillConvers(ctx, userId, []*models.Conversation{conver}, userConvers)
 		if len(conversations) <= 0 {
 			return errs.IMErrorCode_SUCCESS, &pbobjs.Conversation{
 				TargetId:    req.TargetId,
@@ -216,7 +218,7 @@ func QryConversationsV2(ctx context.Context, req *pbobjs.QryConversationsReq) *p
 	} else {
 		resp.IsFinished = true
 	}
-	conversations := fillConvers(ctx, userId, convers)
+	conversations := fillConvers(ctx, userId, convers, userConvers)
 	resp.Conversations = append(resp.Conversations, conversations...)
 	if isPositiveOrder {
 		sort.Slice(resp.Conversations, func(i, j int) bool {
@@ -232,6 +234,9 @@ func ClearTotalUnreadV2(ctx context.Context, userId string) errs.IMErrorCode {
 	userConvers.ClearTotalUnread()
 	storage := storages.NewConversationStorage()
 	storage.ClearTotalUnreadCount(appkey, userId)
+	//clear mention msgs
+	mentionStorage := storages.NewMentionMsgStorage()
+	mentionStorage.CleanMentionMsgsBaseUserId(appkey, userId)
 	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 		MsgType:    "jg:cleartotalunread",
 		MsgContent: []byte(fmt.Sprintf(`{"clear_time":%d}`, time.Now().UnixMilli())),
@@ -408,7 +413,7 @@ func QryTopConversV2(ctx context.Context, userId string, req *pbobjs.QryTopConve
 	}
 	userConvers := getUserConvers(appkey, userId)
 	convers := userConvers.QryTopConvers(req.StartTime, 101, req.SortType, req.Order > 0)
-	conversations := fillConvers(ctx, userId, convers)
+	conversations := fillConvers(ctx, userId, convers, userConvers)
 	resp.Conversations = append(resp.Conversations, conversations...)
 	if len(resp.Conversations) > 100 {
 		resp.Conversations = resp.Conversations[:100]
@@ -454,14 +459,16 @@ func UndisturbConversV2(ctx context.Context, req *pbobjs.UndisturbConversReq) er
 	return errs.IMErrorCode_SUCCESS
 }
 
-func fillConvers(ctx context.Context, userId string, convers []*models.Conversation) []*pbobjs.Conversation {
+func fillConvers(ctx context.Context, userId string, convers []*models.Conversation, userConvers *UserConversations) []*pbobjs.Conversation {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	retConvers := []*pbobjs.Conversation{}
-	mentionStorage := storages.NewMentionMsgStorage()
 
 	priConvers := []hisModels.ConverItem{}
 	grpConvers := []hisModels.ConverItem{}
 	for _, conver := range convers {
+		if conver.IsDeleted > 0 {
+			continue
+		}
 		if conver.ChannelType == pbobjs.ChannelType_Private {
 			priConvers = append(priConvers, hisModels.ConverItem{
 				ConverId: commonservices.GetConversationId(userId, conver.TargetId, conver.ChannelType),
@@ -505,48 +512,52 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 			}
 		}
 		conversation.Msg = downMsg
-		//target userinfo/groupinfo
-		if conversation.ChannelType == pbobjs.ChannelType_Private {
-			conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conversation.TargetId)
-		} else if conversation.ChannelType == pbobjs.ChannelType_Group {
-			conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conversation.TargetId)
-		}
-		//mentions
-		mentionMsgs, err := mentionStorage.QryMentionSenderIdsBaseIndex(appkey, userId, conversation.TargetId, conversation.ChannelType, conversation.LatestReadIndex, 100)
-		if err == nil && len(mentionMsgs) > 0 {
-			conversation.Mentions = &pbobjs.Mentions{
-				IsMentioned:     true,
-				MentionMsgCount: int32(len(mentionMsgs)),
-				Senders:         []*pbobjs.UserInfo{},
-				MentionMsgs:     []*pbobjs.MentionMsg{},
+		if conver.IsDeleted == 0 {
+			//target userinfo/groupinfo
+			if conversation.ChannelType == pbobjs.ChannelType_Private {
+				conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conversation.TargetId)
+			} else if conversation.ChannelType == pbobjs.ChannelType_Group {
+				conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conversation.TargetId)
 			}
-			tmpMap := map[string]int{}
-			for _, mentionMsg := range mentionMsgs {
-				conversation.Mentions.MentionMsgs = append(conversation.Mentions.MentionMsgs, &pbobjs.MentionMsg{
-					SenderId: mentionMsg.SenderId,
-					MsgId:    mentionMsg.MsgId,
-					MsgTime:  mentionMsg.MsgTime,
-				})
-				if _, exist := tmpMap[mentionMsg.SenderId]; !exist {
-					tmpMap[mentionMsg.SenderId] = 1
-					userInfo := commonservices.GetTargetDisplayUserInfo(ctx, mentionMsg.SenderId)
+			//mentions
+			mentionInfo := userConvers.GetMentionInfo(conver.TargetId, conver.ChannelType)
+			if mentionInfo == nil {
+				userConvers.AppendMention(conver.TargetId, conver.ChannelType, nil)
+				mentionInfo = userConvers.GetMentionInfo(conver.TargetId, conver.ChannelType)
+			}
+			if mentionInfo != nil {
+				conversation.Mentions = &pbobjs.Mentions{
+					IsMentioned:     mentionInfo.IsMentioned,
+					MentionMsgCount: int32(mentionInfo.MentionMsgCount),
+					Senders:         []*pbobjs.UserInfo{},
+					MentionMsgs:     []*pbobjs.MentionMsg{},
+				}
+				for _, senderId := range mentionInfo.SenderIds {
+					userInfo := commonservices.GetTargetDisplayUserInfo(ctx, senderId)
 					conversation.Mentions.Senders = append(conversation.Mentions.Senders, userInfo)
 				}
+				for _, mentionMsg := range mentionInfo.MentionMsgs {
+					conversation.Mentions.MentionMsgs = append(conversation.Mentions.MentionMsgs, &pbobjs.MentionMsg{
+						SenderId: mentionMsg.SenderId,
+						MsgId:    mentionMsg.MsgId,
+						MsgTime:  mentionMsg.MsgTime,
+					})
+				}
 			}
-		}
-		//conver tags
-		tagStorage := storages.NewUserConverTagStorage()
-		tags, err := tagStorage.QryTagsByConver(appkey, userId, conver.TargetId, conver.ChannelType)
-		if err == nil {
-			converTags := []*pbobjs.ConverTag{}
-			for _, tag := range tags {
-				converTags = append(converTags, &pbobjs.ConverTag{
-					Tag:     tag.Tag,
-					TagName: tag.TagName,
-					TagType: pbobjs.ConverTagType_UserConverTag,
-				})
+			//conver tags
+			tagStorage := storages.NewUserConverTagStorage()
+			tags, err := tagStorage.QryTagsByConver(appkey, userId, conver.TargetId, conver.ChannelType)
+			if err == nil {
+				converTags := []*pbobjs.ConverTag{}
+				for _, tag := range tags {
+					converTags = append(converTags, &pbobjs.ConverTag{
+						Tag:     tag.Tag,
+						TagName: tag.TagName,
+						TagType: pbobjs.ConverTagType_UserConverTag,
+					})
+				}
+				conversation.ConverTags = append(conversation.ConverTags, converTags...)
 			}
-			conversation.ConverTags = append(conversation.ConverTags, converTags...)
 		}
 		retConvers = append(retConvers, conversation)
 	}

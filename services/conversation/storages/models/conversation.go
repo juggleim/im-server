@@ -28,6 +28,16 @@ type Conversation struct {
 	UnreadTag int
 
 	IsDeleted int
+
+	//mention info
+	MentionInfo *ConverMentionInfo
+}
+
+type ConverMentionInfo struct {
+	IsMentioned     bool
+	MentionMsgCount int
+	SenderIds       []string
+	MentionMsgs     []*MentionMsg
 }
 
 type IConversationStorage interface {

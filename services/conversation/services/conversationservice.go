@@ -215,6 +215,14 @@ func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg) {
 		if msg.IsSend {
 			isRead = 1
 		}
+		//append to cache
+		userConvers := getUserConvers(appkey, userId)
+		userConvers.AppendMention(msg.TargetId, msg.ChannelType, &models.MentionMsg{
+			SenderId: msg.SenderId,
+			MsgId:    msg.MsgId,
+			MsgTime:  msg.MsgTime,
+			MsgIndex: msg.UnreadIndex,
+		})
 		//save mentioned msg
 		storage := storages.NewMentionMsgStorage()
 		storage.SaveMentionMsg(models.MentionMsg{

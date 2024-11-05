@@ -133,6 +133,115 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 	}
 }
 
+func (uc *UserConversations) AppendMention(targetId string, channelType pbobjs.ChannelType, mentionMsg *models.MentionMsg) {
+	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
+	lock := userLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	itemKey := getConverItemKey(targetId, channelType)
+	if cacheConver, exist := uc.ConverItemMap[itemKey]; exist {
+		if cacheConver.MentionInfo != nil && mentionMsg == nil {
+			return
+		}
+		if cacheConver.MentionInfo == nil {
+			mentionInfo := &models.ConverMentionInfo{
+				MentionMsgs: []*models.MentionMsg{},
+				SenderIds:   []string{},
+			}
+			//read from db
+			storage := storages.NewMentionMsgStorage()
+			mentionMsgs, err := storage.QryMentionSenderIdsBaseIndex(uc.Appkey, uc.UserId, targetId, channelType, cacheConver.LatestReadMsgIndex, 100)
+			if err == nil {
+				mentionInfo.MentionMsgs = append(mentionInfo.MentionMsgs, mentionMsgs...)
+			}
+			cacheConver.MentionInfo = mentionInfo
+		}
+		if mentionMsg != nil {
+			//add new mention msg
+			cacheConver.MentionInfo.MentionMsgs = append(cacheConver.MentionInfo.MentionMsgs, &models.MentionMsg{
+				SenderId: mentionMsg.SenderId,
+				MsgId:    mentionMsg.MsgId,
+				MsgTime:  mentionMsg.MsgTime,
+				MsgIndex: mentionMsg.MsgIndex,
+			})
+			length := len(cacheConver.MentionInfo.MentionMsgs)
+			if length > 100 {
+				cacheConver.MentionInfo.MentionMsgs = cacheConver.MentionInfo.MentionMsgs[length-100:]
+			}
+		}
+		//calculate mention count
+		cacheConver.MentionInfo.MentionMsgCount = len(cacheConver.MentionInfo.MentionMsgs)
+		cacheConver.MentionInfo.IsMentioned = cacheConver.MentionInfo.MentionMsgCount > 0
+		//generate sender info
+		cacheConver.MentionInfo.SenderIds = []string{}
+		tmpMap := map[string]int{}
+		for _, mMsg := range cacheConver.MentionInfo.MentionMsgs {
+			if _, exist := tmpMap[mMsg.SenderId]; !exist {
+				tmpMap[mMsg.SenderId] = 1
+				cacheConver.MentionInfo.SenderIds = append(cacheConver.MentionInfo.SenderIds, mMsg.SenderId)
+			}
+		}
+	}
+}
+
+func (uc *UserConversations) GetMentionInfo(targetId string, channelType pbobjs.ChannelType) *models.ConverMentionInfo {
+	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
+	lock := userLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+
+	itemKey := getConverItemKey(targetId, channelType)
+	if cacheConver, exist := uc.ConverItemMap[itemKey]; exist {
+		if cacheConver.MentionInfo != nil {
+			retMentionInfo := &models.ConverMentionInfo{
+				IsMentioned:     cacheConver.MentionInfo.IsMentioned,
+				MentionMsgCount: cacheConver.MentionInfo.MentionMsgCount,
+				SenderIds:       []string{},
+				MentionMsgs:     []*models.MentionMsg{},
+			}
+			retMentionInfo.SenderIds = append(retMentionInfo.SenderIds, cacheConver.MentionInfo.SenderIds...)
+			retMentionInfo.MentionMsgs = append(retMentionInfo.MentionMsgs, cacheConver.MentionInfo.MentionMsgs...)
+			return retMentionInfo
+		}
+		return nil
+	}
+	return &models.ConverMentionInfo{
+		SenderIds:   []string{},
+		MentionMsgs: []*models.MentionMsg{},
+	}
+}
+
+func (uc *UserConversations) innerClearMentionMsgs(item *models.Conversation, msgIndex int64) {
+	if item.MentionInfo != nil {
+		mentionMsgs := []*models.MentionMsg{}
+		for _, mentionMsg := range item.MentionInfo.MentionMsgs {
+			if mentionMsg.MsgIndex > msgIndex {
+				mentionMsgs = append(mentionMsgs, mentionMsg)
+			}
+		}
+		newMentionCount := len(mentionMsgs)
+		if newMentionCount < item.MentionInfo.MentionMsgCount {
+			item.MentionInfo.MentionMsgCount = newMentionCount
+			item.MentionInfo.IsMentioned = newMentionCount > 0
+			item.MentionInfo.MentionMsgs = mentionMsgs
+			item.MentionInfo.SenderIds = []string{}
+			//generate sender info
+			tmpMap := map[string]int{}
+			for _, mMsg := range item.MentionInfo.MentionMsgs {
+				if _, exist := tmpMap[mMsg.SenderId]; !exist {
+					tmpMap[mMsg.SenderId] = 1
+					item.MentionInfo.SenderIds = append(item.MentionInfo.SenderIds, mMsg.SenderId)
+				}
+			}
+			go func() {
+				//clear readed mention msgs
+				storage := storages.NewMentionMsgStorage()
+				storage.CleanMentionMsgsBaseIndex(uc.Appkey, uc.UserId, item.TargetId, item.ChannelType, msgIndex)
+			}()
+		}
+	}
+}
+
 func (uc *UserConversations) purge() {
 	if atomic.CompareAndSwapInt32(&uc.purgeing, 0, 1) {
 		key := getUserConverCacheKey(uc.Appkey, uc.UserId)
@@ -349,6 +458,10 @@ func (uc *UserConversations) ClearTotalUnread() {
 	for _, conver := range uc.ConverItemMap {
 		conver.LatestReadMsgIndex = conver.LatestUnreadMsgIndex
 		conver.UnreadTag = 0
+		conver.MentionInfo = &models.ConverMentionInfo{
+			SenderIds:   []string{},
+			MentionMsgs: []*models.MentionMsg{},
+		}
 	}
 }
 
@@ -382,6 +495,7 @@ func (uc *UserConversations) ClearUnread(targetId string, channelType pbobjs.Cha
 			item.LatestReadMsgId = readMsgId
 			item.LatestReadMsgTime = readMsgTime
 			item.UnreadTag = 0
+			uc.innerClearMentionMsgs(item, readMsgIndex)
 			return true
 		} else if item.UnreadTag > 0 {
 			item.UnreadTag = 0
@@ -404,6 +518,7 @@ func (uc *UserConversations) DefaultClearUnread(targetId string, channelType pbo
 			item.LatestReadMsgId = ""
 			item.LatestReadMsgTime = time.Now().UnixMilli()
 			item.UnreadTag = 0
+			uc.innerClearMentionMsgs(item, item.LatestUnreadMsgIndex)
 			return true
 		} else if item.UnreadTag > 0 {
 			item.UnreadTag = 0
@@ -423,6 +538,7 @@ func (uc *UserConversations) DelConversation(targetId string, channelType pbobjs
 		if item.IsDeleted == 0 {
 			item.IsDeleted = 1
 			uc.SortTimeIndex.Remove(itemKey)
+			uc.innerClearMentionMsgs(item, item.LatestUnreadMsgIndex)
 			return true
 		}
 	}
