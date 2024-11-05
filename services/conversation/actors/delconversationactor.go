@@ -22,7 +22,7 @@ func (actor *DelConversationsActor) OnReceive(ctx context.Context, input proto.M
 
 		logs.WithContext(ctx).WithField("method", "del_convers").Infof("user_id:%s\tconversations=%v", userId, delConverReq.Conversations)
 
-		code := services.DelConversation(ctx, userId, delConverReq.Conversations)
+		code := services.DelConversationV2(ctx, userId, delConverReq.Conversations)
 		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 	} else {

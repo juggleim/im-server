@@ -6,9 +6,7 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
 	"im-server/services/commonservices"
-	"im-server/services/conversation/convercallers"
 	mentionStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 )
@@ -58,7 +56,6 @@ func markReadGroupMsgs(ctx context.Context, req *pbobjs.MarkReadReq) errs.IMErro
 		Msgs:        []*ReadMsg{},
 		IndexScopes: []*IndexScope{},
 	}
-	converId := commonservices.GetConversationId(userId, groupId, req.ChannelType)
 	//TODO check group msg
 	if len(req.Msgs) > 0 {
 		var latestReadMsgIndex int64 = 0
@@ -72,20 +69,6 @@ func markReadGroupMsgs(ctx context.Context, req *pbobjs.MarkReadReq) errs.IMErro
 				MsgId:    msg.MsgId,
 				MsgIndex: msg.MsgReadIndex,
 			})
-			//upd latest msg for conversation
-			if IsLatestMsg(ctx, converId, req.ChannelType, msg.MsgId, msg.MsgTime, 0) {
-				//find msg
-				storage := storages.NewGroupHisMsgStorage()
-				latestMsg, err := storage.FindById(appkey, converId, msg.MsgId)
-				if err == nil && latestMsg != nil {
-					newDownMsg := &pbobjs.DownMsg{}
-					err = tools.PbUnMarshal(latestMsg.MsgBody, newDownMsg)
-					if err == nil {
-						newDownMsg.IsRead = true
-						convercallers.UpdLatestMsgBody(ctx, userId, groupId, req.ChannelType, msg.MsgId, newDownMsg)
-					}
-				}
-			}
 		}
 
 		DispatchGroupMsgMarkRead(ctx, groupId, userId, req.ChannelType, msgIds)
@@ -130,22 +113,6 @@ func markReadPrivateMsgs(ctx context.Context, userId string, req *pbobjs.MarkRea
 		}
 		if len(msgIds) > 0 {
 			storage.MarkReadByMsgIds(appkey, converId, msgIds)
-			for _, msg := range msgIds {
-				if IsLatestMsg(ctx, converId, req.ChannelType, msg, 0, 0) {
-					//find msg
-					latestMsg, err := storage.FindById(appkey, converId, msg)
-					if err == nil && latestMsg != nil {
-						newDownMsg := &pbobjs.DownMsg{}
-						err = tools.PbUnMarshal(latestMsg.MsgBody, newDownMsg)
-						if err == nil {
-							newDownMsg.IsRead = true
-							convercallers.UpdLatestMsgBody(ctx, userId, targetId, req.ChannelType, msg, newDownMsg)
-							convercallers.UpdLatestMsgBody(ctx, targetId, userId, req.ChannelType, msg, newDownMsg)
-						}
-					}
-					break
-				}
-			}
 		}
 	}
 	if len(req.IndexScopes) > 0 {

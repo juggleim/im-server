@@ -31,7 +31,7 @@ func (ext UserExtDao) BatchUpsert(items []UserExtDao) error {
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%d);", item.AppKey, item.UserId, item.ItemKey, item.ItemValue, item.ItemType))
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%d) ON DUPLICATE KEY UPDATE item_value=VALUES(item_value);", item.AppKey, item.UserId, item.ItemKey, item.ItemValue, item.ItemType))
 		} else {
 			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%d),", item.AppKey, item.UserId, item.ItemKey, item.ItemValue, item.ItemType))
 		}

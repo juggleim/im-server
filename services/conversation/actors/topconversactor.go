@@ -20,7 +20,7 @@ func (actor *TopConversActor) OnReceive(ctx context.Context, input proto.Message
 	if conversReq, ok := input.(*pbobjs.ConversationsReq); ok {
 		userId := bases.GetRequesterIdFromCtx(ctx)
 		logs.WithContext(ctx).Infof("user_id:%s\tconversations=%v", userId, conversReq.Conversations)
-		code, cmdMsgTime := services.SetTopConvers(ctx, conversReq)
+		code, cmdMsgTime := services.SetTopConversV2(ctx, conversReq)
 		qryAck := bases.CreateQueryAckWraperWithTime(ctx, code, cmdMsgTime, nil)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 	} else {

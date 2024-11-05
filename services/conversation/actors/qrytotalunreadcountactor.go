@@ -20,7 +20,7 @@ func (actor *QryTotalUnreadCountActor) OnReceive(ctx context.Context, input prot
 		userId := bases.GetTargetIdFromCtx(ctx)
 		logs.WithContext(ctx).Infof("user_id:%s", userId)
 
-		resp := services.QryTotalUnreadCount(ctx, userId, req)
+		resp := services.QryTotalUnreadCountV2(ctx, userId, req)
 		qryAck := bases.CreateQueryAckWraper(ctx, 0, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 

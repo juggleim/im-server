@@ -6,6 +6,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/historymsg/storages/models"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -203,6 +204,34 @@ func (msg GroupHisMsgDao) FindByIds(appkey, converId string, msgIds []string, cl
 	var items []*GroupHisMsgDao
 	err := dbcommons.GetDb().Where("app_key=? and conver_id=? and send_time>? and msg_id in (?)", appkey, converId, cleanTime, msgIds).Order("send_time asc").Find(&items).Error
 
+	retItems := []*models.GroupHisMsg{}
+	for _, dbMsg := range items {
+		retItems = append(retItems, dbMsg2GrpMsg(dbMsg))
+	}
+	return retItems, err
+}
+
+func (msg GroupHisMsgDao) FindByConvers(appkey string, convers []models.ConverItem) ([]*models.GroupHisMsg, error) {
+	length := len(convers)
+	if length <= 0 {
+		return []*models.GroupHisMsg{}, nil
+	}
+	var items []*GroupHisMsgDao
+	var sqlBuilder strings.Builder
+	params := []interface{}{}
+	sqlBuilder.WriteString("app_key=? and (")
+	params = append(params, appkey)
+	for i, conver := range convers {
+		if i == length-1 {
+			sqlBuilder.WriteString("(conver_id=? and msg_id=?)")
+		} else {
+			sqlBuilder.WriteString("(conver_id=? and msg_id=?) or ")
+		}
+		params = append(params, conver.ConverId)
+		params = append(params, conver.MsgId)
+	}
+	sqlBuilder.WriteString(")")
+	err := dbcommons.GetDb().Where(sqlBuilder.String(), params...).Find(&items).Error
 	retItems := []*models.GroupHisMsg{}
 	for _, dbMsg := range items {
 		retItems = append(retItems, dbMsg2GrpMsg(dbMsg))

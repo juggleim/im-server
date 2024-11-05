@@ -766,7 +766,6 @@ type DelMsg struct {
 func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 	delMsgIds := []string{}
 	delMsgs := &DelMsgs{
 		TargetId:    req.TargetId,
@@ -833,12 +832,12 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 				}, &bases.OnlySendboxOption{})
 			}
 			//if latest msg then update conversation
-			for _, msg := range delMsgs.Msgs {
-				if IsLatestMsg(ctx, converId, req.ChannelType, msg.MsgId, 0, 0) {
-					convercallers.UpdLatestMsgBody(ctx, userId, req.TargetId, req.ChannelType, msg.MsgId, &pbobjs.DownMsg{})
-					break
-				}
-			}
+			// for _, msg := range delMsgs.Msgs {
+			// 	if IsLatestMsg(ctx, converId, req.ChannelType, msg.MsgId, 0, 0) {
+			// 		convercallers.UpdLatestMsgBody(ctx, userId, req.TargetId, req.ChannelType, msg.MsgId, &pbobjs.DownMsg{})
+			// 		break
+			// 	}
+			// }
 			//delete mention msg
 			mentionStorage := converStorages.NewMentionMsgStorage()
 			mentionStorage.DelMentionMsgs(appkey, userId, req.TargetId, req.ChannelType, delMsgIds)
@@ -882,23 +881,23 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					Flags:      flag,
 				})
 			}
-			for _, msg := range delMsgs.Msgs {
-				if IsLatestMsg(ctx, converId, req.ChannelType, msg.MsgId, 0, 0) {
-					if req.ChannelType == pbobjs.ChannelType_Private {
-						convercallers.UpdLatestMsgBody(ctx, userId, req.TargetId, req.ChannelType, msg.MsgId, &pbobjs.DownMsg{})
-						convercallers.UpdLatestMsgBody(ctx, req.TargetId, userId, req.ChannelType, msg.MsgId, &pbobjs.DownMsg{})
-					} else if req.ChannelType == pbobjs.ChannelType_Group {
-						bases.AsyncRpcCall(ctx, "upd_grp_conver", req.TargetId, &pbobjs.UpdLatestMsgReq{
-							TargetId:    req.TargetId,
-							ChannelType: req.ChannelType,
-							LatestMsgId: msg.MsgId,
-							Action:      pbobjs.UpdLatestMsgAction_UpdMsg,
-							Msg:         &pbobjs.DownMsg{},
-						})
-					}
-					break
-				}
-			}
+			// for _, msg := range delMsgs.Msgs {
+			// 	if IsLatestMsg(ctx, converId, req.ChannelType, msg.MsgId, 0, 0) {
+			// 		if req.ChannelType == pbobjs.ChannelType_Private {
+			// 			convercallers.UpdLatestMsgBody(ctx, userId, req.TargetId, req.ChannelType, msg.MsgId, &pbobjs.DownMsg{})
+			// 			convercallers.UpdLatestMsgBody(ctx, req.TargetId, userId, req.ChannelType, msg.MsgId, &pbobjs.DownMsg{})
+			// 		} else if req.ChannelType == pbobjs.ChannelType_Group {
+			// 			bases.AsyncRpcCall(ctx, "upd_grp_conver", req.TargetId, &pbobjs.UpdLatestMsgReq{
+			// 				TargetId:    req.TargetId,
+			// 				ChannelType: req.ChannelType,
+			// 				LatestMsgId: msg.MsgId,
+			// 				Action:      pbobjs.UpdLatestMsgAction_UpdMsg,
+			// 				Msg:         &pbobjs.DownMsg{},
+			// 			})
+			// 		}
+			// 		break
+			// 	}
+			// }
 			//delete mention msg
 			mentionStorage := converStorages.NewMentionMsgStorage()
 			mentionStorage.DelOnlyByMsgIds(appkey, delMsgIds)

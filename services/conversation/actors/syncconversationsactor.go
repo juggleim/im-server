@@ -23,7 +23,7 @@ func (actor *SyncConversationsActor) OnReceive(ctx context.Context, input proto.
 
 		logs.WithContext(ctx).Infof("user_id:%s\tstart_time:%d\tcount:%d", userId, startTime, syncConverReq.Count)
 
-		resp := services.SyncConversations(ctx, appkey, userId, startTime, syncConverReq.Count)
+		resp := services.SyncConversationsV2(ctx, appkey, userId, startTime, syncConverReq.Count)
 		qryAck := bases.CreateQueryAckWraper(ctx, 0, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 

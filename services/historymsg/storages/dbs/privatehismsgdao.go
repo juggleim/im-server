@@ -6,6 +6,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/historymsg/storages/models"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -209,6 +210,34 @@ func (msg PrivateHisMsgDao) FindByIds(appkey, converId string, msgIds []string, 
 		retItems = append(retItems, dbMsg2PrivateMsg(dbMsg))
 	}
 
+	return retItems, err
+}
+
+func (msg PrivateHisMsgDao) FindByConvers(appkey string, convers []models.ConverItem) ([]*models.PrivateHisMsg, error) {
+	length := len(convers)
+	if length <= 0 {
+		return []*models.PrivateHisMsg{}, nil
+	}
+	var items []*PrivateHisMsgDao
+	var sqlBuilder strings.Builder
+	params := []interface{}{}
+	sqlBuilder.WriteString("app_key=? and (")
+	params = append(params, appkey)
+	for i, conver := range convers {
+		if i == length-1 {
+			sqlBuilder.WriteString("(conver_id=? and msg_id=?)")
+		} else {
+			sqlBuilder.WriteString("(conver_id=? and msg_id=?) or ")
+		}
+		params = append(params, conver.ConverId)
+		params = append(params, conver.MsgId)
+	}
+	sqlBuilder.WriteString(")")
+	err := dbcommons.GetDb().Where(sqlBuilder.String(), params...).Find(&items).Error
+	retItems := []*models.PrivateHisMsg{}
+	for _, dbMsg := range items {
+		retItems = append(retItems, dbMsg2PrivateMsg(dbMsg))
+	}
 	return retItems, err
 }
 

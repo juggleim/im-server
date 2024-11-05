@@ -19,7 +19,7 @@ type UndisturbConversActor struct {
 func (actor *UndisturbConversActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.UndisturbConversReq); ok {
 		logs.WithContext(ctx).Infof("user_id:%s\tconvers=%v", bases.GetTargetIdFromCtx(ctx), req.Items)
-		code := services.DoUndisturbConvers(ctx, req)
+		code := services.UndisturbConversV2(ctx, req)
 		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 	} else {

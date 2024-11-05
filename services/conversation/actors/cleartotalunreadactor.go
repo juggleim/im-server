@@ -20,7 +20,7 @@ func (actor *ClearTotalUnreadActor) OnReceive(ctx context.Context, input proto.M
 	if _, ok := input.(*pbobjs.QryTotalUnreadCountReq); ok {
 		userId := bases.GetTargetIdFromCtx(ctx)
 		logs.WithContext(ctx).Infof("user_id:%s", userId)
-		code := services.ClearTotalUnread(ctx, userId)
+		code := services.ClearTotalUnreadV2(ctx, userId)
 		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 		logs.WithContext(ctx).Infof("result_code:%v", code)

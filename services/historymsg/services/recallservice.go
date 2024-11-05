@@ -8,7 +8,6 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
-	"im-server/services/conversation/convercallers"
 	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 )
@@ -63,11 +62,6 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 		storage.UpdateMsgBody(appkey, converId, recallMsg.MsgId, RecallInfoType, replaceMsgBs)
 		//send cmd msg
 		commonservices.AsyncPrivateMsg(ctx, userId, targetId, upMsg)
-		//if latest msg then update conversation
-		if IsLatestMsg(ctx, converId, recallMsg.ChannelType, recallMsg.MsgId, recallMsg.MsgTime, 0) {
-			convercallers.UpdLatestMsgBody(ctx, userId, targetId, pbobjs.ChannelType_Private, replaceMsg.MsgId, replaceMsg) //upd for sender
-			convercallers.UpdLatestMsgBody(ctx, targetId, userId, pbobjs.ChannelType_Private, replaceMsg.MsgId, replaceMsg) //upd for receiver
-		}
 		return errs.IMErrorCode_SUCCESS
 	} else if recallMsg.ChannelType == pbobjs.ChannelType_Group {
 		//replace history msg
@@ -89,16 +83,6 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 
 		//send cmd msg
 		commonservices.AsyncGroupMsg(ctx, userId, targetId, upMsg)
-		//if latest msg then update grp conversation
-		if IsLatestMsg(ctx, converId, recallMsg.ChannelType, recallMsg.MsgId, recallMsg.MsgTime, 0) {
-			bases.AsyncRpcCall(ctx, "upd_grp_conver", targetId, &pbobjs.UpdLatestMsgReq{
-				TargetId:    targetId,
-				ChannelType: pbobjs.ChannelType_Group,
-				LatestMsgId: replaceMsg.MsgId,
-				Action:      pbobjs.UpdLatestMsgAction_UpdMsg,
-				Msg:         replaceMsg,
-			})
-		}
 		//delete mention msg
 		mentionStorage := converStorages.NewMentionMsgStorage()
 		mentionStorage.DelOnlyByMsgIds(appkey, []string{recallMsg.MsgId})
