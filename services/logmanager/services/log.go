@@ -21,7 +21,8 @@ type LogEntity struct {
 
 func InitLogDB(path string) (err error) {
 	o := &opt.Options{
-		Filter: filter.NewBloomFilter(10),
+		Filter:              filter.NewBloomFilter(10),
+		CompactionTableSize: 10 * opt.MiB,
 	}
 	db, err = leveldb.OpenFile(path, o)
 	if err != nil {
@@ -40,6 +41,9 @@ func CloseLogDB() {
 }
 
 func writeLog(table string, key string, value string) (err error) {
+	if db == nil {
+		return errors.New("no init visual log")
+	}
 	batch := new(leveldb.Batch)
 
 	batch.Put([]byte(table+":"+key), []byte(value))
@@ -48,6 +52,9 @@ func writeLog(table string, key string, value string) (err error) {
 }
 
 func qryLogs(table string, keyPrefix, startKey string, count int) ([]LogEntity, error) {
+	if db == nil {
+		return []LogEntity{}, errors.New("no init visual log")
+	}
 	iter := db.NewIterator(util.BytesPrefix([]byte(table+":"+keyPrefix)), nil)
 	iterCount := 0
 	logs := []LogEntity{}
