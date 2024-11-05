@@ -11,7 +11,7 @@ import (
 func GenerateAuth(appkey, userId string, rtcChannel pbobjs.RtcChannel) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 	appInfo, exist := commonservices.GetAppInfo(appkey)
 	if !exist {
-		return errs.IMErrorCode_RTCROOM_RTCAUTHFAILED, nil
+		return errs.IMErrorCode_CONNECT_APP_NOT_EXISTED, nil
 	}
 	if rtcChannel == pbobjs.RtcChannel_Zego {
 		if appInfo.ZegoConfigObj == nil {
