@@ -48,6 +48,7 @@ type IGroupHisMsgStorage interface {
 	UpdateMsgBody(appkey, converId, msgId, msgType string, msgBody []byte) error
 	FindById(appkey, converId, msgId string) (*GroupHisMsg, error)
 	FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*GroupHisMsg, error)
+	FindByConvers(appkey string, convers []ConverItem) ([]*GroupHisMsg, error)
 	DelMsgs(appkey, converId string, msgIds []string) error
 	UpdateMsgExtState(appkey, converId, msgId string, isExt int) error
 	UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error
@@ -65,6 +66,7 @@ type IPrivateHisMsgStorage interface {
 	UpdateMsgBody(appkey, converId, msgId, msgType string, msgBody []byte) error
 	FindById(appkey, converId, msgId string) (*PrivateHisMsg, error)
 	FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*PrivateHisMsg, error)
+	FindByConvers(appkey string, convers []ConverItem) ([]*PrivateHisMsg, error)
 	DelMsgs(appkey, converId string, msgIds []string) error
 	UpdateMsgExtState(appkey, converId, msgId string, isExt int) error
 	UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error

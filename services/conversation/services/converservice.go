@@ -11,7 +11,7 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/conversation/storages"
 	"im-server/services/conversation/storages/models"
-	"im-server/services/historymsg/storages/dbs"
+	hisStorages "im-server/services/historymsg/storages"
 	hisModels "im-server/services/historymsg/storages/models"
 	"sort"
 	"time"
@@ -565,8 +565,8 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 }
 
 func qryGrpMsgs(appkey, userId string, convers []hisModels.ConverItem) map[string]*pbobjs.DownMsg {
-	grpMsgDao := dbs.GroupHisMsgDao{}
-	msgs, err := grpMsgDao.FindByConvers(appkey, convers)
+	storage := hisStorages.NewGroupHisMsgStorage()
+	msgs, err := storage.FindByConvers(appkey, convers)
 	ret := map[string]*pbobjs.DownMsg{}
 	if err == nil {
 		for _, msg := range msgs {
@@ -584,8 +584,8 @@ func qryGrpMsgs(appkey, userId string, convers []hisModels.ConverItem) map[strin
 }
 
 func qryPriMsgs(appkey, userId string, convers []hisModels.ConverItem) map[string]*pbobjs.DownMsg {
-	priMsgDao := dbs.PrivateHisMsgDao{}
-	msgs, err := priMsgDao.FindByConvers(appkey, convers)
+	storage := hisStorages.NewPrivateHisMsgStorage()
+	msgs, err := storage.FindByConvers(appkey, convers)
 	ret := map[string]*pbobjs.DownMsg{}
 	if err == nil {
 		for _, msg := range msgs {

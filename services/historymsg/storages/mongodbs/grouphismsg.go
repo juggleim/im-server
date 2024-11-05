@@ -337,6 +337,43 @@ func (msg *GroupHisMsgDao) FindByIds(appkey, converId string, msgIds []string, c
 	return retItems, nil
 }
 
+func (msg *GroupHisMsgDao) FindByConvers(appkey string, convers []models.ConverItem) ([]*models.GroupHisMsg, error) {
+	retItems := []*models.GroupHisMsg{}
+	length := len(convers)
+	if length < 0 {
+		return retItems, nil
+	}
+	collection := msg.getCollection()
+	if collection == nil {
+		return retItems, errors.New("no mongo client")
+	}
+	or := []bson.M{}
+	for _, conver := range convers {
+		or = append(or, bson.M{"conver_id": conver.ConverId, "msg_id": conver.MsgId})
+	}
+	filter := bson.M{
+		"app_key": appkey,
+		"$or":     or,
+	}
+	cur, err := collection.Find(context.TODO(), filter)
+	defer func() {
+		if cur != nil {
+			cur.Close(context.TODO())
+		}
+	}()
+	if err != nil {
+		return nil, err
+	}
+	for cur.Next(context.TODO()) {
+		var item GroupHisMsgDao
+		err = cur.Decode(&item)
+		if err == nil {
+			retItems = append(retItems, dbMsg2GrpMsg(&item))
+		}
+	}
+	return retItems, nil
+}
+
 func (msg *GroupHisMsgDao) DelMsgs(appkey, converId string, msgIds []string) error {
 	collection := msg.getCollection()
 	if collection == nil {
