@@ -1,7 +1,6 @@
 package wsclients
 
 import (
-	"fmt"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/connectmanager/server/codec"
@@ -23,7 +22,6 @@ func (client *WsImClient) SendGroupMsg(targetId string, upMsg *pbobjs.UpMsg) (ut
 func (client *WsImClient) SyncMsgs(req *pbobjs.SyncMsgReq) (utils.ClientErrorCode, *pbobjs.DownMsgSet) {
 	data, _ := tools.PbMarshal(req)
 	code, qryAck := client.Query("sync_msgs", client.UserId, data)
-	fmt.Println(code)
 	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
 		resp := &pbobjs.DownMsgSet{}
 		tools.PbUnMarshal(qryAck.Data, resp)

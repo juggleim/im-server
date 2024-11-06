@@ -133,6 +133,7 @@ func QryRtcMemberRooms(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcMember
 			RoomType: room.RoomType,
 			RoomId:   room.RoomId,
 			RtcState: room.RtcState,
+			DeviceId: room.DeviceId,
 		})
 	})
 	return errs.IMErrorCode_SUCCESS, ret

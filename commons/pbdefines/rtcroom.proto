@@ -96,6 +96,7 @@ message RtcMemberRoom{
     UserInfo owner = 3;
     RtcState rtcState = 4;
     RtcChannel rtcChannel = 5;
+    string deviceId = 6;
 }
 
 message RtcAuth{
