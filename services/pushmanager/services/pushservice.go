@@ -167,6 +167,7 @@ func iosPushPayload(req *pbobjs.PushData) interface{} {
 	iosPayload := payload.NewPayload()
 	iosPayload.AlertTitle(req.Title)
 	iosPayload.AlertBody(tools.PureStr(req.PushText))
+	iosPayload.Sound("default")
 	iosPayload.Custom("conver_id", req.ConverId)
 	iosPayload.Custom("conver_type", int32(req.ChannelType))
 	if req.PushExtraData != "" {
