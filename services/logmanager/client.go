@@ -10,7 +10,7 @@ import (
 )
 
 func checkSwitch(appkey string) bool {
-	if !configures.Config.Log.Visual {
+	if !configures.Config.Kvdb.IsOpen {
 		return false
 	}
 	appInfo, exist := commonservices.GetAppInfo(appkey)

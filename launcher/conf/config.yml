@@ -5,7 +5,9 @@ msgStoreEngine: mysql
 log:
   logPath: ./logs
   logName: jim-info
-  visual: false
+
+kvdb:
+  isOpen: true
 
 mysql:
   user: root

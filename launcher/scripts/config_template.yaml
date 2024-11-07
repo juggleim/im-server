@@ -5,7 +5,9 @@ msgStoreEngine: {{ MSG_STORE_ENGINE }}
 log:
   logPath: ./logs
   logName: jim-info
-  visual: true
+
+kvdb:
+  isOpen: true
 
 mysql:
   user: root

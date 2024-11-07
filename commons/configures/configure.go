@@ -23,11 +23,14 @@ type ImConfig struct {
 	MsgStoreEngine string `yaml:"msgStoreEngine"`
 
 	Log struct {
-		LogPath      string `yaml:"logPath"`
-		LogName      string `yaml:"logName"`
-		Visual       bool   `yaml:"visual"`
-		VLogHttpPort int    `yaml:"vloghttpPort"`
+		LogPath string `yaml:"logPath"`
+		LogName string `yaml:"logName"`
 	} `ymal:"log"`
+
+	Kvdb struct {
+		IsOpen   bool   `yaml:"isOpen"`
+		DataPath string `yaml:"dataPath"`
+	} `ymal:"kvdb"`
 
 	Mysql struct {
 		User     string `yaml:"user"`
