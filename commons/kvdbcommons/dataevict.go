@@ -1,7 +1,6 @@
 package kvdbcommons
 
 import (
-	"fmt"
 	"im-server/commons/tools"
 	"sync"
 	"time"
@@ -40,7 +39,6 @@ func cleanTimeoutData(timeLine int64) {
 				bs := item.Key[len(item.Key)-8:]
 				timestamp := tools.BytesToInt64(bs)
 				timestamp = timestamp >> 10
-				fmt.Println("clean:", timestamp)
 				if timestamp < timeLine {
 					dataKey := item.Val
 
@@ -67,9 +65,6 @@ func cleanTimeoutData(timeLine int64) {
 }
 
 func ExpireAt(key []byte, expiredAt int64) {
-	evictLock.Lock()
-	defer evictLock.Unlock()
-
 	retryCount := 3
 	var evictKey []byte
 	for retryCount > 0 {
@@ -107,7 +102,9 @@ func Ttl(key []byte) int64 {
 	if err != nil {
 		return 0
 	}
-	fmt.Println("expiredAt:", tools.BytesToInt64(val))
 	result := tools.BytesToInt64(val) - time.Now().UnixMilli()
+	if result < 0 {
+		return 0
+	}
 	return result
 }
