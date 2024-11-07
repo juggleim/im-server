@@ -701,7 +701,7 @@ CREATE TABLE `userexts` (
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `user_type` tinyint DEFAULT '0' COMMENT '用户类型',
+  `user_type` tinyint DEFAULT '0' COMMENT '用户类型 0用户, 1机器人',
   `user_id` varchar(32) NOT NULL COMMENT '用户id',
   `nickname` varchar(45) DEFAULT NULL COMMENT '昵称',
   `user_portrait` varchar(200) DEFAULT NULL COMMENT '用户头像',
