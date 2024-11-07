@@ -21,9 +21,19 @@ type GroupMemberDao struct {
 func (msg GroupMemberDao) TableName() string {
 	return "groupmembers"
 }
+
 func (msg GroupMemberDao) Create(item GroupMemberDao) error {
 	err := dbcommons.GetDb().Create(&item).Error
 	return err
+}
+
+func (member GroupMemberDao) Find(appkey, groupId, memberId string) (*GroupMemberDao, error) {
+	var item GroupMemberDao
+	err := dbcommons.GetDb().Where("app_key=? and group_id=? and member_id=?", appkey, groupId, memberId).Take(&item).Error
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
 }
 
 func (member GroupMemberDao) BatchCreate(items []GroupMemberDao) error {

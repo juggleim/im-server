@@ -2,14 +2,12 @@ package kvdbcommons
 
 import (
 	"encoding/base64"
-	"fmt"
 	"im-server/commons/caches"
 	"im-server/commons/tools"
 	"time"
 )
 
 var tsdbCache *caches.LruCache
-var tsdbLocks *tools.SegmentatedLocks
 
 type TsdbCacheItem struct {
 	cacheKey   string
@@ -17,7 +15,7 @@ type TsdbCacheItem struct {
 }
 
 func (item *TsdbCacheItem) GetTimestamp(curr int64) int64 {
-	l := tsdbLocks.GetLocks(item.cacheKey)
+	l := kvdbLocks.GetLocks(item.cacheKey)
 	l.Lock()
 	defer l.Unlock()
 
@@ -31,7 +29,6 @@ func (item *TsdbCacheItem) GetTimestamp(curr int64) int64 {
 
 func init() {
 	tsdbCache = caches.NewLruCacheWithReadTimeout(100000, nil, 30*time.Second)
-	tsdbLocks = tools.NewSegmentatedLocks(256)
 }
 
 func getTsdbCache(keyBs []byte) *TsdbCacheItem {
@@ -39,7 +36,7 @@ func getTsdbCache(keyBs []byte) *TsdbCacheItem {
 	if obj, exist := tsdbCache.Get(key); exist {
 		return obj.(*TsdbCacheItem)
 	} else {
-		l := tsdbLocks.GetLocks(key)
+		l := kvdbLocks.GetLocks(key)
 		l.Lock()
 		defer l.Unlock()
 		if obj, exist := tsdbCache.Get(key); exist {
@@ -57,20 +54,18 @@ func getTsdbCache(keyBs []byte) *TsdbCacheItem {
 
 func TsAppend(key []byte, value []byte) (int64, error) {
 	cacheItem := getTsdbCache(key)
-	fmt.Println(time.Now().UnixMilli())
-	fmt.Println()
 	timestamp := cacheItem.GetTimestamp(time.Now().UnixMilli())
 	keyBs := []byte{}
 	keyBs = append(keyBs, key...)
 	keyBs = append(keyBs, tools.Int64ToBytes(timestamp)...)
-	return timestamp, Put(keyBs, value)
+	return timestamp, Set(keyBs, value)
 }
 
 func TsAppendWithTime(key []byte, value []byte, timestamp int64) error {
 	keyBs := []byte{}
 	keyBs = append(keyBs, key...)
 	keyBs = append(keyBs, tools.Int64ToBytes(timestamp)...)
-	return Put(keyBs, value)
+	return Set(keyBs, value)
 }
 
 type TsItem struct {
@@ -94,6 +89,7 @@ func TsScan(key []byte, startTime int64, count int) ([]TsItem, error) {
 		if len(item.Key) > 8 {
 			bs := item.Key[len(item.Key)-8:]
 			timestamp = tools.BytesToInt64(bs)
+			item.Key = item.Key[:len(item.Key)-8]
 		}
 		ret = append(ret, TsItem{
 			Key:       item.Key,
