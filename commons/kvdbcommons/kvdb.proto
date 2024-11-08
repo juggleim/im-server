@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "./kvobjs";
+
+message KvMeta {
+    int32 valLen = 1;
+    string type = 2;
+    int64 expiredAt = 3;
+}
+
+message KvEvictItem{
+    repeated bytes keys = 1;
+}

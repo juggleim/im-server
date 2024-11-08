@@ -1,18 +1,19 @@
 package kvdbcommons
 
 import (
+	"im-server/commons/kvdbcommons/kvobjs"
+	"im-server/commons/logs"
 	"im-server/commons/tools"
-	"sync"
 	"time"
 )
 
 var evictTicker *time.Ticker
-var evictLock *sync.RWMutex
 var evictQueuePrefix []byte = []byte("kvdb_evict_queue")
-var expirePrefix []byte = []byte("kvdb_expire_prefix")
+var metaPrefix []byte = []byte("kvdb_meta_")
+var evictTaskPools *tools.SinglePools
 
 func init() {
-	evictLock = &sync.RWMutex{}
+	evictTaskPools = tools.NewSinglePools(32)
 }
 
 func startEvictTask() {
@@ -38,24 +39,29 @@ func cleanTimeoutData(timeLine int64) {
 			if len(item.Key) > 8 {
 				bs := item.Key[len(item.Key)-8:]
 				timestamp := tools.BytesToInt64(bs)
-				timestamp = timestamp >> 10
 				if timestamp < timeLine {
-					dataKey := item.Val
-
-					Delete(item.Key)
-					//delete expire record
-					expireKey := []byte{}
-					expireKey = append(expireKey, expirePrefix...)
-					expireKey = append(expireKey, dataKey...)
-					val, err := Get(expireKey)
+					evictItem := &kvobjs.KvEvictItem{}
+					err = tools.PbUnMarshal(item.Val, evictItem)
 					if err == nil {
-						expireAt := tools.BytesToInt64(val)
-						if expireAt < timeLine {
-							Delete(expireKey)
-							//delete data
-							Delete(dataKey)
+						for _, key := range evictItem.Keys {
+							//check expired & delete
+							metaKey := []byte{}
+							metaKey = append(metaKey, metaPrefix...)
+							metaKey = append(metaKey, key...)
+							metaVal, err := Get(metaKey)
+							if err == nil {
+								meta := &kvobjs.KvMeta{}
+								err = tools.PbUnMarshal(metaVal, meta)
+								if err == nil {
+									if meta.ExpiredAt < timeLine {
+										Delete(key)
+										Delete(metaKey)
+									}
+								}
+							}
 						}
 					}
+					Delete(item.Key)
 				} else {
 					break
 				}
@@ -64,47 +70,74 @@ func cleanTimeoutData(timeLine int64) {
 	}
 }
 
+func appendEvictQueue(key []byte, expiredAt int64) {
+	evictKey := []byte{}
+	evictKey = append(evictKey, evictQueuePrefix...)
+	evictKey = append(evictKey, tools.Int64ToBytes(expiredAt)...)
+	evictTaskPools.GetPool(Bytes2SafeKey(evictKey)).Submit(func() {
+		isExist, err := Exist(evictKey)
+		if err == nil {
+			if isExist {
+				val, err := Get(evictKey)
+				if err == nil {
+					var evictItem kvobjs.KvEvictItem
+					err = tools.PbUnMarshal(val, &evictItem)
+					if err == nil {
+						evictItem.Keys = append(evictItem.Keys, key)
+						newVal, _ := tools.PbMarshal(&evictItem)
+						err = Set(evictKey, newVal)
+						if err != nil {
+							logs.Errorf("[kvdb]failed store evict item err:%v", err)
+						}
+					}
+				}
+			} else {
+				evictItem := &kvobjs.KvEvictItem{
+					Keys: [][]byte{},
+				}
+				evictItem.Keys = append(evictItem.Keys, key)
+				newVal, _ := tools.PbMarshal(evictItem)
+				err = Set(evictKey, newVal)
+				if err != nil {
+					logs.Errorf("[kvdb]failed store evict item err:%v", err)
+				}
+			}
+		}
+	})
+}
+
 func ExpireAt(key []byte, expiredAt int64) {
-	retryCount := 3
-	var evictKey []byte
-	for retryCount > 0 {
-		randNum := tools.RandInt(1024)
-		evictKey = []byte{}
-		evictKey = append(evictKey, evictQueuePrefix...)
-		evictKey = append(evictKey, tools.Int64ToBytes(expiredAt<<10+int64(randNum))...)
-		exist, err := Exist(evictKey)
-		if err != nil {
-			return
-		}
-		if !exist {
-			break
-		}
-		retryCount--
-	}
-	Set(evictKey, key)
-	expireKey := []byte{}
-	expireKey = append(expireKey, expirePrefix...)
-	expireKey = append(expireKey, key...)
-	Set(expireKey, tools.Int64ToBytes(expiredAt))
+	//record meta
+	metaKey := []byte{}
+	metaKey = append(metaKey, metaPrefix...)
+	metaKey = append(metaKey, key...)
+	metaBs, _ := tools.PbMarshal(&kvobjs.KvMeta{
+		ExpiredAt: expiredAt,
+	})
+	Set(metaKey, metaBs)
+	//record to evict queue
+	appendEvictQueue(key, expiredAt)
 }
 
 func Expire(key []byte, duration time.Duration) {
-	curr := time.Now().UnixMilli()
-	curr = curr + int64(duration/1000/1000)
-	ExpireAt(key, curr)
+	expiredAt := time.Now().UnixMilli() + int64(duration/1000/1000)
+	ExpireAt(key, expiredAt)
 }
 
 func Ttl(key []byte) int64 {
-	expireKey := []byte{}
-	expireKey = append(expireKey, expirePrefix...)
-	expireKey = append(expireKey, key...)
-	val, err := Get(expireKey)
-	if err != nil {
-		return 0
+	metaKey := []byte{}
+	metaKey = append(metaKey, metaPrefix...)
+	metaKey = append(metaKey, key...)
+	val, err := Get(metaKey)
+	if err == nil {
+		var kvMeta kvobjs.KvMeta
+		err = tools.PbUnMarshal(val, &kvMeta)
+		if err == nil {
+			result := kvMeta.ExpiredAt - time.Now().UnixMilli()
+			if result > 0 {
+				return result
+			}
+		}
 	}
-	result := tools.BytesToInt64(val) - time.Now().UnixMilli()
-	if result < 0 {
-		return 0
-	}
-	return result
+	return 0
 }
