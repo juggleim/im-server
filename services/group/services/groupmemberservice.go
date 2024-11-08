@@ -206,6 +206,7 @@ func GetGroupMembersFromDb(ctx context.Context, appkey, groupId string) map[stri
 				grpMember := &GroupMember{
 					MemberId:    dbMember.MemberId,
 					IsMute:      dbMember.IsMute,
+					MuteEndAt:   dbMember.MuteEndAt,
 					IsAllow:     dbMember.IsAllow,
 					CreatedTime: dbMember.CreatedTime.UnixMilli(),
 					// Settings:    &commonservices.GrpMemberSettings{},
@@ -241,11 +242,11 @@ func SetGroupMemberMute(ctx context.Context, req *pbobjs.GroupMemberMuteReq) err
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	//update db
 	dao := dbs.GroupMemberDao{}
-	dao.UpdateMute(appkey, req.GroupId, int(req.IsMute), req.MemberIds)
+	dao.UpdateMute(appkey, req.GroupId, int(req.IsMute), req.MemberIds, req.MuteEndAt)
 	//update cache
 	container, exist := GetGroupMembersFromCache(ctx, appkey, req.GroupId)
 	if exist {
-		container.SetMemberMute(req.IsMute, req.MemberIds)
+		container.SetMemberMute(req.IsMute, req.MemberIds, req.MuteEndAt)
 	}
 	return errs.IMErrorCode_SUCCESS
 }
@@ -271,11 +272,16 @@ func QryGroupMembersByIds(ctx context.Context, req *pbobjs.GroupMembersReq) (err
 	container, exist := GetGroupMembersFromCache(ctx, appkey, req.GroupId)
 	if exist {
 		memberMap := container.GetMemberMap()
+		curr := time.Now().UnixMilli()
 		for _, memberId := range req.MemberIds {
 			if member, ok := memberMap[memberId]; ok {
+				isMute := member.IsMute
+				if isMute > 0 && member.MuteEndAt < curr {
+					isMute = 0
+				}
 				resp.Items = append(resp.Items, &pbobjs.GroupMember{
 					MemberId: memberId,
-					IsMute:   int32(member.IsMute),
+					IsMute:   int32(isMute),
 					IsAllow:  int32(member.IsAllow),
 				})
 			}
@@ -297,10 +303,15 @@ func QryGroupMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 	dao := dbs.GroupMemberDao{}
 	members, err := dao.QueryMembers(appkey, req.GroupId, startId, req.Limit)
 	if err == nil {
+		curr := time.Now().UnixMilli()
 		for _, member := range members {
+			isMute := member.IsMute
+			if isMute > 0 && member.MuteEndAt < curr {
+				isMute = 0
+			}
 			resp.Items = append(resp.Items, &pbobjs.GroupMember{
 				MemberId: member.MemberId,
-				IsMute:   int32(member.IsMute),
+				IsMute:   int32(isMute),
 				IsAllow:  int32(member.IsAllow),
 			})
 			offset, err := tools.EncodeInt(member.ID)
@@ -352,6 +363,7 @@ func QryMemberSettings(ctx context.Context, groupId string, memberId string) (er
 type GroupMember struct {
 	MemberId    string
 	IsMute      int
+	MuteEndAt   int64
 	IsAllow     int
 	CreatedTime int64 //join time
 }
@@ -422,7 +434,7 @@ func (container *GroupMemberContainer) GetMember(memberId string) *GroupMember {
 	}
 }
 
-func (container *GroupMemberContainer) SetMemberMute(isMute int32, memberIds []string) {
+func (container *GroupMemberContainer) SetMemberMute(isMute int32, memberIds []string, muteEndAt int64) {
 	key := getGroupKey(container.Appkey, container.GroupId)
 	lock := groupLocks.GetLocks(key)
 	lock.Lock()
@@ -430,6 +442,11 @@ func (container *GroupMemberContainer) SetMemberMute(isMute int32, memberIds []s
 	for _, memberId := range memberIds {
 		if member, exist := container.Members[memberId]; exist {
 			member.IsMute = int(isMute)
+			if isMute == 0 {
+				member.MuteEndAt = 0
+			} else {
+				member.MuteEndAt = muteEndAt
+			}
 		}
 	}
 }

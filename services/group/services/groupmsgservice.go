@@ -231,7 +231,11 @@ func checkGroupMemberIsMute(ctx context.Context, groupId, memberId string) bool 
 	if exist {
 		member := groupContainer.GetMember(memberId)
 		if member != nil && member.IsMute > 0 {
-			return true
+			if member.MuteEndAt <= 0 {
+				return true
+			} else if member.MuteEndAt > time.Now().UnixMilli() {
+				return true
+			}
 		}
 	}
 	return false

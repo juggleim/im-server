@@ -8,6 +8,7 @@ import (
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/proto"
@@ -188,10 +189,15 @@ func GroupMemberMute(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
+	var muteEndAt int64 = 0
+	if muteReq.IsMute > 0 && muteReq.MuteMinute > 0 {
+		muteEndAt = time.Now().UnixMilli() + int64(muteReq.MuteMinute*60*1000)
+	}
 	code, _, err := services.SyncApiCall(ctx, "group_member_mute", "", muteReq.GroupId, &pbobjs.GroupMemberMuteReq{
 		GroupId:   muteReq.GroupId,
 		MemberIds: muteReq.MemberIds,
 		IsMute:    int32(muteReq.IsMute),
+		MuteEndAt: muteEndAt,
 	}, nil)
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)

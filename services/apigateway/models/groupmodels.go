@@ -34,9 +34,10 @@ type GroupMembersResp struct {
 }
 
 type GroupMemberMuteReq struct {
-	GroupId   string   `json:"group_id"`
-	MemberIds []string `json:"member_ids"`
-	IsMute    int      `json:"is_mute"`
+	GroupId    string   `json:"group_id"`
+	MemberIds  []string `json:"member_ids"`
+	IsMute     int      `json:"is_mute"`
+	MuteMinute int      `json:"mute_minute"`
 }
 
 type GroupMemberAllowReq struct {

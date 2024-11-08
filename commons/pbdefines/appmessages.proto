@@ -720,6 +720,7 @@ message GroupMemberMuteReq{
   string groupId = 1;
   repeated string memberIds = 2;
   int32 isMute = 3;
+  int64 muteEndAt = 4;
 }
 
 message GroupMemberAllowReq{
