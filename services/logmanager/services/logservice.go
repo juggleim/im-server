@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"im-server/commons/kvdbcommons"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -15,7 +14,6 @@ type LogEntity struct {
 
 func WriteUserConnectLog(data *pbobjs.UserConnectLog) error {
 	data.RealTime = data.Timestamp
-	fmt.Println(data.RealTime)
 	key := strings.Join([]string{string(ServerLogType_UserConnect), data.AppKey, data.UserId}, "_")
 	_, err := kvdbcommons.TsAppend([]byte(key), []byte(tools.ToJson(data)))
 	return err
