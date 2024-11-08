@@ -361,6 +361,7 @@ func QryBlockUsers(ctx *gin.Context) {
 	}
 	offsetStr := ctx.Query("offset")
 	code, resp, err := services.SyncApiCall(ctx, "qry_block_users", userId, userId, &pbobjs.QryBlockUsersReq{
+		UserId: userId,
 		Limit:  limit,
 		Offset: offsetStr,
 	}, func() proto.Message {
