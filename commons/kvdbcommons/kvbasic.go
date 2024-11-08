@@ -2,7 +2,6 @@ package kvdbcommons
 
 import (
 	"bytes"
-	"encoding/base64"
 	"im-server/commons/kvdbcommons/kvobjs"
 	"im-server/commons/tools"
 	"time"
@@ -78,7 +77,7 @@ func Exist(key []byte) (bool, error) {
 }
 
 func SetNx(key, value []byte) (bool, error) {
-	lock := kvdbLocks.GetLocks(base64.URLEncoding.EncodeToString(key))
+	lock := kvdbLocks.GetLocks(Bytes2SafeKey(key))
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -93,7 +92,7 @@ func SetNx(key, value []byte) (bool, error) {
 }
 
 func SetNxWithIncrByStep(key []byte, step int64) (bool, int64, error) {
-	lock := kvdbLocks.GetLocks(base64.URLEncoding.EncodeToString(key))
+	lock := kvdbLocks.GetLocks(Bytes2SafeKey(key))
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -115,6 +114,28 @@ func SetNxWithIncrByStep(key []byte, step int64) (bool, int64, error) {
 
 func SetNxWithIncr(key []byte) (bool, int64, error) {
 	return SetNxWithIncrByStep(key, 1)
+}
+
+func SetNxExWithIncrByStep(key []byte, step int64, duration time.Duration) (bool, int64, error) {
+	lock := kvdbLocks.GetLocks(Bytes2SafeKey(key))
+	lock.Lock()
+	defer lock.Unlock()
+
+	isExist, err := Exist(key)
+	if err == nil {
+		if isExist {
+			val, err := Get(key)
+			if err != nil {
+				return false, 0, err
+			}
+			intVal := tools.BytesToInt64(val)
+			intVal = intVal + step
+			return false, intVal, Set(key, tools.Int64ToBytes(intVal))
+		} else {
+			return true, step, SetEx(key, tools.Int64ToBytes(step), duration)
+		}
+	}
+	return false, 0, err
 }
 
 func Delete(key []byte) error {

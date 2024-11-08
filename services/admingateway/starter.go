@@ -74,6 +74,7 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	//statistic
 	group.GET("/apps/statistic/msg", apis.QryMsgStatistic)
 	group.GET("/apps/statistic/useractivity", apis.QryUserActivities)
+	group.GET("/apps/statistic/connectcount", apis.QryConnectCount)
 	group.GET("/apps/statistic/userreg", apis.QryUserRegiste)
 
 	group.GET("/apps/sensitivewords/list", apis.SensitiveWords)

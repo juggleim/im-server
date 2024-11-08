@@ -16,7 +16,7 @@ func InitKvdb() (err error) {
 	if configures.Config.Kvdb.IsOpen {
 		path := configures.Config.Kvdb.DataPath
 		if path == "" {
-			path = fmt.Sprintf("%s/tsdb_data", configures.Config.Log.LogPath)
+			path = fmt.Sprintf("%s/kvdb_data", configures.Config.Log.LogPath)
 		}
 		o := &opt.Options{
 			Filter:              filter.NewBloomFilter(10),

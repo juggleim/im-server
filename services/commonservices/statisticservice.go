@@ -3,6 +3,7 @@ package commonservices
 import (
 	"fmt"
 	"im-server/commons/caches"
+	"im-server/commons/kvdbcommons"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
@@ -250,4 +251,58 @@ type UserActivityCounter struct {
 
 func (c *UserActivityCounter) Incry() {
 	atomic.AddInt64(&c.Count, 1)
+}
+
+func ReportConcurrentConnectCount(appkey string, count int64) {
+	current := time.Now().UnixMilli()
+	timeMark := current / 30000 * 30000
+	key := fmt.Sprintf("concurrent_connect:%s_%d", appkey, timeMark)
+	kvdbcommons.SetNxExWithIncrByStep(tools.String2Bytes(key), count, 3*24*time.Hour)
+}
+
+type ConcurrentConnectItem struct {
+	TimeMark int64 `json:"time_mark"`
+	Count    int64 `json:"count"`
+}
+
+func QryConncurrentConnect(appkey string, start, end int64) *Statistics {
+	ret := &Statistics{
+		Items: []interface{}{},
+	}
+	prefix := fmt.Sprintf("concurrent_connect:%s_", appkey)
+	for {
+		startBs := []byte{}
+		if start > 0 {
+			startBs = append(startBs, tools.Int64ToBytes(start)...)
+		}
+		items, err := kvdbcommons.Scan([]byte(prefix), startBs, 1000)
+		if err != nil && len(items) <= 0 {
+			break
+		}
+		for _, item := range items {
+			if len(item.Key) > 13 {
+				bs := item.Key[len(item.Key)-13:]
+				timestamp, err := tools.String2Int64(string(bs))
+				if err == nil {
+					ret.Items = append(ret.Items, &ConcurrentConnectItem{
+						TimeMark: timestamp,
+						Count:    tools.BytesToInt64(item.Val),
+					})
+					if timestamp > end {
+						break
+					}
+					start = timestamp
+				} else {
+					break
+				}
+			} else {
+				break
+			}
+		}
+		if len(items) < 1000 {
+			break
+		}
+		break
+	}
+	return ret
 }
