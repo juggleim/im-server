@@ -654,7 +654,7 @@ CREATE TABLE `sensitivewords` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用key',
   `word` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '敏感词',
-  `word_type` tinyint(1) NOT NULL DEFAULT '1' COMMENT '12' COMMENT '敏感词过滤类型。1：拦截敏感词；2：替换敏感词；',
+  `word_type` tinyint(1) NOT NULL DEFAULT '1' COMMENT '敏感词过滤类型。1：拦截敏感词；2：替换敏感词；',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
