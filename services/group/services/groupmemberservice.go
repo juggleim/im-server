@@ -19,6 +19,10 @@ func init() {
 }
 
 func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait string, memberIds []string, extFields []*pbobjs.KvItem) errs.IMErrorCode {
+	if groupId == "" || groupName == "" {
+		return errs.IMErrorCode_API_PARAM_REQUIRED
+	}
+
 	appKey := bases.GetAppKeyFromCtx(ctx)
 	//check group exist
 	_, exist := GetGroupInfoFromCache(ctx, appKey, groupId)
