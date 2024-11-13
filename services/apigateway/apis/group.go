@@ -137,7 +137,12 @@ func GroupMute(ctx *gin.Context) {
 
 func QryGroupInfo(ctx *gin.Context) {
 	groupId := ctx.Query("group_id")
-	code, groupInfo, err := services.SyncApiCall(ctx, "qry_group_info", "", groupId, &pbobjs.GroupInfoReq{}, func() proto.Message {
+
+	groupReq := &pbobjs.GroupInfoReq{
+		GroupId:    groupId,
+		CareFields: []string{},
+	}
+	code, groupInfo, err := services.SyncApiCall(ctx, "qry_group_info", "", groupId, groupReq, func() proto.Message {
 		return &pbobjs.GroupInfo{}
 	})
 	if err != nil {
