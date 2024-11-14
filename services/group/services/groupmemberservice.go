@@ -22,7 +22,7 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 	if groupId == "" {
 		return errs.IMErrorCode_API_PARAM_REQUIRED
 	}
-
+	groupName = tools.TruncateText(groupName, 64)
 	appKey := bases.GetAppKeyFromCtx(ctx)
 	//check group exist
 	grpInfo, exist := GetGroupInfoFromCache(ctx, appKey, groupId)
