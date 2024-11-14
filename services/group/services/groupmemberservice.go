@@ -25,7 +25,7 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 
 	appKey := bases.GetAppKeyFromCtx(ctx)
 	//check group exist
-	_, exist := GetGroupInfoFromCache(ctx, appKey, groupId)
+	grpInfo, exist := GetGroupInfoFromCache(ctx, appKey, groupId)
 	if !exist {
 		//create group
 		if groupName == "" {
@@ -60,6 +60,22 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 				UpdatedTime:   time.Now().UnixMilli(),
 				ExtFields:     commonservices.Kvitems2Map(extFields),
 			})
+		}
+	} else {
+		grpName := ""
+		grpPortrait := ""
+		if grpInfo.GroupName == "" && groupName != "" {
+			grpName = groupName
+			grpInfo.GroupName = groupName
+		}
+		if grpInfo.GroupPortrait == "" && groupPortrait != "" {
+			grpPortrait = groupPortrait
+			grpInfo.GroupPortrait = groupPortrait
+		}
+		if grpName != "" || grpPortrait != "" {
+			grpInfo.GroupName = groupName
+			grpDao := dbs.GroupDao{}
+			grpDao.UpdateGrpName(appKey, groupId, grpName, grpPortrait)
 		}
 	}
 
