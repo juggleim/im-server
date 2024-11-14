@@ -38,7 +38,25 @@ func SetGroupSettings(ctx *gin.Context) {
 }
 
 func GetGroupSettings(ctx *gin.Context) {
-	tools.SuccessHttpResp(ctx, nil)
+	groupId := ctx.Query("group_id")
+
+	groupReq := &pbobjs.GroupInfoReq{
+		GroupId:    groupId,
+		CareFields: []string{},
+	}
+	code, groupInfo, err := services.SyncApiCall(ctx, "get_grp_setting", "", groupId, groupReq, func() proto.Message {
+		return &pbobjs.GroupInfo{}
+	})
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != int32(errs.IMErrorCode_SUCCESS) {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+		return
+	}
+
+	tools.SuccessHttpResp(ctx, groupInfo)
 }
 
 func GroupAddMembers(ctx *gin.Context) {
