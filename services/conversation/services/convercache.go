@@ -112,6 +112,7 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 			cacheConver.SyncTime = conver.SyncTime
 			uc.SyncTimeIndex.Add(float64(conver.SyncTime), itemKey)
 		}
+		cacheConver.IsDeleted = 0
 	} else {
 		item := &models.Conversation{
 			AppKey:               uc.Appkey,
