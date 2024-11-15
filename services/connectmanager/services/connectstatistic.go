@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/imcontext"
 	"strings"
@@ -51,7 +50,6 @@ func foreachConnect() {
 		return true
 	})
 	for appkey, count := range connectCountMap {
-		fmt.Println(appkey, "\t", count)
 		commonservices.ReportConcurrentConnectCount(appkey, count)
 	}
 }

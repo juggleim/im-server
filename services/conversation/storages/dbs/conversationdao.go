@@ -146,7 +146,7 @@ func (conver *ConversationDao) Upsert(item models.Conversation) error {
 		item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex,
 		item.LatestReadMsgIndex, item.LatestReadMsgId, item.LatestReadMsgTime,
 		item.IsTop, item.TopUpdatedTime, item.UndisturbType,
-		item.UndisturbType,
+		item.UnreadTag,
 		item.IsDeleted,
 	)
 	sqlBuilder.WriteString("sort_time=VALUES(sort_time),sync_time=VALUES(sync_time),latest_msg_id=VALUES(latest_msg_id),latest_msg=VALUES(latest_msg),latest_unread_msg_index=VALUES(latest_unread_msg_index),")
@@ -178,7 +178,7 @@ func (conver *ConversationDao) BatchUpsert(items []models.Conversation) error {
 			item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex,
 			item.LatestReadMsgIndex, item.LatestReadMsgId, item.LatestReadMsgTime,
 			item.IsTop, item.TopUpdatedTime, item.UndisturbType,
-			item.UndisturbType,
+			item.UnreadTag,
 			item.IsDeleted,
 		)
 	}

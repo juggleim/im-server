@@ -45,7 +45,7 @@ func NewLruCacheWithReadTimeout(size int, onEvict simplelru.EvictCallback, timeo
 func NewLruCache(size int, onEvict simplelru.EvictCallback) *LruCache {
 	myLru, _ := simplelru.NewLRU(size, func(key, value interface{}) {
 		if onEvict != nil && value != nil {
-			cacheItem, ok := value.(lruCacheItem)
+			cacheItem, ok := value.(*lruCacheItem)
 			if ok {
 				onEvict(key, cacheItem.value)
 			}
@@ -99,7 +99,7 @@ func (c *LruCache) cleanOldestByReadTime(timeLine int64) {
 	for {
 		itemKey, itemValue, ok := c.lru.GetOldest()
 		if ok {
-			valObj := itemValue.(lruCacheItem)
+			valObj := itemValue.(*lruCacheItem)
 			lastReadTime := valObj.lastReadTime
 			if lastReadTime < timeLine {
 				c.Remove(itemKey)
@@ -144,9 +144,19 @@ func (c *LruCache) AddIfAbsent(key, value interface{}) (interface{}, bool) {
 	return value, true
 }
 
+func (c *LruCache) AddIfAbsendNoGetOldVal(key, value interface{}) bool {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.innerContains(key) {
+		return false
+	}
+	c.innerAdd(key, value)
+	return true
+}
+
 func (c *LruCache) innerAdd(key, value interface{}) bool {
 	nowTime := time.Now().UnixMilli()
-	return c.lru.Add(key, lruCacheItem{
+	return c.lru.Add(key, &lruCacheItem{
 		value:        value,
 		lastReadTime: nowTime,
 		addedTime:    nowTime,
@@ -161,7 +171,7 @@ func (c *LruCache) Get(key interface{}) (interface{}, bool) {
 func (c *LruCache) innerGet(key interface{}) (interface{}, bool) {
 	item, ok := c.lru.Get(key)
 	if ok {
-		cacheItem := item.(lruCacheItem)
+		cacheItem := item.(*lruCacheItem)
 		if c.MaxLifeCycle > 0 {
 			timeLine := time.Now().UnixMilli() - int64(c.MaxLifeCycle)/1000/1000
 			if cacheItem.addedTime < timeLine { //remove
@@ -217,7 +227,7 @@ func (c *LruCache) Peek(key interface{}) (interface{}, bool) {
 	defer c.lock.Unlock()
 	item, ok := c.lru.Peek(key)
 	if ok {
-		return item.(lruCacheItem).value, ok
+		return item.(*lruCacheItem).value, ok
 	} else {
 		return nil, ok
 	}

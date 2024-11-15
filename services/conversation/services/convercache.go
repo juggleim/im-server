@@ -267,7 +267,7 @@ func (uc *UserConversations) purge() {
 
 func (uc *UserConversations) PersistConver(targetId string, channelType pbobjs.ChannelType) {
 	key := fmt.Sprintf("%s_%s_%s_%d", uc.Appkey, uc.UserId, targetId, channelType)
-	persistCache.AddIfAbsent(key, &ConverPersistIndex{
+	persistCache.AddIfAbsendNoGetOldVal(key, &ConverPersistIndex{
 		Appkey:      uc.Appkey,
 		UserId:      uc.UserId,
 		TargetId:    targetId,
