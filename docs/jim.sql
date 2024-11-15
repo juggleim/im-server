@@ -97,7 +97,7 @@ CREATE TABLE `blocks` (
 
 DROP TABLE IF EXISTS `brdinboxmsgs`;
 CREATE TABLE `brdinboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -122,7 +122,7 @@ CREATE TABLE `chatroominfos` (
 
 DROP TABLE IF EXISTS `cmdinboxmsgs`;
 CREATE TABLE `cmdinboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -141,7 +141,7 @@ CREATE TABLE `cmdinboxmsgs` (
 
 DROP TABLE IF EXISTS `cmdsendboxmsgs`;
 CREATE TABLE `cmdsendboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -171,7 +171,7 @@ CREATE TABLE `convercleantimes` (
 
 DROP TABLE IF EXISTS `conversations`;
 CREATE TABLE `conversations` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
   `channel_type` tinyint DEFAULT '0' COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
@@ -439,7 +439,7 @@ CREATE TABLE `ic_conditions` (
 
 DROP TABLE IF EXISTS `inboxmsgs`;
 CREATE TABLE `inboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -634,7 +634,7 @@ CREATE TABLE `s_hismsgs` (
 
 DROP TABLE IF EXISTS `sendboxmsgs`;
 CREATE TABLE `sendboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
