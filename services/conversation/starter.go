@@ -13,6 +13,12 @@ var serviceName string = "conversation"
 type ConversationManager struct{}
 
 func (manager *ConversationManager) RegisterActors(register gmicro.IActorRegister) {
+	register.RegisterActor("add_conver", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.AddConversationActor{}, serviceName)
+	})
+	register.RegisterActor("batch_add_conver", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.BatchAddConversationActor{}, serviceName)
+	})
 	register.RegisterActor("sync_convers", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SyncConversationsActor{}, serviceName)
 	})
@@ -45,9 +51,6 @@ func (manager *ConversationManager) RegisterActors(register gmicro.IActorRegiste
 	})
 	register.RegisterActor("qry_top_convers", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryTopConversActor{}, serviceName)
-	})
-	register.RegisterActor("add_conver", func() actorsystem.IUntypedActor {
-		return bases.BaseProcessActor(&actors.AddConversationActor{}, serviceName)
 	})
 	// register.RegisterActor("qry_undisturb", func() actorsystem.IUntypedActor {
 	// 	return bases.BaseProcessActor(&actors.QryUndisturbActor{})
