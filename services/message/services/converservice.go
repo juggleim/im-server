@@ -7,6 +7,7 @@ import (
 	"im-server/commons/caches"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"sync"
 	"time"
@@ -15,7 +16,8 @@ import (
 )
 
 var (
-	converCache *caches.LruCache
+	batchExecutorPool *tools.BatchExecutorPool
+	converCache       *caches.LruCache
 
 	UndisturbType_None   int32 = 0
 	UndisturbType_Normal int32 = 1
@@ -23,6 +25,7 @@ var (
 
 func init() {
 	converCache = caches.NewLruCacheWithAddReadTimeout(100000, nil, 10*time.Minute, 10*time.Minute)
+	batchExecutorPool = tools.NewBatchExecutorPool(128, 100, 2*time.Second, batchSaveConver)
 }
 
 type UserConversationItem struct {
@@ -166,4 +169,37 @@ func HandleDownMsgByConver(ctx context.Context, userId, targetId string, channel
 		downMsg.UnreadIndex = conver.GetUnreadIndex()
 	}
 	downMsg.ConverTags = append(downMsg.ConverTags, conver.ConverTags...)
+}
+
+type BatchConverItem struct {
+	Appkey string
+	UserId string
+	Msg    *pbobjs.DownMsg
+}
+
+func batchSaveConver(tasks []interface{}) {
+	grp4Appkey := map[string][]*pbobjs.Conversation{}
+	for _, task := range tasks {
+		item, ok := task.(*BatchConverItem)
+		if ok && item != nil {
+			var items []*pbobjs.Conversation
+			if existItems, ok := grp4Appkey[item.Appkey]; ok {
+				items = existItems
+			} else {
+				items = []*pbobjs.Conversation{}
+			}
+			items = append(items, &pbobjs.Conversation{
+				UserId: item.UserId,
+				Msg:    item.Msg,
+			})
+			grp4Appkey[item.Appkey] = items
+		}
+	}
+	for appkey, convers := range grp4Appkey {
+		//build context
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, bases.CtxKey_AppKey, appkey)
+		ctx = context.WithValue(ctx, bases.CtxKey_Session, tools.GenerateUUIDShort11())
+		commonservices.BatchSaveConversation(ctx, convers)
+	}
 }
