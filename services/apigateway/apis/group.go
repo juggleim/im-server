@@ -155,7 +155,10 @@ func GroupMute(ctx *gin.Context) {
 
 func QryGroupInfo(ctx *gin.Context) {
 	groupId := ctx.Query("group_id")
-
+	if groupId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
+		return
+	}
 	groupReq := &pbobjs.GroupInfoReq{
 		GroupId:    groupId,
 		CareFields: []string{},
