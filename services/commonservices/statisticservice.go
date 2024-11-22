@@ -265,10 +265,8 @@ type ConcurrentConnectItem struct {
 	Count    int64 `json:"count"`
 }
 
-func QryConncurrentConnect(appkey string, start, end int64) *Statistics {
-	ret := &Statistics{
-		Items: []interface{}{},
-	}
+func QryConncurrentConnect(appkey string, start, end int64) []*ConcurrentConnectItem {
+	retItems := []*ConcurrentConnectItem{}
 	prefix := fmt.Sprintf("concurrent_connect:%s_", appkey)
 	for {
 		startBs := []byte{}
@@ -284,7 +282,7 @@ func QryConncurrentConnect(appkey string, start, end int64) *Statistics {
 				bs := item.Key[len(item.Key)-13:]
 				timestamp, err := tools.String2Int64(string(bs))
 				if err == nil {
-					ret.Items = append(ret.Items, &ConcurrentConnectItem{
+					retItems = append(retItems, &ConcurrentConnectItem{
 						TimeMark: timestamp,
 						Count:    tools.BytesToInt64(item.Val),
 					})
@@ -302,7 +300,6 @@ func QryConncurrentConnect(appkey string, start, end int64) *Statistics {
 		if len(items) < 1000 {
 			break
 		}
-		break
 	}
-	return ret
+	return retItems
 }

@@ -37,7 +37,7 @@ func (actor *QryLogsActor) OnReceive(ctx context.Context, input proto.Message) {
 		ack := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_SUCCESS, ret)
 		actor.Sender.Tell(ack, actorsystem.NoSender)
 	} else {
-		logs.WithContext(ctx).Infof("input is illegal")
+		logs.WithContext(ctx).Info("input is illegal")
 	}
 }
 

@@ -629,6 +629,163 @@ func (x *BusinessLog) GetAppKey() string {
 	return ""
 }
 
+type QryConnectCountReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Start int64 `protobuf:"varint,1,opt,name=start,proto3" json:"start,omitempty"`
+	End   int64 `protobuf:"varint,2,opt,name=end,proto3" json:"end,omitempty"`
+}
+
+func (x *QryConnectCountReq) Reset() {
+	*x = QryConnectCountReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_serverlog_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QryConnectCountReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QryConnectCountReq) ProtoMessage() {}
+
+func (x *QryConnectCountReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_serverlog_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QryConnectCountReq.ProtoReflect.Descriptor instead.
+func (*QryConnectCountReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_serverlog_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *QryConnectCountReq) GetStart() int64 {
+	if x != nil {
+		return x.Start
+	}
+	return 0
+}
+
+func (x *QryConnectCountReq) GetEnd() int64 {
+	if x != nil {
+		return x.End
+	}
+	return 0
+}
+
+type QryConnectCountResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Items []*ConnectCountItem `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+}
+
+func (x *QryConnectCountResp) Reset() {
+	*x = QryConnectCountResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_serverlog_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QryConnectCountResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QryConnectCountResp) ProtoMessage() {}
+
+func (x *QryConnectCountResp) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_serverlog_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QryConnectCountResp.ProtoReflect.Descriptor instead.
+func (*QryConnectCountResp) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_serverlog_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *QryConnectCountResp) GetItems() []*ConnectCountItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ConnectCountItem struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TimeMark int64 `protobuf:"varint,1,opt,name=timeMark,proto3" json:"timeMark,omitempty"`
+	Count    int64 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+}
+
+func (x *ConnectCountItem) Reset() {
+	*x = ConnectCountItem{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_serverlog_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ConnectCountItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConnectCountItem) ProtoMessage() {}
+
+func (x *ConnectCountItem) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_serverlog_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConnectCountItem.ProtoReflect.Descriptor instead.
+func (*ConnectCountItem) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_serverlog_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ConnectCountItem) GetTimeMark() int64 {
+	if x != nil {
+		return x.TimeMark
+	}
+	return 0
+}
+
+func (x *ConnectCountItem) GetCount() int64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
 var File_commons_pbdefines_serverlog_proto protoreflect.FileDescriptor
 
 var file_commons_pbdefines_serverlog_proto_rawDesc = []byte{
@@ -709,10 +866,22 @@ var file_commons_pbdefines_serverlog_proto_rawDesc = []byte{
 	0x01, 0x28, 0x09, 0x52, 0x06, 0x6d, 0x65, 0x74, 0x68, 0x6f, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x6d,
 	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65,
 	0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x70, 0x70, 0x4b, 0x65, 0x79, 0x18,
-	0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x70, 0x70, 0x4b, 0x65, 0x79, 0x42, 0x1a, 0x5a,
-	0x18, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x73, 0x2f, 0x70, 0x62, 0x64, 0x65, 0x66, 0x69, 0x6e,
-	0x65, 0x73, 0x2f, 0x70, 0x62, 0x6f, 0x62, 0x6a, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x70, 0x70, 0x4b, 0x65, 0x79, 0x22, 0x3c, 0x0a,
+	0x12, 0x51, 0x72, 0x79, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x75, 0x6e, 0x74,
+	0x52, 0x65, 0x71, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x72, 0x74, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x05, 0x73, 0x74, 0x61, 0x72, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x65, 0x6e, 0x64,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x03, 0x65, 0x6e, 0x64, 0x22, 0x3e, 0x0a, 0x13, 0x51,
+	0x72, 0x79, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x65,
+	0x73, 0x70, 0x12, 0x27, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x11, 0x2e, 0x43, 0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x75, 0x6e, 0x74,
+	0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x44, 0x0a, 0x10, 0x43,
+	0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x49, 0x74, 0x65, 0x6d, 0x12,
+	0x1a, 0x0a, 0x08, 0x74, 0x69, 0x6d, 0x65, 0x4d, 0x61, 0x72, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x08, 0x74, 0x69, 0x6d, 0x65, 0x4d, 0x61, 0x72, 0x6b, 0x12, 0x14, 0x0a, 0x05, 0x63,
+	0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e,
+	0x74, 0x42, 0x1a, 0x5a, 0x18, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x73, 0x2f, 0x70, 0x62, 0x64,
+	0x65, 0x66, 0x69, 0x6e, 0x65, 0x73, 0x2f, 0x70, 0x62, 0x6f, 0x62, 0x6a, 0x73, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -727,26 +896,30 @@ func file_commons_pbdefines_serverlog_proto_rawDescGZIP() []byte {
 	return file_commons_pbdefines_serverlog_proto_rawDescData
 }
 
-var file_commons_pbdefines_serverlog_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_commons_pbdefines_serverlog_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_commons_pbdefines_serverlog_proto_goTypes = []interface{}{
-	(*QryServerLogsReq)(nil),  // 0: QryServerLogsReq
-	(*QryServerLogsResp)(nil), // 1: QryServerLogsResp
-	(*LogEntities)(nil),       // 2: LogEntities
-	(*LogEntity)(nil),         // 3: LogEntity
-	(*UserConnectLog)(nil),    // 4: UserConnectLog
-	(*ConnectionLog)(nil),     // 5: ConnectionLog
-	(*BusinessLog)(nil),       // 6: BusinessLog
+	(*QryServerLogsReq)(nil),    // 0: QryServerLogsReq
+	(*QryServerLogsResp)(nil),   // 1: QryServerLogsResp
+	(*LogEntities)(nil),         // 2: LogEntities
+	(*LogEntity)(nil),           // 3: LogEntity
+	(*UserConnectLog)(nil),      // 4: UserConnectLog
+	(*ConnectionLog)(nil),       // 5: ConnectionLog
+	(*BusinessLog)(nil),         // 6: BusinessLog
+	(*QryConnectCountReq)(nil),  // 7: QryConnectCountReq
+	(*QryConnectCountResp)(nil), // 8: QryConnectCountResp
+	(*ConnectCountItem)(nil),    // 9: ConnectCountItem
 }
 var file_commons_pbdefines_serverlog_proto_depIdxs = []int32{
 	3, // 0: LogEntities.entities:type_name -> LogEntity
 	4, // 1: LogEntity.userConnectLog:type_name -> UserConnectLog
 	5, // 2: LogEntity.connectionLog:type_name -> ConnectionLog
 	6, // 3: LogEntity.businessLog:type_name -> BusinessLog
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	9, // 4: QryConnectCountResp.items:type_name -> ConnectCountItem
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_serverlog_proto_init() }
@@ -839,6 +1012,42 @@ func file_commons_pbdefines_serverlog_proto_init() {
 				return nil
 			}
 		}
+		file_commons_pbdefines_serverlog_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QryConnectCountReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_serverlog_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QryConnectCountResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_serverlog_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ConnectCountItem); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_commons_pbdefines_serverlog_proto_msgTypes[3].OneofWrappers = []interface{}{
 		(*LogEntity_UserConnectLog)(nil),
@@ -851,7 +1060,7 @@ func file_commons_pbdefines_serverlog_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_commons_pbdefines_serverlog_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
