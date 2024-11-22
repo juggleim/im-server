@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -11,11 +12,9 @@ import (
 )
 
 var MsgSinglePools *tools.SinglePools
-var GrpSinglePools *tools.SinglePools
 
 func init() {
 	MsgSinglePools = tools.NewSinglePools(8192)
-	GrpSinglePools = tools.NewSinglePools(256)
 }
 
 func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
@@ -34,8 +33,7 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 			threadhold = appinfo.BigGrpThreshold
 		}
 		if downMsg.MemberCount > int32(threadhold) {
-			//GrpSinglePools.GetPool(strings.Join([]string{appkey, downMsg.TargetId}, "_")).Submit(func() {
-			preheat(ctx, appkey, memberIds, downMsg)
+			preheat(ctx, appkey, memberIds)
 			for _, receiverId := range memberIds {
 				newDownMsg := copyDownMsg(downMsg)
 				receId := receiverId
@@ -45,7 +43,6 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 					doDispatch(ctx, receId, newDownMsg, closeOffline)
 				})
 			}
-			//})
 		} else {
 			for _, receiverId := range memberIds {
 				newDownMsg := copyDownMsg(downMsg)
@@ -58,24 +55,17 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 	}
 }
 
-func preheat(ctx context.Context, appkey string, memberIds []string, downMsg *pbobjs.DownMsg) {
+func preheat(ctx context.Context, appkey string, memberIds []string) {
 	//preheat user status
 	noStatusCacheUids := []string{}
-	//noConverCacheUids := []string{}
 	for _, receiverId := range memberIds {
 		if !UserStatusCacheContains(appkey, receiverId) {
 			noStatusCacheUids = append(noStatusCacheUids, receiverId)
 		}
-		// if !UserConverCacheContains(appkey, receiverId, downMsg.TargetId, downMsg.ChannelType) {
-		// 	noConverCacheUids = append(noConverCacheUids, receiverId)
-		// }
 	}
 	if len(noStatusCacheUids) > 0 {
 		BatchInitUserStatus(ctx, appkey, noStatusCacheUids)
 	}
-	// if len(noConverCacheUids) > 0 {
-	// 	BatchInitUserConvers(ctx, downMsg.TargetId, downMsg.ChannelType, noConverCacheUids)
-	// }
 }
 
 func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, closeOffline bool) {
@@ -91,10 +81,15 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 		botclient.SendMsg2Bot(ctx, receiverId, msg)
 	} else {
 		if !commonservices.IsStateMsg(msg.Flags) {
-			//record conversation
-			commonservices.SaveConversation(ctx, receiverId, msg)
 			if !closeOffline {
+				commonservices.SaveConversation(ctx, receiverId, msg)
 				SaveMsg2Inbox(appkey, receiverId, msg)
+			} else {
+				batchExecutorPool.GetBatchExecutor(fmt.Sprintf("%s_%s_%d", appkey, msg.TargetId, msg.ChannelType)).Append(&BatchConverItem{
+					Appkey: appkey,
+					UserId: receiverId,
+					Msg:    msg,
+				})
 			}
 			//send to client
 			MsgOrNtf(ctx, receiverId, msg)

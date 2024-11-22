@@ -110,6 +110,12 @@ func Online(ctx imcontext.WsHandleContext, ext, language string) {
 	commonservices.SubOnlineEvent(imcontext.GetRpcContext(ctx), userId, onlineMsg)
 	//set language for user
 	SetLanguage(ctx, language)
+	//close push switch
+	if platform == string(commonservices.Platform_Android) || platform == string(commonservices.Platform_IOS) {
+		bases.AsyncRpcCall(imcontext.GetRpcContext(ctx), "upd_push_status", userId, &pbobjs.UserPushStatus{
+			CanPush: false,
+		})
+	}
 }
 
 func Offline(ctx imcontext.WsHandleContext, code errs.IMErrorCode) {

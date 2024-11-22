@@ -59,10 +59,10 @@ CREATE TABLE `banusers` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) NOT NULL COMMENT '用户id',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
-  `end_time` bigint DEFAULT '0' COMMENT '结束时间',
-  `scope_key` varchar(20) NOT NULL DEFAULT 'default',
-  `scope_value` varchar(1000) DEFAULT '',
-  `ext` varchar(100) DEFAULT NULL COMMENT '其他配置',
+  `end_time` bigint DEFAULT '0' COMMENT '结束时间 为0 为永久封禁',
+  `scope_key` varchar(20) NOT NULL DEFAULT 'default' COMMENT '封禁范围 default 用户封禁；platform:该用户指定的平台封禁；device:该用户指定的设备封禁;ip:该用户指定的ip封禁',
+  `scope_value` varchar(1000) DEFAULT '与scope_key配合使用',
+  `ext` varchar(100) DEFAULT NULL COMMENT '封禁时携带的扩展信息',
   `app_key` varchar(20) NOT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_appkey_userid` (`app_key`,`user_id`,`scope_key`)
@@ -97,7 +97,7 @@ CREATE TABLE `blocks` (
 
 DROP TABLE IF EXISTS `brdinboxmsgs`;
 CREATE TABLE `brdinboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -122,7 +122,7 @@ CREATE TABLE `chatroominfos` (
 
 DROP TABLE IF EXISTS `cmdinboxmsgs`;
 CREATE TABLE `cmdinboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -141,7 +141,7 @@ CREATE TABLE `cmdinboxmsgs` (
 
 DROP TABLE IF EXISTS `cmdsendboxmsgs`;
 CREATE TABLE `cmdsendboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -171,7 +171,7 @@ CREATE TABLE `convercleantimes` (
 
 DROP TABLE IF EXISTS `conversations`;
 CREATE TABLE `conversations` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
   `channel_type` tinyint DEFAULT '0' COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
@@ -185,7 +185,7 @@ CREATE TABLE `conversations` (
   `is_deleted` tinyint DEFAULT '0' COMMENT '是否删除 0 未删除，1已删除',
   `is_top` tinyint DEFAULT '0' COMMENT '是否置顶 0未指定，1置顶',
   `top_updated_time` bigint DEFAULT '0' COMMENT '置顶更新时间',
-  `undisturb_type` tinyint DEFAULT '0',
+  `undisturb_type` tinyint DEFAULT '0' COMMENT '免打扰类型：0:取消免打扰；1:普通会话免打扰；',
   `sync_time` bigint DEFAULT '0' COMMENT '同步消息位点',
   `unread_tag` tinyint DEFAULT '0' COMMENT '未读tag',
   `group` varchar(20) DEFAULT NULL,
@@ -364,7 +364,7 @@ CREATE TABLE `groupinfos` (
   `group_portrait` varchar(200) DEFAULT NULL COMMENT '群头像',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
-  `is_mute` tinyint DEFAULT '0',
+  `is_mute` tinyint DEFAULT '0' COMMENT '是否全局禁言，0：否；1：是；',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_appkey_groupid` (`app_key`,`group_id`)
@@ -392,8 +392,9 @@ CREATE TABLE `groupmembers` (
   `member_type` tinyint DEFAULT '0' COMMENT '成员类型',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `app_key` varchar(45) DEFAULT NULL COMMENT '应用key',
-  `is_mute` tinyint DEFAULT '0' COMMENT '是否静音',
-  `is_allow` tinyint DEFAULT '0' COMMENT '是否允许发言',
+  `is_mute` tinyint DEFAULT '0' COMMENT '是否全局禁言，0：否；1：是；',
+  `is_allow` tinyint DEFAULT '0' COMMENT '是否白名单 0:非白名单用户；1:白名单用户；',
+  `mute_end_at` bigint DEFAULT '0' COMMENT '禁言结束时间戳',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_appkey_grpid_memid` (`app_key`,`group_id`,`member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群成员';
@@ -438,7 +439,7 @@ CREATE TABLE `ic_conditions` (
 
 DROP TABLE IF EXISTS `inboxmsgs`;
 CREATE TABLE `inboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -633,7 +634,7 @@ CREATE TABLE `s_hismsgs` (
 
 DROP TABLE IF EXISTS `sendboxmsgs`;
 CREATE TABLE `sendboxmsgs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -653,7 +654,7 @@ CREATE TABLE `sensitivewords` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用key',
   `word` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '敏感词',
-  `word_type` tinyint(1) NOT NULL DEFAULT '1' COMMENT '12' COMMENT '词类型',
+  `word_type` tinyint(1) NOT NULL DEFAULT '1' COMMENT '敏感词过滤类型。1：拦截敏感词；2：替换敏感词；',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
@@ -742,6 +743,7 @@ CREATE TABLE `rtcrooms` (
   `room_type` tinyint DEFAULT '0' COMMENT '房间类型',
   `owner_id` varchar(32) DEFAULT NULL COMMENT '创建者',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `accepted_time` bigint DEFAULT '0' COMMENT '1v1 接通时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`)

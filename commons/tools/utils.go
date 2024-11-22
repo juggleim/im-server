@@ -161,3 +161,11 @@ func PureStr(str string) string {
 	str = strings.ReplaceAll(str, "\n", "")
 	return str
 }
+
+func TruncateText(str string, length int) string {
+	charArr := []rune(str)
+	if len(charArr) > length {
+		return string(charArr[:length])
+	}
+	return str
+}

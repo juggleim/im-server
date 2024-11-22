@@ -38,10 +38,11 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 	//关闭直发
 	userStatus := GetUserStatus(appKey, userId)
 	userStatus.CheckNtfWithSwitch()
-	//关闭强制推送
-	userStatus.SetPushSwitch(0)
-	//clear badge
-	userStatus.SetBadge(0)
+	platform := bases.GetPlatformFromCtx(ctx)
+	if string(commonservices.Platform_Android) == platform || string(commonservices.Platform_IOS) == platform {
+		//clear badge
+		userStatus.SetBadge(0)
+	}
 
 	ret := &pbobjs.DownMsgSet{
 		Msgs: []*pbobjs.DownMsg{},

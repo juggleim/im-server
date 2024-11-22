@@ -2,7 +2,6 @@ package dbs
 
 import (
 	"errors"
-	"fmt"
 	"im-server/commons/dbcommons"
 	"time"
 
@@ -50,7 +49,7 @@ func (group GroupDao) FindById(appkey, groupId string) (*GroupDao, error) {
 }
 
 func (group GroupDao) Delete(appkey, groupId string) error {
-	return dbcommons.GetDb().Where("app_key=? and group_id=?", appkey, groupId).Delete(&GroupMemberDao{}).Error
+	return dbcommons.GetDb().Where("app_key=? and group_id=?", appkey, groupId).Delete(&GroupDao{}).Error
 }
 
 func (group GroupDao) UpdateGroupMuteStatus(appkey, groupId string, isMute int32) error {
@@ -69,8 +68,6 @@ func (group GroupDao) UpdateGrpName(appkey, groupId, groupName, groupPortrait st
 	}
 	if len(upd) > 0 {
 		upd["updated_time"] = time.Now()
-	} else {
-		return fmt.Errorf("do nothing")
 	}
 	err := dbcommons.GetDb().Model(&GroupDao{}).Where("app_key=? and group_id=?", appkey, groupId).Update(upd).Error
 	return err

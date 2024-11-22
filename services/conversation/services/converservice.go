@@ -505,20 +505,23 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 		if conver.ChannelType == pbobjs.ChannelType_Private {
 			if msg, exist := priMsgs[conver.LatestMsgId]; exist {
 				downMsg = msg
+				conversation.TargetUserInfo = msg.TargetUserInfo
 			}
 		} else if conver.ChannelType == pbobjs.ChannelType_Group {
 			if msg, exist := grpMsgs[conver.LatestMsgId]; exist {
 				downMsg = msg
+				conversation.GroupInfo = msg.GroupInfo
+				conversation.TargetUserInfo = msg.TargetUserInfo
 			}
 		}
 		conversation.Msg = downMsg
 		if conver.IsDeleted == 0 {
 			//target userinfo/groupinfo
-			if conversation.ChannelType == pbobjs.ChannelType_Private {
-				conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conversation.TargetId)
-			} else if conversation.ChannelType == pbobjs.ChannelType_Group {
-				conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conversation.TargetId)
-			}
+			// if conversation.ChannelType == pbobjs.ChannelType_Private {
+			// 	conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conversation.TargetId)
+			// } else if conversation.ChannelType == pbobjs.ChannelType_Group {
+			// 	conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conversation.TargetId)
+			// }
 			//mentions
 			mentionInfo := userConvers.GetMentionInfo(conver.TargetId, conver.ChannelType)
 			if mentionInfo == nil {

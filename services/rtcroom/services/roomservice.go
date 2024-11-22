@@ -46,12 +46,14 @@ const (
 )
 
 type RtcRoomContainer struct {
-	Appkey     string
-	RoomId     string
-	RoomType   pbobjs.RtcRoomType
-	RtcChannel pbobjs.RtcChannel
-	Owner      *pbobjs.UserInfo
-	Status     RtcRoomStatus // 0:normal; 1: destroy; 2: not exist;
+	Appkey       string
+	RoomId       string
+	RoomType     pbobjs.RtcRoomType
+	RtcChannel   pbobjs.RtcChannel
+	Owner        *pbobjs.UserInfo
+	CreatedTime  int64
+	AcceptedTime int64
+	Status       RtcRoomStatus // 0:normal; 1: destroy; 2: not exist;
 
 	Members map[string]*models.RtcRoomMember
 }
@@ -225,6 +227,14 @@ func (container *RtcRoomContainer) UpdMemberState(memberId string, state pbobjs.
 	}
 }
 
+func (container *RtcRoomContainer) UpdAcceptedTime(acceptedTime int64) {
+	key := getRoomKey(container.Appkey, container.RoomId)
+	lock := rtcroomLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	container.AcceptedTime = acceptedTime
+}
+
 func getRtcRoomContainer(appkey, roomId string) (*RtcRoomContainer, bool) {
 	key := getRoomKey(appkey, roomId)
 	if cacheContainer, exist := rtcroomCache.Get(key); exist {
@@ -282,9 +292,10 @@ func getRtcRoomContainerWithInit(appkey, roomId, ownerId string, roomType pbobjs
 		return container, false
 	}
 	container = &RtcRoomContainer{
-		Appkey:   appkey,
-		RoomId:   roomId,
-		RoomType: roomType,
+		Appkey:      appkey,
+		RoomId:      roomId,
+		RoomType:    roomType,
+		CreatedTime: time.Now().UnixMilli(),
 		Owner: &pbobjs.UserInfo{
 			UserId: ownerId,
 		},
@@ -308,6 +319,13 @@ func getRtcRoomContainerFromDb(appkey, roomId string) *RtcRoomContainer {
 	room, err := storage.FindById(appkey, roomId)
 	if err == nil && room != nil {
 		container.Status = RtcRoomStatus_Normal
+		container.RoomType = room.RoomType
+		container.RtcChannel = room.RtcChannel
+		container.Owner = &pbobjs.UserInfo{
+			UserId: room.OwnerId,
+		}
+		container.CreatedTime = room.CreatedTime
+		container.AcceptedTime = room.AcceptedTime
 		//init rtc member relations
 		memberStorage := storages.NewRtcRoomMemberStorage()
 		var startId int64 = 0
@@ -493,6 +511,7 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 		})
 
 		if container.RoomType == pbobjs.RtcRoomType_OneOne {
+			var calleeId string = ""
 			SendRoomEvent(ctx, userId, &pbobjs.RtcRoomEvent{
 				RoomEventType: pbobjs.RtcRoomEventType_RtcDestroy,
 				Room: &pbobjs.RtcRoom{
@@ -521,7 +540,20 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 						Reason: quitReason,
 					})
 				}
+				if member.MemberId != container.Owner.UserId {
+					calleeId = member.MemberId
+				}
 			})
+			//send notify msg
+			var reason CallFinishReasonType
+			var duration int64 = 0
+			if container.AcceptedTime > 0 {
+				reason = CallFinishReasonType_Complete
+				duration = time.Now().UnixMilli() - container.AcceptedTime
+			} else {
+				reason = CallFinishReasonType_NoAnswer
+			}
+			SendFinishNtf(ctx, container.Owner.UserId, calleeId, reason, duration)
 			//destroy room
 			storage.DeleteByRoomId(appkey, roomId)
 			roomStorage := storages.NewRtcRoomStorage()

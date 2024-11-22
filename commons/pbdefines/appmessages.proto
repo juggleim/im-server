@@ -391,6 +391,15 @@ message Conversation{
   repeated ConverTag converTags = 20;
 }
 
+message BatchAddConvers{
+  repeated Conversation convers = 1;
+}
+
+message UserMsgTimeItem{
+  string userId = 1;
+  int64 msgTime = 2;
+}
+
 enum UpdLatestMsgAction{
   UpdMsg = 0;
   UpdRead = 1;
@@ -720,6 +729,7 @@ message GroupMemberMuteReq{
   string groupId = 1;
   repeated string memberIds = 2;
   int32 isMute = 3;
+  int64 muteEndAt = 4;
 }
 
 message GroupMemberAllowReq{

@@ -8,6 +8,7 @@ import (
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/proto"
@@ -37,7 +38,25 @@ func SetGroupSettings(ctx *gin.Context) {
 }
 
 func GetGroupSettings(ctx *gin.Context) {
-	tools.SuccessHttpResp(ctx, nil)
+	groupId := ctx.Query("group_id")
+
+	groupReq := &pbobjs.GroupInfoReq{
+		GroupId:    groupId,
+		CareFields: []string{},
+	}
+	code, groupInfo, err := services.SyncApiCall(ctx, "get_grp_setting", "", groupId, groupReq, func() proto.Message {
+		return &pbobjs.GroupInfo{}
+	})
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != int32(errs.IMErrorCode_SUCCESS) {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+		return
+	}
+
+	tools.SuccessHttpResp(ctx, groupInfo)
 }
 
 func GroupAddMembers(ctx *gin.Context) {
@@ -136,7 +155,15 @@ func GroupMute(ctx *gin.Context) {
 
 func QryGroupInfo(ctx *gin.Context) {
 	groupId := ctx.Query("group_id")
-	code, groupInfo, err := services.SyncApiCall(ctx, "qry_group_info", "", groupId, &pbobjs.GroupInfoReq{}, func() proto.Message {
+	if groupId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
+		return
+	}
+	groupReq := &pbobjs.GroupInfoReq{
+		GroupId:    groupId,
+		CareFields: []string{},
+	}
+	code, groupInfo, err := services.SyncApiCall(ctx, "qry_group_info", "", groupId, groupReq, func() proto.Message {
 		return &pbobjs.GroupInfo{}
 	})
 	if err != nil {
@@ -188,10 +215,15 @@ func GroupMemberMute(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
+	var muteEndAt int64 = 0
+	if muteReq.IsMute > 0 && muteReq.MuteMinute > 0 {
+		muteEndAt = time.Now().UnixMilli() + int64(muteReq.MuteMinute*60*1000)
+	}
 	code, _, err := services.SyncApiCall(ctx, "group_member_mute", "", muteReq.GroupId, &pbobjs.GroupMemberMuteReq{
 		GroupId:   muteReq.GroupId,
 		MemberIds: muteReq.MemberIds,
 		IsMute:    int32(muteReq.IsMute),
+		MuteEndAt: muteEndAt,
 	}, nil)
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)

@@ -44,6 +44,7 @@ func DissolveGroup(ctx context.Context, groupId string) {
 	//remove from db
 	groupDao := dbs.GroupDao{}
 	groupDao.Delete(appkey, groupId)
+
 	memberDao := dbs.GroupMemberDao{}
 	memberDao.DeleteByGroupId(appkey, groupId)
 
@@ -259,4 +260,29 @@ func SetGroupSettings(ctx context.Context, groupId string, settings []*pbobjs.Kv
 		commonservices.FillObjFieldWithIgnore(groupInfo.Settings, valMap, true)
 	}
 	return errs.IMErrorCode_SUCCESS
+}
+
+func GetGroupSettings(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobjs.GroupInfo) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	dao := dbs.GroupExtDao{}
+	groupExts, err := dao.QryExtFields(appkey, groupId)
+	if err != nil {
+		return errs.IMErrorCode_API_INTERNAL_RESP_FAIL, nil
+	}
+
+	groupInfo := &pbobjs.GroupInfo{
+		GroupId:  groupId,
+		Settings: []*pbobjs.KvItem{},
+	}
+
+	for _, item := range groupExts {
+		groupInfo.ExtFields = append(groupInfo.ExtFields, &pbobjs.KvItem{
+			Key:     item.ItemKey,
+			Value:   item.ItemValue,
+			UpdTime: item.UpdatedTime.UnixMilli(),
+		})
+	}
+
+	return errs.IMErrorCode_SUCCESS, groupInfo
+
 }

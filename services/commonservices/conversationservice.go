@@ -18,6 +18,35 @@ func SaveConversation(ctx context.Context, userId string, msg *pbobjs.DownMsg) {
 	}
 }
 
+func BatchSaveConversation(ctx context.Context, convers []*pbobjs.Conversation) {
+	method := "batch_add_conver"
+	grps := map[string][]*pbobjs.Conversation{}
+	for _, conver := range convers {
+		if conver.Msg == nil || !IsStoreMsg(conver.Msg.Flags) {
+			continue
+		}
+		node := bases.GetCluster().GetTargetNode(method, conver.UserId)
+		if node != nil {
+			var arr []*pbobjs.Conversation
+			if existArr, ok := grps[node.Name]; ok {
+				arr = existArr
+			} else {
+				arr = []*pbobjs.Conversation{}
+			}
+			arr = append(arr, &pbobjs.Conversation{
+				UserId: conver.UserId,
+				Msg:    conver.Msg,
+			})
+			grps[node.Name] = arr
+		}
+	}
+	for _, items := range grps {
+		bases.AsyncRpcCall(ctx, method, items[0].UserId, &pbobjs.BatchAddConvers{
+			Convers: items,
+		})
+	}
+}
+
 func GetConversationId(fromId, targetId string, channelType pbobjs.ChannelType) string {
 	if channelType == pbobjs.ChannelType_Private || channelType == pbobjs.ChannelType_System {
 		array := []string{fromId, targetId}
@@ -27,27 +56,5 @@ func GetConversationId(fromId, targetId string, channelType pbobjs.ChannelType) 
 		return fromId
 	} else {
 		return targetId
-	}
-}
-
-func BatchSaveConversations(ctx context.Context, userIds []string, msg *pbobjs.DownMsg) {
-	if IsStoreMsg(msg.Flags) {
-		if len(userIds) <= 0 {
-			return
-		} else if len(userIds) == 1 {
-			SaveConversation(ctx, userIds[0], msg)
-		} else {
-			groups := bases.GroupTargets("add_conver", userIds)
-			for _, ids := range groups {
-				bases.AsyncRpcCall(ctx, "add_conver", ids[0], &pbobjs.Conversation{
-					TargetId:    msg.TargetId,
-					ChannelType: msg.ChannelType,
-					Msg:         msg,
-				}, &bases.TargetIdsOption{
-					TargetIds: ids,
-				})
-			}
-
-		}
 	}
 }

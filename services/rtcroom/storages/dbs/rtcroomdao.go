@@ -4,15 +4,18 @@ import (
 	"im-server/commons/dbcommons"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/rtcroom/storages/models"
+	"time"
 )
 
 type RtcRoomDao struct {
-	ID         int64  `gorm:"primary_key"`
-	RoomId     string `gorm:"room_id"`
-	RoomType   int    `gorm:"room_type"`
-	RtcChannel int    `gorm:"rtc_channel"`
-	OwnerId    string `gorm:"owner_id"`
-	AppKey     string `gorm:"app_key"`
+	ID           int64     `gorm:"primary_key"`
+	RoomId       string    `gorm:"room_id"`
+	RoomType     int       `gorm:"room_type"`
+	RtcChannel   int       `gorm:"rtc_channel"`
+	OwnerId      string    `gorm:"owner_id"`
+	CreatedTime  time.Time `gorm:"created_time"`
+	AcceptedTime int64     `gorm:"accepted_time"`
+	AppKey       string    `gorm:"app_key"`
 }
 
 func (room *RtcRoomDao) TableName() string {
@@ -21,11 +24,13 @@ func (room *RtcRoomDao) TableName() string {
 
 func (room *RtcRoomDao) Create(item models.RtcRoom) error {
 	add := RtcRoomDao{
-		RoomId:     item.RoomId,
-		RoomType:   int(item.RoomType),
-		RtcChannel: int(item.RtcChannel),
-		OwnerId:    item.OwnerId,
-		AppKey:     item.AppKey,
+		RoomId:       item.RoomId,
+		RoomType:     int(item.RoomType),
+		RtcChannel:   int(item.RtcChannel),
+		OwnerId:      item.OwnerId,
+		CreatedTime:  time.Now(),
+		AcceptedTime: item.AcceptedTime,
+		AppKey:       item.AppKey,
 	}
 	return dbcommons.GetDb().Create(&add).Error
 }
@@ -37,12 +42,18 @@ func (room *RtcRoomDao) FindById(appkey, roomId string) (*models.RtcRoom, error)
 		return nil, err
 	}
 	return &models.RtcRoom{
-		RoomId:     item.RoomId,
-		RoomType:   pbobjs.RtcRoomType(item.RoomType),
-		RtcChannel: pbobjs.RtcChannel(item.RtcChannel),
-		OwnerId:    item.OwnerId,
-		AppKey:     item.AppKey,
+		RoomId:       item.RoomId,
+		RoomType:     pbobjs.RtcRoomType(item.RoomType),
+		RtcChannel:   pbobjs.RtcChannel(item.RtcChannel),
+		OwnerId:      item.OwnerId,
+		CreatedTime:  item.CreatedTime.UnixMilli(),
+		AcceptedTime: item.AcceptedTime,
+		AppKey:       item.AppKey,
 	}, nil
+}
+
+func (room *RtcRoomDao) UpdateAcceptedTime(appkey, roomId string, acceptedTime int64) error {
+	return dbcommons.GetDb().Model(room).Where("app_key=? and room_id=?").Update("accepted_time", acceptedTime).Error
 }
 
 func (room *RtcRoomDao) Delete(appkey, roomId string) error {

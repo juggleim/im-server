@@ -112,6 +112,7 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 			cacheConver.SyncTime = conver.SyncTime
 			uc.SyncTimeIndex.Add(float64(conver.SyncTime), itemKey)
 		}
+		cacheConver.IsDeleted = 0
 	} else {
 		item := &models.Conversation{
 			AppKey:               uc.Appkey,
@@ -267,7 +268,7 @@ func (uc *UserConversations) purge() {
 
 func (uc *UserConversations) PersistConver(targetId string, channelType pbobjs.ChannelType) {
 	key := fmt.Sprintf("%s_%s_%s_%d", uc.Appkey, uc.UserId, targetId, channelType)
-	persistCache.AddIfAbsent(key, &ConverPersistIndex{
+	persistCache.AddIfAbsendNoGetOldVal(key, &ConverPersistIndex{
 		Appkey:      uc.Appkey,
 		UserId:      uc.UserId,
 		TargetId:    targetId,

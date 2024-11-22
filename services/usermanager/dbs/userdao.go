@@ -69,7 +69,7 @@ func (user UserDao) Count(appkey string) int {
 
 func (user UserDao) CountByTime(appkey string, start, end int64) int64 {
 	var count int64
-	err := dbcommons.GetDb().Model(&UserDao{}).Where("app_key=? and created_time=>? and created_time<=?", appkey, time.UnixMilli(start), time.UnixMilli(end)).Count(&count).Error
+	err := dbcommons.GetDb().Model(&UserDao{}).Where("app_key=? and created_time>=? and created_time<=?", appkey, time.UnixMilli(start), time.UnixMilli(end)).Count(&count).Error
 	if err != nil {
 		return count
 	}

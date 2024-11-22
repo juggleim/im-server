@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"im-server/commons/configures"
 	"im-server/commons/dbcommons"
+	"im-server/commons/kvdbcommons"
 	"im-server/commons/logs"
 	"im-server/commons/mongocommons"
 	hisMsgMongo "im-server/services/historymsg/storages/mongodbs"
@@ -23,6 +24,10 @@ func main() {
 	if err := dbcommons.InitMysql(); err != nil {
 		logs.Error("Init Mysql failed.", err)
 		return
+	}
+	//init tsdb
+	if err := kvdbcommons.InitKvdb(); err != nil {
+		logs.Error("Init KvDB failed.", err)
 	}
 	//init mongodb
 	if configures.Config.MsgStoreEngine == configures.MsgStoreEngine_Mongo {

@@ -16,14 +16,25 @@ type GroupMemberDao struct {
 	AppKey      string    `gorm:"app_key"`
 	IsMute      int       `gorm:"is_mute"`
 	IsAllow     int       `gorm:"is_allow"`
+	MuteEndAt   int64     `gorm:"mute_end_at"`
 }
 
 func (msg GroupMemberDao) TableName() string {
 	return "groupmembers"
 }
+
 func (msg GroupMemberDao) Create(item GroupMemberDao) error {
 	err := dbcommons.GetDb().Create(&item).Error
 	return err
+}
+
+func (member GroupMemberDao) Find(appkey, groupId, memberId string) (*GroupMemberDao, error) {
+	var item GroupMemberDao
+	err := dbcommons.GetDb().Where("app_key=? and group_id=? and member_id=?", appkey, groupId, memberId).Take(&item).Error
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
 }
 
 func (member GroupMemberDao) BatchCreate(items []GroupMemberDao) error {
@@ -57,9 +68,14 @@ func (member GroupMemberDao) DeleteByGroupId(appkey, groupId string) error {
 	return dbcommons.GetDb().Where("app_key=? and group_id=?", appkey, groupId).Delete(&GroupMemberDao{}).Error
 }
 
-func (member GroupMemberDao) UpdateMute(appkey, groupId string, isMute int, memberIds []string) error {
+func (member GroupMemberDao) UpdateMute(appkey, groupId string, isMute int, memberIds []string, muteEndAt int64) error {
 	upd := map[string]interface{}{}
 	upd["is_mute"] = isMute
+	if isMute == 0 {
+		upd["mute_end_at"] = 0
+	} else {
+		upd["mute_end_at"] = muteEndAt
+	}
 	return dbcommons.GetDb().Model(&GroupMemberDao{}).Where("app_key=? and group_id=? and member_id in (?)", appkey, groupId, memberIds).Update(upd).Error
 }
 
