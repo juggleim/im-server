@@ -3,17 +3,20 @@ package models
 import "im-server/commons/pbdefines/pbobjs"
 
 type RtcRoom struct {
-	RoomId     string
-	RoomType   pbobjs.RtcRoomType
-	RtcChannel pbobjs.RtcChannel
-	OwnerId    string
-	AppKey     string
+	RoomId       string
+	RoomType     pbobjs.RtcRoomType
+	RtcChannel   pbobjs.RtcChannel
+	CreatedTime  int64
+	AcceptedTime int64
+	OwnerId      string
+	AppKey       string
 }
 
 type IRtcRoomStorage interface {
 	Create(item RtcRoom) error
 	FindById(appkey, roomId string) (*RtcRoom, error)
 	Delete(appkey, roomId string) error
+	UpdateAcceptedTime(appkey, roomId string, acceptedTime int64) error
 }
 
 type RtcRoomMember struct {

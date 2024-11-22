@@ -743,6 +743,7 @@ CREATE TABLE `rtcrooms` (
   `room_type` tinyint DEFAULT '0' COMMENT '房间类型',
   `owner_id` varchar(32) DEFAULT NULL COMMENT '创建者',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `accepted_time` bigint DEFAULT '0' COMMENT '1v1 接通时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`)

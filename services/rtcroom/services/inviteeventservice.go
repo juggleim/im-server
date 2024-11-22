@@ -5,6 +5,7 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/rtcroom/storages"
@@ -24,16 +25,21 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 	if roomId == "" || len(req.TargetIds) <= 0 {
 		return errs.IMErrorCode_RTCROOM_PARAMILLIGAL, nil
 	}
-
+	//auth
+	code, auth := GenerateAuth(appkey, userId, req.RtcChannel)
+	if code != errs.IMErrorCode_SUCCESS {
+		return code, auth
+	}
 	container, succ := getRtcRoomContainerWithInit(appkey, roomId, userId, req.RoomType)
 	if succ {
 		// add to db
 		storage := storages.NewRtcRoomStorage()
 		err := storage.Create(models.RtcRoom{
-			RoomId:   req.RoomId,
-			RoomType: req.RoomType,
-			OwnerId:  userId,
-			AppKey:   appkey,
+			RoomId:     req.RoomId,
+			RoomType:   req.RoomType,
+			RtcChannel: req.RtcChannel,
+			OwnerId:    userId,
+			AppKey:     appkey,
 		})
 		if err != nil {
 			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
@@ -103,9 +109,8 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			},
 		})
 	}
-	//auth
-	code, auth := GenerateAuth(appkey, userId, req.RtcChannel)
-	return code, auth
+
+	return errs.IMErrorCode_SUCCESS, auth
 }
 
 func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
@@ -135,6 +140,12 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 	if code != errs.IMErrorCode_SUCCESS {
 		return code, nil
 	}
+	//update accepted time
+	acceptedTime := time.Now().UnixMilli()
+	container.UpdAcceptedTime(acceptedTime)
+	roomStorage := storages.NewRtcRoomStorage()
+	roomStorage.UpdateAcceptedTime(appkey, roomId, acceptedTime)
+	//update member state
 	storage := storages.NewRtcRoomMemberStorage()
 	err := storage.UpdateState(appkey, roomId, userId, pbobjs.RtcState_RtcConnecting, deviceId)
 	if err != nil {
@@ -171,6 +182,7 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 		return errs.IMErrorCode_RTCROOM_NOTMEMBER
 	}
 	if container.RoomType == pbobjs.RtcRoomType_OneOne {
+		var calleeId string = ""
 		container.ForeachMembers(func(member *models.RtcRoomMember) {
 			MemberSyncState(ctx, member.MemberId, &pbobjs.SyncMemberStateReq{
 				IsDelete: true,
@@ -192,7 +204,25 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 					},
 				})
 			}
+			if member.MemberId != container.Owner.UserId {
+				calleeId = member.MemberId
+			}
 		})
+		//send notify msg
+		var reason CallFinishReasonType
+		var duration int64 = 0
+		if container.AcceptedTime > 0 {
+			reason = CallFinishReasonType_Complete
+			duration = time.Now().UnixMilli() - container.AcceptedTime
+		} else {
+			if userId == container.Owner.UserId {
+				reason = CallFinishReasonType_Cancel
+			} else {
+				reason = CallFinishReasonType_Decline
+			}
+		}
+		SendFinishNtf(ctx, container.Owner.UserId, calleeId, reason, duration)
+
 		//destroy room
 		storage := storages.NewRtcRoomMemberStorage()
 		roomStorage := storages.NewRtcRoomStorage()
@@ -220,4 +250,35 @@ func SendInviteEvent(ctx context.Context, targetId string, event *pbobjs.RtcInvi
 	msg.Qos = 0
 	msg.PublishType = int32(commonservices.PublishType_AllSessionExceptSelf)
 	bases.UnicastRouteWithNoSender(msg)
+}
+
+var RtcMsgType_OneOneFinishNtf string = "jg:callfinishntf"
+
+type CallFinishReasonType int
+
+var (
+	CallFinishReasonType_Cancel   CallFinishReasonType = 0
+	CallFinishReasonType_Decline  CallFinishReasonType = 1
+	CallFinishReasonType_NoAnswer CallFinishReasonType = 2
+	CallFinishReasonType_Complete CallFinishReasonType = 3
+)
+
+type CallFinishNtf struct {
+	Reason   int   `json:"reason"`
+	Duration int64 `json:"duration"`
+}
+
+func SendFinishNtf(ctx context.Context, senderId, targetId string, reason CallFinishReasonType, duration int64) {
+	ntf := &CallFinishNtf{
+		Reason:   int(reason),
+		Duration: duration,
+	}
+	contentBs, _ := tools.JsonMarshal(ntf)
+	flag := commonservices.SetStoreMsg(0)
+	msg := &pbobjs.UpMsg{
+		MsgType:    RtcMsgType_OneOneFinishNtf,
+		MsgContent: contentBs,
+		Flags:      flag,
+	}
+	commonservices.AsyncPrivateMsg(ctx, senderId, targetId, msg)
 }
