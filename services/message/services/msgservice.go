@@ -302,16 +302,26 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, exist := commonservices.GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.IsOpenPush {
-		if !commonservices.IsUndisturbMsg(msg.Flags) {
-			pushData := GetPushData(msg, getPushLanguage(ctx, receiverId))
-			if pushData != nil {
-				//badge
-				userStatus := GetUserStatus(appkey, receiverId)
-				pushData.Badge = userStatus.BadgeIncr()
-				if userStatus.CanPush > 0 {
-					pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
-					bases.UnicastRouteWithNoSender(pushRpc)
-				}
+		//check close push threshold
+		if msg.ChannelType == pbobjs.ChannelType_Group && appInfo.ClosePushGrpThreshold > 0 && msg.MemberCount > int32(appInfo.ClosePushGrpThreshold) {
+			if msg.PushData == nil || msg.PushData.PushLevel == pbobjs.PushLevel_DefaultPuhsLevel {
+				return
+			}
+		}
+		//undisturb
+		if commonservices.IsUndisturbMsg(msg.Flags) {
+			if msg.PushData == nil || msg.PushData.PushLevel < pbobjs.PushLevel_IgnoreUndisturb {
+				return
+			}
+		}
+		pushData := GetPushData(msg, getPushLanguage(ctx, receiverId))
+		if pushData != nil {
+			//badge
+			userStatus := GetUserStatus(appkey, receiverId)
+			pushData.Badge = userStatus.BadgeIncr()
+			if userStatus.CanPush > 0 {
+				pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
+				bases.UnicastRouteWithNoSender(pushRpc)
 			}
 		}
 	}

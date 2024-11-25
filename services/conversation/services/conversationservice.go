@@ -210,7 +210,7 @@ func SaveConversation(appkey string, userId string, msg *pbobjs.DownMsg) error {
 }
 
 func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg) {
-	if isMentionedMe(userId, msg) {
+	if commonservices.IsMentionedMe(userId, msg) {
 		isRead := 0
 		if msg.IsSend {
 			isRead = 1
@@ -238,22 +238,6 @@ func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg) {
 			IsRead:      isRead,
 		})
 	}
-}
-
-func isMentionedMe(userId string, downMsg *pbobjs.DownMsg) bool {
-	if downMsg != nil && downMsg.MentionInfo != nil {
-		if downMsg.MentionInfo.MentionType == pbobjs.MentionType_All || downMsg.MentionInfo.MentionType == pbobjs.MentionType_AllAndSomeone {
-			//mention all
-			return true
-		} else if downMsg.MentionInfo.MentionType == pbobjs.MentionType_Someone {
-			for _, mentionedUser := range downMsg.MentionInfo.TargetUsers {
-				if userId == mentionedUser.UserId {
-					return true
-				}
-			}
-		}
-	}
-	return false
 }
 
 func QryTotalUnreadCount(ctx context.Context, userId string, req *pbobjs.QryTotalUnreadCountReq) *pbobjs.QryTotalUnreadCountResp {

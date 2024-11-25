@@ -87,6 +87,7 @@ message PushData{
   string pushId = 2;
   string pushText = 3;
   string pushExtraData = 4;
+  PushLevel pushLevel = 5;
 
   //internal fields
   int32 badge = 50;
@@ -96,6 +97,13 @@ message PushData{
   ChannelType channelType = 54;
   
 }
+
+enum PushLevel{
+  DefaultPuhsLevel = 0;
+  IgnoreSpeedControl = 1;
+  IgnoreUndisturb = 2;
+}
+
 message DownMsg{
   string targetId = 1;
   ChannelType channelType = 2;

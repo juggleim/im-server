@@ -209,3 +209,19 @@ func GroupMsgFromApi(ctx context.Context, userId, groupId string, upMsg *pbobjs.
 		NoSendbox:    noSendbox,
 	})
 }
+
+func IsMentionedMe(userId string, downMsg *pbobjs.DownMsg) bool {
+	if downMsg != nil && downMsg.MentionInfo != nil {
+		if downMsg.MentionInfo.MentionType == pbobjs.MentionType_All || downMsg.MentionInfo.MentionType == pbobjs.MentionType_AllAndSomeone {
+			//mention all
+			return true
+		} else if downMsg.MentionInfo.MentionType == pbobjs.MentionType_Someone {
+			for _, mentionedUser := range downMsg.MentionInfo.TargetUsers {
+				if userId == mentionedUser.UserId {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}

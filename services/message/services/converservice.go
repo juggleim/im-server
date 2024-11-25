@@ -155,13 +155,17 @@ func QryConversation(ctx context.Context, userId, targetId string, channelType p
 func HandleDownMsgByConver(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType, downMsg *pbobjs.DownMsg) {
 	conver := GetConversation(ctx, userId, targetId, channelType)
 	if conver.UndisturbType == UndisturbType_Normal {
-		downMsg.UndisturbType = UndisturbType_Normal
-		downMsg.Flags = commonservices.SetUndisturbMsg(downMsg.Flags)
+		if !commonservices.IsMentionedMe(userId, downMsg) {
+			downMsg.UndisturbType = UndisturbType_Normal
+			downMsg.Flags = commonservices.SetUndisturbMsg(downMsg.Flags)
+		}
 	} else {
 		userSettings := commonservices.GetTargetUserSettings(ctx, userId)
 		if userSettings != nil && userSettings.UndisturbObj != nil {
 			if userSettings.UndisturbObj.CheckUndisturb(ctx, userId) {
-				downMsg.Flags = commonservices.SetUndisturbMsg(downMsg.Flags)
+				if !commonservices.IsMentionedMe(userId, downMsg) {
+					downMsg.Flags = commonservices.SetUndisturbMsg(downMsg.Flags)
+				}
 			}
 		}
 	}

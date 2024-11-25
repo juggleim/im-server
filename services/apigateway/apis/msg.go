@@ -267,6 +267,7 @@ func handlePushData(data *models.PushData) *pbobjs.PushData {
 			Title:         data.PushTitle,
 			PushText:      data.PushText,
 			PushExtraData: data.PushExtra,
+			PushLevel:     pbobjs.PushLevel(data.PushLevel),
 		}
 	}
 	return nil
