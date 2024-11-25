@@ -181,7 +181,7 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 	}
 }
 
-func getPushLanguage(ctx context.Context, userId string) string {
+func getTargetUserLanguage(ctx context.Context, userId string) string {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	language := "en_US"
 	appinfo, exist := commonservices.GetAppInfo(appkey)
@@ -314,7 +314,7 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 				return
 			}
 		}
-		pushData := GetPushData(msg, getPushLanguage(ctx, receiverId))
+		pushData := GetPushData(msg, getTargetUserLanguage(ctx, receiverId))
 		if pushData != nil {
 			//badge
 			userStatus := GetUserStatus(appkey, receiverId)
