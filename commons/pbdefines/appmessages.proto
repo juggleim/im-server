@@ -591,7 +591,6 @@ message UserInfos{
 message UserIdsReq{
   repeated string userIds = 1;
   repeated int32 attTypes = 2;
-  bool noDispatch = 11;
 }
 message UserIdReq{
   string userId = 1;
@@ -727,7 +726,6 @@ message GroupInfoReq{
 }
 message GroupIdsReq{
   repeated string groupIds = 1;
-  bool noDispatch = 11;
 }
 message GroupInfosResp{
   map<string, GroupInfo> groupInfoMap = 1;
