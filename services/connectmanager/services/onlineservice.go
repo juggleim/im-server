@@ -89,7 +89,7 @@ func SetLanguage(ctx imcontext.WsHandleContext, language string) {
 	})
 }
 
-func Online(ctx imcontext.WsHandleContext, ext, language string) {
+func Online(ctx imcontext.WsHandleContext, ext, language string, isBackend bool) {
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	deviceId := imcontext.GetDeviceId(ctx)
 	platform := imcontext.GetPlatform(ctx)
@@ -112,8 +112,12 @@ func Online(ctx imcontext.WsHandleContext, ext, language string) {
 	SetLanguage(ctx, language)
 	//close push switch
 	if platform == string(commonservices.Platform_Android) || platform == string(commonservices.Platform_IOS) {
-		bases.AsyncRpcCall(imcontext.GetRpcContext(ctx), "upd_push_status", userId, &pbobjs.UserPushStatus{
-			CanPush: false,
+		var pushSwitch int32 = 0
+		if isBackend {
+			pushSwitch = 1
+		}
+		bases.AsyncRpcCall(imcontext.GetRpcContext(ctx), "push_switch", userId, &pbobjs.PushSwitch{
+			Switch: pushSwitch,
 		})
 	}
 }
