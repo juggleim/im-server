@@ -12,6 +12,7 @@ type AccountDao struct {
 	CreatedTime   time.Time `gorm:"created_time"`
 	UpdatedTime   time.Time `gorm:"updated_time"`
 	State         int       `gorm:"state"` //0:normal; 1:forbidden
+	RoleId        int       `gorm:"role_id"`
 	ParentAccount string    `gorm:"parent_account"`
 }
 

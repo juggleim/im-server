@@ -8,6 +8,7 @@ CREATE TABLE `accounts` (
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '修改时间',
   `state` tinyint DEFAULT '0' COMMENT '状态',
+  `role_id` int DEFAULT '0', COMMENT '角色id',
   `parent_account` varchar(45) DEFAULT NULL COMMENT '父账号',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_account` (`account`),
@@ -769,4 +770,4 @@ CREATE TABLE `rtcmembers` (
   KEY `idx_room` (`app_key`,`member_id`,`room_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'rtc-成员表';
 
-INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin1','7c4a8d09ca3762af61e59520943dc26494f8941b');
+INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
