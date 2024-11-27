@@ -2,7 +2,6 @@ package apis
 
 import (
 	"bufio"
-	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -88,18 +87,17 @@ type SensitiveWord struct {
 }
 
 func ImportSensitiveWords(ctx *gin.Context) {
-	appKey := services.GetAppkeyFromCtx(ctx)
 	file, err := ctx.FormFile("file")
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_MSG_PARAM_ILLEGAL)
 		return
 	}
 	f, err := file.Open()
-	defer f.Close()
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_RESP_FAIL)
 		return
 	}
+	defer f.Close()
 
 	var (
 		allWords []*pbobjs.SensitiveWord
@@ -123,8 +121,7 @@ func ImportSensitiveWords(ctx *gin.Context) {
 	rpcReq := &pbobjs.AddSensitiveWordsReq{
 		Words: allWords,
 	}
-	bases.SyncOriginalRpcCall(ctx, "add_sensitive_words", appKey, rpcReq)
-
+	services.AsyncApiCall(ctx, "add_sensitive_words", "", tools.RandStr(8), rpcReq)
 	tools.SuccessHttpResp(ctx, nil)
 }
 
