@@ -44,6 +44,13 @@ func (f *FcmPushClient) SendPush(title, body, token string, jcExts map[string]in
 			Title: title,
 			Body:  body,
 		},
+		Android: &messaging.AndroidConfig{
+			Notification: &messaging.AndroidNotification{
+				Title:       title,
+				Body:        body,
+				ClickAction: "com.j.im.intent.MESSAGE_CLICK",
+			},
+		},
 		Token: token,
 	}
 
