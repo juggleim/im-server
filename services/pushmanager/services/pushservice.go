@@ -126,7 +126,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					}
 				case pbobjs.PushChannel_FCM:
 					if androidPushConf.FcmPushClient != nil {
-						err := androidPushConf.FcmPushClient.SendPush(req.Title, req.PushText, pushToken.PushToken)
+						err := androidPushConf.FcmPushClient.SendPush(req.Title, req.PushText, pushToken.PushToken, transfer2Exts(req))
 						if err != nil {
 							logs.WithContext(ctx).Infof("[FCM_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 						} else {
@@ -168,10 +168,9 @@ func iosPushPayload(req *pbobjs.PushData) interface{} {
 	iosPayload.AlertTitle(req.Title)
 	iosPayload.AlertBody(tools.PureStr(req.PushText))
 	iosPayload.Sound("default")
-	iosPayload.Custom("conver_id", req.ConverId)
-	iosPayload.Custom("conver_type", int32(req.ChannelType))
-	if req.PushExtraData != "" {
-		iosPayload.Custom("exts", req.PushExtraData)
+	jcExts := transfer2Exts(req)
+	for k, v := range jcExts {
+		iosPayload.Custom(k, v)
 	}
 	if req.Badge > 0 {
 		iosPayload.Badge(int(req.Badge))

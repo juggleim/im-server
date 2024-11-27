@@ -195,18 +195,26 @@ func (c *LruCache) GetByDefault(key interface{}, defaultValue interface{}) (inte
 		return defaultValue, ok
 	}
 }
-func (c *LruCache) GetByCreator(key interface{}) (interface{}, bool) {
+func (c *LruCache) GetByCreator(key interface{}, creator func() interface{}) (interface{}, bool) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	val, ok := c.innerGet(key)
 	if ok {
 		return val, ok
 	} else {
-		if c.valueCreator != nil {
-			newVal := c.valueCreator(key)
+		if creator != nil {
+			newVal := creator()
 			if newVal != nil {
 				c.innerAdd(key, newVal)
 				return newVal, true
+			}
+		} else {
+			if c.valueCreator != nil {
+				newVal := c.valueCreator(key)
+				if newVal != nil {
+					c.innerAdd(key, newVal)
+					return newVal, true
+				}
 			}
 		}
 	}

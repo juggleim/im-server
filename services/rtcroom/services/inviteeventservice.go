@@ -280,5 +280,6 @@ func SendFinishNtf(ctx context.Context, senderId, targetId string, reason CallFi
 		MsgContent: contentBs,
 		Flags:      flag,
 	}
+	ctx = context.WithValue(ctx, bases.CtxKey_Session, tools.GenerateUUIDShort11())
 	commonservices.AsyncPrivateMsg(ctx, senderId, targetId, msg)
 }

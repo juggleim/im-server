@@ -225,7 +225,7 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 	}
 }
 
-func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
+func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 	if msg == nil {
 		return nil
 	}
@@ -253,7 +253,10 @@ func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 		retPushData.Title = title
 	}
 	if retPushData.PushText != "" {
-		retPushData.PushText = prefix + retPushData.PushText
+		pushText := retPushData.PushText
+		//handle template
+		pushText = TemplateI18nAssign(ctx, pushText, pushLanguage)
+		retPushData.PushText = prefix + pushText
 	} else {
 		if msg.MsgType == "jg:text" {
 			txtMsg := &commonservices.TextMsg{}
@@ -314,7 +317,7 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 				return
 			}
 		}
-		pushData := GetPushData(msg, getTargetUserLanguage(ctx, receiverId))
+		pushData := GetPushData(ctx, msg, getTargetUserLanguage(ctx, receiverId))
 		if pushData != nil {
 			//badge
 			userStatus := GetUserStatus(appkey, receiverId)

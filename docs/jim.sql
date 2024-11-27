@@ -770,4 +770,17 @@ CREATE TABLE `rtcmembers` (
   KEY `idx_room` (`app_key`,`member_id`,`room_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'rtc-成员表';
 
+DROP TABLE IF EXISTS `i18nkeys`;
+CREATE TABLE `i18nkeys` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `lang` VARCHAR(20) NULL,
+  `key` VARCHAR(50) NULL,
+  `value` VARCHAR(200) NULL,
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_key` (`app_key`, `lang`, `key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

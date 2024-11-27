@@ -10,9 +10,12 @@ import (
 	"im-server/commons/caches"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
+
+	"github.com/kataras/i18n"
 )
 
 var appInfoCache *caches.LruCache
+var appLocks *tools.SegmentatedLocks
 
 type AppInfo struct {
 	AppKey       string    `default:"-"`
@@ -56,11 +59,14 @@ type AppInfo struct {
 	// TestInt   int
 	// TestBool  bool  `default:"true"`
 	// TestInt64 int64 `default:"10"`
+
+	I18nKeys *i18n.I18n
 }
 
 var notExistAppInfo *AppInfo
 
 func init() {
+	appLocks = tools.NewSegmentatedLocks(64)
 	notExistAppInfo = &AppInfo{}
 
 	appInfoCache = caches.NewLruCache(10000, nil)
@@ -180,7 +186,7 @@ func setFieldValue(field reflect.Value, typ reflect.Type, val string) {
 }
 
 func GetAppInfo(appkey string) (*AppInfo, bool) {
-	val, ok := appInfoCache.GetByCreator(appkey)
+	val, ok := appInfoCache.GetByCreator(appkey, nil)
 	if ok {
 		info := val.(*AppInfo)
 		if info == notExistAppInfo {

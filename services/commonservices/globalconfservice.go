@@ -28,7 +28,7 @@ func init() {
 }
 
 func GetGlobalConf(key string) string {
-	val, exist := confCache.GetByCreator(key)
+	val, exist := confCache.GetByCreator(key, nil)
 	if exist && val != nil {
 		return val.(string)
 	}
