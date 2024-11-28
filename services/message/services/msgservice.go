@@ -269,18 +269,20 @@ func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) 
 			if err == nil {
 				retPushData.PushText = prefix + pushText
 			} else {
-				retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Text, "[Text]")
+				retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Text, "[Text]")
 			}
 		} else if msg.MsgType == "jg:img" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Image, "[Image]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Image, "[Image]")
 		} else if msg.MsgType == "jg:voice" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Voice, "[Voice]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Voice, "[Voice]")
 		} else if msg.MsgType == "jg:file" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_File, "[File]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_File, "[File]")
 		} else if msg.MsgType == "jg:video" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Video, "[Video]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Video, "[Video]")
 		} else if msg.MsgType == "jg:merge" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Merge, "[Merge]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Merge, "[Merge]")
+		} else if msg.MsgType == "jg:voicecall" {
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_RtcCall, "invites you to a voice call")
 		} else {
 			return nil
 		}

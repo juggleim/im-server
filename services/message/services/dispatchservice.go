@@ -128,3 +128,17 @@ func copyDownMsg(msg *pbobjs.DownMsg) *pbobjs.DownMsg {
 		UnreadIndex:    msg.UnreadIndex,
 	}
 }
+
+func UserPush(ctx context.Context, msg *pbobjs.DownMsg) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	targetId := bases.GetTargetIdFromCtx(ctx)
+	if !UserStatusCacheContains(appkey, targetId) {
+		BatchInitUserStatus(ctx, appkey, []string{targetId})
+	}
+	userStatus := GetUserStatus(appkey, targetId)
+	if userStatus != nil {
+		if !userStatus.IsOnline() || userStatus.OpenPushSwitch() {
+			SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, msg)
+		}
+	}
+}

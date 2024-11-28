@@ -59,6 +59,9 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("upd_push_status", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.UpdPushStatusActor{}, serviceName)
 	})
+	register.RegisterActor("user_push", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.UserPushActor{}, serviceName)
+	})
 }
 
 func (manager *MessageManager) Startup(args map[string]interface{}) {
