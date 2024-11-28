@@ -17,7 +17,7 @@ type BatchAddConversationActor struct {
 func (actor *BatchAddConversationActor) OnReceive(ctx context.Context, input proto.Message) {
 	if batchConvers, ok := input.(*pbobjs.BatchAddConvers); ok {
 		for _, conver := range batchConvers.Convers {
-			services.SaveConversationV2(bases.GetAppKeyFromCtx(ctx), conver.UserId, conver.Msg)
+			services.SaveConversationV2(bases.GetAppKeyFromCtx(ctx), conver.UserId, conver.Msg, true)
 		}
 	} else {
 		logs.WithContext(ctx).Error("input is illigal.")

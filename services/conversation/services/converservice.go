@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg) {
+func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg, isOffline bool) {
 	if msg == nil {
 		return
 	}
@@ -31,23 +31,39 @@ func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg) {
 		} else {
 			unreadIndex = msg.UnreadIndex
 		}
-		userConvers := getUserConvers(appkey, userId)
-		userConvers.UpsertCovner(models.Conversation{
-			AppKey:      appkey,
-			UserId:      userId,
-			TargetId:    msg.TargetId,
-			ChannelType: msg.ChannelType,
-			LatestMsgId: msg.MsgId,
-			// LatestMsg: msg,
-			SortTime:             sortTime,
-			SyncTime:             msg.MsgTime,
-			LatestUnreadMsgIndex: unreadIndex,
-		})
-		if !msg.IsSend {
-			HandleMentionedMsg(appkey, userId, msg)
+		if !isOffline || UserConversContains(appkey, userId) {
+			userConvers := getUserConvers(appkey, userId)
+			userConvers.UpsertCovner(models.Conversation{
+				AppKey:      appkey,
+				UserId:      userId,
+				TargetId:    msg.TargetId,
+				ChannelType: msg.ChannelType,
+				LatestMsgId: msg.MsgId,
+				// LatestMsg: msg,
+				SortTime:             sortTime,
+				SyncTime:             msg.MsgTime,
+				LatestUnreadMsgIndex: unreadIndex,
+			})
+			if !msg.IsSend {
+				HandleMentionedMsg(appkey, userId, msg)
+			}
+			//save to db
+			userConvers.PersistConver(msg.TargetId, msg.ChannelType)
+		} else {
+			UpsertOfflineConversation(&ConversationCacheItem{
+				Appkey:      appkey,
+				UserId:      userId,
+				TargetId:    msg.TargetId,
+				ChannelType: msg.ChannelType,
+				LatestMsgId: msg.MsgId,
+				SortTime:    sortTime,
+				SyncTime:    msg.MsgTime,
+				UnReadIndex: unreadIndex,
+			})
+			if !msg.IsSend {
+				HandleMentionedMsg(appkey, userId, msg)
+			}
 		}
-		//save to db
-		userConvers.PersistConver(msg.TargetId, msg.ChannelType)
 	}
 }
 

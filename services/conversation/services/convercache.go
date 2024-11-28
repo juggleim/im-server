@@ -670,3 +670,8 @@ func getUserConvers(appkey, userId string) *UserConversations {
 		}
 	}
 }
+
+func UserConversContains(appkey, userId string) bool {
+	key := getUserConverCacheKey(appkey, userId)
+	return userConverCache.Contains(key)
+}

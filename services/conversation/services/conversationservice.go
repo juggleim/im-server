@@ -48,7 +48,6 @@ type ConversationCacheItem struct {
 	SortTime    int64
 	SyncTime    int64
 	UnReadIndex int64
-	OnlyUpdMsg  bool
 }
 
 func getGlobalConverCacheKey(appkey, converId string, channelType pbobjs.ChannelType) string {
