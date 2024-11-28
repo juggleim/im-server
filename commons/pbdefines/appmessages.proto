@@ -132,6 +132,13 @@ message DownMsg{
   repeated MsgExtItem msgExSet = 25;
   repeated MsgExtItem msgExts = 26;
   repeated ConverTag converTags = 27;
+  map<string, TransMsgContent> transMsgMap = 28;
+}
+
+message TransMsgContent{
+  string lang = 1;
+  bytes msgContent = 2;
+  PushData pushData = 3;
 }
 
 message MsgAck{

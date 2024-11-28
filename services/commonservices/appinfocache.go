@@ -60,7 +60,9 @@ type AppInfo struct {
 	// TestBool  bool  `default:"true"`
 	// TestInt64 int64 `default:"10"`
 
-	I18nKeys *i18n.I18n `default:"-"`
+	//other configure
+	MsgTransConfs *MsgTransConfs `default:"-"`
+	I18nKeys      *i18n.I18n     `default:"-"`
 }
 
 var notExistAppInfo *AppInfo

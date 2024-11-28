@@ -770,6 +770,18 @@ CREATE TABLE `rtcmembers` (
   KEY `idx_room` (`app_key`,`member_id`,`room_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'rtc-成员表';
 
+DROP TABLE IF EXISTS `msgtransconfs`;
+CREATE TABLE `msgtransconfs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `msg_type` varchar(50) DEFAULT NULL,
+  `json_path` varchar(200) DEFAULT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_path` (`app_key`,`msg_type`,`json_path`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 DROP TABLE IF EXISTS `i18nkeys`;
 CREATE TABLE `i18nkeys` (
   `id` INT NOT NULL AUTO_INCREMENT,
