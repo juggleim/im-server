@@ -17,7 +17,8 @@ import (
 
 var userConverCache *caches.LruCache
 var userLocks *tools.SegmentatedLocks
-var persistCache *caches.LruCache
+
+var persistCache *caches.EphemeralCache
 
 type ConverPersistIndex struct {
 	Appkey      string
@@ -30,50 +31,42 @@ func init() {
 	userConverCache = caches.NewLruCacheWithReadTimeout(100000, nil, time.Hour)
 	userLocks = tools.NewSegmentatedLocks(512)
 
-	persistCache = caches.NewLruCacheWithReadTimeout(100000, nil, 5*time.Second)
+	persistCache = caches.NewEphemeralCache(time.Second, 5*time.Second, func(key, value interface{}) {
+		persistIndex, ok := value.(*ConverPersistIndex)
+		if ok && persistIndex != nil {
+			userConvers := getUserConvers(persistIndex.Appkey, persistIndex.UserId)
+			item := userConvers.QryConver(persistIndex.TargetId, persistIndex.ChannelType)
+			if item != nil {
+				conversation := models.Conversation{
+					AppKey:      item.AppKey,
+					UserId:      item.UserId,
+					TargetId:    item.TargetId,
+					ChannelType: item.ChannelType,
 
-	persistCache.SetBatchEvict(100, func(convers []caches.CacheItem) {
-		if len(convers) <= 0 {
-			return
-		}
-		conversations := []models.Conversation{}
-		for _, conver := range convers {
-			persistIndex, ok := conver.Value.(*ConverPersistIndex)
-			if ok && persistIndex != nil {
-				userConvers := getUserConvers(persistIndex.Appkey, persistIndex.UserId)
-				item := userConvers.QryConver(persistIndex.TargetId, persistIndex.ChannelType)
-				if item != nil {
-					conversations = append(conversations, models.Conversation{
-						AppKey:      item.AppKey,
-						UserId:      item.UserId,
-						TargetId:    item.TargetId,
-						ChannelType: item.ChannelType,
+					SortTime: item.SortTime,
+					SyncTime: item.SyncTime,
 
-						SortTime: item.SortTime,
-						SyncTime: item.SyncTime,
+					LatestMsgId: item.LatestMsgId,
+					// LatestMsg:            item.LatestMsg,
+					LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
 
-						LatestMsgId: item.LatestMsgId,
-						// LatestMsg:            item.LatestMsg,
-						LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
+					LatestReadMsgIndex: item.LatestReadMsgIndex,
+					LatestReadMsgId:    item.LatestReadMsgId,
+					LatestReadMsgTime:  item.LatestReadMsgTime,
 
-						LatestReadMsgIndex: item.LatestReadMsgIndex,
-						LatestReadMsgId:    item.LatestReadMsgId,
-						LatestReadMsgTime:  item.LatestReadMsgTime,
+					IsTop:          item.IsTop,
+					TopUpdatedTime: item.TopUpdatedTime,
+					UndisturbType:  item.UndisturbType,
 
-						IsTop:          item.IsTop,
-						TopUpdatedTime: item.TopUpdatedTime,
-						UndisturbType:  item.UndisturbType,
-
-						UnreadTag: item.UnreadTag,
-						IsDeleted: item.IsDeleted,
-					})
+					UnreadTag: item.UnreadTag,
+					IsDeleted: item.IsDeleted,
+				}
+				storage := storages.NewConversationStorage()
+				err := storage.Upsert(conversation)
+				if err != nil {
+					fmt.Println("save conver err:", err)
 				}
 			}
-		}
-		storage := storages.NewConversationStorage()
-		err := storage.BatchUpsert(conversations)
-		if err != nil {
-			fmt.Println("batch save convers err:", err)
 		}
 	})
 }
@@ -268,7 +261,7 @@ func (uc *UserConversations) purge() {
 
 func (uc *UserConversations) PersistConver(targetId string, channelType pbobjs.ChannelType) {
 	key := fmt.Sprintf("%s_%s_%s_%d", uc.Appkey, uc.UserId, targetId, channelType)
-	persistCache.AddIfAbsendNoGetOldVal(key, &ConverPersistIndex{
+	persistCache.Add(key, &ConverPersistIndex{
 		Appkey:      uc.Appkey,
 		UserId:      uc.UserId,
 		TargetId:    targetId,

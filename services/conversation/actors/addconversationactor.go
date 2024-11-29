@@ -31,10 +31,10 @@ func (actor *AddConversationActor) OnReceive(ctx context.Context, input proto.Me
 			uIds := bases.GetTargetIdsFromCtx(ctx)
 			if len(uIds) > 0 {
 				for _, uId := range uIds {
-					services.SaveConversationV2(bases.GetAppKeyFromCtx(ctx), uId, conver.Msg, false)
+					services.SaveConversationV2(ctx, bases.GetAppKeyFromCtx(ctx), uId, conver.Msg, false)
 				}
 			} else {
-				services.SaveConversationV2(bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.Msg, false)
+				services.SaveConversationV2(ctx, bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.Msg, false)
 			}
 		}
 	} else {

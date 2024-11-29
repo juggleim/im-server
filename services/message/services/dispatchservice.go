@@ -85,7 +85,8 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 				commonservices.SaveConversation(ctx, receiverId, msg)
 				SaveMsg2Inbox(appkey, receiverId, msg)
 			} else {
-				batchExecutorPool.GetBatchExecutor(fmt.Sprintf("%s_%s_%d", appkey, msg.TargetId, msg.ChannelType)).Append(&BatchConverItem{
+				target := fmt.Sprintf("%s_%s_%d", appkey, msg.TargetId, msg.ChannelType)
+				batchExecutorPool.GetBatchExecutor(target).Append(fmt.Sprintf("%s_%s", target, receiverId), &BatchConverItem{
 					Appkey: appkey,
 					UserId: receiverId,
 					Msg:    msg,

@@ -105,7 +105,7 @@ func (actor *baseProcessActor) OnReceive(ctx context.Context, input proto.Messag
 			}
 			ctx = setCtxValue(ctx, CtxKey_Exts, exts)
 			ctx = setCtxValue(ctx, CtxKey_MsgId, ssRequest.MsgId)
-			ctx = setCtxValue(ctx, CtxKey_StartTime, time.Now().UnixMilli())
+			ctx = setCtxValue(ctx, CtxKey_StartTime, startTime.UnixMilli())
 
 			ctx = setCtxValue(ctx, CtxKey_SenderInfo, ssRequest.SenderInfo)
 			if preProcess != nil {

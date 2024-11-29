@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg, isOffline bool) {
+func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *pbobjs.DownMsg, isOffline bool) {
 	if msg == nil {
 		return
 	}
@@ -45,7 +45,7 @@ func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg, isOff
 				LatestUnreadMsgIndex: unreadIndex,
 			})
 			if !msg.IsSend {
-				HandleMentionedMsg(appkey, userId, msg)
+				HandleMentionedMsg(appkey, userId, msg, userConvers)
 			}
 			//save to db
 			userConvers.PersistConver(msg.TargetId, msg.ChannelType)
@@ -61,7 +61,7 @@ func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg, isOff
 				UnReadIndex: unreadIndex,
 			})
 			if !msg.IsSend {
-				HandleMentionedMsg(appkey, userId, msg)
+				HandleMentionedMsg(appkey, userId, msg, nil)
 			}
 		}
 	}

@@ -88,14 +88,16 @@ type AddNilConver struct {
 	Conversation *Conversation `json:"conversation"`
 }
 
-func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg) {
+func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg, userConvers *UserConversations) {
 	if commonservices.IsMentionedMe(userId, msg) {
 		isRead := 0
 		if msg.IsSend {
 			isRead = 1
 		}
 		//append to cache
-		userConvers := getUserConvers(appkey, userId)
+		if userConvers == nil {
+			userConvers = getUserConvers(appkey, userId)
+		}
 		userConvers.AppendMention(msg.TargetId, msg.ChannelType, &models.MentionMsg{
 			SenderId: msg.SenderId,
 			MsgId:    msg.MsgId,
