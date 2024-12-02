@@ -45,15 +45,21 @@ func SearchByPhone(ctx *httputils.HttpContext) {
 		return
 	}
 	rpcCtx := ctx.ToRpcCtx(ctx.CurrentUserId)
-	code, userinfo := services.SearchByPhone(rpcCtx, req.Phone)
+	code, users := services.SearchByPhone(rpcCtx, req.Phone)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
 	}
-	ctx.ResponseSucc(&models.User{
-		UserId:   userinfo.UserId,
-		Nickname: userinfo.Nickname,
-		Avatar:   userinfo.UserPortrait,
-		IsFriend: false,
-	})
+	ret := &models.Users{
+		Items: []*models.User{},
+	}
+	for _, user := range users.UserInfos {
+		ret.Items = append(ret.Items, &models.User{
+			UserId:   user.UserId,
+			Nickname: user.Nickname,
+			Avatar:   user.UserPortrait,
+			IsFriend: false,
+		})
+	}
+	ctx.ResponseSucc(ret)
 }

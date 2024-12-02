@@ -25,7 +25,7 @@ func QryUserInfo(ctx context.Context, userId string) (errs.IMErrorCode, *pbobjs.
 	return errs.IMErrorCode_SUCCESS, respObj.(*pbobjs.UserInfo)
 }
 
-func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs.UserInfo) {
+func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs.UserInfos) {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	targetUserId := tools.ShortMd5(phone)
 	code, respObj, err := AppSyncRpcCall(ctx, "qry_user_info", requestId, targetUserId, &pbobjs.UserIdReq{
@@ -37,7 +37,11 @@ func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs
 	if err != nil || code != errs.IMErrorCode_SUCCESS {
 		return code, nil
 	}
-	return errs.IMErrorCode_SUCCESS, respObj.(*pbobjs.UserInfo)
+	users := &pbobjs.UserInfos{
+		UserInfos: []*pbobjs.UserInfo{},
+	}
+	users.UserInfos = append(users.UserInfos, respObj.(*pbobjs.UserInfo))
+	return errs.IMErrorCode_SUCCESS, users
 }
 
 func UpdateUser(ctx context.Context, req *pbobjs.UserInfo) errs.IMErrorCode {

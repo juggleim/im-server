@@ -44,6 +44,11 @@ func AddFriends(ctx context.Context, req *pbobjs.FriendsAddReq) errs.IMErrorCode
 			UserId:   userId,
 			FriendId: friendId,
 		})
+		storage.Upsert(models.FriendRel{
+			AppKey:   appkey,
+			UserId:   friendId,
+			FriendId: userId,
+		})
 	}
 	return errs.IMErrorCode_SUCCESS
 }

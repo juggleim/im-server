@@ -13,6 +13,10 @@ type User struct {
 	IsFriend bool   `json:"is_friend"`
 }
 
+type Users struct {
+	Items []*User `json:"items"`
+}
+
 type Friends struct {
 	Items  []*User `json:"items"`
 	Offset string  `json:"offset,omitempty"`
