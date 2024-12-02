@@ -55,9 +55,5 @@ func AddFriend(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(code)
 		return
 	}
-	//send notify msg
-	services.SendFriendNotify(ctx.ToRpcCtx(ctx.CurrentUserId), req.FriendId, &models.FriendNotify{
-		Type: 0,
-	})
 	ctx.ResponseSucc(nil)
 }

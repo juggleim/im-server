@@ -6,8 +6,10 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	apiModels "im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/storages"
 	"im-server/services/appbusiness/storages/models"
+	"im-server/services/commonservices"
 )
 
 func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCode, *pbobjs.FriendListResp) {
@@ -27,9 +29,7 @@ func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCod
 	}
 	for _, rel := range rels {
 		ret.Offset, _ = tools.EncodeInt(rel.ID)
-		ret.Items = append(ret.Items, &pbobjs.UserInfo{
-			UserId: rel.FriendId,
-		})
+		ret.Items = append(ret.Items, commonservices.GetTargetDisplayUserInfo(ctx, rel.FriendId))
 	}
 	return errs.IMErrorCode_SUCCESS, ret
 }
@@ -48,6 +48,10 @@ func AddFriends(ctx context.Context, req *pbobjs.FriendsAddReq) errs.IMErrorCode
 			AppKey:   appkey,
 			UserId:   friendId,
 			FriendId: userId,
+		})
+		//send notify msg
+		SendFriendNotify(ctx, friendId, &apiModels.FriendNotify{
+			Type: 0,
 		})
 	}
 	return errs.IMErrorCode_SUCCESS

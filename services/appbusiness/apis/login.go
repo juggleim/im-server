@@ -69,7 +69,8 @@ func SmsLogin(ctx *httputils.HttpContext) {
 		ctx.ResponseSucc(&models.LoginUserResp{
 			UserId:        userId,
 			Authorization: regResp.Token,
-			NickName:      nickname,
+			NickName:      regResp.Nickname,
+			Avatar:        regResp.UserPortrait,
 			Status:        0,
 			ImToken:       regResp.Token,
 		})

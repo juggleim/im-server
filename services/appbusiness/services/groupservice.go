@@ -50,16 +50,12 @@ func CreateGroup(ctx context.Context, req *pbobjs.GroupMembersReq) (errs.IMError
 	//send notify msg
 	targetUsers := []*models.User{}
 	for _, memberId := range req.MemberIds {
-		targetUsers = append(targetUsers, &models.User{
-			UserId: memberId,
-		})
+		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
 	notify := &models.GroupNotify{
-		Operator: &models.User{
-			UserId: requestId,
-		},
-		Members: targetUsers,
-		Type:    models.GroupNotifyType_AddMember,
+		Operator: GetUser(ctx, requestId),
+		Members:  targetUsers,
+		Type:     models.GroupNotifyType_AddMember,
 	}
 	SendGrpNotify(ctx, grpId, notify)
 	return errs.IMErrorCode_SUCCESS, &pbobjs.GroupInfo{
@@ -76,11 +72,9 @@ func UpdateGroup(ctx context.Context, req *pbobjs.GroupInfo) errs.IMErrorCode {
 		return code
 	}
 	SendGrpNotify(ctx, req.GroupId, &models.GroupNotify{
-		Operator: &models.User{
-			UserId: requestId,
-		},
-		Name: req.GroupName,
-		Type: models.GroupNotifyType_Rename,
+		Operator: GetUser(ctx, requestId),
+		Name:     req.GroupName,
+		Type:     models.GroupNotifyType_Rename,
 	})
 	return errs.IMErrorCode_SUCCESS
 }
@@ -97,16 +91,12 @@ func AddGrpMembers(ctx context.Context, grpMembers *pbobjs.GroupMembersReq) errs
 	//send notify msg
 	targetUsers := []*models.User{}
 	for _, memberId := range grpMembers.MemberIds {
-		targetUsers = append(targetUsers, &models.User{
-			UserId: memberId,
-		})
+		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
 	notify := &models.GroupNotify{
-		Operator: &models.User{
-			UserId: requestId,
-		},
-		Members: targetUsers,
-		Type:    models.GroupNotifyType_AddMember,
+		Operator: GetUser(ctx, requestId),
+		Members:  targetUsers,
+		Type:     models.GroupNotifyType_AddMember,
 	}
 	//send notify msg
 	SendGrpNotify(ctx, grpMembers.GroupId, notify)
@@ -125,16 +115,12 @@ func DelGrpMembers(ctx context.Context, req *pbobjs.GroupMembersReq) errs.IMErro
 	//send notify msg
 	targetUsers := []*models.User{}
 	for _, memberId := range req.MemberIds {
-		targetUsers = append(targetUsers, &models.User{
-			UserId: memberId,
-		})
+		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
 	SendGrpNotify(ctx, req.GroupId, &models.GroupNotify{
-		Operator: &models.User{
-			UserId: requestId,
-		},
-		Members: targetUsers,
-		Type:    models.GroupNotifyType_RemoveMember,
+		Operator: GetUser(ctx, requestId),
+		Members:  targetUsers,
+		Type:     models.GroupNotifyType_RemoveMember,
 	})
 	return errs.IMErrorCode_SUCCESS
 }

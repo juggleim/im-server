@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/appbusiness/models"
 	"im-server/services/commonservices"
 	"im-server/services/group/dbs"
 
@@ -72,4 +73,16 @@ func QueryMyGroups(ctx context.Context, req *pbobjs.GroupInfoListReq) (errs.IMEr
 		})
 	}
 	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func GetUser(ctx context.Context, userId string) *models.User {
+	u := &models.User{
+		UserId: userId,
+	}
+	user := commonservices.GetTargetDisplayUserInfo(ctx, userId)
+	if user != nil {
+		u.Nickname = user.Nickname
+		u.Avatar = user.UserPortrait
+	}
+	return u
 }

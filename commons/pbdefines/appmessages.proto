@@ -615,6 +615,10 @@ message UserInfosResp{
 message UserRegResp{
   string userId = 1;
   string token = 2;
+  string nickname = 3;
+  string userPortrait = 4;
+  repeated KvItem extFields = 5;
+  int64 updatedTime = 6;
 }
 
 message UserOnlineStatusReq{
