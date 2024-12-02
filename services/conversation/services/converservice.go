@@ -522,6 +522,11 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 			if msg, exist := priMsgs[conver.LatestMsgId]; exist {
 				downMsg = msg
 				conversation.TargetUserInfo = msg.TargetUserInfo
+				if userId == downMsg.SenderId {
+					downMsg.IsSend = true
+					downMsg.TargetId = conver.TargetId
+					conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, downMsg.TargetId)
+				}
 			}
 		} else if conver.ChannelType == pbobjs.ChannelType_Group {
 			if msg, exist := grpMsgs[conver.LatestMsgId]; exist {
