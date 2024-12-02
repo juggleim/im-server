@@ -56,6 +56,7 @@ const (
 	CtxKey_TargetId      CtxKey = "CtxKey_TargetId"
 	CtxKey_PublishType   CtxKey = "CtxKey_PublishType"
 	CtxKey_IsFromApi     CtxKey = "CtxKey_IsFromApi"
+	CtxKey_IsFromApp     CtxKey = "CtxKey_IsFromApp"
 	CtxKey_TerminalCount CtxKey = "CtxKey_TerminalCount"
 	CtxKey_GroupId       CtxKey = "CtxKey_GroupId"
 	CtxKey_TargetIds     CtxKey = "CtxKey_TargetIds"
@@ -93,6 +94,7 @@ func (actor *baseProcessActor) OnReceive(ctx context.Context, input proto.Messag
 			ctx = setCtxValue(ctx, CtxKey_TargetId, ssRequest.TargetId)
 			ctx = setCtxValue(ctx, CtxKey_PublishType, ssRequest.PublishType)
 			ctx = setCtxValue(ctx, CtxKey_IsFromApi, ssRequest.IsFromApi)
+			ctx = setCtxValue(ctx, CtxKey_IsFromApp, ssRequest.IsFromApp)
 			ctx = setCtxValue(ctx, CtxKey_TerminalCount, ssRequest.TerminalNum)
 			ctx = setCtxValue(ctx, CtxKey_NoSendbox, ssRequest.NoSendbox)
 			ctx = setCtxValue(ctx, CtxKey_OnlySendbox, ssRequest.OnlySendbox)
@@ -264,6 +266,13 @@ func GetSourceMethodFromCtx(ctx context.Context) string {
 func GetIsFromApiFromCtx(ctx context.Context) bool {
 	if isFromApi, ok := ctx.Value(CtxKey_IsFromApi).(bool); ok {
 		return isFromApi
+	}
+	return false
+}
+
+func GetIsFromAppFromCtx(ctx context.Context) bool {
+	if isFromApp, ok := ctx.Value(CtxKey_IsFromApp).(bool); ok {
+		return isFromApp
 	}
 	return false
 }

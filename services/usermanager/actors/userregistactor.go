@@ -31,11 +31,13 @@ func (actor *UserRegistActor) OnReceive(ctx context.Context, input proto.Message
 		appInfo, exist := commonservices.GetAppInfo(token.AppKey)
 		if exist && appInfo != nil {
 			tokenStr, _ := token.ToTokenString([]byte(appInfo.AppSecureKey))
-			queryAck := bases.CreateQueryAckWraper(ctx, 0, &pbobjs.UserRegResp{
+			if !req.NoCover || !services.CheckUserExist(ctx, req.UserId) {
+				services.AddUser(ctx, req.UserId, req.Nickname, req.UserPortrait, req.ExtFields, req.Settings, pbobjs.UserType_User)
+			}
+			queryAck := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_SUCCESS, &pbobjs.UserRegResp{
 				UserId: req.UserId,
 				Token:  tokenStr,
 			})
-			services.AddUser(ctx, req.UserId, req.Nickname, req.UserPortrait, req.ExtFields, req.Settings, pbobjs.UserType_User)
 			actor.Sender.Tell(queryAck, actorsystem.NoSender)
 		} else {
 			queryAck := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_API_APP_NOT_EXISTED, &pbobjs.UserRegResp{

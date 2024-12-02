@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "commons/pbdefines/pbobjs";
+import "commons/pbdefines/appmessages.proto";
+
+message SearchUserReq {
+    string account = 1;
+}
+
+message GroupInfoListReq {
+    int64 limit = 1;
+    string offset = 2;
+}
+
+message GroupInfoListResp {
+    repeated GroupInfo items = 1;
+    string offset = 2;
+}
+
+message FriendListReq {
+    int64 limit = 1;
+    string offset = 2;
+}
+
+message FriendListResp{
+    repeated UserInfo items = 1;
+    string offset = 2;
+}
+
+message FriendsAddReq {
+    repeated string friendIds = 1;
+}

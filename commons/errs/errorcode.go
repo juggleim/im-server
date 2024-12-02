@@ -38,6 +38,7 @@ var (
 	IMErrorCode_USER_NOT_EXIST           IMErrorCode = 10102
 	IMErrorCode_USER_NOT_SUPPROT_SETTING IMErrorCode = 10103
 	IMErrorCode_USER_TIMEZONE_ILLGAL     IMErrorCode = 10104
+	IMErrorCode_USER_EXISTED             IMErrorCode = 10106
 )
 
 // connect errorcode
@@ -135,6 +136,16 @@ var (
 	IMErrorCode_RTCINVITE_PEERHANGUP IMErrorCode = 16102
 	IMErrorCode_RTCINVITE_BUSY       IMErrorCode = 16103
 	IMErrorCode_RTCINVITE_CANCEL     IMErrorCode = 16104
+)
+
+// app errorcode
+var (
+	IMErrorCode_APP_DEFAULT          IMErrorCode = 17000
+	IMErrorCode_APP_APPKEY_REQUIRED  IMErrorCode = 17001
+	IMErrorCode_APP_NOT_EXISTED      IMErrorCode = 17002
+	IMErrorCode_APP_REQ_BODY_ILLEGAL IMErrorCode = 17003
+	IMErrorCode_APP_INTERNAL_TIMEOUT IMErrorCode = 17004
+	IMErrorCode_APP_NOT_LOGIN        IMErrorCode = 17005
 )
 
 var imCode2ApiErrorMap map[IMErrorCode]*ApiErrorMsg = map[IMErrorCode]*ApiErrorMsg{

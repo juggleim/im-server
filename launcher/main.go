@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"im-server/services/appbusiness"
 	"im-server/services/botmsg"
 	"im-server/services/broadcast"
 	"im-server/services/logmanager"
@@ -112,6 +113,7 @@ func main() {
 	imstarters.Loaded(&userstatussub.UserStatusSubManager{})
 	imstarters.Loaded(&botmsg.BotMsgManager{})
 	imstarters.Loaded(&rtcroom.RtcRoomManager{})
+	imstarters.Loaded(&appbusiness.AppBusiness{})
 
 	imstarters.Startup()
 

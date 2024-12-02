@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
 	"im-server/commons/tools"
+	"im-server/services/appbusiness/apis"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 	"net/http"
@@ -22,15 +23,22 @@ type ImWebsocketServer struct {
 }
 
 func (server *ImWebsocketServer) SyncStart(port int) {
-	http.HandleFunc("/im", server.ImWsServer)
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Hello JuggleIM!")
+	})
+	mux.HandleFunc("/im", server.ImWsServer)
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, `{"status":"ok"}`)
 	})
-	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+
+	apis.LoadAppApis(mux)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 }
 
 var upgrader = websocket.Upgrader{

@@ -484,7 +484,7 @@ func (uc *UserConversations) ClearUnread(targetId string, channelType pbobjs.Cha
 
 	itemKey := getConverItemKey(targetId, channelType)
 	if item, exist := uc.ConverItemMap[itemKey]; exist {
-		if item.LatestReadMsgIndex < readMsgIndex {
+		if readMsgIndex > item.LatestReadMsgIndex && readMsgIndex <= item.LatestUnreadMsgIndex {
 			item.LatestReadMsgIndex = readMsgIndex
 			item.LatestReadMsgId = readMsgId
 			item.LatestReadMsgTime = readMsgTime

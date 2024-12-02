@@ -1,0 +1,14 @@
+package models
+
+type FriendRel struct {
+	ID       int64
+	AppKey   string
+	UserId   string
+	FriendId string
+}
+
+type IFriendRelStorage interface {
+	Upsert(item FriendRel) error
+	QueryFriendRels(appkey, userId string, startId, limit int64) ([]*FriendRel, error)
+	BatchDelete(appkey, userId string, friendIds []string) error
+}

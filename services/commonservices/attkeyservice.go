@@ -24,6 +24,7 @@ const (
 
 	//setting keys of group or group_members
 	AttItemKey_HideGrpMsg AttItemKey = "hide_grp_msg"
+	AttItemKey_GrpCreator AttItemKey = "grp_creator"
 
 	//setting keys of users
 	AttItemKey_Language      AttItemKey = "language"

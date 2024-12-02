@@ -32,6 +32,7 @@ message RpcMessageWraper{
   string deviceId = 16;
   string instanceId = 17;
   string platform = 18;
+  bool isFromApp = 19;
 
   int32 resultCode = 21;
   int64 msgSendTime = 22;
@@ -585,6 +586,9 @@ message UserInfo{
   repeated KvItem settings = 6;
   repeated KvItem statuses = 7;
   UserType userType = 8;
+
+  //inner fields
+  bool noCover = 100;
 }
 
 enum UserType{
