@@ -68,9 +68,7 @@ func QueryMyGroups(ctx context.Context, req *pbobjs.GroupInfoListReq) (errs.IMEr
 	}
 	for _, group := range groups {
 		ret.Offset, _ = tools.EncodeInt(group.ID)
-		ret.Items = append(ret.Items, &pbobjs.GroupInfo{
-			GroupId: group.GroupId,
-		})
+		ret.Items = append(ret.Items, commonservices.GetGroupInfoFromCache(ctx, group.GroupId))
 	}
 	return errs.IMErrorCode_SUCCESS, ret
 }
