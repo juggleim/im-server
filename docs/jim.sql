@@ -195,7 +195,6 @@ CREATE TABLE `conversations` (
   UNIQUE KEY `uniq_app_key_user_id_target_id` (`app_key`,`user_id`,`target_id`,`channel_type`),
   KEY `idx_sync_time` (`app_key`,`user_id`,`sync_time`),
   KEY `idx_update_time` (`app_key`,`user_id`,`sort_time`),
-  KEY `idx_undisturb` (`app_key`,`user_id`,`target_id`,`channel_type`),
   KEY `idx_group` (`app_key`,`user_id`,`group`,`sort_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话';
 
