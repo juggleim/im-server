@@ -38,13 +38,14 @@ func AddFriends(ctx context.Context, req *pbobjs.FriendsAddReq) errs.IMErrorCode
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	storage := storages.NewFriendRelStorage()
+	friendRels := []models.FriendRel{}
 	for _, friendId := range req.FriendIds {
-		storage.Upsert(models.FriendRel{
+		friendRels = append(friendRels, models.FriendRel{
 			AppKey:   appkey,
 			UserId:   userId,
 			FriendId: friendId,
 		})
-		storage.Upsert(models.FriendRel{
+		friendRels = append(friendRels, models.FriendRel{
 			AppKey:   appkey,
 			UserId:   friendId,
 			FriendId: userId,
@@ -54,5 +55,6 @@ func AddFriends(ctx context.Context, req *pbobjs.FriendsAddReq) errs.IMErrorCode
 			Type: 0,
 		})
 	}
+	storage.BatchUpsert(friendRels)
 	return errs.IMErrorCode_SUCCESS
 }

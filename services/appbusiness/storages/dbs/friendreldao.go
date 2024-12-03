@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"bytes"
 	"fmt"
 	"im-server/commons/dbcommons"
 	"im-server/services/appbusiness/storages/models"
@@ -20,6 +21,23 @@ func (rel FriendRelDao) TableName() string {
 func (rel FriendRelDao) Upsert(item models.FriendRel) error {
 	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id)VALUES(?,?,?)", rel.TableName())
 	return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.FriendId).Error
+}
+
+func (rel FriendRelDao) BatchUpsert(items []models.FriendRel) error {
+	var buffer bytes.Buffer
+	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id)VALUES", rel.TableName())
+	buffer.WriteString(sql)
+	length := len(items)
+	params := []interface{}{}
+	for i, item := range items {
+		if i == length-1 {
+			buffer.WriteString("(?,?,?)")
+		} else {
+			buffer.WriteString("(?,?,?),")
+		}
+		params = append(params, item.AppKey, item.UserId, item.FriendId)
+	}
+	return dbcommons.GetDb().Exec(buffer.String(), params...).Error
 }
 
 func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit int64) ([]*models.FriendRel, error) {
