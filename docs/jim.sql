@@ -397,7 +397,8 @@ CREATE TABLE `groupmembers` (
   `is_allow` tinyint DEFAULT '0' COMMENT '是否白名单 0:非白名单用户；1:白名单用户；',
   `mute_end_at` bigint DEFAULT '0' COMMENT '禁言结束时间戳',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_appkey_grpid_memid` (`app_key`,`group_id`,`member_id`)
+  UNIQUE KEY `uniq_appkey_grpid_memid` (`app_key`,`group_id`,`member_id`),
+  KEY `idx_memberid` (`app_key`,`member_id`,`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群成员';
 
 DROP TABLE IF EXISTS `grpassistantrels`;
