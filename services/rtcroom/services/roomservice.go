@@ -50,6 +50,7 @@ type RtcRoomContainer struct {
 	RoomId       string
 	RoomType     pbobjs.RtcRoomType
 	RtcChannel   pbobjs.RtcChannel
+	RtcMediaType pbobjs.RtcMediaType
 	Owner        *pbobjs.UserInfo
 	CreatedTime  int64
 	AcceptedTime int64
@@ -266,7 +267,7 @@ func getRtcRoomContainer(appkey, roomId string) (*RtcRoomContainer, bool) {
 	}
 }
 
-func getRtcRoomContainerWithInit(appkey, roomId, ownerId string, roomType pbobjs.RtcRoomType) (*RtcRoomContainer, bool) {
+func getRtcRoomContainerWithInit(appkey, roomId, ownerId string, roomType pbobjs.RtcRoomType, rtcChannel pbobjs.RtcChannel, rtcMediaType pbobjs.RtcMediaType) (*RtcRoomContainer, bool) {
 	key := getRoomKey(appkey, roomId)
 	if cacheContainer, exist := rtcroomCache.Get(key); exist {
 		container := cacheContainer.(*RtcRoomContainer)
@@ -292,10 +293,12 @@ func getRtcRoomContainerWithInit(appkey, roomId, ownerId string, roomType pbobjs
 		return container, false
 	}
 	container = &RtcRoomContainer{
-		Appkey:      appkey,
-		RoomId:      roomId,
-		RoomType:    roomType,
-		CreatedTime: time.Now().UnixMilli(),
+		Appkey:       appkey,
+		RoomId:       roomId,
+		RoomType:     roomType,
+		RtcChannel:   rtcChannel,
+		RtcMediaType: rtcMediaType,
+		CreatedTime:  time.Now().UnixMilli(),
 		Owner: &pbobjs.UserInfo{
 			UserId: ownerId,
 		},
@@ -321,6 +324,7 @@ func getRtcRoomContainerFromDb(appkey, roomId string) *RtcRoomContainer {
 		container.Status = RtcRoomStatus_Normal
 		container.RoomType = room.RoomType
 		container.RtcChannel = room.RtcChannel
+		container.RtcMediaType = room.RtcMediaType
 		container.Owner = &pbobjs.UserInfo{
 			UserId: room.OwnerId,
 		}
@@ -360,15 +364,17 @@ func CreateRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCod
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	deviceId := bases.GetDeviceIdFromCtx(ctx)
 
-	container, succ := getRtcRoomContainerWithInit(appkey, req.RoomId, userId, req.RoomType)
+	container, succ := getRtcRoomContainerWithInit(appkey, req.RoomId, userId, req.RoomType, req.RtcChannel, req.RtcMediaType)
 	if succ {
 		// add to db
 		storage := storages.NewRtcRoomStorage()
 		err := storage.Create(models.RtcRoom{
-			RoomId:   req.RoomId,
-			RoomType: req.RoomType,
-			OwnerId:  userId,
-			AppKey:   appkey,
+			RoomId:       req.RoomId,
+			RoomType:     req.RoomType,
+			RtcChannel:   req.RtcChannel,
+			RtcMediaType: req.RtcMediaType,
+			OwnerId:      userId,
+			AppKey:       appkey,
 		})
 		if err != nil {
 			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
@@ -441,9 +447,12 @@ func generatePbRtcRoom(container *RtcRoomContainer) *pbobjs.RtcRoom {
 		})
 	})
 	return &pbobjs.RtcRoom{
-		RoomId:  container.RoomId,
-		Owner:   container.Owner,
-		Members: members,
+		RoomId:       container.RoomId,
+		Owner:        container.Owner,
+		RtcChannel:   container.RtcChannel,
+		RtcMediaType: container.RtcMediaType,
+		RoomType:     container.RoomType,
+		Members:      members,
 	}
 }
 

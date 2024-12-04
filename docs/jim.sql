@@ -742,6 +742,8 @@ CREATE TABLE `rtcrooms` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `room_id` varchar(50) DEFAULT NULL COMMENT '房间id',
   `room_type` tinyint DEFAULT '0' COMMENT '房间类型',
+  `rtc_channel` tinyint DEFAULT '0',
+  `rtc_media_type` tinyint DEFAULT '0',
   `owner_id` varchar(32) DEFAULT NULL COMMENT '创建者',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `accepted_time` bigint DEFAULT '0' COMMENT '1v1 接通时间',

@@ -30,16 +30,17 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 	if code != errs.IMErrorCode_SUCCESS {
 		return code, auth
 	}
-	container, succ := getRtcRoomContainerWithInit(appkey, roomId, userId, req.RoomType)
+	container, succ := getRtcRoomContainerWithInit(appkey, roomId, userId, req.RoomType, req.RtcChannel, req.RtcMediaType)
 	if succ {
 		// add to db
 		storage := storages.NewRtcRoomStorage()
 		err := storage.Create(models.RtcRoom{
-			RoomId:     req.RoomId,
-			RoomType:   req.RoomType,
-			RtcChannel: req.RtcChannel,
-			OwnerId:    userId,
-			AppKey:     appkey,
+			RoomId:       req.RoomId,
+			RoomType:     req.RoomType,
+			RtcChannel:   req.RtcChannel,
+			RtcMediaType: req.RtcMediaType,
+			OwnerId:      userId,
+			AppKey:       appkey,
 		})
 		if err != nil {
 			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
@@ -102,10 +103,11 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			InviteType: pbobjs.InviteType_RtcInvite,
 			User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
 			Room: &pbobjs.RtcRoom{
-				RoomType:   container.RoomType,
-				RoomId:     container.RoomId,
-				Owner:      container.Owner,
-				RtcChannel: container.RtcChannel,
+				RoomType:     container.RoomType,
+				RoomId:       container.RoomId,
+				Owner:        container.Owner,
+				RtcChannel:   container.RtcChannel,
+				RtcMediaType: container.RtcMediaType,
 			},
 		})
 		//trigger push

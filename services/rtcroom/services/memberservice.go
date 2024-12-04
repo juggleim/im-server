@@ -29,10 +29,12 @@ type RtcMemberContainer struct {
 }
 
 type RtcMemberRoom struct {
-	RoomId   string
-	RoomType pbobjs.RtcRoomType
-	RtcState pbobjs.RtcState
-	DeviceId string
+	RoomId       string
+	RoomType     pbobjs.RtcRoomType
+	RtcChannel   pbobjs.RtcChannel
+	RtcMediaType pbobjs.RtcMediaType
+	RtcState     pbobjs.RtcState
+	DeviceId     string
 }
 
 func (container *RtcMemberContainer) Add(memberRoom RtcMemberRoom) {
