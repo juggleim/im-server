@@ -30,7 +30,15 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 	if code != errs.IMErrorCode_SUCCESS {
 		return code, auth
 	}
-	container, succ := getRtcRoomContainerWithInit(appkey, roomId, userId, req.RoomType, req.RtcChannel, req.RtcMediaType)
+	rtcRoom := &models.RtcRoom{
+		RoomId:       req.RoomId,
+		RoomType:     req.RoomType,
+		RtcChannel:   req.RtcChannel,
+		RtcMediaType: req.RtcMediaType,
+		OwnerId:      userId,
+		AppKey:       appkey,
+	}
+	container, succ := createRtcRoomContainer2Cache(ctx, appkey, rtcRoom)
 	if succ {
 		// add to db
 		storage := storages.NewRtcRoomStorage()

@@ -4,9 +4,11 @@ import (
 	"context"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
+	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"strings"
+	"sync"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -34,6 +36,54 @@ func GetUserInfoFromRpcWithAttTypes(ctx context.Context, userId string, attTypes
 	return &pbobjs.UserInfo{
 		UserId: userId,
 	}
+}
+
+func BatchGetUserInfoFromRpc(ctx context.Context, userIds []string) map[string]*pbobjs.UserInfo {
+	targetGroups := map[string][]string{}
+	method := "qry_user_info_by_ids"
+	for _, userId := range userIds {
+		node := bases.GetCluster().GetTargetNode(method, userId)
+		if node != nil {
+			var uids []string
+			if existUids, ok := targetGroups[node.Name]; ok {
+				uids = existUids
+			} else {
+				uids = []string{}
+			}
+			uids = append(uids, userId)
+			targetGroups[node.Name] = uids
+		}
+	}
+	wg := &sync.WaitGroup{}
+	lock := &sync.RWMutex{}
+	retUserMap := make(map[string]*pbobjs.UserInfo)
+	for _, ids := range targetGroups {
+		wg.Add(1)
+		uids := ids
+		if len(uids) > 0 {
+			go func() {
+				defer wg.Done()
+				code, respObj, err := bases.SyncRpcCall(ctx, method, uids[0], &pbobjs.UserIdsReq{
+					UserIds:  uids,
+					AttTypes: []int32{int32(AttItemType_Att), int32(AttItemType_Setting)},
+				}, func() proto.Message {
+					return &pbobjs.UserInfosResp{}
+				})
+				if err == nil && code == errs.IMErrorCode_SUCCESS && respObj != nil {
+					resp := respObj.(*pbobjs.UserInfosResp)
+					if len(resp.UserInfoMap) > 0 {
+						lock.Lock()
+						defer lock.Unlock()
+						for k, v := range resp.UserInfoMap {
+							retUserMap[k] = v
+						}
+					}
+				}
+			}()
+		}
+	}
+	wg.Wait()
+	return retUserMap
 }
 
 func Map2KvItems(m map[string]string) []*pbobjs.KvItem {
@@ -109,6 +159,51 @@ func GetTargetUserInfo(ctx context.Context, userId string) *TargetUserInfo {
 	}
 }
 
+func BatchGetTargetUserInfo(ctx context.Context, userIds []string) map[string]*TargetUserInfo {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	noCacheUserIds := []string{}
+	ret := map[string]*TargetUserInfo{}
+	for _, userId := range userIds {
+		cacheKey := getKey(appkey, userId)
+		if !targetUserCache.Contains(cacheKey) {
+			noCacheUserIds = append(noCacheUserIds, userId)
+		} else {
+			obj, exist := targetUserCache.Get(cacheKey)
+			if exist && obj != nil {
+				ret[userId] = obj.(*TargetUserInfo)
+			} else {
+				noCacheUserIds = append(noCacheUserIds, userId)
+			}
+		}
+	}
+	if len(noCacheUserIds) > 0 {
+		userMap := BatchGetUserInfoFromRpc(ctx, noCacheUserIds)
+		for userId, userInfo := range userMap {
+			targetUserInfo := &TargetUserInfo{
+				UserId:       userId,
+				Nickname:     userInfo.Nickname,
+				UserPortrait: userInfo.UserPortrait,
+				ExtFields:    userInfo.ExtFields,
+				UpdatedTime:  userInfo.UpdatedTime,
+				Settings:     &UserSettings{},
+				UserType:     userInfo.UserType,
+			}
+			FillObjField(targetUserInfo.Settings, Kvitems2Map(userInfo.Settings))
+			if targetUserInfo.Settings.Undisturb != "" {
+				var userUndisturb UserUndisturb
+				err := tools.JsonUnMarshal([]byte(targetUserInfo.Settings.Undisturb), &userUndisturb)
+				if err == nil {
+					targetUserInfo.Settings.UndisturbObj = &userUndisturb
+				}
+			}
+			cacheKey := getKey(appkey, userId)
+			targetUserCache.Add(cacheKey, targetUserInfo)
+			ret[userId] = targetUserInfo
+		}
+	}
+	return ret
+}
+
 func GetTargetDisplayUserInfo(ctx context.Context, userId string) *pbobjs.UserInfo {
 	tUserInfo := GetTargetUserInfo(ctx, userId)
 	return &pbobjs.UserInfo{
@@ -118,6 +213,21 @@ func GetTargetDisplayUserInfo(ctx context.Context, userId string) *pbobjs.UserIn
 		ExtFields:    tUserInfo.ExtFields,
 		UpdatedTime:  tUserInfo.UpdatedTime,
 	}
+}
+
+func BatchGetTargetDisplayUserInfo(ctx context.Context, userIds []string) map[string]*pbobjs.UserInfo {
+	targetUserMap := BatchGetTargetUserInfo(ctx, userIds)
+	userMap := map[string]*pbobjs.UserInfo{}
+	for userId, tUserInfo := range targetUserMap {
+		userMap[userId] = &pbobjs.UserInfo{
+			UserId:       tUserInfo.UserId,
+			Nickname:     tUserInfo.Nickname,
+			UserPortrait: tUserInfo.UserPortrait,
+			ExtFields:    tUserInfo.ExtFields,
+			UpdatedTime:  tUserInfo.UpdatedTime,
+		}
+	}
+	return userMap
 }
 
 func GetTargetUserSettings(ctx context.Context, userId string) *UserSettings {
