@@ -42,19 +42,12 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 	if succ {
 		// add to db
 		storage := storages.NewRtcRoomStorage()
-		err := storage.Create(models.RtcRoom{
-			RoomId:       req.RoomId,
-			RoomType:     req.RoomType,
-			RtcChannel:   req.RtcChannel,
-			RtcMediaType: req.RtcMediaType,
-			OwnerId:      userId,
-			AppKey:       appkey,
-		})
+		err := storage.Create(*rtcRoom)
 		if err != nil {
 			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
 		}
 	}
-	if container.RoomType == pbobjs.RtcRoomType_OneOne {
+	if req.RoomType == pbobjs.RtcRoomType_OneOne {
 		if !succ {
 			return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, nil
 		}
@@ -126,8 +119,80 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			MsgType:     "jg:voicecall",
 		})
 		bases.UnicastRouteWithNoSender(msg)
+	} else if req.RoomType == pbobjs.RtcRoomType_OneMore {
+		memberStorage := storages.NewRtcRoomMemberStorage()
+		if succ {
+			grabCode := MemberGrabState(ctx, userId, &pbobjs.MemberState{
+				RoomId:   roomId,
+				RoomType: container.RoomType,
+				MemberId: userId,
+				DeviceId: deviceId,
+				RtcState: pbobjs.RtcState_RtcConnected,
+			})
+			if grabCode != errs.IMErrorCode_SUCCESS {
+				return grabCode, nil
+			}
+			ownerMember := &models.RtcRoomMember{
+				RoomId:         roomId,
+				RoomType:       container.RoomType,
+				OwnerId:        userId,
+				MemberId:       userId,
+				DeviceId:       deviceId,
+				RtcState:       pbobjs.RtcState_RtcConnected,
+				LatestPingTime: time.Now().UnixMilli(),
+				AppKey:         appkey,
+			}
+			container.JoinRoom(ownerMember)
+			memberStorage.Upsert(*ownerMember)
+		}
+		// add target members
+		for _, targetId := range req.TargetIds {
+			targetMember := &models.RtcRoomMember{
+				RoomId:         roomId,
+				RoomType:       container.RoomType,
+				OwnerId:        container.Owner.UserId,
+				MemberId:       targetId,
+				RtcState:       pbobjs.RtcState_RtcIncoming,
+				InviterId:      userId,
+				CallTime:       time.Now().UnixMilli(),
+				LatestPingTime: time.Now().UnixMilli(),
+				AppKey:         appkey,
+			}
+			container.JoinRoom(targetMember)
+			memberStorage.Upsert(*targetMember)
+			//notify other node
+			MemberSyncState(ctx, targetId, &pbobjs.SyncMemberStateReq{
+				Member: &pbobjs.MemberState{
+					RoomId:   roomId,
+					RoomType: container.RoomType,
+					MemberId: targetId,
+					RtcState: pbobjs.RtcState_RtcIncoming,
+				},
+			})
+		}
+		//send invite event
+		targetUserMap := commonservices.BatchGetTargetDisplayUserInfo(ctx, req.TargetIds)
+		inviteEvent := &pbobjs.RtcInviteEvent{
+			InviteType: pbobjs.InviteType_RtcInvite,
+			User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
+			Room: &pbobjs.RtcRoom{
+				RoomType:     container.RoomType,
+				RoomId:       container.RoomId,
+				Owner:        container.Owner,
+				RtcChannel:   container.RtcChannel,
+				RtcMediaType: container.RtcMediaType,
+			},
+			TargetUsers: []*pbobjs.UserInfo{},
+		}
+		for _, targetUser := range targetUserMap {
+			inviteEvent.TargetUsers = append(inviteEvent.TargetUsers, targetUser)
+		}
+		container.ForeachMembers(func(member *models.RtcRoomMember) {
+			if member.MemberId != userId {
+				SendInviteEvent(ctx, member.MemberId, inviteEvent)
+			}
+		})
 	}
-
 	return errs.IMErrorCode_SUCCESS, auth
 }
 
