@@ -4,6 +4,7 @@ import (
 	"context"
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
 	"im-server/services/commonservices/transengines"
 	"sync"
@@ -11,6 +12,46 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
+
+func GetTransEngine(appkey string) transengines.ITransEngine {
+	appInfo, exist := GetAppInfo(appkey)
+	if exist && appInfo != nil {
+		if appInfo.TransEngine == nil {
+			lock := appLocks.GetLocks(appInfo.AppKey)
+			lock.Lock()
+			defer lock.Unlock()
+			loadTransEngine(appInfo)
+		}
+		if appInfo.TransEngine != nil {
+			return appInfo.TransEngine
+		}
+	}
+	return transengines.DefaultTransEngine
+}
+
+func loadTransEngine(appInfo *AppInfo) {
+	if appInfo.TransEngineConf == "" {
+		appInfo.TransEngine = transengines.DefaultTransEngine
+	}
+	transConf := &TransEngineConf{}
+	err := tools.JsonUnMarshal([]byte(appInfo.TransEngineConf), transConf)
+	if err != nil {
+		appInfo.TransEngine = transengines.DefaultTransEngine
+	}
+	if transConf.BdTransEngine != nil && transConf.BdTransEngine.ApiKey != "" && transConf.BdTransEngine.SecretKey != "" {
+		appInfo.TransEngine = &transengines.BdTransEngine{
+			AppKey:    appInfo.AppKey,
+			ApiKey:    transConf.BdTransEngine.ApiKey,
+			SecretKey: transConf.BdTransEngine.SecretKey,
+		}
+	} else {
+		appInfo.TransEngine = transengines.DefaultTransEngine
+	}
+}
+
+type TransEngineConf struct {
+	BdTransEngine *transengines.BdTransEngine `json:"baidu,omitempty"`
+}
 
 type MsgTransConfs struct {
 	Confs map[string][]string
@@ -63,10 +104,6 @@ func GetMsgTransConfs(appkey, msgType string) []string {
 		}
 	}
 	return []string{}
-}
-
-func GetTransEngine(appkey string) transengines.ITransEngine {
-	return transengines.DefaultTransEngine
 }
 
 func TranslateMsg(ctx context.Context, lans []string, downMsg *pbobjs.DownMsg) {
