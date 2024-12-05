@@ -144,6 +144,10 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			}
 			container.JoinRoom(ownerMember)
 			memberStorage.Upsert(*ownerMember)
+		} else {
+			if exist := container.MemberExist(userId); !exist {
+				return errs.IMErrorCode_RTCROOM_NOTMEMBER, nil
+			}
 		}
 		// add target members
 		for _, targetId := range req.TargetIds {
@@ -223,11 +227,13 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 	if code != errs.IMErrorCode_SUCCESS {
 		return code, nil
 	}
-	//update accepted time
-	acceptedTime := time.Now().UnixMilli()
-	container.UpdAcceptedTime(acceptedTime)
-	roomStorage := storages.NewRtcRoomStorage()
-	roomStorage.UpdateAcceptedTime(appkey, roomId, acceptedTime)
+	if container.RoomType == pbobjs.RtcRoomType_OneOne {
+		//update accepted time
+		acceptedTime := time.Now().UnixMilli()
+		container.UpdAcceptedTime(acceptedTime)
+		roomStorage := storages.NewRtcRoomStorage()
+		roomStorage.UpdateAcceptedTime(appkey, roomId, acceptedTime)
+	}
 	//update member state
 	storage := storages.NewRtcRoomMemberStorage()
 	err := storage.UpdateState(appkey, roomId, userId, pbobjs.RtcState_RtcConnecting, deviceId)
@@ -256,6 +262,7 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	roomId := bases.GetTargetIdFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
+	deviceId := bases.GetDeviceIdFromCtx(ctx)
 
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
@@ -312,6 +319,30 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 		roomStorage.Delete(appkey, roomId)
 		storage.DeleteByRoomId(appkey, roomId)
 		rtcroomCache.Remove(getRoomKey(appkey, roomId))
+	} else if container.RoomType == pbobjs.RtcRoomType_OneMore {
+		//quit
+		container.QuitRoom(userId)
+		MemberSyncState(ctx, userId, &pbobjs.SyncMemberStateReq{
+			IsDelete: true,
+			Member: &pbobjs.MemberState{
+				RoomId:   roomId,
+				RoomType: container.RoomType,
+				MemberId: userId,
+				DeviceId: deviceId,
+			},
+		})
+		//notify other members
+		container.ForeachMembers(func(member *models.RtcRoomMember) {
+			SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
+				InviteType: pbobjs.InviteType_RtcHangup,
+				User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
+				Room: &pbobjs.RtcRoom{
+					RoomType: container.RoomType,
+					RoomId:   container.RoomId,
+					Owner:    container.Owner,
+				},
+			})
+		})
 	}
 	return errs.IMErrorCode_SUCCESS
 }
