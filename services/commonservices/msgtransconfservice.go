@@ -44,13 +44,19 @@ func loadTransEngine(appInfo *AppInfo) {
 			ApiKey:    transConf.BdTransEngine.ApiKey,
 			SecretKey: transConf.BdTransEngine.SecretKey,
 		}
+	} else if transConf.DeeplTransEngine != nil && transConf.DeeplTransEngine.AuthKey != "" {
+		appInfo.TransEngine = &transengines.DeeplTransEngine{
+			AppKey:  appInfo.AppKey,
+			AuthKey: transConf.DeeplTransEngine.AuthKey,
+		}
 	} else {
 		appInfo.TransEngine = transengines.DefaultTransEngine
 	}
 }
 
 type TransEngineConf struct {
-	BdTransEngine *transengines.BdTransEngine `json:"baidu,omitempty"`
+	BdTransEngine    *transengines.BdTransEngine    `json:"baidu,omitempty"`
+	DeeplTransEngine *transengines.DeeplTransEngine `json:"deepl,omitempty"`
 }
 
 type MsgTransConfs struct {
