@@ -331,9 +331,9 @@ func DelConversationV2(ctx context.Context, userId string, convers []*pbobjs.Con
 				userConvers.PersistConver(conver.TargetId, conver.ChannelType)
 			}
 		}
-		bases.AsyncRpcCall(ctx, "del_conver_cache", userId, &pbobjs.ConversationsReq{
-			Conversations: convers,
-		})
+		// bases.AsyncRpcCall(ctx, "del_conver_cache", userId, &pbobjs.ConversationsReq{
+		// 	Conversations: convers,
+		// })
 		//notify other device
 		flag := commonservices.SetCmdMsg(0)
 		bs, _ := json.Marshal(delConvers)
