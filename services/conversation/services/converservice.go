@@ -453,15 +453,25 @@ func UndisturbConversV2(ctx context.Context, req *pbobjs.UndisturbConversReq) er
 		Conversations: []*UndisturbConver{},
 	}
 	userConvers := getUserConvers(appkey, userId)
+	needUnCacheConvers := []*pbobjs.Conversation{}
 	for _, item := range req.Items {
 		affected := userConvers.UpdateUndisturbType(item.TargetId, item.ChannelType, item.UndisturbType)
 		if affected {
 			userConvers.PersistConver(item.TargetId, item.ChannelType)
+			needUnCacheConvers = append(needUnCacheConvers, &pbobjs.Conversation{
+				TargetId:    item.TargetId,
+				ChannelType: item.ChannelType,
+			})
 		}
 		convers.Conversations = append(convers.Conversations, &UndisturbConver{
 			TargetId:      item.TargetId,
 			ChannelType:   int32(item.ChannelType),
 			UndisturbType: item.UndisturbType,
+		})
+	}
+	if len(needUnCacheConvers) > 0 {
+		bases.AsyncRpcCall(ctx, "del_conver_cache", userId, &pbobjs.ConversationsReq{
+			Conversations: needUnCacheConvers,
 		})
 	}
 	//Notify other device to update undisturb
