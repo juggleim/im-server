@@ -215,7 +215,7 @@ func GetTargetDisplayUserInfo(ctx context.Context, userId string) *pbobjs.UserIn
 	}
 }
 
-func BatchGetTargetDisplayUserInfo(ctx context.Context, userIds []string) map[string]*pbobjs.UserInfo {
+func GetTargetDisplayUserInfosMap(ctx context.Context, userIds []string) map[string]*pbobjs.UserInfo {
 	targetUserMap := BatchGetTargetUserInfo(ctx, userIds)
 	userMap := map[string]*pbobjs.UserInfo{}
 	for userId, tUserInfo := range targetUserMap {
@@ -228,6 +228,21 @@ func BatchGetTargetDisplayUserInfo(ctx context.Context, userIds []string) map[st
 		}
 	}
 	return userMap
+}
+
+func GetTargetDisplayUserInfos(ctx context.Context, userIds []string) []*pbobjs.UserInfo {
+	targetUserMap := BatchGetTargetUserInfo(ctx, userIds)
+	users := []*pbobjs.UserInfo{}
+	for _, userInfo := range targetUserMap {
+		users = append(users, &pbobjs.UserInfo{
+			UserId:       userInfo.UserId,
+			Nickname:     userInfo.Nickname,
+			UserPortrait: userInfo.UserPortrait,
+			ExtFields:    userInfo.ExtFields,
+			UpdatedTime:  userInfo.UpdatedTime,
+		})
+	}
+	return users
 }
 
 func GetTargetUserSettings(ctx context.Context, userId string) *UserSettings {

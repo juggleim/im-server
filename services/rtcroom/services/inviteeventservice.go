@@ -47,6 +47,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
 		}
 	}
+	eventTime := time.Now().UnixMilli()
 	if req.RoomType == pbobjs.RtcRoomType_OneOne {
 		if !succ {
 			return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, nil
@@ -68,7 +69,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			MemberId:       userId,
 			DeviceId:       deviceId,
 			RtcState:       pbobjs.RtcState_RtcOutgoing,
-			LatestPingTime: time.Now().UnixMilli(),
+			LatestPingTime: eventTime,
 			AppKey:         appkey,
 		}
 		container.JoinRoom(fromMember)
@@ -84,8 +85,8 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			MemberId:       targetId,
 			RtcState:       pbobjs.RtcState_RtcIncoming,
 			InviterId:      userId,
-			CallTime:       time.Now().UnixMilli(),
-			LatestPingTime: time.Now().UnixMilli(),
+			CallTime:       eventTime,
+			LatestPingTime: eventTime,
 			AppKey:         appkey,
 		}
 		container.JoinRoom(targetMember)
@@ -113,6 +114,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			TargetUsers: []*pbobjs.UserInfo{
 				commonservices.GetTargetDisplayUserInfo(ctx, targetId),
 			},
+			EventTime: eventTime,
 		})
 		//trigger push
 		msg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "user_push", &pbobjs.DownMsg{
@@ -142,7 +144,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				MemberId:       userId,
 				DeviceId:       deviceId,
 				RtcState:       pbobjs.RtcState_RtcConnecting,
-				LatestPingTime: time.Now().UnixMilli(),
+				LatestPingTime: eventTime,
 				AppKey:         appkey,
 			}
 			container.JoinRoom(ownerMember)
@@ -152,6 +154,20 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				return errs.IMErrorCode_RTCROOM_NOTMEMBER, nil
 			}
 		}
+		rtcRoom := &pbobjs.RtcRoom{
+			RoomType:     container.RoomType,
+			RoomId:       container.RoomId,
+			Owner:        container.Owner,
+			RtcChannel:   container.RtcChannel,
+			RtcMediaType: container.RtcMediaType,
+			Members:      []*pbobjs.RtcMember{},
+		}
+		container.ForeachMembers(func(member *models.RtcRoomMember) {
+			rtcRoom.Members = append(rtcRoom.Members, &pbobjs.RtcMember{
+				Member:   commonservices.GetTargetDisplayUserInfo(ctx, member.MemberId),
+				RtcState: member.RtcState,
+			})
+		})
 		// add target members
 		for _, targetId := range req.TargetIds {
 			targetMember := &models.RtcRoomMember{
@@ -161,8 +177,8 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				MemberId:       targetId,
 				RtcState:       pbobjs.RtcState_RtcIncoming,
 				InviterId:      userId,
-				CallTime:       time.Now().UnixMilli(),
-				LatestPingTime: time.Now().UnixMilli(),
+				CallTime:       eventTime,
+				LatestPingTime: eventTime,
 				AppKey:         appkey,
 			}
 			container.JoinRoom(targetMember)
@@ -177,27 +193,14 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				},
 			})
 		}
-		//send invite event
-		targetUserMap := commonservices.BatchGetTargetDisplayUserInfo(ctx, req.TargetIds)
-		inviteEvent := &pbobjs.RtcInviteEvent{
-			InviteType: pbobjs.InviteType_RtcInvite,
-			User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
-			Room: &pbobjs.RtcRoom{
-				RoomType:     container.RoomType,
-				RoomId:       container.RoomId,
-				Owner:        container.Owner,
-				RtcChannel:   container.RtcChannel,
-				RtcMediaType: container.RtcMediaType,
-			},
-			TargetUsers: []*pbobjs.UserInfo{},
-		}
-		for _, targetUser := range targetUserMap {
-			inviteEvent.TargetUsers = append(inviteEvent.TargetUsers, targetUser)
-		}
+		targetUsers := commonservices.GetTargetDisplayUserInfos(ctx, req.TargetIds)
 		container.ForeachMembers(func(member *models.RtcRoomMember) {
-			if member.MemberId != userId {
-				SendInviteEvent(ctx, member.MemberId, inviteEvent)
-			}
+			SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
+				InviteType:  pbobjs.InviteType_RtcInvite,
+				User:        commonservices.GetTargetDisplayUserInfo(ctx, userId),
+				Room:        rtcRoom,
+				TargetUsers: targetUsers,
+			})
 		})
 	}
 	return errs.IMErrorCode_SUCCESS, auth
@@ -230,9 +233,9 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 	if code != errs.IMErrorCode_SUCCESS {
 		return code, nil
 	}
+	acceptedTime := time.Now().UnixMilli()
 	if container.RoomType == pbobjs.RtcRoomType_OneOne {
 		//update accepted time
-		acceptedTime := time.Now().UnixMilli()
 		container.UpdAcceptedTime(acceptedTime)
 		roomStorage := storages.NewRtcRoomStorage()
 		roomStorage.UpdateAcceptedTime(appkey, roomId, acceptedTime)
@@ -253,6 +256,7 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 					RoomId:   container.RoomId,
 					Owner:    container.Owner,
 				},
+				EventTime: acceptedTime,
 			})
 		}
 	})
@@ -274,6 +278,7 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 	if !container.MemberExist(userId) {
 		return errs.IMErrorCode_RTCROOM_NOTMEMBER
 	}
+	eventTime := time.Now().UnixMilli()
 	if container.RoomType == pbobjs.RtcRoomType_OneOne {
 		var calleeId string = ""
 		container.ForeachMembers(func(member *models.RtcRoomMember) {
@@ -295,6 +300,7 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 						RoomId:   container.RoomId,
 						Owner:    container.Owner,
 					},
+					EventTime: eventTime,
 				})
 			}
 			if member.MemberId != container.Owner.UserId {
@@ -344,6 +350,7 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 					RoomId:   container.RoomId,
 					Owner:    container.Owner,
 				},
+				EventTime: eventTime,
 			})
 		})
 	}
