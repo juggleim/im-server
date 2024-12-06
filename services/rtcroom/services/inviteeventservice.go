@@ -110,6 +110,9 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				RtcChannel:   container.RtcChannel,
 				RtcMediaType: container.RtcMediaType,
 			},
+			TargetUsers: []*pbobjs.UserInfo{
+				commonservices.GetTargetDisplayUserInfo(ctx, targetId),
+			},
 		})
 		//trigger push
 		msg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "user_push", &pbobjs.DownMsg{
@@ -127,7 +130,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				RoomType: container.RoomType,
 				MemberId: userId,
 				DeviceId: deviceId,
-				RtcState: pbobjs.RtcState_RtcConnected,
+				RtcState: pbobjs.RtcState_RtcConnecting,
 			})
 			if grabCode != errs.IMErrorCode_SUCCESS {
 				return grabCode, nil
@@ -138,7 +141,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				OwnerId:        userId,
 				MemberId:       userId,
 				DeviceId:       deviceId,
-				RtcState:       pbobjs.RtcState_RtcConnected,
+				RtcState:       pbobjs.RtcState_RtcConnecting,
 				LatestPingTime: time.Now().UnixMilli(),
 				AppKey:         appkey,
 			}

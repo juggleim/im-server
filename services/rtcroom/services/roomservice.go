@@ -122,13 +122,13 @@ func checkRtcMemberTimeout(appkey, roomId string) {
 			}
 		})
 		for _, memberId := range callTimeOutMemberIds {
-			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, true, pbobjs.RtcRoomQuitReason_CallTimeout)
+			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, pbobjs.RtcRoomQuitReason_CallTimeout)
 			if container.RoomType == pbobjs.RtcRoomType_OneOne {
 				break
 			}
 		}
 		for _, memberId := range pingTimeoutMemberIds {
-			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, true, pbobjs.RtcRoomQuitReason_PingTimeout)
+			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, pbobjs.RtcRoomQuitReason_PingTimeout)
 			if container.RoomType == pbobjs.RtcRoomType_OneOne {
 				break
 			}
@@ -494,10 +494,10 @@ func QuitRtcRoom(ctx context.Context) errs.IMErrorCode {
 	roomId := bases.GetTargetIdFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 
-	return innerQuitRtcRoom(ctx, appkey, roomId, userId, true, pbobjs.RtcRoomQuitReason_Active)
+	return innerQuitRtcRoom(ctx, appkey, roomId, userId, pbobjs.RtcRoomQuitReason_Active)
 }
 
-func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSendEvent bool, quitReason pbobjs.RtcRoomQuitReason) errs.IMErrorCode {
+func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, quitReason pbobjs.RtcRoomQuitReason) errs.IMErrorCode {
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST
@@ -517,17 +517,23 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 				DeviceId: delMember.DeviceId,
 			},
 		})
+		//send room event
+		SendRoomEvent(ctx, userId, &pbobjs.RtcRoomEvent{
+			RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
+			Member: &pbobjs.RtcMember{
+				Member: &pbobjs.UserInfo{
+					UserId: userId,
+				},
+			},
+			Room: &pbobjs.RtcRoom{
+				RoomType: container.RoomType,
+				RoomId:   container.RoomId,
+			},
+			Reason: quitReason,
+		})
 
 		if container.RoomType == pbobjs.RtcRoomType_OneOne {
 			var calleeId string = ""
-			SendRoomEvent(ctx, userId, &pbobjs.RtcRoomEvent{
-				RoomEventType: pbobjs.RtcRoomEventType_RtcDestroy,
-				Room: &pbobjs.RtcRoom{
-					RoomType: container.RoomType,
-					RoomId:   container.RoomId,
-				},
-				Reason: quitReason,
-			})
 			container.ForeachMembers(func(member *models.RtcRoomMember) {
 				MemberSyncState(ctx, member.MemberId, &pbobjs.SyncMemberStateReq{
 					IsDelete: true,
@@ -535,19 +541,22 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 						RoomId:   roomId,
 						RoomType: container.RoomType,
 						MemberId: userId,
-						DeviceId: delMember.MemberId,
+						DeviceId: delMember.DeviceId,
 					},
 				})
-				if isSendEvent {
-					SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
-						RoomEventType: pbobjs.RtcRoomEventType_RtcDestroy,
-						Room: &pbobjs.RtcRoom{
-							RoomType: container.RoomType,
-							RoomId:   container.RoomId,
+				SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
+					RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
+					Member: &pbobjs.RtcMember{
+						Member: &pbobjs.UserInfo{
+							UserId: userId,
 						},
-						Reason: quitReason,
-					})
-				}
+					},
+					Room: &pbobjs.RtcRoom{
+						RoomType: container.RoomType,
+						RoomId:   container.RoomId,
+					},
+					Reason: quitReason,
+				})
 				if member.MemberId != container.Owner.UserId {
 					calleeId = member.MemberId
 				}
@@ -567,22 +576,9 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 			roomStorage := storages.NewRtcRoomStorage()
 			roomStorage.Delete(appkey, roomId)
 			rtcroomCache.Remove(getRoomKey(appkey, roomId))
-		} else {
-			SendRoomEvent(ctx, userId, &pbobjs.RtcRoomEvent{
-				RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
-				Member: &pbobjs.RtcMember{
-					Member: &pbobjs.UserInfo{
-						UserId: userId,
-					},
-				},
-				Room: &pbobjs.RtcRoom{
-					RoomType: container.RoomType,
-					RoomId:   container.RoomId,
-				},
-				Reason: quitReason,
-			})
-			container.ForeachMembers(func(member *models.RtcRoomMember) {
-				if isSendEvent {
+		} else if container.RoomType == pbobjs.RtcRoomType_OneMore {
+			if container.MemberCount() > 0 {
+				container.ForeachMembers(func(member *models.RtcRoomMember) {
 					SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
 						RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
 						Member: &pbobjs.RtcMember{
@@ -596,8 +592,14 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 						},
 						Reason: quitReason,
 					})
-				}
-			})
+				})
+			} else {
+				//desctroy room
+				storage.DeleteByRoomId(appkey, roomId)
+				roomStorage := storages.NewRtcRoomStorage()
+				roomStorage.Delete(appkey, roomId)
+				rtcroomCache.Remove(getRoomKey(appkey, roomId))
+			}
 		}
 	}
 	return code
