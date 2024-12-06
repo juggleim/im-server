@@ -247,7 +247,7 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 		return errs.IMErrorCode_RTCROOM_UPDATEFAILED, nil
 	}
 	container.ForeachMembers(func(member *models.RtcRoomMember) {
-		if member.MemberId != userId && member.RtcState != pbobjs.RtcState_RtcIncoming {
+		if member.MemberId != userId {
 			SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
 				InviteType: pbobjs.InviteType_RtcAccept,
 				User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
