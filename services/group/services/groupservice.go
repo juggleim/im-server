@@ -63,9 +63,10 @@ func DissolveGroup(ctx context.Context, groupId string) {
 	//remove from db
 	groupDao := dbs.GroupDao{}
 	groupDao.Delete(appkey, groupId)
-
 	memberDao := dbs.GroupMemberDao{}
 	memberDao.DeleteByGroupId(appkey, groupId)
+	memberExtDao := dbs.GroupMemberExtDao{}
+	memberExtDao.DeleteByGroupId(appkey, groupId)
 
 	//remove from cache
 	DelGroupInfo(ctx, appkey, groupId)

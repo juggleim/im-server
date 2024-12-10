@@ -53,6 +53,20 @@ func UpdateGroup(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
+func DissolveGroup(ctx *httputils.HttpContext) {
+	req := models.Group{}
+	if err := ctx.BindJson(&req); err != nil {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.DissolveGroup(ctx.ToRpcCtx(ctx.CurrentUserId), req.GroupId)
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(nil)
+}
+
 func AddGrpMembers(ctx *httputils.HttpContext) {
 	req := models.Group{}
 	if err := ctx.BindJson(&req); err != nil {

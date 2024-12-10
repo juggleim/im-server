@@ -18,7 +18,7 @@ type DissolveGroupActor struct {
 
 func (actor *DissolveGroupActor) OnReceive(ctx context.Context, input proto.Message) {
 	if addMembersReq, ok := input.(*pbobjs.GroupMembersReq); ok {
-		logs.WithContext(ctx).Infof("groupId:%s", addMembersReq.GroupId, addMembersReq.MemberIds)
+		logs.WithContext(ctx).Infof("group_id:%s", addMembersReq.GroupId)
 		services.DissolveGroup(ctx, addMembersReq.GroupId)
 		ack := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_SUCCESS, &pbobjs.GroupMembersResp{})
 		actor.Sender.Tell(ack, actorsystem.NoSender)

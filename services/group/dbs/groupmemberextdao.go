@@ -52,3 +52,7 @@ func (ext GroupMemberExtDao) Upsert(appkey, groupId, memberId, itemKey, itemValu
 func (ext GroupMemberExtDao) BatchDelete(appkey, groupId string, memberIds []string) error {
 	return dbcommons.GetDb().Where("app_key=? and group_id=? and member_id in (?)", appkey, groupId, memberIds).Delete(&GroupMemberExtDao{}).Error
 }
+
+func (ext GroupMemberExtDao) DeleteByGroupId(appkey, groupId string) error {
+	return dbcommons.GetDb().Where("app_key=? and group_id=?", appkey, groupId).Delete(&GroupMemberExtDao{}).Error
+}

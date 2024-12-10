@@ -149,6 +149,17 @@ func UpdateGroup(ctx context.Context, req *pbobjs.GroupInfo) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }
 
+func DissolveGroup(ctx context.Context, groupId string) errs.IMErrorCode {
+	requestId := bases.GetRequesterIdFromCtx(ctx)
+	code, _, err := AppSyncRpcCall(ctx, "g_dissolve", requestId, groupId, &pbobjs.GroupMembersReq{
+		GroupId: groupId,
+	}, nil)
+	if err != nil || code != errs.IMErrorCode_SUCCESS {
+		return code
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
 func AddGrpMembers(ctx context.Context, grpMembers *pbobjs.GroupMembersReq) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	code, _, err := AppSyncRpcCall(ctx, "g_add_members", requestId, grpMembers.GroupId, &pbobjs.GroupMembersReq{
