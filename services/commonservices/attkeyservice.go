@@ -23,8 +23,12 @@ const (
 	BotConnectType_Websocket BotConnectType = 1
 
 	//setting keys of group or group_members
-	AttItemKey_HideGrpMsg AttItemKey = "hide_grp_msg"
-	AttItemKey_GrpCreator AttItemKey = "grp_creator"
+	AttItemKey_HideGrpMsg        AttItemKey = "hide_grp_msg"
+	AttItemKey_GrpCreator        AttItemKey = "grp_creator"
+	AttItemKey_GrpAnnouncement   AttItemKey = "grp_announcement"
+	AttItemKey_GrpVerifyType     AttItemKey = "grp_verify_type"
+	AttItemKey_GrpAdministrators AttItemKey = "grp_administrators"
+	AttItemKey_GrpDisplayName    AttItemKey = "grp_display_name"
 
 	//setting keys of users
 	AttItemKey_Language      AttItemKey = "language"

@@ -45,8 +45,8 @@ func (ext GroupMemberExtDao) QryExtFields(appkey, groupId, memberId string) ([]*
 	return items, err
 }
 
-func (ext GroupMemberExtDao) Upsert(appkey, groupId, memberId, itemKey, itemValue string) error {
-	return dbcommons.GetDb().Exec(fmt.Sprintf("INSERT INTO %s (app_key,group_id,member_id,item_key,item_value)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE item_value=?,updated_time=?", ext.TableName()), appkey, groupId, memberId, itemKey, itemValue, itemValue, time.Now()).Error
+func (ext GroupMemberExtDao) Upsert(appkey, groupId, memberId, itemKey, itemValue string, itemType int) error {
+	return dbcommons.GetDb().Exec(fmt.Sprintf("INSERT INTO %s (app_key,group_id,member_id,item_key,item_value,item_type)VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE item_value=?,updated_time=?", ext.TableName()), appkey, groupId, memberId, itemKey, itemValue, itemType, itemValue, time.Now()).Error
 }
 
 func (ext GroupMemberExtDao) BatchDelete(appkey, groupId string, memberIds []string) error {

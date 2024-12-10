@@ -68,6 +68,8 @@ func (group GroupDao) UpdateGrpName(appkey, groupId, groupName, groupPortrait st
 	}
 	if len(upd) > 0 {
 		upd["updated_time"] = time.Now()
+	} else {
+		return nil
 	}
 	err := dbcommons.GetDb().Model(&GroupDao{}).Where("app_key=? and group_id=?", appkey, groupId).Update(upd).Error
 	return err

@@ -58,6 +58,14 @@ func String2Int64(str string) (int64, error) {
 	return strconv.ParseInt(str, 10, 64)
 }
 
+func ToInt(str string) int {
+	intVal, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return int(intVal)
+}
+
 func Int642String(i int64) string {
 	return strconv.FormatInt(i, 10)
 }

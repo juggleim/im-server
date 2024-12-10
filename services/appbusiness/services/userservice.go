@@ -64,11 +64,17 @@ func QueryMyGroups(ctx context.Context, req *pbobjs.GroupInfoListReq) (errs.IMEr
 		return errs.IMErrorCode_APP_DEFAULT, nil
 	}
 	ret := &pbobjs.GroupInfoListResp{
-		Items: []*pbobjs.GroupInfo{},
+		Items: []*pbobjs.GrpInfo{},
 	}
 	for _, group := range groups {
 		ret.Offset, _ = tools.EncodeInt(group.ID)
-		ret.Items = append(ret.Items, commonservices.GetGroupInfoFromCache(ctx, group.GroupId))
+		grpInfo := commonservices.GetGroupInfoFromCache(ctx, group.GroupId)
+		ret.Items = append(ret.Items, &pbobjs.GrpInfo{
+			GroupId:       grpInfo.GroupId,
+			GroupName:     grpInfo.GroupName,
+			GroupPortrait: grpInfo.GroupPortrait,
+			MemberCount:   grpInfo.MemberCount,
+		})
 	}
 	return errs.IMErrorCode_SUCCESS, ret
 }

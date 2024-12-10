@@ -721,6 +721,7 @@ message GroupInfo{
   repeated KvItem extFields = 5;
   int64 updatedTime = 6;
   repeated KvItem settings = 7;
+  int32 memberCount = 8;
 }
 
 message GroupMembersReq {
@@ -729,6 +730,7 @@ message GroupMembersReq {
   string groupPortrait = 3;
   repeated string memberIds = 4;
   repeated KvItem extFields = 5;
+  repeated KvItem settings = 6;
 }
 
 message GroupMuteReq {
@@ -767,6 +769,8 @@ message GroupMember{
   string memberId = 1;
   int32 isMute = 2;
   int32 isAllow = 3;
+  repeated KvItem extFields = 4;
+  repeated KvItem settings = 5;
 }
 
 message QryGroupMembersReq{
@@ -804,6 +808,7 @@ message QryGrpMemberSettingsResp{
   int64 joinTime = 4;
   map<string,string> groupSettings = 5;
   map<string,string> memberSettings = 6;
+  map<string,string> memberExts = 7;
 }
 
 // file

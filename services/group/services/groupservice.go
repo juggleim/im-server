@@ -25,6 +25,7 @@ func init() {
 }
 
 type GroupInfo struct {
+	AppKey        string
 	GroupId       string
 	GroupName     string
 	GroupPortrait string
@@ -32,11 +33,29 @@ type GroupInfo struct {
 	ExtFields     map[string]string
 	UpdatedTime   int64
 	Settings      *commonservices.GroupSettings
+	SettingFields map[string]string
+}
+
+func (grp *GroupInfo) SetSetting(itemKey, itemValue string) {
+	key := getGroupKey(grp.AppKey, grp.GroupId)
+	lock := groupLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	grp.SettingFields[itemKey] = itemValue
+}
+
+func (grp *GroupInfo) SetExt(itemKey, itemValue string) {
+	key := getGroupKey(grp.AppKey, grp.GroupId)
+	lock := groupLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	grp.ExtFields[itemKey] = itemValue
 }
 
 var notExistGroup GroupInfo = GroupInfo{
-	ExtFields: make(map[string]string),
-	Settings:  &commonservices.GroupSettings{},
+	ExtFields:     make(map[string]string),
+	Settings:      &commonservices.GroupSettings{},
+	SettingFields: make(map[string]string),
 }
 
 func DissolveGroup(ctx context.Context, groupId string) {
@@ -112,6 +131,7 @@ func getGroupInfoFromDb(appkey, groupId string) *GroupInfo {
 		return nil
 	} else {
 		groupInfo := &GroupInfo{
+			AppKey:        appkey,
 			GroupId:       dbGroup.GroupId,
 			GroupPortrait: dbGroup.GroupPortrait,
 			GroupName:     dbGroup.GroupName,
@@ -119,6 +139,7 @@ func getGroupInfoFromDb(appkey, groupId string) *GroupInfo {
 			UpdatedTime:   dbGroup.UpdatedTime.UnixMilli(),
 			ExtFields:     map[string]string{},
 			Settings:      &commonservices.GroupSettings{},
+			SettingFields: map[string]string{},
 		}
 		groupExts, err := dbs.GroupExtDao{}.QryExtFields(appkey, groupId)
 		settingValMap := make(map[string]string)
@@ -143,6 +164,7 @@ func getGroupInfoFromDb(appkey, groupId string) *GroupInfo {
 					settingValMap[ext.ItemKey] = ext.ItemValue
 				}
 			}
+			groupInfo.SettingFields = settingValMap
 			commonservices.FillObjField(groupInfo.Settings, settingValMap)
 		}
 		return groupInfo
@@ -194,6 +216,11 @@ func QryGroupInfo(ctx context.Context, req *pbobjs.GroupInfoReq) (errs.IMErrorCo
 			for k, v := range groupInfo.ExtFields {
 				fields[k] = v
 			}
+			var memberCount int32 = 0
+			memberContainer, exist := GetGroupMembersFromCache(ctx, appkey, req.GroupId)
+			if exist && memberContainer != nil {
+				memberCount = int32(memberContainer.GroupMemberCount())
+			}
 			return errs.IMErrorCode_SUCCESS, &pbobjs.GroupInfo{
 				GroupId:       groupInfo.GroupId,
 				GroupName:     groupInfo.GroupName,
@@ -201,6 +228,8 @@ func QryGroupInfo(ctx context.Context, req *pbobjs.GroupInfoReq) (errs.IMErrorCo
 				IsMute:        groupInfo.IsMute,
 				UpdatedTime:   groupInfo.UpdatedTime,
 				ExtFields:     commonservices.Map2KvItems(fields),
+				Settings:      commonservices.Map2KvItems(groupInfo.SettingFields),
+				MemberCount:   memberCount,
 			}
 		}
 	}
@@ -224,18 +253,23 @@ func UpdGroupInfo(ctx context.Context, groupInfo *pbobjs.GroupInfo) errs.IMError
 			GroupId:   groupId,
 			ItemKey:   itemKey,
 			ItemValue: itemValue,
+			ItemType:  int(commonservices.AttItemType_Att),
+		})
+		rvCache = rvCache || true
+	}
+	for _, setting := range groupInfo.Settings {
+		extDao.Upsert(dbs.GroupExtDao{
+			AppKey:    appkey,
+			GroupId:   groupId,
+			ItemKey:   setting.Key,
+			ItemValue: setting.Value,
+			ItemType:  int(commonservices.AttItemType_Setting),
 		})
 		rvCache = rvCache || true
 	}
 	if rvCache { //remove cache
-		grpInfo := getGroupInfoFromDb(appkey, groupId)
-		if grpInfo != nil {
-			key := getGroupKey(appkey, groupId)
-			l := groupLocks.GetLocks(key)
-			l.Lock()
-			defer l.Unlock()
-			groupInfoCache.Remove(key)
-		}
+		key := getGroupKey(appkey, groupId)
+		groupInfoCache.Remove(key)
 	}
 	return errs.IMErrorCode_SUCCESS
 }
@@ -245,7 +279,6 @@ func SetGroupSettings(ctx context.Context, groupId string, settings []*pbobjs.Kv
 	dao := dbs.GroupExtDao{}
 
 	groupInfo, exist := GetGroupInfoFromCache(ctx, appkey, groupId)
-	valMap := make(map[string]string)
 	for _, setting := range settings {
 		dao.Upsert(dbs.GroupExtDao{
 			AppKey:    appkey,
@@ -254,10 +287,10 @@ func SetGroupSettings(ctx context.Context, groupId string, settings []*pbobjs.Kv
 			ItemValue: setting.Value,
 			ItemType:  int(commonservices.AttItemType_Setting),
 		})
-		valMap[setting.Key] = setting.Value
+		groupInfo.SetSetting(setting.Key, setting.Value)
 	}
-	if exist && len(valMap) > 0 {
-		commonservices.FillObjFieldWithIgnore(groupInfo.Settings, valMap, true)
+	if exist && len(settings) > 0 {
+		commonservices.FillObjFieldWithIgnore(groupInfo.Settings, groupInfo.SettingFields, true)
 	}
 	return errs.IMErrorCode_SUCCESS
 }

@@ -1,14 +1,38 @@
 package models
 
 type Group struct {
-	GroupId       string  `json:"group_id"`
-	GroupName     string  `json:"group_name"`
-	GroupPortrait string  `json:"group_portrait"`
-	GrpMembers    []*User `json:"members,omitempty"`
-	IsNotify      bool    `json:"is_notify"`
+	GroupId         string           `json:"group_id"`
+	GroupName       string           `json:"group_name"`
+	GroupPortrait   string           `json:"group_portrait"`
+	GrpMembers      []*GroupMember   `json:"members,omitempty"`
+	MemberCount     int              `json:"member_count"`
+	Owner           *User            `json:"owner,omitempty"`
+	MyRole          int              `json:"my_role"`
+	GroupManagement *GroupManagement `json:"group_management"`
+}
+
+type GroupManagement struct {
+	GroupMute       int `json:"group_mute"`
+	MaxAdminCount   int `json:"max_admin_count"`
+	AdminCount      int `json:"admin_count"`
+	GroupVerifyType int `json:"group_verify_type"`
 }
 
 type Groups struct {
 	Items  []*Group `json:"items"`
 	Offset string   `json:"offset,omitempty"`
+}
+
+type GroupAnnouncement struct {
+	GroupId string `json:"group_id"`
+	Content string `json:"content"`
+}
+
+type GroupMember struct {
+	User
+}
+
+type GroupMembersResp struct {
+	Items  []*GroupMember `json:"items"`
+	Offset string         `json:"offset"`
 }

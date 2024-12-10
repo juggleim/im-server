@@ -3,18 +3,90 @@ syntax = "proto3";
 option go_package = "commons/pbdefines/pbobjs";
 import "commons/pbdefines/appmessages.proto";
 
-message SearchUserReq {
-    string account = 1;
-}
-
 message GroupInfoListReq {
     int64 limit = 1;
     string offset = 2;
 }
 
 message GroupInfoListResp {
-    repeated GroupInfo items = 1;
+    repeated GrpInfo items = 1;
     string offset = 2;
+}
+
+message GrpInfo{
+    string group_id = 1;
+    string group_name = 2;
+    string group_portrait = 3;
+    repeated GroupMemberInfo members = 4;
+    int32 member_count = 5;
+    GroupMemberInfo owner = 6;
+    int32 my_role = 7;
+    GroupManagement group_management = 8;
+    string grp_display_name = 9; 
+}
+
+message GroupManagement{
+    string group_id = 1;
+    int32 group_mute = 2;
+    int32 max_admin_count = 3;
+    int32 admin_count = 4;
+    int32 group_verify_type = 5;
+    int32 group_his_msg_visible = 6;
+}
+
+message GroupMemberInfo {
+    string user_id = 1;
+    string nickname = 2;
+    string user_portrait = 3;
+}
+
+message GroupMemberInfos{
+    repeated GroupMemberInfo items = 1;
+    string offset = 2;
+}
+
+message GrpAnnouncement{
+    string groupId = 1;
+    string content = 2;
+}
+
+message GroupOwnerChgReq {
+    string group_id = 1;
+    string owner_id = 2;
+}
+
+message SetGroupMuteReq {
+    string group_id = 1;
+    int32 is_mute = 2;
+}
+
+message SetGroupVerifyTypeReq{
+    string group_id = 1;
+    int32 verify_type = 2;
+}
+
+message SetGroupHisMsgVisibleReq{
+    string group_id = 1;
+    int32 group_his_msg_visible = 2;
+}
+
+message GroupAdministratorsReq{
+    string group_id = 1;
+    repeated string admin_ids = 2;
+}
+
+message GroupAdministratorsResp{
+    string group_id = 1;
+    repeated GroupMemberInfo items = 2;
+}
+
+message SetGroupDisplayNameReq{
+    string group_id = 1;
+    string display_name = 2;
+}
+
+message SearchUserReq {
+    string account = 1;
 }
 
 message FriendListReq {

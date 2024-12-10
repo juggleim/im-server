@@ -40,14 +40,14 @@ func GetGroupInfoFromCache(ctx context.Context, groupId string) *pbobjs.GroupInf
 		if val, exist := groupInfoCache.Get(key); exist {
 			return val.(*pbobjs.GroupInfo)
 		} else {
-			grpInfo := getGroupInfoFromRpc(ctx, groupId)
+			grpInfo := GetGroupInfoFromRpc(ctx, groupId)
 			groupInfoCache.Add(key, grpInfo)
 			return grpInfo
 		}
 	}
 }
 
-func getGroupInfoFromRpc(ctx context.Context, groupId string) *pbobjs.GroupInfo {
+func GetGroupInfoFromRpc(ctx context.Context, groupId string) *pbobjs.GroupInfo {
 	_, respObj, err := bases.SyncRpcCall(ctx, "qry_group_info", groupId, &pbobjs.GroupInfoReq{
 		GroupId: groupId,
 	}, func() proto.Message {

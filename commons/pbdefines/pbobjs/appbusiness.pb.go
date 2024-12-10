@@ -20,53 +20,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type SearchUserReq struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Account string `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-}
-
-func (x *SearchUserReq) Reset() {
-	*x = SearchUserReq{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SearchUserReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SearchUserReq) ProtoMessage() {}
-
-func (x *SearchUserReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SearchUserReq.ProtoReflect.Descriptor instead.
-func (*SearchUserReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *SearchUserReq) GetAccount() string {
-	if x != nil {
-		return x.Account
-	}
-	return ""
-}
-
 type GroupInfoListReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -79,7 +32,7 @@ type GroupInfoListReq struct {
 func (x *GroupInfoListReq) Reset() {
 	*x = GroupInfoListReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[1]
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -92,7 +45,7 @@ func (x *GroupInfoListReq) String() string {
 func (*GroupInfoListReq) ProtoMessage() {}
 
 func (x *GroupInfoListReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[1]
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -105,7 +58,7 @@ func (x *GroupInfoListReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupInfoListReq.ProtoReflect.Descriptor instead.
 func (*GroupInfoListReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{1}
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *GroupInfoListReq) GetLimit() int64 {
@@ -127,14 +80,14 @@ type GroupInfoListResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Items  []*GroupInfo `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
-	Offset string       `protobuf:"bytes,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	Items  []*GrpInfo `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Offset string     `protobuf:"bytes,2,opt,name=offset,proto3" json:"offset,omitempty"`
 }
 
 func (x *GroupInfoListResp) Reset() {
 	*x = GroupInfoListResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[2]
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -147,7 +100,7 @@ func (x *GroupInfoListResp) String() string {
 func (*GroupInfoListResp) ProtoMessage() {}
 
 func (x *GroupInfoListResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[2]
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,10 +113,10 @@ func (x *GroupInfoListResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupInfoListResp.ProtoReflect.Descriptor instead.
 func (*GroupInfoListResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{2}
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GroupInfoListResp) GetItems() []*GroupInfo {
+func (x *GroupInfoListResp) GetItems() []*GrpInfo {
 	if x != nil {
 		return x.Items
 	}
@@ -173,6 +126,809 @@ func (x *GroupInfoListResp) GetItems() []*GroupInfo {
 func (x *GroupInfoListResp) GetOffset() string {
 	if x != nil {
 		return x.Offset
+	}
+	return ""
+}
+
+type GrpInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId         string             `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	GroupName       string             `protobuf:"bytes,2,opt,name=group_name,json=groupName,proto3" json:"group_name,omitempty"`
+	GroupPortrait   string             `protobuf:"bytes,3,opt,name=group_portrait,json=groupPortrait,proto3" json:"group_portrait,omitempty"`
+	Members         []*GroupMemberInfo `protobuf:"bytes,4,rep,name=members,proto3" json:"members,omitempty"`
+	MemberCount     int32              `protobuf:"varint,5,opt,name=member_count,json=memberCount,proto3" json:"member_count,omitempty"`
+	Owner           *GroupMemberInfo   `protobuf:"bytes,6,opt,name=owner,proto3" json:"owner,omitempty"`
+	MyRole          int32              `protobuf:"varint,7,opt,name=my_role,json=myRole,proto3" json:"my_role,omitempty"`
+	GroupManagement *GroupManagement   `protobuf:"bytes,8,opt,name=group_management,json=groupManagement,proto3" json:"group_management,omitempty"`
+	GrpDisplayName  string             `protobuf:"bytes,9,opt,name=grp_display_name,json=grpDisplayName,proto3" json:"grp_display_name,omitempty"`
+}
+
+func (x *GrpInfo) Reset() {
+	*x = GrpInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GrpInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GrpInfo) ProtoMessage() {}
+
+func (x *GrpInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GrpInfo.ProtoReflect.Descriptor instead.
+func (*GrpInfo) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GrpInfo) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GrpInfo) GetGroupName() string {
+	if x != nil {
+		return x.GroupName
+	}
+	return ""
+}
+
+func (x *GrpInfo) GetGroupPortrait() string {
+	if x != nil {
+		return x.GroupPortrait
+	}
+	return ""
+}
+
+func (x *GrpInfo) GetMembers() []*GroupMemberInfo {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
+func (x *GrpInfo) GetMemberCount() int32 {
+	if x != nil {
+		return x.MemberCount
+	}
+	return 0
+}
+
+func (x *GrpInfo) GetOwner() *GroupMemberInfo {
+	if x != nil {
+		return x.Owner
+	}
+	return nil
+}
+
+func (x *GrpInfo) GetMyRole() int32 {
+	if x != nil {
+		return x.MyRole
+	}
+	return 0
+}
+
+func (x *GrpInfo) GetGroupManagement() *GroupManagement {
+	if x != nil {
+		return x.GroupManagement
+	}
+	return nil
+}
+
+func (x *GrpInfo) GetGrpDisplayName() string {
+	if x != nil {
+		return x.GrpDisplayName
+	}
+	return ""
+}
+
+type GroupManagement struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId            string `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	GroupMute          int32  `protobuf:"varint,2,opt,name=group_mute,json=groupMute,proto3" json:"group_mute,omitempty"`
+	MaxAdminCount      int32  `protobuf:"varint,3,opt,name=max_admin_count,json=maxAdminCount,proto3" json:"max_admin_count,omitempty"`
+	AdminCount         int32  `protobuf:"varint,4,opt,name=admin_count,json=adminCount,proto3" json:"admin_count,omitempty"`
+	GroupVerifyType    int32  `protobuf:"varint,5,opt,name=group_verify_type,json=groupVerifyType,proto3" json:"group_verify_type,omitempty"`
+	GroupHisMsgVisible int32  `protobuf:"varint,6,opt,name=group_his_msg_visible,json=groupHisMsgVisible,proto3" json:"group_his_msg_visible,omitempty"`
+}
+
+func (x *GroupManagement) Reset() {
+	*x = GroupManagement{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GroupManagement) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupManagement) ProtoMessage() {}
+
+func (x *GroupManagement) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupManagement.ProtoReflect.Descriptor instead.
+func (*GroupManagement) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GroupManagement) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupManagement) GetGroupMute() int32 {
+	if x != nil {
+		return x.GroupMute
+	}
+	return 0
+}
+
+func (x *GroupManagement) GetMaxAdminCount() int32 {
+	if x != nil {
+		return x.MaxAdminCount
+	}
+	return 0
+}
+
+func (x *GroupManagement) GetAdminCount() int32 {
+	if x != nil {
+		return x.AdminCount
+	}
+	return 0
+}
+
+func (x *GroupManagement) GetGroupVerifyType() int32 {
+	if x != nil {
+		return x.GroupVerifyType
+	}
+	return 0
+}
+
+func (x *GroupManagement) GetGroupHisMsgVisible() int32 {
+	if x != nil {
+		return x.GroupHisMsgVisible
+	}
+	return 0
+}
+
+type GroupMemberInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId       string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Nickname     string `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	UserPortrait string `protobuf:"bytes,3,opt,name=user_portrait,json=userPortrait,proto3" json:"user_portrait,omitempty"`
+}
+
+func (x *GroupMemberInfo) Reset() {
+	*x = GroupMemberInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GroupMemberInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupMemberInfo) ProtoMessage() {}
+
+func (x *GroupMemberInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupMemberInfo.ProtoReflect.Descriptor instead.
+func (*GroupMemberInfo) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GroupMemberInfo) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GroupMemberInfo) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+func (x *GroupMemberInfo) GetUserPortrait() string {
+	if x != nil {
+		return x.UserPortrait
+	}
+	return ""
+}
+
+type GroupMemberInfos struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Items  []*GroupMemberInfo `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Offset string             `protobuf:"bytes,2,opt,name=offset,proto3" json:"offset,omitempty"`
+}
+
+func (x *GroupMemberInfos) Reset() {
+	*x = GroupMemberInfos{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GroupMemberInfos) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupMemberInfos) ProtoMessage() {}
+
+func (x *GroupMemberInfos) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupMemberInfos.ProtoReflect.Descriptor instead.
+func (*GroupMemberInfos) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GroupMemberInfos) GetItems() []*GroupMemberInfo {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *GroupMemberInfos) GetOffset() string {
+	if x != nil {
+		return x.Offset
+	}
+	return ""
+}
+
+type GrpAnnouncement struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId string `protobuf:"bytes,1,opt,name=groupId,proto3" json:"groupId,omitempty"`
+	Content string `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+}
+
+func (x *GrpAnnouncement) Reset() {
+	*x = GrpAnnouncement{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GrpAnnouncement) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GrpAnnouncement) ProtoMessage() {}
+
+func (x *GrpAnnouncement) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GrpAnnouncement.ProtoReflect.Descriptor instead.
+func (*GrpAnnouncement) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GrpAnnouncement) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GrpAnnouncement) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+type GroupOwnerChgReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId string `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	OwnerId string `protobuf:"bytes,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+}
+
+func (x *GroupOwnerChgReq) Reset() {
+	*x = GroupOwnerChgReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GroupOwnerChgReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupOwnerChgReq) ProtoMessage() {}
+
+func (x *GroupOwnerChgReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupOwnerChgReq.ProtoReflect.Descriptor instead.
+func (*GroupOwnerChgReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GroupOwnerChgReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupOwnerChgReq) GetOwnerId() string {
+	if x != nil {
+		return x.OwnerId
+	}
+	return ""
+}
+
+type SetGroupMuteReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId string `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	IsMute  int32  `protobuf:"varint,2,opt,name=is_mute,json=isMute,proto3" json:"is_mute,omitempty"`
+}
+
+func (x *SetGroupMuteReq) Reset() {
+	*x = SetGroupMuteReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetGroupMuteReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetGroupMuteReq) ProtoMessage() {}
+
+func (x *SetGroupMuteReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetGroupMuteReq.ProtoReflect.Descriptor instead.
+func (*SetGroupMuteReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *SetGroupMuteReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *SetGroupMuteReq) GetIsMute() int32 {
+	if x != nil {
+		return x.IsMute
+	}
+	return 0
+}
+
+type SetGroupVerifyTypeReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId    string `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	VerifyType int32  `protobuf:"varint,2,opt,name=verify_type,json=verifyType,proto3" json:"verify_type,omitempty"`
+}
+
+func (x *SetGroupVerifyTypeReq) Reset() {
+	*x = SetGroupVerifyTypeReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetGroupVerifyTypeReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetGroupVerifyTypeReq) ProtoMessage() {}
+
+func (x *SetGroupVerifyTypeReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetGroupVerifyTypeReq.ProtoReflect.Descriptor instead.
+func (*SetGroupVerifyTypeReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SetGroupVerifyTypeReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *SetGroupVerifyTypeReq) GetVerifyType() int32 {
+	if x != nil {
+		return x.VerifyType
+	}
+	return 0
+}
+
+type SetGroupHisMsgVisibleReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId            string `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	GroupHisMsgVisible int32  `protobuf:"varint,2,opt,name=group_his_msg_visible,json=groupHisMsgVisible,proto3" json:"group_his_msg_visible,omitempty"`
+}
+
+func (x *SetGroupHisMsgVisibleReq) Reset() {
+	*x = SetGroupHisMsgVisibleReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetGroupHisMsgVisibleReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetGroupHisMsgVisibleReq) ProtoMessage() {}
+
+func (x *SetGroupHisMsgVisibleReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetGroupHisMsgVisibleReq.ProtoReflect.Descriptor instead.
+func (*SetGroupHisMsgVisibleReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SetGroupHisMsgVisibleReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *SetGroupHisMsgVisibleReq) GetGroupHisMsgVisible() int32 {
+	if x != nil {
+		return x.GroupHisMsgVisible
+	}
+	return 0
+}
+
+type GroupAdministratorsReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId  string   `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	AdminIds []string `protobuf:"bytes,2,rep,name=admin_ids,json=adminIds,proto3" json:"admin_ids,omitempty"`
+}
+
+func (x *GroupAdministratorsReq) Reset() {
+	*x = GroupAdministratorsReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GroupAdministratorsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupAdministratorsReq) ProtoMessage() {}
+
+func (x *GroupAdministratorsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupAdministratorsReq.ProtoReflect.Descriptor instead.
+func (*GroupAdministratorsReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GroupAdministratorsReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupAdministratorsReq) GetAdminIds() []string {
+	if x != nil {
+		return x.AdminIds
+	}
+	return nil
+}
+
+type GroupAdministratorsResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId string             `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	Items   []*GroupMemberInfo `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+}
+
+func (x *GroupAdministratorsResp) Reset() {
+	*x = GroupAdministratorsResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GroupAdministratorsResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GroupAdministratorsResp) ProtoMessage() {}
+
+func (x *GroupAdministratorsResp) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GroupAdministratorsResp.ProtoReflect.Descriptor instead.
+func (*GroupAdministratorsResp) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GroupAdministratorsResp) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GroupAdministratorsResp) GetItems() []*GroupMemberInfo {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type SetGroupDisplayNameReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GroupId     string `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+}
+
+func (x *SetGroupDisplayNameReq) Reset() {
+	*x = SetGroupDisplayNameReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetGroupDisplayNameReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetGroupDisplayNameReq) ProtoMessage() {}
+
+func (x *SetGroupDisplayNameReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetGroupDisplayNameReq.ProtoReflect.Descriptor instead.
+func (*SetGroupDisplayNameReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *SetGroupDisplayNameReq) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *SetGroupDisplayNameReq) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+type SearchUserReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Account string `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+}
+
+func (x *SearchUserReq) Reset() {
+	*x = SearchUserReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SearchUserReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchUserReq) ProtoMessage() {}
+
+func (x *SearchUserReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchUserReq.ProtoReflect.Descriptor instead.
+func (*SearchUserReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *SearchUserReq) GetAccount() string {
+	if x != nil {
+		return x.Account
 	}
 	return ""
 }
@@ -189,7 +945,7 @@ type FriendListReq struct {
 func (x *FriendListReq) Reset() {
 	*x = FriendListReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[3]
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -202,7 +958,7 @@ func (x *FriendListReq) String() string {
 func (*FriendListReq) ProtoMessage() {}
 
 func (x *FriendListReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[3]
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -215,7 +971,7 @@ func (x *FriendListReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FriendListReq.ProtoReflect.Descriptor instead.
 func (*FriendListReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{3}
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *FriendListReq) GetLimit() int64 {
@@ -244,7 +1000,7 @@ type FriendListResp struct {
 func (x *FriendListResp) Reset() {
 	*x = FriendListResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[4]
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -257,7 +1013,7 @@ func (x *FriendListResp) String() string {
 func (*FriendListResp) ProtoMessage() {}
 
 func (x *FriendListResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[4]
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -270,7 +1026,7 @@ func (x *FriendListResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FriendListResp.ProtoReflect.Descriptor instead.
 func (*FriendListResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{4}
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *FriendListResp) GetItems() []*UserInfo {
@@ -298,7 +1054,7 @@ type FriendsAddReq struct {
 func (x *FriendsAddReq) Reset() {
 	*x = FriendsAddReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[5]
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -311,7 +1067,7 @@ func (x *FriendsAddReq) String() string {
 func (*FriendsAddReq) ProtoMessage() {}
 
 func (x *FriendsAddReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[5]
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -324,7 +1080,7 @@ func (x *FriendsAddReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FriendsAddReq.ProtoReflect.Descriptor instead.
 func (*FriendsAddReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{5}
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *FriendsAddReq) GetFriendIds() []string {
@@ -341,33 +1097,124 @@ var file_commons_pbdefines_appbusiness_proto_rawDesc = []byte{
 	0x6e, 0x65, 0x73, 0x2f, 0x61, 0x70, 0x70, 0x62, 0x75, 0x73, 0x69, 0x6e, 0x65, 0x73, 0x73, 0x2e,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x23, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x73, 0x2f, 0x70,
 	0x62, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x65, 0x73, 0x2f, 0x61, 0x70, 0x70, 0x6d, 0x65, 0x73, 0x73,
-	0x61, 0x67, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x29, 0x0a, 0x0d, 0x53, 0x65,
-	0x61, 0x72, 0x63, 0x68, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x61,
-	0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x63,
-	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x40, 0x0a, 0x10, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x6e,
-	0x66, 0x6f, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d,
-	0x69, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12,
-	0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x4d, 0x0a, 0x11, 0x47, 0x72, 0x6f, 0x75, 0x70,
-	0x49, 0x6e, 0x66, 0x6f, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x20, 0x0a, 0x05,
-	0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0a, 0x2e, 0x47, 0x72,
-	0x6f, 0x75, 0x70, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x12, 0x16,
-	0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06,
-	0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x3d, 0x0a, 0x0d, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64,
-	0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x16, 0x0a,
-	0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6f,
-	0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x49, 0x0a, 0x0e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x4c,
-	0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x1f, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73,
-	0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66,
-	0x6f, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73,
-	0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74,
-	0x22, 0x2d, 0x0a, 0x0d, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x73, 0x41, 0x64, 0x64, 0x52, 0x65,
-	0x71, 0x12, 0x1c, 0x0a, 0x09, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x49, 0x64, 0x73, 0x18, 0x01,
-	0x20, 0x03, 0x28, 0x09, 0x52, 0x09, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x49, 0x64, 0x73, 0x42,
-	0x1a, 0x5a, 0x18, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x73, 0x2f, 0x70, 0x62, 0x64, 0x65, 0x66,
-	0x69, 0x6e, 0x65, 0x73, 0x2f, 0x70, 0x62, 0x6f, 0x62, 0x6a, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x61, 0x67, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x40, 0x0a, 0x10, 0x47, 0x72,
+	0x6f, 0x75, 0x70, 0x49, 0x6e, 0x66, 0x6f, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12, 0x14,
+	0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x6c,
+	0x69, 0x6d, 0x69, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x4b, 0x0a, 0x11,
+	0x47, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x6e, 0x66, 0x6f, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x1e, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x08, 0x2e, 0x47, 0x72, 0x70, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d,
+	0x73, 0x12, 0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0xe1, 0x02, 0x0a, 0x07, 0x47, 0x72,
+	0x70, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x64,
+	0x12, 0x1d, 0x0a, 0x0a, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x25, 0x0a, 0x0e, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x70, 0x6f, 0x72, 0x74, 0x72, 0x61, 0x69,
+	0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x50, 0x6f,
+	0x72, 0x74, 0x72, 0x61, 0x69, 0x74, 0x12, 0x2a, 0x0a, 0x07, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72,
+	0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d,
+	0x65, 0x6d, 0x62, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x07, 0x6d, 0x65, 0x6d, 0x62, 0x65,
+	0x72, 0x73, 0x12, 0x21, 0x0a, 0x0c, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x5f, 0x63, 0x6f, 0x75,
+	0x6e, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72,
+	0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x26, 0x0a, 0x05, 0x6f, 0x77, 0x6e, 0x65, 0x72, 0x18, 0x06,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x65, 0x6d, 0x62,
+	0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x6f, 0x77, 0x6e, 0x65, 0x72, 0x12, 0x17, 0x0a,
+	0x07, 0x6d, 0x79, 0x5f, 0x72, 0x6f, 0x6c, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06,
+	0x6d, 0x79, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x3b, 0x0a, 0x10, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f,
+	0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x10, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65,
+	0x6e, 0x74, 0x52, 0x0f, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d,
+	0x65, 0x6e, 0x74, 0x12, 0x28, 0x0a, 0x10, 0x67, 0x72, 0x70, 0x5f, 0x64, 0x69, 0x73, 0x70, 0x6c,
+	0x61, 0x79, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0e, 0x67,
+	0x72, 0x70, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0xf3, 0x01,
+	0x0a, 0x0f, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e,
+	0x74, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a,
+	0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x6d, 0x75, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x09, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x75, 0x74, 0x65, 0x12, 0x26, 0x0a, 0x0f, 0x6d,
+	0x61, 0x78, 0x5f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x0d, 0x6d, 0x61, 0x78, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x43, 0x6f,
+	0x75, 0x6e, 0x74, 0x12, 0x1f, 0x0a, 0x0b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x63, 0x6f, 0x75,
+	0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x43,
+	0x6f, 0x75, 0x6e, 0x74, 0x12, 0x2a, 0x0a, 0x11, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x76, 0x65,
+	0x72, 0x69, 0x66, 0x79, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x0f, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x54, 0x79, 0x70, 0x65,
+	0x12, 0x31, 0x0a, 0x15, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x68, 0x69, 0x73, 0x5f, 0x6d, 0x73,
+	0x67, 0x5f, 0x76, 0x69, 0x73, 0x69, 0x62, 0x6c, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x12, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x48, 0x69, 0x73, 0x4d, 0x73, 0x67, 0x56, 0x69, 0x73, 0x69,
+	0x62, 0x6c, 0x65, 0x22, 0x6b, 0x0a, 0x0f, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x65, 0x6d, 0x62,
+	0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12,
+	0x1a, 0x0a, 0x08, 0x6e, 0x69, 0x63, 0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x08, 0x6e, 0x69, 0x63, 0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x23, 0x0a, 0x0d, 0x75,
+	0x73, 0x65, 0x72, 0x5f, 0x70, 0x6f, 0x72, 0x74, 0x72, 0x61, 0x69, 0x74, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x0c, 0x75, 0x73, 0x65, 0x72, 0x50, 0x6f, 0x72, 0x74, 0x72, 0x61, 0x69, 0x74,
+	0x22, 0x52, 0x0a, 0x10, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x49,
+	0x6e, 0x66, 0x6f, 0x73, 0x12, 0x26, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65,
+	0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x12, 0x16, 0x0a, 0x06,
+	0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6f, 0x66,
+	0x66, 0x73, 0x65, 0x74, 0x22, 0x45, 0x0a, 0x0f, 0x47, 0x72, 0x70, 0x41, 0x6e, 0x6e, 0x6f, 0x75,
+	0x6e, 0x63, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70,
+	0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49,
+	0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x48, 0x0a, 0x10, 0x47,
+	0x72, 0x6f, 0x75, 0x70, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x43, 0x68, 0x67, 0x52, 0x65, 0x71, 0x12,
+	0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x6f, 0x77,
+	0x6e, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6f, 0x77,
+	0x6e, 0x65, 0x72, 0x49, 0x64, 0x22, 0x45, 0x0a, 0x0f, 0x53, 0x65, 0x74, 0x47, 0x72, 0x6f, 0x75,
+	0x70, 0x4d, 0x75, 0x74, 0x65, 0x52, 0x65, 0x71, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75,
+	0x70, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75,
+	0x70, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x69, 0x73, 0x5f, 0x6d, 0x75, 0x74, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x22, 0x53, 0x0a, 0x15,
+	0x53, 0x65, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x54, 0x79,
+	0x70, 0x65, 0x52, 0x65, 0x71, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x64,
+	0x12, 0x1f, 0x0a, 0x0b, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x54, 0x79, 0x70,
+	0x65, 0x22, 0x68, 0x0a, 0x18, 0x53, 0x65, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x48, 0x69, 0x73,
+	0x4d, 0x73, 0x67, 0x56, 0x69, 0x73, 0x69, 0x62, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x12, 0x19, 0x0a,
+	0x08, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x64, 0x12, 0x31, 0x0a, 0x15, 0x67, 0x72, 0x6f, 0x75,
+	0x70, 0x5f, 0x68, 0x69, 0x73, 0x5f, 0x6d, 0x73, 0x67, 0x5f, 0x76, 0x69, 0x73, 0x69, 0x62, 0x6c,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x12, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x48, 0x69,
+	0x73, 0x4d, 0x73, 0x67, 0x56, 0x69, 0x73, 0x69, 0x62, 0x6c, 0x65, 0x22, 0x50, 0x0a, 0x16, 0x47,
+	0x72, 0x6f, 0x75, 0x70, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x69, 0x73, 0x74, 0x72, 0x61, 0x74, 0x6f,
+	0x72, 0x73, 0x52, 0x65, 0x71, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x64,
+	0x12, 0x1b, 0x0a, 0x09, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x02, 0x20,
+	0x03, 0x28, 0x09, 0x52, 0x08, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x49, 0x64, 0x73, 0x22, 0x5c, 0x0a,
+	0x17, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x69, 0x73, 0x74, 0x72, 0x61,
+	0x74, 0x6f, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75,
+	0x70, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75,
+	0x70, 0x49, 0x64, 0x12, 0x26, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x02, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x10, 0x2e, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72,
+	0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x56, 0x0a, 0x16, 0x53,
+	0x65, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x4e, 0x61,
+	0x6d, 0x65, 0x52, 0x65, 0x71, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x64,
+	0x12, 0x21, 0x0a, 0x0c, 0x64, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x5f, 0x6e, 0x61, 0x6d, 0x65,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x4e,
+	0x61, 0x6d, 0x65, 0x22, 0x29, 0x0a, 0x0d, 0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x55, 0x73, 0x65,
+	0x72, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x3d,
+	0x0a, 0x0d, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x12,
+	0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05,
+	0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x49, 0x0a,
+	0x0e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12,
+	0x1f, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x09,
+	0x2e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73,
+	0x12, 0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x2d, 0x0a, 0x0d, 0x46, 0x72, 0x69, 0x65,
+	0x6e, 0x64, 0x73, 0x41, 0x64, 0x64, 0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x09, 0x66, 0x72, 0x69,
+	0x65, 0x6e, 0x64, 0x49, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x09, 0x66, 0x72,
+	0x69, 0x65, 0x6e, 0x64, 0x49, 0x64, 0x73, 0x42, 0x1a, 0x5a, 0x18, 0x63, 0x6f, 0x6d, 0x6d, 0x6f,
+	0x6e, 0x73, 0x2f, 0x70, 0x62, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x65, 0x73, 0x2f, 0x70, 0x62, 0x6f,
+	0x62, 0x6a, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -382,25 +1229,41 @@ func file_commons_pbdefines_appbusiness_proto_rawDescGZIP() []byte {
 	return file_commons_pbdefines_appbusiness_proto_rawDescData
 }
 
-var file_commons_pbdefines_appbusiness_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_commons_pbdefines_appbusiness_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_commons_pbdefines_appbusiness_proto_goTypes = []interface{}{
-	(*SearchUserReq)(nil),     // 0: SearchUserReq
-	(*GroupInfoListReq)(nil),  // 1: GroupInfoListReq
-	(*GroupInfoListResp)(nil), // 2: GroupInfoListResp
-	(*FriendListReq)(nil),     // 3: FriendListReq
-	(*FriendListResp)(nil),    // 4: FriendListResp
-	(*FriendsAddReq)(nil),     // 5: FriendsAddReq
-	(*GroupInfo)(nil),         // 6: GroupInfo
-	(*UserInfo)(nil),          // 7: UserInfo
+	(*GroupInfoListReq)(nil),         // 0: GroupInfoListReq
+	(*GroupInfoListResp)(nil),        // 1: GroupInfoListResp
+	(*GrpInfo)(nil),                  // 2: GrpInfo
+	(*GroupManagement)(nil),          // 3: GroupManagement
+	(*GroupMemberInfo)(nil),          // 4: GroupMemberInfo
+	(*GroupMemberInfos)(nil),         // 5: GroupMemberInfos
+	(*GrpAnnouncement)(nil),          // 6: GrpAnnouncement
+	(*GroupOwnerChgReq)(nil),         // 7: GroupOwnerChgReq
+	(*SetGroupMuteReq)(nil),          // 8: SetGroupMuteReq
+	(*SetGroupVerifyTypeReq)(nil),    // 9: SetGroupVerifyTypeReq
+	(*SetGroupHisMsgVisibleReq)(nil), // 10: SetGroupHisMsgVisibleReq
+	(*GroupAdministratorsReq)(nil),   // 11: GroupAdministratorsReq
+	(*GroupAdministratorsResp)(nil),  // 12: GroupAdministratorsResp
+	(*SetGroupDisplayNameReq)(nil),   // 13: SetGroupDisplayNameReq
+	(*SearchUserReq)(nil),            // 14: SearchUserReq
+	(*FriendListReq)(nil),            // 15: FriendListReq
+	(*FriendListResp)(nil),           // 16: FriendListResp
+	(*FriendsAddReq)(nil),            // 17: FriendsAddReq
+	(*UserInfo)(nil),                 // 18: UserInfo
 }
 var file_commons_pbdefines_appbusiness_proto_depIdxs = []int32{
-	6, // 0: GroupInfoListResp.items:type_name -> GroupInfo
-	7, // 1: FriendListResp.items:type_name -> UserInfo
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	2,  // 0: GroupInfoListResp.items:type_name -> GrpInfo
+	4,  // 1: GrpInfo.members:type_name -> GroupMemberInfo
+	4,  // 2: GrpInfo.owner:type_name -> GroupMemberInfo
+	3,  // 3: GrpInfo.group_management:type_name -> GroupManagement
+	4,  // 4: GroupMemberInfos.items:type_name -> GroupMemberInfo
+	4,  // 5: GroupAdministratorsResp.items:type_name -> GroupMemberInfo
+	18, // 6: FriendListResp.items:type_name -> UserInfo
+	7,  // [7:7] is the sub-list for method output_type
+	7,  // [7:7] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_appbusiness_proto_init() }
@@ -411,18 +1274,6 @@ func file_commons_pbdefines_appbusiness_proto_init() {
 	file_commons_pbdefines_appmessages_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_commons_pbdefines_appbusiness_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SearchUserReq); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_commons_pbdefines_appbusiness_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GroupInfoListReq); i {
 			case 0:
 				return &v.state
@@ -434,7 +1285,7 @@ func file_commons_pbdefines_appbusiness_proto_init() {
 				return nil
 			}
 		}
-		file_commons_pbdefines_appbusiness_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_commons_pbdefines_appbusiness_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GroupInfoListResp); i {
 			case 0:
 				return &v.state
@@ -446,8 +1297,20 @@ func file_commons_pbdefines_appbusiness_proto_init() {
 				return nil
 			}
 		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GrpInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 		file_commons_pbdefines_appbusiness_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*FriendListReq); i {
+			switch v := v.(*GroupManagement); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -459,7 +1322,7 @@ func file_commons_pbdefines_appbusiness_proto_init() {
 			}
 		}
 		file_commons_pbdefines_appbusiness_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*FriendListResp); i {
+			switch v := v.(*GroupMemberInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -471,6 +1334,150 @@ func file_commons_pbdefines_appbusiness_proto_init() {
 			}
 		}
 		file_commons_pbdefines_appbusiness_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GroupMemberInfos); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GrpAnnouncement); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GroupOwnerChgReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetGroupMuteReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetGroupVerifyTypeReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetGroupHisMsgVisibleReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GroupAdministratorsReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GroupAdministratorsResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetGroupDisplayNameReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SearchUserReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FriendListReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FriendListResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*FriendsAddReq); i {
 			case 0:
 				return &v.state
@@ -489,7 +1496,7 @@ func file_commons_pbdefines_appbusiness_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_commons_pbdefines_appbusiness_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -18,7 +18,7 @@ func init() {
 	groupMembersCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 8*time.Minute, 10*time.Minute)
 }
 
-func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait string, memberIds []string, extFields []*pbobjs.KvItem) errs.IMErrorCode {
+func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait string, memberIds []string, extFields []*pbobjs.KvItem, settings []*pbobjs.KvItem) errs.IMErrorCode {
 	if groupId == "" {
 		return errs.IMErrorCode_API_PARAM_REQUIRED
 	}
@@ -49,6 +49,16 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 				GroupId:   groupId,
 				ItemKey:   itemKey,
 				ItemValue: itemValue,
+			})
+		}
+		for _, setting := range settings {
+			itemKey, itemValue := setting.Key, setting.Value
+			extDao.Upsert(dbs.GroupExtDao{
+				AppKey:    appKey,
+				GroupId:   groupId,
+				ItemKey:   itemKey,
+				ItemValue: itemValue,
+				ItemType:  int(commonservices.AttItemType_Setting),
 			})
 		}
 		if err == nil {
@@ -287,6 +297,23 @@ func SetGroupMemberAllow(ctx context.Context, req *pbobjs.GroupMemberAllowReq) e
 	return errs.IMErrorCode_SUCCESS
 }
 
+func SetGroupMemberSettings(ctx context.Context, groupId string, req *pbobjs.GroupMember) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	dao := dbs.GroupMemberExtDao{}
+	memberAtts, exist := GetGrpMemberAttsFromCache(ctx, appkey, groupId, req.MemberId)
+	if exist {
+		for _, setting := range req.Settings {
+			memberAtts.SetMemberSetting(setting.Key, setting.Value)
+			dao.Upsert(appkey, groupId, req.MemberId, setting.Key, setting.Value, int(commonservices.AttItemType_Setting))
+		}
+		for _, ext := range req.ExtFields {
+			memberAtts.SetMemberExt(ext.Key, ext.Value)
+			dao.Upsert(appkey, groupId, req.MemberId, ext.Key, ext.Value, int(commonservices.AttItemType_Att))
+		}
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
 func QryGroupMembersByIds(ctx context.Context, req *pbobjs.GroupMembersReq) (errs.IMErrorCode, *pbobjs.GroupMembersResp) {
 	resp := &pbobjs.GroupMembersResp{
 		Items: []*pbobjs.GroupMember{},
@@ -376,7 +403,8 @@ func QryMemberSettings(ctx context.Context, groupId string, memberId string) (er
 			resp.JoinTime = member.CreatedTime
 			memberAtts, exist := GetGrpMemberAttsFromCache(ctx, appkey, groupId, memberId)
 			if exist {
-				resp.MemberSettings = commonservices.Obj2Map(memberAtts.Settings)
+				resp.MemberSettings = memberAtts.GetMemberSettings()
+				resp.MemberExts = memberAtts.GetMemberExts()
 			}
 		}
 	}

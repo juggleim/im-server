@@ -30,7 +30,7 @@ func SetGroupSettings(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	services.AsyncApiCall(ctx, "set_grp_setting", "", req.GroupId, &pbobjs.GroupInfo{
+	services.AsyncApiCall(ctx, "upd_group_info", "", req.GroupId, &pbobjs.GroupInfo{
 		GroupId:  req.GroupId,
 		Settings: commonservices.Map2KvItems(kvMap),
 	})
