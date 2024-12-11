@@ -379,7 +379,7 @@ func CreateRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCod
 			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
 		}
 	} else {
-		return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, generatePbRtcRoom(container)
+		return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, generatePbRtcRoom(ctx, container)
 	}
 	container.JoinRoom(&models.RtcRoomMember{
 		RoomId:   req.RoomId,
@@ -399,7 +399,7 @@ func CreateRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCod
 	if err != nil {
 		logs.WithContext(ctx).Errorf("join rtc room failed:%v", err)
 	}
-	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(container)
+	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(ctx, container)
 }
 
 func DestroyRtcRoom(ctx context.Context) errs.IMErrorCode {
@@ -429,13 +429,11 @@ func DestroyRtcRoom(ctx context.Context) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }
 
-func generatePbRtcRoom(container *RtcRoomContainer) *pbobjs.RtcRoom {
+func generatePbRtcRoom(ctx context.Context, container *RtcRoomContainer) *pbobjs.RtcRoom {
 	members := []*pbobjs.RtcMember{}
 	container.ForeachMembers(func(member *models.RtcRoomMember) {
 		members = append(members, &pbobjs.RtcMember{
-			Member: &pbobjs.UserInfo{
-				UserId: member.MemberId,
-			},
+			Member:      commonservices.GetTargetDisplayUserInfo(ctx, member.MemberId),
 			RtcState:    member.RtcState,
 			CallTime:    member.CallTime,
 			ConnectTime: member.ConnectTime,
@@ -465,7 +463,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST, nil
 	}
 	if container.MemberExist(userId) {
-		return errs.IMErrorCode_RTCROOM_HASMEMBER, generatePbRtcRoom(container)
+		return errs.IMErrorCode_RTCROOM_HASMEMBER, generatePbRtcRoom(ctx, container)
 	}
 	member := &models.RtcRoomMember{
 		RoomId:         roomId,
@@ -478,7 +476,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 	//add to cache
 	code := container.JoinRoom(member)
 	if code != errs.IMErrorCode_SUCCESS {
-		return code, generatePbRtcRoom(container)
+		return code, generatePbRtcRoom(ctx, container)
 	}
 	//add to db
 	storage := storages.NewRtcRoomMemberStorage()
@@ -486,7 +484,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 	if err != nil {
 		logs.WithContext(ctx).Errorf("failed to join rtc room. err:%v", err)
 	}
-	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(container)
+	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(ctx, container)
 }
 
 func QuitRtcRoom(ctx context.Context) errs.IMErrorCode {
@@ -644,7 +642,7 @@ func QryRtcRoom(ctx context.Context, roomId string) (errs.IMErrorCode, *pbobjs.R
 	if !exist {
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST, nil
 	}
-	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(container)
+	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(ctx, container)
 }
 
 func UpdRtcMemberState(ctx context.Context, req *pbobjs.RtcMember) errs.IMErrorCode {
