@@ -41,6 +41,11 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/management/setgrpverifytype", SetGrpVerifyType)
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/management/sethismsgvisible", SetGrpHisMsgVisible)
 	RouteRegiste(mux, http.MethodGet, "/jim/groups/mygroups", QryMyGroups)
+	// grp application
+	RouteRegiste(mux, http.MethodGet, "/jim/groups/myapplications", QryMyGrpApplications)
+	RouteRegiste(mux, http.MethodGet, "/jim/groups/mypendinginvitations", QryMyPendingGrpInvitations)
+	RouteRegiste(mux, http.MethodGet, "/jim/groups/grpinvitations", QryGrpInvitations)
+	RouteRegiste(mux, http.MethodGet, "/jim/groups/grppendingapplications", QryGrpPendingApplications)
 
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/list", QryFriends)
 	RouteRegiste(mux, http.MethodPost, "/jim/friends/add", AddFriend)

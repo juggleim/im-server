@@ -7,6 +7,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/appbusiness/models"
+	"im-server/services/appbusiness/storages"
 	"im-server/services/commonservices"
 
 	"google.golang.org/protobuf/proto"
@@ -456,4 +457,112 @@ func SetGrpDisplayName(ctx context.Context, req *pbobjs.SetGroupDisplayNameReq) 
 		return code
 	}
 	return errs.IMErrorCode_SUCCESS
+}
+
+func QryMyGrpApplications(ctx context.Context, req *pbobjs.QryGrpApplicationsReq) (errs.IMErrorCode, *pbobjs.QryGrpApplicationsResp) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	storage := storages.NewGrpApplicationStorage()
+	ret := &pbobjs.QryGrpApplicationsResp{
+		Items: []*pbobjs.GrpApplicationItem{},
+	}
+	applications, err := storage.QueryMyGrpApplications(appkey, userId, req.StartTime, int64(req.Count), req.Order > 0)
+	if err == nil {
+		for _, application := range applications {
+			ret.Items = append(ret.Items, &pbobjs.GrpApplicationItem{
+				GrpInfo: &pbobjs.GrpInfo{
+					GroupId: application.GroupId,
+				},
+				ApplyType: int32(application.ApplyType),
+				Operator: &pbobjs.UserObj{
+					UserId: application.OperatorId,
+				},
+				ApplyTime: application.ApplyTime,
+				Status:    int32(application.Status),
+			})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func QryMyPendingGrpInvitations(ctx context.Context, req *pbobjs.QryGrpApplicationsReq) (errs.IMErrorCode, *pbobjs.QryGrpApplicationsResp) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	storage := storages.NewGrpApplicationStorage()
+	ret := &pbobjs.QryGrpApplicationsResp{
+		Items: []*pbobjs.GrpApplicationItem{},
+	}
+	applications, err := storage.QueryMyPendingGrpInvitations(appkey, userId, req.StartTime, int64(req.Count), req.Order > 0)
+	if err == nil {
+		for _, application := range applications {
+			ret.Items = append(ret.Items, &pbobjs.GrpApplicationItem{
+				GrpInfo: &pbobjs.GrpInfo{
+					GroupId: application.GroupId,
+				},
+				ApplyType: int32(application.ApplyType),
+				Inviter: &pbobjs.UserObj{
+					UserId: application.InviterId,
+				},
+				ApplyTime: application.ApplyTime,
+				Status:    int32(application.Status),
+			})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func QryGrpInvitations(ctx context.Context, req *pbobjs.QryGrpApplicationsReq) (errs.IMErrorCode, *pbobjs.QryGrpApplicationsResp) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	storage := storages.NewGrpApplicationStorage()
+	ret := &pbobjs.QryGrpApplicationsResp{
+		Items: []*pbobjs.GrpApplicationItem{},
+	}
+	applications, err := storage.QueryGrpInvitations(appkey, req.GroupId, req.StartTime, int64(req.Count), req.Order > 0)
+	if err == nil {
+		for _, application := range applications {
+			ret.Items = append(ret.Items, &pbobjs.GrpApplicationItem{
+				GrpInfo: &pbobjs.GrpInfo{
+					GroupId: application.GroupId,
+				},
+				ApplyType: int32(application.ApplyType),
+				Recipient: &pbobjs.UserObj{
+					UserId: application.RecipientId,
+				},
+				Inviter: &pbobjs.UserObj{
+					UserId: application.InviterId,
+				},
+				ApplyTime: application.ApplyTime,
+				Status:    int32(application.Status),
+			})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func QryGrpPendingApplications(ctx context.Context, req *pbobjs.QryGrpApplicationsReq) (errs.IMErrorCode, *pbobjs.QryGrpApplicationsResp) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	storage := storages.NewGrpApplicationStorage()
+	ret := &pbobjs.QryGrpApplicationsResp{
+		Items: []*pbobjs.GrpApplicationItem{},
+	}
+	applications, err := storage.QueryGrpPendingApplications(appkey, req.GroupId, req.StartTime, int64(req.Count), req.Order > 0)
+	if err == nil {
+		for _, application := range applications {
+			ret.Items = append(ret.Items, &pbobjs.GrpApplicationItem{
+				GrpInfo: &pbobjs.GrpInfo{
+					GroupId: application.GroupId,
+				},
+				ApplyType: int32(application.ApplyType),
+				Sponsor: &pbobjs.UserObj{
+					UserId: application.SponsorId,
+				},
+				Operator: &pbobjs.UserObj{
+					UserId: application.OperatorId,
+				},
+				ApplyTime: application.ApplyTime,
+				Status:    int32(application.Status),
+			})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
 }

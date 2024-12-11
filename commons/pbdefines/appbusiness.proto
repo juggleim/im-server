@@ -85,6 +85,28 @@ message SetGroupDisplayNameReq{
     string display_name = 2;
 }
 
+message QryGrpApplicationsReq{
+    int64 start_time = 1;
+    int32 count = 2;
+    int32 order = 3;
+    string group_id = 4;
+}
+
+message QryGrpApplicationsResp{
+    repeated GrpApplicationItem items=1;
+}
+
+message GrpApplicationItem{
+    GrpInfo grp_info = 1;
+    int32 apply_type = 2;
+    UserObj sponsor = 3;
+    UserObj recipient = 4;
+    UserObj inviter = 5;
+    UserObj operator = 6;
+    int64 apply_time = 7;
+    int32 status = 8;
+}
+
 message SearchUserReq {
     string account = 1;
 }
@@ -125,8 +147,8 @@ message QryFriendApplicationsResp{
 }
 
 message FriendApplicationItem{
-    string recipient_id = 1;
-    string sponsor_id = 2;
+    UserObj recipient = 1;
+    UserObj sponsor = 2;
     int32 status = 3;
     int64 apply_time = 4;
 }

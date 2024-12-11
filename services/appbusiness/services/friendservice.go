@@ -6,9 +6,9 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	apiModels "im-server/services/appbusiness/models"
+	"im-server/services/appbusiness/storages"
+	"im-server/services/appbusiness/storages/models"
 	"im-server/services/commonservices"
-	"im-server/services/friends/storages"
-	"im-server/services/friends/storages/models"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -129,10 +129,11 @@ func QryMyFriendApplications(ctx context.Context, req *pbobjs.QryFriendApplicati
 	if err == nil {
 		for _, application := range applications {
 			ret.Items = append(ret.Items, &pbobjs.FriendApplicationItem{
-				RecipientId: application.RecipientId,
-				SponsorId:   application.SponsorId,
-				Status:      int32(application.Status),
-				ApplyTime:   application.ApplyTime,
+				Recipient: &pbobjs.UserObj{
+					UserId: application.RecipientId,
+				},
+				Status:    int32(application.Status),
+				ApplyTime: application.ApplyTime,
 			})
 		}
 	}
@@ -150,10 +151,11 @@ func QryMyPendingFriendApplications(ctx context.Context, req *pbobjs.QryFriendAp
 	if err == nil {
 		for _, application := range applications {
 			ret.Items = append(ret.Items, &pbobjs.FriendApplicationItem{
-				RecipientId: application.RecipientId,
-				SponsorId:   application.SponsorId,
-				Status:      int32(application.Status),
-				ApplyTime:   application.ApplyTime,
+				Sponsor: &pbobjs.UserObj{
+					UserId: application.SponsorId,
+				},
+				Status:    int32(application.Status),
+				ApplyTime: application.ApplyTime,
 			})
 		}
 	}

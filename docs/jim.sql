@@ -809,4 +809,37 @@ CREATE TABLE `friendrels` (
   UNIQUE KEY `uniq_friend` (`app_key`,`user_id`,`friend_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `friendapplications`;
+CREATE TABLE `friendapplications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `recipient_id` varchar(32) DEFAULT NULL,
+  `sponsor_id` varchar(32) DEFAULT NULL,
+  `apply_time` bigint DEFAULT NULL,
+  `status` tinyint DEFAULT '0',
+  `app_key` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_apply` (`app_key`,`recipient_id`,`sponsor_id`),
+  KEY `idx_recipient` (`app_key`,`recipient_id`,`apply_time`),
+  KEY `idx_sponsor` (`app_key`,`sponsor_id`,`apply_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+DROP TABLE IF EXISTS `grpapplications`;
+CREATE TABLE `grpapplications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `group_id` varchar(32) DEFAULT NULL,
+  `apply_type` tinyint DEFAULT '0',
+  `sponsor_id` varchar(32) DEFAULT NULL,
+  `recipient_id` varchar(32) DEFAULT NULL,
+  `inviter_id` varchar(32) DEFAULT NULL,
+  `operator_id` varchar(32) DEFAULT NULL,
+  `apply_time` bigint DEFAULT '0',
+  `status` tinyint DEFAULT '0',
+  `app_key` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_apply` (`app_key`,`group_id`,`apply_type`,`sponsor_id`,`recipient_id`),
+  KEY `idx_sponsor` (`app_key`,`apply_type`,`sponsor_id`,`apply_time`),
+  KEY `idx_group` (`app_key`,`apply_type`,`group_id`,`apply_time`),
+  KEY `idx_recipient` (`app_key`,`apply_type`,`recipient_id`,`apply_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

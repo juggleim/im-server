@@ -3,7 +3,7 @@ package dbs
 import (
 	"fmt"
 	"im-server/commons/dbcommons"
-	"im-server/services/friends/storages/models"
+	"im-server/services/appbusiness/storages/models"
 	"time"
 )
 
@@ -22,7 +22,7 @@ func (apply FriendApplicationDao) TableName() string {
 
 func (apply FriendApplicationDao) Upsert(item models.FriendApplication) error {
 	sql := fmt.Sprintf("INSERT INTO %s (app_key,recipient_id,sponsor_id,apply_time,status)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE apply_time=VALUES(apply_time),status=VALUES(status)", apply.TableName())
-	return dbcommons.GetDb().Exec(sql, item.AppKey, item.RecipientId, item.SponsorId, item.ApplyTime, item.Status).Error
+	return dbcommons.GetDb().Exec(sql, item.AppKey, item.RecipientId, item.SponsorId, item.ApplyTime, int(item.Status)).Error
 }
 
 func (apply FriendApplicationDao) QueryPendingApplications(appkey, recipientId string, startTime, count int64, isPositive bool) ([]*models.FriendApplication, error) {
