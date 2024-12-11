@@ -712,6 +712,25 @@ message BatchMuteUsersReq{
   bool isDelete = 2;
 }
 
+//friend
+message FriendIdsReq{
+  repeated string friendIds = 1;
+}
+
+message QryFriendsReq{
+  int64 limit = 1;
+  string offset = 2;
+}
+
+message QryFriendsResp{
+  repeated FriendMember items = 1;
+  string offset = 2;
+}
+
+message FriendMember{
+  string friendId = 1;
+}
+
 //group
 message GroupInfo{
   string groupId = 1;
