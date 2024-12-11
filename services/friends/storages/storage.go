@@ -8,3 +8,7 @@ import (
 func NewFriendRelStorage() models.IFriendRelStorage {
 	return &dbs.FriendRelDao{}
 }
+
+func NewFriendApplicationStorage() models.IFriendApplicationStorage {
+	return &dbs.FriendApplicationDao{}
+}

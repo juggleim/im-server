@@ -1,12 +1,14 @@
 package models
 
+import "im-server/commons/pbdefines/pbobjs"
+
 type Group struct {
 	GroupId         string           `json:"group_id"`
 	GroupName       string           `json:"group_name"`
 	GroupPortrait   string           `json:"group_portrait"`
 	GrpMembers      []*GroupMember   `json:"members,omitempty"`
 	MemberCount     int              `json:"member_count"`
-	Owner           *User            `json:"owner,omitempty"`
+	Owner           *pbobjs.UserObj  `json:"owner,omitempty"`
 	MyRole          int              `json:"my_role"`
 	GroupManagement *GroupManagement `json:"group_management"`
 }
@@ -29,7 +31,7 @@ type GroupAnnouncement struct {
 }
 
 type GroupMember struct {
-	User
+	pbobjs.UserObj
 }
 
 type GroupMembersResp struct {

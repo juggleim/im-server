@@ -61,3 +61,21 @@ func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit in
 func (rel FriendRelDao) BatchDelete(appkey, userId string, friendIds []string) error {
 	return dbcommons.GetDb().Where("app_key=? and user_id=? and friend_id in (?)", appkey, userId, friendIds).Delete(&FriendRelDao{}).Error
 }
+
+func (rel FriendRelDao) QueryFriendRelsByFriendIds(appkey, userId string, friendIds []string) ([]*models.FriendRel, error) {
+	var items []*FriendRelDao
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and friend_id in (?)", appkey, userId, friendIds).Order("id asc").Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	ret := []*models.FriendRel{}
+	for _, rel := range items {
+		ret = append(ret, &models.FriendRel{
+			ID:       rel.ID,
+			AppKey:   rel.AppKey,
+			UserId:   rel.UserId,
+			FriendId: rel.FriendId,
+		})
+	}
+	return ret, nil
+}

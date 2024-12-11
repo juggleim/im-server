@@ -278,6 +278,16 @@ func UpdUserInfo(ctx context.Context, userinfo *pbobjs.UserInfo) errs.IMErrorCod
 		})
 		rvCache = rvCache || true
 	}
+	for _, setting := range userinfo.Settings {
+		extDao.Upsert(dbs.UserExtDao{
+			AppKey:    appkey,
+			UserId:    userinfo.UserId,
+			ItemKey:   setting.Key,
+			ItemValue: setting.Value,
+			ItemType:  int(commonservices.AttItemType_Setting),
+		})
+		rvCache = rvCache || true
+	}
 	//upd cache
 	if rvCache {
 		key := strings.Join([]string{appkey, userinfo.UserId}, "_")

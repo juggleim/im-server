@@ -5,6 +5,7 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/friends/storages"
 	"im-server/services/friends/storages/models"
 )
@@ -34,5 +35,46 @@ func DelFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode 
 }
 
 func QryFriends(ctx context.Context, req *pbobjs.QryFriendsReq) (errs.IMErrorCode, *pbobjs.QryFriendsResp) {
-	return errs.IMErrorCode_SUCCESS, nil
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetTargetIdFromCtx(ctx)
+	storage := storages.NewFriendRelStorage()
+	var startId int64 = 0
+	if req.Offset != "" {
+		startId, _ = tools.DecodeInt(req.Offset)
+	}
+	ret := &pbobjs.QryFriendsResp{
+		Items: []*pbobjs.FriendMember{},
+	}
+	rels, err := storage.QueryFriendRels(appkey, userId, startId, req.Limit)
+	if err == nil {
+		for _, rel := range rels {
+			ret.Offset, _ = tools.EncodeInt(rel.ID)
+			ret.Items = append(ret.Items, &pbobjs.FriendMember{
+				FriendId: rel.FriendId,
+			})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func CheckFriends(ctx context.Context, req *pbobjs.CheckFriendsReq) (errs.IMErrorCode, *pbobjs.CheckFriendsResp) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetTargetIdFromCtx(ctx)
+	ret := &pbobjs.CheckFriendsResp{
+		CheckResults: make(map[string]bool),
+	}
+	if len(req.FriendIds) <= 0 {
+		return errs.IMErrorCode_SUCCESS, ret
+	}
+	for _, friendId := range req.FriendIds {
+		ret.CheckResults[friendId] = false
+	}
+	storage := storages.NewFriendRelStorage()
+	rels, err := storage.QueryFriendRelsByFriendIds(appkey, userId, req.FriendIds)
+	if err == nil {
+		for _, rel := range rels {
+			ret.CheckResults[rel.FriendId] = true
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
 }

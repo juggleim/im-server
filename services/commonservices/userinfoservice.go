@@ -109,13 +109,14 @@ var targetUserCache *caches.LruCache
 var targetUserLocks *tools.SegmentatedLocks
 
 type TargetUserInfo struct {
-	UserId       string
-	Nickname     string
-	UserPortrait string
-	ExtFields    []*pbobjs.KvItem
-	UpdatedTime  int64
-	Settings     *UserSettings
-	UserType     pbobjs.UserType
+	UserId         string
+	Nickname       string
+	UserPortrait   string
+	ExtFields      []*pbobjs.KvItem
+	UpdatedTime    int64
+	Settings       *UserSettings
+	SettingsFields []*pbobjs.KvItem
+	UserType       pbobjs.UserType
 }
 
 func init() {
@@ -137,13 +138,14 @@ func GetTargetUserInfo(ctx context.Context, userId string) *TargetUserInfo {
 		} else {
 			uInfo := GetUserInfoFromRpcWithAttTypes(ctx, userId, []int32{int32(AttItemType_Att), int32(AttItemType_Setting)})
 			targetUserInfo := &TargetUserInfo{
-				UserId:       userId,
-				Nickname:     uInfo.Nickname,
-				UserPortrait: uInfo.UserPortrait,
-				ExtFields:    uInfo.ExtFields,
-				UpdatedTime:  uInfo.UpdatedTime,
-				Settings:     &UserSettings{},
-				UserType:     uInfo.UserType,
+				UserId:         userId,
+				Nickname:       uInfo.Nickname,
+				UserPortrait:   uInfo.UserPortrait,
+				ExtFields:      uInfo.ExtFields,
+				UpdatedTime:    uInfo.UpdatedTime,
+				Settings:       &UserSettings{},
+				SettingsFields: uInfo.Settings,
+				UserType:       uInfo.UserType,
 			}
 			FillObjField(targetUserInfo.Settings, Kvitems2Map(uInfo.Settings))
 			if targetUserInfo.Settings.Undisturb != "" {

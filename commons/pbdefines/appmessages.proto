@@ -731,6 +731,14 @@ message FriendMember{
   string friendId = 1;
 }
 
+message CheckFriendsReq{
+  repeated string friendIds = 1;
+}
+
+message CheckFriendsResp{
+  map<string,bool> checkResults = 1;
+}
+
 //group
 message GroupInfo{
   string groupId = 1;

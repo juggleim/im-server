@@ -11,20 +11,16 @@ import (
 func QryUserInfo(ctx *httputils.HttpContext) {
 	userId := ctx.Query("user_id")
 	rpcCtx := ctx.ToRpcCtx(ctx.CurrentUserId)
-	code, userInfo := services.QryUserInfo(rpcCtx, userId)
+	code, user := services.QryUserInfo(rpcCtx, userId)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
 	}
-	ctx.ResponseSucc(&models.User{
-		UserId:   userInfo.UserId,
-		Nickname: userInfo.Nickname,
-		Avatar:   userInfo.UserPortrait,
-	})
+	ctx.ResponseSucc(user)
 }
 
 func UpdateUser(ctx *httputils.HttpContext) {
-	req := &models.User{}
+	req := &pbobjs.UserObj{}
 	if err := ctx.BindJson(req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -38,8 +34,22 @@ func UpdateUser(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
+func UpdateUserSettings(ctx *httputils.HttpContext) {
+	req := &pbobjs.UserSettings{}
+	if err := ctx.BindJson(req); err != nil {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.UpdateUserSettings(ctx.ToRpcCtx(ctx.CurrentUserId), req)
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(nil)
+}
+
 func SearchByPhone(ctx *httputils.HttpContext) {
-	req := &models.User{}
+	req := &pbobjs.UserObj{}
 	if err := ctx.BindJson(req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -51,10 +61,10 @@ func SearchByPhone(ctx *httputils.HttpContext) {
 		return
 	}
 	ret := &models.Users{
-		Items: []*models.User{},
+		Items: []*pbobjs.UserObj{},
 	}
 	for _, user := range users.UserInfos {
-		ret.Items = append(ret.Items, &models.User{
+		ret.Items = append(ret.Items, &pbobjs.UserObj{
 			UserId:   user.UserId,
 			Nickname: user.Nickname,
 			Avatar:   user.UserPortrait,

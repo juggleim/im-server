@@ -98,3 +98,64 @@ message FriendListResp{
     repeated UserInfo items = 1;
     string offset = 2;
 }
+
+message ApplyFriend{
+    string friend_id = 1;
+}
+
+enum ApplyFriendResultReason{
+    ApplySucc = 0;
+    ApplySendOut = 1;
+    ApplyDecline = 2;
+    ApplyRepeated = 3;
+}
+
+message ApplyFriendResp{
+    ApplyFriendResultReason reason = 1;
+}
+
+message QryFriendApplicationsReq{
+    int64 start_time = 1;
+    int32 count = 2;
+    int32 order = 3;
+}
+
+message QryFriendApplicationsResp{
+    repeated FriendApplicationItem items=1;
+}
+
+message FriendApplicationItem{
+    string recipient_id = 1;
+    string sponsor_id = 2;
+    int32 status = 3;
+    int64 apply_time = 4;
+}
+
+message UserObj{
+    string user_id = 1;
+    string nickname = 2;
+    string avatar = 3;
+    string phone = 4;
+    int32 status = 5;
+    bool is_friend = 6;
+    UserSettings settings = 7;
+}
+
+enum FriendVerifyType{
+    NeedFriendVerify = 0;
+    NoNeedFriendVerify = 1;
+    DeclineFriend = 2;
+}
+
+enum GrpVerifyType{
+    NoNeedGrpVerify = 0;
+    NeedGrpVerify = 1;
+    DeclineGroup = 2;
+}
+
+message UserSettings{
+    string language = 1;
+    FriendVerifyType friend_verify_type = 2;
+    GrpVerifyType grp_verify_type = 3;
+    string undisturb = 4;
+}

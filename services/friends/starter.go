@@ -13,14 +13,17 @@ var serviceName string = "friends"
 type FriendManager struct{}
 
 func (manager *FriendManager) RegisterActors(register gmicro.IActorRegister) {
-	register.RegisterActor("add_friend", func() actorsystem.IUntypedActor {
+	register.RegisterActor("add_friends", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.AddFriendActor{}, serviceName)
 	})
-	register.RegisterActor("del_friend", func() actorsystem.IUntypedActor {
+	register.RegisterActor("del_friends", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.DelFriendActor{}, serviceName)
 	})
 	register.RegisterActor("qry_friends", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryFriendsActor{}, serviceName)
+	})
+	register.RegisterActor("check_friends", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.CheckFriendActor{}, serviceName)
 	})
 }
 

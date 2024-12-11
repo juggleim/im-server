@@ -13,17 +13,36 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func QryUserInfo(ctx context.Context, userId string) (errs.IMErrorCode, *pbobjs.UserInfo) {
+func QryUserInfo(ctx context.Context, userId string) (errs.IMErrorCode, *pbobjs.UserObj) {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, respObj, err := AppSyncRpcCall(ctx, "qry_user_info", requestId, userId, &pbobjs.UserIdReq{
-		UserId: userId,
-	}, func() proto.Message {
-		return &pbobjs.UserInfo{}
-	})
-	if err != nil || code != errs.IMErrorCode_SUCCESS {
-		return code, nil
+	userInfo := commonservices.GetTargetUserInfo(ctx, userId)
+	ret := &pbobjs.UserObj{
+		UserId:   userInfo.UserId,
+		Nickname: userInfo.Nickname,
+		Avatar:   userInfo.UserPortrait,
 	}
-	return errs.IMErrorCode_SUCCESS, respObj.(*pbobjs.UserInfo)
+	if userId == requestId {
+		ret.Settings = GetUserSettings(userInfo)
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func GetUserSettings(userInfo *commonservices.TargetUserInfo) *pbobjs.UserSettings {
+	settings := &pbobjs.UserSettings{}
+	for _, setting := range userInfo.SettingsFields {
+		if setting.Key == models.UserExtKey_Language {
+			settings.Language = setting.Value
+		} else if setting.Key == models.UserExtKey_Undisturb {
+			settings.Undisturb = setting.Value
+		} else if setting.Key == models.UserExtKey_FriendVerifyType {
+			verifyType := tools.ToInt(setting.Value)
+			settings.FriendVerifyType = pbobjs.FriendVerifyType(verifyType)
+		} else if setting.Key == models.UserExtKey_GrpVerifyType {
+			verifyType := tools.ToInt(setting.Value)
+			settings.GrpVerifyType = pbobjs.GrpVerifyType(verifyType)
+		}
+	}
+	return settings
 }
 
 func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs.UserInfos) {
@@ -48,6 +67,35 @@ func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs
 func UpdateUser(ctx context.Context, req *pbobjs.UserInfo) errs.IMErrorCode {
 	requesterId := bases.GetRequesterIdFromCtx(ctx)
 	AppSyncRpcCall(ctx, "upd_user_info", requesterId, req.UserId, req, nil)
+	return errs.IMErrorCode_SUCCESS
+}
+
+func UpdateUserSettings(ctx context.Context, req *pbobjs.UserSettings) errs.IMErrorCode {
+	requestId := bases.GetRequesterIdFromCtx(ctx)
+	settings := []*pbobjs.KvItem{
+		{
+			Key:   models.UserExtKey_Language,
+			Value: req.Language,
+		},
+		{
+			Key:   models.UserExtKey_Undisturb,
+			Value: req.Undisturb,
+		},
+		{
+			Key:   models.UserExtKey_FriendVerifyType,
+			Value: tools.Int642String(int64(req.FriendVerifyType)),
+		},
+		{
+			Key:   models.UserExtKey_GrpVerifyType,
+			Value: tools.Int642String(int64(req.GrpVerifyType)),
+		},
+	}
+	if len(settings) > 0 {
+		AppSyncRpcCall(ctx, "upd_user_info", requestId, requestId, &pbobjs.UserInfo{
+			UserId:   requestId,
+			Settings: settings,
+		}, nil)
+	}
 	return errs.IMErrorCode_SUCCESS
 }
 
@@ -79,8 +127,8 @@ func QueryMyGroups(ctx context.Context, req *pbobjs.GroupInfoListReq) (errs.IMEr
 	return errs.IMErrorCode_SUCCESS, ret
 }
 
-func GetUser(ctx context.Context, userId string) *models.User {
-	u := &models.User{
+func GetUser(ctx context.Context, userId string) *pbobjs.UserObj {
+	u := &pbobjs.UserObj{
 		UserId: userId,
 	}
 	user := commonservices.GetTargetDisplayUserInfo(ctx, userId)

@@ -1,12 +1,14 @@
 package models
 
+import "im-server/commons/pbdefines/pbobjs"
+
 var GroupNotifyMsgType string = "jgd:grpntf"
 
 type GroupNotify struct {
-	Operator *User           `json:"operator"`
-	Name     string          `json:"name"`
-	Members  []*User         `json:"members"`
-	Type     GroupNotifyType `json:"type"`
+	Operator *pbobjs.UserObj   `json:"operator"`
+	Name     string            `json:"name"`
+	Members  []*pbobjs.UserObj `json:"members"`
+	Type     GroupNotifyType   `json:"type"`
 }
 
 type GroupNotifyType int

@@ -17,6 +17,7 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/sms_login", SmsLogin)
 
 	RouteRegiste(mux, http.MethodPost, "/jim/users/update", UpdateUser)
+	RouteRegiste(mux, http.MethodPost, "/jim/users/updsettings", UpdateUserSettings)
 	RouteRegiste(mux, http.MethodPost, "/jim/users/search", SearchByPhone)
 	RouteRegiste(mux, http.MethodGet, "/jim/users/info", QryUserInfo)
 
@@ -43,6 +44,10 @@ func LoadAppApis(mux *http.ServeMux) {
 
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/list", QryFriends)
 	RouteRegiste(mux, http.MethodPost, "/jim/friends/add", AddFriend)
+	RouteRegiste(mux, http.MethodPost, "/jim/friends/apply", ApplyFriend)
+	RouteRegiste(mux, http.MethodPost, "/jim/friends/del", DelFriend)
+	RouteRegiste(mux, http.MethodGet, "/jim/friends/myapplications", MyFriendApplications)
+	RouteRegiste(mux, http.MethodGet, "/jim/friends/mypendingapplications", MyPendingFriendApplications)
 }
 
 func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *httputils.HttpContext)) {

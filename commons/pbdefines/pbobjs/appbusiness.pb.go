@@ -20,6 +20,156 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ApplyFriendResultReason int32
+
+const (
+	ApplyFriendResultReason_ApplySucc     ApplyFriendResultReason = 0
+	ApplyFriendResultReason_ApplySendOut  ApplyFriendResultReason = 1
+	ApplyFriendResultReason_ApplyDecline  ApplyFriendResultReason = 2
+	ApplyFriendResultReason_ApplyRepeated ApplyFriendResultReason = 3
+)
+
+// Enum value maps for ApplyFriendResultReason.
+var (
+	ApplyFriendResultReason_name = map[int32]string{
+		0: "ApplySucc",
+		1: "ApplySendOut",
+		2: "ApplyDecline",
+		3: "ApplyRepeated",
+	}
+	ApplyFriendResultReason_value = map[string]int32{
+		"ApplySucc":     0,
+		"ApplySendOut":  1,
+		"ApplyDecline":  2,
+		"ApplyRepeated": 3,
+	}
+)
+
+func (x ApplyFriendResultReason) Enum() *ApplyFriendResultReason {
+	p := new(ApplyFriendResultReason)
+	*p = x
+	return p
+}
+
+func (x ApplyFriendResultReason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ApplyFriendResultReason) Descriptor() protoreflect.EnumDescriptor {
+	return file_commons_pbdefines_appbusiness_proto_enumTypes[0].Descriptor()
+}
+
+func (ApplyFriendResultReason) Type() protoreflect.EnumType {
+	return &file_commons_pbdefines_appbusiness_proto_enumTypes[0]
+}
+
+func (x ApplyFriendResultReason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ApplyFriendResultReason.Descriptor instead.
+func (ApplyFriendResultReason) EnumDescriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{0}
+}
+
+type FriendVerifyType int32
+
+const (
+	FriendVerifyType_NeedFriendVerify   FriendVerifyType = 0
+	FriendVerifyType_NoNeedFriendVerify FriendVerifyType = 1
+	FriendVerifyType_DeclineFriend      FriendVerifyType = 2
+)
+
+// Enum value maps for FriendVerifyType.
+var (
+	FriendVerifyType_name = map[int32]string{
+		0: "NeedFriendVerify",
+		1: "NoNeedFriendVerify",
+		2: "DeclineFriend",
+	}
+	FriendVerifyType_value = map[string]int32{
+		"NeedFriendVerify":   0,
+		"NoNeedFriendVerify": 1,
+		"DeclineFriend":      2,
+	}
+)
+
+func (x FriendVerifyType) Enum() *FriendVerifyType {
+	p := new(FriendVerifyType)
+	*p = x
+	return p
+}
+
+func (x FriendVerifyType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (FriendVerifyType) Descriptor() protoreflect.EnumDescriptor {
+	return file_commons_pbdefines_appbusiness_proto_enumTypes[1].Descriptor()
+}
+
+func (FriendVerifyType) Type() protoreflect.EnumType {
+	return &file_commons_pbdefines_appbusiness_proto_enumTypes[1]
+}
+
+func (x FriendVerifyType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use FriendVerifyType.Descriptor instead.
+func (FriendVerifyType) EnumDescriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{1}
+}
+
+type GrpVerifyType int32
+
+const (
+	GrpVerifyType_NoNeedGrpVerify GrpVerifyType = 0
+	GrpVerifyType_NeedGrpVerify   GrpVerifyType = 1
+	GrpVerifyType_DeclineGroup    GrpVerifyType = 2
+)
+
+// Enum value maps for GrpVerifyType.
+var (
+	GrpVerifyType_name = map[int32]string{
+		0: "NoNeedGrpVerify",
+		1: "NeedGrpVerify",
+		2: "DeclineGroup",
+	}
+	GrpVerifyType_value = map[string]int32{
+		"NoNeedGrpVerify": 0,
+		"NeedGrpVerify":   1,
+		"DeclineGroup":    2,
+	}
+)
+
+func (x GrpVerifyType) Enum() *GrpVerifyType {
+	p := new(GrpVerifyType)
+	*p = x
+	return p
+}
+
+func (x GrpVerifyType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GrpVerifyType) Descriptor() protoreflect.EnumDescriptor {
+	return file_commons_pbdefines_appbusiness_proto_enumTypes[2].Descriptor()
+}
+
+func (GrpVerifyType) Type() protoreflect.EnumType {
+	return &file_commons_pbdefines_appbusiness_proto_enumTypes[2]
+}
+
+func (x GrpVerifyType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GrpVerifyType.Descriptor instead.
+func (GrpVerifyType) EnumDescriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{2}
+}
+
 type GroupInfoListReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1043,16 +1193,16 @@ func (x *FriendListResp) GetOffset() string {
 	return ""
 }
 
-type FriendsAddReq struct {
+type ApplyFriend struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	FriendIds []string `protobuf:"bytes,1,rep,name=friendIds,proto3" json:"friendIds,omitempty"`
+	FriendId string `protobuf:"bytes,1,opt,name=friend_id,json=friendId,proto3" json:"friend_id,omitempty"`
 }
 
-func (x *FriendsAddReq) Reset() {
-	*x = FriendsAddReq{}
+func (x *ApplyFriend) Reset() {
+	*x = ApplyFriend{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1060,13 +1210,13 @@ func (x *FriendsAddReq) Reset() {
 	}
 }
 
-func (x *FriendsAddReq) String() string {
+func (x *ApplyFriend) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*FriendsAddReq) ProtoMessage() {}
+func (*ApplyFriend) ProtoMessage() {}
 
-func (x *FriendsAddReq) ProtoReflect() protoreflect.Message {
+func (x *ApplyFriend) ProtoReflect() protoreflect.Message {
 	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1078,16 +1228,410 @@ func (x *FriendsAddReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use FriendsAddReq.ProtoReflect.Descriptor instead.
-func (*FriendsAddReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use ApplyFriend.ProtoReflect.Descriptor instead.
+func (*ApplyFriend) Descriptor() ([]byte, []int) {
 	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *FriendsAddReq) GetFriendIds() []string {
+func (x *ApplyFriend) GetFriendId() string {
 	if x != nil {
-		return x.FriendIds
+		return x.FriendId
+	}
+	return ""
+}
+
+type ApplyFriendResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Reason ApplyFriendResultReason `protobuf:"varint,1,opt,name=reason,proto3,enum=ApplyFriendResultReason" json:"reason,omitempty"`
+}
+
+func (x *ApplyFriendResp) Reset() {
+	*x = ApplyFriendResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ApplyFriendResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplyFriendResp) ProtoMessage() {}
+
+func (x *ApplyFriendResp) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplyFriendResp.ProtoReflect.Descriptor instead.
+func (*ApplyFriendResp) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ApplyFriendResp) GetReason() ApplyFriendResultReason {
+	if x != nil {
+		return x.Reason
+	}
+	return ApplyFriendResultReason_ApplySucc
+}
+
+type QryFriendApplicationsReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	StartTime int64 `protobuf:"varint,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	Count     int32 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Order     int32 `protobuf:"varint,3,opt,name=order,proto3" json:"order,omitempty"`
+}
+
+func (x *QryFriendApplicationsReq) Reset() {
+	*x = QryFriendApplicationsReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QryFriendApplicationsReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QryFriendApplicationsReq) ProtoMessage() {}
+
+func (x *QryFriendApplicationsReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QryFriendApplicationsReq.ProtoReflect.Descriptor instead.
+func (*QryFriendApplicationsReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *QryFriendApplicationsReq) GetStartTime() int64 {
+	if x != nil {
+		return x.StartTime
+	}
+	return 0
+}
+
+func (x *QryFriendApplicationsReq) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *QryFriendApplicationsReq) GetOrder() int32 {
+	if x != nil {
+		return x.Order
+	}
+	return 0
+}
+
+type QryFriendApplicationsResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Items []*FriendApplicationItem `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+}
+
+func (x *QryFriendApplicationsResp) Reset() {
+	*x = QryFriendApplicationsResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QryFriendApplicationsResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QryFriendApplicationsResp) ProtoMessage() {}
+
+func (x *QryFriendApplicationsResp) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QryFriendApplicationsResp.ProtoReflect.Descriptor instead.
+func (*QryFriendApplicationsResp) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *QryFriendApplicationsResp) GetItems() []*FriendApplicationItem {
+	if x != nil {
+		return x.Items
 	}
 	return nil
+}
+
+type FriendApplicationItem struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RecipientId string `protobuf:"bytes,1,opt,name=recipient_id,json=recipientId,proto3" json:"recipient_id,omitempty"`
+	SponsorId   string `protobuf:"bytes,2,opt,name=sponsor_id,json=sponsorId,proto3" json:"sponsor_id,omitempty"`
+	Status      int32  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`
+	ApplyTime   int64  `protobuf:"varint,4,opt,name=apply_time,json=applyTime,proto3" json:"apply_time,omitempty"`
+}
+
+func (x *FriendApplicationItem) Reset() {
+	*x = FriendApplicationItem{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FriendApplicationItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FriendApplicationItem) ProtoMessage() {}
+
+func (x *FriendApplicationItem) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FriendApplicationItem.ProtoReflect.Descriptor instead.
+func (*FriendApplicationItem) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *FriendApplicationItem) GetRecipientId() string {
+	if x != nil {
+		return x.RecipientId
+	}
+	return ""
+}
+
+func (x *FriendApplicationItem) GetSponsorId() string {
+	if x != nil {
+		return x.SponsorId
+	}
+	return ""
+}
+
+func (x *FriendApplicationItem) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *FriendApplicationItem) GetApplyTime() int64 {
+	if x != nil {
+		return x.ApplyTime
+	}
+	return 0
+}
+
+type UserObj struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId   string        `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Nickname string        `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	Avatar   string        `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Phone    string        `protobuf:"bytes,4,opt,name=phone,proto3" json:"phone,omitempty"`
+	Status   int32         `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	IsFriend bool          `protobuf:"varint,6,opt,name=is_friend,json=isFriend,proto3" json:"is_friend,omitempty"`
+	Settings *UserSettings `protobuf:"bytes,7,opt,name=settings,proto3" json:"settings,omitempty"`
+}
+
+func (x *UserObj) Reset() {
+	*x = UserObj{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[22]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UserObj) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserObj) ProtoMessage() {}
+
+func (x *UserObj) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[22]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserObj.ProtoReflect.Descriptor instead.
+func (*UserObj) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *UserObj) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UserObj) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+func (x *UserObj) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *UserObj) GetPhone() string {
+	if x != nil {
+		return x.Phone
+	}
+	return ""
+}
+
+func (x *UserObj) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *UserObj) GetIsFriend() bool {
+	if x != nil {
+		return x.IsFriend
+	}
+	return false
+}
+
+func (x *UserObj) GetSettings() *UserSettings {
+	if x != nil {
+		return x.Settings
+	}
+	return nil
+}
+
+type UserSettings struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Language         string           `protobuf:"bytes,1,opt,name=language,proto3" json:"language,omitempty"`
+	FriendVerifyType FriendVerifyType `protobuf:"varint,2,opt,name=friend_verify_type,json=friendVerifyType,proto3,enum=FriendVerifyType" json:"friend_verify_type,omitempty"`
+	GrpVerifyType    GrpVerifyType    `protobuf:"varint,3,opt,name=grp_verify_type,json=grpVerifyType,proto3,enum=GrpVerifyType" json:"grp_verify_type,omitempty"`
+	Undisturb        string           `protobuf:"bytes,4,opt,name=undisturb,proto3" json:"undisturb,omitempty"`
+}
+
+func (x *UserSettings) Reset() {
+	*x = UserSettings{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[23]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UserSettings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserSettings) ProtoMessage() {}
+
+func (x *UserSettings) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appbusiness_proto_msgTypes[23]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserSettings.ProtoReflect.Descriptor instead.
+func (*UserSettings) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appbusiness_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *UserSettings) GetLanguage() string {
+	if x != nil {
+		return x.Language
+	}
+	return ""
+}
+
+func (x *UserSettings) GetFriendVerifyType() FriendVerifyType {
+	if x != nil {
+		return x.FriendVerifyType
+	}
+	return FriendVerifyType_NeedFriendVerify
+}
+
+func (x *UserSettings) GetGrpVerifyType() GrpVerifyType {
+	if x != nil {
+		return x.GrpVerifyType
+	}
+	return GrpVerifyType_NoNeedGrpVerify
+}
+
+func (x *UserSettings) GetUndisturb() string {
+	if x != nil {
+		return x.Undisturb
+	}
+	return ""
 }
 
 var File_commons_pbdefines_appbusiness_proto protoreflect.FileDescriptor
@@ -1209,12 +1753,78 @@ var file_commons_pbdefines_appbusiness_proto_rawDesc = []byte{
 	0x1f, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x09,
 	0x2e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73,
 	0x12, 0x16, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x2d, 0x0a, 0x0d, 0x46, 0x72, 0x69, 0x65,
-	0x6e, 0x64, 0x73, 0x41, 0x64, 0x64, 0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x09, 0x66, 0x72, 0x69,
-	0x65, 0x6e, 0x64, 0x49, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x09, 0x66, 0x72,
-	0x69, 0x65, 0x6e, 0x64, 0x49, 0x64, 0x73, 0x42, 0x1a, 0x5a, 0x18, 0x63, 0x6f, 0x6d, 0x6d, 0x6f,
-	0x6e, 0x73, 0x2f, 0x70, 0x62, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x65, 0x73, 0x2f, 0x70, 0x62, 0x6f,
-	0x62, 0x6a, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x2a, 0x0a, 0x0b, 0x41, 0x70, 0x70, 0x6c,
+	0x79, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x66, 0x72, 0x69, 0x65, 0x6e,
+	0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x66, 0x72, 0x69, 0x65,
+	0x6e, 0x64, 0x49, 0x64, 0x22, 0x43, 0x0a, 0x0f, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x46, 0x72, 0x69,
+	0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x12, 0x30, 0x0a, 0x06, 0x72, 0x65, 0x61, 0x73, 0x6f,
+	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x18, 0x2e, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x46,
+	0x72, 0x69, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x52, 0x65, 0x61, 0x73, 0x6f,
+	0x6e, 0x52, 0x06, 0x72, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x22, 0x65, 0x0a, 0x18, 0x51, 0x72, 0x79,
+	0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x73, 0x52, 0x65, 0x71, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x74, 0x61, 0x72, 0x74, 0x5f, 0x74,
+	0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x73, 0x74, 0x61, 0x72, 0x74,
+	0x54, 0x69, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6f, 0x72,
+	0x64, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6f, 0x72, 0x64, 0x65, 0x72,
+	0x22, 0x49, 0x0a, 0x19, 0x51, 0x72, 0x79, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x41, 0x70, 0x70,
+	0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12, 0x2c, 0x0a,
+	0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x16, 0x2e, 0x46,
+	0x72, 0x69, 0x65, 0x6e, 0x64, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x90, 0x01, 0x0a, 0x15,
+	0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x41, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x21, 0x0a, 0x0c, 0x72, 0x65, 0x63, 0x69, 0x70, 0x69, 0x65,
+	0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x72, 0x65, 0x63,
+	0x69, 0x70, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x6f, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x6f, 0x72, 0x49, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12,
+	0x1d, 0x0a, 0x0a, 0x61, 0x70, 0x70, 0x6c, 0x79, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x09, 0x61, 0x70, 0x70, 0x6c, 0x79, 0x54, 0x69, 0x6d, 0x65, 0x22, 0xcc,
+	0x01, 0x0a, 0x07, 0x55, 0x73, 0x65, 0x72, 0x4f, 0x62, 0x6a, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
+	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x6e, 0x69, 0x63, 0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6e, 0x69, 0x63, 0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x12,
+	0x16, 0x0a, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x68, 0x6f, 0x6e, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x12, 0x16, 0x0a,
+	0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x73,
+	0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x1b, 0x0a, 0x09, 0x69, 0x73, 0x5f, 0x66, 0x72, 0x69, 0x65,
+	0x6e, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x08, 0x52, 0x08, 0x69, 0x73, 0x46, 0x72, 0x69, 0x65,
+	0x6e, 0x64, 0x12, 0x29, 0x0a, 0x08, 0x73, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x73, 0x18, 0x07,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65, 0x74, 0x74, 0x69,
+	0x6e, 0x67, 0x73, 0x52, 0x08, 0x73, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x73, 0x22, 0xc1, 0x01,
+	0x0a, 0x0c, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x73, 0x12, 0x1a,
+	0x0a, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x12, 0x3f, 0x0a, 0x12, 0x66, 0x72,
+	0x69, 0x65, 0x6e, 0x64, 0x5f, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x5f, 0x74, 0x79, 0x70, 0x65,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x11, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x56,
+	0x65, 0x72, 0x69, 0x66, 0x79, 0x54, 0x79, 0x70, 0x65, 0x52, 0x10, 0x66, 0x72, 0x69, 0x65, 0x6e,
+	0x64, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x54, 0x79, 0x70, 0x65, 0x12, 0x36, 0x0a, 0x0f, 0x67,
+	0x72, 0x70, 0x5f, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x0e, 0x32, 0x0e, 0x2e, 0x47, 0x72, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79,
+	0x54, 0x79, 0x70, 0x65, 0x52, 0x0d, 0x67, 0x72, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x54,
+	0x79, 0x70, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x75, 0x6e, 0x64, 0x69, 0x73, 0x74, 0x75, 0x72, 0x62,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x75, 0x6e, 0x64, 0x69, 0x73, 0x74, 0x75, 0x72,
+	0x62, 0x2a, 0x5f, 0x0a, 0x17, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64,
+	0x52, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x52, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x12, 0x0d, 0x0a, 0x09,
+	0x41, 0x70, 0x70, 0x6c, 0x79, 0x53, 0x75, 0x63, 0x63, 0x10, 0x00, 0x12, 0x10, 0x0a, 0x0c, 0x41,
+	0x70, 0x70, 0x6c, 0x79, 0x53, 0x65, 0x6e, 0x64, 0x4f, 0x75, 0x74, 0x10, 0x01, 0x12, 0x10, 0x0a,
+	0x0c, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x44, 0x65, 0x63, 0x6c, 0x69, 0x6e, 0x65, 0x10, 0x02, 0x12,
+	0x11, 0x0a, 0x0d, 0x41, 0x70, 0x70, 0x6c, 0x79, 0x52, 0x65, 0x70, 0x65, 0x61, 0x74, 0x65, 0x64,
+	0x10, 0x03, 0x2a, 0x53, 0x0a, 0x10, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x56, 0x65, 0x72, 0x69,
+	0x66, 0x79, 0x54, 0x79, 0x70, 0x65, 0x12, 0x14, 0x0a, 0x10, 0x4e, 0x65, 0x65, 0x64, 0x46, 0x72,
+	0x69, 0x65, 0x6e, 0x64, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x10, 0x00, 0x12, 0x16, 0x0a, 0x12,
+	0x4e, 0x6f, 0x4e, 0x65, 0x65, 0x64, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x56, 0x65, 0x72, 0x69,
+	0x66, 0x79, 0x10, 0x01, 0x12, 0x11, 0x0a, 0x0d, 0x44, 0x65, 0x63, 0x6c, 0x69, 0x6e, 0x65, 0x46,
+	0x72, 0x69, 0x65, 0x6e, 0x64, 0x10, 0x02, 0x2a, 0x49, 0x0a, 0x0d, 0x47, 0x72, 0x70, 0x56, 0x65,
+	0x72, 0x69, 0x66, 0x79, 0x54, 0x79, 0x70, 0x65, 0x12, 0x13, 0x0a, 0x0f, 0x4e, 0x6f, 0x4e, 0x65,
+	0x65, 0x64, 0x47, 0x72, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x10, 0x00, 0x12, 0x11, 0x0a,
+	0x0d, 0x4e, 0x65, 0x65, 0x64, 0x47, 0x72, 0x70, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x10, 0x01,
+	0x12, 0x10, 0x0a, 0x0c, 0x44, 0x65, 0x63, 0x6c, 0x69, 0x6e, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70,
+	0x10, 0x02, 0x42, 0x1a, 0x5a, 0x18, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x73, 0x2f, 0x70, 0x62,
+	0x64, 0x65, 0x66, 0x69, 0x6e, 0x65, 0x73, 0x2f, 0x70, 0x62, 0x6f, 0x62, 0x6a, 0x73, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1229,41 +1839,56 @@ func file_commons_pbdefines_appbusiness_proto_rawDescGZIP() []byte {
 	return file_commons_pbdefines_appbusiness_proto_rawDescData
 }
 
-var file_commons_pbdefines_appbusiness_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_commons_pbdefines_appbusiness_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_commons_pbdefines_appbusiness_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_commons_pbdefines_appbusiness_proto_goTypes = []interface{}{
-	(*GroupInfoListReq)(nil),         // 0: GroupInfoListReq
-	(*GroupInfoListResp)(nil),        // 1: GroupInfoListResp
-	(*GrpInfo)(nil),                  // 2: GrpInfo
-	(*GroupManagement)(nil),          // 3: GroupManagement
-	(*GroupMemberInfo)(nil),          // 4: GroupMemberInfo
-	(*GroupMemberInfos)(nil),         // 5: GroupMemberInfos
-	(*GrpAnnouncement)(nil),          // 6: GrpAnnouncement
-	(*GroupOwnerChgReq)(nil),         // 7: GroupOwnerChgReq
-	(*SetGroupMuteReq)(nil),          // 8: SetGroupMuteReq
-	(*SetGroupVerifyTypeReq)(nil),    // 9: SetGroupVerifyTypeReq
-	(*SetGroupHisMsgVisibleReq)(nil), // 10: SetGroupHisMsgVisibleReq
-	(*GroupAdministratorsReq)(nil),   // 11: GroupAdministratorsReq
-	(*GroupAdministratorsResp)(nil),  // 12: GroupAdministratorsResp
-	(*SetGroupDisplayNameReq)(nil),   // 13: SetGroupDisplayNameReq
-	(*SearchUserReq)(nil),            // 14: SearchUserReq
-	(*FriendListReq)(nil),            // 15: FriendListReq
-	(*FriendListResp)(nil),           // 16: FriendListResp
-	(*FriendsAddReq)(nil),            // 17: FriendsAddReq
-	(*UserInfo)(nil),                 // 18: UserInfo
+	(ApplyFriendResultReason)(0),      // 0: ApplyFriendResultReason
+	(FriendVerifyType)(0),             // 1: FriendVerifyType
+	(GrpVerifyType)(0),                // 2: GrpVerifyType
+	(*GroupInfoListReq)(nil),          // 3: GroupInfoListReq
+	(*GroupInfoListResp)(nil),         // 4: GroupInfoListResp
+	(*GrpInfo)(nil),                   // 5: GrpInfo
+	(*GroupManagement)(nil),           // 6: GroupManagement
+	(*GroupMemberInfo)(nil),           // 7: GroupMemberInfo
+	(*GroupMemberInfos)(nil),          // 8: GroupMemberInfos
+	(*GrpAnnouncement)(nil),           // 9: GrpAnnouncement
+	(*GroupOwnerChgReq)(nil),          // 10: GroupOwnerChgReq
+	(*SetGroupMuteReq)(nil),           // 11: SetGroupMuteReq
+	(*SetGroupVerifyTypeReq)(nil),     // 12: SetGroupVerifyTypeReq
+	(*SetGroupHisMsgVisibleReq)(nil),  // 13: SetGroupHisMsgVisibleReq
+	(*GroupAdministratorsReq)(nil),    // 14: GroupAdministratorsReq
+	(*GroupAdministratorsResp)(nil),   // 15: GroupAdministratorsResp
+	(*SetGroupDisplayNameReq)(nil),    // 16: SetGroupDisplayNameReq
+	(*SearchUserReq)(nil),             // 17: SearchUserReq
+	(*FriendListReq)(nil),             // 18: FriendListReq
+	(*FriendListResp)(nil),            // 19: FriendListResp
+	(*ApplyFriend)(nil),               // 20: ApplyFriend
+	(*ApplyFriendResp)(nil),           // 21: ApplyFriendResp
+	(*QryFriendApplicationsReq)(nil),  // 22: QryFriendApplicationsReq
+	(*QryFriendApplicationsResp)(nil), // 23: QryFriendApplicationsResp
+	(*FriendApplicationItem)(nil),     // 24: FriendApplicationItem
+	(*UserObj)(nil),                   // 25: UserObj
+	(*UserSettings)(nil),              // 26: UserSettings
+	(*UserInfo)(nil),                  // 27: UserInfo
 }
 var file_commons_pbdefines_appbusiness_proto_depIdxs = []int32{
-	2,  // 0: GroupInfoListResp.items:type_name -> GrpInfo
-	4,  // 1: GrpInfo.members:type_name -> GroupMemberInfo
-	4,  // 2: GrpInfo.owner:type_name -> GroupMemberInfo
-	3,  // 3: GrpInfo.group_management:type_name -> GroupManagement
-	4,  // 4: GroupMemberInfos.items:type_name -> GroupMemberInfo
-	4,  // 5: GroupAdministratorsResp.items:type_name -> GroupMemberInfo
-	18, // 6: FriendListResp.items:type_name -> UserInfo
-	7,  // [7:7] is the sub-list for method output_type
-	7,  // [7:7] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	5,  // 0: GroupInfoListResp.items:type_name -> GrpInfo
+	7,  // 1: GrpInfo.members:type_name -> GroupMemberInfo
+	7,  // 2: GrpInfo.owner:type_name -> GroupMemberInfo
+	6,  // 3: GrpInfo.group_management:type_name -> GroupManagement
+	7,  // 4: GroupMemberInfos.items:type_name -> GroupMemberInfo
+	7,  // 5: GroupAdministratorsResp.items:type_name -> GroupMemberInfo
+	27, // 6: FriendListResp.items:type_name -> UserInfo
+	0,  // 7: ApplyFriendResp.reason:type_name -> ApplyFriendResultReason
+	24, // 8: QryFriendApplicationsResp.items:type_name -> FriendApplicationItem
+	26, // 9: UserObj.settings:type_name -> UserSettings
+	1,  // 10: UserSettings.friend_verify_type:type_name -> FriendVerifyType
+	2,  // 11: UserSettings.grp_verify_type:type_name -> GrpVerifyType
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_appbusiness_proto_init() }
@@ -1478,7 +2103,79 @@ func file_commons_pbdefines_appbusiness_proto_init() {
 			}
 		}
 		file_commons_pbdefines_appbusiness_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*FriendsAddReq); i {
+			switch v := v.(*ApplyFriend); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ApplyFriendResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QryFriendApplicationsReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QryFriendApplicationsResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FriendApplicationItem); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UserObj); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_commons_pbdefines_appbusiness_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UserSettings); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1495,13 +2192,14 @@ func file_commons_pbdefines_appbusiness_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_commons_pbdefines_appbusiness_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   18,
+			NumEnums:      3,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_commons_pbdefines_appbusiness_proto_goTypes,
 		DependencyIndexes: file_commons_pbdefines_appbusiness_proto_depIdxs,
+		EnumInfos:         file_commons_pbdefines_appbusiness_proto_enumTypes,
 		MessageInfos:      file_commons_pbdefines_appbusiness_proto_msgTypes,
 	}.Build()
 	File_commons_pbdefines_appbusiness_proto = out.File

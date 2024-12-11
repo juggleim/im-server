@@ -1,25 +1,22 @@
 package models
 
-type User struct {
-	UserId   string `json:"user_id"`
-	Nickname string `json:"nickname"`
-	Phone    string `json:"phone,omitempty"`
-	Avatar   string `json:"avatar,omitempty"`
-	Status   int    `json:"status"`
-	City     string `json:"city,omitempty"`
-	Country  string `json:"country,omitempty"`
-	Language string `json:"language,omitempty"`
-	Province string `json:"province,omitempty"`
-	IsFriend bool   `json:"is_friend"`
-}
+import "im-server/commons/pbdefines/pbobjs"
+
+var (
+	UserExtKey_Phone            string = "phone"
+	UserExtKey_Language         string = "language"
+	UserExtKey_Undisturb        string = "undisturb"
+	UserExtKey_FriendVerifyType string = "friend_verify_type"
+	UserExtKey_GrpVerifyType    string = "grp_verify_type"
+)
 
 type Users struct {
-	Items []*User `json:"items"`
+	Items []*pbobjs.UserObj `json:"items"`
 }
 
 type Friends struct {
-	Items  []*User `json:"items"`
-	Offset string  `json:"offset,omitempty"`
+	Items  []*pbobjs.UserObj `json:"items"`
+	Offset string            `json:"offset,omitempty"`
 }
 
 type Friend struct {
@@ -27,6 +24,10 @@ type Friend struct {
 	FriendId string `json:"friend_id"`
 }
 
-type ApplyFriends struct {
+type FriendIds struct {
 	FriendIds []string `json:"friend_ids"`
+}
+
+type ApplyFriend struct {
+	FriendId string `json:"friend_id"`
 }

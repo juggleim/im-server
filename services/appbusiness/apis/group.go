@@ -179,7 +179,7 @@ func QryGrpMembers(ctx *httputils.HttpContext) {
 	}
 	for _, member := range members.Items {
 		ret.Items = append(ret.Items, &models.GroupMember{
-			User: models.User{
+			UserObj: pbobjs.UserObj{
 				UserId:   member.UserId,
 				Nickname: member.Nickname,
 				Avatar:   member.UserPortrait,

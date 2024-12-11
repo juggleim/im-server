@@ -118,7 +118,7 @@ func CreateGroup(ctx context.Context, req *pbobjs.GroupMembersReq) (errs.IMError
 		return code, nil
 	}
 	//send notify msg
-	targetUsers := []*models.User{}
+	targetUsers := []*pbobjs.UserObj{}
 	for _, memberId := range req.MemberIds {
 		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
@@ -170,7 +170,7 @@ func AddGrpMembers(ctx context.Context, grpMembers *pbobjs.GroupMembersReq) errs
 		return code
 	}
 	//send notify msg
-	targetUsers := []*models.User{}
+	targetUsers := []*pbobjs.UserObj{}
 	for _, memberId := range grpMembers.MemberIds {
 		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
@@ -194,7 +194,7 @@ func DelGrpMembers(ctx context.Context, req *pbobjs.GroupMembersReq) errs.IMErro
 		return code
 	}
 	//send notify msg
-	targetUsers := []*models.User{}
+	targetUsers := []*pbobjs.UserObj{}
 	for _, memberId := range req.MemberIds {
 		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
