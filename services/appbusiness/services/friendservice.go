@@ -7,9 +7,8 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	apiModels "im-server/services/appbusiness/models"
-	"im-server/services/appbusiness/storages"
-	"im-server/services/appbusiness/storages/models"
 	"im-server/services/commonservices"
+	"im-server/services/friends/storages"
 )
 
 func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCode, *pbobjs.FriendListResp) {
@@ -34,27 +33,23 @@ func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCod
 	return errs.IMErrorCode_SUCCESS, ret
 }
 
-func AddFriends(ctx context.Context, req *pbobjs.FriendsAddReq) errs.IMErrorCode {
-	appkey := bases.GetAppKeyFromCtx(ctx)
+func AddFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode {
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	storage := storages.NewFriendRelStorage()
-	friendRels := []models.FriendRel{}
 	for _, friendId := range req.FriendIds {
-		friendRels = append(friendRels, models.FriendRel{
-			AppKey:   appkey,
-			UserId:   userId,
-			FriendId: friendId,
-		})
-		friendRels = append(friendRels, models.FriendRel{
-			AppKey:   appkey,
-			UserId:   friendId,
-			FriendId: userId,
-		})
+		AppSyncRpcCall(ctx, "add_friend", userId, userId, &pbobjs.FriendIdsReq{
+			FriendIds: []string{friendId},
+		}, nil)
+		AppSyncRpcCall(ctx, "add_friend", userId, friendId, &pbobjs.FriendIdsReq{
+			FriendIds: []string{userId},
+		}, nil)
 		//send notify msg
 		SendFriendNotify(ctx, friendId, &apiModels.FriendNotify{
 			Type: 0,
 		})
 	}
-	storage.BatchUpsert(friendRels)
+	return errs.IMErrorCode_SUCCESS
+}
+
+func ApplyFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }

@@ -98,7 +98,3 @@ message FriendListResp{
     repeated UserInfo items = 1;
     string offset = 2;
 }
-
-message FriendsAddReq {
-    repeated string friendIds = 1;
-}

@@ -48,8 +48,24 @@ func AddFriend(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.AddFriends(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.FriendsAddReq{
+	code := services.AddFriends(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.FriendIdsReq{
 		FriendIds: []string{req.FriendId},
+	})
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(nil)
+}
+
+func ApplyFriend(ctx *httputils.HttpContext) {
+	req := models.ApplyFriends{}
+	if err := ctx.BindJson(&req); err != nil {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.AddFriends(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.FriendIdsReq{
+		FriendIds: req.FriendIds,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)

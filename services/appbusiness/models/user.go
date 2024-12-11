@@ -26,3 +26,7 @@ type Friend struct {
 	UserId   string `json:"user_id"`
 	FriendId string `json:"friend_id"`
 }
+
+type ApplyFriends struct {
+	FriendIds []string `json:"friend_ids"`
+}
