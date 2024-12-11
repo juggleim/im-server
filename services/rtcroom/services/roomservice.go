@@ -122,7 +122,7 @@ func checkRtcMemberTimeout(appkey, roomId string) {
 			}
 		})
 		for _, memberId := range callTimeOutMemberIds {
-			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, pbobjs.RtcRoomQuitReason_CallTimeout, false)
+			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, pbobjs.RtcRoomQuitReason_CallTimeout, true)
 			if container.RoomType == pbobjs.RtcRoomType_OneOne {
 				break
 			}

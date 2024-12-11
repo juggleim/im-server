@@ -100,6 +100,13 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				RtcState: pbobjs.RtcState_RtcIncoming,
 			},
 		})
+		members := []*pbobjs.RtcMember{}
+		container.ForeachMembers(func(member *models.RtcRoomMember) {
+			members = append(members, &pbobjs.RtcMember{
+				Member:   commonservices.GetTargetDisplayUserInfo(ctx, member.MemberId),
+				RtcState: member.RtcState,
+			})
+		})
 		//send invite event
 		SendInviteEvent(ctx, targetId, &pbobjs.RtcInviteEvent{
 			InviteType: pbobjs.InviteType_RtcInvite,
@@ -110,6 +117,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				Owner:        container.Owner,
 				RtcChannel:   container.RtcChannel,
 				RtcMediaType: container.RtcMediaType,
+				Members:      members,
 			},
 			TargetUsers: []*pbobjs.UserInfo{
 				commonservices.GetTargetDisplayUserInfo(ctx, targetId),
