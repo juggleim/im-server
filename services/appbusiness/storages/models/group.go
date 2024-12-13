@@ -3,22 +3,22 @@ package models
 type GrpApplicationStatus int
 
 var (
-	GrpApplicationStatus_Apply        = 0
-	GrpApplicationStatus_AgreeApply   = 1
-	GrpApplicationStatus_DeclineApply = 2
-	GrpApplicationStatus_ExpiredApply = 3
+	GrpApplicationStatus_Apply        GrpApplicationStatus = 0
+	GrpApplicationStatus_AgreeApply   GrpApplicationStatus = 1
+	GrpApplicationStatus_DeclineApply GrpApplicationStatus = 2
+	GrpApplicationStatus_ExpiredApply GrpApplicationStatus = 3
 
-	GrpApplicationStatus_Invite        = 10
-	GrpApplicationStatus_AgreeInvite   = 11
-	GrpApplicationStatus_DeclineInvite = 12
-	GrpApplicationStatus_ExpiredInvite = 13
+	GrpApplicationStatus_Invite        GrpApplicationStatus = 10
+	GrpApplicationStatus_AgreeInvite   GrpApplicationStatus = 11
+	GrpApplicationStatus_DeclineInvite GrpApplicationStatus = 12
+	GrpApplicationStatus_ExpiredInvite GrpApplicationStatus = 13
 )
 
 type GrpApplicationType int
 
 var (
-	GrpApplicationType_Invite = 0
-	GrpApplicationType_Apply  = 1
+	GrpApplicationType_Invite GrpApplicationType = 0
+	GrpApplicationType_Apply  GrpApplicationType = 1
 )
 
 type GrpApplication struct {

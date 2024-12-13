@@ -8,6 +8,24 @@ import (
 	"im-server/services/appbusiness/services"
 )
 
+func GroupApply(ctx *httputils.HttpContext) {
+
+}
+
+func GroupInvite(ctx *httputils.HttpContext) {
+	req := pbobjs.GroupInviteReq{}
+	if err := ctx.BindJson(&req); err != nil {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code, resp := services.GrpInviteMembers(ctx.ToRpcCtx(ctx.CurrentUserId), &req)
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(resp)
+}
+
 func QryMyGrpApplications(ctx *httputils.HttpContext) {
 	startTimeStr := ctx.Query("start")
 	start, err := tools.String2Int64(startTimeStr)

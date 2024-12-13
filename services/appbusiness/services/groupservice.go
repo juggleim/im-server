@@ -8,7 +8,9 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/storages"
+	storeModels "im-server/services/appbusiness/storages/models"
 	"im-server/services/commonservices"
+	"time"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -183,6 +185,62 @@ func AddGrpMembers(ctx context.Context, grpMembers *pbobjs.GroupMembersReq) errs
 	//send notify msg
 	SendGrpNotify(ctx, grpMembers.GroupId, notify)
 	return errs.IMErrorCode_SUCCESS
+}
+
+func GrpInviteMembers(ctx context.Context, req *pbobjs.GroupInviteReq) (errs.IMErrorCode, *pbobjs.GroupInviteResp) {
+	appkey := bases.GetRequesterIdFromCtx(ctx)
+	requesterId := bases.GetRequesterIdFromCtx(ctx)
+	//TODO check operator
+	results := &pbobjs.GroupInviteResp{
+		Results: make(map[string]pbobjs.GrpInviteResultReason),
+	}
+	//TODO check grp member exist
+	//check user's setting
+	directAddMemberIds := []string{}
+	for _, memberId := range req.MemberIds {
+		reason := pbobjs.GrpInviteResultReason_InviteSucc
+		mUserInfo := commonservices.GetTargetUserInfo(ctx, memberId)
+		mUserSetting := GetUserSettings(mUserInfo)
+		if mUserSetting.GrpVerifyType == pbobjs.GrpVerifyType_DeclineGroup {
+			reason = pbobjs.GrpInviteResultReason_InviteDecline
+		} else if mUserSetting.GrpVerifyType == pbobjs.GrpVerifyType_NeedGrpVerify {
+			storage := storages.NewGrpApplicationStorage()
+			storage.InviteUpsert(storeModels.GrpApplication{
+				GroupId:     req.GroupId,
+				ApplyType:   storeModels.GrpApplicationType_Invite,
+				RecipientId: memberId,
+				InviterId:   requesterId,
+				ApplyTime:   time.Now().UnixMilli(),
+				Status:      storeModels.GrpApplicationStatus_Invite,
+				AppKey:      appkey,
+			})
+			reason = pbobjs.GrpInviteResultReason_InviteSendOut
+		} else if mUserSetting.GrpVerifyType == pbobjs.GrpVerifyType_NoNeedGrpVerify {
+			directAddMemberIds = append(directAddMemberIds, memberId)
+			reason = pbobjs.GrpInviteResultReason_InviteSucc
+		}
+		results.Results[memberId] = reason
+	}
+	if len(directAddMemberIds) > 0 {
+		code, _, err := AppSyncRpcCall(ctx, "g_add_members", requesterId, req.GroupId, &pbobjs.GroupMembersReq{
+			GroupId: req.GroupId,
+		}, nil)
+		if err != nil || code != errs.IMErrorCode_SUCCESS {
+			return code, nil
+		}
+		//send notify msg
+		targetUsers := []*pbobjs.UserObj{}
+		for _, memberId := range directAddMemberIds {
+			targetUsers = append(targetUsers, GetUser(ctx, memberId))
+		}
+		notify := &models.GroupNotify{
+			Operator: GetUser(ctx, requesterId),
+			Members:  targetUsers,
+			Type:     models.GroupNotifyType_AddMember,
+		}
+		SendGrpNotify(ctx, req.GroupId, notify)
+	}
+	return errs.IMErrorCode_SUCCESS, results
 }
 
 func DelGrpMembers(ctx context.Context, req *pbobjs.GroupMembersReq) errs.IMErrorCode {

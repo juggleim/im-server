@@ -26,6 +26,8 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/update", UpdateGroup)
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/dissolve", DissolveGroup)
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/members/add", AddGrpMembers)
+	RouteRegiste(mux, http.MethodPost, "/jim/groups/apply", GroupApply)
+	RouteRegiste(mux, http.MethodPost, "/jim/groups/invite", GroupInvite)
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/members/del", DelGrpMembers)
 	RouteRegiste(mux, http.MethodGet, "/jim/groups/members/list", QryGrpMembers)
 	RouteRegiste(mux, http.MethodGet, "/jim/groups/info", QryGroupInfo)

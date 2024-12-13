@@ -3,6 +3,22 @@ syntax = "proto3";
 option go_package = "commons/pbdefines/pbobjs";
 import "commons/pbdefines/appmessages.proto";
 
+message GroupInviteReq{
+    string group_id = 1;
+    repeated string member_ids = 2;
+}
+
+message GroupInviteResp{
+    map<string,GrpInviteResultReason> results = 1;
+}
+
+enum GrpInviteResultReason{
+    InviteSucc = 0;
+    InviteSendOut = 1;
+    InviteDecline = 2;
+    InviteRepeated = 3;
+}
+
 message GroupInfoListReq {
     int64 limit = 1;
     string offset = 2;
