@@ -774,72 +774,72 @@ CREATE TABLE `rtcmembers` (
 
 DROP TABLE IF EXISTS `msgtransconfs`;
 CREATE TABLE `msgtransconfs` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `msg_type` varchar(50) DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `msg_type` varchar(50) DEFAULT NULL COMMENT '消息类型',
   `json_path` varchar(200) DEFAULT NULL,
-  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  `app_key` varchar(20) DEFAULT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_path` (`app_key`,`msg_type`,`json_path`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `i18nkeys`;
 CREATE TABLE `i18nkeys` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `lang` VARCHAR(20) NULL,
-  `key` VARCHAR(50) NULL,
-  `value` VARCHAR(200) NULL,
-  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  `app_key` VARCHAR(20) NULL,
+  `key` VARCHAR(50) NULL COMMENT 'key',
+  `value` VARCHAR(200) NULL COMMENT 'value',
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `app_key` VARCHAR(20) NULL COMMENT '租户key',
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uniq_key` (`app_key`, `lang`, `key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `friendrels`;
 CREATE TABLE `friendrels` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(32) DEFAULT NULL,
-  `friend_id` varchar(32) DEFAULT NULL,
-  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  `app_key` varchar(20) DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
+  `friend_id` varchar(32) DEFAULT NULL COMMENT '朋友userId',
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_friend` (`app_key`,`user_id`,`friend_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT '好友绑定关系表';
 
 DROP TABLE IF EXISTS `friendapplications`;
 CREATE TABLE `friendapplications` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `recipient_id` varchar(32) DEFAULT NULL,
-  `sponsor_id` varchar(32) DEFAULT NULL,
-  `apply_time` bigint DEFAULT NULL,
-  `status` tinyint DEFAULT '0',
-  `app_key` varchar(20) DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `recipient_id` varchar(32) DEFAULT NULL COMMENT '接收人',
+  `sponsor_id` varchar(32) DEFAULT NULL COMMENT '发起人',
+  `apply_time` bigint DEFAULT NULL COMMENT '申请时间',
+  `status` tinyint DEFAULT '0' COMMENT '状态' ,
+  `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_apply` (`app_key`,`recipient_id`,`sponsor_id`),
   KEY `idx_recipient` (`app_key`,`recipient_id`,`apply_time`),
   KEY `idx_sponsor` (`app_key`,`sponsor_id`,`apply_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT '好友申请表';
 
 DROP TABLE IF EXISTS `grpapplications`;
 CREATE TABLE `grpapplications` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `group_id` varchar(32) DEFAULT NULL,
-  `apply_type` tinyint DEFAULT '0',
-  `sponsor_id` varchar(32) DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `group_id` varchar(32) DEFAULT NULL COMMENT '群id',
+  `apply_type` tinyint DEFAULT '0' COMMENT '申请类型',
+  `sponsor_id` varchar(32) DEFAULT NULL COMMENT '发起人',
   `recipient_id` varchar(32) DEFAULT NULL,
-  `inviter_id` varchar(32) DEFAULT NULL,
-  `operator_id` varchar(32) DEFAULT NULL,
-  `apply_time` bigint DEFAULT '0',
-  `status` tinyint DEFAULT '0',
-  `app_key` varchar(20) DEFAULT NULL,
+  `inviter_id` varchar(32) DEFAULT NULL COMMENT '邀请人',
+  `operator_id` varchar(32) DEFAULT NULL COMMENT '操作人',
+  `apply_time` bigint DEFAULT '0' COMMENT '申请时间',
+  `status` tinyint DEFAULT '0' COMMENT '状态',
+  `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_apply` (`app_key`,`group_id`,`apply_type`,`sponsor_id`,`recipient_id`),
   KEY `idx_sponsor` (`app_key`,`apply_type`,`sponsor_id`,`apply_time`),
   KEY `idx_group` (`app_key`,`apply_type`,`group_id`,`apply_time`),
   KEY `idx_recipient` (`app_key`,`apply_type`,`recipient_id`,`apply_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT '群申请表';
 
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
