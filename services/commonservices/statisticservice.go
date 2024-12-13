@@ -81,17 +81,17 @@ func QryMsgStatistic(appkey string, statTypes []StatType, channelType pbobjs.Cha
 		case int(StatType_Up):
 			ret.MsgUp.Items = append(ret.MsgUp.Items, &StatisticMsgItem{
 				Count:    item.Count,
-				TimeMark: item.TimeMark,
+				TimeMark: item.TimeMark * 1000,
 			})
 		case int(StatType_Down):
 			ret.MsgDown.Items = append(ret.MsgDown.Items, &StatisticMsgItem{
 				Count:    item.Count,
-				TimeMark: item.TimeMark,
+				TimeMark: item.TimeMark * 1000,
 			})
 		case int(StatType_Dispatch):
 			ret.MsgDispatch.Items = append(ret.MsgDispatch.Items, &StatisticMsgItem{
 				Count:    item.Count,
-				TimeMark: item.TimeMark,
+				TimeMark: item.TimeMark * 1000,
 			})
 		}
 	}

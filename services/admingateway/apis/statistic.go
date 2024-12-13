@@ -50,7 +50,7 @@ func QryMsgStatistic(ctx *gin.Context) {
 	if startStr != "" {
 		intVal, err := tools.String2Int64(startStr)
 		if err == nil && intVal > 0 {
-			start = intVal
+			start = intVal / 1000
 		}
 	}
 	endStr := ctx.Query("end")
@@ -58,7 +58,7 @@ func QryMsgStatistic(ctx *gin.Context) {
 	if endStr != "" {
 		intVal, err := tools.String2Int64(endStr)
 		if err == nil && intVal > 0 {
-			end = intVal
+			end = intVal / 1000
 		}
 	}
 	items := commonservices.QryMsgStatistic(appkey, statTypes, pbobjs.ChannelType(channelType), start, end)
