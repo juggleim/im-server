@@ -103,34 +103,21 @@ func UploadIosCer(ctx *gin.Context) {
 	//save to db
 	dao := dbs.IosCertificateDao{}
 	err = dao.Upsert(dbs.IosCertificateDao{
-		Package:     iosPackage,
-		Certificate: iosCerBs,
-		AppKey:      appkey,
-		CertPwd:     certPwd,
-		IsProduct:   isProduct,
-		CertPath:    certPath,
+		AppKey:       appkey,
+		Package:      iosPackage,
+		IsProduct:    isProduct,
+		CertPwd:      certPwd,
+		VoipCertPwd:  voipCertPwd,
+		Certificate:  iosCerBs,
+		CertPath:     certPath,
+		VoipCert:     voipIosCerBs,
+		VoipCertPath: voipCertPath,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
 			Code: services.AdminErrorCode_Default,
 		})
 		return
-	}
-	if len(voipIosCerBs) > 0 {
-		err = dao.UpsertVoip(dbs.IosCertificateDao{
-			Package:      iosPackage,
-			VoipCert:     voipIosCerBs,
-			AppKey:       appkey,
-			VoipCertPwd:  voipCertPwd,
-			IsProduct:    isProduct,
-			VoipCertPath: voipCertPath,
-		})
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
-				Code: services.AdminErrorCode_Default,
-			})
-			return
-		}
 	}
 	services.SuccessHttpResp(ctx, nil)
 }
