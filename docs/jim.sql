@@ -481,6 +481,9 @@ CREATE TABLE `ioscertificates` (
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `is_product` tinyint DEFAULT '0',
   `cert_path` varchar(255) DEFAULT NULL COMMENT 'cert存入路径',
+  `voip_cert` mediumblob COMMENT `voip certificate`,
+  `voip_cert_pwd` varchar(50) DEFAULT NULL COMMENT `voip cert password`,
+  `voip_cert_path` varchar(255) DEFAULT NULL COMMENT `voip cert path`,
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_package` (`app_key`)
@@ -593,6 +596,7 @@ CREATE TABLE `pushtokens` (
   `push_channel` varchar(10) DEFAULT NULL COMMENT '推送渠道',
   `package` varchar(200) DEFAULT NULL,
   `push_token` varchar(200) DEFAULT NULL COMMENT '推送token',
+  `voip_token` varchar(200) DEFAULT NULL COMMENT 'voip推送token',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
