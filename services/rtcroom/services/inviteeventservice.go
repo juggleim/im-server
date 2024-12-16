@@ -126,10 +126,14 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 		})
 		//trigger push
 		msg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "user_push", &pbobjs.DownMsg{
-			TargetId:    userId,
-			ChannelType: pbobjs.ChannelType_Private,
-			SenderId:    userId,
-			MsgType:     "jg:voicecall",
+			TargetId:       userId,
+			ChannelType:    pbobjs.ChannelType_Private,
+			SenderId:       userId,
+			MsgType:        "jg:voicecall",
+			TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, userId),
+			PushData: &pbobjs.PushData{
+				IsVoip: true,
+			},
 		})
 		bases.UnicastRouteWithNoSender(msg)
 	} else if req.RoomType == pbobjs.RtcRoomType_OneMore {

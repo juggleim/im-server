@@ -10,14 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type IosCert struct {
-	Package   string `json:"package"`
-	CertLen   int    `json:"cert_len"`
-	AppKey    string `json:"app_key"`
-	CertPwd   string `json:"cert_pwd"`
-	IsProduct int    `json:"is_product"`
-}
-
 func GetIosCer(ctx *gin.Context) {
 	appkey := ctx.Query("app_key")
 	//isProduct := ctx.Query("is_product")
@@ -71,6 +63,8 @@ func SetIosPushConf(ctx *gin.Context) {
 func UploadIosCer(ctx *gin.Context) {
 	certPath := ctx.PostForm("cert_path")
 	certPwd := ctx.PostForm("cert_pwd")
+	voipCertPath := ctx.PostForm("voip_cert_path")
+	voipCertPwd := ctx.PostForm("voip_cert_pwd")
 	iosPackage := ctx.PostForm("package")
 	appkey := ctx.PostForm("app_key")
 	isProStr := ctx.PostForm("is_product")
@@ -79,27 +73,29 @@ func UploadIosCer(ctx *gin.Context) {
 		isProduct, _ = strconv.Atoi(isProStr)
 	}
 
+	iosCerBs := []byte{}
 	fileHeader, err := ctx.FormFile("ioscer")
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
-			Code: services.AdminErrorCode_Default,
-		})
-		return
+	if err == nil {
+		file, err := fileHeader.Open()
+		if err == nil {
+			defer file.Close()
+			bs, err := io.ReadAll(file)
+			if err == nil {
+				iosCerBs = append(iosCerBs, bs...)
+			}
+		}
 	}
-	file, err := fileHeader.Open()
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
-			Code: services.AdminErrorCode_Default,
-		})
-		return
-	}
-	defer file.Close()
-	iosCerBs, err := io.ReadAll(file)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
-			Code: services.AdminErrorCode_Default,
-		})
-		return
+	voipIosCerBs := []byte{}
+	voipFileHeader, err := ctx.FormFile("voip_ioscer")
+	if err == nil {
+		voipFile, err := voipFileHeader.Open()
+		if err == nil {
+			defer voipFile.Close()
+			bs, err := io.ReadAll(voipFile)
+			if err == nil {
+				voipIosCerBs = append(voipIosCerBs, bs...)
+			}
+		}
 	}
 	//save to db
 	dao := dbs.IosCertificateDao{}
@@ -116,6 +112,22 @@ func UploadIosCer(ctx *gin.Context) {
 			Code: services.AdminErrorCode_Default,
 		})
 		return
+	}
+	if len(voipIosCerBs) > 0 {
+		err = dao.UpsertVoip(dbs.IosCertificateDao{
+			Package:      iosPackage,
+			VoipCert:     voipIosCerBs,
+			AppKey:       appkey,
+			VoipCertPwd:  voipCertPwd,
+			IsProduct:    isProduct,
+			VoipCertPath: voipCertPath,
+		})
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+				Code: services.AdminErrorCode_Default,
+			})
+			return
+		}
 	}
 	services.SuccessHttpResp(ctx, nil)
 }

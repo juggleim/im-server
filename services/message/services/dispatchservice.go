@@ -138,8 +138,12 @@ func UserPush(ctx context.Context, msg *pbobjs.DownMsg) {
 	}
 	userStatus := GetUserStatus(appkey, targetId)
 	if userStatus != nil {
-		if !userStatus.IsOnline() || userStatus.OpenPushSwitch() {
+		if msg.PushData != nil && msg.PushData.IsVoip {
 			SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, msg)
+		} else {
+			if !userStatus.IsOnline() || userStatus.OpenPushSwitch() {
+				SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, msg)
+			}
 		}
 	}
 }

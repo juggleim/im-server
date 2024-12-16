@@ -23,25 +23,36 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 		return
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	pushToken, ok := GetPushToken(appkey, userId)
-	if ok && pushToken != nil {
+	pushToken := GetPushToken(appkey, userId)
+	if pushToken.PushToken != "" || pushToken.VoipPushToken != "" {
 		if pushToken.Platform == pbobjs.Platform_iOS {
 			if pushToken.PushToken != "" {
 				iosPushConf := GetIosPushConf(ctx, appkey, pushToken.PackageName)
-				if iosPushConf != nil && iosPushConf.ApnsClient != nil {
+				if iosPushConf != nil && (iosPushConf.ApnsClient != nil || iosPushConf.ApnsVoipClient != nil) {
 					notification := &apns2.Notification{}
 					notification.DeviceToken = pushToken.PushToken
 					notification.Topic = pushToken.PackageName
 					notification.Payload = iosPushPayload(req)
-					resp, err := iosPushConf.ApnsClient.Push(notification)
-					if err != nil {
-						logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+					var client *apns2.Client
+					if req.IsVoip && iosPushConf.ApnsVoipClient != nil {
+						client = iosPushConf.ApnsVoipClient
+						notification.Topic = notification.Topic + ".voip"
 					} else {
-						if resp.StatusCode == 200 {
-							logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+						client = iosPushConf.ApnsClient
+					}
+					if client != nil {
+						resp, err := client.Push(notification)
+						if err != nil {
+							logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 						} else {
-							logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
+							if resp.StatusCode == 200 {
+								logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+							} else {
+								logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
+							}
 						}
+					} else {
+						logs.WithContext(ctx).Infof("[IOS_ERR]user_id:%s\tnot init apns client")
 					}
 				}
 			}

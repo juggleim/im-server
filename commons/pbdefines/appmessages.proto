@@ -89,6 +89,7 @@ message PushData{
   string pushText = 3;
   string pushExtraData = 4;
   PushLevel pushLevel = 5;
+  bool isVoip = 6;
 
   //internal fields
   int32 badge = 50;
