@@ -248,7 +248,12 @@ func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) 
 		retPushData.PushId = msg.PushData.PushId
 		retPushData.PushText = msg.PushData.PushText
 		retPushData.PushExtraData = msg.PushData.PushExtraData
+
 		retPushData.IsVoip = msg.PushData.IsVoip
+		retPushData.RtcRoomId = msg.PushData.RtcRoomId
+		retPushData.RtcInviterId = msg.PushData.RtcInviterId
+		retPushData.RtcRoomType = msg.PushData.RtcRoomType
+		retPushData.RtcMediaType = msg.PushData.RtcMediaType
 	}
 	if retPushData.Title == "" {
 		retPushData.Title = title

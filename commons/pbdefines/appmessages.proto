@@ -97,6 +97,10 @@ message PushData{
   string senderId = 52;
   string ConverId = 53;
   ChannelType channelType = 54;
+  string rtcRoomId = 55;
+  string rtcInviterId = 56;
+  int32 rtcRoomType = 57;
+  int32 rtcMediaType = 58;
   
 }
 

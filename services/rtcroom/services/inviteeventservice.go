@@ -13,10 +13,6 @@ import (
 	"time"
 )
 
-var (
-	RtcPingTimeOut int64 = 30 * 1000
-)
-
 func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	roomId := req.RoomId
@@ -132,7 +128,11 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			MsgType:        "jg:voicecall",
 			TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, userId),
 			PushData: &pbobjs.PushData{
-				IsVoip: true,
+				IsVoip:       true,
+				RtcRoomId:    roomId,
+				RtcInviterId: userId,
+				RtcRoomType:  int32(req.RoomType),
+				RtcMediaType: int32(req.RtcMediaType),
 			},
 		})
 		bases.UnicastRouteWithNoSender(msg)

@@ -20,8 +20,11 @@ func GetIosCer(ctx *gin.Context) {
 		return
 	}
 	dao := dbs.IosCertificateDao{}
-	cerDao, _ := dao.Find(appkey)
-	cerDao.Certificate = []byte{}
+	cerDao, err := dao.Find(appkey)
+	if err == nil {
+		cerDao.Certificate = []byte{}
+		cerDao.VoipCert = []byte{}
+	}
 	services.SuccessHttpResp(ctx, cerDao)
 }
 

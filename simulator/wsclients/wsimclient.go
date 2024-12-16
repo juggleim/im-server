@@ -27,6 +27,7 @@ type WsImClient struct {
 	DeviceModel     string
 	DeviceOsVersion string
 	PushToken       string
+	VoipToken       string
 
 	DisconnectCallback  func(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody)
 	OnMessageCallBack   func(msg *pbobjs.DownMsg)

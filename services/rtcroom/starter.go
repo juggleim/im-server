@@ -53,6 +53,9 @@ func (manager *RtcRoomManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("rtc_sync_member", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SyncMemberActor{}, serviceName)
 	})
+	register.RegisterActor("rtc_sync_user_quit", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.SyncQuitActor{}, serviceName)
+	})
 }
 
 func (manager *RtcRoomManager) Startup(args map[string]interface{}) {

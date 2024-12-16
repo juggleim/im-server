@@ -37,6 +37,8 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					if req.IsVoip && iosPushConf.ApnsVoipClient != nil {
 						client = iosPushConf.ApnsVoipClient
 						notification.Topic = notification.Topic + ".voip"
+						notification.DeviceToken = pushToken.VoipPushToken
+						notification.PushType = apns2.PushTypeVOIP
 					} else {
 						client = iosPushConf.ApnsClient
 					}
@@ -166,11 +168,32 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 
 func transfer2Exts(pushData *pbobjs.PushData) map[string]interface{} {
 	exts := make(map[string]interface{})
-	exts["msg_id"] = pushData.MsgId
-	exts["sender_id"] = pushData.SenderId
-	exts["conver_id"] = pushData.ConverId
-	exts["conver_type"] = int32(pushData.ChannelType)
-	exts["exts"] = pushData.PushExtraData
+	if pushData.IsVoip {
+		if pushData.RtcRoomId != "" {
+			exts["room_id"] = pushData.RtcRoomId
+		}
+		if pushData.RtcInviterId != "" {
+			exts["inviter_id"] = pushData.RtcInviterId
+		}
+		exts["is_multi"] = pushData.RtcRoomType
+		exts["media_type"] = pushData.RtcMediaType
+	} else {
+		if pushData.MsgId != "" {
+			exts["msg_id"] = pushData.MsgId
+		}
+		if pushData.SenderId != "" {
+			exts["sender_id"] = pushData.SenderId
+		}
+		if pushData.ConverId != "" {
+			exts["conver_id"] = pushData.ConverId
+		}
+		if pushData.ChannelType != pbobjs.ChannelType_Unknown {
+			exts["conver_type"] = int32(pushData.ChannelType)
+		}
+	}
+	if pushData.PushExtraData != "" {
+		exts["exts"] = pushData.PushExtraData
+	}
 	return exts
 }
 
