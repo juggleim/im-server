@@ -121,9 +121,8 @@ func ConfirmFriend(ctx context.Context, req *pbobjs.ConfirmFriend) errs.IMErrorC
 			FriendIds: []string{userId},
 		}, nil)
 		//send notify msg
-		ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, req.SponsorId)
-		SendFriendNotify(ctx, userId, &apiModels.FriendNotify{
-			Type: 0,
+		SendFriendNotify(ctx, req.SponsorId, &apiModels.FriendNotify{
+			Type: 1,
 		})
 		storage.UpdateStatus(appkey, req.SponsorId, userId, models.FriendApplicationStatus_Agree)
 	} else {
