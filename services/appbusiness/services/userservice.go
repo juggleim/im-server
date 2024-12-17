@@ -45,7 +45,7 @@ func GetUserSettings(userInfo *commonservices.TargetUserInfo) *pbobjs.UserSettin
 	return settings
 }
 
-func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs.UserInfos) {
+func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs.UserObjs) {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	targetUserId := tools.ShortMd5(phone)
 	code, respObj, err := AppSyncRpcCall(ctx, "qry_user_info", requestId, targetUserId, &pbobjs.UserIdReq{
@@ -57,10 +57,16 @@ func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs
 	if err != nil || code != errs.IMErrorCode_SUCCESS {
 		return code, nil
 	}
-	users := &pbobjs.UserInfos{
-		UserInfos: []*pbobjs.UserInfo{},
+	users := &pbobjs.UserObjs{
+		Items: []*pbobjs.UserObj{},
 	}
-	users.UserInfos = append(users.UserInfos, respObj.(*pbobjs.UserInfo))
+	userInfo := respObj.(*pbobjs.UserInfo)
+	users.Items = append(users.Items, &pbobjs.UserObj{
+		UserId:   userInfo.UserId,
+		Nickname: userInfo.Nickname,
+		Avatar:   userInfo.UserPortrait,
+		IsFriend: checkFriend(ctx, requestId, targetUserId),
+	})
 	return errs.IMErrorCode_SUCCESS, users
 }
 

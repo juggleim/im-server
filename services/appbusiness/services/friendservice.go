@@ -14,7 +14,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCode, *pbobjs.FriendListResp) {
+func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCode, *pbobjs.UserObjs) {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 
 	code, respObj, err := AppSyncRpcCall(ctx, "qry_friends", userId, userId, &pbobjs.QryFriendsReq{
@@ -27,7 +27,7 @@ func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCod
 		return code, nil
 	}
 	resp := respObj.(*pbobjs.QryFriendsResp)
-	ret := &pbobjs.FriendListResp{
+	ret := &pbobjs.UserObjs{
 		Items:  []*pbobjs.UserObj{},
 		Offset: resp.Offset,
 	}
@@ -88,6 +88,11 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode 
 			Status:      models.FriendApplicationStatus(models.FriendApplicationStatus_Apply),
 			AppKey:      appkey,
 		})
+		//send notify msg
+		SendFriendApplyNotify(ctx, req.FriendId, &apiModels.FriendApplyNotify{
+			SponsorId:   userId,
+			RecipientId: req.FriendId,
+		})
 	} else if friendSettings.FriendVerifyType == pbobjs.FriendVerifyType_NoNeedFriendVerify {
 		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
 			FriendIds: []string{req.FriendId},
@@ -108,6 +113,18 @@ func ConfirmFriend(ctx context.Context, req *pbobjs.ConfirmFriend) errs.IMErrorC
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	storage := storages.NewFriendApplicationStorage()
 	if req.IsAgree {
+		//add friend
+		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
+			FriendIds: []string{req.SponsorId},
+		}, nil)
+		AppSyncRpcCall(ctx, "add_friends", userId, req.SponsorId, &pbobjs.FriendIdsReq{
+			FriendIds: []string{userId},
+		}, nil)
+		//send notify msg
+		ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, req.SponsorId)
+		SendFriendNotify(ctx, userId, &apiModels.FriendNotify{
+			Type: 0,
+		})
 		storage.UpdateStatus(appkey, req.SponsorId, userId, models.FriendApplicationStatus_Agree)
 	} else {
 		storage.UpdateStatus(appkey, req.SponsorId, userId, models.FriendApplicationStatus_Decline)
@@ -116,17 +133,8 @@ func ConfirmFriend(ctx context.Context, req *pbobjs.ConfirmFriend) errs.IMErrorC
 }
 
 func checkFriend(ctx context.Context, userId, friendId string) bool {
-	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, respObj, err := AppSyncRpcCall(ctx, "check_friends", requestId, userId, &pbobjs.CheckFriendsReq{
-		FriendIds: []string{friendId},
-	}, func() proto.Message {
-		return &pbobjs.CheckFriendsResp{}
-	})
-	if err != nil || code != errs.IMErrorCode_SUCCESS {
-		return false
-	}
-	resp := respObj.(*pbobjs.CheckFriendsResp)
-	if isFriend, exist := resp.CheckResults[friendId]; exist {
+	results := CheckFriends(ctx, userId, []string{friendId})
+	if isFriend, exist := results[friendId]; exist {
 		return isFriend
 	}
 	return false
@@ -187,16 +195,36 @@ func QryFriendApplications(ctx context.Context, req *pbobjs.QryFriendApplication
 	if err == nil {
 		for _, application := range applications {
 			ret.Items = append(ret.Items, &pbobjs.FriendApplicationItem{
-				Sponsor: &pbobjs.UserObj{
-					UserId: application.SponsorId,
-				},
-				Recipient: &pbobjs.UserObj{
-					UserId: application.RecipientId,
-				},
+				Sponsor:   GetUser(ctx, application.SponsorId),
+				Recipient: GetUser(ctx, application.RecipientId),
 				Status:    int32(application.Status),
 				ApplyTime: application.ApplyTime,
 			})
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func CheckFriends(ctx context.Context, userId string, friendIds []string) map[string]bool {
+	ret := make(map[string]bool)
+	if len(friendIds) <= 0 {
+		return ret
+	}
+	for _, friend := range friendIds {
+		ret[friend] = false
+	}
+	code, respObj, err := bases.SyncRpcCall(ctx, "check_friends", userId, &pbobjs.CheckFriendsReq{
+		FriendIds: friendIds,
+	}, func() proto.Message {
+		return &pbobjs.CheckFriendsResp{}
+	})
+	if err == nil && code == errs.IMErrorCode_SUCCESS {
+		checkFriendResp := respObj.(*pbobjs.CheckFriendsResp)
+		if checkFriendResp != nil {
+			for friendId, isFriend := range checkFriendResp.CheckResults {
+				ret[friendId] = isFriend
+			}
+		}
+	}
+	return ret
 }

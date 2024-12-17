@@ -24,3 +24,11 @@ var FriendNotifyMsgType string = "jgd:friendntf"
 type FriendNotify struct {
 	Type int `json:"type"`
 }
+
+var SystemFriendApplyConverId string = "friend_apply"
+var FriendApplicationMsgType string = "jgd:friendapply"
+
+type FriendApplyNotify struct {
+	SponsorId   string `json:"sponsor_id"`
+	RecipientId string `json:"recipient_id"`
+}

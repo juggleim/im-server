@@ -4,7 +4,6 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/services"
 )
 
@@ -56,16 +55,5 @@ func SearchByPhone(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(code)
 		return
 	}
-	ret := &models.Users{
-		Items: []*pbobjs.UserObj{},
-	}
-	for _, user := range users.UserInfos {
-		ret.Items = append(ret.Items, &pbobjs.UserObj{
-			UserId:   user.UserId,
-			Nickname: user.Nickname,
-			Avatar:   user.UserPortrait,
-			IsFriend: false,
-		})
-	}
-	ctx.ResponseSucc(ret)
+	ctx.ResponseSucc(users)
 }

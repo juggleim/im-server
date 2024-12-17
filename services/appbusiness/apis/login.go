@@ -26,6 +26,12 @@ func Login(ctx *httputils.HttpContext) {
 		UserId:   userId,
 		Nickname: nickname,
 		NoCover:  true,
+		Settings: []*pbobjs.KvItem{
+			{
+				Key:   models.UserExtKey_FriendVerifyType,
+				Value: tools.Int642String(int64(pbobjs.FriendVerifyType_NeedFriendVerify)),
+			},
+		},
 	}, func() proto.Message {
 		return &pbobjs.UserRegResp{}
 	})

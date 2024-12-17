@@ -131,11 +131,6 @@ message FriendListReq {
     string offset = 2;
 }
 
-message FriendListResp{
-    repeated UserObj items = 1;
-    string offset = 2;
-}
-
 message ApplyFriend{
     string friend_id = 1;
 }
@@ -170,6 +165,11 @@ message UserObj{
     int32 status = 5;
     bool is_friend = 6;
     UserSettings settings = 7;
+}
+
+message UserObjs{
+    repeated UserObj items = 1;
+    string offset = 2;
 }
 
 enum FriendVerifyType{
