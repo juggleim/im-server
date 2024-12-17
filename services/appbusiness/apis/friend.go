@@ -37,7 +37,7 @@ func QryFriends(ctx *httputils.HttpContext) {
 		ret.Items = append(ret.Items, &pbobjs.UserObj{
 			UserId:   friend.UserId,
 			Nickname: friend.Nickname,
-			Avatar:   friend.UserPortrait,
+			Avatar:   friend.Avatar,
 			IsFriend: true,
 		})
 	}
@@ -82,14 +82,28 @@ func ApplyFriend(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, resp := services.ApplyFriend(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.ApplyFriend{
+	code := services.ApplyFriend(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.ApplyFriend{
 		FriendId: req.FriendId,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
 	}
-	ctx.ResponseSucc(resp)
+	ctx.ResponseSucc(nil)
+}
+
+func ConfirmFriend(ctx *httputils.HttpContext) {
+	req := pbobjs.ConfirmFriend{}
+	if err := ctx.BindJson(&req); err != nil {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.ConfirmFriend(ctx.ToRpcCtx(ctx.CurrentUserId), &req)
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(nil)
 }
 
 func MyFriendApplications(ctx *httputils.HttpContext) {
@@ -147,6 +161,39 @@ func MyPendingFriendApplications(ctx *httputils.HttpContext) {
 		order = 0
 	}
 	code, resp := services.QryMyPendingFriendApplications(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryFriendApplicationsReq{
+		StartTime: start,
+		Count:     int32(count),
+		Order:     int32(order),
+	})
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(resp)
+}
+
+func FriendApplications(ctx *httputils.HttpContext) {
+	startTimeStr := ctx.Query("start")
+	start, err := tools.String2Int64(startTimeStr)
+	if err != nil {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	countStr := ctx.Query("count")
+	count, err := tools.String2Int64(countStr)
+	if err != nil {
+		count = 20
+	} else {
+		if count <= 0 || count > 50 {
+			count = 20
+		}
+	}
+	orderStr := ctx.Query("order")
+	order, err := tools.String2Int64(orderStr)
+	if err != nil || order > 1 || order < 0 {
+		order = 0
+	}
+	code, resp := services.QryFriendApplications(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryFriendApplicationsReq{
 		StartTime: start,
 		Count:     int32(count),
 		Order:     int32(order),

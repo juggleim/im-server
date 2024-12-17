@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 option go_package = "commons/pbdefines/pbobjs";
-import "commons/pbdefines/appmessages.proto";
 
 message GroupInviteReq{
     string group_id = 1;
@@ -133,7 +132,7 @@ message FriendListReq {
 }
 
 message FriendListResp{
-    repeated UserInfo items = 1;
+    repeated UserObj items = 1;
     string offset = 2;
 }
 
@@ -141,15 +140,9 @@ message ApplyFriend{
     string friend_id = 1;
 }
 
-enum ApplyFriendResultReason{
-    ApplySucc = 0;
-    ApplySendOut = 1;
-    ApplyDecline = 2;
-    ApplyRepeated = 3;
-}
-
-message ApplyFriendResp{
-    ApplyFriendResultReason reason = 1;
+message ConfirmFriend{
+    string sponsor_id = 1;
+    bool is_agree = 2;
 }
 
 message QryFriendApplicationsReq{

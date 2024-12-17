@@ -92,3 +92,42 @@ func (apply FriendApplicationDao) QueryMyApplications(appkey, sponsorId string, 
 	}
 	return ret, nil
 }
+
+func (apply FriendApplicationDao) QueryApplications(appkey, userId string, startTime, count int64, isPositive bool) ([]*models.FriendApplication, error) {
+	var items []*FriendApplicationDao
+	params := []interface{}{}
+	condition := "app_key=? and (sponsor_id=? or recipient_id=?)"
+	params = append(params, appkey)
+	params = append(params, userId)
+	params = append(params, userId)
+	orderStr := "apply_time desc"
+	if isPositive {
+		orderStr = "apply_time asc"
+		condition = condition + " and apply_time>?"
+	} else {
+		if startTime <= 0 {
+			startTime = time.Now().UnixMilli()
+		}
+		condition = condition + " and apply_time<?"
+	}
+	params = append(params, startTime)
+	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	ret := []*models.FriendApplication{}
+	for _, app := range items {
+		ret = append(ret, &models.FriendApplication{
+			RecipientId: app.RecipientId,
+			SponsorId:   app.SponsorId,
+			ApplyTime:   app.ApplyTime,
+			Status:      models.FriendApplicationStatus(app.Status),
+			AppKey:      app.AppKey,
+		})
+	}
+	return ret, nil
+}
+
+func (apply FriendApplicationDao) UpdateStatus(appkey, sponsorId, recipientId string, status models.FriendApplicationStatus) error {
+	return dbcommons.GetDb().Model(&FriendApplicationDao{}).Where("app_key=? and sponsor_id=? and recipient_id=?", appkey, sponsorId, recipientId).Update("status", status).Error
+}

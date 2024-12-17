@@ -28,11 +28,17 @@ func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCod
 	}
 	resp := respObj.(*pbobjs.QryFriendsResp)
 	ret := &pbobjs.FriendListResp{
-		Items:  []*pbobjs.UserInfo{},
+		Items:  []*pbobjs.UserObj{},
 		Offset: resp.Offset,
 	}
 	for _, rel := range resp.Items {
-		ret.Items = append(ret.Items, commonservices.GetTargetDisplayUserInfo(ctx, rel.FriendId))
+		friend := commonservices.GetTargetDisplayUserInfo(ctx, rel.FriendId)
+
+		ret.Items = append(ret.Items, &pbobjs.UserObj{
+			UserId:   friend.UserId,
+			Nickname: friend.Nickname,
+			Avatar:   friend.UserPortrait,
+		})
 	}
 	return errs.IMErrorCode_SUCCESS, ret
 }
@@ -62,19 +68,17 @@ func DelFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode 
 	return errs.IMErrorCode_SUCCESS
 }
 
-func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) (errs.IMErrorCode, *pbobjs.ApplyFriendResp) {
-	resp := &pbobjs.ApplyFriendResp{}
+func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	//check friend relation
 	if checkFriend(ctx, req.FriendId, userId) {
-		resp.Reason = pbobjs.ApplyFriendResultReason_ApplyRepeated
-		return errs.IMErrorCode_SUCCESS, resp
+		return errs.IMErrorCode_APP_FRIEND_APPLY_REPEATED
 	}
 	friendUserInfo := commonservices.GetTargetUserInfo(ctx, req.FriendId)
 	friendSettings := GetUserSettings(friendUserInfo)
 	if friendSettings.FriendVerifyType == pbobjs.FriendVerifyType_DeclineFriend {
-		resp.Reason = pbobjs.ApplyFriendResultReason_ApplyDecline
+		return errs.IMErrorCode_APP_FRIEND_APPLY_DECLINE
 	} else if friendSettings.FriendVerifyType == pbobjs.FriendVerifyType_NeedFriendVerify {
 		storage := storages.NewFriendApplicationStorage()
 		storage.Upsert(models.FriendApplication{
@@ -84,7 +88,6 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) (errs.IMErrorCode
 			Status:      models.FriendApplicationStatus(models.FriendApplicationStatus_Apply),
 			AppKey:      appkey,
 		})
-		resp.Reason = pbobjs.ApplyFriendResultReason_ApplySendOut
 	} else if friendSettings.FriendVerifyType == pbobjs.FriendVerifyType_NoNeedFriendVerify {
 		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
 			FriendIds: []string{req.FriendId},
@@ -96,9 +99,20 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) (errs.IMErrorCode
 		SendFriendNotify(ctx, req.FriendId, &apiModels.FriendNotify{
 			Type: 0,
 		})
-		resp.Reason = pbobjs.ApplyFriendResultReason_ApplySucc
 	}
-	return errs.IMErrorCode_SUCCESS, resp
+	return errs.IMErrorCode_SUCCESS
+}
+
+func ConfirmFriend(ctx context.Context, req *pbobjs.ConfirmFriend) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	storage := storages.NewFriendApplicationStorage()
+	if req.IsAgree {
+		storage.UpdateStatus(appkey, req.SponsorId, userId, models.FriendApplicationStatus_Agree)
+	} else {
+		storage.UpdateStatus(appkey, req.SponsorId, userId, models.FriendApplicationStatus_Decline)
+	}
+	return errs.IMErrorCode_SUCCESS
 }
 
 func checkFriend(ctx context.Context, userId, friendId string) bool {
@@ -153,6 +167,31 @@ func QryMyPendingFriendApplications(ctx context.Context, req *pbobjs.QryFriendAp
 			ret.Items = append(ret.Items, &pbobjs.FriendApplicationItem{
 				Sponsor: &pbobjs.UserObj{
 					UserId: application.SponsorId,
+				},
+				Status:    int32(application.Status),
+				ApplyTime: application.ApplyTime,
+			})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func QryFriendApplications(ctx context.Context, req *pbobjs.QryFriendApplicationsReq) (errs.IMErrorCode, *pbobjs.QryFriendApplicationsResp) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	storage := storages.NewFriendApplicationStorage()
+	ret := &pbobjs.QryFriendApplicationsResp{
+		Items: []*pbobjs.FriendApplicationItem{},
+	}
+	applications, err := storage.QueryApplications(appkey, userId, req.StartTime, int64(req.Count), req.Order > 0)
+	if err == nil {
+		for _, application := range applications {
+			ret.Items = append(ret.Items, &pbobjs.FriendApplicationItem{
+				Sponsor: &pbobjs.UserObj{
+					UserId: application.SponsorId,
+				},
+				Recipient: &pbobjs.UserObj{
+					UserId: application.RecipientId,
 				},
 				Status:    int32(application.Status),
 				ApplyTime: application.ApplyTime,

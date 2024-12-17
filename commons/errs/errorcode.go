@@ -146,6 +146,12 @@ var (
 	IMErrorCode_APP_REQ_BODY_ILLEGAL IMErrorCode = 17003
 	IMErrorCode_APP_INTERNAL_TIMEOUT IMErrorCode = 17004
 	IMErrorCode_APP_NOT_LOGIN        IMErrorCode = 17005
+
+	//friends
+	IMErrorCode_APP_FRIEND_DEFAULT         IMErrorCode = 17100
+	IMErrorCode_APP_FRIEND_APPLY_DECLINE   IMErrorCode = 17101
+	IMErrorCode_APP_FRIEND_APPLY_REPEATED  IMErrorCode = 17102
+	IMErrorCode_APP_FRIEND_CONFIRM_EXPIRED IMErrorCode = 17103
 )
 
 var imCode2ApiErrorMap map[IMErrorCode]*ApiErrorMsg = map[IMErrorCode]*ApiErrorMsg{

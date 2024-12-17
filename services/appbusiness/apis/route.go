@@ -52,7 +52,9 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/list", QryFriends)
 	RouteRegiste(mux, http.MethodPost, "/jim/friends/add", AddFriend)
 	RouteRegiste(mux, http.MethodPost, "/jim/friends/apply", ApplyFriend)
+	RouteRegiste(mux, http.MethodPost, "jim/friends/confirm", ConfirmFriend)
 	RouteRegiste(mux, http.MethodPost, "/jim/friends/del", DelFriend)
+	RouteRegiste(mux, http.MethodGet, "/jim/friends/applications", FriendApplications)
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/myapplications", MyFriendApplications)
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/mypendingapplications", MyPendingFriendApplications)
 }
