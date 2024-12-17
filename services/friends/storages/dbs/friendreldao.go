@@ -11,6 +11,7 @@ type FriendRelDao struct {
 	ID       int64  `gorm:"primary_key"`
 	UserId   string `gorm:"user_id"`
 	FriendId string `gorm:"friend_id"`
+	OrderTag string `gorm:"order_tag"`
 	AppKey   string `gorm:"app_key"`
 }
 
@@ -19,23 +20,23 @@ func (rel FriendRelDao) TableName() string {
 }
 
 func (rel FriendRelDao) Upsert(item models.FriendRel) error {
-	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id)VALUES(?,?,?)", rel.TableName())
-	return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.FriendId).Error
+	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id,order_tag)VALUES(?,?,?,?)", rel.TableName())
+	return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.FriendId, item.OrderTag).Error
 }
 
 func (rel FriendRelDao) BatchUpsert(items []models.FriendRel) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id)VALUES", rel.TableName())
+	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id,order_tag)VALUES", rel.TableName())
 	buffer.WriteString(sql)
 	length := len(items)
 	params := []interface{}{}
 	for i, item := range items {
 		if i == length-1 {
-			buffer.WriteString("(?,?,?)")
+			buffer.WriteString("(?,?,?,?)")
 		} else {
-			buffer.WriteString("(?,?,?),")
+			buffer.WriteString("(?,?,?,?),")
 		}
-		params = append(params, item.AppKey, item.UserId, item.FriendId)
+		params = append(params, item.AppKey, item.UserId, item.FriendId, item.OrderTag)
 	}
 	return dbcommons.GetDb().Exec(buffer.String(), params...).Error
 }
@@ -53,6 +54,7 @@ func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit in
 			AppKey:   rel.AppKey,
 			UserId:   rel.UserId,
 			FriendId: rel.FriendId,
+			OrderTag: rel.OrderTag,
 		})
 	}
 	return ret, nil
@@ -75,6 +77,7 @@ func (rel FriendRelDao) QueryFriendRelsByFriendIds(appkey, userId string, friend
 			AppKey:   rel.AppKey,
 			UserId:   rel.UserId,
 			FriendId: rel.FriendId,
+			OrderTag: rel.OrderTag,
 		})
 	}
 	return ret, nil

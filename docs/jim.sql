@@ -806,11 +806,13 @@ CREATE TABLE `friendrels` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `friend_id` varchar(32) DEFAULT NULL COMMENT '朋友userId',
+  `order_tag` varchar(20) NULL DEFAULT '' COMMENT '好友的排序标识',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_friend` (`app_key`,`user_id`,`friend_id`)
+  UNIQUE KEY `uniq_friend` (`app_key`,`user_id`,`friend_id`),
+  KEY `idx_order` (`app_key`, `user_id`, `order_tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT '好友绑定关系表';
 
 DROP TABLE IF EXISTS `friendapplications`;

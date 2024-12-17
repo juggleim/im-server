@@ -5,6 +5,7 @@ type FriendRel struct {
 	AppKey   string
 	UserId   string
 	FriendId string
+	OrderTag string
 }
 
 type IFriendRelStorage interface {
