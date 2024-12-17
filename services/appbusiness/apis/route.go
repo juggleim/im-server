@@ -15,6 +15,7 @@ func LoadAppApis(mux *http.ServeMux) {
 		ctx.ResponseSucc(nil)
 	})
 	RouteRegiste(mux, http.MethodPost, "/jim/sms_login", SmsLogin)
+	RouteRegiste(mux, http.MethodPost, "/jim/file_cred", GetFileCred)
 
 	RouteRegiste(mux, http.MethodPost, "/jim/users/update", UpdateUser)
 	RouteRegiste(mux, http.MethodPost, "/jim/users/updsettings", UpdateUserSettings)

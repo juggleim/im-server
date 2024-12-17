@@ -845,7 +845,7 @@ message QryGrpMemberSettingsResp{
 
 // file
 message QryFileCredReq{
-  FileType fileType = 1;
+  FileType file_type = 1;
   string ext = 2;
 }
 enum FileType {
@@ -857,10 +857,10 @@ enum FileType {
   Log = 5;
 }
 message QryFileCredResp{
-  OssType ossType = 1;
+  OssType oss_type = 1;
   oneof ossOf{
-    QiNiuCredResp qiNiuCred = 11;
-    PreSignResp preSignResp = 12;
+    QiNiuCredResp qiniu_cred = 11;
+    PreSignResp pre_sign_resp = 12;
   }
 }
 enum OssType{
