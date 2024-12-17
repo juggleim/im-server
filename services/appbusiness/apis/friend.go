@@ -77,7 +77,7 @@ func DelFriend(ctx *httputils.HttpContext) {
 }
 
 func ApplyFriend(ctx *httputils.HttpContext) {
-	req := models.ApplyFriend{}
+	req := pbobjs.ApplyFriend{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return

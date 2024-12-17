@@ -64,9 +64,13 @@ func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs
 	return errs.IMErrorCode_SUCCESS, users
 }
 
-func UpdateUser(ctx context.Context, req *pbobjs.UserInfo) errs.IMErrorCode {
+func UpdateUser(ctx context.Context, req *pbobjs.UserObj) errs.IMErrorCode {
 	requesterId := bases.GetRequesterIdFromCtx(ctx)
-	AppSyncRpcCall(ctx, "upd_user_info", requesterId, req.UserId, req, nil)
+	AppSyncRpcCall(ctx, "upd_user_info", requesterId, req.UserId, &pbobjs.UserInfo{
+		UserId:       req.UserId,
+		Nickname:     req.Nickname,
+		UserPortrait: req.Avatar,
+	}, nil)
 	return errs.IMErrorCode_SUCCESS
 }
 

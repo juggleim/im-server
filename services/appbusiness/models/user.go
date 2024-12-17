@@ -27,7 +27,3 @@ type Friend struct {
 type FriendIds struct {
 	FriendIds []string `json:"friend_ids"`
 }
-
-type ApplyFriend struct {
-	FriendId string `json:"friend_id"`
-}

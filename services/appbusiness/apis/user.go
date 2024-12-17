@@ -26,11 +26,7 @@ func UpdateUser(ctx *httputils.HttpContext) {
 		return
 	}
 	rpcCtx := ctx.ToRpcCtx(req.UserId)
-	services.UpdateUser(rpcCtx, &pbobjs.UserInfo{
-		UserId:       req.UserId,
-		Nickname:     req.Nickname,
-		UserPortrait: req.Avatar,
-	})
+	services.UpdateUser(rpcCtx, req)
 	ctx.ResponseSucc(nil)
 }
 
