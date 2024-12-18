@@ -153,8 +153,10 @@ message QryFriendApplicationsResp{
 message FriendApplicationItem{
     UserObj recipient = 1;
     UserObj sponsor = 2;
-    int32 status = 3;
-    int64 apply_time = 4;
+    UserObj target_user = 3;
+    bool is_sponsor = 4; 
+    int32 status = 5;
+    int64 apply_time = 6;
 }
 
 message UserObj{

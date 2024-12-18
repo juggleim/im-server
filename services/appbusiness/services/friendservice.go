@@ -193,12 +193,17 @@ func QryFriendApplications(ctx context.Context, req *pbobjs.QryFriendApplication
 	applications, err := storage.QueryApplications(appkey, userId, req.StartTime, int64(req.Count), req.Order > 0)
 	if err == nil {
 		for _, application := range applications {
-			ret.Items = append(ret.Items, &pbobjs.FriendApplicationItem{
-				Sponsor:   GetUser(ctx, application.SponsorId),
-				Recipient: GetUser(ctx, application.RecipientId),
+			item := &pbobjs.FriendApplicationItem{
 				Status:    int32(application.Status),
 				ApplyTime: application.ApplyTime,
-			})
+			}
+			if userId == application.SponsorId {
+				item.IsSponsor = true
+				item.TargetUser = GetUser(ctx, application.RecipientId)
+			} else {
+				item.TargetUser = GetUser(ctx, application.SponsorId)
+			}
+			ret.Items = append(ret.Items, item)
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, ret
