@@ -73,7 +73,10 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode 
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	//check friend relation
 	if checkFriend(ctx, req.FriendId, userId) {
-		return errs.IMErrorCode_APP_FRIEND_APPLY_REPEATED
+		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
+			FriendIds: []string{req.FriendId},
+		}, nil)
+		return errs.IMErrorCode_SUCCESS
 	}
 	friendUserInfo := commonservices.GetTargetUserInfo(ctx, req.FriendId)
 	friendSettings := GetUserSettings(friendUserInfo)

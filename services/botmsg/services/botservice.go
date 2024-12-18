@@ -1,11 +1,15 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/botmsg/services/botengines"
+	"im-server/services/botmsg/storages"
+	"im-server/services/botmsg/storages/models"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"strings"
@@ -21,13 +25,12 @@ func init() {
 }
 
 type BotInfo struct {
+	AppKey    string
 	BotId     string
 	Nickname  string
 	Portrait  string
-	ExtFields []*pbobjs.KvItem
-	Webhook   string
-	BotType   string
-	APIKey    string
+	BotType   models.BotType
+	BotEngine botengines.IBotEngine
 }
 
 func GetBotInfo(ctx context.Context, botId string) *BotInfo {
@@ -42,24 +45,27 @@ func GetBotInfo(ctx context.Context, botId string) *BotInfo {
 		if val, exist := botCache.Get(key); exist {
 			return val.(*BotInfo)
 		} else {
-			bInfo := commonservices.GetUserInfoFromRpcWithAttTypes(ctx, botId, []int32{int32(commonservices.AttItemType_Setting)})
 			botInfo := &BotInfo{
-				BotId:     bInfo.UserId,
-				Nickname:  bInfo.Nickname,
-				Portrait:  bInfo.UserPortrait,
-				ExtFields: bInfo.ExtFields,
+				AppKey:    appkey,
+				BotId:     botId,
+				BotEngine: &botengines.NilBotEngine{},
 			}
-			if len(bInfo.Settings) > 0 {
-				settingMap := commonservices.Kvitems2Map(bInfo.Settings)
-				if webhook, exist := settingMap[string(commonservices.AttItemKey_Bot_WebHook)]; exist && webhook != "" {
-					botInfo.Webhook = webhook
+			storage := storages.NewBotConfStorage()
+			bot, err := storage.FindById(appkey, botId)
+			if err == nil {
+				botInfo.Nickname = bot.Nickname
+				botInfo.Portrait = bot.BotPortrait
+				botInfo.BotType = bot.BotType
+				switch botInfo.BotType {
+				case models.BotType_Dify:
+					difyBot := &botengines.DifyBotEngine{}
+					err = tools.JsonUnMarshal([]byte(bot.BotConf), difyBot)
+					if err == nil && difyBot.ApiKey != "" && difyBot.Url != "" {
+						botInfo.BotEngine = difyBot
+					}
 				}
-				if apiKey, exist := settingMap[string(commonservices.AttItemKey_Bot_ApiKey)]; exist && apiKey != "" {
-					botInfo.APIKey = apiKey
-				}
-				if botType, exist := settingMap[string(commonservices.AttItemKey_Bot_Type)]; exist && botType != "" {
-					botInfo.BotType = botType
-				}
+			} else {
+				botInfo.BotEngine = &botengines.NilBotEngine{}
 			}
 			botCache.Add(key, botInfo)
 			return botInfo
@@ -72,17 +78,37 @@ func getKey(appkey, botId string) string {
 }
 
 func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
+	if msg.MsgType != "jg:text" {
+		return
+	}
+	txtMsg := &commonservices.TextMsg{}
+	err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
+	if err != nil {
+		logs.WithContext(ctx).Errorf("text msg illigal. content:%s", string(msg.MsgContent))
+		return
+	}
 	botId := bases.GetTargetIdFromCtx(ctx)
 	botInfo := GetBotInfo(ctx, botId)
-	if botInfo.BotType == "dify" {
-		if botInfo.Webhook == "" || botInfo.APIKey == "" {
-			logs.WithContext(ctx).Infof("no webhook/apikey")
-			return
+	if botInfo.BotEngine != nil {
+		converId := ""
+		buf := bytes.NewBuffer([]byte{})
+		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, converId, txtMsg.Content, func(answerPart string, isEnd bool) {
+			if !isEnd {
+				buf.WriteString(answerPart)
+			}
+		})
+		answer := buf.String()
+		if answer != "" {
+			answerMsg := &commonservices.TextMsg{
+				Content: answer,
+			}
+			flag := commonservices.SetStoreMsg(0)
+			flag = commonservices.SetCountMsg(flag)
+			commonservices.AsyncPrivateMsgOverUpstream(ctx, botId, msg.SenderId, &pbobjs.UpMsg{
+				MsgType:    "jg:text",
+				MsgContent: []byte(tools.ToJson(answerMsg)),
+				Flags:      flag,
+			})
 		}
-		//https://api.dify.ai/v1/chat-messages
-		//app-UD0yqEwQykpxA8hMbtzP0ktz
-		Chat2Dify(ctx, botId, msg, botInfo.Webhook, botInfo.APIKey)
-	} else {
-		SyncMsg2Bot(ctx, botId, msg)
 	}
 }

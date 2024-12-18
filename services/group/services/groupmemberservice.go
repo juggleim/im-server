@@ -300,8 +300,8 @@ func SetGroupMemberAllow(ctx context.Context, req *pbobjs.GroupMemberAllowReq) e
 func SetGroupMemberSettings(ctx context.Context, groupId string, req *pbobjs.GroupMember) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	dao := dbs.GroupMemberExtDao{}
-	memberAtts, exist := GetGrpMemberAttsFromCache(ctx, appkey, groupId, req.MemberId)
-	if exist {
+	memberAtts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, req.MemberId)
+	if memberAtts != nil {
 		for _, setting := range req.Settings {
 			memberAtts.SetMemberSetting(setting.Key, setting.Value)
 			dao.Upsert(appkey, groupId, req.MemberId, setting.Key, setting.Value, int(commonservices.AttItemType_Setting))
@@ -401,8 +401,8 @@ func QryMemberSettings(ctx context.Context, groupId string, memberId string) (er
 		if member != nil {
 			resp.IsMember = true
 			resp.JoinTime = member.CreatedTime
-			memberAtts, exist := GetGrpMemberAttsFromCache(ctx, appkey, groupId, memberId)
-			if exist {
+			memberAtts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, memberId)
+			if memberAtts != nil {
 				resp.MemberSettings = memberAtts.GetMemberSettings()
 				resp.MemberExts = memberAtts.GetMemberExts()
 			}

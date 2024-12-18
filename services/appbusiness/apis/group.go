@@ -15,10 +15,18 @@ func CreateGroup(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
+	memberIds := req.MemberIds
+	if len(memberIds) <= 0 && len(req.GrpMembers) > 0 {
+		ids := []string{}
+		for _, member := range req.GrpMembers {
+			ids = append(ids, member.UserId)
+		}
+		memberIds = ids
+	}
 	code, grpInfo := services.CreateGroup(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.GroupMembersReq{
 		GroupName:     req.GroupName,
 		GroupPortrait: req.GroupPortrait,
-		MemberIds:     req.MemberIds,
+		MemberIds:     memberIds,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)

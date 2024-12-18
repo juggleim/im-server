@@ -1,17 +1,9 @@
 package services
 
 import (
-	"context"
-	"fmt"
-	"im-server/commons/bases"
-	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
-	"im-server/services/commonservices/logs"
-	"net/http"
 	"time"
 
 	"github.com/avast/retry-go/v4"
-	"github.com/zeromicro/go-zero/core/breaker"
 )
 
 var retryStrategy = []retry.Option{
@@ -48,6 +40,7 @@ type MentionInfo struct {
 	TargetUserIds []string `json:"target_user_ids"`
 }
 
+/*
 func SyncMsg2Bot(ctx context.Context, botId string, msg *pbobjs.DownMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	botInfo := GetBotInfo(ctx, botId)
@@ -98,3 +91,4 @@ func notify(url string, headers map[string]string, body string) error {
 	}
 	return nil
 }
+*/

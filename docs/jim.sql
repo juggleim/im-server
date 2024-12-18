@@ -848,4 +848,19 @@ CREATE TABLE `grpapplications` (
   KEY `idx_recipient` (`app_key`,`apply_type`,`recipient_id`,`apply_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT '群申请表';
 
+DROP TABLE IF EXISTS `botconfs`;
+CREATE TABLE `botconfs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `bot_id` varchar(32) NULL,
+  `nickname` varchar(50) DEFAULT NULL,
+  `bot_portrait` varchar(200) DEFAULT NULL,
+  `bot_type` tinyint DEFAULT '0',
+  `bot_conf` varchar(2000) NULL,
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_botid` (`app_key`, `bot_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
