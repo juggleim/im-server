@@ -330,6 +330,19 @@ func SetGrpAnnouncement(ctx context.Context, req *pbobjs.GrpAnnouncement) errs.I
 		return code
 	}
 	//send announce msg
+	flag := commonservices.SetStoreMsg(0)
+	flag = commonservices.SetCountMsg(flag)
+	txtMsg := &commonservices.TextMsg{
+		Content: req.Content,
+	}
+	commonservices.AsyncGroupMsg(ctx, requestId, req.GroupId, &pbobjs.UpMsg{
+		MsgType:    "jg:text",
+		MsgContent: []byte(tools.ToJson(txtMsg)),
+		Flags:      flag,
+		MentionInfo: &pbobjs.MentionInfo{
+			MentionType: pbobjs.MentionType_All,
+		},
+	})
 	return errs.IMErrorCode_SUCCESS
 }
 

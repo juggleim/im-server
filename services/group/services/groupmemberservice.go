@@ -127,6 +127,8 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 			Settings: &commonservices.GrpMemberSettings{
 				HideGrpMsg: grpHideGrpMsg,
 			},
+			ExtFields:     make(map[string]string),
+			SettingFields: make(map[string]string),
 		})
 	}
 	//添加群成员
