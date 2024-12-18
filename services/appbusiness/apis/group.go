@@ -15,14 +15,10 @@ func CreateGroup(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	memberIds := []string{}
-	for _, user := range req.GrpMembers {
-		memberIds = append(memberIds, user.UserId)
-	}
 	code, grpInfo := services.CreateGroup(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.GroupMembersReq{
 		GroupName:     req.GroupName,
 		GroupPortrait: req.GroupPortrait,
-		MemberIds:     memberIds,
+		MemberIds:     req.MemberIds,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
@@ -60,6 +56,20 @@ func DissolveGroup(ctx *httputils.HttpContext) {
 		return
 	}
 	code := services.DissolveGroup(ctx.ToRpcCtx(ctx.CurrentUserId), req.GroupId)
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(nil)
+}
+
+func QuitGroup(ctx *httputils.HttpContext) {
+	req := models.Group{}
+	if err := ctx.BindJson(&req); err != nil {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.QuitGroup(ctx.ToRpcCtx(ctx.CurrentUserId), req.GroupId)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -182,7 +192,7 @@ func QryGrpMembers(ctx *httputils.HttpContext) {
 			UserObj: pbobjs.UserObj{
 				UserId:   member.UserId,
 				Nickname: member.Nickname,
-				Avatar:   member.UserPortrait,
+				Avatar:   member.Avatar,
 			},
 		})
 	}

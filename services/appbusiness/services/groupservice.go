@@ -163,6 +163,25 @@ func DissolveGroup(ctx context.Context, groupId string) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }
 
+func QuitGroup(ctx context.Context, groupId string) errs.IMErrorCode {
+	requestId := bases.GetRequesterIdFromCtx(ctx)
+	code, _, err := AppSyncRpcCall(ctx, "g_del_members", requestId, groupId, &pbobjs.GroupMembersReq{
+		GroupId:   groupId,
+		MemberIds: []string{requestId},
+	}, nil)
+	if err != nil || code != errs.IMErrorCode_SUCCESS {
+		return code
+	}
+	SendGrpNotify(ctx, groupId, &models.GroupNotify{
+		Operator: GetUser(ctx, requestId),
+		Members: []*pbobjs.UserObj{
+			GetUser(ctx, requestId),
+		},
+		Type: models.GroupNotifyType_RemoveMember,
+	})
+	return errs.IMErrorCode_SUCCESS
+}
+
 func AddGrpMembers(ctx context.Context, grpMembers *pbobjs.GroupMembersReq) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	code, _, err := AppSyncRpcCall(ctx, "g_add_members", requestId, grpMembers.GroupId, &pbobjs.GroupMembersReq{
@@ -290,7 +309,7 @@ func QueryGrpMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 		userInfo, ok := userMap[member.UserId]
 		if ok && userInfo != nil {
 			member.Nickname = userInfo.Nickname
-			member.UserPortrait = userInfo.UserPortrait
+			member.Avatar = userInfo.UserPortrait
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, ret
@@ -492,7 +511,7 @@ func QryGroupAdministrators(ctx context.Context, groupId string) (errs.IMErrorCo
 			}
 			if userInfo, exist := userMap[userId]; exist {
 				grpMember.Nickname = userInfo.Nickname
-				grpMember.UserPortrait = userInfo.UserPortrait
+				grpMember.Avatar = userInfo.UserPortrait
 			}
 			ret.Items = append(ret.Items, grpMember)
 		}
@@ -507,7 +526,7 @@ func SetGrpDisplayName(ctx context.Context, req *pbobjs.SetGroupDisplayNameReq) 
 		ExtFields: []*pbobjs.KvItem{
 			{
 				Key:   string(commonservices.AttItemKey_GrpDisplayName),
-				Value: req.DisplayName,
+				Value: req.GrpDisplayName,
 			},
 		},
 	}, nil)

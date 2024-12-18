@@ -7,6 +7,7 @@ type Group struct {
 	GroupName       string           `json:"group_name"`
 	GroupPortrait   string           `json:"group_portrait"`
 	GrpMembers      []*GroupMember   `json:"members,omitempty"`
+	MemberIds       []string         `json:"member_ids,omitempty"`
 	MemberCount     int              `json:"member_count"`
 	Owner           *pbobjs.UserObj  `json:"owner,omitempty"`
 	MyRole          int              `json:"my_role"`

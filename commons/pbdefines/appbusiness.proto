@@ -52,7 +52,7 @@ message GroupManagement{
 message GroupMemberInfo {
     string user_id = 1;
     string nickname = 2;
-    string user_portrait = 3;
+    string avatar = 3;
 }
 
 message GroupMemberInfos{
@@ -97,7 +97,7 @@ message GroupAdministratorsResp{
 
 message SetGroupDisplayNameReq{
     string group_id = 1;
-    string display_name = 2;
+    string grp_display_name = 2;
 }
 
 message QryGrpApplicationsReq{
