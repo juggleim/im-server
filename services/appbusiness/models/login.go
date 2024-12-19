@@ -18,3 +18,7 @@ type LoginUserResp struct {
 	Status        int    `json:"status"`
 	ImToken       string `json:"im_token,omitempty"`
 }
+
+type QrCode struct {
+	Id string `json:"id"`
+}

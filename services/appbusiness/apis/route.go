@@ -11,10 +11,13 @@ import (
 
 func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/login", Login)
+	RouteRegiste(mux, http.MethodGet, "/jim/login/qrcode", GenerateQrCode)
+	RouteRegiste(mux, http.MethodPost, "/jim/login/qrcode/check", CheckQrCode)
 	RouteRegiste(mux, http.MethodPost, "/jim/sms/send", func(ctx *httputils.HttpContext) {
 		ctx.ResponseSucc(nil)
 	})
 	RouteRegiste(mux, http.MethodPost, "/jim/sms_login", SmsLogin)
+	RouteRegiste(mux, http.MethodPost, "/jim/login/qrcode/confirm", ConfirmQrCode)
 	RouteRegiste(mux, http.MethodPost, "/jim/file_cred", GetFileCred)
 
 	RouteRegiste(mux, http.MethodGet, "/jim/bots/list", QryBots)

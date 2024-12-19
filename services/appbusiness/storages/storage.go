@@ -12,3 +12,7 @@ func NewFriendApplicationStorage() models.IFriendApplicationStorage {
 func NewGrpApplicationStorage() models.IGrpApplicationStorage {
 	return &dbs.GrpApplicationDao{}
 }
+
+func NewQrCodeRecordStorage() models.IQrCodeRecordStorage {
+	return &dbs.QrCodeRecordDao{}
+}

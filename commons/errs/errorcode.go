@@ -146,6 +146,8 @@ var (
 	IMErrorCode_APP_REQ_BODY_ILLEGAL IMErrorCode = 17003
 	IMErrorCode_APP_INTERNAL_TIMEOUT IMErrorCode = 17004
 	IMErrorCode_APP_NOT_LOGIN        IMErrorCode = 17005
+	IMErrorCode_APP_CONTINUE         IMErrorCode = 17006
+	IMErrorCode_APP_QRCODE_EXPIRED   IMErrorCode = 17007
 
 	//friends
 	IMErrorCode_APP_FRIEND_DEFAULT         IMErrorCode = 17100
