@@ -275,7 +275,7 @@ func (uc *UserConversations) SyncConvers(startTime int64, count int32) []*models
 	lock.RLock()
 	defer lock.RUnlock()
 
-	nodes := uc.SyncTimeIndex.RangeByScore(float64(startTime), math.MaxInt64)
+	nodes := uc.SyncTimeIndex.RangeByScore(float64(startTime+1), math.MaxInt64)
 	resp := []*models.Conversation{}
 	var index int32 = 0
 	for _, node := range nodes {
@@ -350,9 +350,9 @@ func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive
 	defer lock.RUnlock()
 	var nodes []zset.Float64Node
 	if isPositive {
-		nodes = uc.SortTimeIndex.RangeByScore(float64(startTime), math.MaxFloat64)
+		nodes = uc.SortTimeIndex.RangeByScore(float64(startTime+1), math.MaxFloat64)
 	} else {
-		nodes = uc.SortTimeIndex.RevRangeByScore(float64(startTime), 0)
+		nodes = uc.SortTimeIndex.RevRangeByScore(float64(startTime-1), 0)
 	}
 	resp := []*models.Conversation{}
 	var index int32 = 0
@@ -402,12 +402,12 @@ func (uc *UserConversations) QryTopConvers(startTime int64, count int32, sortTyp
 		topIndex = uc.TopIndexBaseTopTime
 	}
 	if isPositive {
-		nodes = topIndex.RangeByScore(float64(startTime), math.MaxFloat64)
+		nodes = topIndex.RangeByScore(float64(startTime+1), math.MaxFloat64)
 	} else {
 		if startTime <= 0 {
 			startTime = time.Now().UnixMilli()
 		}
-		nodes = topIndex.RevRangeByScore(float64(startTime), 0)
+		nodes = topIndex.RevRangeByScore(float64(startTime-1), 0)
 	}
 	resp := []*models.Conversation{}
 	var index int32 = 0
