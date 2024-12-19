@@ -7,6 +7,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/botmsg/storages"
+	"im-server/services/botmsg/storages/models"
 )
 
 func QryAiBots(ctx context.Context, req *pbobjs.QryAiBotsReq) (errs.IMErrorCode, *pbobjs.AiBotInfos) {
@@ -22,7 +23,7 @@ func QryAiBots(ctx context.Context, req *pbobjs.QryAiBotsReq) (errs.IMErrorCode,
 	ret := &pbobjs.AiBotInfos{
 		Items: []*pbobjs.AiBotInfo{},
 	}
-	items, err := storage.QryBotConfs(appkey, startId, req.Limit)
+	items, err := storage.QryBotConfsWithStatus(appkey, models.BotStatus_Enable, startId, req.Limit)
 	if err == nil {
 		for _, item := range items {
 			ret.Offset, _ = tools.EncodeInt(item.ID)

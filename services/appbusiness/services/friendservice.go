@@ -76,6 +76,14 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode 
 		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
 			FriendIds: []string{req.FriendId},
 		}, nil)
+		storage := storages.NewFriendApplicationStorage()
+		storage.Upsert(models.FriendApplication{
+			RecipientId: req.FriendId,
+			SponsorId:   userId,
+			ApplyTime:   time.Now().UnixMilli(),
+			Status:      models.FriendApplicationStatus(models.FriendApplicationStatus_Agree),
+			AppKey:      appkey,
+		})
 		return errs.IMErrorCode_SUCCESS
 	}
 	friendUserInfo := commonservices.GetTargetUserInfo(ctx, req.FriendId)
