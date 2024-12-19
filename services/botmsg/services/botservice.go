@@ -63,6 +63,12 @@ func GetBotInfo(ctx context.Context, botId string) *BotInfo {
 					if err == nil && difyBot.ApiKey != "" && difyBot.Url != "" {
 						botInfo.BotEngine = difyBot
 					}
+				case models.BotType_Coze:
+					cozeBot := &botengines.CozeBotEngine{}
+					err = tools.JsonUnMarshal([]byte(bot.BotConf), cozeBot)
+					if err == nil && cozeBot.BotId != "" && cozeBot.Url != "" && cozeBot.Token != "" {
+						botInfo.BotEngine = cozeBot
+					}
 				}
 			} else {
 				botInfo.BotEngine = &botengines.NilBotEngine{}
