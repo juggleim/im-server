@@ -192,3 +192,21 @@ message UserSettings{
     GrpVerifyType grp_verify_type = 3;
     string undisturb = 4;
 }
+
+//bots
+message QryAiBotsReq{
+    int64 limit = 1;
+    string offset = 2;
+}
+
+message AiBotInfo {
+    string bot_id = 1;
+    string nickname = 2;
+    string avatar = 3;
+    int32 bot_type = 4;
+}
+
+message AiBotInfos{
+    repeated AiBotInfo items =1;
+    string offset = 2;
+}

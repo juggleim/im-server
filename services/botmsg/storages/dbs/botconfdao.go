@@ -40,3 +40,24 @@ func (conf BotConfDao) FindById(appkey, botId string) (*models.BotConf, error) {
 		BotConf:     item.BotConf,
 	}, err
 }
+
+func (conf BotConfDao) QryBotConfs(appkey string, startId, limit int64) ([]*models.BotConf, error) {
+	var items []*BotConfDao
+	err := dbcommons.GetDb().Where("app_key=? and id>?", appkey, startId).Order("id asc").Limit(limit).Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	ret := []*models.BotConf{}
+	for _, item := range items {
+		ret = append(ret, &models.BotConf{
+			ID:          item.ID,
+			AppKey:      item.AppKey,
+			BotId:       item.BotId,
+			Nickname:    item.Nickname,
+			BotPortrait: item.BotPortrait,
+			BotType:     models.BotType(item.BotType),
+			BotConf:     item.BotConf,
+		})
+	}
+	return ret, nil
+}

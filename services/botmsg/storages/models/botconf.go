@@ -22,4 +22,5 @@ type BotConf struct {
 type IBotConfStorage interface {
 	Upsert(item BotConf) error
 	FindById(appkey, botId string) (*BotConf, error)
+	QryBotConfs(appkey string, startId, limit int64) ([]*BotConf, error)
 }
