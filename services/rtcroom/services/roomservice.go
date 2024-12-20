@@ -579,7 +579,7 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, quitRe
 			} else {
 				reason = CallFinishReasonType_NoAnswer
 			}
-			SendFinishNtf(ctx, container.Owner.UserId, calleeId, reason, duration)
+			SendFinishNtf(ctx, container.Owner.UserId, calleeId, reason, duration, container.RtcMediaType)
 			//destroy room
 			storage.DeleteByRoomId(appkey, roomId)
 			roomStorage := storages.NewRtcRoomStorage()

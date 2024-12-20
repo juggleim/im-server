@@ -332,7 +332,7 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 				reason = CallFinishReasonType_Decline
 			}
 		}
-		SendFinishNtf(ctx, container.Owner.UserId, calleeId, reason, duration)
+		SendFinishNtf(ctx, container.Owner.UserId, calleeId, reason, duration, container.RtcMediaType)
 
 		//destroy room
 		storage := storages.NewRtcRoomMemberStorage()
@@ -400,14 +400,16 @@ var (
 )
 
 type CallFinishNtf struct {
-	Reason   int   `json:"reason"`
-	Duration int64 `json:"duration"`
+	Reason    int   `json:"reason"`
+	Duration  int64 `json:"duration"`
+	MediaType int   `json:"media_type"`
 }
 
-func SendFinishNtf(ctx context.Context, senderId, targetId string, reason CallFinishReasonType, duration int64) {
+func SendFinishNtf(ctx context.Context, senderId, targetId string, reason CallFinishReasonType, duration int64, mediaType pbobjs.RtcMediaType) {
 	ntf := &CallFinishNtf{
-		Reason:   int(reason),
-		Duration: duration,
+		Reason:    int(reason),
+		Duration:  duration,
+		MediaType: int(mediaType),
 	}
 	contentBs, _ := tools.JsonMarshal(ntf)
 	flag := commonservices.SetStoreMsg(0)
