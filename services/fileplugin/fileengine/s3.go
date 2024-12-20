@@ -95,6 +95,7 @@ func (s *S3Storage) putPreSignURL(fileType string, dir string) (url string, err 
 	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(objectName),
+		ACL:    aws.String("public-read"),
 	})
 	url, err = req.Presign(15 * time.Minute)
 
