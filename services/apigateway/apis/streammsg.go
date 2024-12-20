@@ -50,11 +50,21 @@ func AppendPrivateStreamMsg(ctx *gin.Context) {
 		MsgItems:    []*pbobjs.StreamMsgItem{},
 	}
 	for _, item := range req.Items {
+		pbEvent := pbobjs.StreamEvent_StreamComplete
+		event := item.Event
+		if event == "msg" {
+			pbEvent = pbobjs.StreamEvent_StreamMessage
+		} else {
+			pbEvent = pbobjs.StreamEvent_StreamComplete
+		}
 		streamDown.MsgItems = append(streamDown.MsgItems, &pbobjs.StreamMsgItem{
-			Event:          pbobjs.StreamEvent_StreamMessage,
+			Event:          pbEvent,
 			SubSeq:         item.SubSeq,
 			PartialContent: []byte(item.PartialContent),
 		})
+		if pbEvent == pbobjs.StreamEvent_StreamComplete {
+			break
+		}
 	}
 	targetId := commonservices.GetConversationId(req.SenderId, req.TargetId, pbobjs.ChannelType_Private)
 	services.AsyncApiCall(ctx, "pri_stream", req.SenderId, targetId, streamDown)

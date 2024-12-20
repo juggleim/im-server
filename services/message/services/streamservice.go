@@ -27,6 +27,7 @@ type StreamMsg struct {
 	SenderId string
 	TargetId string
 	MsgId    string
+	MaxSeq   int
 
 	streamMsgItems *skipmap.Int64Map
 }
@@ -42,6 +43,10 @@ func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 	if val, exist := streamMsgCache.Get(key); exist {
 		sMsg := val.(*StreamMsg)
 		for _, item := range req.MsgItems {
+			sMsg.MaxSeq = sMsg.MaxSeq + 1
+			if item.SubSeq <= 0 {
+				item.SubSeq = int64(sMsg.MaxSeq)
+			}
 			sMsg.streamMsgItems.Store(item.SubSeq, item)
 			if item.Event == pbobjs.StreamEvent_StreamComplete {
 				isFinish = true
@@ -61,6 +66,10 @@ func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 			streamMsgItems: skipmap.NewInt64(),
 		}
 		for _, item := range req.MsgItems {
+			sMsg.MaxSeq = sMsg.MaxSeq + 1
+			if item.SubSeq <= 0 {
+				item.SubSeq = int64(sMsg.MaxSeq)
+			}
 			sMsg.streamMsgItems.Store(item.SubSeq, item)
 			if item.Event == pbobjs.StreamEvent_StreamComplete {
 				isFinish = true
@@ -105,11 +114,11 @@ func updateStreamMsg(ctx context.Context, streamMsg *StreamMsg) {
 }
 
 func HandleStreamMsg(ctx context.Context, req *pbobjs.StreamDownMsg) errs.IMErrorCode {
+	AppendStreamMsgItem(ctx, req)
+
 	rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), req.TargetId, "stream_msg", req)
 	rpcMsg.Qos = 0
 	bases.UnicastRouteWithNoSender(rpcMsg)
-
-	AppendStreamMsgItem(ctx, req)
 
 	return errs.IMErrorCode_SUCCESS
 }

@@ -129,6 +129,7 @@ type AppendStreamMsgReq struct {
 }
 
 type StreamMsgItem struct {
+	Event          string `json:"event"`
 	SubSeq         int64  `json:"sub_seq"`
 	PartialContent string `json:"partial_content"`
 }
