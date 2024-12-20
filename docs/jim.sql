@@ -865,4 +865,16 @@ CREATE TABLE `botconfs` (
   UNIQUE INDEX `uniq_botid` (`app_key`, `bot_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `qrcoderecords`;
+CREATE TABLE `qrcoderecords` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code_id` varchar(50) DEFAULT NULL,
+  `status` tinyint DEFAULT NULL,
+  `created_time` bigint DEFAULT NULL,
+  `user_id` varchar(32) DEFAULT NULL,
+  `app_key` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_id` (`app_key`,`code_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
