@@ -159,17 +159,6 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 				ToUserIds:  []string{readInfo.SenderId},
 			}, true)
 
-			convers := []*pbobjs.Conversation{}
-			convers = append(convers, &pbobjs.Conversation{
-				UserId:      userId,
-				TargetId:    req.GroupId,
-				ChannelType: pbobjs.ChannelType(req.ChannelType),
-			})
-			// 接收消息已读，需更新我自己的会话 将readIndex更到最新
-			bases.AsyncRpcCall(ctx, "clear_unread", userId, &pbobjs.ClearUnreadReq{
-				Conversations: convers,
-				NoCmdMsg:      true,
-			})
 		}
 	}
 }
