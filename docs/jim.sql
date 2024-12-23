@@ -481,9 +481,9 @@ CREATE TABLE `ioscertificates` (
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `is_product` tinyint DEFAULT '0',
   `cert_path` varchar(255) DEFAULT NULL COMMENT 'cert存入路径',
-  `voip_cert` mediumblob COMMENT `voip certificate`,
-  `voip_cert_pwd` varchar(50) DEFAULT NULL COMMENT `voip cert password`,
-  `voip_cert_path` varchar(255) DEFAULT NULL COMMENT `voip cert path`,
+  `voip_cert` mediumblob COMMENT 'voip certificate',
+  `voip_cert_pwd` varchar(50) DEFAULT NULL COMMENT 'voip cert password',
+  `voip_cert_path` varchar(255) DEFAULT NULL COMMENT 'voip cert path',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_package` (`app_key`)
@@ -850,31 +850,31 @@ CREATE TABLE `grpapplications` (
 
 DROP TABLE IF EXISTS `botconfs`;
 CREATE TABLE `botconfs` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `bot_id` varchar(32) NULL,
-  `nickname` varchar(50) DEFAULT NULL,
-  `bot_portrait` varchar(200) DEFAULT NULL,
-  `description` varchar(500) DEFAULT NULL,
-  `bot_type` tinyint DEFAULT '0',
-  `bot_conf` varchar(2000) NULL,
-  `status` tinyint DEFAULT '0',
-  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
-  `app_key` varchar(20) NULL,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `bot_id` varchar(32) NULL COMMENT 'bot id',
+  `nickname` varchar(50) DEFAULT NULL COMMENT '昵称',
+  `bot_portrait` varchar(200) DEFAULT NULL COMMENT '头像',
+  `description` varchar(500) DEFAULT NULL COMMENT '描述',
+  `bot_type` tinyint DEFAULT '0' COMMENT '机器人类型',
+  `bot_conf` varchar(2000) NULL COMMENT '配置',
+  `status` tinyint DEFAULT '0' COMMENT '状态',
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  `app_key` varchar(20) NULL COMMENT '租户key',
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uniq_botid` (`app_key`, `bot_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `qrcoderecords`;
 CREATE TABLE `qrcoderecords` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `code_id` varchar(50) DEFAULT NULL,
-  `status` tinyint DEFAULT NULL,
-  `created_time` bigint DEFAULT NULL,
-  `user_id` varchar(32) DEFAULT NULL,
-  `app_key` varchar(20) DEFAULT NULL,
+  `status` tinyint DEFAULT NULL COMMENT '状态',
+  `created_time` bigint DEFAULT NULL COMMENT '创建时间',
+  `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
+  `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_id` (`app_key`,`code_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '二维码扫码记录表';
 
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
