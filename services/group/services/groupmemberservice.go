@@ -69,6 +69,7 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 				IsMute:        int32(0),
 				UpdatedTime:   time.Now().UnixMilli(),
 				ExtFields:     commonservices.Kvitems2Map(extFields),
+				SettingFields: commonservices.Kvitems2Map(settings),
 			})
 		}
 	} else {
