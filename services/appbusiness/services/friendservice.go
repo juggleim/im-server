@@ -5,6 +5,7 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	apiModels "im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/storages"
 	"im-server/services/appbusiness/storages/models"
@@ -43,14 +44,56 @@ func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCod
 	return errs.IMErrorCode_SUCCESS, ret
 }
 
+func QryFriendsWithPage(ctx context.Context, req *pbobjs.FriendListWithPageReq) (errs.IMErrorCode, *pbobjs.UserObjs) {
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	code, respObj, err := AppSyncRpcCall(ctx, "qry_friends_with_page", userId, userId, &pbobjs.QryFriendsWithPageReq{
+		Size:     req.Size,
+		Page:     req.Page,
+		OrderTag: req.OrderTag,
+	}, func() proto.Message {
+		return &pbobjs.QryFriendsResp{}
+	})
+	if err != nil || code != errs.IMErrorCode_SUCCESS {
+		return code, nil
+	}
+	resp := respObj.(*pbobjs.QryFriendsResp)
+	ret := &pbobjs.UserObjs{
+		Items:  []*pbobjs.UserObj{},
+		Offset: resp.Offset,
+	}
+	for _, rel := range resp.Items {
+		friend := commonservices.GetTargetDisplayUserInfo(ctx, rel.FriendId)
+
+		ret.Items = append(ret.Items, &pbobjs.UserObj{
+			UserId:   friend.UserId,
+			Nickname: friend.Nickname,
+			Avatar:   friend.UserPortrait,
+			Pinyin:   rel.OrderTag,
+		})
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
 func AddFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	for _, friendId := range req.FriendIds {
-		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
-			FriendIds: []string{friendId},
+		friendUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, friendId)
+		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendMembersReq{
+			FriendMembers: []*pbobjs.FriendMember{
+				{
+					FriendId: friendId,
+					OrderTag: tools.GetFirstLetter(friendUserInfo.Nickname),
+				},
+			},
 		}, nil)
-		AppSyncRpcCall(ctx, "add_friends", userId, friendId, &pbobjs.FriendIdsReq{
-			FriendIds: []string{userId},
+		userInfo := commonservices.GetTargetDisplayUserInfo(ctx, userId)
+		AppSyncRpcCall(ctx, "add_friends", userId, friendId, &pbobjs.FriendMembersReq{
+			FriendMembers: []*pbobjs.FriendMember{
+				{
+					FriendId: userId,
+					OrderTag: tools.GetFirstLetter(userInfo.Nickname),
+				},
+			},
 		}, nil)
 		//send notify msg
 		SendFriendNotify(ctx, friendId, &apiModels.FriendNotify{
@@ -73,8 +116,14 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode 
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	//check friend relation
 	if checkFriend(ctx, req.FriendId, userId) {
-		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
-			FriendIds: []string{req.FriendId},
+		friendUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, req.FriendId)
+		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendMembersReq{
+			FriendMembers: []*pbobjs.FriendMember{
+				{
+					FriendId: req.FriendId,
+					OrderTag: tools.GetFirstLetter(friendUserInfo.Nickname),
+				},
+			},
 		}, nil)
 		storage := storages.NewFriendApplicationStorage()
 		storage.Upsert(models.FriendApplication{
@@ -105,11 +154,23 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode 
 			RecipientId: req.FriendId,
 		})
 	} else if friendSettings.FriendVerifyType == pbobjs.FriendVerifyType_NoNeedFriendVerify {
-		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
-			FriendIds: []string{req.FriendId},
+		friendUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, req.FriendId)
+		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendMembersReq{
+			FriendMembers: []*pbobjs.FriendMember{
+				{
+					FriendId: req.FriendId,
+					OrderTag: tools.GetFirstLetter(friendUserInfo.Nickname),
+				},
+			},
 		}, nil)
-		AppSyncRpcCall(ctx, "add_friends", userId, req.FriendId, &pbobjs.FriendIdsReq{
-			FriendIds: []string{userId},
+		userInfo := commonservices.GetTargetDisplayUserInfo(ctx, userId)
+		AppSyncRpcCall(ctx, "add_friends", userId, req.FriendId, &pbobjs.FriendMembersReq{
+			FriendMembers: []*pbobjs.FriendMember{
+				{
+					FriendId: userId,
+					OrderTag: tools.GetFirstLetter(userInfo.Nickname),
+				},
+			},
 		}, nil)
 		//send notify msg
 		SendFriendNotify(ctx, req.FriendId, &apiModels.FriendNotify{
@@ -125,11 +186,23 @@ func ConfirmFriend(ctx context.Context, req *pbobjs.ConfirmFriend) errs.IMErrorC
 	storage := storages.NewFriendApplicationStorage()
 	if req.IsAgree {
 		//add friend
-		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendIdsReq{
-			FriendIds: []string{req.SponsorId},
+		sponsorUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, req.SponsorId)
+		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendMembersReq{
+			FriendMembers: []*pbobjs.FriendMember{
+				{
+					FriendId: req.SponsorId,
+					OrderTag: tools.GetFirstLetter(sponsorUserInfo.Nickname),
+				},
+			},
 		}, nil)
-		AppSyncRpcCall(ctx, "add_friends", userId, req.SponsorId, &pbobjs.FriendIdsReq{
-			FriendIds: []string{userId},
+		userInfo := commonservices.GetTargetDisplayUserInfo(ctx, userId)
+		AppSyncRpcCall(ctx, "add_friends", userId, req.SponsorId, &pbobjs.FriendMembersReq{
+			FriendMembers: []*pbobjs.FriendMember{
+				{
+					FriendId: userId,
+					OrderTag: tools.GetFirstLetter(userInfo.Nickname),
+				},
+			},
 		}, nil)
 		//send notify msg
 		SendFriendNotify(ctx, req.SponsorId, &apiModels.FriendNotify{

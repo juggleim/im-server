@@ -38,6 +38,51 @@ func QryFriends(ctx *httputils.HttpContext) {
 			UserId:   friend.UserId,
 			Nickname: friend.Nickname,
 			Avatar:   friend.Avatar,
+			Pinyin:   friend.Pinyin,
+			IsFriend: true,
+		})
+	}
+	ctx.ResponseSucc(ret)
+}
+
+func QryFriendsWithPage(ctx *httputils.HttpContext) {
+	var err error
+	page := 1
+	pageStr := ctx.Query("page")
+	if pageStr != "" {
+		page, err = strconv.Atoi(pageStr)
+		if err != nil {
+			page = 1
+		}
+	}
+
+	size := 20
+	sizeStr := ctx.Query("size")
+	if sizeStr != "" {
+		size, err = strconv.Atoi(sizeStr)
+		if err != nil {
+			size = 20
+		}
+	}
+	orderTag := ctx.Query("order_tag")
+	code, friends := services.QryFriendsWithPage(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.FriendListWithPageReq{
+		Page:     int64(page),
+		Size:     int64(size),
+		OrderTag: orderTag,
+	})
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ret := &models.Friends{
+		Items: []*pbobjs.UserObj{},
+	}
+	for _, friend := range friends.Items {
+		ret.Items = append(ret.Items, &pbobjs.UserObj{
+			UserId:   friend.UserId,
+			Nickname: friend.Nickname,
+			Avatar:   friend.Avatar,
+			Pinyin:   friend.Pinyin,
 			IsFriend: true,
 		})
 	}

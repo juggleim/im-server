@@ -8,6 +8,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/appbusiness/models"
 	"im-server/services/commonservices"
+	"im-server/services/friends/storages"
 	"im-server/services/group/dbs"
 
 	"google.golang.org/protobuf/proto"
@@ -77,6 +78,12 @@ func UpdateUser(ctx context.Context, req *pbobjs.UserObj) errs.IMErrorCode {
 		Nickname:     req.Nickname,
 		UserPortrait: req.Avatar,
 	}, nil)
+	if req.Nickname != "" {
+		// update order tag for friends
+		storage := storages.NewFriendRelStorage()
+		appkey := bases.GetAppKeyFromCtx(ctx)
+		storage.UpdateOrderTag(appkey, req.UserId, tools.GetFirstLetter(req.Nickname))
+	}
 	return errs.IMErrorCode_SUCCESS
 }
 

@@ -22,6 +22,9 @@ func (manager *FriendManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("qry_friends", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryFriendsActor{}, serviceName)
 	})
+	register.RegisterActor("qry_friends_with_page", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryFriendsWithPageActor{}, serviceName)
+	})
 	register.RegisterActor("check_friends", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.CheckFriendActor{}, serviceName)
 	})

@@ -160,7 +160,7 @@ message StreamMsgItem{
 
 message StreamDownMsg{
   string targetId = 1;
-  ChannelType ChannelType = 2;
+  ChannelType channelType = 2;
   string msgId = 3;
   repeated StreamMsgItem msgItems = 4;
 }
@@ -722,9 +722,19 @@ message FriendIdsReq{
   repeated string friendIds = 1;
 }
 
+message FriendMembersReq{
+  repeated FriendMember friendMembers = 1;
+}
+
 message QryFriendsReq{
   int64 limit = 1;
   string offset = 2;
+}
+
+message QryFriendsWithPageReq{
+  int64 page = 1;
+  int64 size = 2;
+  string orderTag = 3;
 }
 
 message QryFriendsResp{
@@ -734,6 +744,7 @@ message QryFriendsResp{
 
 message FriendMember{
   string friendId = 1;
+  string orderTag = 2;
 }
 
 message CheckFriendsReq{

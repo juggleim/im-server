@@ -16,9 +16,9 @@ type AddFriendActor struct {
 }
 
 func (actor *AddFriendActor) OnReceive(ctx context.Context, input proto.Message) {
-	if req, ok := input.(*pbobjs.FriendIdsReq); ok {
+	if req, ok := input.(*pbobjs.FriendMembersReq); ok {
 		userId := bases.GetTargetIdFromCtx(ctx)
-		logs.WithContext(ctx).Infof("user_id:%s\tfriend_ids:%v", userId, req.FriendIds)
+		logs.WithContext(ctx).Infof("user_id:%s\tfriend_ids:%v", userId, req.FriendMembers)
 		code := services.AddFriends(ctx, req)
 		ack := bases.CreateQueryAckWraper(ctx, code, nil)
 		actor.Sender.Tell(ack, actorsystem.NoSender)
@@ -26,5 +26,5 @@ func (actor *AddFriendActor) OnReceive(ctx context.Context, input proto.Message)
 }
 
 func (actor *AddFriendActor) CreateInputObj() proto.Message {
-	return &pbobjs.FriendIdsReq{}
+	return &pbobjs.FriendMembersReq{}
 }

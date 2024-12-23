@@ -23,7 +23,7 @@ func GetFirstLetter(str string) string {
 	}
 	array := []rune(str)
 	if letterMap[array[0]] {
-		return string(array[0])
+		return strings.ToLower(string(array[0]))
 	} else {
 		opts := pinyin.NewArgs()
 		opts.Style = pinyin.Normal
@@ -32,9 +32,9 @@ func GetFirstLetter(str string) string {
 			str = pyArr[0]
 			array = []rune(str)
 			if letterMap[array[0]] {
-				return string(array[0])
+				return strings.ToLower(string(array[0]))
 			}
 		}
 	}
-	return string(array[0])
+	return strings.ToLower(string(array[0]))
 }

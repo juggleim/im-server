@@ -10,16 +10,17 @@ import (
 	"im-server/services/friends/storages/models"
 )
 
-func AddFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode {
+func AddFriends(ctx context.Context, req *pbobjs.FriendMembersReq) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetTargetIdFromCtx(ctx)
 	storage := storages.NewFriendRelStorage()
 	friendRels := []models.FriendRel{}
-	for _, friendId := range req.FriendIds {
+	for _, friendMember := range req.FriendMembers {
 		friendRels = append(friendRels, models.FriendRel{
 			AppKey:   appkey,
 			UserId:   userId,
-			FriendId: friendId,
+			FriendId: friendMember.FriendId,
+			OrderTag: friendMember.OrderTag,
 		})
 	}
 	storage.BatchUpsert(friendRels)
@@ -51,6 +52,26 @@ func QryFriends(ctx context.Context, req *pbobjs.QryFriendsReq) (errs.IMErrorCod
 			ret.Offset, _ = tools.EncodeInt(rel.ID)
 			ret.Items = append(ret.Items, &pbobjs.FriendMember{
 				FriendId: rel.FriendId,
+				OrderTag: rel.OrderTag,
+			})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func QryFriendsWithPage(ctx context.Context, req *pbobjs.QryFriendsWithPageReq) (errs.IMErrorCode, *pbobjs.QryFriendsResp) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetTargetIdFromCtx(ctx)
+	storage := storages.NewFriendRelStorage()
+	ret := &pbobjs.QryFriendsResp{
+		Items: []*pbobjs.FriendMember{},
+	}
+	rels, err := storage.QueryFriendRelsWithPage(appkey, userId, req.OrderTag, req.Page, req.Size)
+	if err == nil {
+		for _, rel := range rels {
+			ret.Items = append(ret.Items, &pbobjs.FriendMember{
+				FriendId: rel.FriendId,
+				OrderTag: rel.OrderTag,
 			})
 		}
 	}

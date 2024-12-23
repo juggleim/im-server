@@ -131,6 +131,12 @@ message FriendListReq {
     string offset = 2;
 }
 
+message FriendListWithPageReq{
+    int64 page = 1;
+    int64 size = 2;
+    string order_tag = 3;
+}
+
 message ApplyFriend{
     string friend_id = 1;
 }
@@ -163,10 +169,11 @@ message UserObj{
     string user_id = 1;
     string nickname = 2;
     string avatar = 3;
-    string phone = 4;
-    int32 status = 5;
-    bool is_friend = 6;
-    UserSettings settings = 7;
+    string pinyin = 4;
+    string phone = 5;
+    int32 status = 6;
+    bool is_friend = 7;
+    UserSettings settings = 8;
 }
 
 message UserObjs{

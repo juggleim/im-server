@@ -43,7 +43,42 @@ func (rel FriendRelDao) BatchUpsert(items []models.FriendRel) error {
 
 func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit int64) ([]*models.FriendRel, error) {
 	var items []*FriendRelDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and id>?", appkey, userId, startId).Order("id asc").Limit(limit).Find(&items).Error
+	params := []interface{}{}
+	condition := "app_key=?"
+	params = append(params, appkey)
+	if userId != "" {
+		condition = condition + " and user_id=?"
+		params = append(params, userId)
+	}
+	condition = condition + " and id>?"
+	params = append(params, startId)
+	err := dbcommons.GetDb().Where(condition, params...).Order("id asc").Limit(limit).Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	ret := []*models.FriendRel{}
+	for _, rel := range items {
+		ret = append(ret, &models.FriendRel{
+			ID:       rel.ID,
+			AppKey:   rel.AppKey,
+			UserId:   rel.UserId,
+			FriendId: rel.FriendId,
+			OrderTag: rel.OrderTag,
+		})
+	}
+	return ret, nil
+}
+
+func (rel FriendRelDao) QueryFriendRelsWithPage(appkey, userId string, orderTag string, page, size int64) ([]*models.FriendRel, error) {
+	var items []*FriendRelDao
+	params := []interface{}{}
+	condition := "app_key=? and user_id=?"
+	params = append(params, appkey, userId)
+	if orderTag != "" {
+		condition = condition + " and order_tag>=?"
+		params = append(params, orderTag)
+	}
+	err := dbcommons.GetDb().Where(condition, params...).Order("order_tag asc").Offset((page - 1) * size).Limit(size).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
@@ -81,4 +116,8 @@ func (rel FriendRelDao) QueryFriendRelsByFriendIds(appkey, userId string, friend
 		})
 	}
 	return ret, nil
+}
+
+func (rel FriendRelDao) UpdateOrderTag(appkey, friendId string, orderTag string) error {
+	return dbcommons.GetDb().Model(&FriendRelDao{}).Where("app_key=? and friend_id=?", appkey, friendId).Update("order_tag", orderTag).Error
 }

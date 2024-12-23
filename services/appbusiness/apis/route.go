@@ -56,7 +56,7 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodGet, "/jim/groups/grpinvitations", QryGrpInvitations)
 	RouteRegiste(mux, http.MethodGet, "/jim/groups/grppendingapplications", QryGrpPendingApplications)
 
-	RouteRegiste(mux, http.MethodGet, "/jim/friends/list", QryFriends)
+	RouteRegiste(mux, http.MethodGet, "/jim/friends/list", QryFriendsWithPage)
 	RouteRegiste(mux, http.MethodPost, "/jim/friends/add", AddFriend)
 	RouteRegiste(mux, http.MethodPost, "/jim/friends/apply", ApplyFriend)
 	RouteRegiste(mux, http.MethodPost, "/jim/friends/confirm", ConfirmFriend)
