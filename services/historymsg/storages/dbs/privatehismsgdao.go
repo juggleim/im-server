@@ -94,7 +94,9 @@ func (msg PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targe
 	params = append(params, appkey)
 	params = append(params, converId)
 
-	condition = condition + fmt.Sprintf(" and msg_id not in (select msg_id from %s where app_key=? and user_id=? and target_id=?)", (&PrivateDelHisMsgDao{}).TableName())
+	hismsgsTable := msg.TableName()
+	delHismsgsTable := (&PrivateDelHisMsgDao{}).TableName()
+	condition = condition + fmt.Sprintf(" and not exists (select msg_id from %s where app_key=? and user_id=? and target_id=? and %s.msg_id=%s.msg_id)", delHismsgsTable, hismsgsTable, delHismsgsTable)
 	params = append(params, appkey)
 	params = append(params, userId)
 	params = append(params, targetId)
