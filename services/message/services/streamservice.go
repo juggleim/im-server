@@ -116,7 +116,9 @@ func updateStreamMsg(ctx context.Context, streamMsg *StreamMsg) {
 func HandleStreamMsg(ctx context.Context, req *pbobjs.StreamDownMsg) errs.IMErrorCode {
 	AppendStreamMsgItem(ctx, req)
 
-	rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), req.TargetId, "stream_msg", req)
+	targetId := req.TargetId
+	req.TargetId = bases.GetRequesterIdFromCtx(ctx)
+	rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "stream_msg", req)
 	rpcMsg.Qos = 0
 	bases.UnicastRouteWithNoSender(rpcMsg)
 
