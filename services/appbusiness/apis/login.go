@@ -30,7 +30,7 @@ func Login(ctx *httputils.HttpContext) {
 	userId := tools.ShortMd5(req.Account)
 	nickname := fmt.Sprintf("user%05d", tools.RandInt(100000))
 
-	code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(userId), "reg_user", userId, &pbobjs.UserInfo{
+	code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
 		UserId:   userId,
 		Nickname: nickname,
 		NoCover:  true,
@@ -64,7 +64,7 @@ func SmsLogin(ctx *httputils.HttpContext) {
 	if succ {
 		userId := tools.ShortMd5(req.Phone)
 		nickname := fmt.Sprintf("user%05d", tools.RandInt(100000))
-		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(userId), "reg_user", userId, &pbobjs.UserInfo{
+		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
 			UserId:   userId,
 			Nickname: nickname,
 			NoCover:  true,
@@ -135,7 +135,7 @@ func CheckQrCode(ctx *httputils.HttpContext) {
 	}
 	if record.Status == storageModels.QrCodeRecordStatus_OK {
 		userId := record.UserId
-		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(userId), "reg_user", userId, &pbobjs.UserInfo{
+		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
 			UserId:  userId,
 			NoCover: true,
 		}, func() proto.Message {

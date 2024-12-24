@@ -13,7 +13,7 @@ func ChgGroupOwner(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.ChgGroupOwner(ctx.ToRpcCtx(ctx.CurrentUserId), req)
+	code := services.ChgGroupOwner(ctx.ToRpcCtx(), req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -27,7 +27,7 @@ func AddGrpAdministrator(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.AddGroupAdministrators(ctx.ToRpcCtx(ctx.CurrentUserId), req)
+	code := services.AddGroupAdministrators(ctx.ToRpcCtx(), req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -41,7 +41,7 @@ func DelGrpAdministrator(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.DelGroupAdministrators(ctx.ToRpcCtx(ctx.CurrentUserId), req)
+	code := services.DelGroupAdministrators(ctx.ToRpcCtx(), req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -51,7 +51,7 @@ func DelGrpAdministrator(ctx *httputils.HttpContext) {
 
 func QryGrpAdministrators(ctx *httputils.HttpContext) {
 	groupId := ctx.Query("group_id")
-	code, resp := services.QryGroupAdministrators(ctx.ToRpcCtx(ctx.CurrentUserId), groupId)
+	code, resp := services.QryGroupAdministrators(ctx.ToRpcCtx(), groupId)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -65,7 +65,7 @@ func SetGroupMute(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.SetGroupMute(ctx.ToRpcCtx(ctx.CurrentUserId), req)
+	code := services.SetGroupMute(ctx.ToRpcCtx(), req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -79,7 +79,7 @@ func SetGrpVerifyType(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.SetGroupVerifyType(ctx.ToRpcCtx(ctx.CurrentUserId), req)
+	code := services.SetGroupVerifyType(ctx.ToRpcCtx(), req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -93,7 +93,7 @@ func SetGrpHisMsgVisible(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.SetGroupHisMsgVisible(ctx.ToRpcCtx(ctx.CurrentUserId), req)
+	code := services.SetGroupHisMsgVisible(ctx.ToRpcCtx(), req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return

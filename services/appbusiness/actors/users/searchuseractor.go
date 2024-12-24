@@ -6,7 +6,6 @@ import (
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	"im-server/services/appbusiness/services"
 	"im-server/services/commonservices"
 
 	"google.golang.org/protobuf/proto"
@@ -18,10 +17,8 @@ type SearchUserActor struct {
 
 func (actor *SearchUserActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.SearchUserReq); ok {
-		requesterId := bases.GetRequesterIdFromCtx(ctx)
 		targetUserId := tools.ShortMd5(req.Account)
-
-		code, respObj, err := services.AppSyncRpcCall(ctx, "qry_user_info", requesterId, targetUserId, &pbobjs.UserIdReq{
+		code, respObj, err := bases.SyncRpcCall(ctx, "qry_user_info", targetUserId, &pbobjs.UserIdReq{
 			UserId:   targetUserId,
 			AttTypes: []int32{int32(commonservices.AttItemType_Att)},
 		}, func() proto.Message {

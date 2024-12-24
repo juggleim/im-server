@@ -19,7 +19,7 @@ func QryBots(ctx *httputils.HttpContext) {
 			count = 20
 		}
 	}
-	code, bots := services.QryAiBots(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryAiBotsReq{
+	code, bots := services.QryAiBots(ctx.ToRpcCtx(), &pbobjs.QryAiBotsReq{
 		Limit:  int64(count),
 		Offset: offset,
 	})

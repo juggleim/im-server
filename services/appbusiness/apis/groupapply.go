@@ -18,7 +18,7 @@ func GroupInvite(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, resp := services.GrpInviteMembers(ctx.ToRpcCtx(ctx.CurrentUserId), &req)
+	code, resp := services.GrpInviteMembers(ctx.ToRpcCtx(), &req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -47,7 +47,7 @@ func QryMyGrpApplications(ctx *httputils.HttpContext) {
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryMyGrpApplications(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryGrpApplicationsReq{
+	code, resp := services.QryMyGrpApplications(ctx.ToRpcCtx(), &pbobjs.QryGrpApplicationsReq{
 		StartTime: start,
 		Count:     int32(count),
 		Order:     int32(order),
@@ -80,7 +80,7 @@ func QryMyPendingGrpInvitations(ctx *httputils.HttpContext) {
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryMyPendingGrpInvitations(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryGrpApplicationsReq{
+	code, resp := services.QryMyPendingGrpInvitations(ctx.ToRpcCtx(), &pbobjs.QryGrpApplicationsReq{
 		StartTime: start,
 		Count:     int32(count),
 		Order:     int32(order),
@@ -114,7 +114,7 @@ func QryGrpInvitations(ctx *httputils.HttpContext) {
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryGrpInvitations(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryGrpApplicationsReq{
+	code, resp := services.QryGrpInvitations(ctx.ToRpcCtx(), &pbobjs.QryGrpApplicationsReq{
 		StartTime: start,
 		Count:     int32(count),
 		Order:     int32(order),
@@ -149,7 +149,7 @@ func QryGrpPendingApplications(ctx *httputils.HttpContext) {
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryGrpPendingApplications(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryGrpApplicationsReq{
+	code, resp := services.QryGrpPendingApplications(ctx.ToRpcCtx(), &pbobjs.QryGrpApplicationsReq{
 		StartTime: start,
 		Count:     int32(count),
 		Order:     int32(order),

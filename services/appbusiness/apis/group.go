@@ -23,7 +23,7 @@ func CreateGroup(ctx *httputils.HttpContext) {
 		}
 		memberIds = ids
 	}
-	code, grpInfo := services.CreateGroup(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.GroupMembersReq{
+	code, grpInfo := services.CreateGroup(ctx.ToRpcCtx(), &pbobjs.GroupMembersReq{
 		GroupName:     req.GroupName,
 		GroupPortrait: req.GroupPortrait,
 		MemberIds:     memberIds,
@@ -45,7 +45,7 @@ func UpdateGroup(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.UpdateGroup(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.GroupInfo{
+	code := services.UpdateGroup(ctx.ToRpcCtx(), &pbobjs.GroupInfo{
 		GroupId:       req.GroupId,
 		GroupName:     req.GroupName,
 		GroupPortrait: req.GroupPortrait,
@@ -63,7 +63,7 @@ func DissolveGroup(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.DissolveGroup(ctx.ToRpcCtx(ctx.CurrentUserId), req.GroupId)
+	code := services.DissolveGroup(ctx.ToRpcCtx(), req.GroupId)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -77,7 +77,7 @@ func QuitGroup(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.QuitGroup(ctx.ToRpcCtx(ctx.CurrentUserId), req.GroupId)
+	code := services.QuitGroup(ctx.ToRpcCtx(), req.GroupId)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -95,7 +95,7 @@ func AddGrpMembers(ctx *httputils.HttpContext) {
 	for _, user := range req.GrpMembers {
 		memberIds = append(memberIds, user.UserId)
 	}
-	code := services.AddGrpMembers(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.GroupMembersReq{
+	code := services.AddGrpMembers(ctx.ToRpcCtx(), &pbobjs.GroupMembersReq{
 		GroupId:   req.GroupId,
 		MemberIds: memberIds,
 	})
@@ -116,7 +116,7 @@ func DelGrpMembers(ctx *httputils.HttpContext) {
 	for _, user := range req.GrpMembers {
 		memberIds = append(memberIds, user.UserId)
 	}
-	code := services.DelGrpMembers(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.GroupMembersReq{
+	code := services.DelGrpMembers(ctx.ToRpcCtx(), &pbobjs.GroupMembersReq{
 		GroupId:   req.GroupId,
 		MemberIds: memberIds,
 	})
@@ -129,7 +129,7 @@ func DelGrpMembers(ctx *httputils.HttpContext) {
 
 func QryGroupInfo(ctx *httputils.HttpContext) {
 	groupId := ctx.Query("group_id")
-	rpcCtx := ctx.ToRpcCtx(ctx.CurrentUserId)
+	rpcCtx := ctx.ToRpcCtx()
 	code, grpInfo := services.QryGroupInfo(rpcCtx, groupId)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
@@ -149,7 +149,7 @@ func QryMyGroups(ctx *httputils.HttpContext) {
 			count = 20
 		}
 	}
-	code, grps := services.QueryMyGroups(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.GroupInfoListReq{
+	code, grps := services.QueryMyGroups(ctx.ToRpcCtx(), &pbobjs.GroupInfoListReq{
 		Limit:  int64(count),
 		Offset: offset,
 	})
@@ -183,7 +183,7 @@ func QryGrpMembers(ctx *httputils.HttpContext) {
 			limit = 100
 		}
 	}
-	code, members := services.QueryGrpMembers(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryGroupMembersReq{
+	code, members := services.QueryGrpMembers(ctx.ToRpcCtx(), &pbobjs.QryGroupMembersReq{
 		GroupId: groupId,
 		Limit:   int64(limit),
 		Offset:  offset,
@@ -214,7 +214,7 @@ func SetGrpAnnouncement(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.SetGrpAnnouncement(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.GrpAnnouncement{
+	code := services.SetGrpAnnouncement(ctx.ToRpcCtx(), &pbobjs.GrpAnnouncement{
 		GroupId: req.GroupId,
 		Content: req.Content,
 	})
@@ -227,7 +227,7 @@ func SetGrpAnnouncement(ctx *httputils.HttpContext) {
 
 func GetGrpAnnouncement(ctx *httputils.HttpContext) {
 	groupId := ctx.Query("group_id")
-	code, grpAnnounce := services.GetGrpAnnouncement(ctx.ToRpcCtx(ctx.CurrentUserId), groupId)
+	code, grpAnnounce := services.GetGrpAnnouncement(ctx.ToRpcCtx(), groupId)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -244,7 +244,7 @@ func SetGrpDisplayName(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.SetGrpDisplayName(ctx.ToRpcCtx(ctx.CurrentUserId), &req)
+	code := services.SetGrpDisplayName(ctx.ToRpcCtx(), &req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return

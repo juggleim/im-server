@@ -49,7 +49,7 @@ func GetUserSettings(userInfo *commonservices.TargetUserInfo) *pbobjs.UserSettin
 func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs.UserObjs) {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	targetUserId := tools.ShortMd5(phone)
-	code, respObj, err := AppSyncRpcCall(ctx, "qry_user_info", requestId, targetUserId, &pbobjs.UserIdReq{
+	code, respObj, err := bases.SyncRpcCall(ctx, "qry_user_info", targetUserId, &pbobjs.UserIdReq{
 		UserId:   targetUserId,
 		AttTypes: []int32{int32(commonservices.AttItemType_Att)},
 	}, func() proto.Message {
@@ -72,8 +72,7 @@ func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs
 }
 
 func UpdateUser(ctx context.Context, req *pbobjs.UserObj) errs.IMErrorCode {
-	requesterId := bases.GetRequesterIdFromCtx(ctx)
-	AppSyncRpcCall(ctx, "upd_user_info", requesterId, req.UserId, &pbobjs.UserInfo{
+	bases.SyncRpcCall(ctx, "upd_user_info", req.UserId, &pbobjs.UserInfo{
 		UserId:       req.UserId,
 		Nickname:     req.Nickname,
 		UserPortrait: req.Avatar,
@@ -108,7 +107,7 @@ func UpdateUserSettings(ctx context.Context, req *pbobjs.UserSettings) errs.IMEr
 		},
 	}
 	if len(settings) > 0 {
-		AppSyncRpcCall(ctx, "upd_user_info", requestId, requestId, &pbobjs.UserInfo{
+		bases.SyncRpcCall(ctx, "upd_user_info", requestId, &pbobjs.UserInfo{
 			UserId:   requestId,
 			Settings: settings,
 		}, nil)

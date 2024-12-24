@@ -18,7 +18,7 @@ import (
 func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCode, *pbobjs.UserObjs) {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 
-	code, respObj, err := AppSyncRpcCall(ctx, "qry_friends", userId, userId, &pbobjs.QryFriendsReq{
+	code, respObj, err := bases.SyncRpcCall(ctx, "qry_friends", userId, &pbobjs.QryFriendsReq{
 		Limit:  req.Limit,
 		Offset: req.Offset,
 	}, func() proto.Message {
@@ -46,7 +46,7 @@ func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCod
 
 func QryFriendsWithPage(ctx context.Context, req *pbobjs.FriendListWithPageReq) (errs.IMErrorCode, *pbobjs.UserObjs) {
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	code, respObj, err := AppSyncRpcCall(ctx, "qry_friends_with_page", userId, userId, &pbobjs.QryFriendsWithPageReq{
+	code, respObj, err := bases.SyncRpcCall(ctx, "qry_friends_with_page", userId, &pbobjs.QryFriendsWithPageReq{
 		Size:     req.Size,
 		Page:     req.Page,
 		OrderTag: req.OrderTag,
@@ -78,7 +78,7 @@ func AddFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode 
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	for _, friendId := range req.FriendIds {
 		friendUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, friendId)
-		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendMembersReq{
+		bases.SyncRpcCall(ctx, "add_friends", userId, &pbobjs.FriendMembersReq{
 			FriendMembers: []*pbobjs.FriendMember{
 				{
 					FriendId: friendId,
@@ -87,7 +87,7 @@ func AddFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode 
 			},
 		}, nil)
 		userInfo := commonservices.GetTargetDisplayUserInfo(ctx, userId)
-		AppSyncRpcCall(ctx, "add_friends", userId, friendId, &pbobjs.FriendMembersReq{
+		bases.SyncRpcCall(ctx, "add_friends", friendId, &pbobjs.FriendMembersReq{
 			FriendMembers: []*pbobjs.FriendMember{
 				{
 					FriendId: userId,
@@ -105,7 +105,7 @@ func AddFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode 
 
 func DelFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode {
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	AppSyncRpcCall(ctx, "del_friends", userId, userId, &pbobjs.FriendIdsReq{
+	bases.SyncRpcCall(ctx, "del_friends", userId, &pbobjs.FriendIdsReq{
 		FriendIds: req.FriendIds,
 	}, nil)
 	return errs.IMErrorCode_SUCCESS
@@ -117,7 +117,7 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode 
 	//check friend relation
 	if checkFriend(ctx, req.FriendId, userId) {
 		friendUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, req.FriendId)
-		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendMembersReq{
+		bases.SyncRpcCall(ctx, "add_friends", userId, &pbobjs.FriendMembersReq{
 			FriendMembers: []*pbobjs.FriendMember{
 				{
 					FriendId: req.FriendId,
@@ -155,7 +155,7 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode 
 		})
 	} else if friendSettings.FriendVerifyType == pbobjs.FriendVerifyType_NoNeedFriendVerify {
 		friendUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, req.FriendId)
-		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendMembersReq{
+		bases.SyncRpcCall(ctx, "add_friends", userId, &pbobjs.FriendMembersReq{
 			FriendMembers: []*pbobjs.FriendMember{
 				{
 					FriendId: req.FriendId,
@@ -164,7 +164,7 @@ func ApplyFriend(ctx context.Context, req *pbobjs.ApplyFriend) errs.IMErrorCode 
 			},
 		}, nil)
 		userInfo := commonservices.GetTargetDisplayUserInfo(ctx, userId)
-		AppSyncRpcCall(ctx, "add_friends", userId, req.FriendId, &pbobjs.FriendMembersReq{
+		bases.SyncRpcCall(ctx, "add_friends", req.FriendId, &pbobjs.FriendMembersReq{
 			FriendMembers: []*pbobjs.FriendMember{
 				{
 					FriendId: userId,
@@ -187,7 +187,7 @@ func ConfirmFriend(ctx context.Context, req *pbobjs.ConfirmFriend) errs.IMErrorC
 	if req.IsAgree {
 		//add friend
 		sponsorUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, req.SponsorId)
-		AppSyncRpcCall(ctx, "add_friends", userId, userId, &pbobjs.FriendMembersReq{
+		bases.SyncRpcCall(ctx, "add_friends", userId, &pbobjs.FriendMembersReq{
 			FriendMembers: []*pbobjs.FriendMember{
 				{
 					FriendId: req.SponsorId,
@@ -196,7 +196,7 @@ func ConfirmFriend(ctx context.Context, req *pbobjs.ConfirmFriend) errs.IMErrorC
 			},
 		}, nil)
 		userInfo := commonservices.GetTargetDisplayUserInfo(ctx, userId)
-		AppSyncRpcCall(ctx, "add_friends", userId, req.SponsorId, &pbobjs.FriendMembersReq{
+		bases.SyncRpcCall(ctx, "add_friends", req.SponsorId, &pbobjs.FriendMembersReq{
 			FriendMembers: []*pbobjs.FriendMember{
 				{
 					FriendId: userId,

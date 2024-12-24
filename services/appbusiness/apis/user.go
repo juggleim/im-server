@@ -9,7 +9,7 @@ import (
 
 func QryUserInfo(ctx *httputils.HttpContext) {
 	userId := ctx.Query("user_id")
-	rpcCtx := ctx.ToRpcCtx(ctx.CurrentUserId)
+	rpcCtx := ctx.ToRpcCtx()
 	code, user := services.QryUserInfo(rpcCtx, userId)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
@@ -24,7 +24,7 @@ func UpdateUser(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	rpcCtx := ctx.ToRpcCtx(req.UserId)
+	rpcCtx := ctx.ToRpcCtx()
 	services.UpdateUser(rpcCtx, req)
 	ctx.ResponseSucc(nil)
 }
@@ -35,7 +35,7 @@ func UpdateUserSettings(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.UpdateUserSettings(ctx.ToRpcCtx(ctx.CurrentUserId), req)
+	code := services.UpdateUserSettings(ctx.ToRpcCtx(), req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -49,7 +49,7 @@ func SearchByPhone(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	rpcCtx := ctx.ToRpcCtx(ctx.CurrentUserId)
+	rpcCtx := ctx.ToRpcCtx()
 	code, users := services.SearchByPhone(rpcCtx, req.Phone)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)

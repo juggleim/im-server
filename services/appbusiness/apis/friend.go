@@ -21,7 +21,7 @@ func QryFriends(ctx *httputils.HttpContext) {
 			count = 20
 		}
 	}
-	code, friends := services.QryFriends(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.FriendListReq{
+	code, friends := services.QryFriends(ctx.ToRpcCtx(), &pbobjs.FriendListReq{
 		Limit:  int64(count),
 		Offset: offset,
 	})
@@ -65,7 +65,7 @@ func QryFriendsWithPage(ctx *httputils.HttpContext) {
 		}
 	}
 	orderTag := ctx.Query("order_tag")
-	code, friends := services.QryFriendsWithPage(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.FriendListWithPageReq{
+	code, friends := services.QryFriendsWithPage(ctx.ToRpcCtx(), &pbobjs.FriendListWithPageReq{
 		Page:     int64(page),
 		Size:     int64(size),
 		OrderTag: orderTag,
@@ -95,7 +95,7 @@ func AddFriend(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.AddFriends(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.FriendIdsReq{
+	code := services.AddFriends(ctx.ToRpcCtx(), &pbobjs.FriendIdsReq{
 		FriendIds: []string{req.FriendId},
 	})
 	if code != errs.IMErrorCode_SUCCESS {
@@ -111,7 +111,7 @@ func DelFriend(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.DelFriends(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.FriendIdsReq{
+	code := services.DelFriends(ctx.ToRpcCtx(), &pbobjs.FriendIdsReq{
 		FriendIds: req.FriendIds,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
@@ -127,7 +127,7 @@ func ApplyFriend(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.ApplyFriend(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.ApplyFriend{
+	code := services.ApplyFriend(ctx.ToRpcCtx(), &pbobjs.ApplyFriend{
 		FriendId: req.FriendId,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
@@ -143,7 +143,7 @@ func ConfirmFriend(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.ConfirmFriend(ctx.ToRpcCtx(ctx.CurrentUserId), &req)
+	code := services.ConfirmFriend(ctx.ToRpcCtx(), &req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -172,7 +172,7 @@ func MyFriendApplications(ctx *httputils.HttpContext) {
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryMyFriendApplications(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryFriendApplicationsReq{
+	code, resp := services.QryMyFriendApplications(ctx.ToRpcCtx(), &pbobjs.QryFriendApplicationsReq{
 		StartTime: start,
 		Count:     int32(count),
 		Order:     int32(order),
@@ -205,7 +205,7 @@ func MyPendingFriendApplications(ctx *httputils.HttpContext) {
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryMyPendingFriendApplications(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryFriendApplicationsReq{
+	code, resp := services.QryMyPendingFriendApplications(ctx.ToRpcCtx(), &pbobjs.QryFriendApplicationsReq{
 		StartTime: start,
 		Count:     int32(count),
 		Order:     int32(order),
@@ -238,7 +238,7 @@ func FriendApplications(ctx *httputils.HttpContext) {
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryFriendApplications(ctx.ToRpcCtx(ctx.CurrentUserId), &pbobjs.QryFriendApplicationsReq{
+	code, resp := services.QryFriendApplications(ctx.ToRpcCtx(), &pbobjs.QryFriendApplicationsReq{
 		StartTime: start,
 		Count:     int32(count),
 		Order:     int32(order),

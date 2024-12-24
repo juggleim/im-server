@@ -13,7 +13,7 @@ func GetFileCred(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, resp := services.GetFileCred(ctx.ToRpcCtx(ctx.CurrentUserId), &req)
+	code, resp := services.GetFileCred(ctx.ToRpcCtx(), &req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return

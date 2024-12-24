@@ -17,7 +17,7 @@ import (
 
 func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobjs.GrpInfo) {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, respObj, err := AppSyncRpcCall(ctx, "qry_group_info", requestId, groupId, &pbobjs.GroupInfoReq{
+	code, respObj, err := bases.SyncRpcCall(ctx, "qry_group_info", groupId, &pbobjs.GroupInfoReq{
 		GroupId: groupId,
 	}, func() proto.Message {
 		return &pbobjs.GroupInfo{}
@@ -81,7 +81,7 @@ func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobj
 		ret.Members = append(ret.Members, topMembers.Items...)
 	}
 	//qry group member exts/settings
-	code, respObj, err = AppSyncRpcCall(ctx, "qry_grp_member_settings", requestId, groupId, &pbobjs.QryGrpMemberSettingsReq{
+	code, respObj, err = bases.SyncRpcCall(ctx, "qry_grp_member_settings", groupId, &pbobjs.QryGrpMemberSettingsReq{
 		MemberId: requestId,
 	}, func() proto.Message {
 		return &pbobjs.QryGrpMemberSettingsResp{}
@@ -110,7 +110,7 @@ func CreateGroup(ctx context.Context, req *pbobjs.GroupMembersReq) (errs.IMError
 		Key:   string(commonservices.AttItemKey_GrpCreator),
 		Value: requestId,
 	})
-	code, _, err := AppSyncRpcCall(ctx, "g_add_members", requestId, grpId, &pbobjs.GroupMembersReq{
+	code, _, err := bases.SyncRpcCall(ctx, "g_add_members", grpId, &pbobjs.GroupMembersReq{
 		GroupId:       grpId,
 		GroupName:     req.GroupName,
 		GroupPortrait: req.GroupPortrait,
@@ -140,7 +140,7 @@ func CreateGroup(ctx context.Context, req *pbobjs.GroupMembersReq) (errs.IMError
 
 func UpdateGroup(ctx context.Context, req *pbobjs.GroupInfo) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "upd_group_info", requestId, req.GroupId, req, nil)
+	code, _, err := bases.SyncRpcCall(ctx, "upd_group_info", req.GroupId, req, nil)
 	if err != nil || code != errs.IMErrorCode_SUCCESS {
 		return code
 	}
@@ -153,8 +153,7 @@ func UpdateGroup(ctx context.Context, req *pbobjs.GroupInfo) errs.IMErrorCode {
 }
 
 func DissolveGroup(ctx context.Context, groupId string) errs.IMErrorCode {
-	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "g_dissolve", requestId, groupId, &pbobjs.GroupMembersReq{
+	code, _, err := bases.SyncRpcCall(ctx, "g_dissolve", groupId, &pbobjs.GroupMembersReq{
 		GroupId: groupId,
 	}, nil)
 	if err != nil || code != errs.IMErrorCode_SUCCESS {
@@ -165,7 +164,7 @@ func DissolveGroup(ctx context.Context, groupId string) errs.IMErrorCode {
 
 func QuitGroup(ctx context.Context, groupId string) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "g_del_members", requestId, groupId, &pbobjs.GroupMembersReq{
+	code, _, err := bases.SyncRpcCall(ctx, "g_del_members", groupId, &pbobjs.GroupMembersReq{
 		GroupId:   groupId,
 		MemberIds: []string{requestId},
 	}, nil)
@@ -184,7 +183,7 @@ func QuitGroup(ctx context.Context, groupId string) errs.IMErrorCode {
 
 func AddGrpMembers(ctx context.Context, grpMembers *pbobjs.GroupMembersReq) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "g_add_members", requestId, grpMembers.GroupId, &pbobjs.GroupMembersReq{
+	code, _, err := bases.SyncRpcCall(ctx, "g_add_members", grpMembers.GroupId, &pbobjs.GroupMembersReq{
 		GroupId:   grpMembers.GroupId,
 		MemberIds: grpMembers.MemberIds,
 	}, nil)
@@ -241,7 +240,7 @@ func GrpInviteMembers(ctx context.Context, req *pbobjs.GroupInviteReq) (errs.IME
 		results.Results[memberId] = reason
 	}
 	if len(directAddMemberIds) > 0 {
-		code, _, err := AppSyncRpcCall(ctx, "g_add_members", requesterId, req.GroupId, &pbobjs.GroupMembersReq{
+		code, _, err := bases.SyncRpcCall(ctx, "g_add_members", req.GroupId, &pbobjs.GroupMembersReq{
 			GroupId: req.GroupId,
 		}, nil)
 		if err != nil || code != errs.IMErrorCode_SUCCESS {
@@ -264,7 +263,7 @@ func GrpInviteMembers(ctx context.Context, req *pbobjs.GroupInviteReq) (errs.IME
 
 func DelGrpMembers(ctx context.Context, req *pbobjs.GroupMembersReq) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "g_del_members", requestId, req.GroupId, &pbobjs.GroupMembersReq{
+	code, _, err := bases.SyncRpcCall(ctx, "g_del_members", req.GroupId, &pbobjs.GroupMembersReq{
 		GroupId:   req.GroupId,
 		MemberIds: req.MemberIds,
 	}, nil)
@@ -285,8 +284,7 @@ func DelGrpMembers(ctx context.Context, req *pbobjs.GroupMembersReq) errs.IMErro
 }
 
 func QueryGrpMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.IMErrorCode, *pbobjs.GroupMemberInfos) {
-	userId := bases.GetRequesterIdFromCtx(ctx)
-	code, respObj, err := AppSyncRpcCall(ctx, "g_qry_members", userId, req.GroupId, req, func() proto.Message {
+	code, respObj, err := bases.SyncRpcCall(ctx, "g_qry_members", req.GroupId, req, func() proto.Message {
 		return &pbobjs.GroupMembersResp{}
 	})
 	if err != nil || code != errs.IMErrorCode_SUCCESS {
@@ -317,7 +315,7 @@ func QueryGrpMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 
 func SetGrpAnnouncement(ctx context.Context, req *pbobjs.GrpAnnouncement) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "upd_group_info", requestId, req.GroupId, &pbobjs.GroupInfo{
+	code, _, err := bases.SyncRpcCall(ctx, "upd_group_info", req.GroupId, &pbobjs.GroupInfo{
 		GroupId: req.GroupId,
 		Settings: []*pbobjs.KvItem{
 			{
@@ -365,8 +363,7 @@ func GetGrpAnnouncement(ctx context.Context, groupId string) (errs.IMErrorCode, 
 
 func ChgGroupOwner(ctx context.Context, req *pbobjs.GroupOwnerChgReq) errs.IMErrorCode {
 	//TODO check right
-	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "upd_group_info", requestId, req.GroupId, &pbobjs.GroupInfo{
+	code, _, err := bases.SyncRpcCall(ctx, "upd_group_info", req.GroupId, &pbobjs.GroupInfo{
 		GroupId: req.GroupId,
 		Settings: []*pbobjs.KvItem{
 			{
@@ -383,8 +380,7 @@ func ChgGroupOwner(ctx context.Context, req *pbobjs.GroupOwnerChgReq) errs.IMErr
 
 func SetGroupMute(ctx context.Context, req *pbobjs.SetGroupMuteReq) errs.IMErrorCode {
 	//TODO check right
-	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "group_mute", requestId, req.GroupId, &pbobjs.GroupMuteReq{
+	code, _, err := bases.SyncRpcCall(ctx, "group_mute", req.GroupId, &pbobjs.GroupMuteReq{
 		GroupId: req.GroupId,
 		IsMute:  req.IsMute,
 	}, nil)
@@ -396,8 +392,7 @@ func SetGroupMute(ctx context.Context, req *pbobjs.SetGroupMuteReq) errs.IMError
 
 func SetGroupVerifyType(ctx context.Context, req *pbobjs.SetGroupVerifyTypeReq) errs.IMErrorCode {
 	//TODO check right
-	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "upd_group_info", requestId, req.GroupId, &pbobjs.GroupInfo{
+	code, _, err := bases.SyncRpcCall(ctx, "upd_group_info", req.GroupId, &pbobjs.GroupInfo{
 		GroupId: req.GroupId,
 		Settings: []*pbobjs.KvItem{
 			{
@@ -414,7 +409,6 @@ func SetGroupVerifyType(ctx context.Context, req *pbobjs.SetGroupVerifyTypeReq) 
 
 func SetGroupHisMsgVisible(ctx context.Context, req *pbobjs.SetGroupHisMsgVisibleReq) errs.IMErrorCode {
 	//TODO check right
-	requestId := bases.GetRequesterIdFromCtx(ctx)
 	visible := req.GroupHisMsgVisible
 	hideGrpMsg := "1"
 	if visible > 0 {
@@ -422,7 +416,7 @@ func SetGroupHisMsgVisible(ctx context.Context, req *pbobjs.SetGroupHisMsgVisibl
 	} else {
 		hideGrpMsg = "1"
 	}
-	code, _, err := AppSyncRpcCall(ctx, "upd_group_info", requestId, req.GroupId, &pbobjs.GroupInfo{
+	code, _, err := bases.SyncRpcCall(ctx, "upd_group_info", req.GroupId, &pbobjs.GroupInfo{
 		GroupId: req.GroupId,
 		Settings: []*pbobjs.KvItem{
 			{
@@ -438,7 +432,6 @@ func SetGroupHisMsgVisible(ctx context.Context, req *pbobjs.SetGroupHisMsgVisibl
 }
 
 func AddGroupAdministrators(ctx context.Context, req *pbobjs.GroupAdministratorsReq) errs.IMErrorCode {
-	requestId := bases.GetRequesterIdFromCtx(ctx)
 	grpInfo := commonservices.GetGroupInfoFromRpc(ctx, req.GroupId)
 	adminIds := []string{}
 	if grpInfo != nil {
@@ -453,7 +446,7 @@ func AddGroupAdministrators(ctx context.Context, req *pbobjs.GroupAdministrators
 		return errs.IMErrorCode_APP_DEFAULT
 	}
 	adminIds = append(adminIds, req.AdminIds...)
-	code, _, err := AppSyncRpcCall(ctx, "upd_group_info", requestId, req.GroupId, &pbobjs.GroupInfo{
+	code, _, err := bases.SyncRpcCall(ctx, "upd_group_info", req.GroupId, &pbobjs.GroupInfo{
 		GroupId: req.GroupId,
 		Settings: []*pbobjs.KvItem{
 			{
@@ -469,7 +462,6 @@ func AddGroupAdministrators(ctx context.Context, req *pbobjs.GroupAdministrators
 }
 
 func DelGroupAdministrators(ctx context.Context, req *pbobjs.GroupAdministratorsReq) errs.IMErrorCode {
-	requestId := bases.GetRequesterIdFromCtx(ctx)
 	grpInfo := commonservices.GetGroupInfoFromRpc(ctx, req.GroupId)
 	adminIds := []string{}
 	if grpInfo != nil {
@@ -490,7 +482,7 @@ func DelGroupAdministrators(ctx context.Context, req *pbobjs.GroupAdministrators
 			newAdminIds = append(newAdminIds, id)
 		}
 	}
-	code, _, err := AppSyncRpcCall(ctx, "upd_group_info", requestId, req.GroupId, &pbobjs.GroupInfo{
+	code, _, err := bases.SyncRpcCall(ctx, "upd_group_info", req.GroupId, &pbobjs.GroupInfo{
 		GroupId: req.GroupId,
 		Settings: []*pbobjs.KvItem{
 			{
@@ -536,7 +528,7 @@ func QryGroupAdministrators(ctx context.Context, groupId string) (errs.IMErrorCo
 
 func SetGrpDisplayName(ctx context.Context, req *pbobjs.SetGroupDisplayNameReq) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	code, _, err := AppSyncRpcCall(ctx, "set_grp_member_setting", requestId, req.GroupId, &pbobjs.GroupMember{
+	code, _, err := bases.SyncRpcCall(ctx, "set_grp_member_setting", req.GroupId, &pbobjs.GroupMember{
 		MemberId: requestId,
 		ExtFields: []*pbobjs.KvItem{
 			{

@@ -53,13 +53,13 @@ func (ctx *HttpContext) ResponseSucc(resp interface{}) {
 	ctx.Writer.Write(bs)
 }
 
-func (ctx *HttpContext) ToRpcCtx(userId string) context.Context {
+func (ctx *HttpContext) ToRpcCtx() context.Context {
 	rpcCtx := context.Background()
 	rpcCtx = context.WithValue(rpcCtx, bases.CtxKey_AppKey, ctx.AppKey)
 	rpcCtx = context.WithValue(rpcCtx, bases.CtxKey_Session, fmt.Sprintf("app_%s", tools.GenerateUUIDShort11()))
 	rpcCtx = context.WithValue(rpcCtx, bases.CtxKey_IsFromApp, true)
-	if userId != "" {
-		rpcCtx = context.WithValue(rpcCtx, bases.CtxKey_RequesterId, userId)
+	if ctx.CurrentUserId != "" {
+		rpcCtx = context.WithValue(rpcCtx, bases.CtxKey_RequesterId, ctx.CurrentUserId)
 	}
 	return rpcCtx
 }
