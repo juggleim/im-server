@@ -151,11 +151,19 @@ func Save2Sendbox(ctx context.Context, downMsg *pbobjs.DownMsg) {
 
 func SyncMsg(ctx context.Context, method, userId, targetId string, upMsg *pbobjs.UpMsg, opts ...bases.BaseActorOption) (errs.IMErrorCode, string, int64, int64) {
 	tmpOpts := []bases.BaseActorOption{}
-	tmpOpts = append(tmpOpts, &bases.ExtsOption{Exts: map[string]string{
-		RpcExtKey_RealTargetId: targetId,
-	}})
-	tmpOpts = append(tmpOpts, opts...)
-	targetId = GetConversationId(userId, targetId, pbobjs.ChannelType_Private)
+	if method == "p_msg" || method == "imp_pri_msg" {
+		tmpOpts = append(tmpOpts, &bases.ExtsOption{Exts: map[string]string{
+			RpcExtKey_RealTargetId: targetId,
+		}})
+		tmpOpts = append(tmpOpts, opts...)
+		targetId = GetConversationId(userId, targetId, pbobjs.ChannelType_Private)
+	} else if method == "s_msg" {
+		tmpOpts = append(tmpOpts, &bases.ExtsOption{Exts: map[string]string{
+			RpcExtKey_RealTargetId: targetId,
+		}})
+		tmpOpts = append(tmpOpts, opts...)
+		targetId = GetConversationId(userId, targetId, pbobjs.ChannelType_System)
+	}
 	ctx = bases.SetRequesterId2Ctx(ctx, userId)
 	result, err := bases.SyncOriginalRpcCall(ctx, method, targetId, upMsg, tmpOpts...)
 	if err != nil || result == nil {
@@ -184,11 +192,19 @@ func SyncMsgOverUpstream(ctx context.Context, method, userId, targetId string, u
 func AsyncMsg(ctx context.Context, method, userId, targetId string, upMsg *pbobjs.UpMsg, opts ...bases.BaseActorOption) {
 	ctx = bases.SetRequesterId2Ctx(ctx, userId)
 	tmpOpts := []bases.BaseActorOption{}
-	tmpOpts = append(tmpOpts, &bases.ExtsOption{Exts: map[string]string{
-		RpcExtKey_RealTargetId: targetId,
-	}})
-	tmpOpts = append(tmpOpts, opts...)
-	targetId = GetConversationId(userId, targetId, pbobjs.ChannelType_Private)
+	if method == "p_msg" || method == "imp_pri_msg" {
+		tmpOpts = append(tmpOpts, &bases.ExtsOption{Exts: map[string]string{
+			RpcExtKey_RealTargetId: targetId,
+		}})
+		tmpOpts = append(tmpOpts, opts...)
+		targetId = GetConversationId(userId, targetId, pbobjs.ChannelType_Private)
+	} else if method == "s_msg" {
+		tmpOpts = append(tmpOpts, &bases.ExtsOption{Exts: map[string]string{
+			RpcExtKey_RealTargetId: targetId,
+		}})
+		tmpOpts = append(tmpOpts, opts...)
+		targetId = GetConversationId(userId, targetId, pbobjs.ChannelType_System)
+	}
 	bases.AsyncRpcCall(ctx, method, targetId, upMsg, tmpOpts...)
 }
 
