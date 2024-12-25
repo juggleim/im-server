@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 option go_package = "commons/pbdefines/pbobjs";
+import "commons/pbdefines/appmessages.proto";
 
 message GroupInviteReq{
     string group_id = 1;
@@ -35,9 +36,15 @@ message GrpInfo{
     repeated GroupMemberInfo members = 4;
     int32 member_count = 5;
     GroupMemberInfo owner = 6;
-    int32 my_role = 7;
+    GrpMemberRole my_role = 7;
     GroupManagement group_management = 8;
     string grp_display_name = 9; 
+}
+
+enum GrpMemberRole{
+    GrpMember = 0;
+    GrpCreator = 1;
+    GrpAdmin = 2;
 }
 
 message GroupManagement{
@@ -53,6 +60,8 @@ message GroupMemberInfo {
     string user_id = 1;
     string nickname = 2;
     string avatar = 3;
+    UserType member_type = 4;
+    GrpMemberRole role = 5;
 }
 
 message GroupMemberInfos{
@@ -170,10 +179,11 @@ message UserObj{
     string nickname = 2;
     string avatar = 3;
     string pinyin = 4;
-    string phone = 5;
-    int32 status = 6;
-    bool is_friend = 7;
-    UserSettings settings = 8;
+    UserType user_type = 5;
+    string phone = 6;
+    int32 status = 7;
+    bool is_friend = 8;
+    UserSettings settings = 9;
 }
 
 message UserObjs{

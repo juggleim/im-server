@@ -333,9 +333,10 @@ func QryGroupMembersByIds(ctx context.Context, req *pbobjs.GroupMembersReq) (err
 					isMute = 0
 				}
 				resp.Items = append(resp.Items, &pbobjs.GroupMember{
-					MemberId: memberId,
-					IsMute:   int32(isMute),
-					IsAllow:  int32(member.IsAllow),
+					MemberId:   memberId,
+					IsMute:     int32(isMute),
+					IsAllow:    int32(member.IsAllow),
+					MemberType: member.MemberType,
 				})
 			}
 		}
@@ -363,9 +364,10 @@ func QryGroupMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 				isMute = 0
 			}
 			resp.Items = append(resp.Items, &pbobjs.GroupMember{
-				MemberId: member.MemberId,
-				IsMute:   int32(isMute),
-				IsAllow:  int32(member.IsAllow),
+				MemberId:   member.MemberId,
+				IsMute:     int32(isMute),
+				IsAllow:    int32(member.IsAllow),
+				MemberType: pbobjs.UserType(member.MemberType),
 			})
 			offset, err := tools.EncodeInt(member.ID)
 			if err != nil {
@@ -420,6 +422,7 @@ type GroupMember struct {
 	MuteEndAt   int64
 	IsAllow     int
 	CreatedTime int64 //join time
+	MemberType  pbobjs.UserType
 }
 
 type GroupMemberContainer struct {

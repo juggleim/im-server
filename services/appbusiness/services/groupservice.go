@@ -38,22 +38,18 @@ func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobj
 			MaxAdminCount: 10,
 		},
 	}
-	//my role
-	myRole := 0 // 0: 群成员；1:群主；2:群管理员
+	var creator string = ""
+	administrators := map[string]bool{}
 	for _, setting := range grpInfo.Settings {
 		if setting.Key == string(commonservices.AttItemKey_GrpCreator) {
-			if requestId == setting.Value {
-				myRole = 1
-			}
+			creator = setting.Value
 		} else if setting.Key == string(commonservices.AttItemKey_GrpAdministrators) {
 			if len(setting.Value) > 0 {
 				adminIds := []string{}
 				err := tools.JsonUnMarshal([]byte(setting.Value), &adminIds)
 				if err == nil {
 					for _, id := range adminIds {
-						if id == requestId {
-							myRole = 2
-						}
+						administrators[id] = true
 					}
 					ret.GroupManagement.AdminCount = int32(len(adminIds))
 				}
@@ -72,13 +68,28 @@ func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobj
 			ret.GroupManagement.GroupHisMsgVisible = visible
 		}
 	}
-	ret.MyRole = int32(myRole)
+	// my role
+	myRole := pbobjs.GrpMemberRole_GrpMember // 0: 群成员；1:群主；2:群管理员
+	if requestId == creator {
+		myRole = pbobjs.GrpMemberRole_GrpCreator
+	} else if _, exist := administrators[requestId]; exist {
+		myRole = pbobjs.GrpMemberRole_GrpAdmin
+	}
+	ret.MyRole = myRole
 	code, topMembers := QueryGrpMembers(ctx, &pbobjs.QryGroupMembersReq{
 		GroupId: groupId,
 		Limit:   20,
 	})
 	if code == errs.IMErrorCode_SUCCESS && topMembers != nil {
-		ret.Members = append(ret.Members, topMembers.Items...)
+		for _, member := range topMembers.Items {
+			member.Role = pbobjs.GrpMemberRole_GrpMember
+			if member.UserId == creator {
+				member.Role = pbobjs.GrpMemberRole_GrpCreator
+			} else if _, exist := administrators[member.UserId]; exist {
+				member.Role = pbobjs.GrpMemberRole_GrpAdmin
+			}
+			ret.Members = append(ret.Members, member)
+		}
 	}
 	//qry group member exts/settings
 	code, respObj, err = bases.SyncRpcCall(ctx, "qry_grp_member_settings", groupId, &pbobjs.QryGrpMemberSettingsReq{
@@ -299,7 +310,8 @@ func QueryGrpMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 	for _, member := range members.Items {
 		memberIds = append(memberIds, member.MemberId)
 		ret.Items = append(ret.Items, &pbobjs.GroupMemberInfo{
-			UserId: member.MemberId,
+			UserId:     member.MemberId,
+			MemberType: member.MemberType,
 		})
 	}
 	userMap := commonservices.GetTargetDisplayUserInfosMap(ctx, memberIds)
@@ -308,6 +320,7 @@ func QueryGrpMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 		if ok && userInfo != nil {
 			member.Nickname = userInfo.Nickname
 			member.Avatar = userInfo.UserPortrait
+			member.MemberType = userInfo.UserType
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, ret

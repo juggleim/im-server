@@ -39,6 +39,7 @@ func QryFriends(ctx context.Context, req *pbobjs.FriendListReq) (errs.IMErrorCod
 			UserId:   friend.UserId,
 			Nickname: friend.Nickname,
 			Avatar:   friend.UserPortrait,
+			UserType: friend.UserType,
 		})
 	}
 	return errs.IMErrorCode_SUCCESS, ret
@@ -69,6 +70,7 @@ func QryFriendsWithPage(ctx context.Context, req *pbobjs.FriendListWithPageReq) 
 			Nickname: friend.Nickname,
 			Avatar:   friend.UserPortrait,
 			Pinyin:   rel.OrderTag,
+			UserType: friend.UserType,
 		})
 	}
 	return errs.IMErrorCode_SUCCESS, ret

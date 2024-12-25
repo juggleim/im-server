@@ -814,6 +814,7 @@ message GroupMember{
   int32 isAllow = 3;
   repeated KvItem extFields = 4;
   repeated KvItem settings = 5;
+  UserType memberType = 6;
 }
 
 message QryGroupMembersReq{
