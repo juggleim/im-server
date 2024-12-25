@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -20,7 +21,7 @@ func QryUserTags(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, msg, err := services.SyncApiCall(ctx, "qry_user_tags", "", strings.Join(userIds, ","), &pbobjs.UserIds{
+	code, msg, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_user_tags", strings.Join(userIds, ","), &pbobjs.UserIds{
 		UserIds: userIds,
 	}, func() proto.Message {
 		return &pbobjs.UserTagList{}
@@ -29,7 +30,7 @@ func QryUserTags(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -58,7 +59,7 @@ func AddUserTags(ctx *gin.Context) {
 	targetId := strings.Join(lo.Map(req.UserTags, func(item models.UserTag, index int) string {
 		return item.UserID
 	}), ",")
-	code, _, err := services.SyncApiCall(ctx, "add_user_tags", "", targetId, &pbobjs.UserTagList{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "add_user_tags", targetId, &pbobjs.UserTagList{
 		UserTags: lo.Map(req.UserTags, func(item models.UserTag, index int) *pbobjs.UserTag {
 			return &pbobjs.UserTag{
 				UserId: item.UserID,
@@ -70,7 +71,7 @@ func AddUserTags(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -86,7 +87,7 @@ func DelUserTags(ctx *gin.Context) {
 	targetId := strings.Join(lo.Map(req.UserTags, func(item models.UserTag, index int) string {
 		return item.UserID
 	}), ",")
-	code, _, err := services.SyncApiCall(ctx, "del_user_tags", "", targetId, &pbobjs.UserTagList{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "del_user_tags", targetId, &pbobjs.UserTagList{
 		UserTags: lo.Map(req.UserTags, func(item models.UserTag, index int) *pbobjs.UserTag {
 			return &pbobjs.UserTag{
 				UserId: item.UserID,
@@ -98,7 +99,7 @@ func DelUserTags(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -111,14 +112,14 @@ func ClearUserTags(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "clear_user_tags", "", strings.Join(req.UserIds, ","), &pbobjs.UserIds{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "clear_user_tags", strings.Join(req.UserIds, ","), &pbobjs.UserIds{
 		UserIds: req.UserIds,
 	}, nil)
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -132,7 +133,7 @@ func PushWithTags(ctx *gin.Context) {
 		return
 	}
 
-	code, _, err := services.SyncApiCall(ctx, "push_with_tags", "", tools.ToJson(req.Condition), &pbobjs.PushNotificationWithTags{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "push_with_tags", tools.ToJson(req.Condition), &pbobjs.PushNotificationWithTags{
 		FromUserId: req.FromUserId,
 		Condition: &pbobjs.PushNotificationWithTags_Condition{
 			TagsAnd: req.Condition.TagsAnd,
@@ -151,7 +152,7 @@ func PushWithTags(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}

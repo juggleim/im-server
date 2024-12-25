@@ -2,6 +2,7 @@ package apis
 
 import (
 	"fmt"
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -18,7 +19,7 @@ func AddConversation(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	services.SyncApiCall(ctx, "add_conver", req.UserId, req.UserId, &pbobjs.Conversation{
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, req.UserId), "add_conver", req.UserId, &pbobjs.Conversation{
 		UserId:      req.UserId,
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
@@ -45,7 +46,7 @@ func DelConversation(ctx *gin.Context) {
 		})
 	}
 
-	services.SyncApiCall(ctx, "del_convers", req.UserId, req.UserId, &pbobjs.ConversationsReq{
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, req.UserId), "del_convers", req.UserId, &pbobjs.ConversationsReq{
 		Conversations: convers,
 	}, nil)
 	tools.SuccessHttpResp(ctx, nil)
@@ -69,7 +70,7 @@ func ClearConverUnread(ctx *gin.Context) {
 			ChannelType: pbobjs.ChannelType(c.ChannelType),
 		})
 	}
-	services.AsyncApiCall(ctx, "clear_unread", req.UserId, req.UserId, &pbobjs.ClearUnreadReq{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.UserId), "clear_unread", req.UserId, &pbobjs.ClearUnreadReq{
 		Conversations: convers,
 		NoCmdMsg:      true,
 	})
@@ -95,7 +96,7 @@ func UndisturbConvers(ctx *gin.Context) {
 			UndisturbType: reqItem.UndisturbType,
 		})
 	}
-	services.SyncApiCall(ctx, "undisturb_convers", undisturbConversReq.UserId, undisturbConversReq.UserId, &pbobjs.UndisturbConversReq{
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, undisturbConversReq.UserId), "undisturb_convers", undisturbConversReq.UserId, &pbobjs.UndisturbConversReq{
 		Items: items,
 	}, nil)
 	tools.SuccessHttpResp(ctx, nil)
@@ -134,7 +135,7 @@ func QryGlobalConvers(ctx *gin.Context) {
 	if len(excludeUserIds) == 0 {
 		excludeUserIds = ctx.QueryArray("exclude_user_ids")
 	}
-	code, resp, err := services.SyncApiCall(ctx, "qry_global_convers", "", rpcTargetId, &pbobjs.QryGlobalConversReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_global_convers", rpcTargetId, &pbobjs.QryGlobalConversReq{
 		Start:          startTime,
 		Order:          0,
 		Count:          int32(limit),
@@ -148,7 +149,7 @@ func QryGlobalConvers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}

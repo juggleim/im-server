@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -32,7 +33,7 @@ func AddBot(ctx *gin.Context) {
 			Value: botInfo.Webhook,
 		})
 	}
-	services.AsyncApiCall(ctx, "add_bot", "", botInfo.BotId, &pbobjs.UserInfo{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "add_bot", botInfo.BotId, &pbobjs.UserInfo{
 		UserId:       botInfo.BotId,
 		Nickname:     botInfo.Nickname,
 		UserPortrait: botInfo.Portrait,

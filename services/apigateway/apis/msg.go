@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
 	"im-server/commons/pbdefines/pbobjs"
@@ -48,14 +49,21 @@ func SendPrivateMsg(ctx *gin.Context) {
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
 			msgId := msgIdMap[targetId]
-			services.AsyncSendMsg(ctx, "p_msg", sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
+			opts := []bases.BaseActorOption{}
+			if !isNotifySender(sendMsgReq) {
+				opts = append(opts, &bases.NoNotifySenderOption{})
+			}
+			opts = append(opts, &bases.WithMsgIdOption{
+				MsgId: msgId,
+			})
+			commonservices.AsyncPrivateMsgOverUpstream(services.ToRpcCtx(ctx, sendMsgReq.SenderId), sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:     sendMsgReq.MsgType,
 				MsgContent:  []byte(sendMsgReq.MsgContent),
 				Flags:       handleFlag(sendMsgReq),
 				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
 				PushData:    handlePushData(sendMsgReq.PushData),
-			}, isNotifySender(sendMsgReq), msgId)
+			}, opts...)
 			time.Sleep(10 * time.Millisecond)
 		}
 	})
@@ -90,12 +98,14 @@ func SendSystemMsg(ctx *gin.Context) {
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
 			msgId := msgIdMap[targetId]
-			services.AsyncSendMsg(ctx, "s_msg", sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
+			commonservices.AsyncSystemMsgOverUpstream(services.ToRpcCtx(ctx, sendMsgReq.SenderId), sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:    sendMsgReq.MsgType,
 				MsgContent: []byte(sendMsgReq.MsgContent),
 				Flags:      handleFlag(sendMsgReq),
 				PushData:   handlePushData(sendMsgReq.PushData),
-			}, false, msgId)
+			}, &bases.NoNotifySenderOption{}, &bases.WithMsgIdOption{
+				MsgId: msgId,
+			})
 			time.Sleep(10 * time.Millisecond)
 		}
 	})
@@ -130,14 +140,21 @@ func SendGroupMsg(ctx *gin.Context) {
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
 			msgId := msgIdMap[targetId]
-			services.AsyncSendMsg(ctx, "g_msg", sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
+			opts := []bases.BaseActorOption{}
+			if !isNotifySender(sendMsgReq) {
+				opts = append(opts, &bases.NoNotifySenderOption{})
+			}
+			opts = append(opts, &bases.WithMsgIdOption{
+				MsgId: msgId,
+			})
+			commonservices.AsyncGroupMsgOverUpstream(services.ToRpcCtx(ctx, sendMsgReq.SenderId), sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:     sendMsgReq.MsgType,
 				MsgContent:  []byte(sendMsgReq.MsgContent),
 				Flags:       handleFlag(sendMsgReq),
 				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
 				PushData:    handlePushData(sendMsgReq.PushData),
-			}, isNotifySender(sendMsgReq), msgId)
+			}, opts...)
 			time.Sleep(10 * time.Millisecond)
 		}
 	})
@@ -152,7 +169,7 @@ func SendGroupCastMsg(ctx *gin.Context) {
 	}
 	if req.TargetId != "" {
 		//add group cast msg
-		services.AsyncApiCall(ctx, "gc_msg", req.SenderId, req.TargetId, &pbobjs.UpMsg{
+		bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "gc_msg", req.TargetId, &pbobjs.UpMsg{
 			MsgType:    req.MsgType,
 			MsgContent: []byte(req.MsgContent),
 			Flags:      commonservices.SetStoreMsg(0),
@@ -170,9 +187,9 @@ func SendGroupCastMsg(ctx *gin.Context) {
 		}
 		for _, conver := range req.TargetConvers {
 			if conver.ChannelType == int(pbobjs.ChannelType_Private) {
-				services.AsyncSendMsg(ctx, "p_msg", req.SenderId, conver.TargetId, upMsg, false, "")
+				commonservices.AsyncPrivateMsgOverUpstream(services.ToRpcCtx(ctx, req.SenderId), req.SenderId, conver.TargetId, upMsg, &bases.NoNotifySenderOption{})
 			} else if conver.ChannelType == int(pbobjs.ChannelType_Group) {
-				services.AsyncSendMsg(ctx, "g_msg", req.SenderId, conver.TargetId, upMsg, false, "")
+				commonservices.AsyncGroupMsgOverUpstream(services.ToRpcCtx(ctx, req.SenderId), req.SenderId, conver.TargetId, upMsg, &bases.NoNotifySenderOption{})
 			}
 			time.Sleep(50 * time.Millisecond)
 		}
@@ -188,7 +205,7 @@ func SendBroadCastMsg(ctx *gin.Context) {
 	}
 	flag := commonservices.SetStoreMsg(0)
 	flag = commonservices.SetCountMsg(flag)
-	services.AsyncApiCall(ctx, "bc_msg", req.SenderId, req.SenderId, &pbobjs.UpMsg{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "bc_msg", req.SenderId, &pbobjs.UpMsg{
 		MsgType:    req.MsgType,
 		MsgContent: []byte(req.MsgContent),
 		Flags:      flag,

@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -21,7 +22,7 @@ func RecallHisMsgs(ctx *gin.Context) {
 	}
 
 	converId := commonservices.GetConversationId(req.FromId, req.TargetId, pbobjs.ChannelType(req.ChannelType))
-	code, _, err := services.SyncApiCall(ctx, "recall_msg", req.FromId, converId, &pbobjs.RecallMsgReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, req.FromId), "recall_msg", converId, &pbobjs.RecallMsgReq{
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
 		MsgId:       req.MsgId,
@@ -32,7 +33,7 @@ func RecallHisMsgs(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -45,7 +46,7 @@ func CleanHisMsgs(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "clean_hismsg", req.FromId, req.TargetId, &pbobjs.CleanHisMsgReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, req.FromId), "clean_hismsg", req.TargetId, &pbobjs.CleanHisMsgReq{
 		TargetId:        req.TargetId,
 		ChannelType:     pbobjs.ChannelType(req.ChannelType),
 		CleanMsgTime:    req.CleanTime,
@@ -58,7 +59,7 @@ func CleanHisMsgs(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -79,7 +80,7 @@ func DelHisMsgs(ctx *gin.Context) {
 			MsgId: m.MsgId,
 		})
 	}
-	code, _, err := services.SyncApiCall(ctx, "del_msg", req.FromId, req.TargetId, &pbobjs.DelHisMsgsReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, req.FromId), "del_msg", req.TargetId, &pbobjs.DelHisMsgsReq{
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
 		Msgs:        msgs,
@@ -89,7 +90,7 @@ func DelHisMsgs(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -134,7 +135,7 @@ func QryHisMsgs(ctx *gin.Context) {
 		order = 0
 	}
 	converId := commonservices.GetConversationId(fromIdStr, targetIdStr, channelType)
-	code, resp, err := services.SyncApiCall(ctx, "qry_hismsgs", fromIdStr, converId, &pbobjs.QryHisMsgsReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, fromIdStr), "qry_hismsgs", converId, &pbobjs.QryHisMsgsReq{
 		TargetId:    targetIdStr,
 		ChannelType: channelType,
 		StartTime:   startTimeInt,
@@ -147,7 +148,7 @@ func QryHisMsgs(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -188,7 +189,7 @@ func MarkRead(ctx *gin.Context) {
 		})
 	}
 	converId := commonservices.GetConversationId(req.UserId, req.TargetId, pbobjs.ChannelType(req.ChannelType))
-	services.AsyncApiCall(ctx, "mark_read", req.UserId, converId, &pbobjs.MarkReadReq{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.UserId), "mark_read", converId, &pbobjs.MarkReadReq{
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
 		Msgs:        pbMsgs,
@@ -217,24 +218,23 @@ func ImportHisMsg(ctx *gin.Context) {
 		return
 	}
 	if msg.ChannelType == int32(pbobjs.ChannelType_Private) {
-		services.AsyncSendMsg(ctx, "imp_pri_msg", msg.SenderId, msg.ReceiverId, &pbobjs.UpMsg{
+		commonservices.AsyncImportPrivateMsgOverUpstream(services.ToRpcCtx(ctx, msg.SenderId), msg.SenderId, msg.ReceiverId, &pbobjs.UpMsg{
 			MsgType:    msg.MsgType,
 			MsgContent: []byte(msg.MsgContent),
 			Flags:      handleHisMsgFlag(msg),
 			MsgTime:    msg.MsgTime,
-		}, false, "")
+		}, &bases.NoNotifySenderOption{})
 	} else if msg.ChannelType == int32(pbobjs.ChannelType_Group) {
-		services.AsyncSendMsg(ctx, "imp_grp_msg", msg.SenderId, msg.ReceiverId, &pbobjs.UpMsg{
+		commonservices.AsyncImportGroupMsgOverUpstream(services.ToRpcCtx(ctx, msg.SenderId), msg.SenderId, msg.ReceiverId, &pbobjs.UpMsg{
 			MsgType:    msg.MsgType,
 			MsgContent: []byte(msg.MsgContent),
 			Flags:      handleHisMsgFlag(msg),
 			MsgTime:    msg.MsgTime,
-		}, false, "")
+		}, &bases.NoNotifySenderOption{})
 	} else {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_ILLEGAL)
 		return
 	}
-	services.AsyncApiCall(ctx, "", msg.SenderId, msg.ReceiverId, &pbobjs.DownMsg{})
 	tools.SuccessHttpResp(ctx, nil)
 }
 

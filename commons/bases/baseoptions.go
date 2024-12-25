@@ -14,6 +14,25 @@ func (opt *OnlySendboxOption) HandleCtx(ctx context.Context) context.Context {
 	return retCtx
 }
 
+type NoNotifySenderOption struct{}
+
+func (opt *NoNotifySenderOption) HandleCtx(ctx context.Context) context.Context {
+	retCtx := setCtxValue(ctx, CtxKey_NoSendbox, true)
+	return retCtx
+}
+
+type WithMsgIdOption struct {
+	MsgId string
+}
+
+func (opt *WithMsgIdOption) HandleCtx(ctx context.Context) context.Context {
+	retCtx := ctx
+	if opt.MsgId != "" {
+		retCtx = setCtxValue(retCtx, CtxKey_MsgId, opt.MsgId)
+	}
+	return retCtx
+}
+
 type TargetIdsOption struct {
 	TargetIds []string
 }
@@ -39,5 +58,12 @@ func (opt *ExtsOption) HandleCtx(ctx context.Context) context.Context {
 		}
 		retCtx = setCtxValue(retCtx, CtxKey_Exts, exts)
 	}
+	return retCtx
+}
+
+type MarkFromApiOption struct{}
+
+func (opt *MarkFromApiOption) HandleCtx(ctx context.Context) context.Context {
+	retCtx := setCtxValue(ctx, CtxKey_IsFromApi, true)
 	return retCtx
 }

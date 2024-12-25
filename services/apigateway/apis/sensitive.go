@@ -2,6 +2,7 @@ package apis
 
 import (
 	"bufio"
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -40,7 +41,7 @@ func QrySensitiveWords(ctx *gin.Context) {
 		wordType, _ = tools.String2Int64(wordTypeStr)
 	}
 
-	code, resp, err := services.SyncApiCall(ctx, "qry_sensitive_words", "", tools.RandStr(8), &pbobjs.QrySensitiveWordsReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_sensitive_words", tools.RandStr(8), &pbobjs.QrySensitiveWordsReq{
 		Size:     int32(size),
 		Page:     int32(page),
 		Word:     word,
@@ -52,7 +53,7 @@ func QrySensitiveWords(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -121,7 +122,7 @@ func ImportSensitiveWords(ctx *gin.Context) {
 	rpcReq := &pbobjs.AddSensitiveWordsReq{
 		Words: allWords,
 	}
-	services.AsyncApiCall(ctx, "add_sensitive_words", "", tools.RandStr(8), rpcReq)
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "add_sensitive_words", tools.RandStr(8), rpcReq)
 	tools.SuccessHttpResp(ctx, nil)
 }
 
@@ -140,7 +141,7 @@ func AddSensitiveWords(ctx *gin.Context) {
 			WordType: pbobjs.SensitiveWordType(word.WordType),
 		})
 	}
-	services.AsyncApiCall(ctx, "add_sensitive_words", "", tools.RandStr(8), rpcReq)
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "add_sensitive_words", tools.RandStr(8), rpcReq)
 	tools.SuccessHttpResp(ctx, nil)
 }
 
@@ -154,8 +155,7 @@ func DeleteSensitiveWords(ctx *gin.Context) {
 	rpcReq := &pbobjs.DelSensitiveWordsReq{
 		Words: req.Words,
 	}
-	services.AsyncApiCall(ctx, "del_sensitive_words", "", tools.RandStr(8), rpcReq)
-
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "del_sensitive_words", tools.RandStr(8), rpcReq)
 	tools.SuccessHttpResp(ctx, nil)
 }
 

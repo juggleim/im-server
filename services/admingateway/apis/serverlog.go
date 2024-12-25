@@ -1,6 +1,8 @@
 package apis
 
 import (
+	"im-server/commons/bases"
+	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/admingateway/services"
@@ -53,7 +55,7 @@ func qryServerLogs(ctx *gin.Context, logType string) {
 		return
 	}
 	services.SetCtxString(ctx, services.CtxKey_AppKey, appkey)
-	code, resp, err := services.SyncApiCall(ctx, "qry_vlog", "", targetId, &pbobjs.QryServerLogsReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_vlog", targetId, &pbobjs.QryServerLogsReq{
 		LogType: logType,
 		UserId:  userId,
 		Session: session,
@@ -66,7 +68,7 @@ func qryServerLogs(ctx *gin.Context, logType string) {
 		services.FailHttpResp(ctx, services.AdminErrorCode_ServerErr, err.Error())
 		return
 	}
-	if code != services.AdminErrorCode_Success {
+	if code != errs.IMErrorCode_SUCCESS {
 		services.FailHttpResp(ctx, services.AdminErrorCode(code), "")
 		return
 	}

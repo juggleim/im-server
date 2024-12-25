@@ -2,6 +2,7 @@ package apis
 
 import (
 	"fmt"
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -30,7 +31,7 @@ func SetGroupSettings(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	services.AsyncApiCall(ctx, "upd_group_info", "", req.GroupId, &pbobjs.GroupInfo{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "upd_group_info", req.GroupId, &pbobjs.GroupInfo{
 		GroupId:  req.GroupId,
 		Settings: commonservices.Map2KvItems(kvMap),
 	})
@@ -44,14 +45,14 @@ func GetGroupSettings(ctx *gin.Context) {
 		GroupId:    groupId,
 		CareFields: []string{},
 	}
-	code, groupInfo, err := services.SyncApiCall(ctx, "get_grp_setting", "", groupId, groupReq, func() proto.Message {
+	code, groupInfo, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "get_grp_setting", groupId, groupReq, func() proto.Message {
 		return &pbobjs.GroupInfo{}
 	})
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -65,7 +66,7 @@ func GroupAddMembers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "g_add_members", "", addMemberReq.GroupId, &pbobjs.GroupMembersReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "g_add_members", addMemberReq.GroupId, &pbobjs.GroupMembersReq{
 		GroupId:       addMemberReq.GroupId,
 		GroupName:     addMemberReq.GroupName,
 		GroupPortrait: addMemberReq.GroupPortrait,
@@ -79,7 +80,7 @@ func GroupAddMembers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -93,7 +94,7 @@ func GroupDelMembers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "g_del_members", "", delMemberReq.GroupId, &pbobjs.GroupMembersReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "g_del_members", delMemberReq.GroupId, &pbobjs.GroupMembersReq{
 		GroupId:   delMemberReq.GroupId,
 		MemberIds: delMemberReq.MemberIds,
 	}, func() proto.Message {
@@ -103,7 +104,7 @@ func GroupDelMembers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -116,7 +117,7 @@ func GroupDissolve(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "g_dissolve", "", disReq.GroupId, &pbobjs.GroupMembersReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "g_dissolve", disReq.GroupId, &pbobjs.GroupMembersReq{
 		GroupId: disReq.GroupId,
 	}, func() proto.Message {
 		return &pbobjs.GroupMembersResp{}
@@ -125,7 +126,7 @@ func GroupDissolve(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -138,7 +139,7 @@ func GroupMute(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "group_mute", "", muteReq.GrouopId, &pbobjs.GroupMuteReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "group_mute", muteReq.GrouopId, &pbobjs.GroupMuteReq{
 		GroupId: muteReq.GrouopId,
 		IsMute:  int32(muteReq.IsMute),
 	}, nil)
@@ -146,7 +147,7 @@ func GroupMute(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -163,14 +164,14 @@ func QryGroupInfo(ctx *gin.Context) {
 		GroupId:    groupId,
 		CareFields: []string{},
 	}
-	code, groupInfo, err := services.SyncApiCall(ctx, "qry_group_info", "", groupId, groupReq, func() proto.Message {
+	code, groupInfo, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_group_info", groupId, groupReq, func() proto.Message {
 		return &pbobjs.GroupInfo{}
 	})
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -192,7 +193,7 @@ func UpdateGroup(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "upd_group_info", "", req.GroupId, &pbobjs.GroupInfo{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "upd_group_info", req.GroupId, &pbobjs.GroupInfo{
 		GroupId:       req.GroupId,
 		GroupName:     req.GroupName,
 		GroupPortrait: req.GroupPortrait,
@@ -219,7 +220,7 @@ func GroupMemberMute(ctx *gin.Context) {
 	if muteReq.IsMute > 0 && muteReq.MuteMinute > 0 {
 		muteEndAt = time.Now().UnixMilli() + int64(muteReq.MuteMinute*60*1000)
 	}
-	code, _, err := services.SyncApiCall(ctx, "group_member_mute", "", muteReq.GroupId, &pbobjs.GroupMemberMuteReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "group_member_mute", muteReq.GroupId, &pbobjs.GroupMemberMuteReq{
 		GroupId:   muteReq.GroupId,
 		MemberIds: muteReq.MemberIds,
 		IsMute:    int32(muteReq.IsMute),
@@ -229,7 +230,7 @@ func GroupMemberMute(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -242,7 +243,7 @@ func GroupMemberAllow(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "group_member_allow", "", allowReq.GroupId, &pbobjs.GroupMemberAllowReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "group_member_allow", allowReq.GroupId, &pbobjs.GroupMemberAllowReq{
 		GroupId:   allowReq.GroupId,
 		MemberIds: allowReq.MemberIds,
 		IsAllow:   int32(allowReq.IsAllow),
@@ -251,7 +252,7 @@ func GroupMemberAllow(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -269,7 +270,7 @@ func GroupMembers(ctx *gin.Context) {
 			limit = intVal
 		}
 	}
-	code, resp, err := services.SyncApiCall(ctx, "g_qry_members", "", groupId, &pbobjs.QryGroupMembersReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "g_qry_members", groupId, &pbobjs.QryGroupMembersReq{
 		GroupId: groupId,
 		Limit:   limit,
 		Offset:  offsetStr,
@@ -280,7 +281,7 @@ func GroupMembers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
@@ -305,14 +306,17 @@ func GroupMembersByIds(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, resp, err := services.SyncApiCall(ctx, "qry_group_members_by_ids", "", req.GroupId, &pbobjs.GroupMembersReq{}, func() proto.Message {
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_group_members_by_ids", req.GroupId, &pbobjs.GroupMembersReq{
+		GroupId:   req.GroupId,
+		MemberIds: req.MemberIds,
+	}, func() proto.Message {
 		return &pbobjs.GroupMembersResp{}
 	})
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}

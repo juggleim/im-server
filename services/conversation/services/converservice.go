@@ -409,7 +409,7 @@ func SetTopConversV2(ctx context.Context, req *pbobjs.ConversationsReq) (errs.IM
 		//notify other device
 		flag := commonservices.SetCmdMsg(0)
 		bs, _ := json.Marshal(topConvers)
-		code, _, msgTime, _ := commonservices.SyncPrivateMsg(ctx, userId, &pbobjs.UpMsg{
+		code, _, msgTime, _ := commonservices.SyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 			MsgType:    topConversMsgType,
 			MsgContent: bs,
 			Flags:      flag,

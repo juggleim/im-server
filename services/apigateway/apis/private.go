@@ -22,7 +22,7 @@ func AddPrivateGlobalMuteMembers(ctx *gin.Context) {
 	for _, ids := range groups {
 		uIds := ids
 		go func() {
-			services.AsyncApiCall(ctx, "pri_global_mute", "", uIds[0], &pbobjs.BatchMuteUsersReq{
+			bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "pri_global_mute", uIds[0], &pbobjs.BatchMuteUsersReq{
 				UserIds:  uIds,
 				IsDelete: false,
 			})
@@ -41,7 +41,7 @@ func DelPrivateGlobalMuteMembers(ctx *gin.Context) {
 	for _, ids := range groups {
 		uIds := ids
 		go func() {
-			services.AsyncApiCall(ctx, "pri_global_mute", "", uIds[0], &pbobjs.BatchMuteUsersReq{
+			bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "pri_global_mute", uIds[0], &pbobjs.BatchMuteUsersReq{
 				UserIds:  uIds,
 				IsDelete: true,
 			})
@@ -64,7 +64,7 @@ func QryPrivateGlobalMuteMembers(ctx *gin.Context) {
 		limit = 1000
 	}
 
-	code, resp, err := services.SyncApiCall(ctx, "qry_pri_global_mute", "", tools.RandStr(10), &pbobjs.QryBlockUsersReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_pri_global_mute", tools.RandStr(10), &pbobjs.QryBlockUsersReq{
 		Limit:  limit,
 		Offset: offset,
 	}, func() proto.Message {
@@ -74,7 +74,7 @@ func QryPrivateGlobalMuteMembers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != int32(errs.IMErrorCode_SUCCESS) {
+	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}

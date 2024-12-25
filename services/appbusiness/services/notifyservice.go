@@ -13,11 +13,11 @@ func SendGrpNotify(ctx context.Context, grpId string, notify *models.GroupNotify
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	bs, _ := tools.JsonMarshal(notify)
 	flag := commonservices.SetStoreMsg(0)
-	commonservices.GroupMsgFromApi(ctx, requestId, grpId, &pbobjs.UpMsg{
+	commonservices.AsyncGroupMsgOverUpstream(ctx, requestId, grpId, &pbobjs.UpMsg{
 		MsgType:    models.GroupNotifyMsgType,
 		MsgContent: bs,
 		Flags:      flag,
-	}, false)
+	}, &bases.MarkFromApiOption{})
 }
 
 func SendFriendNotify(ctx context.Context, targetId string, notify *models.FriendNotify) {

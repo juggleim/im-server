@@ -2,6 +2,7 @@ package apis
 
 import (
 	"im-server/commons/bases"
+	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/admingateway/services"
@@ -128,13 +129,13 @@ func QryConnectCount(ctx *gin.Context) {
 		nodeName := rpcNode.Name
 		go func() {
 			defer wg.Done()
-			code, respObj, err := services.SyncApiCall(ctx, "qry_connect_count", "", nodeName, &pbobjs.QryConnectCountReq{
+			code, respObj, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_connect_count", nodeName, &pbobjs.QryConnectCountReq{
 				Start: start,
 				End:   end,
 			}, func() proto.Message {
 				return &pbobjs.QryConnectCountResp{}
 			})
-			if err == nil && code == services.AdminErrorCode_Success && respObj != nil {
+			if err == nil && code == errs.IMErrorCode_SUCCESS && respObj != nil {
 				resp := respObj.(*pbobjs.QryConnectCountResp)
 				for _, item := range resp.Items {
 					lock.Lock()
