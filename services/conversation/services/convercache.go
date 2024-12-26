@@ -466,11 +466,13 @@ func (uc *UserConversations) TotalUnreadCount() int64 {
 	defer lock.RUnlock()
 	var count int64 = 0
 	for _, conver := range uc.ConverItemMap {
-		c := conver.LatestUnreadMsgIndex - conver.LatestReadMsgIndex
-		if c == 0 && conver.UnreadTag == 1 {
-			count = count + 1
-		} else {
-			count = count + c
+		if conver.IsDeleted == 0 {
+			c := conver.LatestUnreadMsgIndex - conver.LatestReadMsgIndex
+			if c == 0 && conver.UnreadTag == 1 {
+				count = count + 1
+			} else {
+				count = count + c
+			}
 		}
 	}
 	return count

@@ -18,6 +18,18 @@ func (client *WsImClient) QryConversation(req *pbobjs.QryConverReq) (utils.Clien
 	return code, nil
 }
 
+func (client *WsImClient) QryTotalUnreadCount(req *pbobjs.QryTotalUnreadCountReq) (utils.ClientErrorCode, *pbobjs.QryTotalUnreadCountResp) {
+	data, _ := tools.PbMarshal(req)
+	code, qryAck := client.Query("qry_total_unread_count", client.UserId, data)
+	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
+		resp := &pbobjs.QryTotalUnreadCountResp{}
+		tools.PbUnMarshal(qryAck.Data, resp)
+		return utils.ClientErrorCode_Success, resp
+	} else {
+		return utils.ClientErrorCode(code), nil
+	}
+}
+
 func (client *WsImClient) QryConversations(req *pbobjs.QryConversationsReq) (utils.ClientErrorCode, *pbobjs.QryConversationsResp) {
 	data, _ := tools.PbMarshal(req)
 	code, qryAck := client.Query("qry_convers", client.UserId, data)
