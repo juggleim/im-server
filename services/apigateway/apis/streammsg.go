@@ -45,10 +45,8 @@ func AppendPrivateStreamMsg(ctx *gin.Context) {
 		return
 	}
 	streamDown := &pbobjs.StreamDownMsg{
-		TargetId:    req.TargetId,
-		ChannelType: pbobjs.ChannelType_Private,
-		MsgId:       req.MsgId,
-		MsgItems:    []*pbobjs.StreamMsgItem{},
+		MsgId:    req.MsgId,
+		MsgItems: []*pbobjs.StreamMsgItem{},
 	}
 	for _, item := range req.Items {
 		pbEvent := pbobjs.StreamEvent_StreamComplete
@@ -67,8 +65,7 @@ func AppendPrivateStreamMsg(ctx *gin.Context) {
 			break
 		}
 	}
-	targetId := commonservices.GetConversationId(req.SenderId, req.TargetId, pbobjs.ChannelType_Private)
-	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "pri_stream", targetId, streamDown)
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "pri_stream", req.TargetId, streamDown)
 	tools.SuccessHttpResp(ctx, nil)
 }
 
@@ -79,9 +76,7 @@ func CompletePrivateStreamMsg(ctx *gin.Context) {
 		return
 	}
 	streamDown := &pbobjs.StreamDownMsg{
-		TargetId:    req.TargetId,
-		ChannelType: pbobjs.ChannelType_Private,
-		MsgId:       req.MsgId,
+		MsgId: req.MsgId,
 		MsgItems: []*pbobjs.StreamMsgItem{
 			{
 				Event:          pbobjs.StreamEvent_StreamComplete,
@@ -90,7 +85,6 @@ func CompletePrivateStreamMsg(ctx *gin.Context) {
 			},
 		},
 	}
-	targetId := commonservices.GetConversationId(req.SenderId, req.TargetId, pbobjs.ChannelType_Private)
-	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "pri_stream", targetId, streamDown)
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "pri_stream", req.TargetId, streamDown)
 	tools.SuccessHttpResp(ctx, nil)
 }

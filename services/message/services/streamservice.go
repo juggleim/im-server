@@ -35,6 +35,7 @@ type StreamMsg struct {
 func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	senderId := bases.GetRequesterIdFromCtx(ctx)
+	targetId := bases.GetTargetIdFromCtx(ctx)
 	key := strings.Join([]string{appkey, req.MsgId}, "_")
 	l := streamMsgLocks.GetLocks(key)
 	l.Lock()
@@ -61,7 +62,7 @@ func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 		sMsg := &StreamMsg{
 			Appkey:         appkey,
 			SenderId:       senderId,
-			TargetId:       req.TargetId,
+			TargetId:       targetId,
 			MsgId:          req.MsgId,
 			streamMsgItems: skipmap.NewInt64(),
 		}
@@ -84,7 +85,6 @@ func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 }
 
 func updateStreamMsg(ctx context.Context, streamMsg *StreamMsg) {
-	senderId := bases.GetRequesterIdFromCtx(ctx)
 	pbStreamMsg := &pbobjs.StreamDownMsg{
 		TargetId:    streamMsg.TargetId,
 		ChannelType: pbobjs.ChannelType_Private,
@@ -99,28 +99,16 @@ func updateStreamMsg(ctx context.Context, streamMsg *StreamMsg) {
 		}
 		return true
 	})
-	data, _ := tools.PbMarshal(pbStreamMsg)
-	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
-		RpcMsgType:   pbobjs.RpcMsgType_UserPub,
-		AppKey:       bases.GetAppKeyFromCtx(ctx),
-		Session:      bases.GetSessionFromCtx(ctx),
-		Method:       "upd_stream",
-		RequesterId:  bases.GetRequesterIdFromCtx(ctx),
-		ReqIndex:     bases.GetSeqIndexFromCtx(ctx),
-		Qos:          bases.GetQosFromCtx(ctx),
-		AppDataBytes: data,
-		TargetId:     commonservices.GetConversationId(senderId, streamMsg.TargetId, pbobjs.ChannelType_Private),
-	})
+	targetId := commonservices.GetConversationId(streamMsg.SenderId, streamMsg.TargetId, pbobjs.ChannelType_Private)
+	bases.AsyncRpcCall(ctx, "upd_stream", targetId, pbStreamMsg)
 }
 
 func HandleStreamMsg(ctx context.Context, req *pbobjs.StreamDownMsg) errs.IMErrorCode {
 	AppendStreamMsgItem(ctx, req)
 
-	targetId := req.TargetId
 	req.TargetId = bases.GetRequesterIdFromCtx(ctx)
-	rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "stream_msg", req)
-	rpcMsg.Qos = 0
-	bases.UnicastRouteWithNoSender(rpcMsg)
+	req.ChannelType = pbobjs.ChannelType_Private
+	bases.AsyncRpcCall(ctx, "stream_msg", bases.GetTargetIdFromCtx(ctx), req)
 
 	return errs.IMErrorCode_SUCCESS
 }
