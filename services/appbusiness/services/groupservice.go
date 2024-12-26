@@ -76,6 +76,19 @@ func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobj
 		myRole = pbobjs.GrpMemberRole_GrpAdmin
 	}
 	ret.MyRole = myRole
+	//owner
+	if creator != "" {
+		ownerUser := commonservices.GetTargetDisplayUserInfo(ctx, creator)
+		if ownerUser != nil {
+			ret.Owner = &pbobjs.GroupMemberInfo{
+				UserId:     ownerUser.UserId,
+				Nickname:   ownerUser.Nickname,
+				Avatar:     ownerUser.UserPortrait,
+				MemberType: ownerUser.UserType,
+			}
+		}
+	}
+	//top members
 	code, topMembers := QueryGrpMembers(ctx, &pbobjs.QryGroupMembersReq{
 		GroupId: groupId,
 		Limit:   20,
