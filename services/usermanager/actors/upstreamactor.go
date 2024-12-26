@@ -32,6 +32,7 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 		if exist && user != nil {
 			userInfo.Nickname = user.Nickname
 			userInfo.UserPortrait = user.UserPortrait
+			userInfo.UserType = pbobjs.UserType(user.UserType)
 			userInfo.UpdatedTime = user.UpdatedTime
 			userInfo.ExtFields = commonservices.Map2KvItems(user.ExtFields)
 			//check private global mute

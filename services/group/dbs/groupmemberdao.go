@@ -60,6 +60,12 @@ func (member GroupMemberDao) QueryMembers(appkey, groupId string, startId, limit
 	return items, err
 }
 
+func (member GroupMemberDao) QueryGroupsByMemberId(appkey, memberId string, startId, limit int64) ([]*GroupMemberDao, error) {
+	var items []*GroupMemberDao
+	err := dbcommons.GetDb().Where("app_key=? and member_id=? and id>?", appkey, memberId, startId).Order("id asc").Limit(limit).Find(&items).Error
+	return items, err
+}
+
 func (member GroupMemberDao) BatchDelete(appkey, groupId string, memberIds []string) error {
 	return dbcommons.GetDb().Where("app_key=? and group_id=? and member_id in (?)", appkey, groupId, memberIds).Delete(&GroupMemberDao{}).Error
 }

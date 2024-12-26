@@ -8,6 +8,7 @@ message RtcRoomReq{
     string roomId = 2;
     RtcMember joinMember = 3;
     RtcChannel rtcChannel = 4;
+    RtcMediaType rtcMediaType = 5;
 }
 
 message RtcRoom{
@@ -15,6 +16,7 @@ message RtcRoom{
     string roomId = 2;
     UserInfo owner = 3;
     RtcChannel rtcChannel = 4;
+    RtcMediaType rtcMediaType = 5;
     
     repeated RtcMember members = 51;
 }
@@ -60,9 +62,10 @@ enum RtcState{
 
 message RtcRoomEvent{
     RtcRoomEventType roomEventType = 1;
-    RtcMember member = 2;
+    repeated RtcMember members = 2;
     RtcRoom room = 3;
     RtcRoomQuitReason reason = 4;
+    int64 eventTime = 5;
 }
 
 enum RtcRoomEventType{
@@ -79,11 +82,17 @@ enum RtcRoomQuitReason{
     PingTimeout = 2;
 }
 
+enum RtcMediaType{
+    RtcAudio = 0;
+    RtcVideo = 1;
+}
+
 message RtcInviteReq{
     repeated string targetIds = 1;
     RtcRoomType roomType = 2;
     string roomId = 3;
     RtcChannel rtcChannel = 4;
+    RtcMediaType rtcMediaType = 5;
 }
 
 message RtcMemberRooms{
@@ -97,6 +106,7 @@ message RtcMemberRoom{
     RtcState rtcState = 4;
     RtcChannel rtcChannel = 5;
     string deviceId = 6;
+    RtcMediaType rtcMediaType = 7;
 }
 
 message RtcAuth{
@@ -112,6 +122,7 @@ message RtcInviteEvent{
     UserInfo user = 2;
     RtcRoom room = 3;
     repeated UserInfo targetUsers = 4;
+    int64 eventTime = 5;
 }
 
 enum InviteType{

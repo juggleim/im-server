@@ -6,6 +6,7 @@ type RtcRoom struct {
 	RoomId       string
 	RoomType     pbobjs.RtcRoomType
 	RtcChannel   pbobjs.RtcChannel
+	RtcMediaType pbobjs.RtcMediaType
 	CreatedTime  int64
 	AcceptedTime int64
 	OwnerId      string

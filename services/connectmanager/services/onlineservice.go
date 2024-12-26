@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-func RegPushToken(ctx imcontext.WsHandleContext, appkey, userId, deviceId, platformStr, pushChannelStr, packageName, pushToken string) {
-	if deviceId != "" && platformStr != "" && pushChannelStr != "" && packageName != "" && pushToken != "" {
+func RegPushToken(ctx imcontext.WsHandleContext, appkey, userId, deviceId, platformStr, pushChannelStr, packageName, pushToken, voipToken string) {
+	if deviceId != "" && platformStr != "" && pushChannelStr != "" && packageName != "" && (pushToken != "" || voipToken != "") {
 		platform := commonservices.Str2Platform(platformStr)
 		pushChannel := commonservices.Str2PushChannel(pushChannelStr)
 
@@ -23,6 +23,7 @@ func RegPushToken(ctx imcontext.WsHandleContext, appkey, userId, deviceId, platf
 				Platform:    platform,
 				PushChannel: pushChannel,
 				PushToken:   pushToken,
+				VoipToken:   voipToken,
 				PackageName: packageName,
 			}
 			data, _ := tools.PbMarshal(req)
@@ -89,7 +90,7 @@ func SetLanguage(ctx imcontext.WsHandleContext, language string) {
 	})
 }
 
-func Online(ctx imcontext.WsHandleContext, ext, language string) {
+func Online(ctx imcontext.WsHandleContext, ext, language string, isBackend bool) {
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	deviceId := imcontext.GetDeviceId(ctx)
 	platform := imcontext.GetPlatform(ctx)
@@ -112,8 +113,12 @@ func Online(ctx imcontext.WsHandleContext, ext, language string) {
 	SetLanguage(ctx, language)
 	//close push switch
 	if platform == string(commonservices.Platform_Android) || platform == string(commonservices.Platform_IOS) {
-		bases.AsyncRpcCall(imcontext.GetRpcContext(ctx), "upd_push_status", userId, &pbobjs.UserPushStatus{
-			CanPush: false,
+		var pushSwitch int32 = 0
+		if isBackend {
+			pushSwitch = 1
+		}
+		bases.AsyncRpcCall(imcontext.GetRpcContext(ctx), "push_switch", userId, &pbobjs.PushSwitch{
+			Switch: pushSwitch,
 		})
 	}
 }
@@ -143,4 +148,8 @@ func Offline(ctx imcontext.WsHandleContext, code errs.IMErrorCode) {
 		Action:  string(imcontext.Action_Disconnect),
 		Code:    int32(code),
 	})
+	//quit rtc room
+	if code == errs.IMErrorCode_CONNECT_KICKED_OFF {
+		bases.AsyncRpcCall(rpcCtx, "rtc_sync_user_quit", userId, &pbobjs.Nil{})
+	}
 }

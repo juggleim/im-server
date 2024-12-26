@@ -36,8 +36,9 @@ type PushConfWraper struct {
 	AndroidPushConf *AndroidPushConf
 }
 type IosPushConf struct {
-	Package    string
-	ApnsClient *apns2.Client
+	Package        string
+	ApnsClient     *apns2.Client
+	ApnsVoipClient *apns2.Client
 }
 type AndroidPushConf struct {
 	Package          string
@@ -95,20 +96,36 @@ func initIosPushConf(ctx context.Context, appkey, packageName string) *IosPushCo
 	iosDao := dbs.IosCertificateDao{}
 	iosDb, err := iosDao.FindByPackage(appkey, packageName)
 	if err == nil {
-		cert, err := certificate.FromP12Bytes(iosDb.Certificate, iosDb.CertPwd)
-		if err == nil {
-			iosPushConf := &IosPushConf{
-				Package: packageName,
-			}
-			if iosDb.IsProduct > 0 {
-				iosPushConf.ApnsClient = apns2.NewClient(cert).Production()
-			} else {
-				iosPushConf.ApnsClient = apns2.NewClient(cert).Development()
-			}
-			return iosPushConf
-		} else {
-			logs.WithContext(ctx).Errorf("init ios certificate failed. %v", err)
+		iosPushConf := &IosPushConf{
+			Package: packageName,
 		}
+		if len(iosDb.Certificate) > 0 {
+			cert, err := certificate.FromP12Bytes(iosDb.Certificate, iosDb.CertPwd)
+			if err == nil {
+				if iosDb.IsProduct > 0 {
+					iosPushConf.ApnsClient = apns2.NewClient(cert).Production()
+				} else {
+					iosPushConf.ApnsClient = apns2.NewClient(cert).Development()
+				}
+				return iosPushConf
+			} else {
+				logs.WithContext(ctx).Errorf("init ios certificate failed. %v", err)
+			}
+		}
+		//voip cert
+		if len(iosDb.VoipCert) > 0 {
+			voipCert, err := certificate.FromP12Bytes(iosDb.VoipCert, iosDb.VoipCertPwd)
+			if err == nil {
+				if iosDb.IsProduct > 0 {
+					iosPushConf.ApnsVoipClient = apns2.NewClient(voipCert).Production()
+				} else {
+					iosPushConf.ApnsVoipClient = apns2.NewClient(voipCert).Development()
+				}
+			} else {
+				logs.WithContext(ctx).Errorf("init ios voip certificate failed. %v", err)
+			}
+		}
+		return iosPushConf
 	} else {
 		logs.WithContext(ctx).Errorf("qry ios push conf failed. %v", err)
 	}

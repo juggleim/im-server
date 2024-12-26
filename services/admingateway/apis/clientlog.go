@@ -2,6 +2,7 @@ package apis
 
 import (
 	"fmt"
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -59,21 +60,17 @@ func ClientLogNtf(ctx *gin.Context) {
 		End:      req.End,
 		Platform: req.Platform,
 	}
-	code, resp, err := apiService.SyncSendMsg(ctx, "s_msg", "clientlog", req.UserId, &pbobjs.UpMsg{
+	code, msgId, _, _ := commonservices.SyncSystemMsg(apiService.ToRpcCtx(ctx, ""), "clientlog", req.UserId, &pbobjs.UpMsg{
 		MsgType:    "jg:logcmd",
 		MsgContent: []byte(tools.ToJson(logCmd)),
 		Flags:      commonservices.SetCmdMsg(0),
-	}, false)
-	if err != nil || code != errs.IMErrorCode_SUCCESS {
+	}, &bases.NoNotifySenderOption{})
+	if code != errs.IMErrorCode_SUCCESS {
 		item.State = dbs.ClientLogState_SendFail
-		if err != nil {
-			item.FailReason = err.Error()
-		} else {
-			item.FailReason = fmt.Sprintf("code:%d", code)
-		}
+		item.FailReason = fmt.Sprintf("code:%d", code)
 	} else {
 		item.State = dbs.ClientLogState_SendOK
-		item.MsgId = resp.MsgId
+		item.MsgId = msgId
 	}
 	dao := &dbs.ClientLogDao{}
 	dao.Create(item)

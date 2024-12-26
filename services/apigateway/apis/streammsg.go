@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -19,22 +20,22 @@ func CreatePrivateStreamMsg(ctx *gin.Context) {
 		return
 	}
 	msgFlag := handleFlag(sendMsgReq)
-	code, sendAck, err := services.SyncSendMsg(ctx, "p_msg", sendMsgReq.SenderId, sendMsgReq.TargetId, &pbobjs.UpMsg{
+	code, msgId, msgTime, msgSeq := commonservices.SyncPrivateMsgOverUpstream(services.ToRpcCtx(ctx, ""), sendMsgReq.SenderId, sendMsgReq.TargetId, &pbobjs.UpMsg{
 		MsgType:     sendMsgReq.MsgType,
 		MsgContent:  []byte(sendMsgReq.MsgContent),
 		Flags:       commonservices.SetStreamMsg(msgFlag),
 		MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 		ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
-	}, false)
-	if err != nil {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
-		return
-	}
+	}, &bases.NoNotifySenderOption{})
 	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, code)
 		return
 	}
-	tools.SuccessHttpResp(ctx, sendAck)
+	tools.SuccessHttpResp(ctx, &models.SendMsgResp{
+		MsgId:   msgId,
+		MsgTime: msgTime,
+		MsgSeq:  msgSeq,
+	})
 }
 
 func AppendPrivateStreamMsg(ctx *gin.Context) {
@@ -44,20 +45,27 @@ func AppendPrivateStreamMsg(ctx *gin.Context) {
 		return
 	}
 	streamDown := &pbobjs.StreamDownMsg{
-		TargetId:    req.TargetId,
-		ChannelType: pbobjs.ChannelType_Private,
-		MsgId:       req.MsgId,
-		MsgItems:    []*pbobjs.StreamMsgItem{},
+		MsgId:    req.MsgId,
+		MsgItems: []*pbobjs.StreamMsgItem{},
 	}
 	for _, item := range req.Items {
+		pbEvent := pbobjs.StreamEvent_StreamComplete
+		event := item.Event
+		if event == "msg" {
+			pbEvent = pbobjs.StreamEvent_StreamMessage
+		} else {
+			pbEvent = pbobjs.StreamEvent_StreamComplete
+		}
 		streamDown.MsgItems = append(streamDown.MsgItems, &pbobjs.StreamMsgItem{
-			Event:          pbobjs.StreamEvent_StreamMessage,
+			Event:          pbEvent,
 			SubSeq:         item.SubSeq,
 			PartialContent: []byte(item.PartialContent),
 		})
+		if pbEvent == pbobjs.StreamEvent_StreamComplete {
+			break
+		}
 	}
-	targetId := commonservices.GetConversationId(req.SenderId, req.TargetId, pbobjs.ChannelType_Private)
-	services.AsyncApiCall(ctx, "pri_stream", req.SenderId, targetId, streamDown)
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "pri_stream", req.TargetId, streamDown)
 	tools.SuccessHttpResp(ctx, nil)
 }
 
@@ -68,9 +76,7 @@ func CompletePrivateStreamMsg(ctx *gin.Context) {
 		return
 	}
 	streamDown := &pbobjs.StreamDownMsg{
-		TargetId:    req.TargetId,
-		ChannelType: pbobjs.ChannelType_Private,
-		MsgId:       req.MsgId,
+		MsgId: req.MsgId,
 		MsgItems: []*pbobjs.StreamMsgItem{
 			{
 				Event:          pbobjs.StreamEvent_StreamComplete,
@@ -79,7 +85,6 @@ func CompletePrivateStreamMsg(ctx *gin.Context) {
 			},
 		},
 	}
-	targetId := commonservices.GetConversationId(req.SenderId, req.TargetId, pbobjs.ChannelType_Private)
-	services.AsyncApiCall(ctx, "pri_stream", req.SenderId, targetId, streamDown)
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "pri_stream", req.TargetId, streamDown)
 	tools.SuccessHttpResp(ctx, nil)
 }

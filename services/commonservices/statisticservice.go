@@ -81,17 +81,17 @@ func QryMsgStatistic(appkey string, statTypes []StatType, channelType pbobjs.Cha
 		case int(StatType_Up):
 			ret.MsgUp.Items = append(ret.MsgUp.Items, &StatisticMsgItem{
 				Count:    item.Count,
-				TimeMark: item.TimeMark,
+				TimeMark: item.TimeMark * 1000,
 			})
 		case int(StatType_Down):
 			ret.MsgDown.Items = append(ret.MsgDown.Items, &StatisticMsgItem{
 				Count:    item.Count,
-				TimeMark: item.TimeMark,
+				TimeMark: item.TimeMark * 1000,
 			})
 		case int(StatType_Dispatch):
 			ret.MsgDispatch.Items = append(ret.MsgDispatch.Items, &StatisticMsgItem{
 				Count:    item.Count,
-				TimeMark: item.TimeMark,
+				TimeMark: item.TimeMark * 1000,
 			})
 		}
 	}
@@ -265,10 +265,8 @@ type ConcurrentConnectItem struct {
 	Count    int64 `json:"count"`
 }
 
-func QryConncurrentConnect(appkey string, start, end int64) *Statistics {
-	ret := &Statistics{
-		Items: []interface{}{},
-	}
+func QryConncurrentConnect(appkey string, start, end int64) []*ConcurrentConnectItem {
+	retItems := []*ConcurrentConnectItem{}
 	prefix := fmt.Sprintf("concurrent_connect:%s_", appkey)
 	for {
 		startBs := []byte{}
@@ -284,7 +282,7 @@ func QryConncurrentConnect(appkey string, start, end int64) *Statistics {
 				bs := item.Key[len(item.Key)-13:]
 				timestamp, err := tools.String2Int64(string(bs))
 				if err == nil {
-					ret.Items = append(ret.Items, &ConcurrentConnectItem{
+					retItems = append(retItems, &ConcurrentConnectItem{
 						TimeMark: timestamp,
 						Count:    tools.BytesToInt64(item.Val),
 					})
@@ -302,7 +300,6 @@ func QryConncurrentConnect(appkey string, start, end int64) *Statistics {
 		if len(items) < 1000 {
 			break
 		}
-		break
 	}
-	return ret
+	return retItems
 }

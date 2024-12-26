@@ -12,6 +12,7 @@ type GroupInfo struct {
 	IsMute        int               `json:"is_mute"`
 	UpdatedTime   int64             `json:"updated_time"`
 	ExtFields     map[string]string `json:"ext_fields"`
+	Settings      map[string]string `json:"settings"`
 }
 
 type GroupMembersReq struct {

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"im-server/commons/configures"
+	"im-server/commons/logs"
 
-	"github.com/astaxie/beego/logs"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -60,7 +60,7 @@ type dbLogger struct {
 }
 
 func (l *dbLogger) Print(values ...interface{}) {
-	logs.Debug("SQL:", values)
+	logs.Debugf("SQL:%v", values...)
 }
 
 func Create(t interface{}) error {

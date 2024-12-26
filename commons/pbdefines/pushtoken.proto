@@ -27,4 +27,5 @@ message RegPushTokenReq{
     PushChannel pushChannel = 3;
     string pushToken = 4;
     string packageName = 5;
+    string voipToken = 6;
 }

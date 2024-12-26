@@ -21,6 +21,7 @@ type PushData struct {
 	PushTitle string `json:"push_title"`
 	PushText  string `json:"push_text"`
 	PushExtra string `json:"push_extra"`
+	PushLevel int    `json:"push_level"`
 }
 
 type MentionInfo struct {
@@ -128,6 +129,7 @@ type AppendStreamMsgReq struct {
 }
 
 type StreamMsgItem struct {
+	Event          string `json:"event"`
 	SubSeq         int64  `json:"sub_seq"`
 	PartialContent string `json:"partial_content"`
 }

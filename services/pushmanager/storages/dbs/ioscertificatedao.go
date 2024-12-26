@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"fmt"
 	"im-server/commons/dbcommons"
 )
 
@@ -11,6 +12,10 @@ type IosCertificateDao struct {
 	AppKey      string `gorm:"app_key" json:"app_key"`
 	CertPwd     string `gorm:"cert_pwd" json:"cert_pwd"`
 	IsProduct   int    `gorm:"is_product" json:"is_product"`
+
+	VoipCert     []byte `gorm:"voip_cert" json:"voip_cert"`
+	VoipCertPwd  string `gorm:"voip_cert_pwd" json:"voip_cert_pwd"`
+	VoipCertPath string `gorm:"voip_cert_path" json:"voip_cert_path"`
 	// CreatedTime time.Time `gorm:"created_time"`
 }
 
@@ -25,22 +30,20 @@ func (cer IosCertificateDao) FindByPackage(appkey, packageName string) (*IosCert
 }
 
 func (cer IosCertificateDao) Upsert(item IosCertificateDao) error {
-	if len(item.Certificate) <= 0 {
-		err := dbcommons.GetDb().Exec("INSERT INTO ioscertificates (app_key,package,is_product,cert_pwd,cert_path) "+
-			"VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE "+
-			"is_product=?,cert_pwd=?,cert_path=?,package=?",
-			item.AppKey, item.Package, item.IsProduct, item.CertPwd, item.CertPath,
-			item.IsProduct, item.CertPwd, item.CertPath, item.Package,
-		).Error
-		return err
+	var sql string = ""
+	if len(item.Certificate) > 0 && len(item.VoipCert) > 0 {
+		sql = fmt.Sprintf("INSERT INTO %s (app_key,package,is_product,cert_pwd,voip_cert_pwd,certificate,cert_path,voip_cert,voip_cert_path)VALUES(?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE package=VALUES(package),is_product=VALUES(is_product),cert_pwd=VALUES(cert_pwd),voip_cert_pwd=VALUES(voip_cert_pwd),certificate=VALUES(certificate),cert_path=VALUES(cert_path),voip_cert=VALUES(voip_cert),voip_cert_path=VALUES(voip_cert_path)", cer.TableName())
+		return dbcommons.GetDb().Exec(sql, item.AppKey, item.Package, item.IsProduct, item.CertPwd, item.VoipCertPwd, item.Certificate, item.CertPath, item.VoipCert, item.VoipCertPath).Error
+	} else if len(item.Certificate) > 0 {
+		sql = fmt.Sprintf("INSERT INTO %s (app_key,package,is_product,cert_pwd,voip_cert_pwd,certificate,cert_path)VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE package=VALUES(package),is_product=VALUES(is_product),cert_pwd=VALUES(cert_pwd),voip_cert_pwd=VALUES(voip_cert_pwd),certificate=VALUES(certificate),cert_path=VALUES(cert_path)", cer.TableName())
+		return dbcommons.GetDb().Exec(sql, item.AppKey, item.Package, item.IsProduct, item.CertPwd, item.VoipCertPwd, item.Certificate, item.CertPath).Error
+	} else if len(item.VoipCert) > 0 {
+		sql = fmt.Sprintf("INSERT INTO %s (app_key,package,is_product,cert_pwd,voip_cert_pwd,voip_cert,voip_cert_path)VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE package=VALUES(package),is_product=VALUES(is_product),cert_pwd=VALUES(cert_pwd),voip_cert_pwd=VALUES(voip_cert_pwd),voip_cert=VALUES(voip_cert),voip_cert_path=VALUES(voip_cert_path)", cer.TableName())
+		return dbcommons.GetDb().Exec(sql, item.AppKey, item.Package, item.IsProduct, item.CertPwd, item.VoipCertPwd, item.VoipCert, item.VoipCertPath).Error
+	} else {
+		sql = fmt.Sprintf("INSERT INTO %s (app_key,package,is_product,cert_pwd,voip_cert_pwd)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE package=VALUES(package),is_product=VALUES(is_product),cert_pwd=VALUES(cert_pwd),voip_cert_pwd=VALUES(voip_cert_pwd)", cer.TableName())
+		return dbcommons.GetDb().Exec(sql, item.AppKey, item.Package, item.IsProduct, item.CertPwd, item.VoipCertPwd).Error
 	}
-	err := dbcommons.GetDb().Exec("INSERT INTO ioscertificates (app_key,package,is_product,certificate,cert_pwd, cert_path) "+
-		"VALUES(?,?,?,?,?,?) ON DUPLICATE KEY UPDATE "+
-		"is_product=?,certificate=?,cert_pwd=?,cert_path=?,package=?",
-		item.AppKey, item.Package, item.IsProduct, item.Certificate, item.CertPwd, item.CertPath,
-		item.IsProduct, item.Certificate, item.CertPwd, item.CertPath, item.Package,
-	).Error
-	return err
 }
 
 func (cer IosCertificateDao) Create(item IosCertificateDao) error {

@@ -19,7 +19,7 @@ type AddMemberActor struct {
 func (actor *AddMemberActor) OnReceive(ctx context.Context, input proto.Message) {
 	if addMembersReq, ok := input.(*pbobjs.GroupMembersReq); ok {
 		logs.WithContext(ctx).Infof("groupId:%s\tmembers:%v", addMembersReq.GroupId, addMembersReq.MemberIds)
-		code := services.AddGroupMembers(ctx, addMembersReq.GroupId, addMembersReq.GroupName, addMembersReq.GroupPortrait, addMembersReq.MemberIds, addMembersReq.ExtFields)
+		code := services.AddGroupMembers(ctx, addMembersReq.GroupId, addMembersReq.GroupName, addMembersReq.GroupPortrait, addMembersReq.MemberIds, addMembersReq.ExtFields, addMembersReq.Settings)
 		ack := bases.CreateQueryAckWraper(ctx, code, &pbobjs.GroupMembersResp{})
 		actor.Sender.Tell(ack, actorsystem.NoSender)
 	} else {

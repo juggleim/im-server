@@ -198,12 +198,6 @@ func UpdateMentionedUserInfo(ctx context.Context, upMsg *pbobjs.UpMsg) {
 	}
 }
 
-func checkGroupExist(ctx context.Context, groupId string) bool {
-	appkey := bases.GetAppKeyFromCtx(ctx)
-	_, exist := GetGroupInfoFromCache(ctx, appkey, groupId)
-	return exist
-}
-
 func checkIsMember(ctx context.Context, groupId, userId string) bool {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	memberContainer, exist := GetGroupMembersFromCache(ctx, appkey, groupId)

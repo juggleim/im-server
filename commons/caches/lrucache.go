@@ -168,6 +168,7 @@ func (c *LruCache) Get(key interface{}) (interface{}, bool) {
 	defer c.lock.Unlock()
 	return c.innerGet(key)
 }
+
 func (c *LruCache) innerGet(key interface{}) (interface{}, bool) {
 	item, ok := c.lru.Get(key)
 	if ok {
@@ -185,6 +186,7 @@ func (c *LruCache) innerGet(key interface{}) (interface{}, bool) {
 		return nil, ok
 	}
 }
+
 func (c *LruCache) GetByDefault(key interface{}, defaultValue interface{}) (interface{}, bool) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -195,23 +197,33 @@ func (c *LruCache) GetByDefault(key interface{}, defaultValue interface{}) (inte
 		return defaultValue, ok
 	}
 }
-func (c *LruCache) GetByCreator(key interface{}) (interface{}, bool) {
+
+func (c *LruCache) GetByCreator(key interface{}, creator func() interface{}) (interface{}, bool) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	val, ok := c.innerGet(key)
 	if ok {
 		return val, ok
 	} else {
-		if c.valueCreator != nil {
-			newVal := c.valueCreator(key)
+		if creator != nil {
+			newVal := creator()
 			if newVal != nil {
 				c.innerAdd(key, newVal)
 				return newVal, true
+			}
+		} else {
+			if c.valueCreator != nil {
+				newVal := c.valueCreator(key)
+				if newVal != nil {
+					c.innerAdd(key, newVal)
+					return newVal, true
+				}
 			}
 		}
 	}
 	return nil, ok
 }
+
 func (c *LruCache) Contains(key interface{}) bool {
 	c.lock.Lock()
 	defer c.lock.Unlock()
@@ -227,7 +239,15 @@ func (c *LruCache) Peek(key interface{}) (interface{}, bool) {
 	defer c.lock.Unlock()
 	item, ok := c.lru.Peek(key)
 	if ok {
-		return item.(*lruCacheItem).value, ok
+		cacheItem := item.(*lruCacheItem)
+		if c.MaxLifeCycle > 0 {
+			timeLine := time.Now().UnixMilli() - int64(c.MaxLifeCycle)/1000/1000
+			if cacheItem.addedTime < timeLine {
+				c.lru.Remove(key)
+				return nil, false
+			}
+		}
+		return cacheItem.value, ok
 	} else {
 		return nil, ok
 	}
@@ -238,11 +258,13 @@ func (c *LruCache) Purge() {
 	defer c.lock.Unlock()
 	c.lru.Purge()
 }
+
 func (c *LruCache) Len() int {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	return c.lru.Len()
 }
+
 func (c *LruCache) ReSize(size int) int {
 	c.lock.Lock()
 	defer c.lock.Unlock()

@@ -3,6 +3,7 @@ package apis
 import (
 	"bufio"
 	"im-server/commons/bases"
+	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/admingateway/services"
@@ -32,7 +33,7 @@ func SensitiveWords(ctx *gin.Context) {
 	}
 	appkey := ctx.Query("app_key")
 	services.SetCtxString(ctx, services.CtxKey_AppKey, appkey)
-	code, resp, err := services.SyncApiCall(ctx, "qry_sensitive_words", "", tools.RandStr(8), &pbobjs.QrySensitiveWordsReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_sensitive_words", tools.RandStr(8), &pbobjs.QrySensitiveWordsReq{
 		Page: int32(page),
 		Size: int32(size),
 	}, func() proto.Message {
@@ -42,7 +43,7 @@ func SensitiveWords(ctx *gin.Context) {
 		services.FailHttpResp(ctx, services.AdminErrorCode_ServerErr, err.Error())
 		return
 	}
-	if code != services.AdminErrorCode_Success {
+	if code != errs.IMErrorCode_SUCCESS {
 		services.FailHttpResp(ctx, services.AdminErrorCode(code), "")
 		return
 	}
@@ -114,7 +115,7 @@ func ImportSensitiveWords(ctx *gin.Context) {
 		Words: allWords,
 	}
 
-	services.SyncApiCall(ctx, "add_sensitive_words", "", appKey, rpcReq, nil)
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "add_sensitive_words", appKey, rpcReq, nil)
 
 	services.SuccessHttpResp(ctx, nil)
 }
@@ -136,7 +137,7 @@ func AddSensitiveWord(ctx *gin.Context) {
 	}
 	appKey := req.AppKey
 	services.SetCtxString(ctx, services.CtxKey_AppKey, appKey)
-	services.SyncApiCall(ctx, "add_sensitive_words", "", appKey, rpcReq, nil)
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "add_sensitive_words", appKey, rpcReq, nil)
 
 	services.SuccessHttpResp(ctx, nil)
 }
@@ -152,7 +153,7 @@ func DeleteSensitiveWord(ctx *gin.Context) {
 		Words: []string{req.Word},
 	}
 	services.SetCtxString(ctx, services.CtxKey_AppKey, appKey)
-	services.SyncApiCall(ctx, "del_sensitive_words", "", appKey, rpcReq, nil)
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "del_sensitive_words", appKey, rpcReq, nil)
 
 	services.SuccessHttpResp(ctx, nil)
 }

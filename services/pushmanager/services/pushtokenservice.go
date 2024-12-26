@@ -27,18 +27,26 @@ func init() {
 }
 
 type UserPushToken struct {
-	DeviceId    string
-	Platform    pbobjs.Platform
-	PushChannel pbobjs.PushChannel
-	PushToken   string
-	PackageName string
+	AppKey        string
+	UserId        string
+	DeviceId      string
+	Platform      pbobjs.Platform
+	PushChannel   pbobjs.PushChannel
+	PushToken     string
+	VoipPushToken string
+	PackageName   string
 }
 
 func (pushToken *UserPushToken) IsSame(pushToken2 *UserPushToken) bool {
-	if pushToken.DeviceId == pushToken2.DeviceId && pushToken.Platform == pushToken2.Platform && pushToken.PushChannel == pushToken2.PushChannel && pushToken.PushToken == pushToken2.PushToken && pushToken.PackageName == pushToken2.PackageName {
-		return true
+	if pushToken.DeviceId != pushToken2.DeviceId ||
+		pushToken.Platform != pushToken2.Platform ||
+		pushToken.PushChannel != pushToken2.PushChannel ||
+		pushToken.PackageName != pushToken2.PackageName ||
+		(pushToken2.PushToken != "" && pushToken.PushToken != pushToken2.PushToken) ||
+		(pushToken2.VoipPushToken != "" && pushToken.VoipPushToken != pushToken2.VoipPushToken) {
+		return false
 	}
-	return false
+	return true
 }
 
 func getUserPushTokenKey(appkey, userId string) string {
@@ -46,26 +54,37 @@ func getUserPushTokenKey(appkey, userId string) string {
 }
 
 func AddPushToken(appkey, userId string, userPushToken *UserPushToken) {
-	key := getUserPushTokenKey(appkey, userId)
-	cachePushToken, exist := GetPushToken(appkey, userId)
-	if !exist || !cachePushToken.IsSame(userPushToken) {
-		//add to cache
-		pushTokenCache.Add(key, userPushToken)
+	cachePushToken := GetPushToken(appkey, userId)
+	if !cachePushToken.IsSame(userPushToken) {
+		cachePushToken.DeviceId = userPushToken.DeviceId
+		cachePushToken.Platform = userPushToken.Platform
+		cachePushToken.PushChannel = userPushToken.PushChannel
+		cachePushToken.PackageName = userPushToken.PackageName
+		if userPushToken.PushToken != "" {
+			cachePushToken.PushToken = userPushToken.PushToken
+		}
+		if userPushToken.VoipPushToken != "" {
+			cachePushToken.VoipPushToken = userPushToken.VoipPushToken
+		}
 		//save to db
 		dao := dbs.PushTokenDao{}
-		dao.UpsertPushToken(dbs.PushTokenDao{
+		dao.Upsert(dbs.PushTokenDao{
 			AppKey:      appkey,
 			UserId:      userId,
-			DeviceId:    userPushToken.DeviceId,
-			Platform:    commonservices.Platform2Str(userPushToken.Platform),
-			PushChannel: commonservices.PushChannel2Str(userPushToken.PushChannel),
-			Package:     userPushToken.PackageName,
-			PushToken:   userPushToken.PushToken,
+			DeviceId:    cachePushToken.DeviceId,
+			Platform:    commonservices.Platform2Str(cachePushToken.Platform),
+			PushChannel: commonservices.PushChannel2Str(cachePushToken.PushChannel),
+			Package:     cachePushToken.PackageName,
+			PushToken:   cachePushToken.PushToken,
+			VoipToken:   cachePushToken.VoipPushToken,
 		})
 		//清除之前的用户缓存（同一设备先登录A，退出A登录B， A不应该收到推送消息）
-		prevItem, _ := dao.GetUserWithToken(appkey, userPushToken.PushToken)
-		if prevItem != nil {
-			pushConfCache.Remove(getUserPushTokenKey(appkey, prevItem.UserId))
+		items, err := dao.QueryByDeviceId(appkey, userPushToken.DeviceId)
+		if err == nil {
+			for _, item := range items {
+				key := getUserPushTokenKey(appkey, item.UserId)
+				pushTokenCache.Remove(key)
+			}
 		}
 		//clearn other user for this device
 		dao.DeleteByDeviceId(appkey, userPushToken.DeviceId, userId)
@@ -74,59 +93,58 @@ func AddPushToken(appkey, userId string, userPushToken *UserPushToken) {
 
 func RemovePushToken(appkey, userId string) {
 	key := getUserPushTokenKey(appkey, userId)
-	_, exist := GetPushToken(appkey, userId)
-	if exist {
+	pushToken := GetPushToken(appkey, userId)
+	if pushToken != nil && (pushToken.PushToken != "" || pushToken.VoipPushToken != "") {
 		dao := dbs.PushTokenDao{}
 		dao.DeleteByUserId(appkey, userId)
-		pushConfCache.Remove(key)
+		pushTokenCache.Remove(key)
 	}
 }
 
-func GetPushToken(appkey, userId string) (*UserPushToken, bool) {
+func GetPushToken(appkey, userId string) *UserPushToken {
 	key := getUserPushTokenKey(appkey, userId)
 	if obj, exist := pushTokenCache.Get(key); exist {
 		pushToken := obj.(*UserPushToken)
-		if pushToken != notExistPushToken {
-			return pushToken, true
-		} else {
-			return nil, false
-		}
+		return pushToken
 	} else {
 		lock := pushTokenLocks.GetLocks(key)
 		lock.Lock()
 		defer lock.Unlock()
+		userPushToken := &UserPushToken{
+			AppKey: appkey,
+			UserId: userId,
+		}
 		//read from db
 		dao := dbs.PushTokenDao{}
 		dbPushToken, err := dao.FindByUserId(appkey, userId)
 		if err == nil && dbPushToken != nil {
-			userPushToken := &UserPushToken{
-				DeviceId:    dbPushToken.DeviceId,
-				Platform:    commonservices.Str2Platform(dbPushToken.Platform),
-				PushChannel: commonservices.Str2PushChannel(dbPushToken.PushChannel),
-				PushToken:   dbPushToken.PushToken,
-				PackageName: dbPushToken.Package,
-			}
-			pushTokenCache.Add(key, userPushToken)
-			return userPushToken, true
-		} else {
-			pushTokenCache.Add(key, notExistPushToken)
-			return nil, false
+			userPushToken.DeviceId = dbPushToken.DeviceId
+			userPushToken.Platform = commonservices.Str2Platform(dbPushToken.Platform)
+			userPushToken.PushChannel = commonservices.Str2PushChannel(dbPushToken.PushChannel)
+			userPushToken.PackageName = dbPushToken.Package
+			userPushToken.PushToken = dbPushToken.PushToken
+			userPushToken.VoipPushToken = dbPushToken.VoipToken
 		}
+		pushTokenCache.Add(key, userPushToken)
+		return userPushToken
 	}
 }
 
 func RegPushToken(ctx context.Context, userId string, req *pbobjs.RegPushTokenReq) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	AddPushToken(appkey, userId, &UserPushToken{
-		DeviceId:    req.DeviceId,
-		Platform:    req.Platform,
-		PushChannel: req.PushChannel,
-		PushToken:   req.PushToken,
-		PackageName: req.PackageName,
+		DeviceId:      req.DeviceId,
+		Platform:      req.Platform,
+		PushChannel:   req.PushChannel,
+		PushToken:     req.PushToken,
+		VoipPushToken: req.VoipToken,
+		PackageName:   req.PackageName,
 	})
-	//ntf open push
-	bases.AsyncRpcCall(ctx, "upd_push_status", userId, &pbobjs.UserPushStatus{
-		CanPush: true,
-	})
+	if req.PushToken != "" {
+		//ntf open push
+		bases.AsyncRpcCall(ctx, "upd_push_status", userId, &pbobjs.UserPushStatus{
+			CanPush: true,
+		})
+	}
 	return errs.IMErrorCode_SUCCESS
 }

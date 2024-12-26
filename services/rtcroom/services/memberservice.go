@@ -29,10 +29,12 @@ type RtcMemberContainer struct {
 }
 
 type RtcMemberRoom struct {
-	RoomId   string
-	RoomType pbobjs.RtcRoomType
-	RtcState pbobjs.RtcState
-	DeviceId string
+	RoomId       string
+	RoomType     pbobjs.RtcRoomType
+	RtcChannel   pbobjs.RtcChannel
+	RtcMediaType pbobjs.RtcMediaType
+	RtcState     pbobjs.RtcState
+	DeviceId     string
 }
 
 func (container *RtcMemberContainer) Add(memberRoom RtcMemberRoom) {
@@ -183,6 +185,23 @@ func SyncMemberState(ctx context.Context, req *pbobjs.SyncMemberStateReq) errs.I
 			RtcState: req.Member.RtcState,
 			DeviceId: req.Member.DeviceId,
 		})
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
+func SyncQuitWhenConnectKicked(ctx context.Context, userId string) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	container := GetRtcMemberContainer(appkey, userId)
+	if container != nil {
+		roomIds := []string{}
+		container.ForeachRooms(func(room *RtcMemberRoom) {
+			if room.RtcState != pbobjs.RtcState_RtcIncoming {
+				roomIds = append(roomIds, room.RoomId)
+			}
+		})
+		for _, roomId := range roomIds {
+			bases.AsyncRpcCall(ctx, "rtc_hangup", roomId, &pbobjs.Nil{})
+		}
 	}
 	return errs.IMErrorCode_SUCCESS
 }

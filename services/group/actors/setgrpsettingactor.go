@@ -19,9 +19,9 @@ type SetGrpSettingActor struct {
 
 func (actor *SetGrpSettingActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.GroupInfo); ok {
-		logs.WithContext(ctx).Infof("groupId:%s\tsettings:%s", req.GroupId, tools.ToJson(req.Settings))
+		logs.WithContext(ctx).Infof("group_id:%s\tsettings:%s", req.GroupId, tools.ToJson(req.Settings))
 		code := services.SetGroupSettings(ctx, req.GroupId, req.Settings)
-		ack := bases.CreateQueryAckWraper(ctx, code, &pbobjs.GroupMembersResp{})
+		ack := bases.CreateQueryAckWraper(ctx, code, nil)
 		actor.Sender.Tell(ack, actorsystem.NoSender)
 	} else {
 		ack := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_PBILLEGAL, &pbobjs.GroupMembersResp{})

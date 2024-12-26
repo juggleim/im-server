@@ -85,7 +85,8 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 				commonservices.SaveConversation(ctx, receiverId, msg)
 				SaveMsg2Inbox(appkey, receiverId, msg)
 			} else {
-				batchExecutorPool.GetBatchExecutor(fmt.Sprintf("%s_%s_%d", appkey, msg.TargetId, msg.ChannelType)).Append(&BatchConverItem{
+				target := fmt.Sprintf("%s_%s_%d", appkey, msg.TargetId, msg.ChannelType)
+				batchExecutorPool.GetBatchExecutor(target).Append(fmt.Sprintf("%s_%s", target, receiverId), &BatchConverItem{
 					Appkey: appkey,
 					UserId: receiverId,
 					Msg:    msg,
@@ -126,5 +127,23 @@ func copyDownMsg(msg *pbobjs.DownMsg) *pbobjs.DownMsg {
 		MemberCount:    msg.MemberCount,
 		ReadCount:      msg.ReadCount,
 		UnreadIndex:    msg.UnreadIndex,
+	}
+}
+
+func UserPush(ctx context.Context, msg *pbobjs.DownMsg) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	targetId := bases.GetTargetIdFromCtx(ctx)
+	if !UserStatusCacheContains(appkey, targetId) {
+		BatchInitUserStatus(ctx, appkey, []string{targetId})
+	}
+	userStatus := GetUserStatus(appkey, targetId)
+	if userStatus != nil {
+		if msg.PushData != nil && msg.PushData.IsVoip {
+			SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, msg)
+		} else {
+			if !userStatus.IsOnline() || userStatus.OpenPushSwitch() {
+				SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, msg)
+			}
+		}
 	}
 }

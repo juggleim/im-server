@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func CheckLogin(account, password string) AdminErrorCode {
+func CheckLogin(account, password string) (AdminErrorCode, *Account) {
 	dao := dbs.AccountDao{}
 	defaultAccount, err := dao.FindByAccount("admin")
 	if err != nil || defaultAccount == nil {
@@ -25,11 +25,18 @@ func CheckLogin(account, password string) AdminErrorCode {
 	admin, err := dao.FindByAccountPassword(account, password)
 	if err == nil && admin != nil {
 		if admin.State != 0 {
-			return AdminErrorCode_AccountForbidden
+			return AdminErrorCode_AccountForbidden, nil
 		}
-		return AdminErrorCode_Success
+		return AdminErrorCode_Success, &Account{
+			Account:       admin.Account,
+			State:         admin.State,
+			ParentAccount: admin.ParentAccount,
+			RoleId:        admin.RoleId,
+			CreatedTime:   admin.CreatedTime.UnixMilli(),
+			UpdatedTime:   admin.UpdatedTime.UnixMilli(),
+		}
 	}
-	return AdminErrorCode_LoginFail
+	return AdminErrorCode_LoginFail, nil
 }
 
 func CheckAccountState(account string) AdminErrorCode {
@@ -61,7 +68,7 @@ func UpdPassword(account, password, newPassword string) AdminErrorCode {
 	return AdminErrorCode_Success
 }
 
-func AddAccount(parentAccount, account, password string) AdminErrorCode {
+func AddAccount(parentAccount, account, password string, roleId int) AdminErrorCode {
 	dao := dbs.AccountDao{}
 	password = tools.SHA1(password)
 	err := dao.Create(dbs.AccountDao{
@@ -70,6 +77,7 @@ func AddAccount(parentAccount, account, password string) AdminErrorCode {
 		ParentAccount: parentAccount,
 		UpdatedTime:   time.Now(),
 		CreatedTime:   time.Now(),
+		RoleId:        roleId,
 	})
 	if err != nil {
 		return AdminErrorCode_AccountExisted
@@ -113,6 +121,7 @@ func QryAccounts(limit int64, offset string) *Accounts {
 				CreatedTime:   dbAccount.CreatedTime.UnixMilli(),
 				UpdatedTime:   dbAccount.UpdatedTime.UnixMilli(),
 				ParentAccount: dbAccount.ParentAccount,
+				RoleId:        dbAccount.RoleId,
 			})
 			if dbAccount.ID > id {
 				id = dbAccount.ID

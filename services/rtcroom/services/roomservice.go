@@ -50,6 +50,7 @@ type RtcRoomContainer struct {
 	RoomId       string
 	RoomType     pbobjs.RtcRoomType
 	RtcChannel   pbobjs.RtcChannel
+	RtcMediaType pbobjs.RtcMediaType
 	Owner        *pbobjs.UserInfo
 	CreatedTime  int64
 	AcceptedTime int64
@@ -121,13 +122,13 @@ func checkRtcMemberTimeout(appkey, roomId string) {
 			}
 		})
 		for _, memberId := range callTimeOutMemberIds {
-			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, true, pbobjs.RtcRoomQuitReason_CallTimeout)
+			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, pbobjs.RtcRoomQuitReason_CallTimeout, true)
 			if container.RoomType == pbobjs.RtcRoomType_OneOne {
 				break
 			}
 		}
 		for _, memberId := range pingTimeoutMemberIds {
-			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, true, pbobjs.RtcRoomQuitReason_PingTimeout)
+			innerQuitRtcRoom(bases.CreateRpcCtx(appkey, memberId), appkey, roomId, memberId, pbobjs.RtcRoomQuitReason_PingTimeout, true)
 			if container.RoomType == pbobjs.RtcRoomType_OneOne {
 				break
 			}
@@ -266,8 +267,8 @@ func getRtcRoomContainer(appkey, roomId string) (*RtcRoomContainer, bool) {
 	}
 }
 
-func getRtcRoomContainerWithInit(appkey, roomId, ownerId string, roomType pbobjs.RtcRoomType) (*RtcRoomContainer, bool) {
-	key := getRoomKey(appkey, roomId)
+func createRtcRoomContainer2Cache(ctx context.Context, appkey string, room *models.RtcRoom) (*RtcRoomContainer, bool) {
+	key := getRoomKey(appkey, room.RoomId)
 	if cacheContainer, exist := rtcroomCache.Get(key); exist {
 		container := cacheContainer.(*RtcRoomContainer)
 		if container.Status == RtcRoomStatus_Normal {
@@ -283,28 +284,28 @@ func getRtcRoomContainerWithInit(appkey, roomId, ownerId string, roomType pbobjs
 			return container, false
 		}
 	}
-	container := getRtcRoomContainerFromDb(appkey, roomId)
+	container := getRtcRoomContainerFromDb(appkey, room.RoomId)
 	if container.Status == RtcRoomStatus_Normal {
 		rtcroomCache.Add(key, container)
 		checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
-			checkRtcMemberTimeout(appkey, roomId)
+			checkRtcMemberTimeout(appkey, room.RoomId)
 		})
 		return container, false
 	}
 	container = &RtcRoomContainer{
-		Appkey:      appkey,
-		RoomId:      roomId,
-		RoomType:    roomType,
-		CreatedTime: time.Now().UnixMilli(),
-		Owner: &pbobjs.UserInfo{
-			UserId: ownerId,
-		},
-		Status:  RtcRoomStatus_Normal,
-		Members: make(map[string]*models.RtcRoomMember),
+		Appkey:       appkey,
+		RoomId:       room.RoomId,
+		RoomType:     room.RoomType,
+		RtcChannel:   room.RtcChannel,
+		RtcMediaType: room.RtcMediaType,
+		CreatedTime:  time.Now().UnixMilli(),
+		Owner:        commonservices.GetTargetDisplayUserInfo(ctx, room.OwnerId),
+		Status:       RtcRoomStatus_Normal,
+		Members:      make(map[string]*models.RtcRoomMember),
 	}
 	rtcroomCache.Add(key, container)
 	checkTimer.Add(time.Duration(PingCheckInterval)*time.Second, func() {
-		checkRtcMemberTimeout(appkey, roomId)
+		checkRtcMemberTimeout(appkey, room.RoomId)
 	})
 	return container, true
 }
@@ -321,6 +322,7 @@ func getRtcRoomContainerFromDb(appkey, roomId string) *RtcRoomContainer {
 		container.Status = RtcRoomStatus_Normal
 		container.RoomType = room.RoomType
 		container.RtcChannel = room.RtcChannel
+		container.RtcMediaType = room.RtcMediaType
 		container.Owner = &pbobjs.UserInfo{
 			UserId: room.OwnerId,
 		}
@@ -360,21 +362,24 @@ func CreateRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCod
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	deviceId := bases.GetDeviceIdFromCtx(ctx)
 
-	container, succ := getRtcRoomContainerWithInit(appkey, req.RoomId, userId, req.RoomType)
+	rtcRoom := &models.RtcRoom{
+		RoomId:       req.RoomId,
+		RoomType:     req.RoomType,
+		RtcChannel:   req.RtcChannel,
+		RtcMediaType: req.RtcMediaType,
+		OwnerId:      userId,
+		AppKey:       appkey,
+	}
+	container, succ := createRtcRoomContainer2Cache(ctx, appkey, rtcRoom)
 	if succ {
 		// add to db
 		storage := storages.NewRtcRoomStorage()
-		err := storage.Create(models.RtcRoom{
-			RoomId:   req.RoomId,
-			RoomType: req.RoomType,
-			OwnerId:  userId,
-			AppKey:   appkey,
-		})
+		err := storage.Create(*rtcRoom)
 		if err != nil {
 			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
 		}
 	} else {
-		return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, generatePbRtcRoom(container)
+		return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, generatePbRtcRoom(ctx, container)
 	}
 	container.JoinRoom(&models.RtcRoomMember{
 		RoomId:   req.RoomId,
@@ -394,7 +399,7 @@ func CreateRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCod
 	if err != nil {
 		logs.WithContext(ctx).Errorf("join rtc room failed:%v", err)
 	}
-	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(container)
+	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(ctx, container)
 }
 
 func DestroyRtcRoom(ctx context.Context) errs.IMErrorCode {
@@ -424,13 +429,11 @@ func DestroyRtcRoom(ctx context.Context) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }
 
-func generatePbRtcRoom(container *RtcRoomContainer) *pbobjs.RtcRoom {
+func generatePbRtcRoom(ctx context.Context, container *RtcRoomContainer) *pbobjs.RtcRoom {
 	members := []*pbobjs.RtcMember{}
 	container.ForeachMembers(func(member *models.RtcRoomMember) {
 		members = append(members, &pbobjs.RtcMember{
-			Member: &pbobjs.UserInfo{
-				UserId: member.MemberId,
-			},
+			Member:      commonservices.GetTargetDisplayUserInfo(ctx, member.MemberId),
 			RtcState:    member.RtcState,
 			CallTime:    member.CallTime,
 			ConnectTime: member.ConnectTime,
@@ -441,9 +444,12 @@ func generatePbRtcRoom(container *RtcRoomContainer) *pbobjs.RtcRoom {
 		})
 	})
 	return &pbobjs.RtcRoom{
-		RoomId:  container.RoomId,
-		Owner:   container.Owner,
-		Members: members,
+		RoomId:       container.RoomId,
+		Owner:        container.Owner,
+		RtcChannel:   container.RtcChannel,
+		RtcMediaType: container.RtcMediaType,
+		RoomType:     container.RoomType,
+		Members:      members,
 	}
 }
 
@@ -457,7 +463,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST, nil
 	}
 	if container.MemberExist(userId) {
-		return errs.IMErrorCode_RTCROOM_HASMEMBER, generatePbRtcRoom(container)
+		return errs.IMErrorCode_RTCROOM_HASMEMBER, generatePbRtcRoom(ctx, container)
 	}
 	member := &models.RtcRoomMember{
 		RoomId:         roomId,
@@ -470,7 +476,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 	//add to cache
 	code := container.JoinRoom(member)
 	if code != errs.IMErrorCode_SUCCESS {
-		return code, generatePbRtcRoom(container)
+		return code, generatePbRtcRoom(ctx, container)
 	}
 	//add to db
 	storage := storages.NewRtcRoomMemberStorage()
@@ -478,7 +484,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 	if err != nil {
 		logs.WithContext(ctx).Errorf("failed to join rtc room. err:%v", err)
 	}
-	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(container)
+	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(ctx, container)
 }
 
 func QuitRtcRoom(ctx context.Context) errs.IMErrorCode {
@@ -486,10 +492,10 @@ func QuitRtcRoom(ctx context.Context) errs.IMErrorCode {
 	roomId := bases.GetTargetIdFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 
-	return innerQuitRtcRoom(ctx, appkey, roomId, userId, true, pbobjs.RtcRoomQuitReason_Active)
+	return innerQuitRtcRoom(ctx, appkey, roomId, userId, pbobjs.RtcRoomQuitReason_Active, true)
 }
 
-func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSendEvent bool, quitReason pbobjs.RtcRoomQuitReason) errs.IMErrorCode {
+func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, quitReason pbobjs.RtcRoomQuitReason, isSendEvent bool) errs.IMErrorCode {
 	container, exist := getRtcRoomContainer(appkey, roomId)
 	if !exist {
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST
@@ -509,17 +515,29 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 				DeviceId: delMember.DeviceId,
 			},
 		})
-
-		if container.RoomType == pbobjs.RtcRoomType_OneOne {
-			var calleeId string = ""
+		eventTime := time.Now().UnixMilli()
+		//send room event
+		if isSendEvent {
 			SendRoomEvent(ctx, userId, &pbobjs.RtcRoomEvent{
-				RoomEventType: pbobjs.RtcRoomEventType_RtcDestroy,
+				RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
+				Members: []*pbobjs.RtcMember{
+					{
+						Member: &pbobjs.UserInfo{
+							UserId: userId,
+						},
+					},
+				},
 				Room: &pbobjs.RtcRoom{
 					RoomType: container.RoomType,
 					RoomId:   container.RoomId,
 				},
-				Reason: quitReason,
+				Reason:    quitReason,
+				EventTime: eventTime,
 			})
+		}
+
+		if container.RoomType == pbobjs.RtcRoomType_OneOne {
+			var calleeId string = ""
 			container.ForeachMembers(func(member *models.RtcRoomMember) {
 				MemberSyncState(ctx, member.MemberId, &pbobjs.SyncMemberStateReq{
 					IsDelete: true,
@@ -527,17 +545,25 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 						RoomId:   roomId,
 						RoomType: container.RoomType,
 						MemberId: userId,
-						DeviceId: delMember.MemberId,
+						DeviceId: delMember.DeviceId,
 					},
 				})
 				if isSendEvent {
 					SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
-						RoomEventType: pbobjs.RtcRoomEventType_RtcDestroy,
+						RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
+						Members: []*pbobjs.RtcMember{
+							{
+								Member: &pbobjs.UserInfo{
+									UserId: userId,
+								},
+							},
+						},
 						Room: &pbobjs.RtcRoom{
 							RoomType: container.RoomType,
 							RoomId:   container.RoomId,
 						},
-						Reason: quitReason,
+						Reason:    quitReason,
+						EventTime: eventTime,
 					})
 				}
 				if member.MemberId != container.Owner.UserId {
@@ -549,47 +575,45 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, isSend
 			var duration int64 = 0
 			if container.AcceptedTime > 0 {
 				reason = CallFinishReasonType_Complete
-				duration = time.Now().UnixMilli() - container.AcceptedTime
+				duration = eventTime - container.AcceptedTime
 			} else {
 				reason = CallFinishReasonType_NoAnswer
 			}
-			SendFinishNtf(ctx, container.Owner.UserId, calleeId, reason, duration)
+			SendFinishNtf(ctx, container.Owner.UserId, calleeId, reason, duration, container.RtcMediaType)
 			//destroy room
 			storage.DeleteByRoomId(appkey, roomId)
 			roomStorage := storages.NewRtcRoomStorage()
 			roomStorage.Delete(appkey, roomId)
 			rtcroomCache.Remove(getRoomKey(appkey, roomId))
-		} else {
-			SendRoomEvent(ctx, userId, &pbobjs.RtcRoomEvent{
-				RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
-				Member: &pbobjs.RtcMember{
-					Member: &pbobjs.UserInfo{
-						UserId: userId,
-					},
-				},
-				Room: &pbobjs.RtcRoom{
-					RoomType: container.RoomType,
-					RoomId:   container.RoomId,
-				},
-				Reason: quitReason,
-			})
-			container.ForeachMembers(func(member *models.RtcRoomMember) {
+		} else if container.RoomType == pbobjs.RtcRoomType_OneMore {
+			if container.MemberCount() > 0 {
 				if isSendEvent {
-					SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
-						RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
-						Member: &pbobjs.RtcMember{
-							Member: &pbobjs.UserInfo{
-								UserId: userId,
+					container.ForeachMembers(func(member *models.RtcRoomMember) {
+						SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
+							RoomEventType: pbobjs.RtcRoomEventType_RtcQuit,
+							Members: []*pbobjs.RtcMember{
+								{
+									Member: &pbobjs.UserInfo{
+										UserId: userId,
+									},
+								},
 							},
-						},
-						Room: &pbobjs.RtcRoom{
-							RoomType: container.RoomType,
-							RoomId:   container.RoomId,
-						},
-						Reason: quitReason,
+							Room: &pbobjs.RtcRoom{
+								RoomType: container.RoomType,
+								RoomId:   container.RoomId,
+							},
+							Reason:    quitReason,
+							EventTime: eventTime,
+						})
 					})
 				}
-			})
+			} else {
+				//desctroy room
+				storage.DeleteByRoomId(appkey, roomId)
+				roomStorage := storages.NewRtcRoomStorage()
+				roomStorage.Delete(appkey, roomId)
+				rtcroomCache.Remove(getRoomKey(appkey, roomId))
+			}
 		}
 	}
 	return code
@@ -618,7 +642,7 @@ func QryRtcRoom(ctx context.Context, roomId string) (errs.IMErrorCode, *pbobjs.R
 	if !exist {
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST, nil
 	}
-	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(container)
+	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(ctx, container)
 }
 
 func UpdRtcMemberState(ctx context.Context, req *pbobjs.RtcMember) errs.IMErrorCode {
@@ -653,6 +677,7 @@ func UpdRtcMemberState(ctx context.Context, req *pbobjs.RtcMember) errs.IMErrorC
 	if err != nil {
 		return errs.IMErrorCode_RTCROOM_UPDATEFAILED
 	}
+	eventTime := time.Now().UnixMilli()
 	container.ForeachMembers(func(member *models.RtcRoomMember) {
 		if member.MemberId != userId && member.RtcState != pbobjs.RtcState_RtcIncoming {
 			SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
@@ -662,12 +687,15 @@ func UpdRtcMemberState(ctx context.Context, req *pbobjs.RtcMember) errs.IMErrorC
 					RoomType: container.RoomType,
 					Owner:    container.Owner,
 				},
-				Member: &pbobjs.RtcMember{
-					Member: &pbobjs.UserInfo{
-						UserId: userId,
+				Members: []*pbobjs.RtcMember{
+					{
+						Member: &pbobjs.UserInfo{
+							UserId: userId,
+						},
+						RtcState: req.RtcState,
 					},
-					RtcState: req.RtcState,
 				},
+				EventTime: eventTime,
 			})
 		}
 	})

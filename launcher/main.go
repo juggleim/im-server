@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"im-server/services/appbusiness"
 	"im-server/services/botmsg"
 	"im-server/services/broadcast"
+	"im-server/services/friends"
 	"im-server/services/logmanager"
 	"im-server/services/rtcroom"
 	sensitivemanager "im-server/services/sensitivemanager"
@@ -112,6 +114,8 @@ func main() {
 	imstarters.Loaded(&userstatussub.UserStatusSubManager{})
 	imstarters.Loaded(&botmsg.BotMsgManager{})
 	imstarters.Loaded(&rtcroom.RtcRoomManager{})
+	imstarters.Loaded(&appbusiness.AppBusiness{})
+	imstarters.Loaded(&friends.FriendManager{})
 
 	imstarters.Startup()
 

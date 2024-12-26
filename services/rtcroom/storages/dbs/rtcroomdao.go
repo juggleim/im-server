@@ -12,6 +12,7 @@ type RtcRoomDao struct {
 	RoomId       string    `gorm:"room_id"`
 	RoomType     int       `gorm:"room_type"`
 	RtcChannel   int       `gorm:"rtc_channel"`
+	RtcMediaType int       `gorm:"rtc_media_type"`
 	OwnerId      string    `gorm:"owner_id"`
 	CreatedTime  time.Time `gorm:"created_time"`
 	AcceptedTime int64     `gorm:"accepted_time"`
@@ -27,6 +28,7 @@ func (room *RtcRoomDao) Create(item models.RtcRoom) error {
 		RoomId:       item.RoomId,
 		RoomType:     int(item.RoomType),
 		RtcChannel:   int(item.RtcChannel),
+		RtcMediaType: int(item.RtcMediaType),
 		OwnerId:      item.OwnerId,
 		CreatedTime:  time.Now(),
 		AcceptedTime: item.AcceptedTime,
@@ -45,6 +47,7 @@ func (room *RtcRoomDao) FindById(appkey, roomId string) (*models.RtcRoom, error)
 		RoomId:       item.RoomId,
 		RoomType:     pbobjs.RtcRoomType(item.RoomType),
 		RtcChannel:   pbobjs.RtcChannel(item.RtcChannel),
+		RtcMediaType: pbobjs.RtcMediaType(item.RtcMediaType),
 		OwnerId:      item.OwnerId,
 		CreatedTime:  item.CreatedTime.UnixMilli(),
 		AcceptedTime: item.AcceptedTime,

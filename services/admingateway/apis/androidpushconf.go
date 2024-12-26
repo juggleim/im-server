@@ -86,8 +86,9 @@ func GetFcmPushConf(ctx *gin.Context) {
 			Code: services.AdminErrorCode_Default,
 		})
 		return
+	} else {
+		fcmConf.PushExt = []byte{}
 	}
-	fcmConf.PushExt = []byte{}
 	services.SuccessHttpResp(ctx, fcmConf)
 }
 

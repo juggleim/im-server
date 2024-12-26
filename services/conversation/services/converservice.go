@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg) {
+func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *pbobjs.DownMsg, isOffline bool) {
 	if msg == nil {
 		return
 	}
@@ -31,23 +31,39 @@ func SaveConversationV2(appkey string, userId string, msg *pbobjs.DownMsg) {
 		} else {
 			unreadIndex = msg.UnreadIndex
 		}
-		userConvers := getUserConvers(appkey, userId)
-		userConvers.UpsertCovner(models.Conversation{
-			AppKey:      appkey,
-			UserId:      userId,
-			TargetId:    msg.TargetId,
-			ChannelType: msg.ChannelType,
-			LatestMsgId: msg.MsgId,
-			// LatestMsg: msg,
-			SortTime:             sortTime,
-			SyncTime:             msg.MsgTime,
-			LatestUnreadMsgIndex: unreadIndex,
-		})
-		if !msg.IsSend {
-			HandleMentionedMsg(appkey, userId, msg)
+		if !isOffline || UserConversContains(appkey, userId) {
+			userConvers := getUserConvers(appkey, userId)
+			userConvers.UpsertCovner(models.Conversation{
+				AppKey:      appkey,
+				UserId:      userId,
+				TargetId:    msg.TargetId,
+				ChannelType: msg.ChannelType,
+				LatestMsgId: msg.MsgId,
+				// LatestMsg: msg,
+				SortTime:             sortTime,
+				SyncTime:             msg.MsgTime,
+				LatestUnreadMsgIndex: unreadIndex,
+			})
+			if !msg.IsSend {
+				HandleMentionedMsg(appkey, userId, msg, userConvers)
+			}
+			//save to db
+			userConvers.PersistConver(msg.TargetId, msg.ChannelType)
+		} else {
+			UpsertOfflineConversation(&ConversationCacheItem{
+				Appkey:      appkey,
+				UserId:      userId,
+				TargetId:    msg.TargetId,
+				ChannelType: msg.ChannelType,
+				LatestMsgId: msg.MsgId,
+				SortTime:    sortTime,
+				SyncTime:    msg.MsgTime,
+				UnReadIndex: unreadIndex,
+			})
+			if !msg.IsSend {
+				HandleMentionedMsg(appkey, userId, msg, nil)
+			}
 		}
-		//save to db
-		userConvers.PersistConver(msg.TargetId, msg.ChannelType)
 	}
 }
 
@@ -315,9 +331,9 @@ func DelConversationV2(ctx context.Context, userId string, convers []*pbobjs.Con
 				userConvers.PersistConver(conver.TargetId, conver.ChannelType)
 			}
 		}
-		bases.AsyncRpcCall(ctx, "del_conver_cache", userId, &pbobjs.ConversationsReq{
-			Conversations: convers,
-		})
+		// bases.AsyncRpcCall(ctx, "del_conver_cache", userId, &pbobjs.ConversationsReq{
+		// 	Conversations: convers,
+		// })
 		//notify other device
 		flag := commonservices.SetCmdMsg(0)
 		bs, _ := json.Marshal(delConvers)
@@ -393,7 +409,7 @@ func SetTopConversV2(ctx context.Context, req *pbobjs.ConversationsReq) (errs.IM
 		//notify other device
 		flag := commonservices.SetCmdMsg(0)
 		bs, _ := json.Marshal(topConvers)
-		code, _, msgTime, _ := commonservices.SyncPrivateMsg(ctx, userId, &pbobjs.UpMsg{
+		code, _, msgTime, _ := commonservices.SyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 			MsgType:    topConversMsgType,
 			MsgContent: bs,
 			Flags:      flag,
@@ -437,15 +453,25 @@ func UndisturbConversV2(ctx context.Context, req *pbobjs.UndisturbConversReq) er
 		Conversations: []*UndisturbConver{},
 	}
 	userConvers := getUserConvers(appkey, userId)
+	needUnCacheConvers := []*pbobjs.Conversation{}
 	for _, item := range req.Items {
 		affected := userConvers.UpdateUndisturbType(item.TargetId, item.ChannelType, item.UndisturbType)
 		if affected {
 			userConvers.PersistConver(item.TargetId, item.ChannelType)
+			needUnCacheConvers = append(needUnCacheConvers, &pbobjs.Conversation{
+				TargetId:    item.TargetId,
+				ChannelType: item.ChannelType,
+			})
 		}
 		convers.Conversations = append(convers.Conversations, &UndisturbConver{
 			TargetId:      item.TargetId,
 			ChannelType:   int32(item.ChannelType),
 			UndisturbType: item.UndisturbType,
+		})
+	}
+	if len(needUnCacheConvers) > 0 {
+		bases.AsyncRpcCall(ctx, "del_conver_cache", userId, &pbobjs.ConversationsReq{
+			Conversations: needUnCacheConvers,
 		})
 	}
 	//Notify other device to update undisturb
@@ -506,6 +532,11 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 			if msg, exist := priMsgs[conver.LatestMsgId]; exist {
 				downMsg = msg
 				conversation.TargetUserInfo = msg.TargetUserInfo
+				if userId == downMsg.SenderId {
+					downMsg.IsSend = true
+					downMsg.TargetId = conver.TargetId
+					conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, downMsg.TargetId)
+				}
 			}
 		} else if conver.ChannelType == pbobjs.ChannelType_Group {
 			if msg, exist := grpMsgs[conver.LatestMsgId]; exist {

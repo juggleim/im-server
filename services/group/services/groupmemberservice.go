@@ -18,7 +18,7 @@ func init() {
 	groupMembersCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 8*time.Minute, 10*time.Minute)
 }
 
-func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait string, memberIds []string, extFields []*pbobjs.KvItem) errs.IMErrorCode {
+func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait string, memberIds []string, extFields []*pbobjs.KvItem, settings []*pbobjs.KvItem) errs.IMErrorCode {
 	if groupId == "" {
 		return errs.IMErrorCode_API_PARAM_REQUIRED
 	}
@@ -51,6 +51,16 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 				ItemValue: itemValue,
 			})
 		}
+		for _, setting := range settings {
+			itemKey, itemValue := setting.Key, setting.Value
+			extDao.Upsert(dbs.GroupExtDao{
+				AppKey:    appKey,
+				GroupId:   groupId,
+				ItemKey:   itemKey,
+				ItemValue: itemValue,
+				ItemType:  int(commonservices.AttItemType_Setting),
+			})
+		}
 		if err == nil {
 			AddGroupInfo2Cache(ctx, appKey, groupId, &GroupInfo{
 				GroupId:       groupId,
@@ -59,6 +69,7 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 				IsMute:        int32(0),
 				UpdatedTime:   time.Now().UnixMilli(),
 				ExtFields:     commonservices.Kvitems2Map(extFields),
+				SettingFields: commonservices.Kvitems2Map(settings),
 			})
 		}
 	} else {
@@ -117,6 +128,8 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 			Settings: &commonservices.GrpMemberSettings{
 				HideGrpMsg: grpHideGrpMsg,
 			},
+			ExtFields:     make(map[string]string),
+			SettingFields: make(map[string]string),
 		})
 	}
 	//添加群成员
@@ -287,6 +300,23 @@ func SetGroupMemberAllow(ctx context.Context, req *pbobjs.GroupMemberAllowReq) e
 	return errs.IMErrorCode_SUCCESS
 }
 
+func SetGroupMemberSettings(ctx context.Context, groupId string, req *pbobjs.GroupMember) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	dao := dbs.GroupMemberExtDao{}
+	memberAtts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, req.MemberId)
+	if memberAtts != nil {
+		for _, setting := range req.Settings {
+			memberAtts.SetMemberSetting(setting.Key, setting.Value)
+			dao.Upsert(appkey, groupId, req.MemberId, setting.Key, setting.Value, int(commonservices.AttItemType_Setting))
+		}
+		for _, ext := range req.ExtFields {
+			memberAtts.SetMemberExt(ext.Key, ext.Value)
+			dao.Upsert(appkey, groupId, req.MemberId, ext.Key, ext.Value, int(commonservices.AttItemType_Att))
+		}
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
 func QryGroupMembersByIds(ctx context.Context, req *pbobjs.GroupMembersReq) (errs.IMErrorCode, *pbobjs.GroupMembersResp) {
 	resp := &pbobjs.GroupMembersResp{
 		Items: []*pbobjs.GroupMember{},
@@ -303,9 +333,10 @@ func QryGroupMembersByIds(ctx context.Context, req *pbobjs.GroupMembersReq) (err
 					isMute = 0
 				}
 				resp.Items = append(resp.Items, &pbobjs.GroupMember{
-					MemberId: memberId,
-					IsMute:   int32(isMute),
-					IsAllow:  int32(member.IsAllow),
+					MemberId:   memberId,
+					IsMute:     int32(isMute),
+					IsAllow:    int32(member.IsAllow),
+					MemberType: member.MemberType,
 				})
 			}
 		}
@@ -333,9 +364,10 @@ func QryGroupMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 				isMute = 0
 			}
 			resp.Items = append(resp.Items, &pbobjs.GroupMember{
-				MemberId: member.MemberId,
-				IsMute:   int32(isMute),
-				IsAllow:  int32(member.IsAllow),
+				MemberId:   member.MemberId,
+				IsMute:     int32(isMute),
+				IsAllow:    int32(member.IsAllow),
+				MemberType: pbobjs.UserType(member.MemberType),
 			})
 			offset, err := tools.EncodeInt(member.ID)
 			if err != nil {
@@ -374,9 +406,10 @@ func QryMemberSettings(ctx context.Context, groupId string, memberId string) (er
 		if member != nil {
 			resp.IsMember = true
 			resp.JoinTime = member.CreatedTime
-			memberAtts, exist := GetGrpMemberAttsFromCache(ctx, appkey, groupId, memberId)
-			if exist {
-				resp.MemberSettings = commonservices.Obj2Map(memberAtts.Settings)
+			memberAtts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, memberId)
+			if memberAtts != nil {
+				resp.MemberSettings = memberAtts.GetMemberSettings()
+				resp.MemberExts = memberAtts.GetMemberExts()
 			}
 		}
 	}
@@ -389,6 +422,7 @@ type GroupMember struct {
 	MuteEndAt   int64
 	IsAllow     int
 	CreatedTime int64 //join time
+	MemberType  pbobjs.UserType
 }
 
 type GroupMemberContainer struct {

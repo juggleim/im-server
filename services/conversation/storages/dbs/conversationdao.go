@@ -223,9 +223,9 @@ func (conver *ConversationDao) SyncConversations(appkey, userId string, startTim
 	return conversations, nil
 }
 
-func (conver *ConversationDao) QryConvers(appkey, userId string, startId int64, count int32) ([]*models.Conversation, error) {
+func (conver *ConversationDao) QryConvers(appkey, userId string, startTime int64, count int32) ([]*models.Conversation, error) {
 	var items []*ConversationDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and sync_time<?", appkey, userId, startId).Order("sync_time desc").Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and sync_time<?", appkey, userId, startTime).Order("sync_time desc").Limit(count).Find(&items).Error
 	if err != nil {
 		return []*models.Conversation{}, err
 	}

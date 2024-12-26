@@ -1,13 +1,18 @@
 package apis
 
 import (
+	"im-server/commons/bases"
+	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/admingateway/services"
 	"im-server/services/commonservices"
 	"net/http"
+	"sort"
+	"sync"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/proto"
 )
 
 func QryMsgStatistic(ctx *gin.Context) {
@@ -46,7 +51,7 @@ func QryMsgStatistic(ctx *gin.Context) {
 	if startStr != "" {
 		intVal, err := tools.String2Int64(startStr)
 		if err == nil && intVal > 0 {
-			start = intVal
+			start = intVal / 1000
 		}
 	}
 	endStr := ctx.Query("end")
@@ -54,7 +59,7 @@ func QryMsgStatistic(ctx *gin.Context) {
 	if endStr != "" {
 		intVal, err := tools.String2Int64(endStr)
 		if err == nil && intVal > 0 {
-			end = intVal
+			end = intVal / 1000
 		}
 	}
 	items := commonservices.QryMsgStatistic(appkey, statTypes, pbobjs.ChannelType(channelType), start, end)
@@ -115,8 +120,56 @@ func QryConnectCount(ctx *gin.Context) {
 			end = intVal
 		}
 	}
-	items := commonservices.QryConncurrentConnect(appkey, start, end)
-	services.SuccessHttpResp(ctx, items)
+	wg := &sync.WaitGroup{}
+	rpcNodes := bases.GetCluster().GetAllNodes()
+	timeMarkMap := map[int64]int64{}
+	lock := &sync.RWMutex{}
+	for _, rpcNode := range rpcNodes {
+		wg.Add(1)
+		nodeName := rpcNode.Name
+		go func() {
+			defer wg.Done()
+			code, respObj, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_connect_count", nodeName, &pbobjs.QryConnectCountReq{
+				Start: start,
+				End:   end,
+			}, func() proto.Message {
+				return &pbobjs.QryConnectCountResp{}
+			})
+			if err == nil && code == errs.IMErrorCode_SUCCESS && respObj != nil {
+				resp := respObj.(*pbobjs.QryConnectCountResp)
+				for _, item := range resp.Items {
+					lock.Lock()
+					var count int64 = 0
+					if oldCount, exist := timeMarkMap[item.TimeMark]; exist {
+						count = oldCount + item.Count
+					} else {
+						count = item.Count
+					}
+					timeMarkMap[item.TimeMark] = count
+					lock.Unlock()
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	connectCountItems := []*commonservices.ConcurrentConnectItem{}
+	for timeMark, count := range timeMarkMap {
+		connectCountItems = append(connectCountItems, &commonservices.ConcurrentConnectItem{
+			TimeMark: timeMark,
+			Count:    count,
+		})
+	}
+	sort.Slice(connectCountItems, func(i, j int) bool {
+		return connectCountItems[i].TimeMark < connectCountItems[j].TimeMark
+	})
+	retItems := []interface{}{}
+	for _, item := range connectCountItems {
+		retItems = append(retItems, item)
+	}
+	ret := &commonservices.Statistics{
+		Items: retItems,
+	}
+	services.SuccessHttpResp(ctx, ret)
 }
 
 func QryUserRegiste(ctx *gin.Context) {

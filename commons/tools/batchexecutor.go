@@ -55,13 +55,16 @@ func NewBatchExecutor(batchSize int, duration time.Duration, exec func([]interfa
 		batchSize:     batchSize,
 		checkDuration: duration,
 		executeFun:    exec,
+
+		taskBuffer: make(map[string]interface{}),
 	}
 	executor.start()
 	return executor
 }
 
 type BatchExecutor struct {
-	tasks         []interface{}
+	// tasks         []interface{}
+	taskBuffer    map[string]interface{}
 	lock          *sync.RWMutex
 	batchSize     int
 	checkTimer    *time.Ticker
@@ -85,22 +88,24 @@ func (executor *BatchExecutor) start() {
 	}()
 }
 
-func (executor *BatchExecutor) innerAppend(task interface{}) []interface{} {
+func (executor *BatchExecutor) innerAppend(uniqId string, task interface{}) []interface{} {
 	executor.lock.Lock()
 	defer executor.lock.Unlock()
-	if len(executor.tasks) < executor.batchSize {
-		executor.tasks = append(executor.tasks, task)
+	if len(executor.taskBuffer) < executor.batchSize {
+		executor.taskBuffer[uniqId] = task
 	} else {
-		tasks := executor.tasks
-		executor.tasks = []interface{}{}
-		executor.tasks = append(executor.tasks, task)
+		tasks := []interface{}{}
+		for _, v := range executor.taskBuffer {
+			tasks = append(tasks, v)
+		}
+		executor.taskBuffer = make(map[string]interface{})
 		return tasks
 	}
 	return nil
 }
 
-func (executor *BatchExecutor) Append(task interface{}) {
-	tasks := executor.innerAppend(task)
+func (executor *BatchExecutor) Append(uniqId string, task interface{}) {
+	tasks := executor.innerAppend(uniqId, task)
 	if len(tasks) > 0 && executor.executeFun != nil {
 		executor.executeFun(tasks)
 	}
@@ -109,8 +114,11 @@ func (executor *BatchExecutor) Append(task interface{}) {
 func (executor *BatchExecutor) featchTasks() []interface{} {
 	executor.lock.Lock()
 	defer executor.lock.Unlock()
-	tasks := executor.tasks
-	executor.tasks = []interface{}{}
+	tasks := []interface{}{}
+	for _, v := range executor.taskBuffer {
+		tasks = append(tasks, v)
+	}
+	executor.taskBuffer = make(map[string]interface{})
 	return tasks
 }
 

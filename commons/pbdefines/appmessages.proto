@@ -32,6 +32,7 @@ message RpcMessageWraper{
   string deviceId = 16;
   string instanceId = 17;
   string platform = 18;
+  bool isFromApp = 19;
 
   int32 resultCode = 21;
   int64 msgSendTime = 22;
@@ -87,6 +88,8 @@ message PushData{
   string pushId = 2;
   string pushText = 3;
   string pushExtraData = 4;
+  PushLevel pushLevel = 5;
+  bool isVoip = 6;
 
   //internal fields
   int32 badge = 50;
@@ -94,8 +97,19 @@ message PushData{
   string senderId = 52;
   string ConverId = 53;
   ChannelType channelType = 54;
+  string rtcRoomId = 55;
+  string rtcInviterId = 56;
+  int32 rtcRoomType = 57;
+  int32 rtcMediaType = 58;
   
 }
+
+enum PushLevel{
+  DefaultPuhsLevel = 0;
+  IgnoreSpeedControl = 1;
+  IgnoreUndisturb = 2;
+}
+
 message DownMsg{
   string targetId = 1;
   ChannelType channelType = 2;
@@ -124,6 +138,13 @@ message DownMsg{
   repeated MsgExtItem msgExSet = 25;
   repeated MsgExtItem msgExts = 26;
   repeated ConverTag converTags = 27;
+  map<string, TransMsgContent> transMsgMap = 28;
+}
+
+message TransMsgContent{
+  string lang = 1;
+  bytes msgContent = 2;
+  PushData pushData = 3;
 }
 
 message MsgAck{
@@ -139,7 +160,7 @@ message StreamMsgItem{
 
 message StreamDownMsg{
   string targetId = 1;
-  ChannelType ChannelType = 2;
+  ChannelType channelType = 2;
   string msgId = 3;
   repeated StreamMsgItem msgItems = 4;
 }
@@ -570,6 +591,9 @@ message UserInfo{
   repeated KvItem settings = 6;
   repeated KvItem statuses = 7;
   UserType userType = 8;
+
+  //inner fields
+  bool noCover = 100;
 }
 
 enum UserType{
@@ -583,7 +607,6 @@ message UserInfos{
 message UserIdsReq{
   repeated string userIds = 1;
   repeated int32 attTypes = 2;
-  bool noDispatch = 11;
 }
 message UserIdReq{
   string userId = 1;
@@ -597,6 +620,10 @@ message UserInfosResp{
 message UserRegResp{
   string userId = 1;
   string token = 2;
+  string nickname = 3;
+  string userPortrait = 4;
+  repeated KvItem extFields = 5;
+  int64 updatedTime = 6;
 }
 
 message UserOnlineStatusReq{
@@ -690,6 +717,44 @@ message BatchMuteUsersReq{
   bool isDelete = 2;
 }
 
+//friend
+message FriendIdsReq{
+  repeated string friendIds = 1;
+}
+
+message FriendMembersReq{
+  repeated FriendMember friendMembers = 1;
+}
+
+message QryFriendsReq{
+  int64 limit = 1;
+  string offset = 2;
+}
+
+message QryFriendsWithPageReq{
+  int64 page = 1;
+  int64 size = 2;
+  string orderTag = 3;
+}
+
+message QryFriendsResp{
+  repeated FriendMember items = 1;
+  string offset = 2;
+}
+
+message FriendMember{
+  string friendId = 1;
+  string orderTag = 2;
+}
+
+message CheckFriendsReq{
+  repeated string friendIds = 1;
+}
+
+message CheckFriendsResp{
+  map<string,bool> checkResults = 1;
+}
+
 //group
 message GroupInfo{
   string groupId = 1;
@@ -699,6 +764,7 @@ message GroupInfo{
   repeated KvItem extFields = 5;
   int64 updatedTime = 6;
   repeated KvItem settings = 7;
+  int32 memberCount = 8;
 }
 
 message GroupMembersReq {
@@ -707,6 +773,7 @@ message GroupMembersReq {
   string groupPortrait = 3;
   repeated string memberIds = 4;
   repeated KvItem extFields = 5;
+  repeated KvItem settings = 6;
 }
 
 message GroupMuteReq {
@@ -719,7 +786,6 @@ message GroupInfoReq{
 }
 message GroupIdsReq{
   repeated string groupIds = 1;
-  bool noDispatch = 11;
 }
 message GroupInfosResp{
   map<string, GroupInfo> groupInfoMap = 1;
@@ -746,6 +812,9 @@ message GroupMember{
   string memberId = 1;
   int32 isMute = 2;
   int32 isAllow = 3;
+  repeated KvItem extFields = 4;
+  repeated KvItem settings = 5;
+  UserType memberType = 6;
 }
 
 message QryGroupMembersReq{
@@ -783,11 +852,12 @@ message QryGrpMemberSettingsResp{
   int64 joinTime = 4;
   map<string,string> groupSettings = 5;
   map<string,string> memberSettings = 6;
+  map<string,string> memberExts = 7;
 }
 
 // file
 message QryFileCredReq{
-  FileType fileType = 1;
+  FileType file_type = 1;
   string ext = 2;
 }
 enum FileType {
@@ -799,10 +869,10 @@ enum FileType {
   Log = 5;
 }
 message QryFileCredResp{
-  OssType ossType = 1;
+  OssType oss_type = 1;
   oneof ossOf{
-    QiNiuCredResp qiNiuCred = 11;
-    PreSignResp preSignResp = 12;
+    QiNiuCredResp qiniu_cred = 11;
+    PreSignResp pre_sign_resp = 12;
   }
 }
 enum OssType{

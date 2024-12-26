@@ -255,6 +255,7 @@ func GetUserInfo(appkey, userId string) (*UserInfo, bool) {
 }
 
 func UpdUserInfo(ctx context.Context, userinfo *pbobjs.UserInfo) errs.IMErrorCode {
+	userinfo.Nickname = tools.TruncateText(userinfo.Nickname, 32)
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	_, exist := GetUserInfo(appkey, userinfo.UserId)
 	if !exist {
@@ -275,6 +276,16 @@ func UpdUserInfo(ctx context.Context, userinfo *pbobjs.UserInfo) errs.IMErrorCod
 			ItemKey:   ext.Key,
 			ItemValue: ext.Value,
 			ItemType:  int(commonservices.AttItemType_Att),
+		})
+		rvCache = rvCache || true
+	}
+	for _, setting := range userinfo.Settings {
+		extDao.Upsert(dbs.UserExtDao{
+			AppKey:    appkey,
+			UserId:    userinfo.UserId,
+			ItemKey:   setting.Key,
+			ItemValue: setting.Value,
+			ItemType:  int(commonservices.AttItemType_Setting),
 		})
 		rvCache = rvCache || true
 	}

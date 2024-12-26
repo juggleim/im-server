@@ -152,12 +152,12 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 				MemberCount: readInfo.MemberCount,
 			})
 			bs, _ := json.Marshal(ntf)
-			commonservices.GroupMsgFromApi(ctx, req.GroupId, req.GroupId, &pbobjs.UpMsg{
+			commonservices.AsyncGroupMsg(ctx, req.GroupId, req.GroupId, &pbobjs.UpMsg{
 				MsgType:    GrpReadNtfType,
 				MsgContent: bs,
 				Flags:      commonservices.SetCmdMsg(0),
 				ToUserIds:  []string{readInfo.SenderId},
-			}, true)
+			}, &bases.NoNotifySenderOption{}, &bases.MarkFromApiOption{})
 
 		}
 	}

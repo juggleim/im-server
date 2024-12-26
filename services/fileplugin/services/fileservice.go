@@ -102,8 +102,8 @@ func GetFileCred(ctx context.Context, req *pbobjs.QryFileCredReq) (errs.IMErrorC
 		uploadToken, domain := fileConf.QiNiu.UploadToken(req.Ext)
 		return errs.IMErrorCode_SUCCESS, &pbobjs.QryFileCredResp{
 			OssType: pbobjs.OssType_QiNiu,
-			OssOf: &pbobjs.QryFileCredResp_QiNiuCred{
-				QiNiuCred: &pbobjs.QiNiuCredResp{
+			OssOf: &pbobjs.QryFileCredResp_QiniuCred{
+				QiniuCred: &pbobjs.QiNiuCredResp{
 					Domain: domain,
 					Token:  uploadToken,
 				},

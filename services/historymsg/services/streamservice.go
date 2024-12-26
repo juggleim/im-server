@@ -24,9 +24,7 @@ func UpdStreamMsg(ctx context.Context, req *pbobjs.StreamDownMsg) errs.IMErrorCo
 				if len(newDownMsg.MsgItems) <= 0 {
 					newDownMsg.MsgItems = []*pbobjs.StreamMsgItem{}
 				}
-				for _, item := range req.MsgItems {
-					newDownMsg.MsgItems = append(newDownMsg.MsgItems, item)
-				}
+				newDownMsg.MsgItems = append(newDownMsg.MsgItems, req.MsgItems...)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
 				storage.UpdateMsgBody(appkey, converId, req.MsgId, newDownMsg.MsgType, newDownMsgBs)
 			}

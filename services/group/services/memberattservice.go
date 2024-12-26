@@ -18,16 +18,54 @@ func init() {
 	memberLocks = tools.NewSegmentatedLocks(512)
 }
 
-var notExistGrpMemberAtts MemberAtts = MemberAtts{
-	ExtFields: make(map[string]string),
-	Settings:  &commonservices.GrpMemberSettings{},
+type MemberAtts struct {
+	AppKey        string
+	GroupId       string
+	MemberId      string
+	ExtFields     map[string]string
+	Settings      *commonservices.GrpMemberSettings
+	SettingFields map[string]string
+	UpdatedTime   int64
 }
 
-type MemberAtts struct {
-	MemberId    string
-	ExtFields   map[string]string
-	Settings    *commonservices.GrpMemberSettings
-	UpdatedTime int64
+func (member *MemberAtts) SetMemberSetting(itemKey, itemValue string) {
+	key := getGrpMemberKey(member.AppKey, member.GroupId, member.MemberId)
+	lock := memberLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	member.SettingFields[itemKey] = itemValue
+}
+
+func (member *MemberAtts) GetMemberSettings() map[string]string {
+	key := getGrpMemberKey(member.AppKey, member.GroupId, member.MemberId)
+	lock := memberLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+	ret := make(map[string]string)
+	for k, v := range member.SettingFields {
+		ret[k] = v
+	}
+	return ret
+}
+
+func (member *MemberAtts) SetMemberExt(itemKey, itemValue string) {
+	key := getGrpMemberKey(member.AppKey, member.GroupId, member.MemberId)
+	lock := memberLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	member.ExtFields[itemKey] = itemValue
+}
+
+func (member *MemberAtts) GetMemberExts() map[string]string {
+	key := getGrpMemberKey(member.AppKey, member.GroupId, member.MemberId)
+	lock := memberLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+	ret := make(map[string]string)
+	for k, v := range member.ExtFields {
+		ret[k] = v
+	}
+	return ret
 }
 
 func AddGrpMemberAtts2Cache(ctx context.Context, appkey, groupId, memberId string, atts MemberAtts) {
@@ -35,15 +73,11 @@ func AddGrpMemberAtts2Cache(ctx context.Context, appkey, groupId, memberId strin
 	memberAttCache.Add(key, &atts)
 }
 
-func GetGrpMemberAttsFromCache(ctx context.Context, appkey, groupId, memberId string) (*MemberAtts, bool) {
+func GetGrpMemberAttsFromCache(ctx context.Context, appkey, groupId, memberId string) *MemberAtts {
 	key := getGrpMemberKey(appkey, groupId, memberId)
 	if val, exist := memberAttCache.Get(key); exist {
 		memberAtts := val.(*MemberAtts)
-		if memberAtts == &notExistGrpMemberAtts {
-			return nil, false
-		} else {
-			return memberAtts, true
-		}
+		return memberAtts
 	} else {
 		l := memberLocks.GetLocks(key)
 		l.Lock()
@@ -51,30 +85,27 @@ func GetGrpMemberAttsFromCache(ctx context.Context, appkey, groupId, memberId st
 
 		if val, exist := memberAttCache.Get(key); exist {
 			memberAtts := val.(*MemberAtts)
-			if memberAtts == &notExistGrpMemberAtts {
-				return nil, false
-			} else {
-				return memberAtts, true
-			}
+			return memberAtts
 		} else {
 			memberAtts := getGrpMemberAttsFromDb(ctx, appkey, groupId, memberId)
 			memberAttCache.Add(key, memberAtts)
-			return memberAtts, memberAtts != &notExistGrpMemberAtts
+			return memberAtts
 		}
 	}
 }
 
 func getGrpMemberAttsFromDb(ctx context.Context, appkey, groupId, memberId string) *MemberAtts {
+	ret := &MemberAtts{
+		AppKey:        appkey,
+		GroupId:       groupId,
+		MemberId:      memberId,
+		ExtFields:     make(map[string]string),
+		Settings:      &commonservices.GrpMemberSettings{},
+		SettingFields: make(map[string]string),
+	}
 	dao := dbs.GroupMemberExtDao{}
 	exts, err := dao.QryExtFields(appkey, groupId, memberId)
-	if err != nil || len(exts) <= 0 {
-		return &notExistGrpMemberAtts
-	} else {
-		ret := &MemberAtts{
-			MemberId:  memberId,
-			ExtFields: make(map[string]string),
-			Settings:  &commonservices.GrpMemberSettings{},
-		}
+	if err == nil && len(exts) > 0 {
 		grpInfo, exist := GetGroupInfoFromCache(ctx, appkey, groupId)
 		hideGrpMsg := "0"
 		if exist && grpInfo != nil && grpInfo.Settings != nil {
@@ -87,13 +118,14 @@ func getGrpMemberAttsFromDb(ctx context.Context, appkey, groupId, memberId strin
 		for _, ext := range exts {
 			if ext.ItemType == int(commonservices.AttItemType_Setting) {
 				valMap[ext.ItemKey] = ext.ItemValue
+				ret.SettingFields[ext.ItemKey] = ext.ItemValue
 			} else if ext.ItemType == int(commonservices.AttItemType_Att) {
 				ret.ExtFields[ext.ItemKey] = ext.ItemValue
 			}
 		}
 		commonservices.FillObjField(ret.Settings, valMap)
-		return ret
 	}
+	return ret
 }
 
 func getGrpMemberKey(appkey, groupId, memberId string) string {

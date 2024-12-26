@@ -27,6 +27,7 @@ type StreamMsg struct {
 	SenderId string
 	TargetId string
 	MsgId    string
+	MaxSeq   int
 
 	streamMsgItems *skipmap.Int64Map
 }
@@ -34,6 +35,7 @@ type StreamMsg struct {
 func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	senderId := bases.GetRequesterIdFromCtx(ctx)
+	targetId := bases.GetTargetIdFromCtx(ctx)
 	key := strings.Join([]string{appkey, req.MsgId}, "_")
 	l := streamMsgLocks.GetLocks(key)
 	l.Lock()
@@ -42,6 +44,10 @@ func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 	if val, exist := streamMsgCache.Get(key); exist {
 		sMsg := val.(*StreamMsg)
 		for _, item := range req.MsgItems {
+			sMsg.MaxSeq = sMsg.MaxSeq + 1
+			if item.SubSeq <= 0 {
+				item.SubSeq = int64(sMsg.MaxSeq)
+			}
 			sMsg.streamMsgItems.Store(item.SubSeq, item)
 			if item.Event == pbobjs.StreamEvent_StreamComplete {
 				isFinish = true
@@ -56,11 +62,15 @@ func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 		sMsg := &StreamMsg{
 			Appkey:         appkey,
 			SenderId:       senderId,
-			TargetId:       req.TargetId,
+			TargetId:       targetId,
 			MsgId:          req.MsgId,
 			streamMsgItems: skipmap.NewInt64(),
 		}
 		for _, item := range req.MsgItems {
+			sMsg.MaxSeq = sMsg.MaxSeq + 1
+			if item.SubSeq <= 0 {
+				item.SubSeq = int64(sMsg.MaxSeq)
+			}
 			sMsg.streamMsgItems.Store(item.SubSeq, item)
 			if item.Event == pbobjs.StreamEvent_StreamComplete {
 				isFinish = true
@@ -75,7 +85,6 @@ func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 }
 
 func updateStreamMsg(ctx context.Context, streamMsg *StreamMsg) {
-	senderId := bases.GetRequesterIdFromCtx(ctx)
 	pbStreamMsg := &pbobjs.StreamDownMsg{
 		TargetId:    streamMsg.TargetId,
 		ChannelType: pbobjs.ChannelType_Private,
@@ -90,26 +99,16 @@ func updateStreamMsg(ctx context.Context, streamMsg *StreamMsg) {
 		}
 		return true
 	})
-	data, _ := tools.PbMarshal(pbStreamMsg)
-	bases.UnicastRouteWithNoSender(&pbobjs.RpcMessageWraper{
-		RpcMsgType:   pbobjs.RpcMsgType_UserPub,
-		AppKey:       bases.GetAppKeyFromCtx(ctx),
-		Session:      bases.GetSessionFromCtx(ctx),
-		Method:       "upd_stream",
-		RequesterId:  bases.GetRequesterIdFromCtx(ctx),
-		ReqIndex:     bases.GetSeqIndexFromCtx(ctx),
-		Qos:          bases.GetQosFromCtx(ctx),
-		AppDataBytes: data,
-		TargetId:     commonservices.GetConversationId(senderId, streamMsg.TargetId, pbobjs.ChannelType_Private),
-	})
+	targetId := commonservices.GetConversationId(streamMsg.SenderId, streamMsg.TargetId, pbobjs.ChannelType_Private)
+	bases.AsyncRpcCall(ctx, "upd_stream", targetId, pbStreamMsg)
 }
 
 func HandleStreamMsg(ctx context.Context, req *pbobjs.StreamDownMsg) errs.IMErrorCode {
-	rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), req.TargetId, "stream_msg", req)
-	rpcMsg.Qos = 0
-	bases.UnicastRouteWithNoSender(rpcMsg)
-
 	AppendStreamMsgItem(ctx, req)
+
+	req.TargetId = bases.GetRequesterIdFromCtx(ctx)
+	req.ChannelType = pbobjs.ChannelType_Private
+	bases.AsyncRpcCall(ctx, "stream_msg", bases.GetTargetIdFromCtx(ctx), req)
 
 	return errs.IMErrorCode_SUCCESS
 }

@@ -17,7 +17,7 @@ func Login(ctx *gin.Context) {
 		})
 		return
 	}
-	code := services.CheckLogin(req.Account, req.Password)
+	code, account := services.CheckLogin(req.Account, req.Password)
 	if code == services.AdminErrorCode_Success {
 		authStr, err := generateAuthorization(req.Account)
 		if err != nil {
@@ -31,6 +31,7 @@ func Login(ctx *gin.Context) {
 			Account:       req.Account,
 			Authorization: authStr,
 			Env:           "private", //public
+			RoleId:        account.RoleId,
 		})
 	} else {
 		ctx.JSON(http.StatusOK, &services.ApiErrorMsg{
@@ -44,12 +45,14 @@ type AccountReq struct {
 	Account     string `json:"account"`
 	Password    string `json:"password"`
 	NewPassword string `json:"new_password"`
+	RoleId      int    `json:"role_id"`
 }
 
 type LoginResp struct {
 	Account       string `json:"account"`
 	Authorization string `json:"authorization"`
 	Env           string `json:"env"`
+	RoleId        int    `json:"role_id"`
 }
 
 func AddAccount(ctx *gin.Context) {
@@ -61,7 +64,7 @@ func AddAccount(ctx *gin.Context) {
 		})
 		return
 	}
-	code := services.AddAccount(GetLoginedAccount(ctx), req.Account, req.Password)
+	code := services.AddAccount(GetLoginedAccount(ctx), req.Account, req.Password, req.RoleId)
 	ctx.JSON(http.StatusOK, &services.ApiErrorMsg{
 		Code: code,
 	})

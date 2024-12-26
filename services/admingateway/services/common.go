@@ -1,13 +1,10 @@
 package services
 
 import (
+	"context"
 	"im-server/commons/bases"
-	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -16,32 +13,15 @@ const (
 	CtxKey_Session string = "CtxKey_Session"
 )
 
-func SyncApiCall(ctx *gin.Context, method, requestId, targetId string, req proto.Message, respFactory func() proto.Message) (AdminErrorCode, interface{}, error) {
-	dataBytes, _ := tools.PbMarshal(req)
-	result, err := bases.SyncUnicastRoute(&pbobjs.RpcMessageWraper{
-		RpcMsgType:   pbobjs.RpcMsgType_QueryMsg,
-		AppKey:       GetCtxString(ctx, CtxKey_AppKey),
-		Session:      GetCtxString(ctx, CtxKey_Session),
-		Method:       method,
-		RequesterId:  requestId,
-		Qos:          1,
-		AppDataBytes: dataBytes,
-		TargetId:     targetId,
-		IsFromApi:    true,
-	}, 5*time.Second)
-	if err != nil {
-		return AdminErrorCode_ServerErr, nil, err
+func ToRpcCtx(ginCtx *gin.Context, requestId string) context.Context {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, bases.CtxKey_AppKey, GetCtxString(ginCtx, CtxKey_AppKey))
+	ctx = context.WithValue(ctx, bases.CtxKey_Session, GetCtxString(ginCtx, CtxKey_Session))
+	ctx = context.WithValue(ctx, bases.CtxKey_IsFromApi, true)
+	if requestId != "" {
+		ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, requestId)
 	}
-	if respFactory != nil {
-		respObj := respFactory()
-		err = tools.PbUnMarshal(result.AppDataBytes, respObj)
-		if err != nil {
-			return AdminErrorCode_ServerErr, nil, err
-		}
-		return AdminErrorCode(result.ResultCode), respObj, nil
-	} else {
-		return AdminErrorCode(result.ResultCode), nil, nil
-	}
+	return ctx
 }
 
 func GetCtxString(ctx *gin.Context, key string) string {

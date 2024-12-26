@@ -11,6 +11,7 @@ type PushTokenDao struct {
 	PushChannel string `gorm:"push_channel"`
 	Package     string `gorm:"package"`
 	PushToken   string `gorm:"push_token"`
+	VoipToken   string `gorm:"voip_token"`
 	//CreatedTime time.Time `gorm:"created_time"`
 	//UpdatedTme  time.Time `gorm:"updated_time"`
 	AppKey string `gorm:"app_key"`
@@ -20,9 +21,9 @@ func (token PushTokenDao) TableName() string {
 	return "pushtokens"
 }
 
-func (token PushTokenDao) UpsertPushToken(item PushTokenDao) error {
-	err := dbcommons.GetDb().Exec("INSERT INTO pushtokens (app_key,user_id,device_id,platform,push_channel,package,push_token)VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE device_id=?,platform=?,push_channel=?,package=?,push_token=?",
-		item.AppKey, item.UserId, item.DeviceId, item.Platform, item.PushChannel, item.Package, item.PushToken, item.DeviceId, item.Platform, item.PushChannel, item.Package, item.PushToken).Error
+func (token PushTokenDao) Upsert(item PushTokenDao) error {
+	err := dbcommons.GetDb().Exec("INSERT INTO pushtokens (app_key,user_id,device_id,platform,push_channel,package,push_token,voip_token)VALUES(?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE device_id=?,platform=?,push_channel=?,package=?,push_token=?,voip_token=?",
+		item.AppKey, item.UserId, item.DeviceId, item.Platform, item.PushChannel, item.Package, item.PushToken, item.VoipToken, item.DeviceId, item.Platform, item.PushChannel, item.Package, item.PushToken, item.VoipToken).Error
 	return err
 }
 
@@ -46,6 +47,12 @@ func (token PushTokenDao) GetUserWithToken(appkey string, pushToken string) (*Pu
 		return nil, err
 	}
 	return &item, nil
+}
+
+func (token PushTokenDao) QueryByDeviceId(appkey, deviceId string) ([]*PushTokenDao, error) {
+	var items []*PushTokenDao
+	err := dbcommons.GetDb().Where("app_key=? and device_id=?", appkey, deviceId).Find(&items).Error
+	return items, err
 }
 
 func (token PushTokenDao) DeleteByUserId(appkey, userId string) error {

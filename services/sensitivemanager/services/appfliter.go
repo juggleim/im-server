@@ -25,7 +25,6 @@ func init() {
 		start := time.Now()
 		loadAppWords(s, key.(string))
 		fmt.Println("load app words cost:", time.Since(start))
-
 		return s
 	})
 }
@@ -35,7 +34,7 @@ func GetAppFilter(appKey string) *SensitiveService {
 	lock.Lock()
 	defer lock.Unlock()
 
-	v, ok := filterCache.GetByCreator(appKey)
+	v, ok := filterCache.GetByCreator(appKey, nil)
 	if !ok {
 		return nil
 	}

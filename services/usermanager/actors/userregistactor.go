@@ -8,6 +8,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/tokens"
@@ -22,6 +23,7 @@ type UserRegistActor struct {
 
 func (actor *UserRegistActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.UserInfo); ok {
+		req.Nickname = tools.TruncateText(req.Nickname, 32)
 		token := tokens.ImToken{
 			AppKey:    bases.GetAppKeyFromCtx(ctx),
 			UserId:    req.UserId,
@@ -31,11 +33,13 @@ func (actor *UserRegistActor) OnReceive(ctx context.Context, input proto.Message
 		appInfo, exist := commonservices.GetAppInfo(token.AppKey)
 		if exist && appInfo != nil {
 			tokenStr, _ := token.ToTokenString([]byte(appInfo.AppSecureKey))
-			queryAck := bases.CreateQueryAckWraper(ctx, 0, &pbobjs.UserRegResp{
+			if !req.NoCover || !services.CheckUserExist(ctx, req.UserId) {
+				services.AddUser(ctx, req.UserId, req.Nickname, req.UserPortrait, req.ExtFields, req.Settings, pbobjs.UserType_User)
+			}
+			queryAck := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_SUCCESS, &pbobjs.UserRegResp{
 				UserId: req.UserId,
 				Token:  tokenStr,
 			})
-			services.AddUser(ctx, req.UserId, req.Nickname, req.UserPortrait, req.ExtFields, req.Settings, pbobjs.UserType_User)
 			actor.Sender.Tell(queryAck, actorsystem.NoSender)
 		} else {
 			queryAck := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_API_APP_NOT_EXISTED, &pbobjs.UserRegResp{

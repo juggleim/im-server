@@ -181,7 +181,7 @@ func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 	}
 }
 
-func getPushLanguage(ctx context.Context, userId string) string {
+func getTargetUserLanguage(ctx context.Context, userId string) string {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	language := "en_US"
 	appinfo, exist := commonservices.GetAppInfo(appkey)
@@ -225,7 +225,7 @@ func (actor *SendMsgAckActor) OnReceive(ctx context.Context, input proto.Message
 	}
 }
 
-func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
+func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 	if msg == nil {
 		return nil
 	}
@@ -248,12 +248,21 @@ func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 		retPushData.PushId = msg.PushData.PushId
 		retPushData.PushText = msg.PushData.PushText
 		retPushData.PushExtraData = msg.PushData.PushExtraData
+
+		retPushData.IsVoip = msg.PushData.IsVoip
+		retPushData.RtcRoomId = msg.PushData.RtcRoomId
+		retPushData.RtcInviterId = msg.PushData.RtcInviterId
+		retPushData.RtcRoomType = msg.PushData.RtcRoomType
+		retPushData.RtcMediaType = msg.PushData.RtcMediaType
 	}
 	if retPushData.Title == "" {
 		retPushData.Title = title
 	}
 	if retPushData.PushText != "" {
-		retPushData.PushText = prefix + retPushData.PushText
+		pushText := retPushData.PushText
+		//handle template
+		pushText = TemplateI18nAssign(ctx, pushText, pushLanguage)
+		retPushData.PushText = prefix + pushText
 	} else {
 		if msg.MsgType == "jg:text" {
 			txtMsg := &commonservices.TextMsg{}
@@ -266,18 +275,20 @@ func GetPushData(msg *pbobjs.DownMsg, pushLanguage string) *pbobjs.PushData {
 			if err == nil {
 				retPushData.PushText = prefix + pushText
 			} else {
-				retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Text, "[Text]")
+				retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Text, "[Text]")
 			}
 		} else if msg.MsgType == "jg:img" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Image, "[Image]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Image, "[Image]")
 		} else if msg.MsgType == "jg:voice" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Voice, "[Voice]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Voice, "[Voice]")
 		} else if msg.MsgType == "jg:file" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_File, "[File]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_File, "[File]")
 		} else if msg.MsgType == "jg:video" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Video, "[Video]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Video, "[Video]")
 		} else if msg.MsgType == "jg:merge" {
-			retPushData.PushText = prefix + GetI18nStr(pushLanguage, PlaceholderKey_Merge, "[Merge]")
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Merge, "[Merge]")
+		} else if msg.MsgType == "jg:voicecall" {
+			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_RtcCall, "invites you to a voice call")
 		} else {
 			return nil
 		}
@@ -302,16 +313,26 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, exist := commonservices.GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.IsOpenPush {
-		if !commonservices.IsUndisturbMsg(msg.Flags) {
-			pushData := GetPushData(msg, getPushLanguage(ctx, receiverId))
-			if pushData != nil {
-				//badge
-				userStatus := GetUserStatus(appkey, receiverId)
-				pushData.Badge = userStatus.BadgeIncr()
-				if userStatus.CanPush > 0 {
-					pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
-					bases.UnicastRouteWithNoSender(pushRpc)
-				}
+		//check close push threshold
+		if msg.ChannelType == pbobjs.ChannelType_Group && appInfo.ClosePushGrpThreshold > 0 && msg.MemberCount > int32(appInfo.ClosePushGrpThreshold) {
+			if msg.PushData == nil || msg.PushData.PushLevel == pbobjs.PushLevel_DefaultPuhsLevel {
+				return
+			}
+		}
+		//undisturb
+		if commonservices.IsUndisturbMsg(msg.Flags) {
+			if msg.PushData == nil || msg.PushData.PushLevel < pbobjs.PushLevel_IgnoreUndisturb {
+				return
+			}
+		}
+		pushData := GetPushData(ctx, msg, getTargetUserLanguage(ctx, receiverId))
+		if pushData != nil {
+			//badge
+			userStatus := GetUserStatus(appkey, receiverId)
+			pushData.Badge = userStatus.BadgeIncr()
+			if userStatus.CanPush > 0 {
+				pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
+				bases.UnicastRouteWithNoSender(pushRpc)
 			}
 		}
 	}

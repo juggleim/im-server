@@ -23,25 +23,38 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 		return
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	pushToken, ok := GetPushToken(appkey, userId)
-	if ok && pushToken != nil {
+	pushToken := GetPushToken(appkey, userId)
+	if pushToken.PushToken != "" || pushToken.VoipPushToken != "" {
 		if pushToken.Platform == pbobjs.Platform_iOS {
 			if pushToken.PushToken != "" {
 				iosPushConf := GetIosPushConf(ctx, appkey, pushToken.PackageName)
-				if iosPushConf != nil && iosPushConf.ApnsClient != nil {
+				if iosPushConf != nil && (iosPushConf.ApnsClient != nil || iosPushConf.ApnsVoipClient != nil) {
 					notification := &apns2.Notification{}
 					notification.DeviceToken = pushToken.PushToken
 					notification.Topic = pushToken.PackageName
 					notification.Payload = iosPushPayload(req)
-					resp, err := iosPushConf.ApnsClient.Push(notification)
-					if err != nil {
-						logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+					var client *apns2.Client
+					if req.IsVoip && iosPushConf.ApnsVoipClient != nil {
+						client = iosPushConf.ApnsVoipClient
+						notification.Topic = notification.Topic + ".voip"
+						notification.DeviceToken = pushToken.VoipPushToken
+						notification.PushType = apns2.PushTypeVOIP
 					} else {
-						if resp.StatusCode == 200 {
-							logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+						client = iosPushConf.ApnsClient
+					}
+					if client != nil {
+						resp, err := client.Push(notification)
+						if err != nil {
+							logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 						} else {
-							logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
+							if resp.StatusCode == 200 {
+								logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+							} else {
+								logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
+							}
 						}
+					} else {
+						logs.WithContext(ctx).Infof("[IOS_ERR]user_id:%s\tnot init apns client")
 					}
 				}
 			}
@@ -126,7 +139,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					}
 				case pbobjs.PushChannel_FCM:
 					if androidPushConf.FcmPushClient != nil {
-						err := androidPushConf.FcmPushClient.SendPush(req.Title, req.PushText, pushToken.PushToken)
+						err := androidPushConf.FcmPushClient.SendPush(req.Title, req.PushText, pushToken.PushToken, transfer2Exts(req))
 						if err != nil {
 							logs.WithContext(ctx).Infof("[FCM_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 						} else {
@@ -155,11 +168,32 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 
 func transfer2Exts(pushData *pbobjs.PushData) map[string]interface{} {
 	exts := make(map[string]interface{})
-	exts["msg_id"] = pushData.MsgId
-	exts["sender_id"] = pushData.SenderId
-	exts["conver_id"] = pushData.ConverId
-	exts["conver_type"] = int32(pushData.ChannelType)
-	exts["exts"] = pushData.PushExtraData
+	if pushData.IsVoip {
+		if pushData.RtcRoomId != "" {
+			exts["room_id"] = pushData.RtcRoomId
+		}
+		if pushData.RtcInviterId != "" {
+			exts["inviter_id"] = pushData.RtcInviterId
+		}
+		exts["is_multi"] = pushData.RtcRoomType
+		exts["media_type"] = pushData.RtcMediaType
+	} else {
+		if pushData.MsgId != "" {
+			exts["msg_id"] = pushData.MsgId
+		}
+		if pushData.SenderId != "" {
+			exts["sender_id"] = pushData.SenderId
+		}
+		if pushData.ConverId != "" {
+			exts["conver_id"] = pushData.ConverId
+		}
+		if pushData.ChannelType != pbobjs.ChannelType_Unknown {
+			exts["conver_type"] = int32(pushData.ChannelType)
+		}
+	}
+	if pushData.PushExtraData != "" {
+		exts["exts"] = pushData.PushExtraData
+	}
 	return exts
 }
 
@@ -168,10 +202,9 @@ func iosPushPayload(req *pbobjs.PushData) interface{} {
 	iosPayload.AlertTitle(req.Title)
 	iosPayload.AlertBody(tools.PureStr(req.PushText))
 	iosPayload.Sound("default")
-	iosPayload.Custom("conver_id", req.ConverId)
-	iosPayload.Custom("conver_type", int32(req.ChannelType))
-	if req.PushExtraData != "" {
-		iosPayload.Custom("exts", req.PushExtraData)
+	jcExts := transfer2Exts(req)
+	for k, v := range jcExts {
+		iosPayload.Custom(k, v)
 	}
 	if req.Badge > 0 {
 		iosPayload.Badge(int(req.Badge))

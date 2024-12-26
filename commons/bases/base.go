@@ -129,6 +129,7 @@ func SyncOriginalRpcCall(ctx context.Context, method, targetId string, req proto
 		OnlySendbox:  GetOnlySendboxFromCtx(ctx),
 		NoSendbox:    GetNoSendboxFromCtx(ctx),
 		IsFromApi:    GetIsFromApiFromCtx(ctx),
+		IsFromApp:    GetIsFromAppFromCtx(ctx),
 		TargetIds:    GetTargetIdsFromCtx(ctx),
 		ExtParams:    GetExtsFromCtx(ctx),
 	}, 5*time.Second)
@@ -158,6 +159,7 @@ func AsyncRpcCall(ctx context.Context, method, targetId string, req proto.Messag
 		OnlySendbox:  GetOnlySendboxFromCtx(ctx),
 		NoSendbox:    GetNoSendboxFromCtx(ctx),
 		IsFromApi:    GetIsFromApiFromCtx(ctx),
+		IsFromApp:    GetIsFromAppFromCtx(ctx),
 		TargetIds:    GetTargetIdsFromCtx(ctx),
 		ExtParams:    GetExtsFromCtx(ctx),
 	})
@@ -183,6 +185,7 @@ func AsyncRpcCallWithSender(ctx context.Context, method, targetId string, req pr
 		OnlySendbox:  GetOnlySendboxFromCtx(ctx),
 		NoSendbox:    GetNoSendboxFromCtx(ctx),
 		IsFromApi:    GetIsFromApiFromCtx(ctx),
+		IsFromApp:    GetIsFromAppFromCtx(ctx),
 		TargetIds:    GetTargetIdsFromCtx(ctx),
 		ExtParams:    GetExtsFromCtx(ctx),
 	}, sender)
@@ -211,6 +214,7 @@ func GroupRpcCall(ctx context.Context, method string, targetIds []string, req pr
 				OnlySendbox:  GetOnlySendboxFromCtx(ctx),
 				NoSendbox:    GetNoSendboxFromCtx(ctx),
 				IsFromApi:    GetIsFromApiFromCtx(ctx),
+				IsFromApp:    GetIsFromAppFromCtx(ctx),
 				TargetIds:    ids,
 			})
 		}
@@ -236,6 +240,7 @@ func Broadcast(ctx context.Context, method string, req proto.Message, opts ...Ba
 		OnlySendbox:  GetOnlySendboxFromCtx(ctx),
 		NoSendbox:    GetNoSendboxFromCtx(ctx),
 		IsFromApi:    GetIsFromApiFromCtx(ctx),
+		IsFromApp:    GetIsFromAppFromCtx(ctx),
 		TargetIds:    GetTargetIdsFromCtx(ctx),
 		ExtParams:    GetExtsFromCtx(ctx),
 	})

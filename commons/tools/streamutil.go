@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-var headerData = []byte("data: ")
+var headerData = []byte("data:")
 var defaultEmptyMessagesLimit uint = 300
 
 type HttpStream struct {

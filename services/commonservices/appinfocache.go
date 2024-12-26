@@ -10,9 +10,13 @@ import (
 	"im-server/commons/caches"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
+	"im-server/services/commonservices/transengines"
+
+	"github.com/kataras/i18n"
 )
 
 var appInfoCache *caches.LruCache
+var appLocks *tools.SegmentatedLocks
 
 type AppInfo struct {
 	AppKey       string    `default:"-"`
@@ -45,21 +49,29 @@ type AppInfo struct {
 	MsgThreshold             int  `default:"2000"`
 	OpenGrpSnapshot          bool `default:"false"`
 	BigGrpThreshold          int  `default:"1000"`
+	ClosePushGrpThreshold    int  `default:"0"`
 
 	EventSubConfig  string `default:""`
 	EventSubSwitch  string `default:""`
 	SecurityDomains string `default:""`
 	ZegoConfig      string `default:""`
+	TransEngineConf string `default:""`
 
 	// TestItem  string
 	// TestInt   int
 	// TestBool  bool  `default:"true"`
 	// TestInt64 int64 `default:"10"`
+
+	//other configure
+	MsgTransConfs *MsgTransConfs            `default:"-"`
+	TransEngine   transengines.ITransEngine `default:"-"`
+	I18nKeys      *i18n.I18n                `default:"-"`
 }
 
 var notExistAppInfo *AppInfo
 
 func init() {
+	appLocks = tools.NewSegmentatedLocks(64)
 	notExistAppInfo = &AppInfo{}
 
 	appInfoCache = caches.NewLruCache(10000, nil)
@@ -179,7 +191,7 @@ func setFieldValue(field reflect.Value, typ reflect.Type, val string) {
 }
 
 func GetAppInfo(appkey string) (*AppInfo, bool) {
-	val, ok := appInfoCache.GetByCreator(appkey)
+	val, ok := appInfoCache.GetByCreator(appkey, nil)
 	if ok {
 		info := val.(*AppInfo)
 		if info == notExistAppInfo {

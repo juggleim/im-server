@@ -62,3 +62,17 @@ message BusinessLog {
   string message = 7;
   string appKey = 8;
 }
+
+message QryConnectCountReq {
+  int64 start = 1;
+  int64 end = 2;
+}
+
+message QryConnectCountResp{
+  repeated ConnectCountItem items = 1;
+}
+
+message ConnectCountItem{
+  int64 timeMark = 1;
+  int64 count = 2;
+}

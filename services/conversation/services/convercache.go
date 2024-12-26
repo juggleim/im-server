@@ -17,7 +17,8 @@ import (
 
 var userConverCache *caches.LruCache
 var userLocks *tools.SegmentatedLocks
-var persistCache *caches.LruCache
+
+var persistCache *caches.EphemeralCache
 
 type ConverPersistIndex struct {
 	Appkey      string
@@ -30,50 +31,42 @@ func init() {
 	userConverCache = caches.NewLruCacheWithReadTimeout(100000, nil, time.Hour)
 	userLocks = tools.NewSegmentatedLocks(512)
 
-	persistCache = caches.NewLruCacheWithReadTimeout(100000, nil, 5*time.Second)
+	persistCache = caches.NewEphemeralCache(time.Second, 5*time.Second, func(key, value interface{}) {
+		persistIndex, ok := value.(*ConverPersistIndex)
+		if ok && persistIndex != nil {
+			userConvers := getUserConvers(persistIndex.Appkey, persistIndex.UserId)
+			item := userConvers.QryConver(persistIndex.TargetId, persistIndex.ChannelType)
+			if item != nil {
+				conversation := models.Conversation{
+					AppKey:      item.AppKey,
+					UserId:      item.UserId,
+					TargetId:    item.TargetId,
+					ChannelType: item.ChannelType,
 
-	persistCache.SetBatchEvict(100, func(convers []caches.CacheItem) {
-		if len(convers) <= 0 {
-			return
-		}
-		conversations := []models.Conversation{}
-		for _, conver := range convers {
-			persistIndex, ok := conver.Value.(*ConverPersistIndex)
-			if ok && persistIndex != nil {
-				userConvers := getUserConvers(persistIndex.Appkey, persistIndex.UserId)
-				item := userConvers.QryConver(persistIndex.TargetId, persistIndex.ChannelType)
-				if item != nil {
-					conversations = append(conversations, models.Conversation{
-						AppKey:      item.AppKey,
-						UserId:      item.UserId,
-						TargetId:    item.TargetId,
-						ChannelType: item.ChannelType,
+					SortTime: item.SortTime,
+					SyncTime: item.SyncTime,
 
-						SortTime: item.SortTime,
-						SyncTime: item.SyncTime,
+					LatestMsgId: item.LatestMsgId,
+					// LatestMsg:            item.LatestMsg,
+					LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
 
-						LatestMsgId: item.LatestMsgId,
-						// LatestMsg:            item.LatestMsg,
-						LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
+					LatestReadMsgIndex: item.LatestReadMsgIndex,
+					LatestReadMsgId:    item.LatestReadMsgId,
+					LatestReadMsgTime:  item.LatestReadMsgTime,
 
-						LatestReadMsgIndex: item.LatestReadMsgIndex,
-						LatestReadMsgId:    item.LatestReadMsgId,
-						LatestReadMsgTime:  item.LatestReadMsgTime,
+					IsTop:          item.IsTop,
+					TopUpdatedTime: item.TopUpdatedTime,
+					UndisturbType:  item.UndisturbType,
 
-						IsTop:          item.IsTop,
-						TopUpdatedTime: item.TopUpdatedTime,
-						UndisturbType:  item.UndisturbType,
-
-						UnreadTag: item.UnreadTag,
-						IsDeleted: item.IsDeleted,
-					})
+					UnreadTag: item.UnreadTag,
+					IsDeleted: item.IsDeleted,
+				}
+				storage := storages.NewConversationStorage()
+				err := storage.Upsert(conversation)
+				if err != nil {
+					fmt.Println("save conver err:", err)
 				}
 			}
-		}
-		storage := storages.NewConversationStorage()
-		err := storage.BatchUpsert(conversations)
-		if err != nil {
-			fmt.Println("batch save convers err:", err)
 		}
 	})
 }
@@ -268,7 +261,7 @@ func (uc *UserConversations) purge() {
 
 func (uc *UserConversations) PersistConver(targetId string, channelType pbobjs.ChannelType) {
 	key := fmt.Sprintf("%s_%s_%s_%d", uc.Appkey, uc.UserId, targetId, channelType)
-	persistCache.AddIfAbsendNoGetOldVal(key, &ConverPersistIndex{
+	persistCache.Add(key, &ConverPersistIndex{
 		Appkey:      uc.Appkey,
 		UserId:      uc.UserId,
 		TargetId:    targetId,
@@ -282,7 +275,7 @@ func (uc *UserConversations) SyncConvers(startTime int64, count int32) []*models
 	lock.RLock()
 	defer lock.RUnlock()
 
-	nodes := uc.SyncTimeIndex.RangeByScore(float64(startTime), math.MaxInt64)
+	nodes := uc.SyncTimeIndex.RangeByScore(float64(startTime+1), math.MaxInt64)
 	resp := []*models.Conversation{}
 	var index int32 = 0
 	for _, node := range nodes {
@@ -357,9 +350,9 @@ func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive
 	defer lock.RUnlock()
 	var nodes []zset.Float64Node
 	if isPositive {
-		nodes = uc.SortTimeIndex.RangeByScore(float64(startTime), math.MaxFloat64)
+		nodes = uc.SortTimeIndex.RangeByScore(float64(startTime+1), math.MaxFloat64)
 	} else {
-		nodes = uc.SortTimeIndex.RevRangeByScore(float64(startTime), 0)
+		nodes = uc.SortTimeIndex.RevRangeByScore(float64(startTime-1), 0)
 	}
 	resp := []*models.Conversation{}
 	var index int32 = 0
@@ -409,12 +402,12 @@ func (uc *UserConversations) QryTopConvers(startTime int64, count int32, sortTyp
 		topIndex = uc.TopIndexBaseTopTime
 	}
 	if isPositive {
-		nodes = topIndex.RangeByScore(float64(startTime), math.MaxFloat64)
+		nodes = topIndex.RangeByScore(float64(startTime+1), math.MaxFloat64)
 	} else {
 		if startTime <= 0 {
 			startTime = time.Now().UnixMilli()
 		}
-		nodes = topIndex.RevRangeByScore(float64(startTime), 0)
+		nodes = topIndex.RevRangeByScore(float64(startTime-1), 0)
 	}
 	resp := []*models.Conversation{}
 	var index int32 = 0
@@ -473,11 +466,13 @@ func (uc *UserConversations) TotalUnreadCount() int64 {
 	defer lock.RUnlock()
 	var count int64 = 0
 	for _, conver := range uc.ConverItemMap {
-		c := conver.LatestUnreadMsgIndex - conver.LatestReadMsgIndex
-		if c == 0 && conver.UnreadTag == 1 {
-			count = count + 1
-		} else {
-			count = count + c
+		if conver.IsDeleted == 0 {
+			c := conver.LatestUnreadMsgIndex - conver.LatestReadMsgIndex
+			if c == 0 && conver.UnreadTag == 1 {
+				count = count + 1
+			} else {
+				count = count + c
+			}
 		}
 	}
 	return count
@@ -491,7 +486,7 @@ func (uc *UserConversations) ClearUnread(targetId string, channelType pbobjs.Cha
 
 	itemKey := getConverItemKey(targetId, channelType)
 	if item, exist := uc.ConverItemMap[itemKey]; exist {
-		if item.LatestReadMsgIndex < readMsgIndex {
+		if readMsgIndex > item.LatestReadMsgIndex && readMsgIndex <= item.LatestUnreadMsgIndex {
 			item.LatestReadMsgIndex = readMsgIndex
 			item.LatestReadMsgId = readMsgId
 			item.LatestReadMsgTime = readMsgTime
@@ -669,4 +664,9 @@ func getUserConvers(appkey, userId string) *UserConversations {
 			return userConvers
 		}
 	}
+}
+
+func UserConversContains(appkey, userId string) bool {
+	key := getUserConverCacheKey(appkey, userId)
+	return userConverCache.Contains(key)
 }

@@ -22,7 +22,7 @@ func Register(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, resp, err := services.SyncApiCall(ctx, "reg_user", "", userInfo.UserId, &pbobjs.UserInfo{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "req_user", userInfo.UserId, &pbobjs.UserInfo{
 		UserId:       userInfo.UserId,
 		Nickname:     userInfo.Nickname,
 		UserPortrait: userInfo.UserPortrait,
@@ -56,7 +56,7 @@ func UpdateUser(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "upd_user_info", "", req.UserId, &pbobjs.UserInfo{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "upd_user_info", req.UserId, &pbobjs.UserInfo{
 		UserId:       req.UserId,
 		Nickname:     req.Nickname,
 		UserPortrait: req.UserPortrait,
@@ -79,7 +79,7 @@ func QryUserInfo(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
 		return
 	}
-	code, userInfoObj, err := services.SyncApiCall(ctx, "qry_user_info", userid, userid, &pbobjs.UserIdReq{
+	code, userInfoObj, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, userid), "qry_user_info", userid, &pbobjs.UserIdReq{
 		UserId: userid,
 	}, func() proto.Message {
 		return &pbobjs.UserInfo{}
@@ -108,7 +108,7 @@ func KickUsers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := services.SyncApiCall(ctx, "kick_user", "", req.UserId, &pbobjs.KickUserReq{
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "kick_user", req.UserId, &pbobjs.KickUserReq{
 		UserId:    req.UserId,
 		Platforms: req.Platforms,
 		DeviceIds: req.DeviceIds,
@@ -147,7 +147,7 @@ func QryUserOnlineStatus(ctx *gin.Context) {
 		userIds := ids
 		go func() {
 			defer wg.Done()
-			_, resp, err := services.SyncApiCall(ctx, "qry_online_status", "", userIds[0], &pbobjs.UserOnlineStatusReq{
+			_, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_online_status", userIds[0], &pbobjs.UserOnlineStatusReq{
 				UserIds: userIds,
 			}, func() proto.Message {
 				return &pbobjs.UserOnlineStatusResp{}
@@ -215,7 +215,7 @@ func UserBan(ctx *gin.Context) {
 		users := banUsers
 		go func() {
 			defer wg.Done()
-			services.AsyncApiCall(ctx, "ban_users", "", users[0].UserId, &pbobjs.BanUsersReq{
+			bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "ban_users", users[0].UserId, &pbobjs.BanUsersReq{
 				BanUsers: users,
 				IsAdd:    true,
 			})
@@ -261,7 +261,7 @@ func UserUnBan(ctx *gin.Context) {
 		users := banUsers
 		go func() {
 			defer wg.Done()
-			services.AsyncApiCall(ctx, "ban_users", "", users[0].UserId, &pbobjs.BanUsersReq{
+			bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "ban_users", users[0].UserId, &pbobjs.BanUsersReq{
 				BanUsers: users,
 				IsAdd:    false,
 			})
@@ -282,7 +282,7 @@ func QryBanUsers(ctx *gin.Context) {
 	}
 	offsetStr := ctx.Query("offset")
 
-	code, resp, err := services.SyncApiCall(ctx, "qry_ban_users", "", fmt.Sprintf("%s%d", services.GetCtxString(ctx, services.CtxKey_AppKey), tools.RandInt(100000)), &pbobjs.QryBanUsersReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_ban_users", fmt.Sprintf("%s%d", services.GetCtxString(ctx, services.CtxKey_AppKey), tools.RandInt(100000)), &pbobjs.QryBanUsersReq{
 		Limit:  limit,
 		Offset: offsetStr,
 	}, func() proto.Message {
@@ -325,7 +325,7 @@ func BlockUser(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
 		return
 	}
-	services.SyncApiCall(ctx, "block_users", blockReq.UserId, blockReq.UserId, &pbobjs.BlockUsersReq{
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, blockReq.UserId), "block_users", blockReq.UserId, &pbobjs.BlockUsersReq{
 		UserIds: blockReq.BlockUserIds,
 		IsAdd:   true,
 	}, nil)
@@ -342,7 +342,7 @@ func UnBlockUser(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
 		return
 	}
-	services.SyncApiCall(ctx, "block_users", blockReq.UserId, blockReq.UserId, &pbobjs.BlockUsersReq{
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, blockReq.UserId), "block_users", blockReq.UserId, &pbobjs.BlockUsersReq{
 		UserIds: blockReq.BlockUserIds,
 		IsAdd:   false,
 	}, nil)
@@ -360,7 +360,7 @@ func QryBlockUsers(ctx *gin.Context) {
 		}
 	}
 	offsetStr := ctx.Query("offset")
-	code, resp, err := services.SyncApiCall(ctx, "qry_block_users", userId, userId, &pbobjs.QryBlockUsersReq{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, userId), "qry_block_users", userId, &pbobjs.QryBlockUsersReq{
 		UserId: userId,
 		Limit:  limit,
 		Offset: offsetStr,

@@ -59,14 +59,11 @@ func (manager *GroupManager) RegisterActors(register gmicro.IActorRegister) {
 		return bases.BaseProcessActor(&actors.UpdGrpConverActor{}, serviceName)
 	})
 	//settings
-	register.RegisterActor("set_grp_setting", func() actorsystem.IUntypedActor {
-		return bases.BaseProcessActor(&actors.SetGrpSettingActor{}, serviceName)
-	})
-	register.RegisterActor("get_grp_setting", func() actorsystem.IUntypedActor {
-		return bases.BaseProcessActor(&actors.GetGrpSettingActor{}, serviceName)
-	})
 	register.RegisterActor("qry_grp_member_settings", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryMemberSettingsActor{}, serviceName)
+	})
+	register.RegisterActor("set_grp_member_setting", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.SetGrpMemberSettingActor{}, serviceName)
 	})
 	register.RegisterActor("imp_grp_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.ImportGroupHisMsgActor{}, serviceName)
