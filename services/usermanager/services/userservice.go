@@ -255,6 +255,7 @@ func GetUserInfo(appkey, userId string) (*UserInfo, bool) {
 }
 
 func UpdUserInfo(ctx context.Context, userinfo *pbobjs.UserInfo) errs.IMErrorCode {
+	userinfo.Nickname = tools.TruncateText(userinfo.Nickname, 32)
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	_, exist := GetUserInfo(appkey, userinfo.UserId)
 	if !exist {

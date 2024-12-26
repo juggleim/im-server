@@ -238,6 +238,7 @@ func QryGroupInfo(ctx context.Context, req *pbobjs.GroupInfoReq) (errs.IMErrorCo
 }
 
 func UpdGroupInfo(ctx context.Context, groupInfo *pbobjs.GroupInfo) errs.IMErrorCode {
+	groupInfo.GroupName = tools.TruncateText(groupInfo.GroupName, 64)
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	rvCache := false
 	groupId := groupInfo.GroupId

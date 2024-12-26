@@ -8,6 +8,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/tokens"
@@ -22,6 +23,7 @@ type UserRegistActor struct {
 
 func (actor *UserRegistActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.UserInfo); ok {
+		req.Nickname = tools.TruncateText(req.Nickname, 32)
 		token := tokens.ImToken{
 			AppKey:    bases.GetAppKeyFromCtx(ctx),
 			UserId:    req.UserId,
