@@ -265,7 +265,8 @@ func GrpInviteMembers(ctx context.Context, req *pbobjs.GroupInviteReq) (errs.IME
 	}
 	if len(directAddMemberIds) > 0 {
 		code, _, err := bases.SyncRpcCall(ctx, "g_add_members", req.GroupId, &pbobjs.GroupMembersReq{
-			GroupId: req.GroupId,
+			GroupId:   req.GroupId,
+			MemberIds: directAddMemberIds,
 		}, nil)
 		if err != nil || code != errs.IMErrorCode_SUCCESS {
 			return code, nil
