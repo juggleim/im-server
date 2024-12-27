@@ -108,17 +108,13 @@ func AddGrpMembers(ctx *httputils.HttpContext) {
 
 func DelGrpMembers(ctx *httputils.HttpContext) {
 	req := models.Group{}
-	if err := ctx.BindJson(&req); err != nil {
+	if err := ctx.BindJson(&req); err != nil || req.GroupId == "" || len(req.MemberIds) <= 0 {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	memberIds := []string{}
-	for _, user := range req.GrpMembers {
-		memberIds = append(memberIds, user.UserId)
-	}
 	code := services.DelGrpMembers(ctx.ToRpcCtx(), &pbobjs.GroupMembersReq{
 		GroupId:   req.GroupId,
-		MemberIds: memberIds,
+		MemberIds: req.MemberIds,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
