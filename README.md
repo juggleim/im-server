@@ -39,7 +39,7 @@ _备注：由于微信群二维码有时间限制，加入微信讨论可优先�
 
 ## 快速部署体验
 
-部署文档(https://www.jugglechat.com/docs/download/deploy/)
+部署文档(https://www.jugglechat.com/docs/guide/quickdeploy/)
 
 ## 手动部署
 
