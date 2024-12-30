@@ -44,7 +44,6 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 
 	group.POST("/apps/create", apis.CreateApp)
 	group.GET("/apps/list", apis.QryApps)
-	// group.POST("/apps/updlicense", apis.UpdateLicense)
 	group.GET("/apps/info", apis.QryAppInfo)
 	group.POST("/apps/configs/set", apis.UpdateAppConfigs)
 	group.POST("/apps/configs/get", apis.QryAppConfigs)
