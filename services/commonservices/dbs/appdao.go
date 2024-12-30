@@ -65,6 +65,6 @@ func (app AppInfoDao) FindById(id int64) *AppInfoDao {
 
 func (app AppInfoDao) QryApps(limit int64, offset int64) ([]*AppInfoDao, error) {
 	var list []*AppInfoDao
-	err := dbcommons.GetDb().Where("id > ?", offset).Order("id asc").Limit(limit).Find(&list).Error
+	err := dbcommons.GetDb().Where("id < ?", offset).Order("id desc").Limit(limit).Find(&list).Error
 	return list, err
 }

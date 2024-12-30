@@ -5,6 +5,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
 	userDbs "im-server/services/usermanager/dbs"
+	"math"
 )
 
 var appFieldsMap map[string]bool
@@ -28,7 +29,7 @@ func QryApps(limit int64, offset string) *Apps {
 	dao := dbs.AppInfoDao{}
 	offsetInt, err := tools.DecodeInt(offset)
 	if err != nil {
-		offsetInt = 0
+		offsetInt = math.MaxInt64
 	}
 	dbApps, err := dao.QryApps(limit+1, offsetInt)
 	if err == nil {
@@ -36,7 +37,7 @@ func QryApps(limit int64, offset string) *Apps {
 			dbApps = dbApps[:len(dbApps)-1]
 			apps.HasMore = true
 		}
-		var id int64 = 0
+		var id int64 = math.MaxInt64
 		for _, dbApp := range dbApps {
 			app := &SimpleApp{
 				AppKey:       dbApp.AppKey,
@@ -48,7 +49,7 @@ func QryApps(limit int64, offset string) *Apps {
 			userDao := userDbs.UserDao{}
 			app.CurUserCount = userDao.Count(dbApp.AppKey)
 			apps.Items = append(apps.Items, app)
-			if dbApp.ID > id {
+			if dbApp.ID < id {
 				id = dbApp.ID
 			}
 		}

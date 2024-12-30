@@ -402,6 +402,16 @@ func ChgGroupOwner(ctx context.Context, req *pbobjs.GroupOwnerChgReq) errs.IMErr
 	if err != nil || code != errs.IMErrorCode_SUCCESS {
 		return code
 	}
+	//send notify
+	requestId := bases.GetRequesterIdFromCtx(ctx)
+	notify := &models.GroupNotify{
+		Operator: GetUser(ctx, requestId),
+		Members: []*pbobjs.UserObj{
+			GetUser(ctx, req.OwnerId),
+		},
+		Type: models.GroupNotifyType_ChgOwner,
+	}
+	SendGrpNotify(ctx, req.GroupId, notify)
 	return errs.IMErrorCode_SUCCESS
 }
 

@@ -14,9 +14,10 @@ type GroupNotify struct {
 type GroupNotifyType int
 
 const (
-	GroupNotifyType_AddMember    = 1
-	GroupNotifyType_RemoveMember = 2
-	GroupNotifyType_Rename       = 3
+	GroupNotifyType_AddMember    GroupNotifyType = 1
+	GroupNotifyType_RemoveMember GroupNotifyType = 2
+	GroupNotifyType_Rename       GroupNotifyType = 3
+	GroupNotifyType_ChgOwner     GroupNotifyType = 4
 )
 
 var FriendNotifyMsgType string = "jgd:friendntf"
