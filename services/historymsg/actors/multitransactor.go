@@ -9,6 +9,7 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/transengines"
+	"sync"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -31,17 +32,25 @@ func (actor *MultiTransActor) OnReceive(ctx context.Context, input proto.Message
 		} else {
 			transEngine := commonservices.GetTransEngine(bases.GetAppKeyFromCtx(ctx))
 			if transEngine != nil && transEngine != transengines.DefaultTransEngine {
+				wg := &sync.WaitGroup{}
 				for _, item := range req.Items {
-					result := transEngine.Translate(item.Content, []string{req.TargetLang})
-					if len(result) > 0 {
-						if afterTranslated, exist := result[req.TargetLang]; exist {
-							resp.Items = append(resp.Items, &pbobjs.TransItem{
-								Key:     item.Key,
-								Content: afterTranslated,
-							})
-						}
+					afterItem := &pbobjs.TransItem{
+						Key:     item.Key,
+						Content: item.Content,
 					}
+					resp.Items = append(resp.Items, afterItem)
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						result := transEngine.Translate(afterItem.Content, []string{req.TargetLang})
+						if len(result) > 0 {
+							if afterTranslated, exist := result[req.TargetLang]; exist {
+								afterItem.Content = afterTranslated
+							}
+						}
+					}()
 				}
+				wg.Wait()
 			} else {
 				code = errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC
 			}
