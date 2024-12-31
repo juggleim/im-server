@@ -75,7 +75,8 @@ func bdTranslate(targetLan string, text string, accessToken string) string {
 	}
 	resp := &BdTransResp{}
 	err = tools.JsonUnMarshal(bs, resp)
-	if err != nil || len(resp.Result.TransResultItems) <= 0 {
+	if err != nil || resp.Result == nil || len(resp.Result.TransResultItems) <= 0 {
+		fmt.Println("bd_trans_err:", string(bs))
 		return ""
 	}
 	results := []string{}
