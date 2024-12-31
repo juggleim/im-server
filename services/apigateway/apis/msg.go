@@ -240,14 +240,14 @@ func handleMentionInfo(mentionInfo *models.MentionInfo) *pbobjs.MentionInfo {
 		} else if mentionInfo.MentionType == commonservices.MentionType_AllSomeone {
 			retMention.MentionType = pbobjs.MentionType_AllAndSomeone
 		}
-		if mentionInfo.TargetUserIds != nil && len(mentionInfo.TargetUserIds) > 0 {
+		if len(mentionInfo.TargetUserIds) > 0 {
 			retMention.TargetUsers = []*pbobjs.UserInfo{}
 			for _, userId := range mentionInfo.TargetUserIds {
 				retMention.TargetUsers = append(retMention.TargetUsers, &pbobjs.UserInfo{
 					UserId: userId,
 				})
 			}
-		} else if mentionInfo.TargetUsers != nil && len(mentionInfo.TargetUsers) > 0 {
+		} else if len(mentionInfo.TargetUsers) > 0 {
 			retMention.TargetUsers = []*pbobjs.UserInfo{}
 			for _, user := range mentionInfo.TargetUsers {
 				retMention.TargetUsers = append(retMention.TargetUsers, &pbobjs.UserInfo{

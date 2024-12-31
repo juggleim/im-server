@@ -73,6 +73,9 @@ func (manager *HistoryMsgManager) RegisterActors(register gmicro.IActorRegister)
 	register.RegisterActor("del_msg_exset", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.DelMsgExSetActor{}, serviceName)
 	})
+	register.RegisterActor("batch_trans", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.MultiTransActor{}, serviceName)
+	})
 }
 
 func (manager *HistoryMsgManager) Startup(args map[string]interface{}) {

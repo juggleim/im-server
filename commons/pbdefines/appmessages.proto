@@ -917,3 +917,14 @@ message OnlineOfflineMsg {
   string connectionExt = 8;
   string instanceId = 9;
 }
+
+message TransReq{
+  repeated TransItem items = 1;
+  string target_lang = 2;
+  string source_lang = 3;
+}
+
+message TransItem{
+  string key = 1;
+  string content = 2;
+}

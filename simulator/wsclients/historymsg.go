@@ -95,3 +95,15 @@ func (client *WsImClient) QryMergedMsgs(msgId string, req *pbobjs.QryMergedMsgsR
 		return utils.ClientErrorCode(code), nil
 	}
 }
+
+func (client *WsImClient) BatchTranslate(req *pbobjs.TransReq) (utils.ClientErrorCode, *pbobjs.TransReq) {
+	data, _ := tools.PbMarshal(req)
+	code, qryAck := client.Query("batch_trans", client.UserId, data)
+	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
+		resp := &pbobjs.TransReq{}
+		tools.PbUnMarshal(qryAck.Data, resp)
+		return utils.ClientErrorCode(code), resp
+	} else {
+		return utils.ClientErrorCode(code), nil
+	}
+}
