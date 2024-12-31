@@ -22,7 +22,7 @@ func Register(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "req_user", userInfo.UserId, &pbobjs.UserInfo{
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "reg_user", userInfo.UserId, &pbobjs.UserInfo{
 		UserId:       userInfo.UserId,
 		Nickname:     userInfo.Nickname,
 		UserPortrait: userInfo.UserPortrait,
