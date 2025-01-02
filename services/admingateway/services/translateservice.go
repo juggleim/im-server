@@ -18,15 +18,11 @@ func SetTranslateConf(appkey string, req *commonservices.TransEngineConf) AdminE
 }
 
 func GetTranslateConf(appkey string) (AdminErrorCode, *commonservices.TransEngineConf) {
+	transConf := &commonservices.TransEngineConf{}
 	dao := dbs.AppExtDao{}
 	conf, err := dao.Find(appkey, "trans_engine_conf")
-	if err != nil {
-		return AdminErrorCode_Default, nil
-	}
-	transConf := &commonservices.TransEngineConf{}
-	err = tools.JsonUnMarshal([]byte(conf.AppItemValue), transConf)
-	if err != nil {
-		return AdminErrorCode_Default, nil
+	if err == nil {
+		tools.JsonUnMarshal([]byte(conf.AppItemValue), transConf)
 	}
 	return AdminErrorCode_Success, transConf
 }

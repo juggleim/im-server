@@ -23,18 +23,17 @@ func SetRtcConf(appkey string, req *RtcConf) AdminErrorCode {
 }
 
 func GetRtcConf(appkey string) (AdminErrorCode, *RtcConf) {
+	ret := &RtcConf{}
 	dao := dbs.AppExtDao{}
 	exts, err := dao.FindByItemKeys(appkey, []string{"zego_config"})
-	if err != nil {
-		return AdminErrorCode_Default, nil
-	}
-	ret := &RtcConf{}
-	for _, ext := range exts {
-		if ext.AppItemKey == "zego_config" {
-			zegoConf := &commonservices.ZegoConfigObj{}
-			err = tools.JsonUnMarshal([]byte(ext.AppItemValue), zegoConf)
-			if err == nil {
-				ret.ZegoConf = zegoConf
+	if err == nil {
+		for _, ext := range exts {
+			if ext.AppItemKey == "zego_config" {
+				zegoConf := &commonservices.ZegoConfigObj{}
+				err = tools.JsonUnMarshal([]byte(ext.AppItemValue), zegoConf)
+				if err == nil {
+					ret.ZegoConf = zegoConf
+				}
 			}
 		}
 	}
