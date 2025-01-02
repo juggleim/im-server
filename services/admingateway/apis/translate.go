@@ -9,7 +9,7 @@ import (
 
 func SetTranslateConf(ctx *gin.Context) {
 	var req services.TranslateConf
-	if err := ctx.ShouldBindJSON(&req); err != nil || req.Conf == nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil || req.AppKey == "" || req.Conf == nil {
 		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
 			Code: services.AdminErrorCode_ParamError,
 			Msg:  "param illegal",
