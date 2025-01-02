@@ -35,6 +35,9 @@ func (manager *UserManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("set_user_settings", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SetUserSettingActor{}, serviceName)
 	})
+	register.RegisterActor("get_user_settings", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.GetUserSettingActor{}, serviceName)
+	})
 	register.RegisterActor("set_user_undisturb", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SetUserUndisturbActor{}, serviceName)
 	})

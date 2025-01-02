@@ -49,6 +49,12 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	group.POST("/apps/configs/get", apis.QryAppConfigs)
 	group.POST("/apps/eventsubconfig/set", apis.SetEventSubConfig)
 	group.GET("/apps/eventsubconfig/get", apis.GetEventSubConfig)
+	//translate
+	group.POST("/apps/translate/set", apis.SetTranslateConf)
+	group.GET("/apps/translate/get", apis.GetTranslateConf)
+	//rtc
+	group.POST("/apps/rtcconf/set", apis.SetRtcConf)
+	group.GET("/apps/rtcconf/get", apis.GetRtcConf)
 
 	group.POST("/apps/iospushcer/set", apis.SetIosPushConf)
 	group.POST("/apps/iospushcer/upload", apis.UploadIosCer)

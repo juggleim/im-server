@@ -55,6 +55,7 @@ func loadTransEngine(appInfo *AppInfo) {
 }
 
 type TransEngineConf struct {
+	Channel          string                         `json:"channel,omitempty"`
 	BdTransEngine    *transengines.BdTransEngine    `json:"baidu,omitempty"`
 	DeeplTransEngine *transengines.DeeplTransEngine `json:"deepl,omitempty"`
 }
