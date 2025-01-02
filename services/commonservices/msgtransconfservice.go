@@ -38,19 +38,32 @@ func loadTransEngine(appInfo *AppInfo) {
 	if err != nil {
 		appInfo.TransEngine = transengines.DefaultTransEngine
 	}
-	if transConf.BdTransEngine != nil && transConf.BdTransEngine.ApiKey != "" && transConf.BdTransEngine.SecretKey != "" {
+	if transConf.Channel == "baidu" && transConf.BdTransEngine != nil && transConf.BdTransEngine.ApiKey != "" && transConf.BdTransEngine.SecretKey != "" {
 		appInfo.TransEngine = &transengines.BdTransEngine{
 			AppKey:    appInfo.AppKey,
 			ApiKey:    transConf.BdTransEngine.ApiKey,
 			SecretKey: transConf.BdTransEngine.SecretKey,
 		}
-	} else if transConf.DeeplTransEngine != nil && transConf.DeeplTransEngine.AuthKey != "" {
+	} else if transConf.Channel == "deepl" && transConf.DeeplTransEngine != nil && transConf.DeeplTransEngine.AuthKey != "" {
 		appInfo.TransEngine = &transengines.DeeplTransEngine{
 			AppKey:  appInfo.AppKey,
 			AuthKey: transConf.DeeplTransEngine.AuthKey,
 		}
 	} else {
-		appInfo.TransEngine = transengines.DefaultTransEngine
+		if transConf.BdTransEngine != nil && transConf.BdTransEngine.ApiKey != "" && transConf.BdTransEngine.SecretKey != "" {
+			appInfo.TransEngine = &transengines.BdTransEngine{
+				AppKey:    appInfo.AppKey,
+				ApiKey:    transConf.BdTransEngine.ApiKey,
+				SecretKey: transConf.BdTransEngine.SecretKey,
+			}
+		} else if transConf.DeeplTransEngine != nil && transConf.DeeplTransEngine.AuthKey != "" {
+			appInfo.TransEngine = &transengines.DeeplTransEngine{
+				AppKey:  appInfo.AppKey,
+				AuthKey: transConf.DeeplTransEngine.AuthKey,
+			}
+		} else {
+			appInfo.TransEngine = transengines.DefaultTransEngine
+		}
 	}
 }
 
