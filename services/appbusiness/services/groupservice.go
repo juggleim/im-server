@@ -39,6 +39,27 @@ func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobj
 			MaxAdminCount: 10,
 		},
 	}
+	isMember := false
+	//check is member
+	code, respObj, err = bases.SyncRpcCall(ctx, "g_check_members", groupId, &pbobjs.CheckGroupMembersReq{
+		GroupId:   groupId,
+		MemberIds: []string{requestId},
+	}, func() proto.Message {
+		return &pbobjs.CheckGroupMembersResp{}
+	})
+	if err == nil && code == errs.IMErrorCode_SUCCESS && respObj != nil {
+		checkResp, ok := respObj.(*pbobjs.CheckGroupMembersResp)
+		if ok {
+			if _, exist := checkResp.MemberIdMap[requestId]; exist {
+				isMember = true
+			}
+		}
+	}
+	if !isMember {
+		ret.MyRole = pbobjs.GrpMemberRole_GrpNotMember
+		return errs.IMErrorCode_SUCCESS, ret
+	}
+
 	var creator string = ""
 	administrators := map[string]bool{}
 	for _, setting := range grpInfo.Settings {
