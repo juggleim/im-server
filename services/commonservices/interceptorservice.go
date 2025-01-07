@@ -9,19 +9,19 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
-	"im-server/services/sensitivemanager/interceptor"
-	"im-server/services/sensitivemanager/interceptor/adapters/local"
-	"regexp"
-	"strconv"
-	"strings"
+	"im-server/services/commonservices/interceptors"
 	"time"
+
+	"go.uber.org/atomic"
 )
 
 var (
 	interceptorCache *caches.LruCache
 	interceptorLocks *tools.SegmentatedLocks
 
-	defaultLocalInterceptor = &local.LocalInterceptor{}
+	sensitiveInterceptor = &interceptors.MsgInterceptor{
+		Interceptor: &interceptors.SensitiveInterceptor{},
+	}
 )
 
 func init() {
@@ -30,22 +30,23 @@ func init() {
 }
 
 func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, upMsg *pbobjs.UpMsg) errs.IMErrorCode {
-	intercept, _ := defaultLocalInterceptor.CheckMsgInterceptor(ctx, upMsg)
-	if intercept {
-		return errs.IMErrorCode_MSG_Hit_Sensitive
-	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	msgInterceptors := GetMsgInterceptors(appkey)
-	for _, msgInterceptor := range msgInterceptors.Interceptors {
-		if msgInterceptor.Match(senderId, receiverId, channelType, upMsg.MsgType) {
-			if msgInterceptor.interceptor != nil {
-				intercept, _ := msgInterceptor.interceptor.CheckMsgInterceptor(ctx, upMsg)
-				if intercept {
-					return errs.IMErrorCode_MSG_Hit_Sensitive
-				}
-			}
+	appInfo, exist := GetAppInfo(appkey)
+	if exist && appInfo != nil && appInfo.OpenSensitive {
+		if sensitiveInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg) {
+			return errs.IMErrorCode_MSG_Hit_Sensitive
 		}
 	}
+
+	//other
+	msgInterceptors := GetMsgInterceptors(appkey)
+	for _, msgInterceptor := range msgInterceptors.Interceptors {
+		if msgInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg) {
+			fmt.Println("sender:", senderId, "receiver:", receiverId, "channel_type", channelType, "msg_type:", upMsg.MsgType, "content:", string(upMsg.MsgContent), "isSensi:", true)
+			return errs.IMErrorCode_MSG_Hit_Sensitive
+		}
+	}
+	fmt.Println("sender:", senderId, "receiver:", receiverId, "channel_type", channelType, "msg_type:", upMsg.MsgType, "content:", string(upMsg.MsgContent), "isSensi:", false)
 	return errs.IMErrorCode_SUCCESS
 }
 
@@ -67,157 +68,67 @@ func GetMsgInterceptors(appkey string) *MsgInterceptors {
 }
 
 type MsgInterceptors struct {
-	Interceptors []*MsgInterceptor
-}
-
-type MsgInterceptor struct {
-	Id              int64
-	Name            string
-	Sort            int
-	RequestUrl      string
-	RequestTemplate string
-	SuccTemplate    string
-	IsAsync         bool
-	AppKey          string
-	Conf            string
-	interceptor     interceptor.Interceptor
-	Conditions      []*Condition
-}
-
-func (interceptor *MsgInterceptor) Match(senderId, receiverId string, channelType pbobjs.ChannelType, msgType string) bool {
-	for _, condition := range interceptor.Conditions {
-		if condition.ChannelTypeChecker.Match(strconv.Itoa(int(channelType))) &&
-			condition.MsgTypeChecker.Match(msgType) &&
-			condition.SenderIdChecker.Match(senderId) &&
-			condition.ReceiverIdChecker.Match(receiverId) {
-			return true
-		}
-	}
-	return false
-}
-
-type Condition struct {
-	ChannelTypeChecker Matcher
-	MsgTypeChecker     Matcher
-	SenderIdChecker    Matcher
-	ReceiverIdChecker  Matcher
+	Interceptors []*interceptors.MsgInterceptor
 }
 
 func LoadInterceptors(appkey string) *MsgInterceptors {
 	ret := &MsgInterceptors{
-		Interceptors: []*MsgInterceptor{},
+		Interceptors: []*interceptors.MsgInterceptor{},
 	}
 	dao := dbs.InterceptorDao{}
 	dbInterceptors, err := dao.QryInterceptors(appkey)
 	if err == nil {
 		for _, dbInterceptor := range dbInterceptors {
-			interceptorHandler, _ := interceptor.BuildInterceptor(dbInterceptor.Name, dbInterceptor.Conf, dbInterceptor.InterceptType != 0)
-			msgInterceptor := &MsgInterceptor{
-				Id:              dbInterceptor.ID,
-				Name:            dbInterceptor.Name,
-				Sort:            dbInterceptor.Sort,
-				RequestUrl:      dbInterceptor.RequestUrl,
-				RequestTemplate: dbInterceptor.RequestTemplate,
-				SuccTemplate:    dbInterceptor.SuccTemplate,
-				IsAsync:         dbInterceptor.IsAsync > 0,
-				AppKey:          dbInterceptor.AppKey,
-				Conf:            dbInterceptor.Conf,
-				Conditions:      LoadIcConditions(appkey, dbInterceptor.ID),
-				interceptor:     interceptorHandler,
+			if dbInterceptor.InterceptType == dbs.InterceptorType_Custom {
+				appInfo, exist := GetAppInfo(appkey)
+				if exist && appInfo != nil {
+					ret.Interceptors = append(ret.Interceptors, &interceptors.MsgInterceptor{
+						Interceptor: &interceptors.CustomInterceptor{
+							AppKey:     dbInterceptor.AppKey,
+							AppSecret:  appInfo.AppSecret,
+							RequestUrl: dbInterceptor.RequestUrl,
+							Conditions: LoadIcConditions(appkey, dbInterceptor.ID),
+						},
+					})
+				}
+			} else if dbInterceptor.InterceptType == dbs.InterceptorType_Baidu {
+				bdConf := interceptors.BdInterceptorConf{}
+				err := tools.JsonUnMarshal([]byte(dbInterceptor.Conf), &bdConf)
+				if err == nil && bdConf.ApiKey != "" && bdConf.SecretKey != "" {
+					ret.Interceptors = append(ret.Interceptors, &interceptors.MsgInterceptor{
+						Interceptor: &interceptors.BdInterceptor{
+							Conf:        &bdConf,
+							AccessToken: atomic.NewString(""),
+							ExpireAt:    atomic.NewInt64(0),
+							Conditions:  LoadIcConditions(appkey, dbInterceptor.ID),
+						},
+					})
+				}
 			}
-			ret.Interceptors = append(ret.Interceptors, msgInterceptor)
 		}
 	}
 	return ret
 }
 
-func LoadIcConditions(appkey string, interceptorId int64) []*Condition {
-	ret := []*Condition{}
+type BdInterceptorConf struct {
+	ApiKey    string `json:"api_key"`
+	SecretKey string `json:"secret_key"`
+}
+
+func LoadIcConditions(appkey string, interceptorId int64) []*interceptors.Condition {
+	ret := []*interceptors.Condition{}
 	dao := dbs.IcConditionDao{}
 	dbConditions, err := dao.QryConditions(appkey, interceptorId)
 	if err == nil {
 		for _, dbCondition := range dbConditions {
-			condition := &Condition{
-				ChannelTypeChecker: CreateMatcher(dbCondition.ChannelType),
-				MsgTypeChecker:     CreateMatcher(dbCondition.MsgType),
-				SenderIdChecker:    CreateMatcher(dbCondition.SenderId),
-				ReceiverIdChecker:  CreateMatcher(dbCondition.ReceiverId),
+			condition := &interceptors.Condition{
+				ChannelTypeChecker: interceptors.CreateMatcher(dbCondition.ChannelType),
+				MsgTypeChecker:     interceptors.CreateMatcher(dbCondition.MsgType),
+				SenderIdChecker:    interceptors.CreateMatcher(dbCondition.SenderId),
+				ReceiverIdChecker:  interceptors.CreateMatcher(dbCondition.ReceiverId),
 			}
 			ret = append(ret, condition)
 		}
 	}
 	return ret
-}
-
-func CreateMatcher(val string) Matcher {
-	if val == "" || val == "*" {
-		return &NilMatcher{}
-	} else if strings.Contains(val, "contains") {
-		values, err := extractContainsValues(val)
-		if err != nil {
-			return &NilMatcher{}
-		}
-		return NewContainsChecker(values)
-	} else {
-		return &EqualMatcher{
-			value: val,
-		}
-	}
-}
-
-func extractContainsValues(input string) ([]string, error) {
-	re := regexp.MustCompile(`contains\(([^)]+)\)`)
-	matches := re.FindStringSubmatch(input)
-	if len(matches) < 2 {
-		return nil, fmt.Errorf("no matches found")
-	}
-	values := strings.Split(matches[1], ",")
-
-	return values, nil
-}
-
-type Matcher interface {
-	Match(val string) bool
-}
-
-type NilMatcher struct {
-}
-
-func (checker *NilMatcher) Match(val string) bool {
-	return true
-}
-
-type EqualMatcher struct {
-	value string
-}
-
-func NewEqualChecker(val string) *EqualMatcher {
-	return &EqualMatcher{
-		value: val,
-	}
-}
-
-func (checker *EqualMatcher) Match(val string) bool {
-	return checker.value == val
-}
-
-type ContainsMatcher struct {
-	values map[string]struct{}
-}
-
-func NewContainsChecker(vals []string) *ContainsMatcher {
-	m := &ContainsMatcher{
-		values: make(map[string]struct{}, len(vals)),
-	}
-	for _, val := range vals {
-		m.values[val] = struct{}{}
-	}
-	return m
-}
-
-func (checker *ContainsMatcher) Match(val string) bool {
-	if _, ok := checker.values[val]; ok {
-		return true
-	}
-	return false
 }

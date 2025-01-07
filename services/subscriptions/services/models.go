@@ -22,6 +22,7 @@ type MsgEvent struct {
 	Sender      string       `json:"sender"`
 	Receiver    string       `json:"receiver"`
 	ConverType  int          `json:"conver_type"`
+	ChannelType int          `json:"channel_type"`
 	MsgType     string       `json:"msg_type"`
 	MsgContent  string       `json:"msg_content"`
 	MsgId       string       `json:"msg_id"`

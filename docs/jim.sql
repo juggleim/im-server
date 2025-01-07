@@ -464,6 +464,8 @@ CREATE TABLE `interceptors` (
   `request_template` text COMMENT '请求模板',
   `succ_template` varchar(200) DEFAULT NULL COMMENT '成功模板',
   `is_async` tinyint DEFAULT '0' COMMENT '是否异步',
+  `conf` varchar(2000) DEFAULT NULL,
+  `intercept_type` tinyint DEFAULT '0',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `app_key` varchar(20) NOT NULL COMMENT '应用key',

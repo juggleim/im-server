@@ -45,6 +45,7 @@ enum GrpMemberRole{
     GrpMember = 0;
     GrpCreator = 1;
     GrpAdmin = 2;
+    GrpNotMember = 3;
 }
 
 message GroupManagement{

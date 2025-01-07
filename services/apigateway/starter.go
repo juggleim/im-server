@@ -18,6 +18,7 @@ type ApiGateway struct {
 func (ser *ApiGateway) RegisterActors(register gmicro.IActorRegister) {
 
 }
+
 func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	ser.httpServer = gin.Default()
 	ser.httpServer.GET("/", func(ctx *gin.Context) {

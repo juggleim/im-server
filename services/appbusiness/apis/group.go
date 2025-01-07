@@ -1,12 +1,19 @@
 package apis
 
 import (
+	"bytes"
+	"encoding/base64"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/commons/tools"
 	"im-server/services/appbusiness/httputils"
 	"im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/services"
+	"image/png"
 	"strconv"
+
+	"github.com/boombuler/barcode"
+	"github.com/boombuler/barcode/qr"
 )
 
 func CreateGroup(ctx *httputils.HttpContext) {
@@ -246,4 +253,30 @@ func SetGrpDisplayName(ctx *httputils.HttpContext) {
 		return
 	}
 	ctx.ResponseSucc(nil)
+}
+
+func QryGrpQrCode(ctx *httputils.HttpContext) {
+	grpId := ctx.Query("group_id")
+	if grpId == "" {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	userId := ctx.CurrentUserId
+
+	m := map[string]interface{}{
+		"action":   "join_group",
+		"group_id": grpId,
+		"user_id":  userId,
+	}
+	buf := bytes.NewBuffer([]byte{})
+	qrCode, _ := qr.Encode(tools.ToJson(m), qr.M, qr.Auto)
+	qrCode, _ = barcode.Scale(qrCode, 400, 400)
+	err := png.Encode(buf, qrCode)
+	if err != nil {
+		ctx.ResponseErr(errs.IMErrorCode_APP_DEFAULT)
+		return
+	}
+	ctx.ResponseSucc(map[string]string{
+		"qr_code": base64.StdEncoding.EncodeToString(buf.Bytes()),
+	})
 }

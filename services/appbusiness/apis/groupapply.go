@@ -9,12 +9,22 @@ import (
 )
 
 func GroupApply(ctx *httputils.HttpContext) {
-
+	req := pbobjs.GroupInviteReq{}
+	if err := ctx.BindJson(&req); err != nil || req.GroupId == "" {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.GrpJoinApply(ctx.ToRpcCtx(), &req)
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(nil)
 }
 
 func GroupInvite(ctx *httputils.HttpContext) {
 	req := pbobjs.GroupInviteReq{}
-	if err := ctx.BindJson(&req); err != nil {
+	if err := ctx.BindJson(&req); err != nil || req.GroupId == "" || len(req.MemberIds) <= 0 {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}

@@ -11,6 +11,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgtypes"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -265,7 +266,7 @@ func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) 
 		retPushData.PushText = prefix + pushText
 	} else {
 		if msg.MsgType == "jg:text" {
-			txtMsg := &commonservices.TextMsg{}
+			txtMsg := &msgtypes.TextMsg{}
 			err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
 			pushText := txtMsg.Content
 			charArr := []rune(pushText)

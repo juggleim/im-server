@@ -1,4 +1,4 @@
-package commonservices
+package msgtypes
 
 const (
 	MentionType_All        string = "mention_all"

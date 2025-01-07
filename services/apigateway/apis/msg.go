@@ -9,6 +9,7 @@ import (
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgtypes"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -233,11 +234,11 @@ func handleFlag(sendMsgReq models.SendMsgReq) int32 {
 func handleMentionInfo(mentionInfo *models.MentionInfo) *pbobjs.MentionInfo {
 	retMention := &pbobjs.MentionInfo{}
 	if mentionInfo != nil {
-		if mentionInfo.MentionType == commonservices.MentionType_All {
+		if mentionInfo.MentionType == msgtypes.MentionType_All {
 			retMention.MentionType = pbobjs.MentionType_All
-		} else if mentionInfo.MentionType == commonservices.MentionType_Someone {
+		} else if mentionInfo.MentionType == msgtypes.MentionType_Someone {
 			retMention.MentionType = pbobjs.MentionType_Someone
-		} else if mentionInfo.MentionType == commonservices.MentionType_AllSomeone {
+		} else if mentionInfo.MentionType == msgtypes.MentionType_AllSomeone {
 			retMention.MentionType = pbobjs.MentionType_AllAndSomeone
 		}
 		if len(mentionInfo.TargetUserIds) > 0 {

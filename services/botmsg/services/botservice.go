@@ -12,6 +12,7 @@ import (
 	"im-server/services/botmsg/storages/models"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgtypes"
 	"strings"
 	"time"
 )
@@ -87,7 +88,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 	if msg.MsgType != "jg:text" || msg.ChannelType != pbobjs.ChannelType_Private {
 		return
 	}
-	txtMsg := &commonservices.TextMsg{}
+	txtMsg := &msgtypes.TextMsg{}
 	err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
 	if err != nil {
 		logs.WithContext(ctx).Errorf("text msg illigal. content:%s", string(msg.MsgContent))

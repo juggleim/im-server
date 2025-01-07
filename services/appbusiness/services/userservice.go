@@ -24,6 +24,8 @@ func QryUserInfo(ctx context.Context, userId string) (errs.IMErrorCode, *pbobjs.
 	}
 	if userId == requestId {
 		ret.Settings = GetUserSettings(userInfo)
+	} else {
+		ret.IsFriend = checkFriend(ctx, requestId, userId)
 	}
 	return errs.IMErrorCode_SUCCESS, ret
 }

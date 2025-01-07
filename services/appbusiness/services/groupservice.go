@@ -10,6 +10,7 @@ import (
 	"im-server/services/appbusiness/storages"
 	storeModels "im-server/services/appbusiness/storages/models"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgtypes"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -69,7 +70,7 @@ func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobj
 		}
 	}
 	// my role
-	myRole := pbobjs.GrpMemberRole_GrpMember // 0: 群成员；1:群主；2:群管理员
+	myRole := pbobjs.GrpMemberRole_GrpMember // 0: 群成员；1:群主；2:群管理员；3:非群成员；
 	if requestId == creator {
 		myRole = pbobjs.GrpMemberRole_GrpCreator
 	} else if _, exist := administrators[requestId]; exist {
@@ -286,6 +287,44 @@ func GrpInviteMembers(ctx context.Context, req *pbobjs.GroupInviteReq) (errs.IME
 	return errs.IMErrorCode_SUCCESS, results
 }
 
+func GrpJoinApply(ctx context.Context, req *pbobjs.GroupInviteReq) errs.IMErrorCode {
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	groupId := req.GroupId
+	//check grp member exists
+	code, respObj, err := bases.SyncRpcCall(ctx, "g_check_members", groupId, &pbobjs.CheckGroupMembersReq{
+		GroupId:   groupId,
+		MemberIds: []string{userId},
+	}, func() proto.Message {
+		return &pbobjs.CheckGroupMembersResp{}
+	})
+	if err == nil && code == errs.IMErrorCode_SUCCESS && respObj != nil {
+		checkResp, ok := respObj.(*pbobjs.CheckGroupMembersResp)
+		if ok {
+			if _, exist := checkResp.MemberIdMap[userId]; exist {
+				return errs.IMErrorCode_APP_GROUP_MEMBEREXISTED
+			}
+		}
+	}
+	//add group
+	code, _, err = bases.SyncRpcCall(ctx, "g_add_members", groupId, &pbobjs.GroupMembersReq{
+		GroupId:   groupId,
+		MemberIds: []string{userId},
+	}, nil)
+	if err != nil || code != errs.IMErrorCode_SUCCESS {
+		return code
+	}
+	//send notify msg
+	targetUsers := []*pbobjs.UserObj{}
+	targetUsers = append(targetUsers, GetUser(ctx, userId))
+	notify := &models.GroupNotify{
+		Operator: GetUser(ctx, userId),
+		Members:  targetUsers,
+		Type:     models.GroupNotifyType_AddMember,
+	}
+	SendGrpNotify(ctx, groupId, notify)
+	return errs.IMErrorCode_SUCCESS
+}
+
 func DelGrpMembers(ctx context.Context, req *pbobjs.GroupMembersReq) errs.IMErrorCode {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	code, _, err := bases.SyncRpcCall(ctx, "g_del_members", req.GroupId, &pbobjs.GroupMembersReq{
@@ -358,7 +397,7 @@ func SetGrpAnnouncement(ctx context.Context, req *pbobjs.GrpAnnouncement) errs.I
 		//send announce msg
 		flag := commonservices.SetStoreMsg(0)
 		flag = commonservices.SetCountMsg(flag)
-		txtMsg := &commonservices.TextMsg{
+		txtMsg := &msgtypes.TextMsg{
 			Content: req.Content,
 		}
 		commonservices.AsyncGroupMsgOverUpstream(ctx, requestId, req.GroupId, &pbobjs.UpMsg{

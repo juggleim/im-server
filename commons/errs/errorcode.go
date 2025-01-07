@@ -154,6 +154,10 @@ var (
 	IMErrorCode_APP_FRIEND_APPLY_DECLINE   IMErrorCode = 17101
 	IMErrorCode_APP_FRIEND_APPLY_REPEATED  IMErrorCode = 17102
 	IMErrorCode_APP_FRIEND_CONFIRM_EXPIRED IMErrorCode = 17103
+
+	//group
+	IMErrorCode_APP_GROUP_DEFAULT       IMErrorCode = 17200
+	IMErrorCode_APP_GROUP_MEMBEREXISTED IMErrorCode = 17201
 )
 
 var imCode2ApiErrorMap map[IMErrorCode]*ApiErrorMsg = map[IMErrorCode]*ApiErrorMsg{

@@ -26,6 +26,7 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/users/updsettings", UpdateUserSettings)
 	RouteRegiste(mux, http.MethodPost, "/jim/users/search", SearchByPhone)
 	RouteRegiste(mux, http.MethodGet, "/jim/users/info", QryUserInfo)
+	RouteRegiste(mux, http.MethodGet, "/jim/users/qrcode", QryUserQrCode)
 
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/add", CreateGroup)
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/create", CreateGroup)
@@ -38,6 +39,7 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/members/del", DelGrpMembers)
 	RouteRegiste(mux, http.MethodGet, "/jim/groups/members/list", QryGrpMembers)
 	RouteRegiste(mux, http.MethodGet, "/jim/groups/info", QryGroupInfo)
+	RouteRegiste(mux, http.MethodGet, "/jim/groups/qrcode", QryGrpQrCode)
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/setgrpannouncement", SetGrpAnnouncement)
 	RouteRegiste(mux, http.MethodGet, "/jim/groups/getgrpannouncement", GetGrpAnnouncement)
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/setdisplayname", SetGrpDisplayName)

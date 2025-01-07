@@ -39,6 +39,7 @@ type AppInfo struct {
 	KickMode              int    `default:"0"`
 	OpenVisualLog         bool   `default:"false"`
 	RecordGlobalConvers   bool   `default:"false"`
+	OpenSensitive         bool   `default:"false"`
 
 	//group
 	IsHideMsgBeforeJoinGroup bool `default:"false"`

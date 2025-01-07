@@ -96,7 +96,11 @@ func SmsLogin(ctx *httputils.HttpContext) {
 
 func GenerateQrCode(ctx *httputils.HttpContext) {
 	uuidStr := tools.GenerateUUIDString()
-	qrCode, _ := qr.Encode(uuidStr, qr.M, qr.Auto)
+	m := map[string]interface{}{
+		"action": "login",
+		"code":   uuidStr,
+	}
+	qrCode, _ := qr.Encode(tools.ToJson(m), qr.M, qr.Auto)
 	qrCode, _ = barcode.Scale(qrCode, 400, 400)
 	buf := bytes.NewBuffer([]byte{})
 	err := png.Encode(buf, qrCode)

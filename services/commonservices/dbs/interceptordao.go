@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+var (
+	InterceptorType_Custom int = 0
+	InterceptorType_Baidu  int = 1
+)
+
 type InterceptorDao struct {
 	ID              int64     `gorm:"primary_key"`
 	Name            string    `gorm:"name"`
