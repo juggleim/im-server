@@ -9,11 +9,9 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"time"
-
-	"golang.org/x/time/rate"
 )
 
-var msgThreshold = 2000
+var msgThreshold = 3000
 var dispatchQueues []*Dispatcher
 
 type GrpMsgDispatchItem struct {
@@ -24,16 +22,18 @@ type GrpMsgDispatchItem struct {
 }
 
 type Dispatcher struct {
-	msgQueue      chan *GrpMsgDispatchItem
-	maxQueueLen   int
-	isContinued   bool
-	maxDisCount   int
-	limiter       *rate.Limiter
+	Ratio       int
+	msgQueue    chan *GrpMsgDispatchItem
+	maxQueueLen int
+	isContinued bool
+	maxDisCount int
+	// limiter       *rate.Limiter
 	latestUpdTime int64
 }
 
-func NewDispatcher(maxLen int) *Dispatcher {
+func NewDispatcher(ratio, maxLen int) *Dispatcher {
 	return &Dispatcher{
+		Ratio:         ratio,
 		maxQueueLen:   maxLen,
 		latestUpdTime: time.Now().UnixMilli(),
 	}
@@ -47,29 +47,20 @@ func (dis *Dispatcher) start() {
 
 				now := time.Now().UnixMilli()
 				if now-item.Msg.MsgTime > 60*1000 {
-					logs.WithContext(item.Ctx).Warnf("discard group msg:%s, msg_time:%d", item.Msg.MsgId, item.Msg.MsgTime)
+					logs.WithContext(item.Ctx).Warnf("[discard_group_msg] group_id:%s\tmsg_id:%s\tmsg_time:%d", item.GroupId, item.Msg.MsgId, item.Msg.MsgTime)
 					continue
 				}
 
 				memberCount := len(item.MemberIds)
 				maxDisCount := dis.getMaxDisCount()
-				ratio := memberCount / getGrpThresholdFromCtx(item.Ctx)
-				if ratio <= 0 || maxDisCount <= 0 { //dispatch directly
+				if maxDisCount <= 0 { //dispatch directly
 					groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
-				} else if memberCount > maxDisCount {
+				} else if memberCount <= maxDisCount {
 					groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
-					sleepTime := memberCount / maxDisCount
-					time.Sleep(time.Duration(sleepTime) * time.Second)
 				} else {
-					if dis.limiter == nil {
-						dis.limiter = rate.NewLimiter(rate.Limit(maxDisCount), maxDisCount)
-					}
-					allow := dis.limiter.AllowN(time.Now(), memberCount)
-					for !allow {
-						time.Sleep(5 * time.Millisecond)
-						allow = dis.limiter.AllowN(time.Now(), memberCount)
-					}
 					groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
+					time.Sleep(150 * time.Millisecond)
+					logs.WithContext(item.Ctx).Warnf("[group_dispatch_delay] group_id:%s\tmember_count:%d", item.GroupId, memberCount)
 				}
 			} else {
 				break
@@ -80,7 +71,7 @@ func (dis *Dispatcher) start() {
 }
 
 func getGrpThresholdFromCtx(ctx context.Context) int {
-	grpThreshold := 100
+	grpThreshold := 10000
 	appinfo, exist := commonservices.GetAppInfo(bases.GetAppKeyFromCtx(ctx))
 	if exist && appinfo != nil && appinfo.GrpMsgThreshold > 0 {
 		grpThreshold = appinfo.GrpMsgThreshold
@@ -99,7 +90,7 @@ func (dis *Dispatcher) getMaxDisCount() int {
 		if maxDisCount != dis.maxDisCount {
 			dis.maxDisCount = maxDisCount
 			dis.latestUpdTime = now
-			dis.limiter = rate.NewLimiter(rate.Limit(dis.maxDisCount), dis.maxDisCount)
+			// dis.limiter = rate.NewLimiter(rate.Limit(dis.maxDisCount), dis.maxDisCount)
 		}
 	}
 	return dis.maxDisCount
@@ -121,7 +112,7 @@ func (dis *Dispatcher) Put(item *GrpMsgDispatchItem) {
 func init() {
 	dispatchQueues = make([]*Dispatcher, 10)
 	for i := 0; i < 10; i++ {
-		dispatchQueues[i] = NewDispatcher(10000)
+		dispatchQueues[i] = NewDispatcher(i+1, 10000)
 	}
 }
 

@@ -18,6 +18,7 @@ const (
 	GroupNotifyType_RemoveMember GroupNotifyType = 2
 	GroupNotifyType_Rename       GroupNotifyType = 3
 	GroupNotifyType_ChgOwner     GroupNotifyType = 4
+	GroupNotifyType_Join         GroupNotifyType = 5
 )
 
 var FriendNotifyMsgType string = "jgd:friendntf"

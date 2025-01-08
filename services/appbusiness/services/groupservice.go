@@ -335,12 +335,9 @@ func GrpJoinApply(ctx context.Context, req *pbobjs.GroupInviteReq) errs.IMErrorC
 		return code
 	}
 	//send notify msg
-	targetUsers := []*pbobjs.UserObj{}
-	targetUsers = append(targetUsers, GetUser(ctx, userId))
 	notify := &models.GroupNotify{
 		Operator: GetUser(ctx, userId),
-		Members:  targetUsers,
-		Type:     models.GroupNotifyType_AddMember,
+		Type:     models.GroupNotifyType_Join,
 	}
 	SendGrpNotify(ctx, groupId, notify)
 	return errs.IMErrorCode_SUCCESS

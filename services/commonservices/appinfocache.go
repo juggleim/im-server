@@ -45,9 +45,9 @@ type AppInfo struct {
 	IsHideMsgBeforeJoinGroup bool `default:"false"`
 	HideGrpMsg               bool `default:"false"`
 	NotCheckGrpMember        bool `default:"false"`
-	MaxGrpMemberCount        int  `default:"1000"`
-	GrpMsgThreshold          int  `default:"100"`
-	MsgThreshold             int  `default:"2000"`
+	MaxGrpMemberCount        int  `default:"10000"`
+	GrpMsgThreshold          int  `default:"10000"`
+	MsgThreshold             int  `default:"3000"`
 	OpenGrpSnapshot          bool `default:"false"`
 	BigGrpThreshold          int  `default:"1000"`
 	ClosePushGrpThreshold    int  `default:"0"`
