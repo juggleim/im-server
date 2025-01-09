@@ -879,4 +879,21 @@ CREATE TABLE `qrcoderecords` (
   UNIQUE KEY `uniq_id` (`app_key`,`code_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '二维码扫码记录表';
 
+DROP TABLE IF EXISTS `favoritemsgs`;
+CREATE TABLE `favoritemsgs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` VARCHAR(50) NULL,
+  `sender_id` VARCHAR(50) NULL,
+  `receiver_id` VARCHAR(50) NULL,
+  `channel_type` TINYINT NULL,
+  `msg_id` VARCHAR(50) NULL,
+  `msg_time` BIGINT DEFAULT '0',
+  `msg_type` VARCHAR(50) NULL,
+  `msg_content` TEXT NULL,
+  `created_time` DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `idx_userid` (`app_key`, `user_id`, `created_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

@@ -16,3 +16,7 @@ func NewGrpApplicationStorage() models.IGrpApplicationStorage {
 func NewQrCodeRecordStorage() models.IQrCodeRecordStorage {
 	return &dbs.QrCodeRecordDao{}
 }
+
+func NewFavoriteMsgStorage() models.IFavoriteMsgStorage {
+	return &dbs.FavoriteMsgDao{}
+}

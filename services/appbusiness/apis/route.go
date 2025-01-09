@@ -66,6 +66,10 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/applications", FriendApplications)
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/myapplications", MyFriendApplications)
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/mypendingapplications", MyPendingFriendApplications)
+
+	//favorite msg
+	RouteRegiste(mux, http.MethodPost, "/jim/favoritemsgs/add", AddFavoriteMsg)
+	RouteRegiste(mux, http.MethodGet, "/jim/favoritemsgs/list", QryFavoriteMsgs)
 }
 
 func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *httputils.HttpContext)) {
