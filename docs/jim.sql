@@ -896,4 +896,17 @@ CREATE TABLE `favoritemsgs` (
   INDEX `idx_userid` (`app_key`, `user_id`, `created_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `topmsgs`;
+CREATE TABLE `topmsgs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `conver_id` varchar(100) DEFAULT '',
+  `channel_type` tinyint DEFAULT '0',
+  `msg_id` varchar(20) DEFAULT NULL,
+  `user_id` varchar(32) DEFAULT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`channel_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

@@ -82,6 +82,12 @@ func (manager *HistoryMsgManager) RegisterActors(register gmicro.IActorRegister)
 	register.RegisterActor("qry_favorite_msgs", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryFavoriteMsgsActor{}, serviceName)
 	})
+	register.RegisterActor("set_top_msg", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.SetTopMsgActor{}, serviceName)
+	})
+	register.RegisterActor("get_top_msg", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.GetTopMsgActor{}, serviceName)
+	})
 }
 
 func (manager *HistoryMsgManager) Startup(args map[string]interface{}) {

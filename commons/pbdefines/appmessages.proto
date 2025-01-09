@@ -377,6 +377,23 @@ message FavoriteMsgs{
   string offset = 2;
 }
 
+message SetTopMsgReq{
+  string targetId = 1;
+  ChannelType channelType = 2;
+  string msgId = 3;
+}
+
+message GetTopMsgReq{
+  string targetId = 1;
+  ChannelType channelType = 2;
+}
+
+message TopMsg{
+  DownMsg msg = 1;
+  UserInfo operator = 2;
+  int64 createdTime = 3;
+}
+
 //conversation
 message QryGlobalConversReq{
   int64 start = 1;
