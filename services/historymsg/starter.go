@@ -76,6 +76,12 @@ func (manager *HistoryMsgManager) RegisterActors(register gmicro.IActorRegister)
 	register.RegisterActor("batch_trans", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.MultiTransActor{}, serviceName)
 	})
+	register.RegisterActor("add_favorite_msg", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.AddFavoriteMsgActor{}, serviceName)
+	})
+	register.RegisterActor("qry_favorite_msgs", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryFavoriteMsgsActor{}, serviceName)
+	})
 }
 
 func (manager *HistoryMsgManager) Startup(args map[string]interface{}) {

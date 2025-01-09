@@ -2,7 +2,8 @@ package dbs
 
 import (
 	"im-server/commons/dbcommons"
-	"im-server/services/appbusiness/storages/models"
+	"im-server/commons/pbdefines/pbobjs"
+	"im-server/services/historymsg/storages/models"
 	"time"
 )
 
@@ -15,7 +16,7 @@ type FavoriteMsgDao struct {
 	MsgId       string    `gorm:"msg_id"`
 	MsgTime     int64     `gorm:"msg_time"`
 	MsgType     string    `gorm:"msg_type"`
-	MsgContent  string    `gorm:"msg_content"`
+	MsgBody     []byte    `gorm:"msg_body"`
 	CreatedTime time.Time `gorm:"created_time"`
 	AppKey      string    `gorm:"app_key"`
 }
@@ -29,11 +30,11 @@ func (msg FavoriteMsgDao) Create(item models.FavoriteMsg) error {
 		UserId:      item.UserId,
 		SenderId:    item.SenderId,
 		ReceiverId:  item.ReceiverId,
-		ChannelType: item.ChannelType,
+		ChannelType: int32(item.ChannelType),
 		MsgId:       item.MsgId,
 		MsgTime:     item.MsgTime,
 		MsgType:     item.MsgType,
-		MsgContent:  item.MsgContent,
+		MsgBody:     item.MsgBody,
 		CreatedTime: time.Now(),
 		AppKey:      item.AppKey,
 	}).Error
@@ -52,11 +53,11 @@ func (msg FavoriteMsgDao) QueryFavoriteMsgs(appkey, userId string, startId, limi
 			UserId:      item.UserId,
 			SenderId:    item.SenderId,
 			ReceiverId:  item.ReceiverId,
-			ChannelType: item.ChannelType,
+			ChannelType: pbobjs.ChannelType(item.ChannelType),
 			MsgId:       item.MsgId,
 			MsgTime:     item.MsgTime,
 			MsgType:     item.MsgType,
-			MsgContent:  item.MsgContent,
+			MsgBody:     item.MsgBody,
 			CreatedTime: item.CreatedTime,
 			AppKey:      item.AppKey,
 		})

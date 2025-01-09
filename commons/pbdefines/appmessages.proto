@@ -355,6 +355,28 @@ message MsgExtItem {
   UserInfo userInfo = 4;
 }
 
+message AddFavoriteMsgReq{
+  string senderId = 1;
+  string receiverId = 2;
+  ChannelType channelType = 3;
+  string msgId = 4;
+}
+
+message QryFavoriteMsgsReq{
+  int64 limit = 1;
+  string offset = 2;
+}
+
+message FavoriteMsg{
+  DownMsg msg = 1;
+  int64 createdTime = 2;
+}
+
+message FavoriteMsgs{
+  repeated FavoriteMsg items = 1;
+  string offset = 2;
+}
+
 //conversation
 message QryGlobalConversReq{
   int64 start = 1;

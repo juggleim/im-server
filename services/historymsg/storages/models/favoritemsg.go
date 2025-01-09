@@ -1,17 +1,20 @@
 package models
 
-import "time"
+import (
+	"im-server/commons/pbdefines/pbobjs"
+	"time"
+)
 
 type FavoriteMsg struct {
 	ID          int64
 	UserId      string
 	SenderId    string
 	ReceiverId  string
-	ChannelType int32
+	ChannelType pbobjs.ChannelType
 	MsgId       string
 	MsgTime     int64
 	MsgType     string
-	MsgContent  string
+	MsgBody     []byte
 	CreatedTime time.Time
 	AppKey      string
 }

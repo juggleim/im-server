@@ -889,7 +889,7 @@ CREATE TABLE `favoritemsgs` (
   `msg_id` VARCHAR(50) NULL,
   `msg_time` BIGINT DEFAULT '0',
   `msg_type` VARCHAR(50) NULL,
-  `msg_content` TEXT NULL,
+  `msg_body` MEDIUMBLOB,
   `created_time` DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
   `app_key` VARCHAR(20) NULL,
   PRIMARY KEY (`id`),

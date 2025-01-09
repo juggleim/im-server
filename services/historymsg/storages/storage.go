@@ -142,3 +142,7 @@ func NewMsgExSetStorage() models.IMsgExSetStorage {
 		return &dbs.MsgExSetDao{}
 	}
 }
+
+func NewFavoriteMsgStorage() models.IFavoriteMsgStorage {
+	return &dbs.FavoriteMsgDao{}
+}

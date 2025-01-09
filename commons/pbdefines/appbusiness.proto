@@ -228,20 +228,3 @@ message AiBotInfos{
     repeated AiBotInfo items =1;
     string offset = 2;
 }
-
-//favorite msg
-message FavoriteMsg{
-    string sender_id = 1;
-    string receiver_id = 2;
-    int32 channel_type = 3;
-    string msg_id = 4;
-    int64 msg_time = 5;
-    string msg_type = 6;
-    string msg_content = 7;
-    int64 created_time = 8;
-}
-
-message FavoriteMsgs{
-    repeated FavoriteMsg items = 1;
-    string offset = 2;
-}
