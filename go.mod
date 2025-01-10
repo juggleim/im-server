@@ -124,6 +124,7 @@ require (
 )
 
 require (
+	github.com/baidubce/bce-sdk-go v0.9.213
 	github.com/boombuler/barcode v1.0.2
 	github.com/bytedance/gopkg v0.0.0-20230728082804-614d0af6619b
 	github.com/gin-gonic/gin v1.9.1

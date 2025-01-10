@@ -32,11 +32,13 @@ func GetTransEngine(appkey string) transengines.ITransEngine {
 func loadTransEngine(appInfo *AppInfo) {
 	if appInfo.TransEngineConf == "" {
 		appInfo.TransEngine = transengines.DefaultTransEngine
+		return
 	}
 	transConf := &TransEngineConf{}
 	err := tools.JsonUnMarshal([]byte(appInfo.TransEngineConf), transConf)
 	if err != nil {
 		appInfo.TransEngine = transengines.DefaultTransEngine
+		return
 	}
 	if transConf.Channel == "baidu" && transConf.BdTransEngine != nil && transConf.BdTransEngine.ApiKey != "" && transConf.BdTransEngine.SecretKey != "" {
 		appInfo.TransEngine = &transengines.BdTransEngine{

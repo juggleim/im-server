@@ -10,6 +10,7 @@ import (
 	"im-server/commons/caches"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
+	"im-server/services/commonservices/sms"
 	"im-server/services/commonservices/transengines"
 
 	"github.com/kataras/i18n"
@@ -57,6 +58,7 @@ type AppInfo struct {
 	SecurityDomains string `default:""`
 	ZegoConfig      string `default:""`
 	TransEngineConf string `default:""`
+	SmsEngineConf   string `default:""`
 
 	// TestItem  string
 	// TestInt   int
@@ -66,6 +68,7 @@ type AppInfo struct {
 	//other configure
 	MsgTransConfs *MsgTransConfs            `default:"-"`
 	TransEngine   transengines.ITransEngine `default:"-"`
+	SmsEngine     sms.ISmsEngine            `default:"-"`
 	I18nKeys      *i18n.I18n                `default:"-"`
 }
 

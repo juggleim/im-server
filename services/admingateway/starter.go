@@ -52,6 +52,9 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	//translate
 	group.POST("/apps/translate/set", apis.SetTranslateConf)
 	group.GET("/apps/translate/get", apis.GetTranslateConf)
+	//sms
+	group.POST("/apps/sms/set", apis.SetSmsConf)
+	group.GET("/apps/sms/get", apis.GetSmsConf)
 	//rtc
 	group.POST("/apps/rtcconf/set", apis.SetRtcConf)
 	group.GET("/apps/rtcconf/get", apis.GetRtcConf)
