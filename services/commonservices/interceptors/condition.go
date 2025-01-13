@@ -77,12 +77,18 @@ type Matcher interface {
 func CreateMatcher(val string) Matcher {
 	if val == "" || val == "*" {
 		return &NilMatcher{}
-	} else if strings.Contains(val, "contains") {
+	} else if strings.HasPrefix(val, "contains(") {
 		values, err := extractContainsValues(val)
 		if err != nil {
 			return &NilMatcher{}
 		}
 		return NewContainsChecker(values)
+	} else if strings.HasPrefix(val, "regex(") {
+		value, err := extractRegexValues(val)
+		if err != nil {
+			return &NilMatcher{}
+		}
+		return NewRegexChecker(value)
 	} else {
 		return &EqualMatcher{
 			value: val,
@@ -99,6 +105,15 @@ func extractContainsValues(input string) ([]string, error) {
 	values := strings.Split(matches[1], ",")
 
 	return values, nil
+}
+
+func extractRegexValues(input string) (string, error) {
+	re := regexp.MustCompile(`regex\(([^)]+)\)`)
+	matches := re.FindStringSubmatch(input)
+	if len(matches) < 2 {
+		return "", fmt.Errorf("no matches found")
+	}
+	return matches[1], nil
 }
 
 // nil matcher
@@ -142,6 +157,24 @@ func NewContainsChecker(vals []string) *ContainsMatcher {
 func (checker *ContainsMatcher) Match(val string) bool {
 	if _, ok := checker.values[val]; ok {
 		return true
+	}
+	return false
+}
+
+// regex matcher
+type RegexMatcher struct {
+	reg *regexp.Regexp
+}
+
+func NewRegexChecker(reg string) *RegexMatcher {
+	return &RegexMatcher{
+		reg: regexp.MustCompile(reg),
+	}
+}
+
+func (checker *RegexMatcher) Match(val string) bool {
+	if checker.reg != nil {
+		return checker.reg.MatchString(val)
 	}
 	return false
 }
