@@ -21,7 +21,7 @@ func (inter *MsgInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, 
 		return false
 	}
 	fmt.Println("no interceptor")
-	if !ConditionMatchs(inter.Interceptor.GetConditions(), senderId, receiverId, channelType, msg.MsgType) {
+	if !ConditionMatchs(inter.Interceptor.GetConditions(), senderId, receiverId, channelType, msg.MsgType, msg.MsgContent) {
 		fmt.Println("match:", false)
 		return false
 	}

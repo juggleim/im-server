@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-func ConditionMatchs(conditions []*Condition, senderId, receiverId string, channelType pbobjs.ChannelType, msgType string) bool {
+func ConditionMatchs(conditions []*Condition, senderId, receiverId string, channelType pbobjs.ChannelType, msgType string, msgContent []byte) bool {
 	if len(conditions) <= 0 {
 		return true
 	}
 	match := false
 	for _, condition := range conditions {
-		isMatch := condition.Match(senderId, receiverId, channelType, msgType)
+		isMatch := condition.Match(senderId, receiverId, channelType, msgType, msgContent)
 		if isMatch {
 			return true
 		}
@@ -27,9 +27,10 @@ type Condition struct {
 	MsgTypeChecker     Matcher
 	SenderIdChecker    Matcher
 	ReceiverIdChecker  Matcher
+	MsgContentChecker  Matcher
 }
 
-func (condition *Condition) Match(senderId, receiverId string, channelType pbobjs.ChannelType, msgType string) bool {
+func (condition *Condition) Match(senderId, receiverId string, channelType pbobjs.ChannelType, msgType string, msgContent []byte) bool {
 	ret := true
 	//channel_type
 	if condition.ChannelTypeChecker != nil {
@@ -55,6 +56,13 @@ func (condition *Condition) Match(senderId, receiverId string, channelType pbobj
 	//receiver_id
 	if condition.ReceiverIdChecker != nil {
 		isMatch := condition.ReceiverIdChecker.Match(receiverId)
+		ret = ret && isMatch
+	} else {
+		ret = ret && true
+	}
+	//msg content
+	if condition.MsgContentChecker != nil {
+		isMatch := condition.ReceiverIdChecker.Match(string(msgContent))
 		ret = ret && isMatch
 	} else {
 		ret = ret && true
