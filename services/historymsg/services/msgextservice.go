@@ -27,6 +27,7 @@ func SetMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		Key:         req.Ext.Key,
 		Value:       req.Ext.Value,
 		CreatedTime: optTime,
+		UserId:      bases.GetRequesterIdFromCtx(ctx),
 	})
 	if err == nil {
 		//set msg's ext state   TODO: need to add cache
@@ -125,6 +126,7 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		Key:         req.Ext.Key,
 		Item:        req.Ext.Value,
 		CreatedTime: optTime,
+		UserId:      bases.GetRequesterIdFromCtx(ctx),
 	})
 	if err == nil {
 		converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
