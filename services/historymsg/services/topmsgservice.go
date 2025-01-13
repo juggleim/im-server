@@ -87,35 +87,35 @@ func GetTopMsg(ctx context.Context, req *pbobjs.GetTopMsgReq) (errs.IMErrorCode,
 	storage := storages.NewTopMsgStorage()
 	msg, err := storage.FindTopMsg(appkey, converId, req.ChannelType)
 	if err != nil {
-		return errs.IMErrorCode_MSG_DEFAULT, nil
+		return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 	}
 	downMsg := &pbobjs.DownMsg{}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		hisStorage := storages.NewPrivateHisMsgStorage()
 		hisMsg, err := hisStorage.FindById(appkey, converId, msg.MsgId)
 		if err != nil || hisMsg == nil {
-			return errs.IMErrorCode_MSG_DEFAULT, nil
+			return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 		}
 		msg := &pbobjs.DownMsg{}
 		err = tools.PbUnMarshal(hisMsg.MsgBody, msg)
 		if err != nil {
-			return errs.IMErrorCode_MSG_DEFAULT, nil
+			return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 		}
 		downMsg = msg
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		hisStorage := storages.NewGroupHisMsgStorage()
 		hisMsg, err := hisStorage.FindById(appkey, converId, msg.MsgId)
 		if err != nil || hisMsg == nil {
-			return errs.IMErrorCode_MSG_DEFAULT, nil
+			return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 		}
 		msg := &pbobjs.DownMsg{}
 		err = tools.PbUnMarshal(hisMsg.MsgBody, msg)
 		if err != nil {
-			return errs.IMErrorCode_MSG_DEFAULT, nil
+			return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 		}
 		downMsg = msg
 	} else {
-		return errs.IMErrorCode_MSG_DEFAULT, nil
+		return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 	}
 	ret := &pbobjs.TopMsg{
 		Operator:    commonservices.GetTargetDisplayUserInfo(ctx, msg.UserId),

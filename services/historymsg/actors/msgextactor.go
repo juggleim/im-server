@@ -48,3 +48,22 @@ func (actor *DelMsgExtActor) OnReceive(ctx context.Context, input proto.Message)
 func (actor *DelMsgExtActor) CreateInputObj() proto.Message {
 	return &pbobjs.MsgExt{}
 }
+
+type QryMsgExtActor struct {
+	bases.BaseActor
+}
+
+func (actor *QryMsgExtActor) OnReceive(ctx context.Context, input proto.Message) {
+	if req, ok := input.(*pbobjs.QryMsgExtReq); ok {
+		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tchannel_type:%v\tmsg_ids:%v", bases.GetRequesterIdFromCtx(ctx), req.TargetId, req.ChannelType, req.MsgIds)
+		code, resp := services.QryMsgExts(ctx, req)
+		qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
+		actor.Sender.Tell(qryAck, actorsystem.NoSender)
+	} else {
+		logs.WithContext(ctx).Errorf("input is illigal. input:%v", input)
+	}
+}
+
+func (actor *QryMsgExtActor) CreateInputObj() proto.Message {
+	return &pbobjs.QryMsgExtReq{}
+}

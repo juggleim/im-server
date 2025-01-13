@@ -355,6 +355,21 @@ message MsgExtItem {
   UserInfo userInfo = 4;
 }
 
+message QryMsgExtReq{
+  string targetId = 1;
+  ChannelType channelType = 2;
+  repeated string msgIds = 3;
+}
+
+message MsgExtItemsList{
+  repeated MsgExtItems items = 1;
+}
+
+message MsgExtItems{
+  string msgId = 1;
+  repeated MsgExtItem exts = 2;
+}
+
 message FavoriteMsgIds{
   repeated FavoriteMsgIdItem items = 1;
 }

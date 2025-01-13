@@ -74,6 +74,41 @@ func DelMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }
 
+func QryMsgExts(ctx context.Context, req *pbobjs.QryMsgExtReq) (errs.IMErrorCode, *pbobjs.MsgExtItemsList) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	storage := storages.NewMsgExtStorage()
+	exts, err := storage.QryExtsByMsgIds(appkey, req.MsgIds)
+	ret := &pbobjs.MsgExtItemsList{
+		Items: []*pbobjs.MsgExtItems{},
+	}
+	if err == nil {
+		extMap := make(map[string]*pbobjs.MsgExtItems)
+		for _, ext := range exts {
+			extItems := &pbobjs.MsgExtItems{
+				MsgId: ext.MsgId,
+				Exts:  []*pbobjs.MsgExtItem{},
+			}
+			if items, exist := extMap[ext.MsgId]; exist {
+				extItems = items
+			} else {
+				extMap[ext.MsgId] = extItems
+			}
+			extItems.Exts = append(extItems.Exts, &pbobjs.MsgExtItem{
+				Key:       ext.Key,
+				Value:     ext.Value,
+				Timestamp: ext.CreatedTime,
+				UserInfo: &pbobjs.UserInfo{
+					UserId: ext.UserId,
+				},
+			})
+		}
+		for _, v := range extMap {
+			ret.Items = append(ret.Items, v)
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
 func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	if req.Ext == nil || req.Ext.Key == "" {
 		return errs.IMErrorCode_SUCCESS
@@ -163,6 +198,41 @@ func DelMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		}
 	}
 	return errs.IMErrorCode_SUCCESS
+}
+
+func QryMsgExSets(ctx context.Context, req *pbobjs.QryMsgExtReq) (errs.IMErrorCode, *pbobjs.MsgExtItemsList) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	storage := storages.NewMsgExSetStorage()
+	exts, err := storage.QryExtsByMsgIds(appkey, req.MsgIds)
+	ret := &pbobjs.MsgExtItemsList{
+		Items: []*pbobjs.MsgExtItems{},
+	}
+	if err == nil {
+		extMap := make(map[string]*pbobjs.MsgExtItems)
+		for _, ext := range exts {
+			extItems := &pbobjs.MsgExtItems{
+				MsgId: ext.MsgId,
+				Exts:  []*pbobjs.MsgExtItem{},
+			}
+			if items, exist := extMap[ext.MsgId]; exist {
+				extItems = items
+			} else {
+				extMap[ext.MsgId] = extItems
+			}
+			extItems.Exts = append(extItems.Exts, &pbobjs.MsgExtItem{
+				Key:       ext.Key,
+				Value:     ext.Item,
+				Timestamp: ext.CreatedTime,
+				UserInfo: &pbobjs.UserInfo{
+					UserId: ext.UserId,
+				},
+			})
+		}
+		for _, v := range extMap {
+			ret.Items = append(ret.Items, v)
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
 }
 
 var MsgExtCmdType string = "jg:msgext"
