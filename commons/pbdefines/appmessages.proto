@@ -355,10 +355,14 @@ message MsgExtItem {
   UserInfo userInfo = 4;
 }
 
-message AddFavoriteMsgReq{
+message FavoriteMsgIds{
+  repeated FavoriteMsgIdItem items = 1;
+}
+
+message FavoriteMsgIdItem{
   string senderId = 1;
   string receiverId = 2;
-  ChannelType channelType = 3;
+  ChannelType ChannelType = 3;
   string msgId = 4;
 }
 
@@ -377,7 +381,7 @@ message FavoriteMsgs{
   string offset = 2;
 }
 
-message SetTopMsgReq{
+message TopMsgReq{
   string targetId = 1;
   ChannelType channelType = 2;
   string msgId = 3;

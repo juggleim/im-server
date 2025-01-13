@@ -893,7 +893,8 @@ CREATE TABLE `favoritemsgs` (
   `created_time` DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
   `app_key` VARCHAR(20) NULL,
   PRIMARY KEY (`id`),
-  INDEX `idx_userid` (`app_key`, `user_id`, `created_time`)
+  INDEX `idx_userid` (`app_key`, `user_id`, `created_time`),
+  INDEX `idx_msgid` (`app_key`, `user_id`, `msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `topmsgs`;

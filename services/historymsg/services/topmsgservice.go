@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func SetTopMsg(ctx context.Context, req *pbobjs.SetTopMsgReq) errs.IMErrorCode {
+func SetTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	storage := storages.NewTopMsgStorage()
@@ -30,7 +30,35 @@ func SetTopMsg(ctx context.Context, req *pbobjs.SetTopMsgReq) errs.IMErrorCode {
 	}
 	// send cmd msg
 	contentBs, _ := tools.JsonMarshal(&TopMsgCmd{
-		MsgId: req.MsgId,
+		Action: 0,
+		MsgId:  req.MsgId,
+	})
+	upMsg := &pbobjs.UpMsg{
+		MsgType:    topMsgType,
+		MsgContent: contentBs,
+		Flags:      commonservices.SetCmdMsg(0),
+	}
+	if req.ChannelType == pbobjs.ChannelType_Private {
+		commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)
+	} else if req.ChannelType == pbobjs.ChannelType_Group {
+		commonservices.AsyncGroupMsg(ctx, userId, req.TargetId, upMsg)
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
+func DelTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	storage := storages.NewTopMsgStorage()
+	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
+	err := storage.DelTopMsg(appkey, converId, req.ChannelType, req.MsgId)
+	if err != nil {
+		return errs.IMErrorCode_MSG_DEFAULT
+	}
+	// send cmd msg
+	contentBs, _ := tools.JsonMarshal(&TopMsgCmd{
+		Action: 1,
+		MsgId:  req.MsgId,
 	})
 	upMsg := &pbobjs.UpMsg{
 		MsgType:    topMsgType,
@@ -48,7 +76,8 @@ func SetTopMsg(ctx context.Context, req *pbobjs.SetTopMsgReq) errs.IMErrorCode {
 var topMsgType string = "jg:topmsg"
 
 type TopMsgCmd struct {
-	MsgId string `json:"msg_id"`
+	Action int    `json:"action"` // 0:add; 1:delete;
+	MsgId  string `json:"msg_id"`
 }
 
 func GetTopMsg(ctx context.Context, req *pbobjs.GetTopMsgReq) (errs.IMErrorCode, *pbobjs.TopMsg) {

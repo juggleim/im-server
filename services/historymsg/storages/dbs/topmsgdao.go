@@ -42,3 +42,7 @@ func (msg TopMsgDao) FindTopMsg(appkey, converId string, channelType pbobjs.Chan
 		AppKey:      item.AppKey,
 	}, nil
 }
+
+func (msg TopMsgDao) DelTopMsg(appkey, converId string, channelType pbobjs.ChannelType, msgId string) error {
+	return dbcommons.GetDb().Where("app_key=? and conver_id=? and channel_type=? and msg_id=?", appkey, converId, channelType, msgId).Delete(&TopMsgDao{}).Error
+}

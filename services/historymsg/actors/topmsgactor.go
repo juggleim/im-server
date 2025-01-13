@@ -16,7 +16,7 @@ type SetTopMsgActor struct {
 }
 
 func (actor *SetTopMsgActor) OnReceive(ctx context.Context, input proto.Message) {
-	if req, ok := input.(*pbobjs.SetTopMsgReq); ok {
+	if req, ok := input.(*pbobjs.TopMsgReq); ok {
 		userId := bases.GetRequesterIdFromCtx(ctx)
 		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tchannel_type:%v\tmsg_id:%s", userId, req.TargetId, req.ChannelType, req.MsgId)
 		code := services.SetTopMsg(ctx, req)
@@ -28,7 +28,27 @@ func (actor *SetTopMsgActor) OnReceive(ctx context.Context, input proto.Message)
 }
 
 func (actor *SetTopMsgActor) CreateInputObj() proto.Message {
-	return &pbobjs.SetTopMsgReq{}
+	return &pbobjs.TopMsgReq{}
+}
+
+type DelTopMsgActor struct {
+	bases.BaseActor
+}
+
+func (actor *DelTopMsgActor) OnReceive(ctx context.Context, input proto.Message) {
+	if req, ok := input.(*pbobjs.TopMsgReq); ok {
+		userId := bases.GetRequesterIdFromCtx(ctx)
+		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tchannel_type:%v\tmsg_id:%s", userId, req.TargetId, req.ChannelType, req.MsgId)
+		code := services.DelTopMsg(ctx, req)
+		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
+		actor.Sender.Tell(qryAck, actorsystem.NoSender)
+	} else {
+		logs.WithContext(ctx).Error("input is illegal")
+	}
+}
+
+func (actor *DelTopMsgActor) CreateInputObj() proto.Message {
+	return &pbobjs.TopMsgReq{}
 }
 
 type GetTopMsgActor struct {

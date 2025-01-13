@@ -22,4 +22,5 @@ type FavoriteMsg struct {
 type IFavoriteMsgStorage interface {
 	Create(item FavoriteMsg) error
 	QueryFavoriteMsgs(appkey, userId string, startId, limit int64) ([]*FavoriteMsg, error)
+	BatchDelete(appkey, userId string, msgIds []string) error
 }

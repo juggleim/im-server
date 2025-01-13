@@ -64,3 +64,7 @@ func (msg FavoriteMsgDao) QueryFavoriteMsgs(appkey, userId string, startId, limi
 	}
 	return ret, nil
 }
+
+func (msg FavoriteMsgDao) BatchDelete(appkey, userId string, msgIds []string) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and msg_id in(?)", appkey, userId, msgIds).Delete(&FavoriteMsgDao{}).Error
+}

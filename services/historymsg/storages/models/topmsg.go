@@ -18,4 +18,5 @@ type TopMsg struct {
 type ITopMsgStorage interface {
 	Upsert(item TopMsg) error
 	FindTopMsg(appkey, converId string, channelType pbobjs.ChannelType) (*TopMsg, error)
+	DelTopMsg(appkey, converId string, channelType pbobjs.ChannelType, msgId string) error
 }

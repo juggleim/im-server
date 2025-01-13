@@ -14,58 +14,77 @@ import (
 	"time"
 )
 
-func AddFavoriteMsg(ctx context.Context, req *pbobjs.AddFavoriteMsgReq) errs.IMErrorCode {
+func AddFavoriteMsgs(ctx context.Context, req *pbobjs.FavoriteMsgIds) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	converId := commonservices.GetConversationId(req.SenderId, req.ReceiverId, req.ChannelType)
 
-	var downMsg *pbobjs.DownMsg
-	//qry msg from history
-	if req.ChannelType == pbobjs.ChannelType_Private {
-		hisStorage := storages.NewPrivateHisMsgStorage()
-		hisMsg, err := hisStorage.FindById(appkey, converId, req.MsgId)
-		if err != nil || hisMsg == nil {
+	for _, msg := range req.Items {
+		converId := commonservices.GetConversationId(msg.SenderId, msg.ReceiverId, msg.ChannelType)
+		var downMsg *pbobjs.DownMsg
+		//qry msg from history
+		if msg.ChannelType == pbobjs.ChannelType_Private {
+			hisStorage := storages.NewPrivateHisMsgStorage()
+			hisMsg, err := hisStorage.FindById(appkey, converId, msg.MsgId)
+			if err != nil || hisMsg == nil {
+				return errs.IMErrorCode_MSG_DEFAULT
+			}
+			msg := &pbobjs.DownMsg{}
+			err = tools.PbUnMarshal(hisMsg.MsgBody, msg)
+			if err != nil {
+				return errs.IMErrorCode_MSG_DEFAULT
+			}
+			downMsg = msg
+		} else if msg.ChannelType == pbobjs.ChannelType_Group {
+			hisStorage := storages.NewGroupHisMsgStorage()
+			hisMsg, err := hisStorage.FindById(appkey, converId, msg.MsgId)
+			if err != nil || hisMsg == nil {
+				return errs.IMErrorCode_MSG_DEFAULT
+			}
+			msg := &pbobjs.DownMsg{}
+			err = tools.PbUnMarshal(hisMsg.MsgBody, msg)
+			if err != nil {
+				return errs.IMErrorCode_MSG_DEFAULT
+			}
+			downMsg = msg
+		}
+		if downMsg == nil {
 			return errs.IMErrorCode_MSG_DEFAULT
 		}
-		msg := &pbobjs.DownMsg{}
-		err = tools.PbUnMarshal(hisMsg.MsgBody, msg)
+		storage := storages.NewFavoriteMsgStorage()
+		msgBs, _ := tools.PbMarshal(downMsg)
+		err := storage.Create(models.FavoriteMsg{
+			UserId:      userId,
+			SenderId:    msg.SenderId,
+			ReceiverId:  msg.ReceiverId,
+			ChannelType: msg.ChannelType,
+			MsgId:       msg.MsgId,
+			MsgTime:     downMsg.MsgTime,
+			MsgType:     downMsg.MsgType,
+			MsgBody:     msgBs,
+			CreatedTime: time.Now(),
+			AppKey:      appkey,
+		})
 		if err != nil {
+			logs.WithContext(ctx).Errorf("save favorite msgs fail:%s", err.Error())
 			return errs.IMErrorCode_MSG_DEFAULT
 		}
-		downMsg = msg
-	} else if req.ChannelType == pbobjs.ChannelType_Group {
-		hisStorage := storages.NewGroupHisMsgStorage()
-		hisMsg, err := hisStorage.FindById(appkey, converId, req.MsgId)
-		if err != nil || hisMsg == nil {
-			return errs.IMErrorCode_MSG_DEFAULT
-		}
-		msg := &pbobjs.DownMsg{}
-		err = tools.PbUnMarshal(hisMsg.MsgBody, msg)
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
+func DelFavoriteMsgs(ctx context.Context, req *pbobjs.FavoriteMsgIds) errs.IMErrorCode {
+	msgIds := []string{}
+	for _, msg := range req.Items {
+		msgIds = append(msgIds, msg.MsgId)
+	}
+	if len(msgIds) > 0 {
+		appkey := bases.GetAppKeyFromCtx(ctx)
+		userId := bases.GetRequesterIdFromCtx(ctx)
+		storage := storages.NewFavoriteMsgStorage()
+		err := storage.BatchDelete(appkey, userId, msgIds)
 		if err != nil {
-			return errs.IMErrorCode_MSG_DEFAULT
+			logs.WithContext(ctx).Errorf("del favorite msgs fail:%s", err.Error())
 		}
-		downMsg = msg
-	}
-	if downMsg == nil {
-		return errs.IMErrorCode_MSG_DEFAULT
-	}
-	storage := storages.NewFavoriteMsgStorage()
-	msgBs, _ := tools.PbMarshal(downMsg)
-	err := storage.Create(models.FavoriteMsg{
-		UserId:      userId,
-		SenderId:    req.SenderId,
-		ReceiverId:  req.ReceiverId,
-		ChannelType: req.ChannelType,
-		MsgId:       req.MsgId,
-		MsgTime:     downMsg.MsgTime,
-		MsgType:     downMsg.MsgType,
-		MsgBody:     msgBs,
-		CreatedTime: time.Now(),
-		AppKey:      appkey,
-	})
-	if err != nil {
-		logs.WithContext(ctx).Errorf("save favorite msg fail:%s", err.Error())
-		return errs.IMErrorCode_MSG_DEFAULT
 	}
 	return errs.IMErrorCode_SUCCESS
 }
