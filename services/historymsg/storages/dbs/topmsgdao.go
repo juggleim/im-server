@@ -23,7 +23,7 @@ func (msg TopMsgDao) TableName() string {
 }
 
 func (msg TopMsgDao) Upsert(item models.TopMsg) error {
-	return dbcommons.GetDb().Exec(fmt.Sprintf("INSERT INTO %s (app_key,conver_id,channel_type,msg_id,user_id)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE msg_id=(msg_id),user_id=(user_id)", msg.TableName()), item.AppKey, item.ConverId, item.ChannelType, item.MsgId, item.UserId).Error
+	return dbcommons.GetDb().Exec(fmt.Sprintf("INSERT INTO %s (app_key,conver_id,channel_type,msg_id,user_id)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE msg_id=VALUES(msg_id),user_id=VALUES(user_id)", msg.TableName()), item.AppKey, item.ConverId, item.ChannelType, item.MsgId, item.UserId).Error
 }
 
 func (msg TopMsgDao) FindTopMsg(appkey, converId string, channelType pbobjs.ChannelType) (*models.TopMsg, error) {
