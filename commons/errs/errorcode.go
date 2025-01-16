@@ -76,6 +76,7 @@ var (
 	IMErrorCode_MSG_BLOCK           IMErrorCode = 12005
 	IMErrorCode_MSG_MSGEXTDUPLICATE IMErrorCode = 12006
 	IMErrorCode_MSG_Hit_Sensitive   IMErrorCode = 12007
+	IMErrorCode_MSG_MSGEXTOVERLIMIT IMErrorCode = 12008
 )
 
 // conversation

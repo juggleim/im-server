@@ -28,6 +28,8 @@ type GroupHisMsgDao struct {
 	AppKey      string   `bson:"app_key"`
 	IsExt       int      `bson:"is_ext"`
 	IsExset     int      `bson:"is_exset"`
+	MsgExt      []byte   `bson:"msg_ext"`
+	MsgExset    []byte   `bson:"msg_exset"`
 	MemberCount int      `bson:"member_count"`
 	ReadCount   int      `bson:"read_count"`
 	IsDelete    int      `bson:"is_delete"`
@@ -89,6 +91,8 @@ func (msg *GroupHisMsgDao) SaveGroupHisMsg(item models.GroupHisMsg) error {
 		AppKey:      item.AppKey,
 		IsExt:       item.IsExt,
 		IsExset:     item.IsExset,
+		MsgExt:      item.MsgExt,
+		MsgExset:    item.MsgExset,
 		MemberCount: item.MemberCount,
 		ReadCount:   item.ReadCount,
 		IsDelete:    item.IsDelete,
@@ -402,6 +406,21 @@ func (msg *GroupHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, isE
 	return err
 }
 
+func (msg *GroupHisMsgDao) UpdateMsgExt(appkey, converId, msgId string, ext []byte) error {
+	collection := msg.getCollection()
+	if collection == nil {
+		return errors.New("no mongo client")
+	}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	update := bson.M{
+		"$set": bson.M{
+			"msg_ext": ext,
+		},
+	}
+	_, err := collection.UpdateOne(context.TODO(), filter, update)
+	return err
+}
+
 func (msg *GroupHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error {
 	collection := msg.getCollection()
 	if collection == nil {
@@ -411,6 +430,21 @@ func (msg *GroupHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, i
 	update := bson.M{
 		"$set": bson.M{
 			"is_exset": isExset,
+		},
+	}
+	_, err := collection.UpdateOne(context.TODO(), filter, update)
+	return err
+}
+
+func (msg *GroupHisMsgDao) UpdateMsgExset(appkey, converId, msgId string, ext []byte) error {
+	collection := msg.getCollection()
+	if collection == nil {
+		return errors.New("no mongo client")
+	}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	update := bson.M{
+		"$set": bson.M{
+			"msg_exset": ext,
 		},
 	}
 	_, err := collection.UpdateOne(context.TODO(), filter, update)
@@ -446,6 +480,8 @@ func dbMsg2GrpMsg(dbMsg *GroupHisMsgDao) *models.GroupHisMsg {
 			AppKey:      dbMsg.AppKey,
 			IsExt:       dbMsg.IsExt,
 			IsExset:     dbMsg.IsExset,
+			MsgExt:      dbMsg.MsgExt,
+			MsgExset:    dbMsg.MsgExset,
 			IsDelete:    dbMsg.IsDelete,
 		},
 		MemberCount: dbMsg.MemberCount,

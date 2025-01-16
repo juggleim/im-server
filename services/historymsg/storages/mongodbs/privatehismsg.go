@@ -30,6 +30,8 @@ type PrivateHisMsgDao struct {
 	IsDelete    int       `bson:"is_delete"`
 	IsExt       int       `bson:"is_ext"`
 	IsExset     int       `bson:"is_exset"`
+	MsgExt      []byte    `bson:"msg_ext"`
+	MsgExset    []byte    `bson:"msg_exset"`
 	DelUserIds  []string  `bson:"del_user_ids"`
 	AddTime     time.Time `bson:"add_time"`
 }
@@ -90,6 +92,8 @@ func (msg *PrivateHisMsgDao) SavePrivateHisMsg(item models.PrivateHisMsg) error 
 		AppKey:      item.AppKey,
 		IsExt:       item.IsExt,
 		IsExset:     item.IsExset,
+		MsgExt:      item.MsgExt,
+		MsgExset:    item.MsgExset,
 		IsDelete:    item.IsDelete,
 		IsRead:      item.IsRead,
 	}
@@ -419,6 +423,21 @@ func (msg *PrivateHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, i
 	return err
 }
 
+func (msg *PrivateHisMsgDao) UpdateMsgExt(appkey, converId, msgId string, ext []byte) error {
+	collection := msg.getCollection()
+	if collection == nil {
+		return errors.New("no mongo client")
+	}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	update := bson.M{
+		"$set": bson.M{
+			"msg_ext": ext,
+		},
+	}
+	_, err := collection.UpdateOne(context.TODO(), filter, update)
+	return err
+}
+
 func (msg PrivateHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error {
 	collection := msg.getCollection()
 	if collection == nil {
@@ -428,6 +447,21 @@ func (msg PrivateHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, 
 	update := bson.M{
 		"$set": bson.M{
 			"is_exset": isExset,
+		},
+	}
+	_, err := collection.UpdateOne(context.TODO(), filter, update)
+	return err
+}
+
+func (msg PrivateHisMsgDao) UpdateMsgExset(appkey, converId, msgId string, ext []byte) error {
+	collection := msg.getCollection()
+	if collection == nil {
+		return errors.New("no mongo client")
+	}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	update := bson.M{
+		"$set": bson.M{
+			"msg_exset": ext,
 		},
 	}
 	_, err := collection.UpdateOne(context.TODO(), filter, update)
@@ -463,6 +497,8 @@ func dbMsg2PrivateMsg(dbMsg *PrivateHisMsgDao) *models.PrivateHisMsg {
 			AppKey:      dbMsg.AppKey,
 			IsExt:       dbMsg.IsExt,
 			IsExset:     dbMsg.IsExset,
+			MsgExt:      dbMsg.MsgExt,
+			MsgExset:    dbMsg.MsgExset,
 			IsDelete:    dbMsg.IsDelete,
 		},
 		IsRead: dbMsg.IsRead,

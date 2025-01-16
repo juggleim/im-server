@@ -3,12 +3,9 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"im-server/commons/bases"
-	"im-server/commons/caches"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/historymsg/storages"
 	"im-server/services/historymsg/storages/models"
@@ -19,112 +16,15 @@ import (
 )
 
 var (
-	msgCache   *caches.LruCache
-	msgLocks   *tools.SegmentatedLocks
-	noExistMsg = &GrpMsgReadInfo{
-		ReadMembers: make(map[string]int64),
-	}
 	GrpMsgReadInfoLimit int64 = 1000
 )
-
-func init() {
-	msgCache = caches.NewLruCacheWithReadTimeout(100000, nil, 10*time.Minute)
-	msgLocks = tools.NewSegmentatedLocks(512)
-}
-
-type GrpMsgReadInfo struct {
-	Appkey      string
-	ChannelType pbobjs.ChannelType
-	GroupId     string
-	MsgId       string
-	SenderId    string
-	ReadMembers map[string]int64
-	MemberCount int
-}
-
-func (info *GrpMsgReadInfo) AddReadMembers(members map[string]int64) (bool, int) {
-	isAdded := false
-	for memberId, addedTime := range members {
-		if _, exist := info.ReadMembers[memberId]; !exist {
-			info.ReadMembers[memberId] = addedTime
-			isAdded = true
-		}
-	}
-	return isAdded, len(info.ReadMembers)
-}
-
-func (info *GrpMsgReadInfo) AddReadMember(memberId string, addedTime int64) (bool, int) {
-	key := getCacheKey(info.Appkey, info.GroupId, info.MsgId, info.ChannelType)
-	lock := msgLocks.GetLocks(key)
-	lock.Lock()
-	defer lock.Unlock()
-	if _, exist := info.ReadMembers[memberId]; exist {
-		return false, len(info.ReadMembers)
-	} else {
-		info.ReadMembers[memberId] = addedTime
-		return true, len(info.ReadMembers)
-	}
-}
-
-func (info *GrpMsgReadInfo) GetReadMemberCount() int {
-	key := getCacheKey(info.Appkey, info.GroupId, info.MsgId, info.ChannelType)
-	lock := msgLocks.GetLocks(key)
-	lock.RLock()
-	defer lock.RUnlock()
-	return len(info.ReadMembers)
-}
-
-func getCacheKey(appkey, groupId, msgId string, channelType pbobjs.ChannelType) string {
-	return fmt.Sprintf("%s_%d_%s_%s", appkey, channelType, groupId, msgId)
-}
-func GetGroupMsgReadInfo(appkey, groupId, msgId string, channelType pbobjs.ChannelType) *GrpMsgReadInfo {
-	key := getCacheKey(appkey, groupId, msgId, channelType)
-	if info, exist := msgCache.Get(key); exist {
-		return info.(*GrpMsgReadInfo)
-	} else {
-		lock := msgLocks.GetLocks(key)
-		lock.Lock()
-		defer lock.Unlock()
-		if info, exist := msgCache.Get(key); exist {
-			return info.(*GrpMsgReadInfo)
-		} else {
-			hisStorage := storages.NewGroupHisMsgStorage()
-			grpMsg, err := hisStorage.FindById(appkey, groupId, msgId)
-			if err != nil || grpMsg == nil {
-				msgCache.Add(key, noExistMsg)
-				return noExistMsg
-			}
-			readInfo := &GrpMsgReadInfo{
-				Appkey:      appkey,
-				ChannelType: channelType,
-				GroupId:     groupId,
-				MsgId:       msgId,
-				ReadMembers: make(map[string]int64),
-			}
-			readInfoStorage := storages.NewReadInfoStorage()
-			infos, err := readInfoStorage.QryReadInfosByMsgId(appkey, groupId, pbobjs.ChannelType_Group, msgId, 0, GrpMsgReadInfoLimit)
-			if err == nil {
-				members := make(map[string]int64)
-				for _, info := range infos {
-					members[info.MemberId] = info.CreatedTime
-				}
-				readInfo.AddReadMembers(members)
-
-				readInfo.MemberCount = grpMsg.MemberCount
-				readInfo.SenderId = grpMsg.SenderId
-			}
-			msgCache.Add(key, readInfo)
-			return readInfo
-		}
-	}
-}
 
 func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	addedTime := time.Now()
 	for _, msgId := range req.MsgIds {
-		readInfo := GetGroupMsgReadInfo(appkey, req.GroupId, msgId, req.ChannelType)
+		readInfo := GetMsgInfo(appkey, req.GroupId, msgId, req.ChannelType)
 		if readInfo.SenderId == userId {
 			continue
 		}

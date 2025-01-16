@@ -254,10 +254,6 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
 		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
 		if err == nil {
-			extMsgMap := map[string]*pbobjs.DownMsg{}
-			extMsgIds := []string{}
-			exsetMsgMap := map[string]*pbobjs.DownMsg{}
-			exsetMsgIds := []string{}
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
@@ -280,49 +276,33 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 						downMsg.TargetId = targetId
 					}
 					downMsg.IsRead = dbMsg.IsRead > 0
-					if dbMsg.IsExt > 0 {
-						downMsg.Flags = commonservices.SetExtMsg(downMsg.Flags)
-						downMsg.MsgExts = []*pbobjs.MsgExtItem{}
-						extMsgMap[dbMsg.MsgId] = downMsg
-						extMsgIds = append(extMsgIds, dbMsg.MsgId)
+					//msg ext
+					if len(dbMsg.MsgExt) > 0 {
+						extItems := &pbobjs.MsgExtItems{
+							MsgId: dbMsg.MsgId,
+						}
+						err = tools.PbUnMarshal(dbMsg.MsgExt, extItems)
+						if err == nil {
+							downMsg.MsgExts = extItems.Exts
+						}
 					}
-					if dbMsg.IsExset > 0 {
-						downMsg.MsgExSet = []*pbobjs.MsgExtItem{}
-						exsetMsgMap[dbMsg.MsgId] = downMsg
-						exsetMsgIds = append(exsetMsgIds, dbMsg.MsgId)
+					//msg exset
+					if len(dbMsg.MsgExset) > 0 {
+						extItems := &pbobjs.MsgExtItems{
+							MsgId: dbMsg.MsgId,
+						}
+						err = tools.PbUnMarshal(dbMsg.MsgExset, extItems)
+						if err == nil {
+							downMsg.MsgExSet = extItems.Exts
+							fillUserInfos(ctx, []*pbobjs.MsgExtItems{
+								{
+									MsgId: downMsg.MsgId,
+									Exts:  downMsg.MsgExSet,
+								},
+							})
+						}
 					}
 					resp.Msgs = append(resp.Msgs, downMsg)
-				}
-			}
-			//add ext of msg
-			if len(extMsgIds) > 0 {
-				extStorage := storages.NewMsgExtStorage()
-				exts, err := extStorage.QryExtsByMsgIds(appkey, extMsgIds)
-				if err == nil {
-					for _, ext := range exts {
-						if msg, exist := extMsgMap[ext.MsgId]; exist {
-							msg.MsgExts = append(msg.MsgExts, &pbobjs.MsgExtItem{
-								Key:       ext.Key,
-								Value:     ext.Value,
-								Timestamp: ext.CreatedTime,
-							})
-						}
-					}
-				}
-			}
-			if len(exsetMsgIds) > 0 {
-				exsetStorage := storages.NewMsgExSetStorage()
-				exts, err := exsetStorage.QryExtsByMsgIds(appkey, exsetMsgIds)
-				if err == nil {
-					for _, ext := range exts {
-						if msg, exist := exsetMsgMap[ext.MsgId]; exist {
-							msg.MsgExSet = append(msg.MsgExSet, &pbobjs.MsgExtItem{
-								Key:       ext.Key,
-								Value:     ext.Item,
-								Timestamp: ext.CreatedTime,
-							})
-						}
-					}
 				}
 			}
 			//add userinfo
@@ -385,10 +365,6 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		if err == nil {
 			msgMap := map[string]*pbobjs.DownMsg{}
 			msgIds := []string{}
-			extMsgMap := map[string]*pbobjs.DownMsg{}
-			extMsgIds := []string{}
-			exsetMsgMap := map[string]*pbobjs.DownMsg{}
-			exsetMsgIds := []string{}
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
@@ -414,49 +390,33 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 					}
 					downMsg.MemberCount = int32(dbMsg.MemberCount)
 					downMsg.ReadCount = int32(dbMsg.ReadCount)
-					if dbMsg.IsExt > 0 {
-						downMsg.Flags = commonservices.SetExtMsg(downMsg.Flags)
-						downMsg.MsgExts = []*pbobjs.MsgExtItem{}
-						extMsgMap[dbMsg.MsgId] = downMsg
-						extMsgIds = append(extMsgIds, dbMsg.MsgId)
+					//msg ext
+					if len(dbMsg.MsgExt) > 0 {
+						extItems := &pbobjs.MsgExtItems{
+							MsgId: dbMsg.MsgId,
+						}
+						err = tools.PbUnMarshal(dbMsg.MsgExt, extItems)
+						if err == nil {
+							downMsg.MsgExts = extItems.Exts
+						}
 					}
-					if dbMsg.IsExset > 0 {
-						downMsg.MsgExSet = []*pbobjs.MsgExtItem{}
-						exsetMsgMap[dbMsg.MsgId] = downMsg
-						exsetMsgIds = append(exsetMsgIds, dbMsg.MsgId)
+					//msg exset
+					if len(dbMsg.MsgExset) > 0 {
+						extItems := &pbobjs.MsgExtItems{
+							MsgId: dbMsg.MsgId,
+						}
+						err = tools.PbUnMarshal(dbMsg.MsgExset, extItems)
+						if err == nil {
+							downMsg.MsgExSet = extItems.Exts
+							fillUserInfos(ctx, []*pbobjs.MsgExtItems{
+								{
+									MsgId: downMsg.MsgId,
+									Exts:  downMsg.MsgExSet,
+								},
+							})
+						}
 					}
 					resp.Msgs = append(resp.Msgs, downMsg)
-				}
-			}
-			//add ext of msg
-			if len(extMsgIds) > 0 {
-				extStorage := storages.NewMsgExtStorage()
-				exts, err := extStorage.QryExtsByMsgIds(appkey, extMsgIds)
-				if err == nil {
-					for _, ext := range exts {
-						if msg, exist := extMsgMap[ext.MsgId]; exist {
-							msg.MsgExts = append(msg.MsgExts, &pbobjs.MsgExtItem{
-								Key:       ext.Key,
-								Value:     ext.Value,
-								Timestamp: ext.CreatedTime,
-							})
-						}
-					}
-				}
-			}
-			if len(exsetMsgIds) > 0 {
-				exsetStorage := storages.NewMsgExSetStorage()
-				exts, err := exsetStorage.QryExtsByMsgIds(appkey, exsetMsgIds)
-				if err == nil {
-					for _, ext := range exts {
-						if msg, exist := exsetMsgMap[ext.MsgId]; exist {
-							msg.MsgExSet = append(msg.MsgExSet, &pbobjs.MsgExtItem{
-								Key:       ext.Key,
-								Value:     ext.Item,
-								Timestamp: ext.CreatedTime,
-							})
-						}
-					}
 				}
 			}
 			//readed status of group msg

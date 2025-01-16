@@ -132,6 +132,7 @@ func SyncOriginalRpcCall(ctx context.Context, method, targetId string, req proto
 		IsFromApp:    GetIsFromAppFromCtx(ctx),
 		TargetIds:    GetTargetIdsFromCtx(ctx),
 		ExtParams:    GetExtsFromCtx(ctx),
+		MsgId:        GetMsgIdFromCtx(ctx),
 	}, 5*time.Second)
 	if err != nil {
 		return nil, err
@@ -162,6 +163,7 @@ func AsyncRpcCall(ctx context.Context, method, targetId string, req proto.Messag
 		IsFromApp:    GetIsFromAppFromCtx(ctx),
 		TargetIds:    GetTargetIdsFromCtx(ctx),
 		ExtParams:    GetExtsFromCtx(ctx),
+		MsgId:        GetMsgIdFromCtx(ctx),
 	})
 }
 
@@ -188,6 +190,7 @@ func AsyncRpcCallWithSender(ctx context.Context, method, targetId string, req pr
 		IsFromApp:    GetIsFromAppFromCtx(ctx),
 		TargetIds:    GetTargetIdsFromCtx(ctx),
 		ExtParams:    GetExtsFromCtx(ctx),
+		MsgId:        GetMsgIdFromCtx(ctx),
 	}, sender)
 }
 
@@ -216,6 +219,8 @@ func GroupRpcCall(ctx context.Context, method string, targetIds []string, req pr
 				IsFromApi:    GetIsFromApiFromCtx(ctx),
 				IsFromApp:    GetIsFromAppFromCtx(ctx),
 				TargetIds:    ids,
+				ExtParams:    GetExtsFromCtx(ctx),
+				MsgId:        GetMsgIdFromCtx(ctx),
 			})
 		}
 	}
@@ -243,6 +248,7 @@ func Broadcast(ctx context.Context, method string, req proto.Message, opts ...Ba
 		IsFromApp:    GetIsFromAppFromCtx(ctx),
 		TargetIds:    GetTargetIdsFromCtx(ctx),
 		ExtParams:    GetExtsFromCtx(ctx),
+		MsgId:        GetMsgIdFromCtx(ctx),
 	})
 }
 

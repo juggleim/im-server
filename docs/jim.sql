@@ -295,6 +295,8 @@ CREATE TABLE `g_hismsgs` (
   `is_delete` tinyint DEFAULT '0' COMMENT '是否删除 0未删除， 1已删除',
   `is_ext` tinyint DEFAULT '0',
   `is_exset` tinyint DEFAULT '0',
+  `msg_ext` mediumblob,
+  `msg_exset` mediumblob,
   PRIMARY KEY (`id`),
   KEY `idx_appkey_converid` (`app_key`,`conver_id`,`msg_id`,`send_time`),
   KEY `idx_conver_time` (`app_key`,`conver_id`,`send_time`)
@@ -584,6 +586,8 @@ CREATE TABLE `p_hismsgs` (
   `is_delete` tinyint DEFAULT '0' COMMENT '是否删除 0未删除，1已删除',
   `is_ext` tinyint DEFAULT '0',
   `is_exset` tinyint DEFAULT '0',
+  `msg_ext` mediumblob,
+  `msg_exset` mediumblob,
   PRIMARY KEY (`id`),
   KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`msg_id`,`send_time`),
   KEY `idx_conver_time` (`app_key`,`conver_id`,`send_time`)

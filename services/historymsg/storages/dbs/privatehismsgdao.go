@@ -26,6 +26,8 @@ type PrivateHisMsgDao struct {
 	IsDelete    int    `gorm:"is_delete"`
 	IsExt       int    `gorm:"is_ext"`
 	IsExset     int    `gorm:"is_exset"`
+	MsgExt      []byte `hbase:"msg_ext"`
+	MsgExset    []byte `hbase:"msg_exset"`
 }
 
 func (msg PrivateHisMsgDao) TableName() string {
@@ -46,6 +48,8 @@ func (msg PrivateHisMsgDao) SavePrivateHisMsg(item models.PrivateHisMsg) error {
 		AppKey:      item.AppKey,
 		IsExt:       item.IsExt,
 		IsExset:     item.IsExset,
+		MsgExt:      item.MsgExt,
+		MsgExset:    item.MsgExset,
 		IsDelete:    item.IsDelete,
 		IsRead:      item.IsRead,
 	}
@@ -251,8 +255,16 @@ func (msg PrivateHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, is
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("is_ext", isExt).Error
 }
 
+func (msg PrivateHisMsgDao) UpdateMsgExt(appkey, converId, msgId string, ext []byte) error {
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("msg_ext", ext).Error
+}
+
 func (msg PrivateHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error {
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("is_exset", isExset).Error
+}
+
+func (msg PrivateHisMsgDao) UpdateMsgExset(appkey, converId, msgId string, ext []byte) error {
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("msg_exset", ext).Error
 }
 
 // TODO need batch delete
@@ -275,6 +287,8 @@ func dbMsg2PrivateMsg(dbMsg *PrivateHisMsgDao) *models.PrivateHisMsg {
 			AppKey:      dbMsg.AppKey,
 			IsExt:       dbMsg.IsExt,
 			IsExset:     dbMsg.IsExset,
+			MsgExt:      dbMsg.MsgExt,
+			MsgExset:    dbMsg.MsgExset,
 			IsDelete:    dbMsg.IsDelete,
 		},
 		IsRead: dbMsg.IsRead,
