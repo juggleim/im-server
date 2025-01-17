@@ -8,3 +8,7 @@ import (
 func NewBotConfStorage() models.IBotConfStorage {
 	return &dbs.BotConfDao{}
 }
+
+func NewAssistantStorage() models.IAssistantStorage {
+	return &dbs.AssistantDao{}
+}

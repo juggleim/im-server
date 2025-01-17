@@ -6,12 +6,17 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices/logs"
 	"net/http"
+	"strings"
 )
 
 type CozeBotEngine struct {
 	Token string `json:"token"`
 	Url   string `json:"url"`
 	BotId string `json:"bot_id"`
+}
+
+func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converId string, question string) string {
+	return ""
 }
 
 func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId string, question string, f func(part string, isEnd bool)) {
@@ -37,24 +42,24 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId 
 		logs.WithContext(ctx).Errorf("call coze api failed. http_code:%d,err:%v", code, err)
 		return
 	}
-	filter := map[string]bool{}
 	for {
 		line, err := stream.Receive()
 		if err != nil {
 			f("", true)
 			return
 		}
-		item := CozeChatMsgRespItem{}
-		err = tools.JsonUnMarshal([]byte(line), &item)
-		if err != nil {
+		if strings.TrimSpace(string(line)) == "\"[DONE]\"" {
 			f("", true)
 			return
 		}
-		if item.Type == "answer" {
-			if _, exist := filter[item.Id]; !exist {
-				filter[item.Id] = true
-				f(item.Content, false)
-			}
+		item := CozeChatMsgRespItem{}
+		err = tools.JsonUnMarshal([]byte(line), &item)
+		if err != nil {
+			fmt.Println("err:", err, string(line))
+			continue
+		}
+		if item.Type == "answer" && item.CreatedAt == 0 {
+			f(item.Content, false)
 		}
 	}
 }

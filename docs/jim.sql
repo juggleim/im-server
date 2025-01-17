@@ -871,6 +871,24 @@ CREATE TABLE `botconfs` (
   UNIQUE INDEX `uniq_botid` (`app_key`, `bot_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `assistants`;
+CREATE TABLE `assistants` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `assistant_id` VARCHAR(32) NULL,
+  `owner_id` VARCHAR(32) NULL,
+  `nickname` VARCHAR(50) NULL,
+  `portrait` VARCHAR(200) NULL,
+  `description` VARCHAR(500) NULL,
+  `bot_type` TINYINT NULL,
+  `bot_conf` VARCHAR(2000) NULL,
+  `status` TINYINT NULL,
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `uniq_id` (`app_key`, `owner_id`, `assistant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 DROP TABLE IF EXISTS `qrcoderecords`;
 CREATE TABLE `qrcoderecords` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',

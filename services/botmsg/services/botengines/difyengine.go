@@ -13,6 +13,10 @@ type DifyBotEngine struct {
 	Url    string `json:"url"`
 }
 
+func (engine *DifyBotEngine) Chat(ctx context.Context, senderId, converId string, question string) string {
+	return ""
+}
+
 func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, converId string, question string, f func(answerPart string, isEnd bool)) {
 	req := &DifyChatMsgReq{
 		Inputs:         map[string]string{},

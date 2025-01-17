@@ -22,6 +22,8 @@ func LoadAppApis(mux *http.ServeMux) {
 
 	RouteRegiste(mux, http.MethodGet, "/jim/bots/list", QryBots)
 
+	RouteRegiste(mux, http.MethodPost, "/jim/assistants/answer", AssistantAnswer)
+
 	RouteRegiste(mux, http.MethodPost, "/jim/users/update", UpdateUser)
 	RouteRegiste(mux, http.MethodPost, "/jim/users/updsettings", UpdateUserSettings)
 	RouteRegiste(mux, http.MethodPost, "/jim/users/search", SearchByPhone)
