@@ -62,6 +62,9 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 		return InterceptorResult_Pass
 	} else if result == "replace" {
 		if msg != nil {
+			if resp.MsgType == "" && resp.MsgContent == "" {
+				return InterceptorResult_Pass
+			}
 			if resp.MsgType != "" {
 				msg.MsgType = resp.MsgType
 				msg.Flags = msgdefines.SetModifiedMsg(msg.Flags)
@@ -70,8 +73,9 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 				msg.MsgContent = []byte(resp.MsgContent)
 				msg.Flags = msgdefines.SetModifiedMsg(msg.Flags)
 			}
+			return InterceptorResult_Replace
 		}
-		return InterceptorResult_Replace
+		return InterceptorResult_Pass
 	} else if result == "reject" {
 		return InterceptorResult_Reject
 	} else {
