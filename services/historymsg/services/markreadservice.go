@@ -7,6 +7,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	mentionStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 )
@@ -73,7 +74,7 @@ func markReadGroupMsgs(ctx context.Context, req *pbobjs.MarkReadReq) errs.IMErro
 
 		DispatchGroupMsgMarkRead(ctx, groupId, userId, req.ChannelType, msgIds)
 
-		flag := commonservices.SetCmdMsg(0)
+		flag := msgdefines.SetCmdMsg(0)
 		//notify for other device
 		bs, _ := json.Marshal(markReadMsg)
 		commonservices.AsyncGroupMsg(ctx, userId, groupId, &pbobjs.UpMsg{
@@ -135,7 +136,7 @@ func markReadPrivateMsgs(ctx context.Context, userId string, req *pbobjs.MarkRea
 	}
 	//Notify msg's sender
 	bs, _ := json.Marshal(markReadMsg)
-	flag := commonservices.SetCmdMsg(0)
+	flag := msgdefines.SetCmdMsg(0)
 	commonservices.AsyncPrivateMsg(ctx, userId, targetId, &pbobjs.UpMsg{
 		MsgType:    ReadNtfType,
 		Flags:      flag,

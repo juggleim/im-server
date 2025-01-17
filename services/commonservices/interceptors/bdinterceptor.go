@@ -30,9 +30,12 @@ func (inter *BdInterceptor) GetConditions() []*Condition {
 	return inter.Conditions
 }
 
-func (inter *BdInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, msg *pbobjs.UpMsg) bool {
+func (inter *BdInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, msg *pbobjs.UpMsg) InterceptorResult {
 	interceptor, _ := inter.checkTxtMsgInterceptor(msg)
-	return interceptor
+	if interceptor {
+		return InterceptorResult_Reject
+	}
+	return InterceptorResult_Pass
 }
 
 func (inter *BdInterceptor) checkTxtMsgInterceptor(upMsg *pbobjs.UpMsg) (intercept bool, err error) {

@@ -40,6 +40,7 @@ message RpcMessageWraper{
   int64 msgSeqNo = 24;
   int32 memberCount = 25;
   string clientMsgId = 26;
+  DownMsg modifiedMsg = 27;
 
   string groupId = 31;
   repeated string targetIds = 32;

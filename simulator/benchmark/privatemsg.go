@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/simulator/utils"
 	"im-server/simulator/wsclients"
 	"time"
@@ -53,8 +53,8 @@ func PrivateMsg1000() {
 
 			client := connectMap[senderId]
 			if client != nil {
-				flag := commonservices.SetStoreMsg(0)
-				flag = commonservices.SetCountMsg(flag)
+				flag := msgdefines.SetStoreMsg(0)
+				flag = msgdefines.SetCountMsg(flag)
 				start := time.Now()
 				code, resp := client.SendPrivateMsg(targetId, &pbobjs.UpMsg{
 					MsgType:    "jg:text",
@@ -85,8 +85,8 @@ func PrivateMsg2000() {
 			targetId := fmt.Sprintf("userid%d", tarInt)
 			client := connectMap[senderId]
 			if client != nil {
-				flag := commonservices.SetStoreMsg(0)
-				flag = commonservices.SetCountMsg(flag)
+				flag := msgdefines.SetStoreMsg(0)
+				flag = msgdefines.SetCountMsg(flag)
 				start := time.Now()
 				code, resp := client.SendPrivateMsg(targetId, &pbobjs.UpMsg{
 					MsgType:    "jg:text",
@@ -118,8 +118,8 @@ func PrivateMsg3000() {
 
 			client := connectMap[senderId]
 			if client != nil {
-				flag := commonservices.SetStoreMsg(0)
-				flag = commonservices.SetCountMsg(flag)
+				flag := msgdefines.SetStoreMsg(0)
+				flag = msgdefines.SetCountMsg(flag)
 				start := time.Now()
 				code, resp := client.SendPrivateMsg(targetId, &pbobjs.UpMsg{
 					MsgType:    "jg:text",
@@ -151,8 +151,8 @@ func PrivateMsg3000_5() {
 
 			client := connectMap[senderId]
 			if client != nil {
-				flag := commonservices.SetStoreMsg(0)
-				flag = commonservices.SetCountMsg(flag)
+				flag := msgdefines.SetStoreMsg(0)
+				flag = msgdefines.SetCountMsg(flag)
 
 				for y := 0; y < 20; y++ {
 					for x := 0; x < 5; x++ {

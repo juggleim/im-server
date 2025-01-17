@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 )
 
@@ -35,7 +36,7 @@ func SendGroupCastMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCod
 		IsSend:         true,
 		TargetUserInfo: bases.GetSenderInfoFromCtx(ctx),
 	}
-	if !commonservices.IsStateMsg(upMsg.Flags) {
+	if !msgdefines.IsStateMsg(upMsg.Flags) {
 		//save msg to sendbox for sender
 		//record conversation for sender
 		commonservices.Save2Sendbox(ctx, downMsg4Sendbox)

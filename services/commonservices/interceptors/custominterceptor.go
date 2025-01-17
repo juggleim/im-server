@@ -6,6 +6,7 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices/msgdefines"
 	"strings"
 	"time"
 )
@@ -21,9 +22,9 @@ func (inter *CustomInterceptor) GetConditions() []*Condition {
 	return inter.Conditions
 }
 
-func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, msg *pbobjs.UpMsg) bool {
+func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, msg *pbobjs.UpMsg) InterceptorResult {
 	if bases.GetIsFromApiFromCtx(ctx) {
-		return false
+		return InterceptorResult_Pass
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	nonce := tools.RandStr(8)
@@ -46,27 +47,42 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 	body := tools.ToJson(msgEvent)
 	respBs, code, err := tools.HttpDoBytes("POST", inter.RequestUrl, headers, body)
 	if err != nil {
-		fmt.Println("xxx:", err)
-		return false
+		return InterceptorResult_Pass
 	}
 	if code != 200 {
-		fmt.Println("xxx:", code)
-		return false
+		return InterceptorResult_Pass
 	}
 	resp := &CustomInterceptorResp{}
 	err = tools.JsonUnMarshal(respBs, resp)
 	if err != nil {
-		return false
+		return InterceptorResult_Pass
 	}
-	if strings.ToLower(resp.Result) == "pass" {
-		return false
+	result := strings.ToLower(resp.Result)
+	if result == "pass" {
+		return InterceptorResult_Pass
+	} else if result == "replace" {
+		if msg != nil {
+			if resp.MsgType != "" {
+				msg.MsgType = resp.MsgType
+				msg.Flags = msgdefines.SetModifiedMsg(msg.Flags)
+			}
+			if resp.MsgContent != "" {
+				msg.MsgContent = []byte(resp.MsgContent)
+				msg.Flags = msgdefines.SetModifiedMsg(msg.Flags)
+			}
+		}
+		return InterceptorResult_Replace
+	} else if result == "reject" {
+		return InterceptorResult_Reject
 	} else {
-		return true
+		return InterceptorResult_Pass
 	}
 }
 
 type CustomInterceptorResp struct {
-	Result string `json:"result"`
+	Result     string `json:"result"`
+	MsgType    string `json:"msg_type"`
+	MsgContent string `json:"msg_content"`
 }
 
 type MsgEvent struct {

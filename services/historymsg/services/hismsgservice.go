@@ -9,6 +9,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/conversation/convercallers"
 	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
@@ -183,7 +184,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 					}
 					downMsg.IsRead = msg.IsRead > 0
 					if msg.IsExt > 0 {
-						downMsg.Flags = commonservices.SetExtMsg(downMsg.Flags)
+						downMsg.Flags = msgdefines.SetExtMsg(downMsg.Flags)
 					}
 					return errs.IMErrorCode_SUCCESS, downMsg
 				}
@@ -233,7 +234,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 					downMsg.MemberCount = int32(dbMsg.MemberCount)
 					downMsg.ReadCount = int32(dbMsg.ReadCount)
 					if dbMsg.IsExt > 0 {
-						downMsg.Flags = commonservices.SetExtMsg(downMsg.Flags)
+						downMsg.Flags = msgdefines.SetExtMsg(downMsg.Flags)
 					}
 					return errs.IMErrorCode_SUCCESS, downMsg
 				}
@@ -613,7 +614,7 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 	if cleanTime == 0 || cleanTime > time.Now().UnixMilli() {
 		cleanTime = time.Now().UnixMilli()
 	}
-	flag := commonservices.SetCmdMsg(0)
+	flag := msgdefines.SetCmdMsg(0)
 	bs, _ := json.Marshal(CleanMsg{
 		TargetId:    targetId,
 		ChannelType: int32(channelType),
@@ -776,7 +777,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 		}
 		//notify other device to clean msgs
 		if len(delMsgs.Msgs) > 0 {
-			flag := commonservices.SetCmdMsg(0)
+			flag := msgdefines.SetCmdMsg(0)
 			bs, _ := json.Marshal(delMsgs)
 			if req.ChannelType == pbobjs.ChannelType_Private {
 				commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, &pbobjs.UpMsg{
@@ -826,7 +827,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 		}
 		//notify all people of conversation
 		if len(delMsgs.Msgs) > 0 {
-			flag := commonservices.SetCmdMsg(0)
+			flag := msgdefines.SetCmdMsg(0)
 			bs, _ := json.Marshal(delMsgs)
 			if req.ChannelType == pbobjs.ChannelType_Private {
 				commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, &pbobjs.UpMsg{

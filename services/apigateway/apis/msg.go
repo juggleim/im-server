@@ -9,7 +9,7 @@ import (
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
-	"im-server/services/commonservices/msgtypes"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,8 +18,8 @@ import (
 var defaultFlag int32
 
 func init() {
-	defaultFlag = commonservices.SetCountMsg(0)
-	defaultFlag = commonservices.SetStoreMsg(defaultFlag)
+	defaultFlag = msgdefines.SetCountMsg(0)
+	defaultFlag = msgdefines.SetStoreMsg(defaultFlag)
 }
 
 func SendPrivateMsg(ctx *gin.Context) {
@@ -173,14 +173,14 @@ func SendGroupCastMsg(ctx *gin.Context) {
 		bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "gc_msg", req.TargetId, &pbobjs.UpMsg{
 			MsgType:    req.MsgType,
 			MsgContent: []byte(req.MsgContent),
-			Flags:      commonservices.SetStoreMsg(0),
+			Flags:      msgdefines.SetStoreMsg(0),
 		})
 	}
 	//dispatch for target conversations
 	utils.SafeGo(func() {
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
-		flag = commonservices.SetNoAffectSenderConver(flag)
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
+		flag = msgdefines.SetNoAffectSenderConver(flag)
 		upMsg := &pbobjs.UpMsg{
 			MsgType:    req.MsgType,
 			MsgContent: []byte(req.MsgContent),
@@ -204,8 +204,8 @@ func SendBroadCastMsg(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	flag := commonservices.SetStoreMsg(0)
-	flag = commonservices.SetCountMsg(flag)
+	flag := msgdefines.SetStoreMsg(0)
+	flag = msgdefines.SetCountMsg(flag)
 	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.SenderId), "bc_msg", req.SenderId, &pbobjs.UpMsg{
 		MsgType:    req.MsgType,
 		MsgContent: []byte(req.MsgContent),
@@ -217,16 +217,16 @@ func SendBroadCastMsg(ctx *gin.Context) {
 func handleFlag(sendMsgReq models.SendMsgReq) int32 {
 	var flag int32 = 0
 	if sendMsgReq.IsStorage == nil || *sendMsgReq.IsStorage {
-		flag = commonservices.SetStoreMsg(flag)
+		flag = msgdefines.SetStoreMsg(flag)
 	}
 	if sendMsgReq.IsCount == nil || *sendMsgReq.IsCount {
-		flag = commonservices.SetCountMsg(flag)
+		flag = msgdefines.SetCountMsg(flag)
 	}
 	if sendMsgReq.IsCmd != nil && *sendMsgReq.IsCmd {
-		flag = commonservices.SetCmdMsg(flag)
+		flag = msgdefines.SetCmdMsg(flag)
 	}
 	if sendMsgReq.IsState != nil && *sendMsgReq.IsState {
-		flag = commonservices.SetStateMsg(flag)
+		flag = msgdefines.SetStateMsg(flag)
 	}
 	return flag
 }
@@ -234,11 +234,11 @@ func handleFlag(sendMsgReq models.SendMsgReq) int32 {
 func handleMentionInfo(mentionInfo *models.MentionInfo) *pbobjs.MentionInfo {
 	retMention := &pbobjs.MentionInfo{}
 	if mentionInfo != nil {
-		if mentionInfo.MentionType == msgtypes.MentionType_All {
+		if mentionInfo.MentionType == msgdefines.MentionType_All {
 			retMention.MentionType = pbobjs.MentionType_All
-		} else if mentionInfo.MentionType == msgtypes.MentionType_Someone {
+		} else if mentionInfo.MentionType == msgdefines.MentionType_Someone {
 			retMention.MentionType = pbobjs.MentionType_Someone
-		} else if mentionInfo.MentionType == msgtypes.MentionType_AllSomeone {
+		} else if mentionInfo.MentionType == msgdefines.MentionType_AllSomeone {
 			retMention.MentionType = pbobjs.MentionType_AllAndSomeone
 		}
 		if len(mentionInfo.TargetUserIds) > 0 {

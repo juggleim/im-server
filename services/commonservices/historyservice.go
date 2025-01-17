@@ -5,10 +5,11 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices/msgdefines"
 )
 
 func SaveHistoryMsg(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, downMsg *pbobjs.DownMsg, memberCount int) {
-	if IsStoreMsg(downMsg.Flags) {
+	if msgdefines.IsStoreMsg(downMsg.Flags) {
 		addHisMsgReq := pbobjs.AddHisMsgReq{
 			SenderId:         senderId,
 			TargetId:         targetId,

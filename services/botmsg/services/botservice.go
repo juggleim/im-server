@@ -12,7 +12,7 @@ import (
 	"im-server/services/botmsg/storages/models"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
-	"im-server/services/commonservices/msgtypes"
+	"im-server/services/commonservices/msgdefines"
 	"strings"
 	"time"
 )
@@ -88,7 +88,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 	if msg.MsgType != "jg:text" || msg.ChannelType != pbobjs.ChannelType_Private {
 		return
 	}
-	txtMsg := &msgtypes.TextMsg{}
+	txtMsg := &msgdefines.TextMsg{}
 	err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
 	if err != nil {
 		logs.WithContext(ctx).Errorf("text msg illigal. content:%s", string(msg.MsgContent))
@@ -98,9 +98,9 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 	botInfo := GetBotInfo(ctx, botId)
 	if botInfo.BotEngine != nil {
 		// create stream msg
-		msgFlag := commonservices.SetStoreMsg(0)
-		msgFlag = commonservices.SetCountMsg(msgFlag)
-		msgFlag = commonservices.SetStreamMsg(msgFlag)
+		msgFlag := msgdefines.SetStoreMsg(0)
+		msgFlag = msgdefines.SetCountMsg(msgFlag)
+		msgFlag = msgdefines.SetStreamMsg(msgFlag)
 		ctx = bases.SetRequesterId2Ctx(ctx, botId)
 		shellContent := &StreamMsg{
 			Content: "",

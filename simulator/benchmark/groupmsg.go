@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 )
 
@@ -14,8 +14,8 @@ func GroupMsg1000() {
 	for i := 1; i <= 100; i++ {
 		senderId := fmt.Sprintf("userid%d", i)
 		client := connectMap[senderId]
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
 			MsgType:    "jg:text",
@@ -38,8 +38,8 @@ func GroupMsg2000() {
 	for i := 1; i <= 100; i++ {
 		senderId := fmt.Sprintf("userid%d", i)
 		client := connectMap[senderId]
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
 			MsgType:    "jg:text",
@@ -62,8 +62,8 @@ func GroupMsg3000() {
 	for i := 1; i <= 100; i++ {
 		senderId := fmt.Sprintf("userid%d", i)
 		client := connectMap[senderId]
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
 			MsgType:    "jg:text",
@@ -85,8 +85,8 @@ func GroupMsg5000() {
 	for i := 1; i <= 10; i++ {
 		senderId := fmt.Sprintf("userid%d", i)
 		client := connectMap[senderId]
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
 			MsgType:    "jg:text",

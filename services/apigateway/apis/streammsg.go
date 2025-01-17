@@ -8,6 +8,7 @@ import (
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"math"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +24,7 @@ func CreatePrivateStreamMsg(ctx *gin.Context) {
 	code, msgId, msgTime, msgSeq := commonservices.SyncPrivateMsgOverUpstream(services.ToRpcCtx(ctx, ""), sendMsgReq.SenderId, sendMsgReq.TargetId, &pbobjs.UpMsg{
 		MsgType:     sendMsgReq.MsgType,
 		MsgContent:  []byte(sendMsgReq.MsgContent),
-		Flags:       commonservices.SetStreamMsg(msgFlag),
+		Flags:       msgdefines.SetStreamMsg(msgFlag),
 		MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 		ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
 	}, &bases.NoNotifySenderOption{})

@@ -8,6 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/historymsg/storages"
 	"time"
 )
@@ -74,7 +75,7 @@ func SetMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	upMsg := &pbobjs.UpMsg{
 		MsgType:    MsgExtCmdType,
 		MsgContent: bs,
-		Flags:      commonservices.SetStateMsg(0),
+		Flags:      msgdefines.SetStateMsg(0),
 	}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		commonservices.AsyncPrivateMsg(ctx, userId, targetId, upMsg)
@@ -136,7 +137,7 @@ func DelMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		upMsg := &pbobjs.UpMsg{
 			MsgType:    MsgExtCmdType,
 			MsgContent: bs,
-			Flags:      commonservices.SetStateMsg(0),
+			Flags:      msgdefines.SetStateMsg(0),
 		}
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)
@@ -256,7 +257,7 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	upMsg := &pbobjs.UpMsg{
 		MsgType:    MsgExSetCmdType,
 		MsgContent: bs,
-		Flags:      commonservices.SetStateMsg(0),
+		Flags:      msgdefines.SetStateMsg(0),
 	}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)
@@ -328,7 +329,7 @@ func DelMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		upMsg := &pbobjs.UpMsg{
 			MsgType:    MsgExSetCmdType,
 			MsgContent: bs,
-			Flags:      commonservices.SetStateMsg(0),
+			Flags:      msgdefines.SetStateMsg(0),
 		}
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)

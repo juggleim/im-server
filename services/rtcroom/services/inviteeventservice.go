@@ -8,6 +8,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/rtcroom/storages"
 	"im-server/services/rtcroom/storages/models"
 	"time"
@@ -412,7 +413,7 @@ func SendFinishNtf(ctx context.Context, senderId, targetId string, reason CallFi
 		MediaType: int(mediaType),
 	}
 	contentBs, _ := tools.JsonMarshal(ntf)
-	flag := commonservices.SetStoreMsg(0)
+	flag := msgdefines.SetStoreMsg(0)
 	msg := &pbobjs.UpMsg{
 		MsgType:    RtcMsgType_OneOneFinishNtf,
 		MsgContent: contentBs,

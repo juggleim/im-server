@@ -10,7 +10,7 @@ import (
 	"im-server/services/appbusiness/storages"
 	storeModels "im-server/services/appbusiness/storages/models"
 	"im-server/services/commonservices"
-	"im-server/services/commonservices/msgtypes"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -413,9 +413,9 @@ func SetGrpAnnouncement(ctx context.Context, req *pbobjs.GrpAnnouncement) errs.I
 	}
 	if req.Content != "" {
 		//send announce msg
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
-		txtMsg := &msgtypes.TextMsg{
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
+		txtMsg := &msgdefines.TextMsg{
 			Content: req.Content,
 		}
 		commonservices.AsyncGroupMsgOverUpstream(ctx, requestId, req.GroupId, &pbobjs.UpMsg{

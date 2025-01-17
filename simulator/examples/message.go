@@ -4,15 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"im-server/commons/pbdefines/pbobjs"
-	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/simulator/utils"
 	"im-server/simulator/wsclients"
 )
 
 func SendPrivateMsg(wsClient *wsclients.WsImClient, targetId string) {
 	if wsClient != nil && wsClient.GetState() == utils.State_Connected {
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
 		upMsg := pbobjs.UpMsg{
 			MsgType:    "txtMsg",
 			MsgContent: []byte(`{"content":"msg content"}`),

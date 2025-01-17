@@ -10,8 +10,9 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/interceptors"
 	"im-server/services/commonservices/logs"
-	"im-server/services/commonservices/msgtypes"
+	"im-server/services/commonservices/msgdefines"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -30,10 +31,13 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid
 	}
 	//check msg interceptor
-	if code := commonservices.CheckMsgInterceptor(ctx, senderId, receiverId, pbobjs.ChannelType_Private, upMsg); code != errs.IMErrorCode_SUCCESS {
+	result := commonservices.CheckMsgInterceptor(ctx, senderId, receiverId, pbobjs.ChannelType_Private, upMsg)
+	if result == interceptors.InterceptorResult_Reject {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
-		return code, msgId, sendTime, 0, upMsg.ClientUid
+		return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid
+	} else if result == interceptors.InterceptorResult_Replace {
+		//TODO
 	}
 	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
@@ -98,7 +102,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	}
 
 	//check merged msg
-	if commonservices.IsMergedMsg(upMsg.Flags) && upMsg.MergedMsgs != nil && len(upMsg.MergedMsgs.Msgs) > 0 {
+	if msgdefines.IsMergedMsg(upMsg.Flags) && upMsg.MergedMsgs != nil && len(upMsg.MergedMsgs.Msgs) > 0 {
 		bases.AsyncRpcCall(ctx, "merge_msgs", msgId, &pbobjs.MergeMsgReq{
 			ParentMsgId: msgId,
 			MergedMsgs:  upMsg.MergedMsgs,
@@ -106,7 +110,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	}
 
 	//save history msg
-	if commonservices.IsStoreMsg(upMsg.Flags) {
+	if msgdefines.IsStoreMsg(upMsg.Flags) {
 		commonservices.SaveHistoryMsg(ctx, senderId, receiverId, pbobjs.ChannelType_Private, downMsg, 0)
 	}
 
@@ -266,7 +270,7 @@ func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) 
 		retPushData.PushText = prefix + pushText
 	} else {
 		if msg.MsgType == "jg:text" {
-			txtMsg := &msgtypes.TextMsg{}
+			txtMsg := &msgdefines.TextMsg{}
 			err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
 			pushText := txtMsg.Content
 			charArr := []rune(pushText)
@@ -321,7 +325,7 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 			}
 		}
 		//undisturb
-		if commonservices.IsUndisturbMsg(msg.Flags) {
+		if msgdefines.IsUndisturbMsg(msg.Flags) {
 			if msg.PushData == nil || msg.PushData.PushLevel < pbobjs.PushLevel_IgnoreUndisturb {
 				return
 			}
@@ -373,7 +377,7 @@ func ImportPrivateHisMsg(ctx context.Context, senderId, targetId string, msg *pb
 		TargetUserInfo: commonservices.GetSenderUserInfo(ctx),
 	}
 	//add hismsg
-	if commonservices.IsStoreMsg(msg.Flags) {
+	if msgdefines.IsStoreMsg(msg.Flags) {
 		commonservices.SaveHistoryMsg(ctx, senderId, targetId, pbobjs.ChannelType_Private, downMsg, 0)
 
 		//add conver for receiver

@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 )
 
@@ -29,7 +30,7 @@ func BroadcastMsg(ctx context.Context, msg *pbobjs.UpMsg) (errs.IMErrorCode, str
 		Flags:       msg.Flags,
 	}
 	//save to history msg
-	if !commonservices.IsStateMsg(msg.Flags) {
+	if !msgdefines.IsStateMsg(msg.Flags) {
 		commonservices.SaveHistoryMsg(ctx, senderId, "", pbobjs.ChannelType_BroadCast, downMsg, 0)
 	}
 

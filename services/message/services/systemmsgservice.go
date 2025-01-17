@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 )
 
@@ -63,7 +64,7 @@ func SendSystemMsg(ctx context.Context, senderId, receiverId string, upMsg *pbob
 		TargetUserInfo: commonservices.GetSenderUserInfo(ctx),
 	}
 	//save history msg
-	if commonservices.IsStoreMsg(upMsg.Flags) {
+	if msgdefines.IsStoreMsg(upMsg.Flags) {
 		commonservices.SaveHistoryMsg(ctx, senderId, receiverId, pbobjs.ChannelType_System, downMsg, 0)
 	}
 	//dispatch to receiver

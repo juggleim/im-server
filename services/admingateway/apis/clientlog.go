@@ -10,6 +10,7 @@ import (
 	apiService "im-server/services/apigateway/services"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/dbs"
+	"im-server/services/commonservices/msgdefines"
 	"net/http"
 	"time"
 
@@ -63,7 +64,7 @@ func ClientLogNtf(ctx *gin.Context) {
 	code, msgId, _, _ := commonservices.SyncSystemMsg(apiService.ToRpcCtx(ctx, ""), "clientlog", req.UserId, &pbobjs.UpMsg{
 		MsgType:    "jg:logcmd",
 		MsgContent: []byte(tools.ToJson(logCmd)),
-		Flags:      commonservices.SetCmdMsg(0),
+		Flags:      msgdefines.SetCmdMsg(0),
 	}, &bases.NoNotifySenderOption{})
 	if code != errs.IMErrorCode_SUCCESS {
 		item.State = dbs.ClientLogState_SendFail

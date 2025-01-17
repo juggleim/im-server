@@ -1,4 +1,4 @@
-package msgtypes
+package msgdefines
 
 const (
 	MentionType_All        string = "mention_all"

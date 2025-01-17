@@ -4,12 +4,13 @@ import (
 	"context"
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/services/commonservices/msgdefines"
 	"sort"
 	"strings"
 )
 
 func SaveConversation(ctx context.Context, userId string, msg *pbobjs.DownMsg) {
-	if IsStoreMsg(msg.Flags) {
+	if msgdefines.IsStoreMsg(msg.Flags) {
 		bases.AsyncRpcCall(ctx, "add_conver", userId, &pbobjs.Conversation{
 			TargetId:    msg.TargetId,
 			ChannelType: msg.ChannelType,
@@ -22,7 +23,7 @@ func BatchSaveConversation(ctx context.Context, convers []*pbobjs.Conversation) 
 	method := "batch_add_conver"
 	grps := map[string][]*pbobjs.Conversation{}
 	for _, conver := range convers {
-		if conver.Msg == nil || !IsStoreMsg(conver.Msg.Flags) {
+		if conver.Msg == nil || !msgdefines.IsStoreMsg(conver.Msg.Flags) {
 			continue
 		}
 		node := bases.GetCluster().GetTargetNode(method, conver.UserId)

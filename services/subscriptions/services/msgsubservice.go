@@ -8,7 +8,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
-	"im-server/services/commonservices/msgtypes"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 
 	"github.com/avast/retry-go/v4"
@@ -185,11 +185,11 @@ func transMentionInfo(mention *pbobjs.MentionInfo) *MentionInfo {
 	if mention != nil {
 		mentionType := ""
 		if mention.MentionType == pbobjs.MentionType_All {
-			mentionType = msgtypes.MentionType_All
+			mentionType = msgdefines.MentionType_All
 		} else if mention.MentionType == pbobjs.MentionType_Someone {
-			mentionType = msgtypes.MentionType_Someone
+			mentionType = msgdefines.MentionType_Someone
 		} else if mention.MentionType == pbobjs.MentionType_AllAndSomeone {
-			mentionType = msgtypes.MentionType_AllSomeone
+			mentionType = msgdefines.MentionType_AllSomeone
 		}
 		userIds := []string{}
 		for _, user := range mention.TargetUsers {

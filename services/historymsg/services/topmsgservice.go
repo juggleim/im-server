@@ -7,6 +7,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/historymsg/storages"
 	"im-server/services/historymsg/storages/models"
 	"time"
@@ -36,7 +37,7 @@ func SetTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
 	upMsg := &pbobjs.UpMsg{
 		MsgType:    topMsgType,
 		MsgContent: contentBs,
-		Flags:      commonservices.SetCmdMsg(0),
+		Flags:      msgdefines.SetCmdMsg(0),
 	}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)
@@ -63,7 +64,7 @@ func DelTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
 	upMsg := &pbobjs.UpMsg{
 		MsgType:    topMsgType,
 		MsgContent: contentBs,
-		Flags:      commonservices.SetCmdMsg(0),
+		Flags:      msgdefines.SetCmdMsg(0),
 	}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)

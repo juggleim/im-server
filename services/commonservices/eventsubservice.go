@@ -4,10 +4,11 @@ import (
 	"context"
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/services/commonservices/msgdefines"
 )
 
 func SubPrivateMsg(ctx context.Context, targetId string, msg *pbobjs.DownMsg) {
-	if IsCmdMsg(msg.Flags) {
+	if msgdefines.IsCmdMsg(msg.Flags) {
 		return
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
@@ -28,7 +29,7 @@ func SubPrivateMsg(ctx context.Context, targetId string, msg *pbobjs.DownMsg) {
 }
 
 func SubGroupMsg(ctx context.Context, targetId string, msg *pbobjs.DownMsg) {
-	if IsCmdMsg(msg.Flags) {
+	if msgdefines.IsCmdMsg(msg.Flags) {
 		return
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)

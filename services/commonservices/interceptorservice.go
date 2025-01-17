@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
-	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
@@ -29,25 +28,27 @@ func init() {
 	interceptorLocks = tools.NewSegmentatedLocks(128)
 }
 
-func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, upMsg *pbobjs.UpMsg) errs.IMErrorCode {
+func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, upMsg *pbobjs.UpMsg) interceptors.InterceptorResult {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, exist := GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.OpenSensitive {
-		if sensitiveInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg) {
-			return errs.IMErrorCode_MSG_Hit_Sensitive
+		result := sensitiveInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg)
+		if result != interceptors.InterceptorResult_Pass {
+			return result
 		}
 	}
 
 	//other
 	msgInterceptors := GetMsgInterceptors(appkey)
 	for _, msgInterceptor := range msgInterceptors.Interceptors {
-		if msgInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg) {
+		result := msgInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg)
+		if result != interceptors.InterceptorResult_Pass {
 			fmt.Println("sender:", senderId, "receiver:", receiverId, "channel_type", channelType, "msg_type:", upMsg.MsgType, "content:", string(upMsg.MsgContent), "isSensi:", true)
-			return errs.IMErrorCode_MSG_Hit_Sensitive
+			return result
 		}
 	}
 	fmt.Println("sender:", senderId, "receiver:", receiverId, "channel_type", channelType, "msg_type:", upMsg.MsgType, "content:", string(upMsg.MsgContent), "isSensi:", false)
-	return errs.IMErrorCode_SUCCESS
+	return interceptors.InterceptorResult_Pass
 }
 
 func GetMsgInterceptors(appkey string) *MsgInterceptors {

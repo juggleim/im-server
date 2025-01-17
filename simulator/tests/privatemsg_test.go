@@ -2,7 +2,7 @@ package tests
 
 import (
 	"im-server/commons/pbdefines/pbobjs"
-	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/simulator/utils"
 	"im-server/simulator/wsclients"
 	"testing"
@@ -30,8 +30,8 @@ func TestPrivateMsg(t *testing.T) {
 	}
 
 	//send private msg
-	flag := commonservices.SetStoreMsg(0)
-	flag = commonservices.SetCountMsg(flag)
+	flag := msgdefines.SetStoreMsg(0)
+	flag = msgdefines.SetCountMsg(flag)
 	code, pubAck := wsClient1.SendPrivateMsg(User2, &pbobjs.UpMsg{
 		MsgType:    "t:txtmsg",
 		MsgContent: []byte("{\"content\":\"hello im.\"}"),

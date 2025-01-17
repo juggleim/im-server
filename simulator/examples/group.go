@@ -3,18 +3,18 @@ package examples
 import (
 	"fmt"
 	"im-server/commons/pbdefines/pbobjs"
-	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/simulator/utils"
 	"im-server/simulator/wsclients"
 )
 
 func SendGroupMsg(wsClient *wsclients.WsImClient, groupId string) {
 	if wsClient != nil && wsClient.GetState() == utils.State_Connected {
-		flag := commonservices.SetCountMsg(0)
+		flag := msgdefines.SetCountMsg(0)
 		upMsg := pbobjs.UpMsg{
 			MsgType:    "text",
 			MsgContent: []byte(`{"content":"msg content"}`),
-			Flags:      commonservices.SetStoreMsg(flag),
+			Flags:      msgdefines.SetStoreMsg(flag),
 
 			MentionInfo: &pbobjs.MentionInfo{
 				MentionType: pbobjs.MentionType_Someone,
@@ -34,7 +34,7 @@ func SendGroupMsgWithMention(wsClient *wsclients.WsImClient, groupId string) {
 		upMsg := pbobjs.UpMsg{
 			MsgType:    "txtmsg",
 			MsgContent: []byte(`{"content":"msg content"}`),
-			Flags:      commonservices.SetStoreMsg(0),
+			Flags:      msgdefines.SetStoreMsg(0),
 			MentionInfo: &pbobjs.MentionInfo{
 				MentionType: pbobjs.MentionType_All,
 			},

@@ -8,6 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/historymsg/storages"
 )
 
@@ -28,7 +29,7 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 	converId := commonservices.GetConversationId(fromUserId, targetId, modifyReq.ChannelType)
 
 	//send modify msg
-	flag := commonservices.SetCmdMsg(0)
+	flag := msgdefines.SetCmdMsg(0)
 
 	contentBs, _ := json.Marshal(ModifyMsgContent{
 		MsgType:    modifyReq.MsgType,
@@ -52,7 +53,7 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 			err = tools.PbUnMarshal(dbMsg.MsgBody, newDownMsg)
 			if err == nil {
 				newDownMsg.MsgContent = modifyReq.MsgContent
-				newDownMsg.Flags = commonservices.SetModifiedMsg(newDownMsg.Flags)
+				newDownMsg.Flags = msgdefines.SetModifiedMsg(newDownMsg.Flags)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
 				storage.UpdateMsgBody(appkey, converId, modifyReq.MsgId, newDownMsg.MsgType, newDownMsgBs)
 			}
@@ -69,7 +70,7 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 			err = tools.PbUnMarshal(dbMsg.MsgBody, newDownMsg)
 			if err == nil {
 				newDownMsg.MsgContent = modifyReq.MsgContent
-				newDownMsg.Flags = commonservices.SetModifiedMsg(newDownMsg.Flags)
+				newDownMsg.Flags = msgdefines.SetModifiedMsg(newDownMsg.Flags)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
 				storage.UpdateMsgBody(appkey, converId, modifyReq.MsgId, newDownMsg.MsgType, newDownMsgBs)
 			}

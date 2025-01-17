@@ -9,6 +9,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/conversation/storages"
 	"im-server/services/conversation/storages/models"
 	hisStorages "im-server/services/historymsg/storages"
@@ -21,11 +22,11 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 	if msg == nil {
 		return
 	}
-	if commonservices.IsStoreMsg(msg.Flags) {
+	if msgdefines.IsStoreMsg(msg.Flags) {
 		var sortTime int64 = msg.MsgTime
 		var unreadIndex int64 = 0
 		if msg.IsSend {
-			if commonservices.IsNoAffectSenderConver(msg.Flags) {
+			if msgdefines.IsNoAffectSenderConver(msg.Flags) {
 				sortTime = 0
 			}
 		} else {
@@ -117,7 +118,7 @@ func SaveNilConversationV2(ctx context.Context, appkey string, userId string, ta
 			GroupInfo:      grpInfo,
 		},
 	}
-	flag := commonservices.SetCmdMsg(0)
+	flag := msgdefines.SetCmdMsg(0)
 	bs, _ := json.Marshal(addConver)
 	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 		MsgType:    addConverMsgType,
@@ -256,7 +257,7 @@ func ClearTotalUnreadV2(ctx context.Context, userId string) errs.IMErrorCode {
 	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 		MsgType:    "jg:cleartotalunread",
 		MsgContent: []byte(fmt.Sprintf(`{"clear_time":%d}`, time.Now().UnixMilli())),
-		Flags:      commonservices.SetCmdMsg(0),
+		Flags:      msgdefines.SetCmdMsg(0),
 	})
 	return errs.IMErrorCode_SUCCESS
 }
@@ -298,7 +299,7 @@ func ClearUnreadV2(ctx context.Context, userId string, convers []*pbobjs.Convers
 		}
 		if affected && !noCmdMsg {
 			//Notify other device to clear unread
-			flag := commonservices.SetCmdMsg(0)
+			flag := msgdefines.SetCmdMsg(0)
 			bs, _ := json.Marshal(clearUnreadConvers)
 			exts := bases.GetExtsFromCtx(ctx)
 			if len(convers) == 1 {
@@ -335,7 +336,7 @@ func DelConversationV2(ctx context.Context, userId string, convers []*pbobjs.Con
 		// 	Conversations: convers,
 		// })
 		//notify other device
-		flag := commonservices.SetCmdMsg(0)
+		flag := msgdefines.SetCmdMsg(0)
 		bs, _ := json.Marshal(delConvers)
 		commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 			MsgType:    delConversMsgType,
@@ -368,7 +369,7 @@ func MarkUnreadV2(ctx context.Context, userId string, req *pbobjs.ConversationsR
 		}
 		if affected {
 			//Notify other device to mark unread
-			flag := commonservices.SetCmdMsg(0)
+			flag := msgdefines.SetCmdMsg(0)
 			bs, _ := json.Marshal(markUnreadConvers)
 			commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 				MsgType:    commonservices.CmdMsgType_MarkUnread,
@@ -407,7 +408,7 @@ func SetTopConversV2(ctx context.Context, req *pbobjs.ConversationsReq) (errs.IM
 			})
 		}
 		//notify other device
-		flag := commonservices.SetCmdMsg(0)
+		flag := msgdefines.SetCmdMsg(0)
 		bs, _ := json.Marshal(topConvers)
 		code, _, msgTime, _ := commonservices.SyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 			MsgType:    topConversMsgType,
@@ -475,7 +476,7 @@ func UndisturbConversV2(ctx context.Context, req *pbobjs.UndisturbConversReq) er
 		})
 	}
 	//Notify other device to update undisturb
-	flag := commonservices.SetCmdMsg(0)
+	flag := msgdefines.SetCmdMsg(0)
 	bs, _ := json.Marshal(convers)
 	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 		MsgType:    undisturbMsgType,

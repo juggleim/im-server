@@ -7,6 +7,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/message/services"
 	"time"
 
@@ -31,7 +32,7 @@ func (actor *SendBoxActor) OnReceive(ctx context.Context, input proto.Message) {
 		}
 		//send to sender's other device
 		services.MsgDirect(ctx, bases.GetRequesterIdFromCtx(ctx), downMsg)
-		if !commonservices.IsStateMsg(downMsg.Flags) {
+		if !msgdefines.IsStateMsg(downMsg.Flags) {
 			//save msg to sendbox for sender
 			services.SaveMsg2Sendbox(ctx, bases.GetAppKeyFromCtx(ctx), bases.GetRequesterIdFromCtx(ctx), downMsg)
 			//record conversation for sender

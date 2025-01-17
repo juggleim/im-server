@@ -8,6 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/conversation/storages"
 	"im-server/services/conversation/storages/models"
 )
@@ -87,7 +88,7 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 		}
 	}
 	// ntf other device
-	flag := commonservices.SetCmdMsg(0)
+	flag := msgdefines.SetCmdMsg(0)
 	bs, _ := json.Marshal(cmdmsg)
 	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 		MsgType:    CmdMsgType_TagAddConvers,
@@ -138,7 +139,7 @@ func TagDelConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 		logs.WithContext(ctx).Errorf("err:%v", err)
 	}
 	// ntf other device
-	flag := commonservices.SetCmdMsg(0)
+	flag := msgdefines.SetCmdMsg(0)
 	bs, _ := json.Marshal(cmdmsg)
 	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 		MsgType:    CmdMsgType_TagDelConvers,
@@ -189,7 +190,7 @@ func DelUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.IME
 		})
 	}
 	// ntf other device
-	flag := commonservices.SetCmdMsg(0)
+	flag := msgdefines.SetCmdMsg(0)
 	bs, _ := json.Marshal(cmdmsg)
 	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
 		MsgType:    CmdMsgType_DelConverTags,

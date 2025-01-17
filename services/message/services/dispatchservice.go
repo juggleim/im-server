@@ -8,6 +8,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/botmsg/botclient"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"strings"
 )
 
@@ -80,7 +81,7 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 	if targetUserInfo.UserType == pbobjs.UserType_Bot {
 		botclient.SendMsg2Bot(ctx, receiverId, msg)
 	} else {
-		if !commonservices.IsStateMsg(msg.Flags) {
+		if !msgdefines.IsStateMsg(msg.Flags) {
 			if !closeOffline {
 				commonservices.SaveConversation(ctx, receiverId, msg)
 				SaveMsg2Inbox(appkey, receiverId, msg)

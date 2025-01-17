@@ -9,6 +9,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/message/storages"
 	"im-server/services/message/storages/models"
 	"time"
@@ -33,7 +34,7 @@ func SaveMsg2Inbox(appkey, receiverId string, msg *pbobjs.DownMsg) error {
 		TargetId:    msg.TargetId,
 		MsgType:     msg.MsgType,
 	}
-	if commonservices.IsCmdMsg(msg.Flags) {
+	if msgdefines.IsCmdMsg(msg.Flags) {
 		msgStorage := storages.NewCmdInboxMsgStorage()
 		err = msgStorage.SaveMsg(message)
 		purgeMsgs(appkey+"1", msg.MsgTime, func() {
@@ -76,7 +77,7 @@ func SaveMsg2Sendbox(ctx context.Context, appkey, senderId string, msg *pbobjs.D
 		TargetId:    msg.TargetId,
 		MsgType:     msg.MsgType,
 	}
-	if commonservices.IsCmdMsg(msg.Flags) {
+	if msgdefines.IsCmdMsg(msg.Flags) {
 		storage := storages.NewCmdSendboxMsgStorage()
 		if msg.MsgType == commonservices.CmdMsgType_ClearUnread {
 			rpcExts := bases.GetExtsFromCtx(ctx)

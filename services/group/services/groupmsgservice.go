@@ -7,6 +7,8 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/interceptors"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 )
 
@@ -44,10 +46,13 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 	}
 
 	//check msg interceptor
-	if code := commonservices.CheckMsgInterceptor(ctx, senderId, groupId, pbobjs.ChannelType_Group, upMsg); code != errs.IMErrorCode_SUCCESS {
+	result := commonservices.CheckMsgInterceptor(ctx, senderId, groupId, pbobjs.ChannelType_Group, upMsg)
+	if result == interceptors.InterceptorResult_Reject {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
-		return code, msgId, sendTime, 0, upMsg.ClientUid, 0
+		return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, 0
+	} else if result == interceptors.InterceptorResult_Replace {
+		//TODO
 	}
 	msgConverCache := commonservices.GetMsgConverCache(ctx, groupId, pbobjs.ChannelType_Group)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(groupId, pbobjs.ChannelType_Group, time.Now().UnixMilli(), upMsg.Flags)
@@ -136,14 +141,14 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 	commonservices.SubGroupMsg(ctx, msgId, downMsg4Sendbox)
 
 	//check merged msg
-	if commonservices.IsMergedMsg(upMsg.Flags) && upMsg.MergedMsgs != nil && len(upMsg.MergedMsgs.Msgs) > 0 {
+	if msgdefines.IsMergedMsg(upMsg.Flags) && upMsg.MergedMsgs != nil && len(upMsg.MergedMsgs.Msgs) > 0 {
 		bases.AsyncRpcCall(ctx, "merge_msgs", msgId, &pbobjs.MergeMsgReq{
 			ParentMsgId: msgId,
 			MergedMsgs:  upMsg.MergedMsgs,
 		})
 	}
 
-	if !commonservices.IsStateMsg(upMsg.Flags) {
+	if !msgdefines.IsStateMsg(upMsg.Flags) {
 		//save history msg
 		commonservices.SaveHistoryMsg(ctx, bases.GetRequesterIdFromCtx(ctx), groupId, pbobjs.ChannelType_Group, downMsg, memberCount)
 	}
@@ -303,7 +308,7 @@ func ImportGroupHisMsg(ctx context.Context, msg *pbobjs.UpMsg) {
 		GroupInfo:      groupInfo,
 		MemberCount:    int32(memberCount),
 	}
-	if commonservices.IsStoreMsg(msg.Flags) {
+	if msgdefines.IsStoreMsg(msg.Flags) {
 		//add hismsg
 		commonservices.SaveHistoryMsg(ctx, senderId, groupId, pbobjs.ChannelType_Group, downMsg, memberCount)
 		//add conver for receivers

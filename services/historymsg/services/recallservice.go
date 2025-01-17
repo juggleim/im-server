@@ -8,6 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 )
@@ -29,7 +30,7 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 
 	//send recall msg
 	var flag int32 = 0
-	flag = commonservices.SetCmdMsg(flag)
+	flag = msgdefines.SetCmdMsg(flag)
 
 	contentBs, _ := json.Marshal(RecallMsgContent{
 		MsgId:   recallMsg.MsgId,
@@ -45,8 +46,8 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 	if recallMsg.ChannelType == pbobjs.ChannelType_Private {
 		//replace history msg
 		storage := storages.NewPrivateHisMsgStorage()
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
 		replaceMsg := &pbobjs.DownMsg{
 			SenderId:    userId,
 			TargetId:    targetId,
@@ -66,8 +67,8 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 	} else if recallMsg.ChannelType == pbobjs.ChannelType_Group {
 		//replace history msg
 		storage := storages.NewGroupHisMsgStorage()
-		flag := commonservices.SetStoreMsg(0)
-		flag = commonservices.SetCountMsg(flag)
+		flag := msgdefines.SetStoreMsg(0)
+		flag = msgdefines.SetCountMsg(flag)
 		replaceMsg := &pbobjs.DownMsg{
 			SenderId:    userId,
 			TargetId:    targetId,

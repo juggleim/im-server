@@ -8,6 +8,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -28,7 +29,7 @@ type MsgConverItem struct {
 }
 
 func (item *MsgConverItem) GetMsgSeqWithIncr(msgFlag int32) int64 {
-	if IsStoreMsg(msgFlag) {
+	if msgdefines.IsStoreMsg(msgFlag) {
 		lock := msgConverLocks.GetLocks(item.cacheKey)
 		lock.Lock()
 		defer lock.Unlock()
@@ -62,7 +63,7 @@ func (item *MsgConverItem) GenerateMsgId(converId string, channelType pbobjs.Cha
 	}
 	msgTime := item.LatestMsgTime
 	var msgSeq int64 = -1
-	if IsStoreMsg(msgFlag) {
+	if msgdefines.IsStoreMsg(msgFlag) {
 		item.LatestMsgSeq = item.LatestMsgSeq + 1
 		msgSeq = item.LatestMsgSeq
 	}

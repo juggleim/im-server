@@ -7,6 +7,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/historymsg/storages"
 	"im-server/services/historymsg/storages/models"
 
@@ -55,7 +56,7 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 			commonservices.AsyncGroupMsg(ctx, req.GroupId, req.GroupId, &pbobjs.UpMsg{
 				MsgType:    GrpReadNtfType,
 				MsgContent: bs,
-				Flags:      commonservices.SetCmdMsg(0),
+				Flags:      msgdefines.SetCmdMsg(0),
 				ToUserIds:  []string{readInfo.SenderId},
 			}, &bases.NoNotifySenderOption{}, &bases.MarkFromApiOption{})
 

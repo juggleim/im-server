@@ -2,7 +2,7 @@ package tests
 
 import (
 	"im-server/commons/pbdefines/pbobjs"
-	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/simulator/utils"
 	"im-server/simulator/wsclients"
 	"testing"
@@ -58,8 +58,8 @@ func TestGroupMsg(t *testing.T) {
 		assert.Equal(t, User3, connectAck.UserId)
 		Print("%s is connected.", User3)
 	}
-	flag := commonservices.SetStoreMsg(0)
-	flag = commonservices.SetCountMsg(flag)
+	flag := msgdefines.SetStoreMsg(0)
+	flag = msgdefines.SetCountMsg(flag)
 	//send group msg
 	code, pubAck := wsClient1.SendGroupMsg(Group1, &pbobjs.UpMsg{
 		MsgType:    "test_msg",

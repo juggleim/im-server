@@ -9,6 +9,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"sync"
 	"time"
 
@@ -157,19 +158,19 @@ func HandleDownMsgByConver(ctx context.Context, userId, targetId string, channel
 	if conver.UndisturbType == UndisturbType_Normal {
 		if !commonservices.IsMentionedMe(userId, downMsg) {
 			downMsg.UndisturbType = UndisturbType_Normal
-			downMsg.Flags = commonservices.SetUndisturbMsg(downMsg.Flags)
+			downMsg.Flags = msgdefines.SetUndisturbMsg(downMsg.Flags)
 		}
 	} else {
 		userSettings := commonservices.GetTargetUserSettings(ctx, userId)
 		if userSettings != nil && userSettings.UndisturbObj != nil {
 			if userSettings.UndisturbObj.CheckUndisturb(ctx, userId) {
 				if !commonservices.IsMentionedMe(userId, downMsg) {
-					downMsg.Flags = commonservices.SetUndisturbMsg(downMsg.Flags)
+					downMsg.Flags = msgdefines.SetUndisturbMsg(downMsg.Flags)
 				}
 			}
 		}
 	}
-	if commonservices.IsCountMsg(downMsg.Flags) {
+	if msgdefines.IsCountMsg(downMsg.Flags) {
 		downMsg.UnreadIndex = conver.GetUnreadIndex()
 	}
 	downMsg.ConverTags = append(downMsg.ConverTags, conver.ConverTags...)

@@ -8,6 +8,7 @@ import (
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"sort"
 
 	"github.com/gin-gonic/gin"
@@ -241,10 +242,10 @@ func ImportHisMsg(ctx *gin.Context) {
 func handleHisMsgFlag(msg models.HisMsg) int32 {
 	var flag int32 = 0
 	if msg.IsStorage == nil || *msg.IsStorage {
-		flag = commonservices.SetStoreMsg(flag)
+		flag = msgdefines.SetStoreMsg(flag)
 	}
 	if msg.IsCount == nil || *msg.IsCount {
-		flag = commonservices.SetCountMsg(flag)
+		flag = msgdefines.SetCountMsg(flag)
 	}
 	return flag
 }
