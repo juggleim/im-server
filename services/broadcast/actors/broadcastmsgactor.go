@@ -8,6 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/broadcast/services"
 	"im-server/services/commonservices/logs"
+	"time"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -20,10 +21,10 @@ func (actor *BroadcastMsgActor) OnReceive(ctx context.Context, input proto.Messa
 	if upMsg, ok := input.(*pbobjs.UpMsg); ok {
 		logs.WithContext(ctx).Infof("sender_id:%s\tmsg_type:%s", bases.GetRequesterIdFromCtx(ctx), upMsg.MsgType)
 		code, msgId, sendTime, msgSeq := services.BroadcastMsg(ctx, upMsg)
-		userPubAck := bases.CreateUserPubAckWraper(ctx, code, msgId, sendTime, msgSeq, "")
+		userPubAck := bases.CreateUserPubAckWraper(ctx, code, msgId, sendTime, msgSeq, "", nil)
 		actor.Sender.Tell(userPubAck, actorsystem.NoSender)
 	} else {
-		ack := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_PBILLEGAL, &pbobjs.GroupMembersResp{})
+		ack := bases.CreateUserPubAckWraper(ctx, errs.IMErrorCode_PBILLEGAL, "", time.Now().UnixMilli(), 0, "", nil)
 		actor.Sender.Tell(ack, actorsystem.NoSender)
 	}
 }

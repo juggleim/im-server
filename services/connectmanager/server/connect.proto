@@ -60,6 +60,7 @@ message PublishAckMsgBody{
     int64 msgSeqNo = 5;
     int32 memberCount = 6;
     string clientMsgId = 7;
+    bytes modifiedMsg = 8;
 }
 
 message QueryMsgBody{

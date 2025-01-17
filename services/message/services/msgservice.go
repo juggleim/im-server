@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, string, int64, int64, string) {
+func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, string, int64, int64, string, *pbobjs.DownMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	converId := commonservices.GetConversationId(senderId, receiverId, pbobjs.ChannelType_Private)
 	//statistic
@@ -28,16 +28,20 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	if blockUsers.CheckBlockUser(senderId) {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
-		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid
+		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid, nil
 	}
 	//check msg interceptor
+	var modifiedMsg *pbobjs.DownMsg = nil
 	result := commonservices.CheckMsgInterceptor(ctx, senderId, receiverId, pbobjs.ChannelType_Private, upMsg)
 	if result == interceptors.InterceptorResult_Reject {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
-		return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid
+		return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, nil
 	} else if result == interceptors.InterceptorResult_Replace {
-		//TODO
+		modifiedMsg = &pbobjs.DownMsg{
+			MsgType:    upMsg.MsgType,
+			MsgContent: upMsg.MsgContent,
+		}
 	}
 	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
@@ -52,7 +56,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 			MsgTime: sendTime,
 			MsgSeq:  msgSeq,
 		}); filter {
-			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq, upMsg.ClientUid
+			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq, upMsg.ClientUid, nil
 		}
 	} else {
 		upMsg.ClientUid = tools.GenerateUUIDShort22()
@@ -79,7 +83,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 
 	if bases.GetOnlySendboxFromCtx(ctx) {
-		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid
+		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, modifiedMsg
 	}
 	commonservices.SubPrivateMsg(ctx, msgId, downMsg4Sendbox)
 
@@ -119,7 +123,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		dispatchMsg(ctx, receiverId, downMsg)
 	}
 
-	return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid
+	return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, modifiedMsg
 }
 
 func dispatchMsg(ctx context.Context, receiverId string, msg *pbobjs.DownMsg) {

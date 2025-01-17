@@ -64,7 +64,7 @@ func CreateServerPubWraper(ctx context.Context, requesterId, targetId, method st
 	return serverPub
 }
 
-func CreateUserPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId string, msgSendTime, msgSeqNo int64, clientMsgId string) *pbobjs.RpcMessageWraper {
+func CreateUserPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId string, msgSendTime, msgSeqNo int64, clientMsgId string, modifiedMsg *pbobjs.DownMsg) *pbobjs.RpcMessageWraper {
 	userPubAck := &pbobjs.RpcMessageWraper{
 		RpcMsgType:  pbobjs.RpcMsgType_UserPubAck,
 		ResultCode:  int32(code),
@@ -72,12 +72,13 @@ func CreateUserPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId st
 		MsgSendTime: msgSendTime,
 		MsgSeqNo:    msgSeqNo,
 		ClientMsgId: clientMsgId,
+		ModifiedMsg: modifiedMsg,
 	}
 	handleBaseContext(ctx, userPubAck)
 	return userPubAck
 }
 
-func CreateGrpPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId string, msgSendTime, msgSeqNo int64, clientMsgId string, memberCount int32) *pbobjs.RpcMessageWraper {
+func CreateGrpPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId string, msgSendTime, msgSeqNo int64, clientMsgId string, memberCount int32, modifiedMsg *pbobjs.DownMsg) *pbobjs.RpcMessageWraper {
 	userPubAck := &pbobjs.RpcMessageWraper{
 		RpcMsgType:  pbobjs.RpcMsgType_UserPubAck,
 		ResultCode:  int32(code),
@@ -86,6 +87,7 @@ func CreateGrpPubAckWraper(ctx context.Context, code errs.IMErrorCode, msgId str
 		MsgSeqNo:    msgSeqNo,
 		MemberCount: memberCount,
 		ClientMsgId: clientMsgId,
+		ModifiedMsg: modifiedMsg,
 	}
 	handleBaseContext(ctx, userPubAck)
 	return userPubAck

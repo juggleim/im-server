@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, string, int64, int64, string, int32) {
+func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, string, int64, int64, string, int32, *pbobjs.DownMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	groupId := bases.GetTargetIdFromCtx(ctx)
 	senderId := bases.GetRequesterIdFromCtx(ctx)
@@ -26,13 +26,13 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		if !checkIsMember(ctx, groupId, bases.GetRequesterIdFromCtx(ctx)) {
 			sendTime := time.Now().UnixMilli()
 			msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
-			return errs.IMErrorCode_GROUP_NOTGROUPMEMBER, msgId, sendTime, 0, upMsg.ClientUid, 0
+			return errs.IMErrorCode_GROUP_NOTGROUPMEMBER, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 		}
 		//check group member mute
 		if checkGroupMemberIsMute(ctx, groupId, senderId) {
 			sendTime := time.Now().UnixMilli()
 			msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
-			return errs.IMErrorCode_GROUP_GROUPMEMBERMUTE, msgId, sendTime, 0, upMsg.ClientUid, 0
+			return errs.IMErrorCode_GROUP_GROUPMEMBERMUTE, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 		}
 		//check group mute
 		if checkGroupIsMute(ctx, groupId) {
@@ -40,19 +40,23 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 			if !checkGroupMemberIsAllow(ctx, groupId, senderId) {
 				sendTime := time.Now().UnixMilli()
 				msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
-				return errs.IMErrorCode_GROUP_GROUPMUTE, msgId, sendTime, 0, upMsg.ClientUid, 0
+				return errs.IMErrorCode_GROUP_GROUPMUTE, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 			}
 		}
 	}
 
 	//check msg interceptor
+	var modifiedMsg *pbobjs.DownMsg
 	result := commonservices.CheckMsgInterceptor(ctx, senderId, groupId, pbobjs.ChannelType_Group, upMsg)
 	if result == interceptors.InterceptorResult_Reject {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
-		return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, 0
+		return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 	} else if result == interceptors.InterceptorResult_Replace {
-		//TODO
+		modifiedMsg = &pbobjs.DownMsg{
+			MsgType:    upMsg.MsgType,
+			MsgContent: upMsg.MsgContent,
+		}
 	}
 	msgConverCache := commonservices.GetMsgConverCache(ctx, groupId, pbobjs.ChannelType_Group)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(groupId, pbobjs.ChannelType_Group, time.Now().UnixMilli(), upMsg.Flags)
@@ -66,7 +70,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 			MsgTime: sendTime,
 			MsgSeq:  msgSeq,
 		}); filter {
-			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq, upMsg.ClientUid, 0
+			return errs.IMErrorCode_SUCCESS, oldAck.MsgId, oldAck.MsgTime, oldAck.MsgSeq, upMsg.ClientUid, 0, nil
 		}
 	} else {
 		upMsg.ClientUid = tools.GenerateUUIDShort22()
@@ -115,7 +119,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 
 	if bases.GetOnlySendboxFromCtx(ctx) {
-		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, int32(memberCount)
+		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, int32(memberCount), modifiedMsg
 	}
 
 	downMsg := &pbobjs.DownMsg{
@@ -159,7 +163,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		Dispatch2Message(ctx, groupId, memberIds, downMsg)
 	}
 
-	return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, int32(memberCount)
+	return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, int32(memberCount), modifiedMsg
 }
 
 func GetGroupInfo4Msg(ctx context.Context, groupId string) *pbobjs.GroupInfo {

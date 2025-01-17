@@ -27,7 +27,7 @@ func (actor *SystemMsgActor) OnReceive(ctx context.Context, input proto.Message)
 			if receiverId, exist := exts[commonservices.RpcExtKey_RealTargetId]; exist {
 				logs.WithContext(ctx).WithField("method", "s_msg").Infof("sender:%s\treceiver:%s", userId, receiverId)
 				code, msgId, sendTime, msgSeq := services.SendSystemMsg(ctx, userId, receiverId, upMsg)
-				userPubAck := bases.CreateUserPubAckWraper(ctx, code, msgId, sendTime, msgSeq, "")
+				userPubAck := bases.CreateUserPubAckWraper(ctx, code, msgId, sendTime, msgSeq, "", nil)
 				actor.Sender.Tell(userPubAck, actorsystem.NoSender)
 				logs.WithContext(ctx).Infof("code:%d", code)
 			} else {
@@ -37,7 +37,7 @@ func (actor *SystemMsgActor) OnReceive(ctx context.Context, input proto.Message)
 			logs.WithContext(ctx).Errorf("upMsg is illigal. upMsg:%v", upMsg)
 		}
 	} else {
-		userPubAck := bases.CreateUserPubAckWraper(ctx, errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC, "", 0, 0, "")
+		userPubAck := bases.CreateUserPubAckWraper(ctx, errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC, "", 0, 0, "", nil)
 		actor.Sender.Tell(userPubAck, actorsystem.NoSender)
 	}
 }
