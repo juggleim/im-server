@@ -67,3 +67,12 @@ func (opt *MarkFromApiOption) HandleCtx(ctx context.Context) context.Context {
 	retCtx := setCtxValue(ctx, CtxKey_IsFromApi, true)
 	return retCtx
 }
+
+type WithDelMsgOption struct {
+	MsgId string
+}
+
+func (opt *WithDelMsgOption) HandleCtx(ctx context.Context) context.Context {
+	retCtx := setCtxValue(ctx, CtxKey_DelMsgId, opt.MsgId)
+	return retCtx
+}

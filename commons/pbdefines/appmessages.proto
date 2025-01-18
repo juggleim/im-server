@@ -44,6 +44,7 @@ message RpcMessageWraper{
 
   string groupId = 31;
   repeated string targetIds = 32;
+  string delMsgId = 33;
 
   bytes appDataBytes = 50;
   UserInfo senderInfo = 51;

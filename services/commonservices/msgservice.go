@@ -60,6 +60,8 @@ func SyncMsg(ctx context.Context, method, userId, targetId string, upMsg *pbobjs
 		}})
 		tmpOpts = append(tmpOpts, opts...)
 		targetId = GetConversationId(userId, targetId, pbobjs.ChannelType_System)
+	} else {
+		tmpOpts = append(tmpOpts, opts...)
 	}
 	ctx = bases.SetRequesterId2Ctx(ctx, userId)
 	result, err := bases.SyncOriginalRpcCall(ctx, method, targetId, upMsg, tmpOpts...)
@@ -101,6 +103,8 @@ func AsyncMsg(ctx context.Context, method, userId, targetId string, upMsg *pbobj
 		}})
 		tmpOpts = append(tmpOpts, opts...)
 		targetId = GetConversationId(userId, targetId, pbobjs.ChannelType_System)
+	} else {
+		tmpOpts = append(tmpOpts, opts...)
 	}
 	bases.AsyncRpcCall(ctx, method, targetId, upMsg, tmpOpts...)
 }
