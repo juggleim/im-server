@@ -295,9 +295,13 @@ func QryMaxConnect(appkey string, start, end int64) *Statistics {
 	dao := dbs.ConnectCountDao{}
 	for _, timemark := range timeMarks {
 		item := dao.MaxByTime(appkey, int(ConnectType_Connect), timemark, timemark+oneDay)
+		var count int64 = 0
+		if item != nil {
+			count = item.Count
+		}
 		ret.Items = append(ret.Items, &ConcurrentConnectItem{
 			TimeMark: timemark,
-			Count:    item.Count,
+			Count:    count,
 		})
 	}
 	return ret
