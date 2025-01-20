@@ -124,6 +124,7 @@ func QryConnectCount(ctx *gin.Context) {
 	rpcNodes := bases.GetCluster().GetAllNodes()
 	timeMarkMap := map[int64]int64{}
 	lock := &sync.RWMutex{}
+	services.SetCtxString(ctx, services.CtxKey_AppKey, appkey)
 	for _, rpcNode := range rpcNodes {
 		wg.Add(1)
 		nodeName := rpcNode.Name
