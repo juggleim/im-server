@@ -506,6 +506,7 @@ message MentionMsg{
   string senderId = 1;
   string msgId = 2;
   int64 msgTime = 3;
+  MentionType mentionType = 4;
 }
 
 message QryMentionMsgsReq{

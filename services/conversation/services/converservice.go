@@ -573,9 +573,10 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 				}
 				for _, mentionMsg := range mentionInfo.MentionMsgs {
 					conversation.Mentions.MentionMsgs = append(conversation.Mentions.MentionMsgs, &pbobjs.MentionMsg{
-						SenderId: mentionMsg.SenderId,
-						MsgId:    mentionMsg.MsgId,
-						MsgTime:  mentionMsg.MsgTime,
+						SenderId:    mentionMsg.SenderId,
+						MsgId:       mentionMsg.MsgId,
+						MsgTime:     mentionMsg.MsgTime,
+						MentionType: mentionMsg.MentionType,
 					})
 				}
 			}
