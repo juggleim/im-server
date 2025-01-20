@@ -153,10 +153,11 @@ func (uc *UserConversations) AppendMention(targetId string, channelType pbobjs.C
 		if mentionMsg != nil {
 			//add new mention msg
 			cacheConver.MentionInfo.MentionMsgs = append(cacheConver.MentionInfo.MentionMsgs, &models.MentionMsg{
-				SenderId: mentionMsg.SenderId,
-				MsgId:    mentionMsg.MsgId,
-				MsgTime:  mentionMsg.MsgTime,
-				MsgIndex: mentionMsg.MsgIndex,
+				SenderId:    mentionMsg.SenderId,
+				MsgId:       mentionMsg.MsgId,
+				MsgTime:     mentionMsg.MsgTime,
+				MsgIndex:    mentionMsg.MsgIndex,
+				MentionType: mentionMsg.MentionType,
 			})
 			length := len(cacheConver.MentionInfo.MentionMsgs)
 			if length > 100 {

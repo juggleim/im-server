@@ -139,17 +139,18 @@ func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId stri
 
 func (mention *MentionMsgDao) QryMentionSenderIdsBaseIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, startIndex int64, count int) ([]*models.MentionMsg, error) {
 	var items []MentionMsgDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_index>?", appkey, userId, targetId, int(channelType), startIndex).Select("sender_id,msg_id,msg_time,msg_index").Order("msg_index desc").Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_index>?", appkey, userId, targetId, int(channelType), startIndex).Select("sender_id,msg_id,msg_time,msg_index,mention_type").Order("msg_index desc").Limit(count).Find(&items).Error
 	if err != nil {
 		return []*models.MentionMsg{}, err
 	}
 	mentionMsgs := []*models.MentionMsg{}
 	for _, item := range items {
 		mentionMsgs = append(mentionMsgs, &models.MentionMsg{
-			SenderId: item.SenderId,
-			MsgTime:  item.MsgTime,
-			MsgId:    item.MsgId,
-			MsgIndex: item.MsgIndex,
+			SenderId:    item.SenderId,
+			MsgTime:     item.MsgTime,
+			MsgId:       item.MsgId,
+			MsgIndex:    item.MsgIndex,
+			MentionType: pbobjs.MentionType(item.MentionType),
 		})
 	}
 	sort.Slice(mentionMsgs, func(i, j int) bool {
