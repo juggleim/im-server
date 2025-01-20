@@ -3,7 +3,6 @@ package commonservices
 import (
 	"fmt"
 	"im-server/commons/caches"
-	"im-server/commons/kvdbcommons"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
@@ -13,6 +12,7 @@ import (
 )
 
 type StatType int
+type ConnectType int
 
 var (
 	statCache           *caches.LruCache
@@ -22,6 +22,9 @@ var (
 	StatType_Up       StatType = 1
 	StatType_Dispatch StatType = 2
 	StatType_Down     StatType = 3
+
+	ConnectType_Connect     ConnectType = 0
+	ConnectType_ChrmConnect ConnectType = 1
 )
 
 func init() {
@@ -256,8 +259,8 @@ func (c *UserActivityCounter) Incry() {
 func ReportConcurrentConnectCount(appkey string, count int64) {
 	current := time.Now().UnixMilli()
 	timeMark := current / 30000 * 30000
-	key := fmt.Sprintf("concurrent_connect:%s_%d", appkey, timeMark)
-	kvdbcommons.SetNxExWithIncrByStep(tools.String2Bytes(key), count, 3*24*time.Hour)
+	dao := dbs.ConnectCountDao{}
+	dao.IncrByStep(appkey, int(ConnectType_Connect), timeMark, count)
 }
 
 type ConcurrentConnectItem struct {
@@ -265,41 +268,37 @@ type ConcurrentConnectItem struct {
 	Count    int64 `json:"count"`
 }
 
-func QryConncurrentConnect(appkey string, start, end int64) []*ConcurrentConnectItem {
-	retItems := []*ConcurrentConnectItem{}
-	prefix := fmt.Sprintf("concurrent_connect:%s_", appkey)
-	for {
-		startBs := []byte{}
-		if start > 0 {
-			startBs = append(startBs, tools.Int64ToBytes(start)...)
-		}
-		items, err := kvdbcommons.Scan([]byte(prefix), startBs, 1000)
-		if err != nil && len(items) <= 0 {
-			break
-		}
-		for _, item := range items {
-			if len(item.Key) > 13 {
-				bs := item.Key[len(item.Key)-13:]
-				timestamp, err := tools.String2Int64(string(bs))
-				if err == nil {
-					retItems = append(retItems, &ConcurrentConnectItem{
-						TimeMark: timestamp,
-						Count:    tools.BytesToInt64(item.Val),
-					})
-					if timestamp > end {
-						break
-					}
-					start = timestamp
-				} else {
-					break
-				}
-			} else {
-				break
-			}
-		}
-		if len(items) < 1000 {
-			break
-		}
+func QryConnect(appkey string, start, end int64) *Statistics {
+	ret := &Statistics{
+		Items: []interface{}{},
 	}
-	return retItems
+	dao := dbs.ConnectCountDao{}
+	list := dao.QryStats(appkey, int(ConnectType_Connect), start, end)
+	for _, item := range list {
+		ret.Items = append(ret.Items, &ConcurrentConnectItem{
+			TimeMark: item.TimeMark,
+			Count:    item.Count,
+		})
+	}
+	return ret
+}
+
+func QryMaxConnect(appkey string, start, end int64) *Statistics {
+	ret := &Statistics{
+		Items: []interface{}{},
+	}
+	timeMarks := []int64{}
+	for s := start / oneDay * oneDay; s <= end; {
+		timeMarks = append(timeMarks, s)
+		s = s + oneDay
+	}
+	dao := dbs.ConnectCountDao{}
+	for _, timemark := range timeMarks {
+		item := dao.MaxByTime(appkey, int(ConnectType_Connect), timemark, timemark+oneDay)
+		ret.Items = append(ret.Items, &ConcurrentConnectItem{
+			TimeMark: timemark,
+			Count:    item.Count,
+		})
+	}
+	return ret
 }

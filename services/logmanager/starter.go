@@ -17,9 +17,6 @@ func (manager *LogManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("qry_vlog", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryLogsActor{}, serviceName)
 	})
-	register.RegisterActor("qry_connect_count", func() actorsystem.IUntypedActor {
-		return bases.BaseProcessActor(&actors.QryConnectCount{}, serviceName)
-	})
 }
 
 func (manager *LogManager) Startup(args map[string]interface{}) {

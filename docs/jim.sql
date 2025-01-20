@@ -250,6 +250,17 @@ CREATE TABLE `useractivities` (
   UNIQUE INDEX `uniq_userid` (`app_key` ASC, `time_mark` ASC, `user_id` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-用户活跃统计';
 
+DROP TABLE IF EXISTS `connectcounts`;
+CREATE TABLE `connectcounts` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `connect_type` TINYINT NULL DEFAULT 0,
+  `time_mark` BIGINT NULL,
+  `count` INT NULL,
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_mark` (`app_key`, `connect_type`, `time_mark`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 DROP TABLE IF EXISTS `fileconfs`;
 CREATE TABLE `fileconfs` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
