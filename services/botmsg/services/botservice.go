@@ -107,7 +107,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 		}
 		bs, _ := tools.JsonMarshal(shellContent)
 		_, msgId, _, _ := commonservices.SyncPrivateMsgOverUpstream(ctx, botId, msg.SenderId, &pbobjs.UpMsg{
-			MsgType:    MsgType_Stream,
+			MsgType:    msgdefines.InnerMsgType_StreamText,
 			MsgContent: bs,
 			Flags:      msgFlag,
 		})
@@ -163,8 +163,6 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 		})
 	}
 }
-
-var MsgType_Stream string = "jgs:text"
 
 type StreamMsg struct {
 	Content string `json:"content"`
