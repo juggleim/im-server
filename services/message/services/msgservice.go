@@ -273,7 +273,7 @@ func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) 
 		pushText = TemplateI18nAssign(ctx, pushText, pushLanguage)
 		retPushData.PushText = prefix + pushText
 	} else {
-		if msg.MsgType == "jg:text" {
+		if msg.MsgType == msgdefines.InnerMsgType_Text {
 			txtMsg := &msgdefines.TextMsg{}
 			err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
 			pushText := txtMsg.Content
@@ -286,17 +286,17 @@ func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) 
 			} else {
 				retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Text, "[Text]")
 			}
-		} else if msg.MsgType == "jg:img" {
+		} else if msg.MsgType == msgdefines.InnerMsgType_Img {
 			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Image, "[Image]")
-		} else if msg.MsgType == "jg:voice" {
+		} else if msg.MsgType == msgdefines.InnerMsgType_Voice {
 			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Voice, "[Voice]")
-		} else if msg.MsgType == "jg:file" {
+		} else if msg.MsgType == msgdefines.InnerMsgType_File {
 			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_File, "[File]")
-		} else if msg.MsgType == "jg:video" {
+		} else if msg.MsgType == msgdefines.InnerMsgType_Video {
 			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Video, "[Video]")
-		} else if msg.MsgType == "jg:merge" {
+		} else if msg.MsgType == msgdefines.InnerMsgType_Merge {
 			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_Merge, "[Merge]")
-		} else if msg.MsgType == "jg:voicecall" {
+		} else if msg.MsgType == msgdefines.InnerMsgType_VoiceCall {
 			retPushData.PushText = prefix + commonservices.GetInnerI18nStr(pushLanguage, commonservices.PlaceholderKey_RtcCall, "invites you to a voice call")
 		} else {
 			return nil

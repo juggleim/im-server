@@ -146,7 +146,7 @@ func markReadPrivateMsgs(ctx context.Context, userId string, req *pbobjs.MarkRea
 	return errs.IMErrorCode_SUCCESS
 }
 
-var ReadNtfType string = "jg:readntf"
+var ReadNtfType string = msgdefines.CmdMsgType_ReadNtf
 
 type ReadNtf struct {
 	Msgs        []*ReadMsg    `json:"msgs"`

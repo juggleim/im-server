@@ -13,8 +13,8 @@ import (
 	"im-server/services/historymsg/storages"
 )
 
-var RecallCmdType string = "jg:recall"
-var RecallInfoType string = "jg:recallinfo"
+var RecallCmdType string = msgdefines.CmdMsgType_Recall
+var RecallInfoType string = msgdefines.CmdMsgType_RecallInfo
 
 type RecallMsgContent struct {
 	MsgId   string            `json:"msg_id"`

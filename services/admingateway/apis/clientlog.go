@@ -62,7 +62,7 @@ func ClientLogNtf(ctx *gin.Context) {
 		Platform: req.Platform,
 	}
 	code, msgId, _, _ := commonservices.SyncSystemMsg(apiService.ToRpcCtx(ctx, ""), "clientlog", req.UserId, &pbobjs.UpMsg{
-		MsgType:    "jg:logcmd",
+		MsgType:    msgdefines.CmdMsgType_LogCmd,
 		MsgContent: []byte(tools.ToJson(logCmd)),
 		Flags:      msgdefines.SetCmdMsg(0),
 	}, &bases.NoNotifySenderOption{})

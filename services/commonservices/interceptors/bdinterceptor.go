@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices/msgdefines"
 	"net/http"
 	"net/url"
 	"time"
@@ -39,7 +40,7 @@ func (inter *BdInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, r
 }
 
 func (inter *BdInterceptor) checkTxtMsgInterceptor(upMsg *pbobjs.UpMsg) (intercept bool, err error) {
-	if upMsg.MsgType == "jg:text" {
+	if upMsg.MsgType == msgdefines.InnerMsgType_Text {
 		var (
 			text              string
 			containsSensitive bool

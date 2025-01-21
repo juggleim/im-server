@@ -156,7 +156,7 @@ func QryReadDetail(ctx context.Context, req *pbobjs.QryReadDetailReq) (errs.IMEr
 	return errs.IMErrorCode_SUCCESS, resp
 }
 
-var GrpReadNtfType string = "jg:grpreadntf"
+var GrpReadNtfType string = msgdefines.CmdMsgType_GrpReadNtf
 
 type GrpReadNtf struct {
 	Msgs []*GrpReadMsg `json:"msgs"`

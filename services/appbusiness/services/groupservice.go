@@ -419,7 +419,7 @@ func SetGrpAnnouncement(ctx context.Context, req *pbobjs.GrpAnnouncement) errs.I
 			Content: req.Content,
 		}
 		commonservices.AsyncGroupMsgOverUpstream(ctx, requestId, req.GroupId, &pbobjs.UpMsg{
-			MsgType:    "jg:text",
+			MsgType:    msgdefines.InnerMsgType_Text,
 			MsgContent: []byte(tools.ToJson(txtMsg)),
 			Flags:      flag,
 			MentionInfo: &pbobjs.MentionInfo{

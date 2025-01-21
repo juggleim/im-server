@@ -98,8 +98,8 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 	return errs.IMErrorCode_SUCCESS
 }
 
-var CmdMsgType_TagAddConvers string = "jg:tagaddconvers"
-var CmdMsgType_TagDelConvers string = "jg:tagdelconvers"
+var CmdMsgType_TagAddConvers string = msgdefines.CmdMsgType_TagAddConvers
+var CmdMsgType_TagDelConvers string = msgdefines.CmdMsgType_TagDelConvers
 
 type CmdMsg_TagConvers struct {
 	Tag     string          `json:"tag"`
@@ -200,7 +200,7 @@ func DelUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.IME
 	return errs.IMErrorCode_SUCCESS
 }
 
-var CmdMsgType_DelConverTags string = "jg:delconvertags"
+var CmdMsgType_DelConverTags string = msgdefines.CmdMsgType_DelConverTags
 
 type CmdMsg_DelUserConverTags struct {
 	Tags []*ConverTag `json:"tags"`

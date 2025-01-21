@@ -74,7 +74,7 @@ func DelTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }
 
-var topMsgType string = "jg:topmsg"
+var topMsgType string = msgdefines.CmdMsgType_TopMsg
 
 type TopMsgCmd struct {
 	Action int    `json:"action"` // 0:add; 1:delete;

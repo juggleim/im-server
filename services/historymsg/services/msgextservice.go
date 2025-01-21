@@ -382,8 +382,8 @@ func QryMsgExSets(ctx context.Context, req *pbobjs.QryMsgExtReq) (errs.IMErrorCo
 	return errs.IMErrorCode_SUCCESS, ret
 }
 
-var MsgExtCmdType string = "jg:msgext"
-var MsgExSetCmdType string = "jg:msgexset"
+var MsgExtCmdType string = msgdefines.CmdMsgType_MsgExt
+var MsgExSetCmdType string = msgdefines.CmdMsgType_MsgExSet
 
 type MsgExt struct {
 	MsgId string     `json:"msg_id"`

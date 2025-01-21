@@ -6,7 +6,17 @@ const (
 	MentionType_AllSomeone string = "mention_all_someone"
 )
 
+var InnerMsgType_Text string = "jg:text"
+
 type TextMsg struct {
 	Content string `json:"content"`
 	Extra   string `json:"extra"`
 }
+
+var InnerMsgType_Img string = "jg:img"
+var InnerMsgType_Voice string = "jg:voice"
+var InnerMsgType_File string = "jg:file"
+var InnerMsgType_Video string = "jg:video"
+var InnerMsgType_Merge string = "jg:merge"
+var InnerMsgType_VoiceCall string = "jg:voicecall"
+var InnerMsgType_CallFinishNtf string = "jg:callfinishntf"

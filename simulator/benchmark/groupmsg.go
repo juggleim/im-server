@@ -18,7 +18,7 @@ func GroupMsg1000() {
 		flag = msgdefines.SetCountMsg(flag)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
-			MsgType:    "jg:text",
+			MsgType:    msgdefines.InnerMsgType_Text,
 			MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
 			Flags:      flag,
 		})
@@ -42,7 +42,7 @@ func GroupMsg2000() {
 		flag = msgdefines.SetCountMsg(flag)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
-			MsgType:    "jg:text",
+			MsgType:    msgdefines.InnerMsgType_Text,
 			MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
 			Flags:      flag,
 		})
@@ -66,7 +66,7 @@ func GroupMsg3000() {
 		flag = msgdefines.SetCountMsg(flag)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
-			MsgType:    "jg:text",
+			MsgType:    msgdefines.InnerMsgType_Text,
 			MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
 			Flags:      flag,
 		})
@@ -89,7 +89,7 @@ func GroupMsg5000() {
 		flag = msgdefines.SetCountMsg(flag)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
-			MsgType:    "jg:text",
+			MsgType:    msgdefines.InnerMsgType_Text,
 			MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
 			Flags:      flag,
 		})

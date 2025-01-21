@@ -79,7 +79,7 @@ func SaveMsg2Sendbox(ctx context.Context, appkey, senderId string, msg *pbobjs.D
 	}
 	if msgdefines.IsCmdMsg(msg.Flags) {
 		storage := storages.NewCmdSendboxMsgStorage()
-		if msg.MsgType == commonservices.CmdMsgType_ClearUnread {
+		if msg.MsgType == msgdefines.CmdMsgType_ClearUnread {
 			rpcExts := bases.GetExtsFromCtx(ctx)
 			if uniqTag, ok := rpcExts[commonservices.RpcExtKey_UniqTag]; ok && uniqTag != "" {
 				message.UniqTag = uniqTag

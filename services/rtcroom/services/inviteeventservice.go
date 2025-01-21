@@ -126,7 +126,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			TargetId:       userId,
 			ChannelType:    pbobjs.ChannelType_Private,
 			SenderId:       userId,
-			MsgType:        "jg:voicecall",
+			MsgType:        msgdefines.InnerMsgType_VoiceCall,
 			TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, userId),
 			PushData: &pbobjs.PushData{
 				IsVoip:       true,
@@ -389,7 +389,7 @@ func SendInviteEvent(ctx context.Context, targetId string, event *pbobjs.RtcInvi
 	bases.UnicastRouteWithNoSender(msg)
 }
 
-var RtcMsgType_OneOneFinishNtf string = "jg:callfinishntf"
+var RtcMsgType_OneOneFinishNtf string = msgdefines.InnerMsgType_CallFinishNtf
 
 type CallFinishReasonType int
 

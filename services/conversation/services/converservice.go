@@ -255,7 +255,7 @@ func ClearTotalUnreadV2(ctx context.Context, userId string) errs.IMErrorCode {
 	mentionStorage := storages.NewMentionMsgStorage()
 	mentionStorage.CleanMentionMsgsBaseUserId(appkey, userId)
 	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
-		MsgType:    "jg:cleartotalunread",
+		MsgType:    msgdefines.CmdMsgType_ClearTotalUnread,
 		MsgContent: []byte(fmt.Sprintf(`{"clear_time":%d}`, time.Now().UnixMilli())),
 		Flags:      msgdefines.SetCmdMsg(0),
 	})
@@ -306,7 +306,7 @@ func ClearUnreadV2(ctx context.Context, userId string, convers []*pbobjs.Convers
 				exts[commonservices.RpcExtKey_UniqTag] = fmt.Sprintf("%s_%d", convers[0].TargetId, convers[0].ChannelType)
 			}
 			commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
-				MsgType:    commonservices.CmdMsgType_ClearUnread,
+				MsgType:    msgdefines.CmdMsgType_ClearUnread,
 				MsgContent: bs,
 				Flags:      flag,
 			}, &bases.ExtsOption{Exts: exts})
@@ -372,7 +372,7 @@ func MarkUnreadV2(ctx context.Context, userId string, req *pbobjs.ConversationsR
 			flag := msgdefines.SetCmdMsg(0)
 			bs, _ := json.Marshal(markUnreadConvers)
 			commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
-				MsgType:    commonservices.CmdMsgType_MarkUnread,
+				MsgType:    msgdefines.CmdMsgType_MarkUnread,
 				MsgContent: bs,
 				Flags:      flag,
 			})

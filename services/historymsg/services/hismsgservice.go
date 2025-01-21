@@ -704,7 +704,7 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 	return errs.IMErrorCode_SUCCESS
 }
 
-var cleanMsgType string = "jg:cleanmsg"
+var cleanMsgType string = msgdefines.CmdMsgType_CleanMsg
 
 type CleanMsg struct {
 	TargetId    string `json:"target_id"`
@@ -713,7 +713,7 @@ type CleanMsg struct {
 	SenderId    string `json:"sender_id,omitempty"`
 }
 
-var delMsgsType string = "jg:delmsgs"
+var delMsgsType string = msgdefines.CmdMsgType_DelMsgs
 
 type DelMsgs struct {
 	TargetId    string    `json:"target_id"`

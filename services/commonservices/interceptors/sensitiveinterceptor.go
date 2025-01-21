@@ -5,6 +5,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/sensitivemanager/sensitivecall"
 )
 
@@ -15,7 +16,7 @@ func (inter *SensitiveInterceptor) GetConditions() []*Condition {
 	return []*Condition{
 		{
 			ChannelTypeChecker: CreateMatcher("*"),
-			MsgTypeChecker:     CreateMatcher("jg:text"),
+			MsgTypeChecker:     CreateMatcher(msgdefines.InnerMsgType_Text),
 			SenderIdChecker:    CreateMatcher("*"),
 			ReceiverIdChecker:  CreateMatcher("*"),
 		},

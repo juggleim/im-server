@@ -9,6 +9,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/conversation/storages"
 	"im-server/services/conversation/storages/models"
 	"time"
@@ -82,7 +83,7 @@ func SaveGlobalConversationByCache(item *GlobalConversationCacheItem) {
 	})
 }
 
-var addConverMsgType string = "jg:addconver"
+var addConverMsgType string = msgdefines.CmdMsgType_AddConver
 
 type AddNilConver struct {
 	Conversation *Conversation `json:"conversation"`
@@ -180,7 +181,7 @@ func QryHisMsgByIds(ctx context.Context, userId, targetId string, channelType pb
 	return []*pbobjs.DownMsg{}
 }
 
-var delConversMsgType string = "jg:delconvers"
+var delConversMsgType string = msgdefines.CmdMsgType_DelConvers
 
 type DelConvers struct {
 	Conversations []*Conversation `json:"conversations"`
@@ -214,7 +215,7 @@ type GroupInfo struct {
 	ExtFields     map[string]string `json:"ext_fields"`
 }
 
-var topConversMsgType string = "jg:topconvers"
+var topConversMsgType string = msgdefines.CmdMsgType_TopConvers
 
 type TopConvers struct {
 	Conversations []*Conversation `json:"conversations"`
@@ -240,7 +241,7 @@ type MarkUnreadConver struct {
 	UnreadTag   int    `json:"unread_tag"`
 }
 
-var undisturbMsgType string = "jg:undisturb"
+var undisturbMsgType string = msgdefines.CmdMsgType_Undisturb
 
 type UndisturbConvers struct {
 	Conversations []*UndisturbConver `json:"conversations"`

@@ -57,7 +57,7 @@ func PrivateMsg1000() {
 				flag = msgdefines.SetCountMsg(flag)
 				start := time.Now()
 				code, resp := client.SendPrivateMsg(targetId, &pbobjs.UpMsg{
-					MsgType:    "jg:text",
+					MsgType:    msgdefines.InnerMsgType_Text,
 					MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
 					Flags:      flag,
 				})
@@ -89,7 +89,7 @@ func PrivateMsg2000() {
 				flag = msgdefines.SetCountMsg(flag)
 				start := time.Now()
 				code, resp := client.SendPrivateMsg(targetId, &pbobjs.UpMsg{
-					MsgType:    "jg:text",
+					MsgType:    msgdefines.InnerMsgType_Text,
 					MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
 					Flags:      flag,
 				})
@@ -122,7 +122,7 @@ func PrivateMsg3000() {
 				flag = msgdefines.SetCountMsg(flag)
 				start := time.Now()
 				code, resp := client.SendPrivateMsg(targetId, &pbobjs.UpMsg{
-					MsgType:    "jg:text",
+					MsgType:    msgdefines.InnerMsgType_Text,
 					MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
 					Flags:      flag,
 				})
@@ -158,7 +158,7 @@ func PrivateMsg3000_5() {
 					for x := 0; x < 5; x++ {
 						start := time.Now()
 						code, resp := client.SendPrivateMsg(targetId, &pbobjs.UpMsg{
-							MsgType:    "jg:text",
+							MsgType:    msgdefines.InnerMsgType_Text,
 							MsgContent: []byte(fmt.Sprintf("{\"content\":\"hello\",\"time\":%d}", time.Now().UnixMilli())),
 							Flags:      flag,
 						})

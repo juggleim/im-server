@@ -12,7 +12,7 @@ import (
 	"im-server/services/historymsg/storages"
 )
 
-var defaultModifyMsgType string = "jg:modify"
+var defaultModifyMsgType string = msgdefines.CmdMsgType_MsgModify
 
 type ModifyMsgContent struct {
 	MsgType    string `json:"msg_type"`

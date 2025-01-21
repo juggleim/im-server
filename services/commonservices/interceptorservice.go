@@ -2,13 +2,13 @@ package commonservices
 
 import (
 	"context"
-	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
 	"im-server/services/commonservices/interceptors"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 
 	"go.uber.org/atomic"
@@ -29,6 +29,9 @@ func init() {
 }
 
 func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, upMsg *pbobjs.UpMsg) interceptors.InterceptorResult {
+	if msgdefines.IsCmdMsg(upMsg.Flags) {
+		return interceptors.InterceptorResult_Pass
+	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, exist := GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.OpenSensitive {
@@ -43,11 +46,9 @@ func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, chann
 	for _, msgInterceptor := range msgInterceptors.Interceptors {
 		result := msgInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg)
 		if result != interceptors.InterceptorResult_Pass {
-			fmt.Println("sender:", senderId, "receiver:", receiverId, "channel_type", channelType, "msg_type:", upMsg.MsgType, "content:", string(upMsg.MsgContent), "isSensi:", true)
 			return result
 		}
 	}
-	fmt.Println("sender:", senderId, "receiver:", receiverId, "channel_type", channelType, "msg_type:", upMsg.MsgType, "content:", string(upMsg.MsgContent), "isSensi:", false)
 	return interceptors.InterceptorResult_Pass
 }
 

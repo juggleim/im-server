@@ -85,7 +85,7 @@ func getKey(appkey, botId string) string {
 }
 
 func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
-	if msg.MsgType != "jg:text" || msg.ChannelType != pbobjs.ChannelType_Private {
+	if msg.MsgType != msgdefines.InnerMsgType_Text || msg.ChannelType != pbobjs.ChannelType_Private {
 		return
 	}
 	txtMsg := &msgdefines.TextMsg{}
