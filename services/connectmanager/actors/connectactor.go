@@ -20,9 +20,12 @@ type ConnectActor struct {
 func (actor *ConnectActor) OnReceive(ctx context.Context, input proto.Message) {
 	if rpcMsg, ok := input.(*pbobjs.RpcMessageWraper); ok {
 		if rpcMsg.RpcMsgType == pbobjs.RpcMsgType_UserPubAck {
-			var modifiedMsgBs []byte
+			var afterModified *codec.SimplifiedDownMsg
 			if rpcMsg.ModifiedMsg != nil {
-				modifiedMsgBs, _ = tools.PbMarshal(rpcMsg.ModifiedMsg)
+				afterModified = &codec.SimplifiedDownMsg{
+					MsgType:    rpcMsg.ModifiedMsg.MsgType,
+					MsgContent: rpcMsg.ModifiedMsg.MsgContent,
+				}
 			}
 			services.PublishUserPubAckMessage(rpcMsg.AppKey, rpcMsg.RequesterId, rpcMsg.Session, &codec.PublishAckMsgBody{
 				Index:       rpcMsg.ReqIndex,
@@ -32,7 +35,7 @@ func (actor *ConnectActor) OnReceive(ctx context.Context, input proto.Message) {
 				MsgSeqNo:    rpcMsg.MsgSeqNo,
 				MemberCount: rpcMsg.MemberCount,
 				ClientMsgId: rpcMsg.ClientMsgId,
-				ModifiedMsg: modifiedMsgBs,
+				ModifiedMsg: afterModified,
 			})
 		} else if rpcMsg.RpcMsgType == pbobjs.RpcMsgType_QueryAck {
 			var callback func()
