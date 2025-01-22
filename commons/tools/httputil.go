@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func HttpDo(method, url string, header map[string]string, body string) (string, int, error) {
@@ -13,10 +14,15 @@ func HttpDo(method, url string, header map[string]string, body string) (string, 
 }
 
 func HttpDoBytes(method, url string, header map[string]string, body string) ([]byte, int, error) {
+	return HttpDoBytesWithTimeout(method, url, header, body, 5*time.Second)
+}
+
+func HttpDoBytesWithTimeout(method, url string, header map[string]string, body string, timeout time.Duration) ([]byte, int, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
+		Timeout: timeout,
 	}
 	request, err := http.NewRequest(method, url, strings.NewReader(body))
 	if err != nil {
