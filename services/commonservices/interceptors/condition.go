@@ -10,7 +10,7 @@ import (
 
 func ConditionMatchs(conditions []*Condition, senderId, receiverId string, channelType pbobjs.ChannelType, msgType string, msgContent []byte) bool {
 	if len(conditions) <= 0 {
-		return true
+		return false
 	}
 	match := false
 	for _, condition := range conditions {
