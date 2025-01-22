@@ -742,6 +742,9 @@ message QryBlockUsersResp{
   repeated BlockUser items = 1;
   string offset = 2;
 }
+message CheckBlockUserResp{
+  bool isBlock = 1;
+}
 enum OnlineType{
   Offline = 0;
   Online = 1;

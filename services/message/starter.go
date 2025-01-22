@@ -47,6 +47,9 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("qry_block_users", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryBlockUsersActor{}, serviceName)
 	})
+	register.RegisterActor("check_block_user", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.CheckBlockUserActor{}, serviceName)
+	})
 	register.RegisterActor("del_conver_cache", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.DelConverCacheActor{}, serviceName)
 	})

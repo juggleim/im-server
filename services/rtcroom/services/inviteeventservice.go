@@ -12,6 +12,8 @@ import (
 	"im-server/services/rtcroom/storages"
 	"im-server/services/rtcroom/storages/models"
 	"time"
+
+	"google.golang.org/protobuf/proto"
 )
 
 func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode, *pbobjs.RtcAuth) {
@@ -21,6 +23,19 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 	deviceId := bases.GetDeviceIdFromCtx(ctx)
 	if roomId == "" || len(req.TargetIds) <= 0 {
 		return errs.IMErrorCode_RTCROOM_PARAMILLIGAL, nil
+	}
+	//check user block
+	if req.RoomType == pbobjs.RtcRoomType_OneOne {
+		targetId := req.TargetIds[0]
+		code, resp, err := bases.SyncRpcCall(ctx, "check_block_user", targetId, &pbobjs.Nil{}, func() proto.Message {
+			return &pbobjs.CheckBlockUserResp{}
+		})
+		if err == nil && code == errs.IMErrorCode_SUCCESS && resp != nil {
+			checkResp, ok := resp.(*pbobjs.CheckBlockUserResp)
+			if ok && checkResp.IsBlock {
+				return errs.IMErrorCode_MSG_BLOCK, nil
+			}
+		}
 	}
 	//auth
 	code, auth := GenerateAuth(appkey, userId, req.RtcChannel)
