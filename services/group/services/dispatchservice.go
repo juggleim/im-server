@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var msgThreshold = 3000
+var msgThreshold = 2000
 var dispatchQueues []*Dispatcher
 
 type GrpMsgDispatchItem struct {
@@ -89,9 +89,9 @@ func (dis *Dispatcher) getMaxDisCount() int {
 		maxDisCount := msgNodeCount * msgThreshold
 		if maxDisCount != dis.maxDisCount {
 			dis.maxDisCount = maxDisCount
-			dis.latestUpdTime = now
 			// dis.limiter = rate.NewLimiter(rate.Limit(dis.maxDisCount), dis.maxDisCount)
 		}
+		dis.latestUpdTime = now
 	}
 	return dis.maxDisCount
 }
