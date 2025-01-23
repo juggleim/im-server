@@ -165,6 +165,7 @@ message StreamDownMsg{
   ChannelType channelType = 2;
   string msgId = 3;
   repeated StreamMsgItem msgItems = 4;
+  string msg_type = 5;
 }
 
 enum StreamEvent{

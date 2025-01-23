@@ -134,6 +134,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 								PartialContent: partBs,
 							},
 						},
+						MsgType: msgdefines.InnerMsgType_StreamText,
 					}, nil)
 					buf = bytes.NewBuffer([]byte{})
 					ts = curr
