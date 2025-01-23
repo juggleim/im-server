@@ -2,6 +2,9 @@ package tools
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
 	"strconv"
@@ -121,4 +124,17 @@ func BoolPtr(v bool) *bool {
 }
 func StringPtr(v string) *string {
 	return &v
+}
+
+func HmacSha256(key []byte, data string) []byte {
+	h := hmac.New(sha256.New, key)
+	h.Write([]byte(data))
+	mac := h.Sum(nil)
+	return mac
+}
+func HmacSha1(key []byte, data string) []byte {
+	h := hmac.New(sha1.New, key)
+	h.Write([]byte(data))
+	mac := h.Sum(nil)
+	return mac
 }

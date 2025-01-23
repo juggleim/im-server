@@ -954,6 +954,12 @@ message QiNiuCredResp{
 
 message PreSignResp {
   string url = 1;
+  string objKey = 2;
+  string policy = 3;
+  string signVersion  = 4;
+  string credential = 5;
+  string date = 6;
+  string signature = 7;
 }
 
 message UploadLogStatusReq{

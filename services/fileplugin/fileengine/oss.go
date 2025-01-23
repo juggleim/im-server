@@ -1,13 +1,11 @@
 package fileengine
 
 import (
-	"crypto/hmac"
-	"crypto/sha1"
 	"encoding/base64"
-	"encoding/json"
+	"encoding/hex"
 	"fmt"
+	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	"io"
 	"path/filepath"
 	"time"
 
@@ -23,11 +21,13 @@ type OssConfig struct {
 	SecretKey string `json:"secret_key"`
 	Endpoint  string `json:"endpoint"`
 	Bucket    string `json:"bucket"`
+	Region    string `json:"region"`
 }
 
 type OssStorage struct {
 	accessKeyId, accessKeySecret string
 	endpoint, bucket             string
+	region                       string
 }
 
 func NewOss(conf OssConfig) *OssStorage {
@@ -36,6 +36,7 @@ func NewOss(conf OssConfig) *OssStorage {
 		accessKeySecret: conf.SecretKey,
 		endpoint:        conf.Endpoint,
 		bucket:          conf.Bucket,
+		region:          conf.Region,
 	}
 }
 
@@ -49,47 +50,6 @@ type PolicyToken struct {
 	Signature   string `json:"signature"`
 	Policy      string `json:"policy"`
 	Directory   string `json:"dir"`
-}
-
-func getGMTISO8601(expireEnd int64) string {
-	return time.Unix(expireEnd, 0).UTC().Format("2006-01-02T15:04:05Z")
-}
-func (o *OssStorage) getPolicyToken() string {
-	var uploadDir = "files/"
-
-	now := time.Now().Unix()
-	expireEnd := now + expireTime
-	tokenExpire := getGMTISO8601(expireEnd)
-	var config ConfigStruct
-	config.Expiration = tokenExpire
-	var condition []string
-	condition = append(condition, "starts-with")
-	condition = append(condition, "$key")
-	condition = append(condition, uploadDir)
-	config.Conditions = append(config.Conditions, condition)
-	result, err := json.Marshal(config)
-	if err != nil {
-		fmt.Println("callback json err:", err)
-		return ""
-	}
-	encodedResult := base64.StdEncoding.EncodeToString(result)
-	h := hmac.New(sha1.New, []byte(o.accessKeySecret))
-	_, _ = io.WriteString(h, encodedResult)
-	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	host := fmt.Sprintf("https://%s.%s", o.bucket, o.endpoint)
-	policyToken := PolicyToken{
-		AccessKeyId: o.accessKeyId,
-		Host:        host,
-		Signature:   signedStr,
-		Policy:      encodedResult,
-		Directory:   uploadDir,
-	}
-	response, err := json.Marshal(policyToken)
-	if err != nil {
-		fmt.Println("json err:", err)
-		return ""
-	}
-	return string(response)
 }
 
 func (o *OssStorage) buildBucket() (bucket *oss.Bucket, err error) {
@@ -126,4 +86,46 @@ func (o *OssStorage) getURL(fileType string, dir string) (signedURL string, err 
 
 func (o *OssStorage) PreSignedURL(fileType string, dir string) (url string, err error) {
 	return o.getURL(fileType, dir)
+}
+
+func (o *OssStorage) PostSign(fileType string, dir string) *pbobjs.PreSignResp {
+	objectName := tools.GenerateUUIDShort22() + "." + fileType
+	objectName = filepath.Join(dir, objectName)
+	ret := &pbobjs.PreSignResp{
+		ObjKey: objectName,
+	}
+	utcTime := time.Now().UTC()
+	date := utcTime.Format("20060102")
+	//policy
+	expiration := utcTime.Add(1 * time.Hour)
+	policyMap := map[string]any{
+		"expiration": expiration.Format("2006-01-02T15:04:05.000Z"),
+		"conditions": []any{
+			map[string]string{"bucket": o.bucket},
+			map[string]string{"x-oss-signature-version": "OSS4-HMAC-SHA256"},
+			map[string]string{"x-oss-credential": fmt.Sprintf("%v/%v/%v/%v/aliyun_v4_request",
+				o.accessKeyId, date, o.region, "oss")}, // 凭证
+			map[string]string{"x-oss-date": utcTime.Format("20060102T150405Z")},
+			// 其他条件
+			[]any{"content-length-range", 1, 1024},
+			// []any{"eq", "$success_action_status", "201"},
+			// []any{"starts-with", "$key", "user/eric/"},
+			// []any{"in", "$content-type", []string{"image/jpg", "image/png"}},
+			// []any{"not-in", "$cache-control", []string{"no-cache"}},
+		},
+	}
+	policy := tools.ToJson(policyMap)
+	strToSign := base64.StdEncoding.EncodeToString([]byte(policy))
+	ret.Policy = policy
+	//signature
+	h1 := tools.HmacSha256([]byte("aliyun_v4"+o.accessKeySecret), date)
+	h2 := tools.HmacSha256(h1, o.region)
+	h3 := tools.HmacSha256(h2, "oss")
+	h4 := tools.HmacSha256(h3, "aliyun_v4_request")
+	signature := hex.EncodeToString(tools.HmacSha256(h4, strToSign))
+	ret.Signature = signature
+	ret.SignVersion = "OSS4-HMAC-SHA256"
+	ret.Date = utcTime.Format("20060102T150405Z")
+	ret.Credential = fmt.Sprintf("%v/%v/%v/%v/aliyun_v4_request", o.accessKeyId, date, o.region, "oss")
+	return ret
 }

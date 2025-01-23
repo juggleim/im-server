@@ -142,9 +142,18 @@ func GetFileCred(ctx context.Context, req *pbobjs.QryFileCredReq) (errs.IMErrorC
 		if err != nil {
 			return errs.IMErrorCode_OTHER_SIGNERR, nil
 		}
+		resp := fileConf.Oss.PostSign(req.Ext, dir)
 		return errs.IMErrorCode_SUCCESS, &pbobjs.QryFileCredResp{
 			OssType: pbobjs.OssType_Oss,
-			OssOf:   &pbobjs.QryFileCredResp_PreSignResp{PreSignResp: &pbobjs.PreSignResp{Url: signedURL}},
+			OssOf: &pbobjs.QryFileCredResp_PreSignResp{PreSignResp: &pbobjs.PreSignResp{
+				Url:         signedURL,
+				ObjKey:      resp.ObjKey,
+				Policy:      resp.Policy,
+				SignVersion: resp.SignVersion,
+				Credential:  resp.Credential,
+				Date:        resp.Date,
+				Signature:   resp.Signature,
+			}},
 		}
 	default:
 		return errs.IMErrorCode_OTHER_NOOSS, nil
