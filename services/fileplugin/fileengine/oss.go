@@ -107,7 +107,7 @@ func (o *OssStorage) PostSign(fileType string, dir string) *pbobjs.PreSignResp {
 				o.accessKeyId, date, o.region, "oss")}, // 凭证
 			map[string]string{"x-oss-date": utcTime.Format("20060102T150405Z")},
 			// 其他条件
-			[]any{"content-length-range", 1, 1024},
+			[]any{"content-length-range", 1, 1024 * 1024 * 1024},
 			// []any{"eq", "$success_action_status", "201"},
 			// []any{"starts-with", "$key", "user/eric/"},
 			// []any{"in", "$content-type", []string{"image/jpg", "image/png"}},
