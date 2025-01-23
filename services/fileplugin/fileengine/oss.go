@@ -116,7 +116,7 @@ func (o *OssStorage) PostSign(fileType string, dir string) *pbobjs.PreSignResp {
 	}
 	policy := tools.ToJson(policyMap)
 	strToSign := base64.StdEncoding.EncodeToString([]byte(policy))
-	ret.Policy = policy
+	ret.Policy = strToSign
 	//signature
 	h1 := tools.HmacSha256([]byte("aliyun_v4"+o.accessKeySecret), date)
 	h2 := tools.HmacSha256(h1, o.region)
