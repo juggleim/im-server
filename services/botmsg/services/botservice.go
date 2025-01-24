@@ -86,10 +86,12 @@ func getKey(appkey, botId string) string {
 }
 
 type Combiner struct {
-	tmpbuf   *bytes.Buffer
-	finalbuf *bytes.Buffer
-	ts       int64
-	interval int64
+	StreamMsg *pbobjs.DownMsg
+	tmpbuf    *bytes.Buffer
+	finalbuf  *bytes.Buffer
+	ts        int64
+	interval  int64
+	subSeq    int64
 }
 
 func (combiner *Combiner) Append(part string) string {
@@ -128,6 +130,11 @@ func (combiner *Combiner) GetFinal() string {
 	return ""
 }
 
+func (combiner *Combiner) GetSubSeq() int64 {
+	combiner.subSeq = combiner.subSeq + 1
+	return combiner.subSeq
+}
+
 func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 	if msg.MsgType != msgdefines.InnerMsgType_Text || msg.ChannelType != pbobjs.ChannelType_Private {
 		return
@@ -153,26 +160,73 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 		msgFlag = msgdefines.SetCountMsg(msgFlag)
 
 		var combiner *Combiner
+		botUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, botId)
 		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, converId, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
 			if sectionStart {
+				curr := time.Now().UnixMilli()
 				combiner = &Combiner{
 					interval: 50,
+					StreamMsg: &pbobjs.DownMsg{
+						TargetId:       botId,
+						ChannelType:    msg.ChannelType,
+						MsgType:        "jgs:text",
+						SenderId:       botId,
+						Flags:          msgdefines.SetStreamMsg(0),
+						ClientUid:      tools.GenerateUUIDShort22(),
+						TargetUserInfo: botUserInfo,
+						MsgTime:        curr,
+						MsgId:          tools.GenerateMsgId(curr, int32(msg.ChannelType), msg.SenderId),
+						StreamMsgParts: []*pbobjs.StreamMsgItem{},
+					},
 				}
 			}
 			if isEnd || sectionEnd {
 				if combiner != nil {
-					commonservices.SyncPrivateMsgOverUpstream(ctx, botId, msg.SenderId, &pbobjs.UpMsg{
-						MsgType: msgdefines.InnerMsgType_Text,
-						MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
-							Content: combiner.GetFinal(),
-						}),
-						Flags: msgFlag,
+					streamMsg := combiner.StreamMsg
+					streamMsg.StreamMsgParts = []*pbobjs.StreamMsgItem{}
+					part := combiner.GetLeft()
+					if part != "" {
+						streamMsg.StreamMsgParts = append(streamMsg.StreamMsgParts, &pbobjs.StreamMsgItem{
+							Event:          pbobjs.StreamEvent_StreamMessage,
+							SubSeq:         combiner.GetSubSeq(),
+							PartialContent: tools.ToJsonBs(&msgdefines.TextMsg{Content: part}),
+						})
+					}
+					streamMsg.StreamMsgParts = append(streamMsg.StreamMsgParts, &pbobjs.StreamMsgItem{
+						Event:  pbobjs.StreamEvent_StreamComplete,
+						SubSeq: combiner.GetSubSeq(),
 					})
+					ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
+					bases.SyncRpcCall(ctx, "stream_msg", msg.SenderId, streamMsg, nil)
+					finalContent := combiner.GetFinal()
+					if finalContent != "" {
+						commonservices.SyncPrivateMsgOverUpstream(ctx, botId, msg.SenderId, &pbobjs.UpMsg{
+							MsgType: msgdefines.InnerMsgType_Text,
+							MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
+								Content: combiner.GetFinal(),
+							}),
+							Flags: msgFlag,
+						}, &bases.WithMsgIdOption{MsgId: streamMsg.MsgId})
+					}
 					combiner = nil
 				}
 			} else {
 				if combiner != nil {
-					combiner.Append(answerPart)
+					part := combiner.Append(answerPart)
+					if part != "" {
+						streamMsg := combiner.StreamMsg
+						streamMsg.StreamMsgParts = []*pbobjs.StreamMsgItem{
+							{
+								Event:  pbobjs.StreamEvent_StreamMessage,
+								SubSeq: combiner.GetSubSeq(),
+								PartialContent: tools.ToJsonBs(&msgdefines.TextMsg{
+									Content: part,
+								}),
+							},
+						}
+						ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
+						bases.SyncRpcCall(ctx, "stream_msg", msg.SenderId, streamMsg, nil)
+					}
 				}
 			}
 		})

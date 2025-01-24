@@ -136,7 +136,7 @@ message DownMsg{
   int32 memberCount = 21;
   int32 readCount = 22;
   int64 unreadIndex = 23;
-  repeated StreamMsgItem msgItems = 24;
+  repeated StreamMsgItem streamMsgParts = 24;
   repeated MsgExtItem msgExSet = 25;
   repeated MsgExtItem msgExts = 26;
   repeated ConverTag converTags = 27;
