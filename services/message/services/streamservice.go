@@ -28,6 +28,7 @@ type StreamMsg struct {
 	TargetId string
 	MsgId    string
 	MaxSeq   int
+	MsgType  string
 
 	streamMsgItems *skipmap.Int64Map
 }
@@ -64,6 +65,7 @@ func AppendStreamMsgItem(ctx context.Context, req *pbobjs.StreamDownMsg) {
 			SenderId:       senderId,
 			TargetId:       targetId,
 			MsgId:          req.MsgId,
+			MsgType:        req.MsgType,
 			streamMsgItems: skipmap.NewInt64(),
 		}
 		for _, item := range req.MsgItems {
@@ -90,6 +92,7 @@ func updateStreamMsg(ctx context.Context, streamMsg *StreamMsg) {
 		ChannelType: pbobjs.ChannelType_Private,
 		MsgId:       streamMsg.MsgId,
 		MsgItems:    []*pbobjs.StreamMsgItem{},
+		MsgType:     streamMsg.MsgType,
 	}
 	streamMsg.streamMsgItems.Range(func(key int64, value interface{}) bool {
 		if value != nil {

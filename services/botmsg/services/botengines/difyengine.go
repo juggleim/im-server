@@ -6,6 +6,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices/logs"
 	"net/http"
+	"strings"
 )
 
 type DifyBotEngine struct {
@@ -40,6 +41,7 @@ func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, converId 
 			f("", true)
 			return
 		}
+		line = strings.TrimPrefix(line, "data:")
 		item := DifyStreamRespItem{}
 		err = tools.JsonUnMarshal([]byte(line), &item)
 		if err != nil {

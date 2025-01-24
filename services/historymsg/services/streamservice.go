@@ -7,6 +7,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"im-server/services/historymsg/storages"
 )
 
@@ -24,7 +25,23 @@ func UpdStreamMsg(ctx context.Context, req *pbobjs.StreamDownMsg) errs.IMErrorCo
 				if len(newDownMsg.MsgItems) <= 0 {
 					newDownMsg.MsgItems = []*pbobjs.StreamMsgItem{}
 				}
-				newDownMsg.MsgItems = append(newDownMsg.MsgItems, req.MsgItems...)
+				mergedContent := ""
+				for _, item := range req.MsgItems {
+					newDownMsg.MsgItems = append(newDownMsg.MsgItems, item)
+					//merged content
+					if req.MsgType == msgdefines.InnerMsgType_StreamText {
+						streamMsgBody := &msgdefines.StreamMsg{}
+						if len(item.PartialContent) > 0 {
+							err = tools.JsonUnMarshal(item.PartialContent, streamMsgBody)
+							if err == nil {
+								mergedContent = mergedContent + streamMsgBody.Content
+							}
+						}
+					}
+				}
+				if mergedContent != "" {
+					newDownMsg.MsgContent, _ = tools.JsonMarshal(&msgdefines.StreamMsg{Content: mergedContent})
+				}
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
 				storage.UpdateMsgBody(appkey, converId, req.MsgId, newDownMsg.MsgType, newDownMsgBs)
 			}

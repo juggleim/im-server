@@ -10,7 +10,6 @@ import (
 	"strings"
 )
 
-var headerData = []byte("data:")
 var defaultEmptyMessagesLimit uint = 300
 
 type HttpStream struct {
@@ -33,14 +32,13 @@ func (stream *HttpStream) Receive() (string, error) {
 			return "", err
 		}
 		line = bytes.TrimSpace(line)
-		if !bytes.HasPrefix(line, headerData) {
+		if len(line) == 0 {
 			emptyMsgCount++
 			if emptyMsgCount > defaultEmptyMessagesLimit {
 				return "", errors.New("stream has sent too many empty messages")
 			}
 			continue
 		}
-		line = bytes.TrimPrefix(line, headerData)
 		lineStr := string(line)
 		if lineStr == "[DONE]" {
 			stream.Close()

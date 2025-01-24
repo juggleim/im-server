@@ -102,7 +102,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 		msgFlag = msgdefines.SetCountMsg(msgFlag)
 		msgFlag = msgdefines.SetStreamMsg(msgFlag)
 		ctx = bases.SetRequesterId2Ctx(ctx, botId)
-		shellContent := &StreamMsg{
+		shellContent := &msgdefines.StreamMsg{
 			Content: "",
 		}
 		bs, _ := tools.JsonMarshal(shellContent)
@@ -121,7 +121,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 			if !isEnd {
 				buf.WriteString(answerPart)
 				if curr-ts > 50 {
-					partBs, _ := tools.JsonMarshal(&StreamMsg{
+					partBs, _ := tools.JsonMarshal(&msgdefines.StreamMsg{
 						Content: buf.String(),
 					})
 					bases.SyncRpcCall(ctx, "pri_stream", msg.SenderId, &pbobjs.StreamDownMsg{
@@ -143,7 +143,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 				lastPart := buf.String()
 				items := []*pbobjs.StreamMsgItem{}
 				if lastPart != "" {
-					partBs, _ := tools.JsonMarshal(&StreamMsg{
+					partBs, _ := tools.JsonMarshal(&msgdefines.StreamMsg{
 						Content: lastPart,
 					})
 					items = append(items, &pbobjs.StreamMsgItem{
@@ -159,12 +159,9 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 					ChannelType: msg.ChannelType,
 					MsgId:       msgId,
 					MsgItems:    items,
+					MsgType:     msgdefines.InnerMsgType_StreamText,
 				}, nil)
 			}
 		})
 	}
-}
-
-type StreamMsg struct {
-	Content string `json:"content"`
 }

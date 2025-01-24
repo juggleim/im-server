@@ -42,6 +42,7 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId 
 		logs.WithContext(ctx).Errorf("call coze api failed. http_code:%d,err:%v", code, err)
 		return
 	}
+	event := ""
 	for {
 		line, err := stream.Receive()
 		if err != nil {
@@ -52,14 +53,24 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId 
 			f("", true)
 			return
 		}
+		if strings.HasPrefix(line, "event:") {
+			event = strings.TrimPrefix(line, "event:")
+			continue
+		}
+		line = strings.TrimPrefix(line, "data:")
 		item := CozeChatMsgRespItem{}
 		err = tools.JsonUnMarshal([]byte(line), &item)
 		if err != nil {
-			fmt.Println("err:", err, string(line))
+			fmt.Println("unmarshal_err:", err, string(line))
 			continue
 		}
 		if item.Type == "answer" && item.CreatedAt == 0 {
-			f(item.Content, false)
+			if event == "conversation.message.delta" {
+				f(item.Content, false)
+			} else if event == "conversation.message.completed" {
+				f(item.Content, true)
+				return
+			}
 		}
 	}
 }
