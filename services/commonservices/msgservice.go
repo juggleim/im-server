@@ -200,3 +200,16 @@ func IsMentionedMe(userId string, downMsg *pbobjs.DownMsg) bool {
 	}
 	return false
 }
+
+func IsDirectMentionedMe(userId string, downMsg *pbobjs.DownMsg) bool {
+	if downMsg != nil && downMsg.MentionInfo != nil {
+		if downMsg.MentionInfo.MentionType == pbobjs.MentionType_Someone || downMsg.MentionInfo.MentionType == pbobjs.MentionType_AllAndSomeone {
+			for _, mentionedUser := range downMsg.MentionInfo.TargetUsers {
+				if userId == mentionedUser.UserId {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}

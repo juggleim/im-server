@@ -29,7 +29,7 @@ func init() {
 }
 
 func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, upMsg *pbobjs.UpMsg) interceptors.InterceptorResult {
-	if msgdefines.IsCmdMsg(upMsg.Flags) {
+	if msgdefines.IsCmdMsg(upMsg.Flags) || msgdefines.IsStateMsg(upMsg.Flags) {
 		return interceptors.InterceptorResult_Pass
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)

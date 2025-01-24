@@ -71,15 +71,17 @@ func preheat(ctx context.Context, appkey string, memberIds []string) {
 
 func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, closeOffline bool) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	//TODO save imediately when user online, other wise, user async queue.
-	//TODO batch insert & regenate msg time.
+	//TODO save imediately when user online, other wise, use async queue.
+	//TODO batch insert
 	sendTime := RegenateSendTime(appkey, receiverId, msg.MsgTime)
 	msg.MsgTime = sendTime
 	//handle conversation check, such as undisturb, unread index
 	HandleDownMsgByConver(ctx, receiverId, msg.TargetId, msg.ChannelType, msg)
 	targetUserInfo := commonservices.GetTargetUserInfo(ctx, receiverId)
 	if targetUserInfo.UserType == pbobjs.UserType_Bot {
-		botclient.SendMsg2Bot(ctx, receiverId, msg)
+		if msg.ChannelType == pbobjs.ChannelType_Private || (msg.ChannelType == pbobjs.ChannelType_Group && commonservices.IsDirectMentionedMe(targetUserInfo.UserId, msg)) {
+			botclient.SendMsg2Bot(ctx, receiverId, msg)
+		}
 	} else {
 		if !msgdefines.IsStateMsg(msg.Flags) {
 			if !closeOffline {

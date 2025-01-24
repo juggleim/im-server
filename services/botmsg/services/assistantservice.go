@@ -80,7 +80,7 @@ func GenerateAnswer(ctx context.Context, content string) string {
 	assistantInfo := GetAssistantInfo(ctx, userId)
 	if assistantInfo != nil && assistantInfo.BotEngine != nil {
 		buf := bytes.NewBuffer([]byte{})
-		assistantInfo.BotEngine.StreamChat(ctx, userId, "", content, func(answerPart string, isEnd bool) {
+		assistantInfo.BotEngine.StreamChat(ctx, userId, "", content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
 			if !isEnd {
 				buf.WriteString(answerPart)
 			}

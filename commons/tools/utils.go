@@ -78,6 +78,14 @@ func ToJson(obj interface{}) string {
 	return string(bs)
 }
 
+func ToJsonBs(obj interface{}) []byte {
+	bs, err := json.Marshal(obj)
+	if err != nil {
+		return []byte{}
+	}
+	return bs
+}
+
 func MapToStruct[T any](m map[string]interface{}) T {
 	var t T
 	data, _ := json.Marshal(m)

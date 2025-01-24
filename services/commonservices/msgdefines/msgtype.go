@@ -20,9 +20,3 @@ var InnerMsgType_Video string = "jg:video"
 var InnerMsgType_Merge string = "jg:merge"
 var InnerMsgType_VoiceCall string = "jg:voicecall"
 var InnerMsgType_CallFinishNtf string = "jg:callfinishntf"
-
-var InnerMsgType_StreamText string = "jgs:text"
-
-type StreamMsg struct {
-	Content string `json:"content"`
-}

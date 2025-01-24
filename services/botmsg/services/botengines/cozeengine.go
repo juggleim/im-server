@@ -19,7 +19,7 @@ func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converId string
 	return ""
 }
 
-func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId string, question string, f func(part string, isEnd bool)) {
+func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId string, question string, f func(part string, sectionStart, sectionEnd, isEnd bool)) {
 	req := &CozeChatMsgReq{
 		BotId:  engine.BotId,
 		UserId: senderId,
@@ -43,14 +43,15 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId 
 		return
 	}
 	event := ""
+	sectionStart := true
 	for {
 		line, err := stream.Receive()
 		if err != nil {
-			f("", true)
+			f("", false, false, true)
 			return
 		}
 		if strings.TrimSpace(string(line)) == "\"[DONE]\"" {
-			f("", true)
+			f("", false, false, true)
 			return
 		}
 		if strings.HasPrefix(line, "event:") {
@@ -66,10 +67,11 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId 
 		}
 		if item.Type == "answer" && item.CreatedAt == 0 {
 			if event == "conversation.message.delta" {
-				f(item.Content, false)
+				f(item.Content, sectionStart, false, false)
+				sectionStart = false
 			} else if event == "conversation.message.completed" {
-				f(item.Content, true)
-				return
+				f(item.Content, false, true, false)
+				sectionStart = true
 			}
 		}
 	}

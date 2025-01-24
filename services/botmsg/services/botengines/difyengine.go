@@ -18,7 +18,7 @@ func (engine *DifyBotEngine) Chat(ctx context.Context, senderId, converId string
 	return ""
 }
 
-func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, converId string, question string, f func(answerPart string, isEnd bool)) {
+func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, converId string, question string, f func(answerPart string, sectionStart, sectionEnd, isEnd bool)) {
 	req := &DifyChatMsgReq{
 		Inputs:         map[string]string{},
 		Query:          question,
@@ -35,23 +35,25 @@ func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, converId 
 		logs.WithContext(ctx).Errorf("call dify api failed. http_code:%d,err:%v", code, err)
 		return
 	}
+	sectionStart := true
 	for {
 		line, err := stream.Receive()
 		if err != nil {
-			f("", true)
+			f("", false, false, true)
 			return
 		}
 		line = strings.TrimPrefix(line, "data:")
 		item := DifyStreamRespItem{}
 		err = tools.JsonUnMarshal([]byte(line), &item)
 		if err != nil {
-			f("", true)
+			f("", false, false, true)
 			return
 		}
 		if item.Event == "message" {
-			f(item.Answer, false)
+			f(item.Answer, sectionStart, false, false)
+			sectionStart = false
 		} else if item.Event == "message_end" {
-			f(item.Answer, true)
+			f(item.Answer, false, false, true)
 			return
 		}
 	}

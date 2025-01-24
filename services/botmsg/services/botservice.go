@@ -3,6 +3,7 @@ package services
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
 	"im-server/commons/pbdefines/pbobjs"
@@ -84,6 +85,49 @@ func getKey(appkey, botId string) string {
 	return strings.Join([]string{appkey, botId}, "_")
 }
 
+type Combiner struct {
+	tmpbuf   *bytes.Buffer
+	finalbuf *bytes.Buffer
+	ts       int64
+	interval int64
+}
+
+func (combiner *Combiner) Append(part string) string {
+	if combiner.finalbuf == nil {
+		combiner.finalbuf = bytes.NewBuffer([]byte{})
+	}
+	if combiner.tmpbuf == nil {
+		combiner.tmpbuf = bytes.NewBuffer([]byte{})
+	}
+	combiner.tmpbuf.WriteString(part)
+	combiner.finalbuf.WriteString(part)
+	cur := time.Now().UnixMilli()
+	if combiner.ts == 0 {
+		combiner.ts = cur
+	}
+	if cur-combiner.ts > combiner.interval {
+		ret := combiner.tmpbuf.String()
+		combiner.tmpbuf = nil
+		combiner.ts = cur
+		return ret
+	}
+	return ""
+}
+
+func (combiner *Combiner) GetLeft() string {
+	if combiner.tmpbuf != nil {
+		return combiner.tmpbuf.String()
+	}
+	return ""
+}
+
+func (combiner *Combiner) GetFinal() string {
+	if combiner.finalbuf != nil {
+		return combiner.finalbuf.String()
+	}
+	return ""
+}
+
 func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 	if msg.MsgType != msgdefines.InnerMsgType_Text || msg.ChannelType != pbobjs.ChannelType_Private {
 		return
@@ -97,70 +141,39 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 	botId := bases.GetTargetIdFromCtx(ctx)
 	botInfo := GetBotInfo(ctx, botId)
 	if botInfo.BotEngine != nil {
-		// create stream msg
+		converId := ""
+		if msg.ChannelType == pbobjs.ChannelType_Private {
+			converId = commonservices.GetConversationId(msg.SenderId, botId, pbobjs.ChannelType_Private)
+			converId = fmt.Sprintf("%s_%d", converId, pbobjs.ChannelType_Private)
+		} else if msg.ChannelType == pbobjs.ChannelType_Group {
+			converId = commonservices.GetConversationId(msg.SenderId, msg.TargetId, pbobjs.ChannelType_Group)
+			converId = fmt.Sprintf("%s_%d", converId, pbobjs.ChannelType_Group)
+		}
 		msgFlag := msgdefines.SetStoreMsg(0)
 		msgFlag = msgdefines.SetCountMsg(msgFlag)
-		msgFlag = msgdefines.SetStreamMsg(msgFlag)
-		ctx = bases.SetRequesterId2Ctx(ctx, botId)
-		shellContent := &msgdefines.StreamMsg{
-			Content: "",
-		}
-		bs, _ := tools.JsonMarshal(shellContent)
-		_, msgId, _, _ := commonservices.SyncPrivateMsgOverUpstream(ctx, botId, msg.SenderId, &pbobjs.UpMsg{
-			MsgType:    msgdefines.InnerMsgType_StreamText,
-			MsgContent: bs,
-			Flags:      msgFlag,
-		})
-		var ts int64 = 0
-		buf := bytes.NewBuffer([]byte{})
-		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, "", txtMsg.Content, func(answerPart string, isEnd bool) {
-			curr := time.Now().UnixMilli()
-			if ts == 0 {
-				ts = curr
+
+		var combiner *Combiner
+		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, converId, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
+			if sectionStart {
+				combiner = &Combiner{
+					interval: 50,
+				}
 			}
-			if !isEnd {
-				buf.WriteString(answerPart)
-				if curr-ts > 50 {
-					partBs, _ := tools.JsonMarshal(&msgdefines.StreamMsg{
-						Content: buf.String(),
+			if isEnd || sectionEnd {
+				if combiner != nil {
+					commonservices.SyncPrivateMsgOverUpstream(ctx, botId, msg.SenderId, &pbobjs.UpMsg{
+						MsgType: msgdefines.InnerMsgType_Text,
+						MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
+							Content: combiner.GetFinal(),
+						}),
+						Flags: msgFlag,
 					})
-					bases.SyncRpcCall(ctx, "pri_stream", msg.SenderId, &pbobjs.StreamDownMsg{
-						TargetId:    msg.SenderId,
-						ChannelType: msg.ChannelType,
-						MsgId:       msgId,
-						MsgItems: []*pbobjs.StreamMsgItem{
-							{
-								Event:          pbobjs.StreamEvent_StreamMessage,
-								PartialContent: partBs,
-							},
-						},
-						MsgType: msgdefines.InnerMsgType_StreamText,
-					}, nil)
-					buf = bytes.NewBuffer([]byte{})
-					ts = curr
+					combiner = nil
 				}
 			} else {
-				lastPart := buf.String()
-				items := []*pbobjs.StreamMsgItem{}
-				if lastPart != "" {
-					partBs, _ := tools.JsonMarshal(&msgdefines.StreamMsg{
-						Content: lastPart,
-					})
-					items = append(items, &pbobjs.StreamMsgItem{
-						Event:          pbobjs.StreamEvent_StreamMessage,
-						PartialContent: partBs,
-					})
+				if combiner != nil {
+					combiner.Append(answerPart)
 				}
-				items = append(items, &pbobjs.StreamMsgItem{
-					Event: pbobjs.StreamEvent_StreamComplete,
-				})
-				bases.SyncRpcCall(ctx, "pri_stream", msg.SenderId, &pbobjs.StreamDownMsg{
-					TargetId:    msg.SenderId,
-					ChannelType: msg.ChannelType,
-					MsgId:       msgId,
-					MsgItems:    items,
-					MsgType:     msgdefines.InnerMsgType_StreamText,
-				}, nil)
 			}
 		})
 	}

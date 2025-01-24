@@ -126,6 +126,7 @@ type AppendStreamMsgReq struct {
 	TargetId string           `json:"target_id"`
 	MsgId    string           `json:"msg_id"`
 	Items    []*StreamMsgItem `json:"items"`
+	MsgType  string           `json:"msg_type"`
 }
 
 type StreamMsgItem struct {
