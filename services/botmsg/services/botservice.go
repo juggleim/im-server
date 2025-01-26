@@ -189,7 +189,10 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 						part := combiner.GetLeft()
 						if part != "" {
 							streamMsg.MsgSeqNo = combiner.GetSubSeq()
-							streamMsg.MsgContent = tools.ToJsonBs(&msgdefines.TextMsg{Content: part})
+							streamMsg.MsgContent = tools.ToJsonBs(&StreamMsg{
+								Content:     part,
+								StreamMsgId: streamMsg.MsgId,
+							})
 							ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
 							bases.SyncRpcCall(ctx, "msg", msg.SenderId, streamMsg, nil)
 						}
@@ -201,17 +204,23 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 								MsgType: msgdefines.InnerMsgType_Text,
 								MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
 									Content: combiner.GetFinal(),
+									Extra: tools.ToJson(&StreamMsg{
+										StreamMsgId: streamMsg.MsgId,
+									}),
 								}),
 								Flags: msgFlag,
-							}, &bases.WithMsgIdOption{MsgId: streamMsg.MsgId})
+							})
 						} else if msg.ChannelType == pbobjs.ChannelType_Group {
 							commonservices.SyncGroupMsgOverUpstream(ctx, botId, msg.TargetId, &pbobjs.UpMsg{
 								MsgType: msgdefines.InnerMsgType_Text,
 								MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
 									Content: combiner.GetFinal(),
+									Extra: tools.ToJson(&StreamMsg{
+										StreamMsgId: streamMsg.MsgId,
+									}),
 								}),
 								Flags: msgFlag,
-							}, &bases.WithMsgIdOption{MsgId: streamMsg.MsgId})
+							})
 						}
 					}
 					combiner = nil
@@ -222,7 +231,10 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 					if part != "" {
 						if msg.ChannelType == pbobjs.ChannelType_Private {
 							streamMsg := combiner.StreamMsg
-							streamMsg.MsgContent = tools.ToJsonBs(&msgdefines.TextMsg{Content: part})
+							streamMsg.MsgContent = tools.ToJsonBs(&StreamMsg{
+								Content:     part,
+								StreamMsgId: combiner.StreamMsg.MsgId,
+							})
 							streamMsg.MsgSeqNo = combiner.GetSubSeq()
 							ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
 							bases.SyncRpcCall(ctx, "msg", msg.SenderId, streamMsg, nil)
@@ -232,4 +244,9 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 			}
 		})
 	}
+}
+
+type StreamMsg struct {
+	Content     string `json:"content,omitempty"`
+	StreamMsgId string `json:"stream_msg_id"`
 }
