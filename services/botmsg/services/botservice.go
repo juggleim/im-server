@@ -194,7 +194,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 								StreamMsgId: streamMsg.MsgId,
 							})
 							ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
-							bases.SyncRpcCall(ctx, "msg", msg.SenderId, streamMsg, nil)
+							MsgDirect(ctx, msg.SenderId, streamMsg)
 						}
 					}
 					finalContent := combiner.GetFinal()
@@ -237,7 +237,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 							})
 							streamMsg.MsgSeqNo = combiner.GetSubSeq()
 							ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
-							bases.SyncRpcCall(ctx, "msg", msg.SenderId, streamMsg, nil)
+							MsgDirect(ctx, msg.SenderId, streamMsg)
 						}
 					}
 				}
@@ -249,4 +249,13 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 type StreamMsg struct {
 	Content     string `json:"content,omitempty"`
 	StreamMsgId string `json:"stream_msg_id"`
+}
+
+func MsgDirect(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
+	rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "msg", downMsg)
+	if downMsg.IsSend {
+		rpcMsg.PublishType = int32(commonservices.PublishType_AllSessionExceptSelf)
+	}
+	rpcMsg.Qos = 0
+	bases.UnicastRouteWithNoSender(rpcMsg)
 }
