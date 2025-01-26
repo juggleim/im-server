@@ -11,7 +11,7 @@ type AppExtDao struct {
 	AppKey       string    `gorm:"app_key"`
 	AppItemKey   string    `gorm:"app_item_key"`
 	AppItemValue string    `gorm:"app_item_value"`
-	UpdatedTime  time.Time `gorm:"created_time"`
+	UpdatedTime  time.Time `gorm:"updated_time"`
 }
 
 func (appExt AppExtDao) TableName() string {

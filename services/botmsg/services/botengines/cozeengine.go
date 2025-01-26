@@ -3,10 +3,15 @@ package botengines
 import (
 	"context"
 	"fmt"
+	"im-server/commons/bases"
+	"im-server/commons/caches"
 	"im-server/commons/tools"
+	"im-server/services/botmsg/storages"
+	"im-server/services/botmsg/storages/models"
 	"im-server/services/commonservices/logs"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type CozeBotEngine struct {
@@ -15,11 +20,16 @@ type CozeBotEngine struct {
 	BotId string `json:"bot_id"`
 }
 
-func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converId string, question string) string {
+func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converKey string, question string) string {
 	return ""
 }
 
-func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId string, question string, f func(part string, sectionStart, sectionEnd, isEnd bool)) {
+func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converKey string, question string, f func(part string, sectionStart, sectionEnd, isEnd bool)) {
+	url := engine.Url
+	cozeConverItem := GetCozeConverId(ctx, converKey, engine.Token)
+	if cozeConverItem != nil && cozeConverItem.ConverId != "" {
+		url = fmt.Sprintf("%s?conversation_id=%s", url, cozeConverItem.ConverId)
+	}
 	req := &CozeChatMsgReq{
 		BotId:  engine.BotId,
 		UserId: senderId,
@@ -37,7 +47,7 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converId 
 	headers := map[string]string{}
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", engine.Token)
 	headers["Content-Type"] = "application/json"
-	stream, code, err := tools.CreateStream(http.MethodPost, engine.Url, headers, body)
+	stream, code, err := tools.CreateStream(http.MethodPost, url, headers, body)
 	if err != nil || code != http.StatusOK {
 		logs.WithContext(ctx).Errorf("call coze api failed. http_code:%d,err:%v", code, err)
 		return
@@ -102,4 +112,82 @@ type CozeChatMsgRespItem struct {
 	ChatId         string `json:"chat_id"`
 	SectionId      string `json:"section_id"`
 	CreatedAt      int64  `json:"created_at"`
+}
+
+var cozeConverCache *caches.LruCache
+var cozeConverLock *tools.SegmentatedLocks
+
+type CozeConverItem struct {
+	AppKey    string
+	ConverKey string
+	ConverId  string
+}
+
+func init() {
+	cozeConverCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 10*time.Minute, 10*time.Minute)
+	cozeConverLock = tools.NewSegmentatedLocks(128)
+}
+
+func GetCozeConverId(ctx context.Context, converKey, token string) *CozeConverItem {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	key := strings.Join([]string{appkey, converKey}, "_")
+	if val, exist := cozeConverCache.Get(key); exist {
+		return val.(*CozeConverItem)
+	} else {
+		l := cozeConverLock.GetLocks(key)
+		l.Lock()
+		defer l.Unlock()
+		if val, exist := cozeConverCache.Get(key); exist {
+			return val.(*CozeConverItem)
+		} else {
+			item := &CozeConverItem{
+				AppKey:    appkey,
+				ConverKey: converKey,
+			}
+			storage := storages.NewBotConverStorage()
+			botConver, err := storage.Find(appkey, models.BotConverType_Coze, converKey)
+			if err == nil && botConver != nil && botConver.ConverId != "" {
+				item.ConverId = botConver.ConverId
+			} else {
+				converId := createCozeConver(token)
+				if converId != "" {
+					item.ConverId = converId
+					storage.Upsert(models.BotConver{
+						AppKey:     appkey,
+						ConverType: models.BotConverType_Coze,
+						ConverKey:  converKey,
+						ConverId:   converId,
+					})
+				}
+			}
+			cozeConverCache.Add(key, item)
+			return item
+		}
+	}
+}
+
+func createCozeConver(token string) string {
+	url := "https://api.coze.cn/v1/conversation/create"
+	headers := map[string]string{}
+	headers["Authorization"] = fmt.Sprintf("Bearer %s", token)
+	headers["Content-Type"] = "application/json"
+	respBs, _, err := tools.HttpDoBytes(http.MethodPost, url, headers, "")
+	if err == nil && len(respBs) > 0 {
+		var resp CozeResp
+		err = tools.JsonUnMarshal(respBs, &resp)
+		if err == nil && resp.Data != nil && resp.Data.Id != "" {
+			return resp.Data.Id
+		}
+	}
+	return ""
+}
+
+type CozeResp struct {
+	Code int             `json:"coze"`
+	Data *CozeConverResp `json:"data"`
+}
+type CozeConverResp struct {
+	Id            string `json:"id"`
+	LastSectionId string `json:"last_section_id"`
+	CreatedAt     int64  `json:"created_at"`
 }

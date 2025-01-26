@@ -12,3 +12,7 @@ func NewBotConfStorage() models.IBotConfStorage {
 func NewAssistantStorage() models.IAssistantStorage {
 	return &dbs.AssistantDao{}
 }
+
+func NewBotConverStorage() models.IBotConverStorage {
+	return &dbs.BotConverDao{}
+}

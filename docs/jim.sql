@@ -882,6 +882,18 @@ CREATE TABLE `botconfs` (
   UNIQUE INDEX `uniq_botid` (`app_key`, `bot_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `botconvers`;
+CREATE TABLE `botconvers` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `conver_key` VARCHAR(100) NULL DEFAULT '',
+  `conver_type` TINYINT NULL DEFAULT 0,
+  `conver_id` VARCHAR(50) NULL DEFAULT '',
+  `app_key` VARCHAR(50) NULL DEFAULT '',
+  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_key` (`app_key`, `conver_type`, `conver_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 DROP TABLE IF EXISTS `assistants`;
 CREATE TABLE `assistants` (
   `id` INT NOT NULL AUTO_INCREMENT,
