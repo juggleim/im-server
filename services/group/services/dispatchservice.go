@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-var msgThreshold = 2000
 var dispatchQueues []*Dispatcher
 
 type GrpMsgDispatchItem struct {
@@ -26,7 +25,6 @@ type Dispatcher struct {
 	msgQueue    chan *GrpMsgDispatchItem
 	maxQueueLen int
 	isContinued bool
-	maxDisCount int
 	// limiter       *rate.Limiter
 	latestUpdTime int64
 }
@@ -52,16 +50,10 @@ func (dis *Dispatcher) start() {
 				}
 
 				memberCount := len(item.MemberIds)
-				maxDisCount := dis.getMaxDisCount()
-				if maxDisCount <= 0 { //dispatch directly
-					groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
-				} else if memberCount <= maxDisCount {
-					groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
-				} else {
-					groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
-					time.Sleep(150 * time.Millisecond)
-					logs.WithContext(item.Ctx).Warnf("[group_dispatch_delay] group_id:%s\tmember_count:%d", item.GroupId, memberCount)
-				}
+				groupCastMsg(item.Ctx, item.GroupId, item.MemberIds, item.Msg)
+				interval := dis.Ratio * 100
+				time.Sleep(time.Duration(interval) * time.Millisecond)
+				logs.WithContext(item.Ctx).Warnf("[group_dispatch_delay] group_id:%s\tmember_count:%d\tsleep:%d", item.GroupId, memberCount, interval)
 			} else {
 				break
 			}
@@ -79,23 +71,6 @@ func getGrpThresholdFromCtx(ctx context.Context) int {
 	return grpThreshold
 }
 
-func (dis *Dispatcher) getMaxDisCount() int {
-	now := time.Now().UnixMilli()
-	if now-5000 > dis.latestUpdTime {
-		msgNodeCount := bases.GetCluster().GetTargetNodeCount("g_msg_dispatch")
-		if msgNodeCount <= 0 {
-			msgNodeCount = 1
-		}
-		maxDisCount := msgNodeCount * msgThreshold
-		if maxDisCount != dis.maxDisCount {
-			dis.maxDisCount = maxDisCount
-			// dis.limiter = rate.NewLimiter(rate.Limit(dis.maxDisCount), dis.maxDisCount)
-		}
-		dis.latestUpdTime = now
-	}
-	return dis.maxDisCount
-}
-
 func (dis *Dispatcher) Stop() {
 	dis.isContinued = false
 }
@@ -104,9 +79,9 @@ func (dis *Dispatcher) Put(item *GrpMsgDispatchItem) {
 	if !dis.isContinued {
 		dis.isContinued = true
 		dis.msgQueue = make(chan *GrpMsgDispatchItem, dis.maxQueueLen)
+		dis.start()
 	}
 	dis.msgQueue <- item
-	dis.start()
 }
 
 func init() {
