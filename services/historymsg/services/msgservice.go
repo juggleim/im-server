@@ -230,12 +230,15 @@ func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) 
 				extItems := MsgExtBs2Pb(msgExt)
 				if extItems != nil && len(extItems.Exts) > 0 {
 					for _, extItem := range extItems.Exts {
-						val := &pbobjs.MsgExtItem{
-							Value:     extItem.Value,
-							Timestamp: extItem.Timestamp,
-							UserInfo:  extItem.UserInfo,
+						if extItem.Key != "" {
+							val := &pbobjs.MsgExtItem{
+								Key:       extItem.Key,
+								Value:     extItem.Value,
+								Timestamp: extItem.Timestamp,
+								UserInfo:  extItem.UserInfo,
+							}
+							msgInfo.MsgExtMap[extItem.Key] = val
 						}
-						msgInfo.MsgExtMap[extItem.Key] = val
 					}
 				}
 			}
@@ -243,18 +246,21 @@ func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) 
 				extItems := MsgExtBs2Pb(msgExset)
 				if extItems != nil && len(extItems.Exts) > 0 {
 					for _, extItem := range extItems.Exts {
-						val := &pbobjs.MsgExtItem{
-							Value:     extItem.Value,
-							Timestamp: extItem.Timestamp,
-							UserInfo:  extItem.UserInfo,
-						}
-						uniqKey := fmt.Sprintf("%s_%s", extItem.Key, extItem.Value)
-						if _, exist := msgInfo.MsgExsetUniqMap[uniqKey]; !exist {
-							msgInfo.MsgExsetUniqMap[uniqKey] = true
-							if list, exist := msgInfo.MsgExsetMap[extItem.Key]; exist {
-								msgInfo.MsgExsetMap[extItem.Key] = append(list, val)
-							} else {
-								msgInfo.MsgExsetMap[extItem.Key] = []*pbobjs.MsgExtItem{val}
+						if extItem.Key != "" {
+							val := &pbobjs.MsgExtItem{
+								Key:       extItem.Key,
+								Value:     extItem.Value,
+								Timestamp: extItem.Timestamp,
+								UserInfo:  extItem.UserInfo,
+							}
+							uniqKey := fmt.Sprintf("%s_%s", extItem.Key, extItem.Value)
+							if _, exist := msgInfo.MsgExsetUniqMap[uniqKey]; !exist {
+								msgInfo.MsgExsetUniqMap[uniqKey] = true
+								if list, exist := msgInfo.MsgExsetMap[extItem.Key]; exist {
+									msgInfo.MsgExsetMap[extItem.Key] = append(list, val)
+								} else {
+									msgInfo.MsgExsetMap[extItem.Key] = []*pbobjs.MsgExtItem{val}
+								}
 							}
 						}
 					}

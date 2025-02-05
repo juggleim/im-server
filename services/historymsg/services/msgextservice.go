@@ -10,6 +10,7 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/msgdefines"
 	"im-server/services/historymsg/storages"
+	"sort"
 	"time"
 )
 
@@ -215,7 +216,7 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	msgInfo.ForeachMsgExset(func(key string, exts []*pbobjs.MsgExtItem) {
 		for _, ext := range exts {
 			extItem := &pbobjs.MsgExtItem{
-				Key:       ext.Key,
+				Key:       key,
 				Value:     ext.Value,
 				Timestamp: ext.Timestamp,
 			}
@@ -227,6 +228,11 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 			extItems.Exts = append(extItems.Exts, extItem)
 		}
 	})
+	if len(extItems.Exts) > 0 {
+		sort.Slice(extItems.Exts, func(i, j int) bool {
+			return extItems.Exts[i].Timestamp < extItems.Exts[j].Timestamp
+		})
+	}
 	extItemsBs, _ := tools.PbMarshal(extItems)
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
@@ -286,7 +292,7 @@ func DelMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		msgInfo.ForeachMsgExset(func(key string, exts []*pbobjs.MsgExtItem) {
 			for _, ext := range exts {
 				extItem := &pbobjs.MsgExtItem{
-					Key:       ext.Key,
+					Key:       key,
 					Value:     ext.Value,
 					Timestamp: ext.Timestamp,
 				}
@@ -298,6 +304,11 @@ func DelMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 				extItems.Exts = append(extItems.Exts, extItem)
 			}
 		})
+		if len(extItems.Exts) > 0 {
+			sort.Slice(extItems.Exts, func(i, j int) bool {
+				return extItems.Exts[i].Timestamp < extItems.Exts[j].Timestamp
+			})
+		}
 		extItemsBs, _ := tools.PbMarshal(extItems)
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			storage := storages.NewPrivateHisMsgStorage()
@@ -367,13 +378,18 @@ func QryMsgExSets(ctx context.Context, req *pbobjs.QryMsgExtReq) (errs.IMErrorCo
 	ret := &pbobjs.MsgExtItemsList{
 		Items: []*pbobjs.MsgExtItems{},
 	}
-	for msgId, extBs := range msgMap {
+	for _, msgId := range req.MsgIds {
 		msgExtItems := &pbobjs.MsgExtItems{
 			MsgId: msgId,
 			Exts:  []*pbobjs.MsgExtItem{},
 		}
-		if len(extBs) > 0 {
+		if extBs, ok := msgMap[msgId]; ok && len(extBs) > 0 {
 			tools.PbUnMarshal(extBs, msgExtItems)
+			if len(msgExtItems.Exts) > 0 {
+				sort.Slice(msgExtItems.Exts, func(i, j int) bool {
+					return msgExtItems.Exts[i].Timestamp < msgExtItems.Exts[j].Timestamp
+				})
+			}
 		}
 		ret.Items = append(ret.Items, msgExtItems)
 	}
