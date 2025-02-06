@@ -19,9 +19,9 @@ func (actor *CheckBlockUserActor) OnReceive(ctx context.Context, input proto.Mes
 	targetUserId := bases.GetTargetIdFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	blockUsers := services.GetBlockUsers(appkey, targetUserId)
+	blockUser := services.GetBlockUserItem(appkey, targetUserId, userId)
 	ret := &pbobjs.CheckBlockUserResp{
-		IsBlock: blockUsers.CheckBlockUser(userId),
+		IsBlock: blockUser.IsBlock,
 	}
 	ack := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_SUCCESS, ret)
 	actor.Sender.Tell(ack, actorsystem.NoSender)

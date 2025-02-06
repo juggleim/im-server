@@ -325,10 +325,13 @@ func BlockUser(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
 		return
 	}
-	bases.SyncRpcCall(services.ToRpcCtx(ctx, blockReq.UserId), "block_users", blockReq.UserId, &pbobjs.BlockUsersReq{
-		UserIds: blockReq.BlockUserIds,
-		IsAdd:   true,
-	}, nil)
+	for _, blockUserId := range blockReq.BlockUserIds {
+		targetId := commonservices.GetConversationId(blockReq.UserId, blockUserId, pbobjs.ChannelType_Private)
+		bases.AsyncRpcCall(services.ToRpcCtx(ctx, blockReq.UserId), "block_users", targetId, &pbobjs.BlockUsersReq{
+			UserIds: []string{blockUserId},
+			IsAdd:   true,
+		})
+	}
 	tools.SuccessHttpResp(ctx, nil)
 }
 
@@ -342,10 +345,13 @@ func UnBlockUser(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
 		return
 	}
-	bases.SyncRpcCall(services.ToRpcCtx(ctx, blockReq.UserId), "block_users", blockReq.UserId, &pbobjs.BlockUsersReq{
-		UserIds: blockReq.BlockUserIds,
-		IsAdd:   false,
-	}, nil)
+	for _, blockUserId := range blockReq.BlockUserIds {
+		targetId := commonservices.GetConversationId(blockReq.UserId, blockUserId, pbobjs.ChannelType_Private)
+		bases.AsyncRpcCall(services.ToRpcCtx(ctx, blockReq.UserId), "block_users", targetId, &pbobjs.BlockUsersReq{
+			UserIds: []string{blockUserId},
+			IsAdd:   false,
+		})
+	}
 	tools.SuccessHttpResp(ctx, nil)
 }
 

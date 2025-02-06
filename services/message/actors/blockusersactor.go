@@ -19,12 +19,17 @@ type BlockUsersActor struct {
 func (actor *BlockUsersActor) OnReceive(ctx context.Context, input proto.Message) {
 	code := errs.IMErrorCode_SUCCESS
 	if blockReq, ok := input.(*pbobjs.BlockUsersReq); ok {
-		logs.WithContext(ctx).Infof("is_add:%v\tuser_ids:%v", blockReq.IsAdd, blockReq.UserIds)
+		userId := bases.GetRequesterIdFromCtx(ctx)
+		logs.WithContext(ctx).Infof("user_id:%s\tis_add:%v\tuser_ids:%v", userId, blockReq.IsAdd, blockReq.UserIds)
 		if len(blockReq.UserIds) > 0 {
 			if blockReq.IsAdd {
-				services.AddBlockUsers(ctx, blockReq.UserIds)
+				for _, blockUserId := range blockReq.UserIds {
+					services.AddBlockUser(ctx, userId, blockUserId)
+				}
 			} else {
-				services.RemoveBlockUsers(ctx, blockReq.UserIds)
+				for _, blockUserId := range blockReq.UserIds {
+					services.DelBlockUser(ctx, userId, blockUserId)
+				}
 			}
 		}
 	} else {

@@ -24,8 +24,8 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	commonservices.ReportUpMsg(appkey, pbobjs.ChannelType_Private, 1)
 	commonservices.ReportDispatchMsg(appkey, pbobjs.ChannelType_Private, 1)
 	//check block user
-	blockUsers := GetBlockUsers(appkey, receiverId)
-	if blockUsers.CheckBlockUser(senderId) {
+	blockUser := GetBlockUserItem(appkey, receiverId, senderId)
+	if blockUser.IsBlock {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
 		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid, nil

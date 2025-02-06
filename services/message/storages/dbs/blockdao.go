@@ -30,6 +30,15 @@ func (block BlockDao) BatchDelBlockUsers(appkey, userId string, blockUserIds []s
 	return dbcommons.GetDb().Where("app_key=? and user_id=? and block_user_id in (?)", appkey, userId, blockUserIds).Delete(&BlockDao{}).Error
 }
 
+func (block BlockDao) Find(appkey, userId, blockUserId string) (*BlockDao, error) {
+	var item BlockDao
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and block_user_id=?", appkey, userId, blockUserId).Take(&item).Error
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
 func (block BlockDao) QryBlockUsers(appkey, userId string, limit, startId int64) ([]*BlockDao, error) {
 	var items []*BlockDao
 	err := dbcommons.GetDb().Where("app_key=? and user_id=? and id>?", appkey, userId, startId).Order("id asc").Limit(limit).Find(&items).Error
