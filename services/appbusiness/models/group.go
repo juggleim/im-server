@@ -39,3 +39,13 @@ type GroupMembersResp struct {
 	Items  []*GroupMember `json:"items"`
 	Offset string         `json:"offset"`
 }
+
+type CheckGroupMembersReq struct {
+	GroupId   string   `json:"group_id"`
+	MemberIds []string `json:"member_ids"`
+}
+
+type CheckGroupMembersResp struct {
+	GroupId        string          `json:"group_id"`
+	MemberExistMap map[string]bool `json:"member_exist_map"`
+}

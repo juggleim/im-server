@@ -142,6 +142,31 @@ func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobj
 	return errs.IMErrorCode_SUCCESS, ret
 }
 
+func CheckGroupMembers(ctx context.Context, req *models.CheckGroupMembersReq) (errs.IMErrorCode, *models.CheckGroupMembersResp) {
+	ret := &models.CheckGroupMembersResp{
+		GroupId:        req.GroupId,
+		MemberExistMap: map[string]bool{},
+	}
+	for _, memberId := range req.MemberIds {
+		ret.MemberExistMap[memberId] = false
+	}
+	code, respObj, err := bases.SyncRpcCall(ctx, "g_check_members", req.GroupId, &pbobjs.CheckGroupMembersReq{
+		GroupId:   req.GroupId,
+		MemberIds: req.MemberIds,
+	}, func() proto.Message {
+		return &pbobjs.CheckGroupMembersResp{}
+	})
+	if err == nil && code == errs.IMErrorCode_SUCCESS && respObj != nil {
+		checkResp, ok := respObj.(*pbobjs.CheckGroupMembersResp)
+		if ok {
+			for memberId := range checkResp.MemberIdMap {
+				ret.MemberExistMap[memberId] = true
+			}
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
 func CreateGroup(ctx context.Context, req *pbobjs.GroupMembersReq) (errs.IMErrorCode, *pbobjs.GroupInfo) {
 	grpId := tools.GenerateUUIDShort11()
 	requestId := bases.GetRequesterIdFromCtx(ctx)
