@@ -122,6 +122,10 @@ func getGrpMemberAttsFromDb(ctx context.Context, appkey, groupId, memberId strin
 			} else if ext.ItemType == int(commonservices.AttItemType_Att) {
 				ret.ExtFields[ext.ItemKey] = ext.ItemValue
 			}
+			updTime := ext.UpdatedTime.UnixMilli()
+			if updTime > ret.UpdatedTime {
+				ret.UpdatedTime = updTime
+			}
 		}
 		commonservices.FillObjField(ret.Settings, valMap)
 	}
