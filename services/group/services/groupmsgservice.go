@@ -80,6 +80,8 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 
 	//update mentioned user's info
 	UpdateMentionedUserInfo(ctx, upMsg)
+	//get group member info
+	grpMemberInfo := getGroupMemberInfo(ctx, groupId, senderId)
 
 	var memberIds []string
 	//oriented msgs
@@ -115,6 +117,8 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		MergedMsgs:     upMsg.MergedMsgs,
 		MemberCount:    int32(memberCount),
 		PushData:       upMsg.PushData,
+		SearchText:     upMsg.SearchText,
+		GrpMemberInfo:  grpMemberInfo,
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 
@@ -140,6 +144,8 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		MergedMsgs:     upMsg.MergedMsgs,
 		MemberCount:    int32(memberCount),
 		PushData:       upMsg.PushData,
+		SearchText:     upMsg.SearchText,
+		GrpMemberInfo:  grpMemberInfo,
 	}
 
 	commonservices.SubGroupMsg(ctx, msgId, downMsg4Sendbox)
@@ -205,6 +211,29 @@ func UpdateMentionedUserInfo(ctx context.Context, upMsg *pbobjs.UpMsg) {
 			}
 		}
 	}
+}
+
+func getGroupMemberInfo(ctx context.Context, groupId, memberId string) *pbobjs.GrpMemberInfo {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	memberAtts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, memberId)
+	if memberAtts != nil {
+		ret := &pbobjs.GrpMemberInfo{
+			ExtFields:   []*pbobjs.KvItem{},
+			UpdatedTime: memberAtts.UpdatedTime,
+		}
+		for key, val := range memberAtts.ExtFields {
+			if key == string(commonservices.AttItemKey_GrpDisplayName) {
+				ret.GrpDisplayName = val
+			} else {
+				ret.ExtFields = append(ret.ExtFields, &pbobjs.KvItem{
+					Key:   key,
+					Value: val,
+				})
+			}
+		}
+		return ret
+	}
+	return nil
 }
 
 func checkIsMember(ctx context.Context, groupId, userId string) bool {

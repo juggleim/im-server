@@ -79,6 +79,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
 		MergedMsgs:     upMsg.MergedMsgs,
 		PushData:       upMsg.PushData,
+		SearchText:     upMsg.SearchText,
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 
@@ -103,6 +104,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		TargetUserInfo: commonservices.GetSenderUserInfo(ctx),
 		MergedMsgs:     upMsg.MergedMsgs,
 		PushData:       upMsg.PushData,
+		SearchText:     upMsg.SearchText,
 	}
 
 	//check merged msg

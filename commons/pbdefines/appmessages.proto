@@ -62,6 +62,7 @@ message UpMsg {
   DownMsg referMsg = 7;//被引用的消息
   repeated string toUserIds = 8;//群定向消息，指定接收消息的部分群成员
   MergedMsgs mergedMsgs = 9;
+  string SearchText = 10;
 
   int64 msgTime = 51;
 }

@@ -130,6 +130,8 @@ func copyDownMsg(msg *pbobjs.DownMsg) *pbobjs.DownMsg {
 		MemberCount:    msg.MemberCount,
 		ReadCount:      msg.ReadCount,
 		UnreadIndex:    msg.UnreadIndex,
+		SearchText:     msg.SearchText,
+		GrpMemberInfo:  msg.GrpMemberInfo,
 	}
 }
 
