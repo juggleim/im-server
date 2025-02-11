@@ -332,12 +332,19 @@ func QryGroupMembersByIds(ctx context.Context, req *pbobjs.GroupMembersReq) (err
 				if isMute > 0 && member.MuteEndAt < curr {
 					isMute = 0
 				}
-				resp.Items = append(resp.Items, &pbobjs.GroupMember{
+				member := &pbobjs.GroupMember{
 					MemberId:   memberId,
 					IsMute:     int32(isMute),
 					IsAllow:    int32(member.IsAllow),
 					MemberType: member.MemberType,
-				})
+				}
+				//add extfields
+				memberAtts := GetGrpMemberAttsFromCache(ctx, appkey, req.GroupId, memberId)
+				if memberAtts != nil {
+					member.ExtFields = commonservices.Map2KvItems(memberAtts.ExtFields)
+					member.Settings = commonservices.Map2KvItems(memberAtts.SettingFields)
+				}
+				resp.Items = append(resp.Items, member)
 			}
 		}
 	}
@@ -358,7 +365,9 @@ func QryGroupMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 	members, err := dao.QueryMembers(appkey, req.GroupId, startId, req.Limit)
 	if err == nil {
 		curr := time.Now().UnixMilli()
+		memberIds := []string{}
 		for _, member := range members {
+			memberIds = append(memberIds, member.MemberId)
 			isMute := member.IsMute
 			if isMute > 0 && member.MuteEndAt < curr {
 				isMute = 0
@@ -374,6 +383,34 @@ func QryGroupMembers(ctx context.Context, req *pbobjs.QryGroupMembersReq) (errs.
 				offset = ""
 			}
 			resp.Offset = offset
+		}
+		//add member extfields
+		memberExtDao := dbs.GroupMemberExtDao{}
+		extMap, err := memberExtDao.QryExtFieldsByMemberIds(appkey, req.GroupId, memberIds)
+		if err == nil {
+			for _, member := range resp.Items {
+				if exts, exist := extMap[member.MemberId]; exist {
+					if len(exts) > 0 {
+						member.ExtFields = []*pbobjs.KvItem{}
+						member.Settings = []*pbobjs.KvItem{}
+						for _, ext := range exts {
+							if ext.ItemType == int(commonservices.AttItemType_Att) {
+								member.ExtFields = append(member.ExtFields, &pbobjs.KvItem{
+									Key:     ext.ItemKey,
+									Value:   ext.ItemValue,
+									UpdTime: ext.UpdatedTime.UnixMilli(),
+								})
+							} else if ext.ItemType == int(commonservices.AttItemType_Setting) {
+								member.Settings = append(member.Settings, &pbobjs.KvItem{
+									Key:     ext.ItemKey,
+									Value:   ext.ItemValue,
+									UpdTime: ext.UpdatedTime.UnixMilli(),
+								})
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, resp

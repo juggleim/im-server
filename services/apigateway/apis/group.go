@@ -111,6 +111,36 @@ func GroupDelMembers(ctx *gin.Context) {
 	tools.SuccessHttpResp(ctx, nil)
 }
 
+func GroupMemberUpdate(ctx *gin.Context) {
+	var req models.GroupMemberUpdateReq
+	if err := ctx.BindJSON(&req); err != nil || req.GroupId == "" || req.MemberId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	extFields := map[string]string{}
+	if req.GrpDisplayName != "" {
+		extFields[string(commonservices.AttItemKey_GrpDisplayName)] = req.GrpDisplayName
+	}
+	if len(req.ExtFields) > 0 {
+		for k, v := range req.ExtFields {
+			extFields[k] = v
+		}
+	}
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "set_grp_member_setting", req.GroupId, &pbobjs.GroupMember{
+		MemberId:  req.MemberId,
+		ExtFields: commonservices.Map2KvItems(extFields),
+	}, nil)
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+		return
+	}
+	tools.SuccessHttpResp(ctx, nil)
+}
+
 func GroupDissolve(ctx *gin.Context) {
 	var disReq models.GroupInfo
 	if err := ctx.BindJSON(&disReq); err != nil {
@@ -291,10 +321,23 @@ func GroupMembers(ctx *gin.Context) {
 		Offset: groupMembers.Offset,
 	}
 	for _, member := range groupMembers.Items {
+		displayName := ""
+		extMap := map[string]string{}
+		if len(member.ExtFields) > 0 {
+			for _, ext := range member.ExtFields {
+				if ext.Key == string(commonservices.AttItemKey_GrpDisplayName) {
+					displayName = ext.Value
+				} else {
+					extMap[ext.Key] = ext.Value
+				}
+			}
+		}
 		ret.Items = append(ret.Items, &models.GroupMember{
-			MemberId: member.MemberId,
-			IsMute:   int(member.IsMute),
-			IsAllow:  int(member.IsAllow),
+			MemberId:       member.MemberId,
+			IsMute:         int(member.IsMute),
+			IsAllow:        int(member.IsAllow),
+			GrpDisplayName: displayName,
+			ExtFields:      extMap,
 		})
 	}
 	tools.SuccessHttpResp(ctx, ret)
@@ -326,10 +369,23 @@ func GroupMembersByIds(ctx *gin.Context) {
 		Offset: groupMembers.Offset,
 	}
 	for _, member := range groupMembers.Items {
+		displayName := ""
+		extMap := map[string]string{}
+		if len(member.ExtFields) > 0 {
+			for _, ext := range member.ExtFields {
+				if ext.Key == string(commonservices.AttItemKey_GrpDisplayName) {
+					displayName = ext.Value
+				} else {
+					extMap[ext.Key] = ext.Value
+				}
+			}
+		}
 		ret.Items = append(ret.Items, &models.GroupMember{
-			MemberId: member.MemberId,
-			IsMute:   int(member.IsMute),
-			IsAllow:  int(member.IsAllow),
+			MemberId:       member.MemberId,
+			IsMute:         int(member.IsMute),
+			IsAllow:        int(member.IsAllow),
+			GrpDisplayName: displayName,
+			ExtFields:      extMap,
 		})
 	}
 	tools.SuccessHttpResp(ctx, ret)

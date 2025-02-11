@@ -72,6 +72,7 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.POST("/groups/members/add", apis.GroupAddMembers)
 	group.POST("/groups/members/del", apis.GroupDelMembers)
 	group.GET("/groups/members/query", apis.GroupMembers)
+	group.POST("/groups/members/update", apis.GroupMemberUpdate)
 	group.POST("/groups/members/querybyids", apis.GroupMembersByIds)
 	group.POST("/groups/groupmute/set", apis.GroupMute)
 	group.POST("/groups/groupmembermute/set", apis.GroupMemberMute)

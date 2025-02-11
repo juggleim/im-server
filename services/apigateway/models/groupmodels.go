@@ -23,10 +23,19 @@ type GroupMembersReq struct {
 	MemberIds     []string          `json:"member_ids"`
 }
 
+type GroupMemberUpdateReq struct {
+	GroupId        string            `json:"group_id"`
+	MemberId       string            `json:"member_id"`
+	GrpDisplayName string            `json:"grp_display_name"`
+	ExtFields      map[string]string `json:"ext_fields"`
+}
+
 type GroupMember struct {
-	MemberId string `json:"member_id"`
-	IsMute   int    `json:"is_mute"`
-	IsAllow  int    `json:"is_allow"`
+	MemberId       string            `json:"member_id"`
+	IsMute         int               `json:"is_mute"`
+	IsAllow        int               `json:"is_allow"`
+	GrpDisplayName string            `json:"grp_display_name"`
+	ExtFields      map[string]string `json:"ext_fields"`
 }
 
 type GroupMembersResp struct {
