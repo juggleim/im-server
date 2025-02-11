@@ -47,6 +47,17 @@ func GetConnSession(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_ConnectSession)
 }
 
+func GetConnectCreateTime(ctx WsHandleContext) int64 {
+	ret := GetContextAttr(ctx, StateKey_ConnectCreateTime)
+	if ret != nil {
+		intVal, ok := ret.(int64)
+		if ok {
+			return intVal
+		}
+	}
+	return 0
+}
+
 func GetAppkey(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_Appkey)
 }

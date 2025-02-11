@@ -47,6 +47,7 @@ const (
 	CtxKey_AppKey        CtxKey = "CtxKey_AppKey"
 	CtxKey_Qos           CtxKey = "CtxKey_Qos"
 	CtxKey_Session       CtxKey = "CtxKey_Session"
+	CtxKey_ConnectedTime CtxKey = "CtxKey_ConnectedTime"
 	CtxKey_DeviceId      CtxKey = "CtxKey_DeviceId"
 	CtxKey_InstanceId    CtxKey = "CtxKey_InstanceId"
 	CtxKey_Platform      CtxKey = "CtxKey_Platform"
@@ -86,6 +87,7 @@ func (actor *baseProcessActor) OnReceive(ctx context.Context, input proto.Messag
 			ctx = setCtxValue(ctx, CtxKey_AppKey, ssRequest.AppKey)
 			ctx = setCtxValue(ctx, CtxKey_Qos, ssRequest.Qos)
 			ctx = setCtxValue(ctx, CtxKey_Session, ssRequest.Session)
+			ctx = setCtxValue(ctx, CtxKey_ConnectedTime, ssRequest.ConnectedTime)
 			ctx = setCtxValue(ctx, CtxKey_DeviceId, ssRequest.DeviceId)
 			ctx = setCtxValue(ctx, CtxKey_InstanceId, ssRequest.InstanceId)
 			ctx = setCtxValue(ctx, CtxKey_Platform, ssRequest.Platform)
@@ -213,6 +215,12 @@ func GetSessionFromCtx(ctx context.Context) string {
 		return session
 	}
 	return ""
+}
+func GetConnectedTimeFromCtx(ctx context.Context) int64 {
+	if connectedTime, ok := ctx.Value(CtxKey_ConnectedTime).(int64); ok {
+		return connectedTime
+	}
+	return 0
 }
 func GetDeviceIdFromCtx(ctx context.Context) string {
 	if deviceId, ok := ctx.Value(CtxKey_DeviceId).(string); ok {

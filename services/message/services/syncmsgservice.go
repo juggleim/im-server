@@ -22,7 +22,12 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 	appinfo, exist := commonservices.GetAppInfo(appKey)
 	restrictTime := time.Now().Add(-time.Minute * 1440).UnixMilli()
 	if exist && appinfo != nil {
-		restrictTime = time.Now().Add(-time.Minute * time.Duration(appinfo.OfflineMsgSaveTime)).UnixMilli()
+		connectedTime := bases.GetConnectedTimeFromCtx(ctx)
+		if appinfo.CloseOfflineMsg && connectedTime > 0 {
+			restrictTime = connectedTime - 5*1000
+		} else {
+			restrictTime = time.Now().Add(-time.Minute * time.Duration(appinfo.OfflineMsgSaveTime)).UnixMilli()
+		}
 	}
 	syncTime := syncMsg.SyncTime
 	sendboxSyncTime := syncMsg.SendBoxSyncTime

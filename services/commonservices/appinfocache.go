@@ -34,6 +34,7 @@ type AppInfo struct {
 	TokenEffectiveMinute  int    `default:"0"`
 	OfflineMsgSaveTime    int    `default:"1440"`
 	OfflineCmdMsgSaveTime int    `default:"10080"`
+	CloseOfflineMsg       bool   `default:"false"`
 	IsSubApiMsg           bool   `default:"false"`
 	IsOpenPush            bool   `default:"true"`
 	PushLanguage          string `default:"en_US"`

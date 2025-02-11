@@ -33,6 +33,7 @@ message RpcMessageWraper{
   string instanceId = 17;
   string platform = 18;
   bool isFromApp = 19;
+  int64 connectedTime = 20;
 
   int32 resultCode = 21;
   int64 msgSendTime = 22;
@@ -141,6 +142,8 @@ message DownMsg{
   repeated MsgExtItem msgExts = 26;
   repeated ConverTag converTags = 27;
   map<string, TransMsgContent> transMsgMap = 28;
+  string SearchText = 29;
+  GrpMemberInfo grpMemberInfo = 30;
 }
 
 message TransMsgContent{
@@ -830,6 +833,12 @@ message GroupInfo{
   int64 updatedTime = 6;
   repeated KvItem settings = 7;
   int32 memberCount = 8;
+}
+
+message GrpMemberInfo{
+  string grpDisplayName = 1;
+  repeated KvItem extFields = 2;
+  int64 updatedTime = 3;
 }
 
 message GroupMembersReq {

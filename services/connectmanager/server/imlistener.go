@@ -309,19 +309,20 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 	}
 
 	isSucc := bases.UnicastRoute(&pbobjs.RpcMessageWraper{
-		RpcMsgType:   pbobjs.RpcMsgType_QueryMsg,
-		AppKey:       appkey,
-		Session:      imcontext.GetConnSession(ctx),
-		DeviceId:     imcontext.GetDeviceId(ctx),
-		InstanceId:   imcontext.GetInstanceId(ctx),
-		Platform:     imcontext.GetPlatform(ctx),
-		Method:       msg.Topic,
-		RequesterId:  userid,
-		ReqIndex:     msg.Index,
-		Qos:          int32(codec.QoS_NeedAck),
-		AppDataBytes: msg.Data,
-		TargetId:     targetId,
-		TerminalNum:  services.GetConnectCountByUser(appkey, userid),
+		RpcMsgType:    pbobjs.RpcMsgType_QueryMsg,
+		AppKey:        appkey,
+		Session:       imcontext.GetConnSession(ctx),
+		ConnectedTime: imcontext.GetConnectCreateTime(ctx),
+		DeviceId:      imcontext.GetDeviceId(ctx),
+		InstanceId:    imcontext.GetInstanceId(ctx),
+		Platform:      imcontext.GetPlatform(ctx),
+		Method:        msg.Topic,
+		RequesterId:   userid,
+		ReqIndex:      msg.Index,
+		Qos:           int32(codec.QoS_NeedAck),
+		AppDataBytes:  msg.Data,
+		TargetId:      targetId,
+		TerminalNum:   services.GetConnectCountByUser(appkey, userid),
 	}, "connect")
 	if !isSucc {
 		ack := codec.NewQueryAckMessage(&codec.QueryAckMsgBody{
