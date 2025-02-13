@@ -216,7 +216,7 @@ func UpdateMentionedUserInfo(ctx context.Context, upMsg *pbobjs.UpMsg) {
 func getGroupMemberInfo(ctx context.Context, groupId, memberId string) *pbobjs.GrpMemberInfo {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	memberAtts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, memberId)
-	if memberAtts != nil {
+	if memberAtts != nil && len(memberAtts.ExtFields) > 0 {
 		ret := &pbobjs.GrpMemberInfo{
 			ExtFields:   []*pbobjs.KvItem{},
 			UpdatedTime: memberAtts.UpdatedTime,
