@@ -46,6 +46,7 @@ func PutInContextCache(ctx imcontext.WsHandleContext) {
 		appkey := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey)
 		userid := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 		identifier := getUserIdentifier(appkey, userid)
+		deviceId := imcontext.GetDeviceId(ctx)
 
 		lock := GetLock(identifier)
 		lock.Lock()
@@ -84,13 +85,18 @@ func PutInContextCache(ctx imcontext.WsHandleContext) {
 				if exist && kickCtxObj != nil {
 					kickCtx := kickCtxObj.(imcontext.WsHandleContext)
 					go func() {
+						code := errs.IMErrorCode_CONNECT_KICKED_OFF
+						kickDeviceId := imcontext.GetDeviceId(kickCtx)
+						if deviceId == kickDeviceId {
+							code = errs.IMErrorCode_CONNECT_KICKED_BY_SELF
+						}
 						disconnectMsg := codec.NewDisconnectMessage(&codec.DisconnectMsgBody{
-							Code:      int32(errs.IMErrorCode_CONNECT_KICKED_OFF),
+							Code:      int32(code),
 							Timestamp: time.Now().UnixMilli(),
 						})
 						kickCtx.Write(disconnectMsg)
 						logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(kickCtx), imcontext.Action_Disconnect, disconnectMsg.MsgBody.Code)
-						Offline(kickCtx, errs.IMErrorCode_CONNECT_KICKED_OFF)
+						Offline(kickCtx, code)
 						time.Sleep(time.Millisecond * 50)
 						kickCtx.Close(errors.New("kick off by other login"))
 					}()

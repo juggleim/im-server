@@ -64,6 +64,8 @@ var (
 	IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT IMErrorCode = 11018
 	IMErrorCode_CONNECT_CLOSE_DATA_ILLEGAL      IMErrorCode = 11019
 	IMErrorCode_CONNECT_UNSECURITYDOMAIN        IMErrorCode = 11020
+	IMErrorCode_CONNECT_FUNCTIONDISABLED        IMErrorCode = 11021
+	IMErrorCode_CONNECT_KICKED_BY_SELF          IMErrorCode = 11022
 )
 
 // msg errorcode
