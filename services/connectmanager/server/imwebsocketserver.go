@@ -180,6 +180,7 @@ func (ctx *WsHandleContextImpl) Write(message interface{}) {
 		if err == nil {
 			ctx.lock.Lock()
 			defer ctx.lock.Unlock()
+			_ = ctx.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 			err = ctx.conn.WriteMessage(websocket.BinaryMessage, bs)
 			if err != nil {
 				fmt.Println("write result:", err)
