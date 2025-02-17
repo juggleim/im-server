@@ -10,6 +10,7 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/friends/storages"
 	"im-server/services/group/dbs"
+	userStorage "im-server/services/usermanager/storages"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -50,7 +51,13 @@ func GetUserSettings(userInfo *commonservices.TargetUserInfo) *pbobjs.UserSettin
 
 func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs.UserObjs) {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
+	appkey := bases.GetAppKeyFromCtx(ctx)
 	targetUserId := tools.ShortMd5(phone)
+	storage := userStorage.NewUserStorage()
+	user, err := storage.FindByPhone(appkey, phone)
+	if err == nil && user != nil {
+		targetUserId = user.UserId
+	}
 	code, respObj, err := bases.SyncRpcCall(ctx, "qry_user_info", targetUserId, &pbobjs.UserIdReq{
 		UserId:   targetUserId,
 		AttTypes: []int32{int32(commonservices.AttItemType_Att)},
