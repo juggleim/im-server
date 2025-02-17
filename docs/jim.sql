@@ -726,13 +726,21 @@ CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_type` tinyint DEFAULT '0' COMMENT '用户类型 0用户, 1机器人',
   `user_id` varchar(32) NOT NULL COMMENT '用户id',
-  `nickname` varchar(45) DEFAULT NULL COMMENT '昵称',
+  `nickname` varchar(50) DEFAULT NULL COMMENT '昵称',
   `user_portrait` varchar(200) DEFAULT NULL COMMENT '用户头像',
+  `pinyin` varchar(50) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `login_account` varchar(50) DEFAULT NULL,
+  `login_pass` varchar(50) DEFAULT NULL,
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
-  `app_key` varchar(45) DEFAULT NULL COMMENT '应用key',
+  `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_userid` (`app_key`,`user_id`),
+  UNIQUE KEY `uniq_phone` (`app_key`,`phone`),
+  UNIQUE KEY `uniq_email` (`app_key`,`email`),
+  UNIQUE KEY `uniq_account` (`app_key`,`login_account`),
   KEY `idx_userid` (`app_key`,`user_type`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '用户-基本信息表';
 
@@ -923,6 +931,17 @@ CREATE TABLE `qrcoderecords` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_id` (`app_key`,`code_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '二维码扫码记录表';
+
+DROP TABLE IF EXISTS `smsrecords`;
+CREATE TABLE `smsrecords` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `phone` varchar(50) DEFAULT NULL,
+  `code` varchar(10) DEFAULT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_phone` (`app_key`,`phone`,`created_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `favoritemsgs`;
 CREATE TABLE `favoritemsgs` (

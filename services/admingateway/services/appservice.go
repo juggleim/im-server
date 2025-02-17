@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
-	userDbs "im-server/services/usermanager/dbs"
+	userStorage "im-server/services/usermanager/storages"
 	"math"
 )
 
@@ -46,8 +46,8 @@ func QryApps(limit int64, offset string) *Apps {
 				AppType:      dbApp.AppType,
 				MaxUserCount: 100,
 			}
-			userDao := userDbs.UserDao{}
-			app.CurUserCount = userDao.Count(dbApp.AppKey)
+			storage := userStorage.NewUserStorage()
+			app.CurUserCount = storage.Count(dbApp.AppKey)
 			apps.Items = append(apps.Items, app)
 			if dbApp.ID < id {
 				id = dbApp.ID
@@ -78,8 +78,8 @@ func QryApp(appkey string) *AppInfo {
 		ConfigFields: make(map[string]string),
 		MaxUserCount: 100,
 	}
-	userDao := userDbs.UserDao{}
-	appInfo.CurUserCount = userDao.Count(dbApp.AppKey)
+	storage := userStorage.NewUserStorage()
+	appInfo.CurUserCount = storage.Count(dbApp.AppKey)
 	//appext
 	extDao := dbs.AppExtDao{}
 	dbExts := extDao.FindListByAppkey(appkey)

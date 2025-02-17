@@ -7,7 +7,8 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
-	"im-server/services/usermanager/dbs"
+	userStorage "im-server/services/usermanager/storages"
+	userModels "im-server/services/usermanager/storages/models"
 )
 
 func SetPrivateGlobalMute(ctx context.Context, req *pbobjs.BatchMuteUsersReq) {
@@ -15,15 +16,15 @@ func SetPrivateGlobalMute(ctx context.Context, req *pbobjs.BatchMuteUsersReq) {
 		return
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	dao := dbs.UserExtDao{}
-	items := []dbs.UserExtDao{}
+	storage := userStorage.NewUserExtStorage()
+	items := []userModels.UserExt{}
 	for _, userId := range req.UserIds {
 		user, exist := GetUserInfo(appkey, userId)
 		if exist && user != nil {
 			user.SetPriGlobalMute(req.IsDelete, 0)
 		}
 		if !req.IsDelete {
-			items = append(items, dbs.UserExtDao{
+			items = append(items, userModels.UserExt{
 				AppKey:    appkey,
 				UserId:    userId,
 				ItemKey:   string(commonservices.AttItemKey_PriGlobalMute),
@@ -33,15 +34,15 @@ func SetPrivateGlobalMute(ctx context.Context, req *pbobjs.BatchMuteUsersReq) {
 		}
 	}
 	if req.IsDelete {
-		dao.BatchDelete(appkey, string(commonservices.AttItemKey_PriGlobalMute), req.UserIds)
+		storage.BatchDelete(appkey, string(commonservices.AttItemKey_PriGlobalMute), req.UserIds)
 	} else {
-		dao.BatchUpsert(items)
+		storage.BatchUpsert(items)
 	}
 }
 
 func QryPriGlobalMuteUsers(ctx context.Context, req *pbobjs.QryBlockUsersReq) (errs.IMErrorCode, *pbobjs.QryBlockUsersResp) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	dao := dbs.UserExtDao{}
+	storage := userStorage.NewUserExtStorage()
 	var startId int64 = 0
 	if req.Offset != "" {
 		offsetInt, err := tools.DecodeInt(req.Offset)
@@ -53,7 +54,7 @@ func QryPriGlobalMuteUsers(ctx context.Context, req *pbobjs.QryBlockUsersReq) (e
 		Items: []*pbobjs.BlockUser{},
 	}
 	var maxId int64 = 0
-	exts, err := dao.QryExtsBaseItemKey(appkey, string(commonservices.AttItemKey_PriGlobalMute), startId, req.Limit)
+	exts, err := storage.QryExtsBaseItemKey(appkey, string(commonservices.AttItemKey_PriGlobalMute), startId, req.Limit)
 	if err == nil {
 		for _, ext := range exts {
 			if ext.ID > maxId {

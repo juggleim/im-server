@@ -151,6 +151,8 @@ var (
 	IMErrorCode_APP_NOT_LOGIN        IMErrorCode = 17005
 	IMErrorCode_APP_CONTINUE         IMErrorCode = 17006
 	IMErrorCode_APP_QRCODE_EXPIRED   IMErrorCode = 17007
+	IMErrorCode_APP_SMS_SEND_FAILED  IMErrorCode = 17008
+	IMErrorCode_APP_SMS_CODE_EXPIRED IMErrorCode = 17009
 
 	//friends
 	IMErrorCode_APP_FRIEND_DEFAULT         IMErrorCode = 17100

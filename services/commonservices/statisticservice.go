@@ -6,7 +6,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
-	userDbs "im-server/services/usermanager/dbs"
+	"im-server/services/usermanager/storages"
 	"sync/atomic"
 	"time"
 )
@@ -138,14 +138,14 @@ func QryUserRegiste(appkey string, start, end int64) *Statistics {
 		timeMarks = append(timeMarks, s)
 		s = s + oneDay
 	}
-	dao := userDbs.UserDao{}
+	storage := storages.NewUserStorage()
 	for _, timemark := range timeMarks {
 		ret.Items = append(ret.Items, &UserActivityItem{
 			TimeMark: timemark,
-			Count:    dao.CountByTime(appkey, timemark, timemark+oneDay),
+			Count:    storage.CountByTime(appkey, timemark, timemark+oneDay),
 		})
 	}
-	totalCount := dao.Count(appkey)
+	totalCount := storage.Count(appkey)
 	if totalCount > 0 {
 		ret.TotalUserCount = tools.Int64Ptr(int64(totalCount))
 	}

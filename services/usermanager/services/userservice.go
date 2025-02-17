@@ -9,7 +9,9 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
-	"im-server/services/usermanager/dbs"
+	userStorage "im-server/services/usermanager/storages"
+	"im-server/services/usermanager/storages/dbs"
+	"im-server/services/usermanager/storages/models"
 	"strings"
 	"time"
 )
@@ -95,25 +97,22 @@ func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFiel
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	key := strings.Join([]string{appkey, userId}, "_")
 	userInfo, exist := GetUserInfo(appkey, userId)
-	dao := dbs.UserDao{}
-	current := time.Now()
+	storage := userStorage.NewUserStorage()
 	if exist && userInfo != nil {
 		if nickname != userInfo.Nickname || userPortrait != userInfo.UserPortrait {
-			err := dao.Upsert(dbs.UserDao{
+			err := storage.Upsert(models.User{
 				UserId:       userId,
-				UserType:     int(userType),
+				UserType:     userType,
 				Nickname:     nickname,
 				UserPortrait: userPortrait,
-				CreatedTime:  current,
-				UpdatedTime:  current,
 				AppKey:       appkey,
 			})
 			if err == nil {
-				extDao := dbs.UserExtDao{}
+				userExtStorage := userStorage.NewUserExtStorage()
 				for _, ext := range extFields {
 					itemKey := ext.Key
 					itemValue := ext.Value
-					err = extDao.Upsert(dbs.UserExtDao{
+					err = userExtStorage.Upsert(models.UserExt{
 						AppKey:    appkey,
 						UserId:    userId,
 						ItemKey:   itemKey,
@@ -125,7 +124,7 @@ func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFiel
 					}
 				}
 				for _, set := range settings {
-					err = extDao.Upsert(dbs.UserExtDao{
+					err = userExtStorage.Upsert(models.UserExt{
 						AppKey:    appkey,
 						UserId:    userId,
 						ItemKey:   set.Key,
@@ -142,21 +141,19 @@ func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFiel
 			userCache.Remove(key)
 		}
 	} else {
-		err := dao.Upsert(dbs.UserDao{
+		err := storage.Upsert(models.User{
 			UserId:       userId,
-			UserType:     int(userType),
+			UserType:     userType,
 			Nickname:     nickname,
 			UserPortrait: userPortrait,
-			CreatedTime:  current,
-			UpdatedTime:  current,
 			AppKey:       appkey,
 		})
 		if err == nil {
-			extDao := dbs.UserExtDao{}
+			userExtStorage := userStorage.NewUserExtStorage()
 			for _, ext := range extFields {
 				itemKey := ext.Key
 				itemValue := ext.Value
-				err = extDao.Upsert(dbs.UserExtDao{
+				err = userExtStorage.Upsert(models.UserExt{
 					AppKey:    appkey,
 					UserId:    userId,
 					ItemKey:   itemKey,
@@ -168,7 +165,7 @@ func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFiel
 				}
 			}
 			for _, set := range settings {
-				err = extDao.Upsert(dbs.UserExtDao{
+				err = userExtStorage.Upsert(models.UserExt{
 					AppKey:    appkey,
 					UserId:    userId,
 					ItemKey:   set.Key,
@@ -208,12 +205,12 @@ func GetUserInfo(appkey, userId string) (*UserInfo, bool) {
 				return userInfo, true
 			}
 		} else {
-			dao := dbs.UserDao{}
-			user := dao.FindByUserId(appkey, userId)
-			if user != nil {
+			storage := userStorage.NewUserStorage()
+			user, err := storage.FindByUserId(appkey, userId)
+			if err == nil && user != nil {
 				userInfo := &UserInfo{
 					UserId:        userId,
-					UserType:      user.UserType,
+					UserType:      int(user.UserType),
 					Nickname:      user.Nickname,
 					UserPortrait:  user.UserPortrait,
 					ExtFields:     make(map[string]string),
@@ -268,9 +265,9 @@ func UpdUserInfo(ctx context.Context, userinfo *pbobjs.UserInfo) errs.IMErrorCod
 	if err == nil {
 		rvCache = rvCache || true
 	}
-	extDao := dbs.UserExtDao{}
+	extStorage := userStorage.NewUserExtStorage()
 	for _, ext := range userinfo.ExtFields {
-		extDao.Upsert(dbs.UserExtDao{
+		extStorage.Upsert(models.UserExt{
 			AppKey:    appkey,
 			UserId:    userinfo.UserId,
 			ItemKey:   ext.Key,
@@ -280,7 +277,7 @@ func UpdUserInfo(ctx context.Context, userinfo *pbobjs.UserInfo) errs.IMErrorCod
 		rvCache = rvCache || true
 	}
 	for _, setting := range userinfo.Settings {
-		extDao.Upsert(dbs.UserExtDao{
+		extStorage.Upsert(models.UserExt{
 			AppKey:    appkey,
 			UserId:    userinfo.UserId,
 			ItemKey:   setting.Key,
@@ -331,8 +328,8 @@ func SetUserUndisturb(ctx context.Context, userId string, req *pbobjs.UserUndist
 	}
 	userInfo.SettingFields[string(commonservices.AttItemKey_Undisturb)] = jsonStr
 	//upd db
-	extDao := dbs.UserExtDao{}
-	extDao.Upsert(dbs.UserExtDao{
+	extStorage := userStorage.NewUserExtStorage()
+	extStorage.Upsert(models.UserExt{
 		AppKey:    appkey,
 		UserId:    userId,
 		ItemKey:   string(commonservices.AttItemKey_Undisturb),
@@ -389,9 +386,9 @@ func SetUserSettings(ctx context.Context, userId string, userinfo *pbobjs.UserIn
 	}
 	rvCache := false
 	//upd db
-	extDao := dbs.UserExtDao{}
+	extStorage := userStorage.NewUserExtStorage()
 	for _, item := range userinfo.Settings {
-		extDao.Upsert(dbs.UserExtDao{
+		extStorage.Upsert(models.UserExt{
 			AppKey:    appkey,
 			UserId:    userId,
 			ItemKey:   item.Key,
@@ -418,10 +415,10 @@ func SetUserStatus(ctx context.Context, userId string, userinfo *pbobjs.UserInfo
 		UserId:   userId,
 		Statuses: []*pbobjs.KvItem{},
 	}
-	extDao := dbs.UserExtDao{}
+	extStorage := userStorage.NewUserExtStorage()
 	for _, item := range userinfo.Statuses {
 		//upd db
-		extDao.Upsert(dbs.UserExtDao{
+		extStorage.Upsert(models.UserExt{
 			AppKey:    appkey,
 			UserId:    userId,
 			ItemKey:   item.Key,

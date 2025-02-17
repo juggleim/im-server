@@ -13,11 +13,14 @@ import (
 	"im-server/services/appbusiness/services"
 	"im-server/services/appbusiness/storages"
 	storageModels "im-server/services/appbusiness/storages/models"
+	userStorage "im-server/services/usermanager/storages"
+	userModels "im-server/services/usermanager/storages/models"
 	"image/png"
 	"time"
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
+	"github.com/jinzhu/gorm"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -54,16 +57,60 @@ func Login(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(resp)
 }
 
+func SmsSend(ctx *httputils.HttpContext) {
+	req := &models.SmsLoginReq{}
+	if err := ctx.BindJson(req); err != nil || req.Phone == "" {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.SmsSend(ctx.ToRpcCtx(), req.Phone)
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(nil)
+}
+
 func SmsLogin(ctx *httputils.HttpContext) {
 	req := &models.SmsLoginReq{}
 	if err := ctx.BindJson(req); err != nil || req.Phone == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	succ := services.CheckPhoneSmsCode(req.Phone, req.Code)
-	if succ {
+	code := services.CheckPhoneSmsCode(ctx.ToRpcCtx(), req.Phone, req.Code)
+	if code == errs.IMErrorCode_SUCCESS {
+		appkey := ctx.AppKey
 		userId := tools.ShortMd5(req.Phone)
 		nickname := fmt.Sprintf("user%05d", tools.RandInt(100000))
+		storage := userStorage.NewUserStorage()
+		user, err := storage.FindByPhone(appkey, req.Phone)
+		if err == nil && user != nil {
+			userId = user.UserId
+			nickname = user.Nickname
+		} else {
+			user, err = storage.FindByUserId(appkey, userId)
+			if err == nil && user != nil {
+				userId = user.UserId
+				nickname = user.Nickname
+			} else {
+				if err != gorm.ErrRecordNotFound {
+					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+					return
+				}
+				userId = tools.GenerateUUIDShort11()
+				err = storage.Create(userModels.User{
+					UserId:   userId,
+					Nickname: nickname,
+					Phone:    req.Phone,
+					AppKey:   appkey,
+				})
+				if err != nil {
+					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+					return
+				}
+			}
+		}
+
 		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
 			UserId:   userId,
 			Nickname: nickname,
@@ -89,7 +136,7 @@ func SmsLogin(ctx *httputils.HttpContext) {
 			ImToken:       regResp.Token,
 		})
 	} else {
-		ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+		ctx.ResponseErr(code)
 		return
 	}
 }
