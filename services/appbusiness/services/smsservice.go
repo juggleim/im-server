@@ -30,29 +30,30 @@ func RandomSms() string {
 
 func SmsSend(ctx context.Context, phone string) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	if appinfo, exist := commonservices.GetAppInfo(appkey); exist {
-		if appinfo.SmsEngine != nil && appinfo.SmsEngine != sms.DefaultSmsEngine {
-			// 检查是否还有有效的
-			storage := storages.NewSmsRecordStorage()
-			record, err := storage.FindByPhone(appkey, phone, time.Now().Add(-3*time.Minute))
-			randomCode := RandomSms()
-			if err == nil {
-				randomCode = record.Code
-			} else {
-				_, err = storage.Create(models.SmsRecord{
-					AppKey:      appkey,
-					Phone:       phone,
-					Code:        randomCode,
-					CreatedTime: time.Now(),
-				})
-				if err != nil {
-					return errs.IMErrorCode_APP_SMS_SEND_FAILED
-				}
+	smsEngine := commonservices.GetSmsEngine(appkey)
+	if smsEngine != nil && smsEngine != sms.DefaultSmsEngine {
+		// 检查是否还有有效的
+		storage := storages.NewSmsRecordStorage()
+		record, err := storage.FindByPhone(appkey, phone, time.Now().Add(-3*time.Minute))
+		randomCode := RandomSms()
+		if err == nil {
+			randomCode = record.Code
+		} else {
+			_, err = storage.Create(models.SmsRecord{
+				AppKey:      appkey,
+				Phone:       phone,
+				Code:        randomCode,
+				CreatedTime: time.Now(),
+			})
+			if err != nil {
+				return errs.IMErrorCode_APP_SMS_SEND_FAILED
 			}
-			err = appinfo.SmsEngine.SmsSend(phone, randomCode)
-			if err == nil {
-				return errs.IMErrorCode_SUCCESS
-			}
+		}
+		err = smsEngine.SmsSend(phone, map[string]interface{}{
+			"code": randomCode,
+		})
+		if err == nil {
+			return errs.IMErrorCode_SUCCESS
 		}
 	}
 	return errs.IMErrorCode_SUCCESS

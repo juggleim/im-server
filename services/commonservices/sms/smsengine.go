@@ -5,11 +5,11 @@ var (
 )
 
 type ISmsEngine interface {
-	SmsSend(phone, content string) error
+	SmsSend(phone string, params map[string]interface{}) error
 }
 
 type NilSmsEngine struct{}
 
-func (engine *NilSmsEngine) SmsSend(phone, content string) error {
+func (engine *NilSmsEngine) SmsSend(phone string, params map[string]interface{}) error {
 	return nil
 }
