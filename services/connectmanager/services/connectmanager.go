@@ -69,6 +69,10 @@ func PutInContextCache(ctx imcontext.WsHandleContext) {
 				if sessionKey == session {
 					continue
 				}
+				did := imcontext.GetDeviceId(clientCtx)
+				if did == deviceId {
+					continue
+				}
 				platform := imcontext.GetContextAttrString(clientCtx, imcontext.StateKey_Platform)
 				if currentPlatform == string(commonservices.Platform_Android) || currentPlatform == string(commonservices.Platform_IOS) {
 					if platform == string(commonservices.Platform_Android) || platform == string(commonservices.Platform_IOS) {
