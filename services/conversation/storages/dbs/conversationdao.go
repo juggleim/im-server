@@ -61,7 +61,7 @@ func (conver *ConversationDao) FindOne(appkey, userId, targetId string, channelT
 		IsTop:              item.IsTop,
 		TopUpdatedTime:     item.TopUpdatedTime,
 		UndisturbType:      item.UndisturbType,
-		ConverExts:         parseConverTags(item.ConverExts),
+		ConverExts:         parseConverExts(item.ConverExts),
 	}, nil
 }
 
@@ -102,7 +102,7 @@ func (conver *ConversationDao) Upsert(item models.Conversation) error {
 		item.IsTop, item.TopUpdatedTime, item.UndisturbType,
 		item.UnreadTag,
 		item.IsDeleted,
-		item.ConverExts,
+		converExts2Bs(item.ConverExts),
 	)
 	sqlBuilder.WriteString("sort_time=VALUES(sort_time),sync_time=VALUES(sync_time),latest_msg_id=VALUES(latest_msg_id),latest_msg=VALUES(latest_msg),latest_unread_msg_index=VALUES(latest_unread_msg_index),")
 	sqlBuilder.WriteString("latest_read_msg_index=VALUES(latest_read_msg_index),latest_read_msg_id=VALUES(latest_read_msg_id),latest_read_msg_time=VALUES(latest_read_msg_time),")
@@ -137,7 +137,7 @@ func (conver *ConversationDao) QryConvers(appkey, userId string, startTime int64
 			TopUpdatedTime:       item.TopUpdatedTime,
 			IsDeleted:            item.IsDeleted,
 			UnreadTag:            item.UnreadTag,
-			ConverExts:           parseConverTags(item.ConverExts),
+			ConverExts:           parseConverExts(item.ConverExts),
 		})
 	}
 	return conversations, nil
@@ -147,7 +147,7 @@ func (conver *ConversationDao) ClearTotalUnreadCount(appkey, userId string) erro
 	return dbcommons.GetDb().Exec("UPDATE conversations set latest_read_msg_index=latest_unread_msg_index, latest_read_msg_time =(UNIX_TIMESTAMP(NOW(3)) * 1000), unread_tag=0 where app_key=? and user_id=?", appkey, userId).Error
 }
 
-func parseConverTags(bs []byte) *pbobjs.ConverExts {
+func parseConverExts(bs []byte) *pbobjs.ConverExts {
 	if len(bs) > 0 {
 		var tags pbobjs.ConverExts
 		err := tools.PbUnMarshal(bs, &tags)
@@ -156,4 +156,12 @@ func parseConverTags(bs []byte) *pbobjs.ConverExts {
 		}
 	}
 	return nil
+}
+
+func converExts2Bs(exts *pbobjs.ConverExts) []byte {
+	if exts != nil {
+		bs, _ := tools.PbMarshal(exts)
+		return bs
+	}
+	return []byte{}
 }

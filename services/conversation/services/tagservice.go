@@ -97,7 +97,12 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 	})
 	//cache
 	userConvers := getUserConvers(appkey, userId)
-	userConvers.TagAddConvers(req.Tag, req.Convers)
+	affected := userConvers.TagAddConvers(req.Tag, req.Convers)
+	if affected {
+		for _, conver := range req.Convers {
+			userConvers.PersistConver(conver.TargetId, conver.ChannelType)
+		}
+	}
 	return errs.IMErrorCode_SUCCESS
 }
 
@@ -151,7 +156,12 @@ func TagDelConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 	})
 	//cache
 	userConvers := getUserConvers(appkey, userId)
-	userConvers.TagDelConvers(req.Tag, req.Convers)
+	affected := userConvers.TagDelConvers(req.Tag, req.Convers)
+	if affected {
+		for _, conver := range req.Convers {
+			userConvers.PersistConver(conver.TargetId, conver.ChannelType)
+		}
+	}
 	return errs.IMErrorCode_SUCCESS
 }
 

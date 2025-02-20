@@ -58,8 +58,9 @@ func init() {
 					TopUpdatedTime: item.TopUpdatedTime,
 					UndisturbType:  item.UndisturbType,
 
-					UnreadTag: item.UnreadTag,
-					IsDeleted: item.IsDeleted,
+					UnreadTag:  item.UnreadTag,
+					ConverExts: item.ConverExts,
+					IsDeleted:  item.IsDeleted,
 				}
 				storage := storages.NewConversationStorage()
 				err := storage.Upsert(conversation)
@@ -301,6 +302,7 @@ func (uc *UserConversations) SyncConvers(startTime int64, count int32) []*models
 				UndisturbType:  conver.UndisturbType,
 				IsDeleted:      conver.IsDeleted,
 				UnreadTag:      conver.UnreadTag,
+				ConverExts:     conver.ConverExts,
 			})
 			index++
 		}
@@ -338,6 +340,7 @@ func (uc *UserConversations) QryConver(targetId string, channelType pbobjs.Chann
 			UndisturbType:  conver.UndisturbType,
 			IsDeleted:      conver.IsDeleted,
 			UnreadTag:      conver.UnreadTag,
+			ConverExts:     conver.ConverExts,
 		}
 		return ret
 	}
