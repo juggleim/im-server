@@ -974,4 +974,35 @@ CREATE TABLE `topmsgs` (
   UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+DROP TABLE IF EXISTS `assistants`;
+CREATE TABLE `assistants` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `assistant_id` VARCHAR(32) NULL,
+  `owner_id` VARCHAR(32) NULL,
+  `nickname` VARCHAR(50) NULL,
+  `portrait` VARCHAR(200) NULL,
+  `description` VARCHAR(500) NULL,
+  `bot_type` TINYINT NULL,
+  `bot_conf` VARCHAR(2000) NULL,
+  `status` TINYINT NULL,
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` VARCHAR(20) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_assis` (`app_key`, `assistant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+DROP TABLE IF EXISTS `assistant_prompts`;
+CREATE TABLE `assistant_prompts` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT NULL,
+  `prompts` varchar(2000) DEFAULT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_id` (`app_key`,`id`),
+  KEY `idx_user` (`app_key`,`user_id`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
