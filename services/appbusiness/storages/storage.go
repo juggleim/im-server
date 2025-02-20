@@ -20,3 +20,7 @@ func NewQrCodeRecordStorage() models.IQrCodeRecordStorage {
 func NewSmsRecordStorage() models.ISmsRecordStorage {
 	return &dbs.SmsRecordDao{}
 }
+
+func NewPromptStorage() models.IPromptStorage {
+	return &dbs.PromptDao{}
+}

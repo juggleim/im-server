@@ -163,6 +163,9 @@ var (
 	//group
 	IMErrorCode_APP_GROUP_DEFAULT       IMErrorCode = 17200
 	IMErrorCode_APP_GROUP_MEMBEREXISTED IMErrorCode = 17201
+
+	//assistant
+	IMErrorCode_APP_ASSISTANT_PROMPT_DBERROR IMErrorCode = 17300
 )
 
 var imCode2ApiErrorMap map[IMErrorCode]*ApiErrorMsg = map[IMErrorCode]*ApiErrorMsg{

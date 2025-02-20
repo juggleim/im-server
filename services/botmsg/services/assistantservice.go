@@ -30,9 +30,9 @@ type AssistantInfo struct {
 	BotEngine   botengines.IBotEngine
 }
 
-func GetAssistantInfo(ctx context.Context, ownerId string) *AssistantInfo {
+func GetAssistantInfo(ctx context.Context, assistantId string) *AssistantInfo {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	key := getKey(appkey, ownerId)
+	key := getKey(appkey, assistantId)
 	if val, exist := assistantCache.Get(key); exist {
 		return val.(*AssistantInfo)
 	} else {
@@ -43,12 +43,12 @@ func GetAssistantInfo(ctx context.Context, ownerId string) *AssistantInfo {
 			return val.(*AssistantInfo)
 		} else {
 			assInfo := &AssistantInfo{
-				AppKey:    appkey,
-				OwnerId:   ownerId,
-				BotEngine: &botengines.NilBotEngine{},
+				AppKey:      appkey,
+				AssistantId: assistantId,
+				BotEngine:   &botengines.NilBotEngine{},
 			}
 			storage := storages.NewAssistantStorage()
-			ass, err := storage.FindByOwnerId(appkey, ownerId)
+			ass, err := storage.FindByAssistantId(appkey, assistantId)
 			if err == nil {
 				assInfo.AssistantId = ass.AssistantId
 				assInfo.Nickname = ass.Nickname

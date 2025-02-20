@@ -1,4 +1,4 @@
-package models
+package apimodels
 
 type LoginReq struct {
 	Account  string `json:"account"`

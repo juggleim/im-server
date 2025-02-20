@@ -15,5 +15,5 @@ type Assistant struct {
 
 type IAssistantStorage interface {
 	Create(item Assistant) error
-	FindByOwnerId(appkey, ownerId string) (*Assistant, error)
+	FindByAssistantId(appkey, assistantId string) (*Assistant, error)
 }

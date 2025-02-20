@@ -36,9 +36,9 @@ func (assis AssistantDao) Create(item models.Assistant) error {
 	}).Error
 }
 
-func (assis AssistantDao) FindByOwnerId(appkey, ownerId string) (*models.Assistant, error) {
+func (assis AssistantDao) FindByAssistantId(appkey, assistantId string) (*models.Assistant, error) {
 	var item AssistantDao
-	err := dbcommons.GetDb().Where("app_key=? and owner_id=?", appkey, ownerId).Take(&item).Error
+	err := dbcommons.GetDb().Where("app_key=? and assistant_id=?", appkey, assistantId).Take(&item).Error
 	if err != nil {
 		return nil, err
 	}

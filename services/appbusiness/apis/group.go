@@ -6,8 +6,8 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/appbusiness/apimodels"
 	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/services"
 	"image/png"
 	"strconv"
@@ -17,7 +17,7 @@ import (
 )
 
 func CreateGroup(ctx *httputils.HttpContext) {
-	req := models.Group{}
+	req := apimodels.Group{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -39,7 +39,7 @@ func CreateGroup(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(code)
 		return
 	}
-	ctx.ResponseSucc(&models.Group{
+	ctx.ResponseSucc(&apimodels.Group{
 		GroupId:       grpInfo.GroupId,
 		GroupName:     grpInfo.GroupName,
 		GroupPortrait: grpInfo.GroupPortrait,
@@ -47,7 +47,7 @@ func CreateGroup(ctx *httputils.HttpContext) {
 }
 
 func UpdateGroup(ctx *httputils.HttpContext) {
-	req := models.Group{}
+	req := apimodels.Group{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -65,7 +65,7 @@ func UpdateGroup(ctx *httputils.HttpContext) {
 }
 
 func DissolveGroup(ctx *httputils.HttpContext) {
-	req := models.Group{}
+	req := apimodels.Group{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -79,7 +79,7 @@ func DissolveGroup(ctx *httputils.HttpContext) {
 }
 
 func QuitGroup(ctx *httputils.HttpContext) {
-	req := models.Group{}
+	req := apimodels.Group{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -93,7 +93,7 @@ func QuitGroup(ctx *httputils.HttpContext) {
 }
 
 func AddGrpMembers(ctx *httputils.HttpContext) {
-	req := models.Group{}
+	req := apimodels.Group{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -114,7 +114,7 @@ func AddGrpMembers(ctx *httputils.HttpContext) {
 }
 
 func DelGrpMembers(ctx *httputils.HttpContext) {
-	req := models.Group{}
+	req := apimodels.Group{}
 	if err := ctx.BindJson(&req); err != nil || req.GroupId == "" || len(req.MemberIds) <= 0 {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -160,12 +160,12 @@ func QryMyGroups(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(code)
 		return
 	}
-	ret := &models.Groups{
+	ret := &apimodels.Groups{
 		Offset: grps.Offset,
-		Items:  []*models.Group{},
+		Items:  []*apimodels.Group{},
 	}
 	for _, grp := range grps.Items {
-		ret.Items = append(ret.Items, &models.Group{
+		ret.Items = append(ret.Items, &apimodels.Group{
 			GroupId:       grp.GroupId,
 			GroupName:     grp.GroupName,
 			GroupPortrait: grp.GroupPortrait,
@@ -195,11 +195,11 @@ func QryGrpMembers(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(code)
 		return
 	}
-	ret := &models.GroupMembersResp{
-		Items: []*models.GroupMember{},
+	ret := &apimodels.GroupMembersResp{
+		Items: []*apimodels.GroupMember{},
 	}
 	for _, member := range members.Items {
-		ret.Items = append(ret.Items, &models.GroupMember{
+		ret.Items = append(ret.Items, &apimodels.GroupMember{
 			UserObj: pbobjs.UserObj{
 				UserId:   member.UserId,
 				Nickname: member.Nickname,
@@ -212,7 +212,7 @@ func QryGrpMembers(ctx *httputils.HttpContext) {
 }
 
 func CheckGroupMembers(ctx *httputils.HttpContext) {
-	req := models.CheckGroupMembersReq{}
+	req := apimodels.CheckGroupMembersReq{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -226,7 +226,7 @@ func CheckGroupMembers(ctx *httputils.HttpContext) {
 }
 
 func SetGrpAnnouncement(ctx *httputils.HttpContext) {
-	req := models.GroupAnnouncement{}
+	req := apimodels.GroupAnnouncement{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -249,7 +249,7 @@ func GetGrpAnnouncement(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(code)
 		return
 	}
-	ctx.ResponseSucc(&models.GroupAnnouncement{
+	ctx.ResponseSucc(&apimodels.GroupAnnouncement{
 		GroupId: grpAnnounce.GroupId,
 		Content: grpAnnounce.Content,
 	})

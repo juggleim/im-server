@@ -4,8 +4,8 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/appbusiness/apimodels"
 	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/services"
 	"strconv"
 )
@@ -29,7 +29,7 @@ func QryFriends(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(code)
 		return
 	}
-	ret := &models.Friends{
+	ret := &apimodels.Friends{
 		Items:  []*pbobjs.UserObj{},
 		Offset: friends.Offset,
 	}
@@ -74,7 +74,7 @@ func QryFriendsWithPage(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(code)
 		return
 	}
-	ret := &models.Friends{
+	ret := &apimodels.Friends{
 		Items: []*pbobjs.UserObj{},
 	}
 	for _, friend := range friends.Items {
@@ -90,7 +90,7 @@ func QryFriendsWithPage(ctx *httputils.HttpContext) {
 }
 
 func AddFriend(ctx *httputils.HttpContext) {
-	req := models.Friend{}
+	req := apimodels.Friend{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -106,7 +106,7 @@ func AddFriend(ctx *httputils.HttpContext) {
 }
 
 func DelFriend(ctx *httputils.HttpContext) {
-	req := models.FriendIds{}
+	req := apimodels.FriendIds{}
 	if err := ctx.BindJson(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return

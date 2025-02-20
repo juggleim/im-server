@@ -6,7 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	"im-server/services/appbusiness/models"
+	"im-server/services/appbusiness/apimodels"
 	"im-server/services/appbusiness/storages"
 	storeModels "im-server/services/appbusiness/storages/models"
 	"im-server/services/commonservices"
@@ -142,8 +142,8 @@ func QryGroupInfo(ctx context.Context, groupId string) (errs.IMErrorCode, *pbobj
 	return errs.IMErrorCode_SUCCESS, ret
 }
 
-func CheckGroupMembers(ctx context.Context, req *models.CheckGroupMembersReq) (errs.IMErrorCode, *models.CheckGroupMembersResp) {
-	ret := &models.CheckGroupMembersResp{
+func CheckGroupMembers(ctx context.Context, req *apimodels.CheckGroupMembersReq) (errs.IMErrorCode, *apimodels.CheckGroupMembersResp) {
+	ret := &apimodels.CheckGroupMembersResp{
 		GroupId:        req.GroupId,
 		MemberExistMap: map[string]bool{},
 	}
@@ -196,10 +196,10 @@ func CreateGroup(ctx context.Context, req *pbobjs.GroupMembersReq) (errs.IMError
 	for _, memberId := range req.MemberIds {
 		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
-	notify := &models.GroupNotify{
+	notify := &apimodels.GroupNotify{
 		Operator: GetUser(ctx, requestId),
 		Members:  targetUsers,
-		Type:     models.GroupNotifyType_AddMember,
+		Type:     apimodels.GroupNotifyType_AddMember,
 	}
 	SendGrpNotify(ctx, grpId, notify)
 	return errs.IMErrorCode_SUCCESS, &pbobjs.GroupInfo{
@@ -215,10 +215,10 @@ func UpdateGroup(ctx context.Context, req *pbobjs.GroupInfo) errs.IMErrorCode {
 	if err != nil || code != errs.IMErrorCode_SUCCESS {
 		return code
 	}
-	SendGrpNotify(ctx, req.GroupId, &models.GroupNotify{
+	SendGrpNotify(ctx, req.GroupId, &apimodels.GroupNotify{
 		Operator: GetUser(ctx, requestId),
 		Name:     req.GroupName,
-		Type:     models.GroupNotifyType_Rename,
+		Type:     apimodels.GroupNotifyType_Rename,
 	})
 	return errs.IMErrorCode_SUCCESS
 }
@@ -242,12 +242,12 @@ func QuitGroup(ctx context.Context, groupId string) errs.IMErrorCode {
 	if err != nil || code != errs.IMErrorCode_SUCCESS {
 		return code
 	}
-	SendGrpNotify(ctx, groupId, &models.GroupNotify{
+	SendGrpNotify(ctx, groupId, &apimodels.GroupNotify{
 		Operator: GetUser(ctx, requestId),
 		Members: []*pbobjs.UserObj{
 			GetUser(ctx, requestId),
 		},
-		Type: models.GroupNotifyType_RemoveMember,
+		Type: apimodels.GroupNotifyType_RemoveMember,
 	})
 	return errs.IMErrorCode_SUCCESS
 }
@@ -266,10 +266,10 @@ func AddGrpMembers(ctx context.Context, grpMembers *pbobjs.GroupMembersReq) errs
 	for _, memberId := range grpMembers.MemberIds {
 		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
-	notify := &models.GroupNotify{
+	notify := &apimodels.GroupNotify{
 		Operator: GetUser(ctx, requestId),
 		Members:  targetUsers,
-		Type:     models.GroupNotifyType_AddMember,
+		Type:     apimodels.GroupNotifyType_AddMember,
 	}
 	//send notify msg
 	SendGrpNotify(ctx, grpMembers.GroupId, notify)
@@ -323,10 +323,10 @@ func GrpInviteMembers(ctx context.Context, req *pbobjs.GroupInviteReq) (errs.IME
 		for _, memberId := range directAddMemberIds {
 			targetUsers = append(targetUsers, GetUser(ctx, memberId))
 		}
-		notify := &models.GroupNotify{
+		notify := &apimodels.GroupNotify{
 			Operator: GetUser(ctx, requesterId),
 			Members:  targetUsers,
-			Type:     models.GroupNotifyType_AddMember,
+			Type:     apimodels.GroupNotifyType_AddMember,
 		}
 		SendGrpNotify(ctx, req.GroupId, notify)
 	}
@@ -360,9 +360,9 @@ func GrpJoinApply(ctx context.Context, req *pbobjs.GroupInviteReq) errs.IMErrorC
 		return code
 	}
 	//send notify msg
-	notify := &models.GroupNotify{
+	notify := &apimodels.GroupNotify{
 		Operator: GetUser(ctx, userId),
-		Type:     models.GroupNotifyType_Join,
+		Type:     apimodels.GroupNotifyType_Join,
 	}
 	SendGrpNotify(ctx, groupId, notify)
 	return errs.IMErrorCode_SUCCESS
@@ -382,10 +382,10 @@ func DelGrpMembers(ctx context.Context, req *pbobjs.GroupMembersReq) errs.IMErro
 	for _, memberId := range req.MemberIds {
 		targetUsers = append(targetUsers, GetUser(ctx, memberId))
 	}
-	SendGrpNotify(ctx, req.GroupId, &models.GroupNotify{
+	SendGrpNotify(ctx, req.GroupId, &apimodels.GroupNotify{
 		Operator: GetUser(ctx, requestId),
 		Members:  targetUsers,
-		Type:     models.GroupNotifyType_RemoveMember,
+		Type:     apimodels.GroupNotifyType_RemoveMember,
 	})
 	return errs.IMErrorCode_SUCCESS
 }
@@ -486,12 +486,12 @@ func ChgGroupOwner(ctx context.Context, req *pbobjs.GroupOwnerChgReq) errs.IMErr
 	}
 	//send notify
 	requestId := bases.GetRequesterIdFromCtx(ctx)
-	notify := &models.GroupNotify{
+	notify := &apimodels.GroupNotify{
 		Operator: GetUser(ctx, requestId),
 		Members: []*pbobjs.UserObj{
 			GetUser(ctx, req.OwnerId),
 		},
-		Type: models.GroupNotifyType_ChgOwner,
+		Type: apimodels.GroupNotifyType_ChgOwner,
 	}
 	SendGrpNotify(ctx, req.GroupId, notify)
 	return errs.IMErrorCode_SUCCESS

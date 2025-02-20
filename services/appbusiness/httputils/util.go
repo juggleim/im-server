@@ -8,7 +8,7 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/tools"
-	"im-server/services/appbusiness/models"
+	"im-server/services/appbusiness/apimodels"
 	"io"
 	"net/http"
 	"net/url"
@@ -42,8 +42,8 @@ func (ctx *HttpContext) ResponseErr(code errs.IMErrorCode) {
 }
 
 func (ctx *HttpContext) ResponseSucc(resp interface{}) {
-	connonResp := &models.CommonResp{
-		CommonError: models.CommonError{
+	connonResp := &apimodels.CommonResp{
+		CommonError: apimodels.CommonError{
 			ErrorMsg: "success",
 		},
 		Data: resp,

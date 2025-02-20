@@ -8,8 +8,8 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/appbusiness/apimodels"
 	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/services"
 	"im-server/services/appbusiness/storages"
 	storageModels "im-server/services/appbusiness/storages/models"
@@ -25,7 +25,7 @@ import (
 )
 
 func Login(ctx *httputils.HttpContext) {
-	req := &models.LoginReq{}
+	req := &apimodels.LoginReq{}
 	if err := ctx.BindJson(req); err != nil || req.Account == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -39,7 +39,7 @@ func Login(ctx *httputils.HttpContext) {
 		NoCover:  true,
 		Settings: []*pbobjs.KvItem{
 			{
-				Key:   models.UserExtKey_FriendVerifyType,
+				Key:   apimodels.UserExtKey_FriendVerifyType,
 				Value: tools.Int642String(int64(pbobjs.FriendVerifyType_NeedFriendVerify)),
 			},
 		},
@@ -58,7 +58,7 @@ func Login(ctx *httputils.HttpContext) {
 }
 
 func SmsSend(ctx *httputils.HttpContext) {
-	req := &models.SmsLoginReq{}
+	req := &apimodels.SmsLoginReq{}
 	if err := ctx.BindJson(req); err != nil || req.Phone == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -72,7 +72,7 @@ func SmsSend(ctx *httputils.HttpContext) {
 }
 
 func SmsLogin(ctx *httputils.HttpContext) {
-	req := &models.SmsLoginReq{}
+	req := &apimodels.SmsLoginReq{}
 	if err := ctx.BindJson(req); err != nil || req.Phone == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -127,7 +127,7 @@ func SmsLogin(ctx *httputils.HttpContext) {
 			return
 		}
 		regResp := resp.(*pbobjs.UserRegResp)
-		ctx.ResponseSucc(&models.LoginUserResp{
+		ctx.ResponseSucc(&apimodels.LoginUserResp{
 			UserId:        userId,
 			Authorization: regResp.Token,
 			NickName:      regResp.Nickname,
@@ -169,7 +169,7 @@ func GenerateQrCode(ctx *httputils.HttpContext) {
 }
 
 func CheckQrCode(ctx *httputils.HttpContext) {
-	req := &models.QrCode{}
+	req := &apimodels.QrCode{}
 	if err := ctx.BindJson(req); err != nil || req.Id == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -201,7 +201,7 @@ func CheckQrCode(ctx *httputils.HttpContext) {
 			return
 		}
 		regResp := resp.(*pbobjs.UserRegResp)
-		ctx.ResponseSucc(&models.LoginUserResp{
+		ctx.ResponseSucc(&apimodels.LoginUserResp{
 			UserId:        userId,
 			Authorization: regResp.Token,
 			NickName:      regResp.Nickname,
@@ -216,7 +216,7 @@ func CheckQrCode(ctx *httputils.HttpContext) {
 }
 
 func ConfirmQrCode(ctx *httputils.HttpContext) {
-	req := &models.QrCode{}
+	req := &apimodels.QrCode{}
 	if err := ctx.BindJson(req); err != nil || req.Id == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
