@@ -189,7 +189,7 @@ CREATE TABLE `conversations` (
   `undisturb_type` tinyint DEFAULT '0' COMMENT '免打扰类型：0:取消免打扰；1:普通会话免打扰；',
   `sync_time` bigint DEFAULT '0' COMMENT '同步消息位点',
   `unread_tag` tinyint DEFAULT '0' COMMENT '未读tag',
-  `group` varchar(20) DEFAULT NULL,
+  `conver_exts` mediumblob,
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_app_key_user_id_target_id` (`app_key`,`user_id`,`target_id`,`channel_type`),

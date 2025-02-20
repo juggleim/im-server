@@ -95,6 +95,9 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 		MsgContent: bs,
 		Flags:      flag,
 	})
+	//cache
+	userConvers := getUserConvers(appkey, userId)
+	userConvers.TagAddConvers(req.Tag, req.Convers)
 	return errs.IMErrorCode_SUCCESS
 }
 
@@ -146,6 +149,9 @@ func TagDelConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 		MsgContent: bs,
 		Flags:      flag,
 	})
+	//cache
+	userConvers := getUserConvers(appkey, userId)
+	userConvers.TagDelConvers(req.Tag, req.Convers)
 	return errs.IMErrorCode_SUCCESS
 }
 

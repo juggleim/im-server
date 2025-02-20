@@ -344,7 +344,7 @@ func (uc *UserConversations) QryConver(targetId string, channelType pbobjs.Chann
 	return nil
 }
 
-func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive bool) []*models.Conversation {
+func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive bool, targetId string, channelType pbobjs.ChannelType, tag string) []*models.Conversation {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.RLock()
@@ -360,6 +360,13 @@ func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive
 	for _, node := range nodes {
 		itemKey := node.Value
 		if conver, exist := uc.ConverItemMap[itemKey]; exist {
+			if channelType != pbobjs.ChannelType_Unknown && conver.ChannelType != channelType {
+				continue
+			}
+			if tag != "" && (conver.ConverExts == nil || len(conver.ConverExts.ConverTags) <= 0 || !conver.ConverExts.ConverTags[tag]) {
+				continue
+			}
+
 			resp = append(resp, &models.Conversation{
 				AppKey:      conver.AppKey,
 				UserId:      conver.UserId,
@@ -380,6 +387,8 @@ func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive
 				UndisturbType:  conver.UndisturbType,
 				IsDeleted:      conver.IsDeleted,
 				UnreadTag:      conver.UnreadTag,
+
+				ConverExts: conver.ConverExts,
 			})
 			index++
 		}
@@ -593,6 +602,47 @@ func (uc *UserConversations) UpdateUndisturbType(targetId string, channelType pb
 		}
 	}
 	return false
+}
+
+func (uc *UserConversations) TagAddConvers(tag string, convers []*pbobjs.SimpleConversation) bool {
+	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
+	lock := userLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	ret := false
+	for _, conver := range convers {
+		itemKey := getConverItemKey(conver.TargetId, conver.ChannelType)
+		if item, exist := uc.ConverItemMap[itemKey]; exist {
+			if item.ConverExts == nil {
+				item.ConverExts = &pbobjs.ConverExts{
+					ConverTags: make(map[string]bool),
+				}
+			}
+			if _, exist := item.ConverExts.ConverTags[tag]; !exist {
+				item.ConverExts.ConverTags[tag] = true
+				ret = ret || true
+			}
+		}
+	}
+	return ret
+}
+
+func (uc *UserConversations) TagDelConvers(tag string, convers []*pbobjs.SimpleConversation) bool {
+	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
+	lock := userLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	ret := false
+	for _, conver := range convers {
+		itemKey := getConverItemKey(conver.TargetId, conver.ChannelType)
+		if item, exist := uc.ConverItemMap[itemKey]; exist && item.ConverExts != nil {
+			if _, exist := item.ConverExts.ConverTags[tag]; exist {
+				delete(item.ConverExts.ConverTags, tag)
+				ret = ret || true
+			}
+		}
+	}
+	return ret
 }
 
 func getUserConverCacheKey(appkey, userId string) string {

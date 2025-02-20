@@ -641,6 +641,10 @@ message ConverTag{
   ConverTagType tagType = 3;
 }
 
+message ConverExts {
+  map<string,bool> converTags = 1;
+}
+
 enum ConverTagType{
   UserConverTag = 0;
   SystemConverTag = 1;

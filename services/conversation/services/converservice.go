@@ -229,7 +229,7 @@ func QryConversationsV2(ctx context.Context, req *pbobjs.QryConversationsReq) *p
 		Conversations: []*pbobjs.Conversation{},
 	}
 	userConvers := getUserConvers(appkey, userId)
-	convers := userConvers.QryConvers(startTime, count+1, isPositiveOrder)
+	convers := userConvers.QryConvers(startTime, count+1, isPositiveOrder, req.TargetId, req.ChannelType, req.Tag)
 	if len(convers) > int(count) {
 		convers = convers[:count]
 	} else {
@@ -581,18 +581,14 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 				}
 			}
 			//conver tags
-			tagStorage := storages.NewUserConverTagStorage()
-			tags, err := tagStorage.QryTagsByConver(appkey, userId, conver.TargetId, conver.ChannelType)
-			if err == nil {
-				converTags := []*pbobjs.ConverTag{}
-				for _, tag := range tags {
-					converTags = append(converTags, &pbobjs.ConverTag{
-						Tag:     tag.Tag,
-						TagName: tag.TagName,
-						TagType: pbobjs.ConverTagType_UserConverTag,
+			if conver.ConverExts != nil && len(conver.ConverExts.ConverTags) > 0 {
+				tagList := []*pbobjs.ConverTag{}
+				for tag := range conver.ConverExts.ConverTags {
+					tagList = append(tagList, &pbobjs.ConverTag{
+						Tag: tag,
 					})
 				}
-				conversation.ConverTags = append(conversation.ConverTags, converTags...)
+				conversation.ConverTags = tagList
 			}
 		}
 		retConvers = append(retConvers, conversation)
