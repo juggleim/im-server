@@ -24,3 +24,7 @@ func NewSmsRecordStorage() models.ISmsRecordStorage {
 func NewPromptStorage() models.IPromptStorage {
 	return &dbs.PromptDao{}
 }
+
+func NewAssistantStorage() models.IAssistantStorage {
+	return &dbs.AssistantDao{}
+}

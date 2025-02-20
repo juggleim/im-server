@@ -2,7 +2,8 @@ package dbs
 
 import (
 	"im-server/commons/dbcommons"
-	"im-server/services/botmsg/storages/models"
+	"im-server/services/appbusiness/storages/models"
+	botModels "im-server/services/botmsg/storages/models"
 )
 
 type AssistantDao struct {
@@ -49,7 +50,27 @@ func (assis AssistantDao) FindByAssistantId(appkey, assistantId string) (*models
 		Nickname:    item.Nickname,
 		Portrait:    item.Portrait,
 		Description: item.Description,
-		BotType:     models.BotType(item.BotType),
+		BotType:     botModels.BotType(item.BotType),
+		BotConf:     item.BotConf,
+		Status:      item.Status,
+		AppKey:      item.AppKey,
+	}, nil
+}
+
+func (assis AssistantDao) FindEnableAssistant(appkey string) (*models.Assistant, error) {
+	var item AssistantDao
+	err := dbcommons.GetDb().Where("app_key=?", appkey).Take(&item).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.Assistant{
+		ID:          item.ID,
+		AssistantId: item.AssistantId,
+		OwnerId:     item.OwnerId,
+		Nickname:    item.Nickname,
+		Portrait:    item.Portrait,
+		Description: item.Description,
+		BotType:     botModels.BotType(item.BotType),
 		BotConf:     item.BotConf,
 		Status:      item.Status,
 		AppKey:      item.AppKey,

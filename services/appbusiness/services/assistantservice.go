@@ -5,13 +5,14 @@ import (
 	"context"
 	"fmt"
 	"im-server/commons/bases"
+	"im-server/commons/caches"
 	"im-server/commons/errs"
 	"im-server/commons/tools"
 	"im-server/services/appbusiness/apimodels"
 	"im-server/services/appbusiness/storages"
-	"im-server/services/appbusiness/storages/models"
-	"im-server/services/botmsg/services"
-	"math"
+	"im-server/services/botmsg/services/botengines"
+	botModels "im-server/services/botmsg/storages/models"
+	"time"
 )
 
 func AssistantAnswer(ctx context.Context, req *apimodels.AssistantAnswerReq) (errs.IMErrorCode, *apimodels.AssistantAnswerResp) {
@@ -28,74 +29,84 @@ func AssistantAnswer(ctx context.Context, req *apimodels.AssistantAnswerReq) (er
 		}
 	}
 	buf.WriteString("帮我生成回复")
-	answer := services.GenerateAnswer(ctx, buf.String())
+	answer := GenerateAnswer(ctx, buf.String())
 	return errs.IMErrorCode_SUCCESS, &apimodels.AssistantAnswerResp{
 		Answer: answer,
 	}
 }
 
-func PromptAdd(ctx context.Context, req *apimodels.Prompt) errs.IMErrorCode {
-	storage := storages.NewPromptStorage()
-	err := storage.Create(models.Prompt{
-		UserId:  bases.GetRequesterIdFromCtx(ctx),
-		Prompts: req.Prompts,
-		AppKey:  bases.GetAppKeyFromCtx(ctx),
-	})
-	if err != nil {
-		return errs.IMErrorCode_APP_ASSISTANT_PROMPT_DBERROR
-	}
-	return errs.IMErrorCode_SUCCESS
+var assistantCache *caches.LruCache
+var assistantLocks *tools.SegmentatedLocks
+
+func init() {
+	assistantCache = caches.NewLruCacheWithAddReadTimeout(1000, nil, 5*time.Minute, 5*time.Minute)
+	assistantLocks = tools.NewSegmentatedLocks(32)
 }
 
-func PromptUpdate(ctx context.Context, req *apimodels.Prompt) errs.IMErrorCode {
-	id, _ := tools.DecodeInt(req.Id)
-	if id <= 0 {
-		return errs.IMErrorCode_APP_REQ_BODY_ILLEGAL
-	}
-	storage := storages.NewPromptStorage()
-	err := storage.UpdatePrompts(bases.GetAppKeyFromCtx(ctx), bases.GetRequesterIdFromCtx(ctx), id, req.Prompts)
-	if err != nil {
-		return errs.IMErrorCode_APP_ASSISTANT_PROMPT_DBERROR
-	}
-	return errs.IMErrorCode_SUCCESS
+type AssistantInfo struct {
+	AppKey      string
+	AssistantId string
+	OwnerId     string
+	Nickname    string
+	Portrait    string
+	BotType     botModels.BotType
+	BotEngine   botengines.IBotEngine
 }
 
-func PromptDel(ctx context.Context, req *apimodels.Prompt) errs.IMErrorCode {
-	id, _ := tools.DecodeInt(req.Id)
-	if id <= 0 {
-		return errs.IMErrorCode_APP_REQ_BODY_ILLEGAL
-	}
-	storage := storages.NewPromptStorage()
-	err := storage.DelPrompts(bases.GetAppKeyFromCtx(ctx), bases.GetRequesterIdFromCtx(ctx), id)
-	if err != nil {
-		return errs.IMErrorCode_APP_ASSISTANT_PROMPT_DBERROR
-	}
-	return errs.IMErrorCode_SUCCESS
-}
-
-func QryPrompts(ctx context.Context, count int64, offset string) (errs.IMErrorCode, *apimodels.Prompts) {
-	var startId int64 = math.MaxInt64
-	if offset != "" {
-		id, _ := tools.DecodeInt(offset)
-		if id > 0 {
-			startId = id
+func GetAssistantInfo(ctx context.Context) *AssistantInfo {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	key := appkey
+	if val, exist := assistantCache.Get(key); exist {
+		return val.(*AssistantInfo)
+	} else {
+		l := assistantLocks.GetLocks(key)
+		l.Lock()
+		defer l.Unlock()
+		if val, exist := assistantCache.Get(key); exist {
+			return val.(*AssistantInfo)
+		} else {
+			assInfo := &AssistantInfo{
+				AppKey:    appkey,
+				BotEngine: &botengines.NilBotEngine{},
+			}
+			storage := storages.NewAssistantStorage()
+			ass, err := storage.FindEnableAssistant(appkey)
+			if err == nil {
+				assInfo.AssistantId = ass.AssistantId
+				assInfo.Nickname = ass.Nickname
+				assInfo.Portrait = ass.Portrait
+				assInfo.BotType = ass.BotType
+				switch assInfo.BotType {
+				case botModels.BotType_Dify:
+					difyBot := &botengines.DifyBotEngine{}
+					err = tools.JsonUnMarshal([]byte(ass.BotConf), difyBot)
+					if err == nil && difyBot.ApiKey != "" && difyBot.Url != "" {
+						assInfo.BotEngine = difyBot
+					}
+				case botModels.BotType_Coze:
+					cozeBot := &botengines.CozeBotEngine{}
+					err = tools.JsonUnMarshal([]byte(ass.BotConf), cozeBot)
+					if err == nil && cozeBot.BotId != "" && cozeBot.Url != "" && cozeBot.Token != "" {
+						assInfo.BotEngine = cozeBot
+					}
+				}
+			}
+			assistantCache.Add(key, assInfo)
+			return assInfo
 		}
 	}
-	ret := &apimodels.Prompts{
-		Items: []*apimodels.Prompt{},
+}
+
+func GenerateAnswer(ctx context.Context, content string) string {
+	assistantInfo := GetAssistantInfo(ctx)
+	if assistantInfo != nil && assistantInfo.BotEngine != nil {
+		buf := bytes.NewBuffer([]byte{})
+		assistantInfo.BotEngine.StreamChat(ctx, bases.GetRequesterIdFromCtx(ctx), "", content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
+			if !isEnd {
+				buf.WriteString(answerPart)
+			}
+		})
+		return buf.String()
 	}
-	storage := storages.NewPromptStorage()
-	items, err := storage.QryPrompts(bases.GetAppKeyFromCtx(ctx), bases.GetRequesterIdFromCtx(ctx), count, startId)
-	if err == nil {
-		for _, item := range items {
-			idStr, _ := tools.EncodeInt(item.ID)
-			ret.Items = append(ret.Items, &apimodels.Prompt{
-				Id:          idStr,
-				Prompts:     item.Prompts,
-				CreatedTime: item.CreatedTime,
-			})
-			ret.Offset = idStr
-		}
-	}
-	return errs.IMErrorCode_SUCCESS, ret
+	return "No Answer"
 }
