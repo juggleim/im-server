@@ -23,6 +23,10 @@ type Prompt struct {
 	CreatedTime int64  `json:"created_time"`
 }
 
+type PromptIds struct {
+	Ids []string `json:"ids"`
+}
+
 type Prompts struct {
 	Items  []*Prompt `json:"items"`
 	Offset string    `json:"offset"`

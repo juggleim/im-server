@@ -71,6 +71,12 @@ func GetBotInfo(ctx context.Context, botId string) *BotInfo {
 					if err == nil && cozeBot.BotId != "" && cozeBot.Url != "" && cozeBot.Token != "" {
 						botInfo.BotEngine = cozeBot
 					}
+				case models.BotType_SiliconFlow:
+					sfBot := &botengines.SiliconFlowEngine{}
+					err = tools.JsonUnMarshal([]byte(bot.BotConf), sfBot)
+					if err == nil && sfBot.ApiKey != "" && sfBot.Model != "" && sfBot.Url != "" {
+						botInfo.BotEngine = sfBot
+					}
 				}
 			} else {
 				botInfo.BotEngine = &botengines.NilBotEngine{}

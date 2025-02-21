@@ -64,6 +64,20 @@ func PromptDel(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
+func PromptBatchDel(ctx *httputils.HttpContext) {
+	req := apimodels.PromptIds{}
+	if err := ctx.BindJson(&req); err != nil || len(req.Ids) <= 0 {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.PromptBatchDel(ctx.ToRpcCtx(), &req)
+	if code != errs.IMErrorCode_SUCCESS {
+		ctx.ResponseErr(code)
+		return
+	}
+	ctx.ResponseSucc(nil)
+}
+
 func QryPrompts(ctx *httputils.HttpContext) {
 	offset := ctx.Query("offset")
 	count := 20

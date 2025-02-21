@@ -35,6 +35,10 @@ func (pro PromptDao) DelPrompts(appkey, userId string, id int64) error {
 	return dbcommons.GetDb().Where("app_key=? and id=? and user_id=?", appkey, id, userId).Delete(&PromptDao{}).Error
 }
 
+func (pro PromptDao) BatchDelPrompts(appkey, userId string, ids []int64) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and id in (?)", appkey, userId, ids).Delete(&PromptDao{}).Error
+}
+
 func (pro PromptDao) FindPrompt(appkey, userId string, id int64) (*models.Prompt, error) {
 	var item PromptDao
 	err := dbcommons.GetDb().Where("app_key=? and id=? and user_id=?", appkey, id, userId).Take(&item).Error

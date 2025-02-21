@@ -50,6 +50,22 @@ func PromptDel(ctx context.Context, req *apimodels.Prompt) errs.IMErrorCode {
 	return errs.IMErrorCode_SUCCESS
 }
 
+func PromptBatchDel(ctx context.Context, req *apimodels.PromptIds) errs.IMErrorCode {
+	ids := []int64{}
+	for _, idStr := range req.Ids {
+		id, _ := tools.DecodeInt(idStr)
+		if id > 0 {
+			ids = append(ids, id)
+		}
+	}
+	storage := storages.NewPromptStorage()
+	err := storage.BatchDelPrompts(bases.GetAppKeyFromCtx(ctx), bases.GetRequesterIdFromCtx(ctx), ids)
+	if err != nil {
+		return errs.IMErrorCode_APP_ASSISTANT_PROMPT_DBERROR
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
 func QryPrompts(ctx context.Context, count int64, offset string) (errs.IMErrorCode, *apimodels.Prompts) {
 	var startId int64 = math.MaxInt64
 	if offset != "" {

@@ -24,6 +24,7 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/assistants/prompts/add", PromptAdd)
 	RouteRegiste(mux, http.MethodPost, "/jim/assistants/prompts/update", PromptUpdate)
 	RouteRegiste(mux, http.MethodPost, "/jim/assistants/prompts/del", PromptDel)
+	RouteRegiste(mux, http.MethodPost, "/jim/assistants/prompts/batchdel", PromptBatchDel)
 	RouteRegiste(mux, http.MethodGet, "/jim/assistants/prompts/list", QryPrompts)
 
 	RouteRegiste(mux, http.MethodPost, "/jim/users/update", UpdateUser)

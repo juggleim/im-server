@@ -105,6 +105,12 @@ func GetAssistantInfo(ctx context.Context) *AssistantInfo {
 					if err == nil && cozeBot.BotId != "" && cozeBot.Url != "" && cozeBot.Token != "" {
 						assInfo.BotEngine = cozeBot
 					}
+				case botModels.BotType_SiliconFlow:
+					sfBot := &botengines.SiliconFlowEngine{}
+					err = tools.JsonUnMarshal([]byte(ass.BotConf), sfBot)
+					if err == nil && sfBot.ApiKey != "" && sfBot.Url != "" && sfBot.Model != "" {
+						assInfo.BotEngine = sfBot
+					}
 				}
 			}
 			assistantCache.Add(key, assInfo)
