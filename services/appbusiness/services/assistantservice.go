@@ -29,7 +29,23 @@ func AssistantAnswer(ctx context.Context, req *apimodels.AssistantAnswerReq) (er
 		}
 	}
 	buf.WriteString("帮我生成回复")
-	answer := GenerateAnswer(ctx, buf.String())
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	if req.PromptId != "" {
+		pId, err := tools.DecodeInt(req.PromptId)
+		if err == nil && pId > 0 {
+			storage := storages.NewPromptStorage()
+			prompt, err := storage.FindPrompt(appkey, userId, pId)
+			if err == nil && prompt != nil && prompt.Prompts != "" {
+				buf.WriteString(",回复要求如下：\n")
+				buf.WriteString(prompt.Prompts)
+			}
+		}
+	}
+	content := buf.String()
+	fmt.Println("----------------------------------------------------")
+	fmt.Println(content)
+	fmt.Println("----------------------------------------------------")
+	answer := GenerateAnswer(ctx, content)
 	return errs.IMErrorCode_SUCCESS, &apimodels.AssistantAnswerResp{
 		Answer: answer,
 	}

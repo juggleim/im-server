@@ -13,5 +13,6 @@ type IPromptStorage interface {
 	Create(prompt Prompt) error
 	UpdatePrompts(appkey, userId string, id int64, prompts string) error
 	DelPrompts(appkey, userId string, id int64) error
+	FindPrompt(appkey, userId string, id int64) (*Prompt, error)
 	QryPrompts(appkey, userId string, limit int64, startId int64) ([]*Prompt, error)
 }
