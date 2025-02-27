@@ -22,9 +22,9 @@ func (inter *CustomInterceptor) GetConditions() []*Condition {
 	return inter.Conditions
 }
 
-func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, msg *pbobjs.UpMsg) InterceptorResult {
+func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, msg *pbobjs.UpMsg) (InterceptorResult, int64) {
 	if bases.GetIsFromApiFromCtx(ctx) {
-		return InterceptorResult_Pass
+		return InterceptorResult_Pass, 0
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	nonce := tools.RandStr(8)
@@ -47,23 +47,24 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 	body := tools.ToJson(msgEvent)
 	respBs, code, err := tools.HttpDoBytes("POST", inter.RequestUrl, headers, body)
 	if err != nil {
-		return InterceptorResult_Pass
+		return InterceptorResult_Pass, 0
 	}
 	if code != 200 {
-		return InterceptorResult_Pass
+		return InterceptorResult_Pass, 0
 	}
 	resp := &CustomInterceptorResp{}
 	err = tools.JsonUnMarshal(respBs, resp)
 	if err != nil {
-		return InterceptorResult_Pass
+		return InterceptorResult_Pass, 0
 	}
 	result := strings.ToLower(resp.Result)
+	customCode := resp.CustomCode
 	if result == "pass" {
-		return InterceptorResult_Pass
+		return InterceptorResult_Pass, 0
 	} else if result == "replace" {
 		if msg != nil {
 			if resp.MsgType == "" && resp.MsgContent == "" {
-				return InterceptorResult_Pass
+				return InterceptorResult_Pass, customCode
 			}
 			if resp.MsgType != "" {
 				msg.MsgType = resp.MsgType
@@ -73,13 +74,13 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 				msg.MsgContent = []byte(resp.MsgContent)
 				msg.Flags = msgdefines.SetModifiedMsg(msg.Flags)
 			}
-			return InterceptorResult_Replace
+			return InterceptorResult_Replace, customCode
 		}
-		return InterceptorResult_Pass
+		return InterceptorResult_Pass, customCode
 	} else if result == "reject" {
-		return InterceptorResult_Reject
+		return InterceptorResult_Reject, customCode
 	} else {
-		return InterceptorResult_Pass
+		return InterceptorResult_Pass, customCode
 	}
 }
 
@@ -87,6 +88,7 @@ type CustomInterceptorResp struct {
 	Result     string `json:"result"`
 	MsgType    string `json:"msg_type"`
 	MsgContent string `json:"msg_content"`
+	CustomCode int64  `json:"custom_code"`
 }
 
 type MsgEvent struct {
