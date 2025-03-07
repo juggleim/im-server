@@ -220,7 +220,7 @@ func (msg *PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targ
 	return retItems, nil
 }
 
-func (msg *PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime, endTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
+func (msg *PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
 	collection := msg.getCollection()
 	retItems := []*models.PrivateHisMsg{}
 	if collection == nil {
@@ -230,33 +230,28 @@ func (msg *PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime, endT
 
 	dbSort := -1
 	start := startTime
-	end := endTime
 	if isPositiveOrder {
 		dbSort = 1
 
 		if start < cleanTime {
 			start = cleanTime
 		}
-		if end > 0 {
-			filter["send_time"] = bson.M{
-				"$gt": start,
-				"$lt": end,
-			}
-		} else {
-			filter["send_time"] = bson.M{
-				"$gt": start,
-			}
+		filter["send_time"] = bson.M{
+			"$gt": start,
 		}
 	} else {
 		if start <= 0 {
 			start = time.Now().UnixMilli()
 		}
-		if end < cleanTime {
-			end = cleanTime
-		}
-		filter["send_time"] = bson.M{
-			"$lt": start,
-			"$gt": end,
+		if cleanTime > 0 {
+			filter["send_time"] = bson.M{
+				"$lt": start,
+				"$gt": cleanTime,
+			}
+		} else {
+			filter["send_time"] = bson.M{
+				"$lt": start,
+			}
 		}
 	}
 
