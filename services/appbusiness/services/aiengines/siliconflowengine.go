@@ -1,9 +1,8 @@
-package botengines
+package aiengines
 
 import (
 	"context"
 	"fmt"
-	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/logs"
 	"net/http"
@@ -16,18 +15,25 @@ type SiliconFlowEngine struct {
 	Model  string `json:"model"`
 }
 
-func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string, f func(part string, sectionStart, sectionend, isFinish bool)) {
+func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, converKey string, prompt string, question string, f func(part string, isEnd bool)) {
 	headers := map[string]string{}
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", engine.ApiKey)
 	headers["Content-Type"] = "application/json"
+
+	msgs := []*SiliconFlowChatMsg{}
+	if prompt != "" {
+		msgs = append(msgs, &SiliconFlowChatMsg{
+			Role:    "system",
+			Content: prompt,
+		})
+	}
+	msgs = append(msgs, &SiliconFlowChatMsg{
+		Role:    "user",
+		Content: question,
+	})
 	req := &SiliconFlowChatReq{
-		Model: engine.Model,
-		Messages: []*SiliconFlowChatMsg{
-			{
-				Role:    "user",
-				Content: question,
-			},
-		},
+		Model:     engine.Model,
+		Messages:  msgs,
 		Stream:    true,
 		MaxTokens: 512,
 		// Tools:     getTools(),
@@ -38,60 +44,31 @@ func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, conve
 		logs.WithContext(ctx).Errorf("call siliconflow api failed. http_code:%d,err:%v", code, err)
 		return
 	}
-	sectionStart := true
 	for {
 		line, err := stream.Receive()
 		if err != nil {
-			f("", false, false, true)
+			f("", true)
 			return
 		}
 		line = strings.TrimPrefix(line, "data:")
 		item := SiliconFlowChatResp{}
 		err = tools.JsonUnMarshal([]byte(line), &item)
 		if err != nil {
-			f("", false, false, true)
+			f("", true)
 			return
 		}
 		if len(item.Choices) > 0 {
 			for _, choice := range item.Choices {
 				if choice.Delta != nil {
 					if choice.FinishReason != "stop" {
-						f(choice.Delta.Content, sectionStart, false, false)
-						sectionStart = false
+						f(choice.Delta.Content, false)
 					} else {
-						f(choice.Delta.Content, false, false, true)
+						f(choice.Delta.Content, true)
 					}
 				}
 			}
-			fmt.Println("x:", line)
 		}
 	}
-}
-
-func (engine *SiliconFlowEngine) Chat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string) string {
-	headers := map[string]string{}
-	headers["Authorization"] = fmt.Sprintf("Bearer %s", engine.ApiKey)
-	headers["Content-Type"] = "application/json"
-	req := &SiliconFlowChatReq{
-		Model: engine.Model,
-		Messages: []*SiliconFlowChatMsg{
-			{
-				Role:    "user",
-				Content: question,
-			},
-		},
-		Stream:    false,
-		MaxTokens: 512,
-		Tools:     getTools(),
-	}
-	body := tools.ToJson(req)
-	fmt.Println(body)
-	resp, code, err := tools.HttpDoBytesWithTimeout(http.MethodPost, engine.Url, headers, body, 0)
-	if err != nil || code != http.StatusOK {
-		logs.WithContext(ctx).Errorf("call siliconflow api failed. http_code:%d,err:%v", code, err)
-		return ""
-	}
-	return string(resp)
 }
 
 func getTools() []*SiliconFlowTool {
@@ -125,13 +102,13 @@ type SiliconFlowChatReq struct {
 	Messages  []*SiliconFlowChatMsg `json:"messages"`
 	Stream    bool                  `json:"stream"`
 	MaxTokens int                   `json:"max_tokens"`
-	Tools     []*SiliconFlowTool    `json:"tools,omitempty"`
+	Tools     []*SiliconFlowTool    `json:"tools"`
 }
 
 type SiliconFlowChatMsg struct {
 	Role      string        `json:"role"`
 	Content   string        `json:"content"`
-	ToolCalls []*SfToolCall `json:"tool_calls,omitempty"`
+	ToolCalls []*SfToolCall `json:"tool_calls"`
 }
 
 type SfToolCall struct {

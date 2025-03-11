@@ -70,6 +70,12 @@ func UploadIosCer(ctx *gin.Context) {
 	voipCertPwd := ctx.PostForm("voip_cert_pwd")
 	iosPackage := ctx.PostForm("package")
 	appkey := ctx.PostForm("app_key")
+	if appkey == "" || iosPackage == "" {
+		ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+			Code: services.AdminErrorCode_ParamError,
+		})
+		return
+	}
 	isProStr := ctx.PostForm("is_product")
 	isProduct := 0
 	if isProStr != "" {

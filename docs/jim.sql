@@ -902,24 +902,6 @@ CREATE TABLE `botconvers` (
   UNIQUE INDEX `uniq_key` (`app_key`, `conver_type`, `conver_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `assistants`;
-CREATE TABLE `assistants` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `assistant_id` VARCHAR(32) NULL,
-  `owner_id` VARCHAR(32) NULL,
-  `nickname` VARCHAR(50) NULL,
-  `portrait` VARCHAR(200) NULL,
-  `description` VARCHAR(500) NULL,
-  `bot_type` TINYINT NULL,
-  `bot_conf` VARCHAR(2000) NULL,
-  `status` TINYINT NULL,
-  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  `app_key` VARCHAR(20) NULL,
-  PRIMARY KEY (`id`),
-  INDEX `uniq_id` (`app_key`, `owner_id`, `assistant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 DROP TABLE IF EXISTS `qrcoderecords`;
 CREATE TABLE `qrcoderecords` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -974,22 +956,15 @@ CREATE TABLE `topmsgs` (
   UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `assistants`;
-CREATE TABLE `assistants` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `assistant_id` VARCHAR(32) NULL,
-  `owner_id` VARCHAR(32) NULL,
-  `nickname` VARCHAR(50) NULL,
-  `portrait` VARCHAR(200) NULL,
-  `description` VARCHAR(500) NULL,
-  `bot_type` TINYINT NULL,
-  `bot_conf` VARCHAR(2000) NULL,
-  `status` TINYINT NULL,
-  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  `app_key` VARCHAR(20) NULL,
+DROP TABLE IF EXISTS `ai_engines`;
+CREATE TABLE `ai_engines` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `engine_type` tinyint DEFAULT '0',
+  `engine_conf` varchar(5000) DEFAULT NULL,
+  `status` tinyint DEFAULT '0',
+  `app_key` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `uniq_assis` (`app_key`, `assistant_id`)
+  KEY `idx_appkey` (`app_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `assistant_prompts`;

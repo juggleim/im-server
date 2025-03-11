@@ -28,12 +28,12 @@ func PromptAdd(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.PromptAdd(ctx.ToRpcCtx(), &req)
+	code, resp := services.PromptAdd(ctx.ToRpcCtx(), &req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	ctx.ResponseSucc(resp)
 }
 
 func PromptUpdate(ctx *httputils.HttpContext) {

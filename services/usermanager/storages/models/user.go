@@ -25,6 +25,7 @@ type IUserStorage interface {
 	Create(item User) error
 	Upsert(item User) error
 	FindByPhone(appkey, phone string) (*User, error)
+	FindByEmail(appkey, email string) (*User, error)
 	FindByUserId(appkey, userId string) (*User, error)
 	Update(appkey, userId, nickname, userPortrait string) error
 	Count(appkey string) int

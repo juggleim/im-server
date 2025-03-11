@@ -18,13 +18,15 @@ func (pro PromptDao) TableName() string {
 	return "assistant_prompts"
 }
 
-func (pro PromptDao) Create(prompt models.Prompt) error {
-	return dbcommons.GetDb().Create(&PromptDao{
+func (pro PromptDao) Create(prompt models.Prompt) (int64, error) {
+	item := &PromptDao{
 		UserId:      prompt.UserId,
 		Prompts:     prompt.Prompts,
 		CreatedTime: time.Now(),
 		AppKey:      prompt.AppKey,
-	}).Error
+	}
+	result := dbcommons.GetDb().Create(item)
+	return item.ID, result.Error
 }
 
 func (pro PromptDao) UpdatePrompts(appkey, userId string, id int64, prompts string) error {

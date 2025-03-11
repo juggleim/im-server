@@ -167,7 +167,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 
 		var combiner *Combiner
 		botUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, botId)
-		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, converKey, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
+		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, converKey, msg.ChannelType, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
 			if sectionStart {
 				curr := time.Now().UnixMilli()
 				streamFlag := msgdefines.SetStreamMsg(0)

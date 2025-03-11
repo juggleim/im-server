@@ -10,6 +10,11 @@ type SmsLoginReq struct {
 	Code  string `json:"code"`
 }
 
+type EmailLoginReq struct {
+	Email string `json:"email"`
+	Code  string `json:"code"`
+}
+
 type LoginUserResp struct {
 	UserId        string `json:"user_id"`
 	Authorization string `json:"authorization"`

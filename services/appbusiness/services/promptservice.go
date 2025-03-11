@@ -11,17 +11,20 @@ import (
 	"math"
 )
 
-func PromptAdd(ctx context.Context, req *apimodels.Prompt) errs.IMErrorCode {
+func PromptAdd(ctx context.Context, req *apimodels.Prompt) (errs.IMErrorCode, *apimodels.Prompt) {
 	storage := storages.NewPromptStorage()
-	err := storage.Create(models.Prompt{
+	id, err := storage.Create(models.Prompt{
 		UserId:  bases.GetRequesterIdFromCtx(ctx),
 		Prompts: req.Prompts,
 		AppKey:  bases.GetAppKeyFromCtx(ctx),
 	})
 	if err != nil {
-		return errs.IMErrorCode_APP_ASSISTANT_PROMPT_DBERROR
+		return errs.IMErrorCode_APP_ASSISTANT_PROMPT_DBERROR, nil
 	}
-	return errs.IMErrorCode_SUCCESS
+	idStr, _ := tools.EncodeInt(id)
+	return errs.IMErrorCode_SUCCESS, &apimodels.Prompt{
+		Id: idStr,
+	}
 }
 
 func PromptUpdate(ctx context.Context, req *apimodels.Prompt) errs.IMErrorCode {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
+	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/botmsg/storages"
 	"im-server/services/botmsg/storages/models"
@@ -20,11 +21,11 @@ type CozeBotEngine struct {
 	BotId string `json:"bot_id"`
 }
 
-func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converKey string, question string) string {
+func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string) string {
 	return ""
 }
 
-func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converKey string, question string, f func(part string, sectionStart, sectionEnd, isEnd bool)) {
+func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string, f func(part string, sectionStart, sectionEnd, isEnd bool)) {
 	url := engine.Url
 	cozeConverItem := GetCozeConverId(ctx, converKey, engine.Token)
 	if cozeConverItem != nil && cozeConverItem.ConverId != "" {

@@ -14,7 +14,8 @@ type MsgContentItem struct {
 }
 
 type AssistantAnswerResp struct {
-	Answer string `json:"answer"`
+	Answer      string `json:"answer"`
+	StreamMsgId string `json:"stream_msg_id"`
 }
 
 type Prompt struct {

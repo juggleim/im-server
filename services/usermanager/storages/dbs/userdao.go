@@ -29,6 +29,7 @@ type UserDao struct {
 func (user UserDao) TableName() string {
 	return "users"
 }
+
 func (user UserDao) FindByUserId(appkey, userId string) (*models.User, error) {
 	var item UserDao
 	err := dbcommons.GetDb().Where("app_key=? and user_id=?", appkey, userId).Take(&item).Error
@@ -53,6 +54,27 @@ func (user UserDao) FindByUserId(appkey, userId string) (*models.User, error) {
 func (user UserDao) FindByPhone(appkey, phone string) (*models.User, error) {
 	var item UserDao
 	err := dbcommons.GetDb().Where("app_key=? and phone=?", appkey, phone).Take(&item).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.User{
+		ID:           item.ID,
+		UserId:       item.UserId,
+		Nickname:     item.Nickname,
+		UserPortrait: item.UserPortrait,
+		Pinyin:       item.Pinyin,
+		UserType:     pbobjs.UserType(item.UserType),
+		Phone:        item.Phone,
+		Email:        item.Email,
+		LoginAccount: item.LoginAccount,
+		UpdatedTime:  item.UpdatedTime,
+		AppKey:       item.AppKey,
+	}, nil
+}
+
+func (user UserDao) FindByEmail(appkey, email string) (*models.User, error) {
+	var item UserDao
+	err := dbcommons.GetDb().Where("app_key=? and email=?", appkey, email).Take(&item).Error
 	if err != nil {
 		return nil, err
 	}

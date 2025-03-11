@@ -41,3 +41,14 @@ func SendFriendApplyNotify(ctx context.Context, targetId string, notify *apimode
 		Flags:      flag,
 	})
 }
+
+func SendPriMsg(ctx context.Context, senderId, targetId string, msgType string, msg interface{}) {
+	bs, _ := tools.JsonMarshal(msg)
+	flag := msgdefines.SetStoreMsg(0)
+	flag = msgdefines.SetCountMsg(flag)
+	commonservices.AsyncPrivateMsgOverUpstream(ctx, senderId, targetId, &pbobjs.UpMsg{
+		MsgType:    msgType,
+		MsgContent: bs,
+		Flags:      flag,
+	})
+}

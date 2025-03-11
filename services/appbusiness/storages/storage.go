@@ -25,6 +25,6 @@ func NewPromptStorage() models.IPromptStorage {
 	return &dbs.PromptDao{}
 }
 
-func NewAssistantStorage() models.IAssistantStorage {
-	return &dbs.AssistantDao{}
+func NewAiEngineStorage() models.IAiEngineStorage {
+	return &dbs.AiEngineDao{}
 }

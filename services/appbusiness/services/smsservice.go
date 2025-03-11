@@ -75,3 +75,10 @@ func CheckPhoneSmsCode(ctx context.Context, phone, code string) errs.IMErrorCode
 	}
 	return errs.IMErrorCode_SUCCESS
 }
+
+func CheckEmailCode(ctx context.Context, email, code string) errs.IMErrorCode {
+	if code == "123321" {
+		return errs.IMErrorCode_SUCCESS
+	}
+	return errs.IMErrorCode_APP_SMS_CODE_EXPIRED
+}

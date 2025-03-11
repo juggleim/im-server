@@ -10,7 +10,7 @@ type Prompt struct {
 }
 
 type IPromptStorage interface {
-	Create(prompt Prompt) error
+	Create(prompt Prompt) (int64, error)
 	UpdatePrompts(appkey, userId string, id int64, prompts string) error
 	DelPrompts(appkey, userId string, id int64) error
 	BatchDelPrompts(appkey, userId string, ids []int64) error
