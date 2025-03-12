@@ -28,3 +28,7 @@ func NewPromptStorage() models.IPromptStorage {
 func NewAiEngineStorage() models.IAiEngineStorage {
 	return &dbs.AiEngineDao{}
 }
+
+func NewBotConfStorage() models.IBotConfStorage {
+	return &dbs.BotConfDao{}
+}

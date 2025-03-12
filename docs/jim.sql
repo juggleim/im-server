@@ -712,7 +712,7 @@ CREATE TABLE `userexts` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `item_key` varchar(50) DEFAULT NULL COMMENT '参数key',
-  `item_value` varchar(100) DEFAULT NULL COMMENT '参数value',
+  `item_value` varchar(2000) DEFAULT NULL COMMENT '参数value',
   `item_type` tinyint DEFAULT '0' COMMENT '参数类型',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',

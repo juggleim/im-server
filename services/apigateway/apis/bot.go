@@ -15,6 +15,8 @@ type BotInfo struct {
 	BotId       string            `json:"bot_id"`
 	Nickname    string            `json:"nickname"`
 	Portrait    string            `json:"portrait"`
+	BotType     int               `json:"bot_type"`
+	BotConf     string            `json:"bot_conf"`
 	Webhook     string            `json:"webhook"`
 	ExtFields   map[string]string `json:"ext_fields"`
 	UpdatedTime int64             `json:"updated_time"`
@@ -31,6 +33,16 @@ func AddBot(ctx *gin.Context) {
 		settings = append(settings, &pbobjs.KvItem{
 			Key:   string(commonservices.AttItemKey_Bot_WebHook),
 			Value: botInfo.Webhook,
+		})
+	}
+	settings = append(settings, &pbobjs.KvItem{
+		Key:   string(commonservices.AttItemKey_Bot_Type),
+		Value: tools.Int642String(int64(botInfo.BotType)),
+	})
+	if botInfo.BotConf != "" {
+		settings = append(settings, &pbobjs.KvItem{
+			Key:   string(commonservices.AttItemKey_Bot_BotConf),
+			Value: botInfo.BotConf,
 		})
 	}
 	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "add_bot", botInfo.BotId, &pbobjs.UserInfo{

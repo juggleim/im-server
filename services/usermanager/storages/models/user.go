@@ -47,5 +47,6 @@ type IUserExtStorage interface {
 	BatchUpsert(items []UserExt) error
 	BatchDelete(appkey, itemKey string, userIds []string) error
 	QryExtFields(appkey, userId string) ([]*UserExt, error)
+	QryExtFieldsByItemKeys(appkey, userId string, itemKeys []string) (map[string]*UserExt, error)
 	QryExtsBaseItemKey(appkey, itemKey string, startId, limit int64) ([]*UserExt, error)
 }
