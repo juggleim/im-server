@@ -95,7 +95,7 @@ func UpdateUser(ctx context.Context, req *pbobjs.UserObj) errs.IMErrorCode {
 		if sdk != nil {
 			sdk.AddBot(juggleimsdk.BotInfo{
 				BotId:    GetAssistantId(req.UserId),
-				Nickname: req.Nickname,
+				Nickname: GetAssistantNickname(req.Nickname),
 				Portrait: req.Avatar,
 				BotType:  int(commonservices.BotType_Custom),
 			})

@@ -22,7 +22,7 @@ func InitUserAssistant(ctx context.Context, userId, nickname, portrait string) {
 				botId := GetAssistantId(userId)
 				sdk.AddBot(juggleimsdk.BotInfo{
 					BotId:    botId,
-					Nickname: fmt.Sprintf("%s 的助理", nickname),
+					Nickname: GetAssistantNickname(nickname),
 					Portrait: portrait,
 					BotType:  int(commonservices.BotType_Custom),
 					BotConf:  fmt.Sprintf(`{"url":"http://127.0.0.1:%d/jim/bots/messages/listener","api_key":"%s","bot_id":"%s"}`, configures.Config.ConnectManager.WsPort, apikey, botId),
@@ -42,4 +42,8 @@ func InitUserAssistant(ctx context.Context, userId, nickname, portrait string) {
 func GetAssistantId(userId string) string {
 	botId := fmt.Sprintf("ass_%s", userId)
 	return botId
+}
+
+func GetAssistantNickname(nickname string) string {
+	return fmt.Sprintf("%s 的助理", nickname)
 }
