@@ -19,7 +19,7 @@ func InitUserAssistant(ctx context.Context, userId, nickname, portrait string) {
 		if appinfo, exist := commonservices.GetAppInfo(appkey); exist {
 			apikey, err := GenerateApiKey(appkey, appinfo.AppSecureKey)
 			if err == nil {
-				botId := fmt.Sprintf("ass_%s", userId)
+				botId := GetAssistantId(userId)
 				sdk.AddBot(juggleimsdk.BotInfo{
 					BotId:    botId,
 					Nickname: fmt.Sprintf("%s 的助理", nickname),
@@ -37,4 +37,9 @@ func InitUserAssistant(ctx context.Context, userId, nickname, portrait string) {
 			}
 		}
 	}
+}
+
+func GetAssistantId(userId string) string {
+	botId := fmt.Sprintf("ass_%s", userId)
+	return botId
 }

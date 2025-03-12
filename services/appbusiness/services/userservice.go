@@ -7,11 +7,13 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/appbusiness/apimodels"
+	"im-server/services/appbusiness/services/imsdk"
 	"im-server/services/commonservices"
 	"im-server/services/friends/storages"
 	"im-server/services/group/dbs"
 	userStorage "im-server/services/usermanager/storages"
 
+	juggleimsdk "github.com/juggleim/imserver-sdk-go"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -81,12 +83,23 @@ func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs
 }
 
 func UpdateUser(ctx context.Context, req *pbobjs.UserObj) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
 	bases.SyncRpcCall(ctx, "upd_user_info", req.UserId, &pbobjs.UserInfo{
 		UserId:       req.UserId,
 		Nickname:     req.Nickname,
 		UserPortrait: req.Avatar,
 	}, nil)
 	if req.Nickname != "" {
+		//update assistant
+		sdk := imsdk.GetImSdk(appkey)
+		if sdk != nil {
+			sdk.AddBot(juggleimsdk.BotInfo{
+				BotId:    GetAssistantId(req.UserId),
+				Nickname: req.Nickname,
+				Portrait: req.Avatar,
+				BotType:  int(commonservices.BotType_Custom),
+			})
+		}
 		// update order tag for friends
 		storage := storages.NewFriendRelStorage()
 		appkey := bases.GetAppKeyFromCtx(ctx)
