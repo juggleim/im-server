@@ -7,6 +7,7 @@ import (
 	"im-server/services/appbusiness/apimodels"
 	"im-server/services/appbusiness/httputils"
 	"im-server/services/appbusiness/services"
+	"im-server/services/appbusiness/services/aiengines"
 	"net/http"
 	"strconv"
 )
@@ -44,10 +45,10 @@ func BotMsgListener(ctx *httputils.HttpContext) {
 		ctx.Writer.Header().Set("Content-Type", "text/event-stream")
 		ctx.Writer.Header().Set("Cache-Control", "no-cache")
 		ctx.Writer.Header().Set("Connection", "keep-alive")
-		assistantInfo := services.GetAssistantInfo(ctx.ToRpcCtx())
+		assistantInfo := aiengines.GetAiEngineInfo(ctx.ToRpcCtx())
 		if assistantInfo != nil && assistantInfo.AiEngine != nil {
 			idIndex := 1
-			assistantInfo.AiEngine.StreamChat(ctx.ToRpcCtx(), req.SenderId, "assistant", prompt, req.Messages[0].Content, func(answerPart string, isEnd bool) {
+			assistantInfo.AiEngine.StreamChat(ctx.ToRpcCtx(), req.SenderId, req.BotId, prompt, req.Messages[0].Content, func(answerPart string, isEnd bool) {
 				if !isEnd {
 					item := &apimodels.BotResponsePartData{
 						Id:      tools.Int642String(int64(idIndex)),

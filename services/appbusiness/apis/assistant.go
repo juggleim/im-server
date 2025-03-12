@@ -14,7 +14,7 @@ func AssistantAnswer(ctx *httputils.HttpContext) {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, resp := services.AssistantAnswer(ctx.ToRpcCtx(), &req)
+	code, resp := services.AutoAnswer(ctx.ToRpcCtx(), &req)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return

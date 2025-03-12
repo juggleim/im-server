@@ -1,11 +1,9 @@
 package apis
 
 import (
-	"encoding/base64"
 	"im-server/commons/errs"
-	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
 	"im-server/services/appbusiness/httputils"
+	"im-server/services/appbusiness/services"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/tokens"
 	"net/http"
@@ -127,7 +125,7 @@ func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *htt
 			if tokenStr != "" {
 				if strings.HasPrefix(tokenStr, "Bearer ") {
 					tokenStr = tokenStr[7:]
-					if !CheckApiKey(tokenStr, appkey, appInfo.AppSecureKey) {
+					if !services.CheckApiKey(tokenStr, appkey, appInfo.AppSecureKey) {
 						ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
 						return
 					}
@@ -148,24 +146,4 @@ func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *htt
 		}
 		handler(ctx)
 	})
-}
-
-func CheckApiKey(apiKey string, appkey, secureKey string) bool {
-	bs, err := base64.URLEncoding.DecodeString(apiKey)
-	if err != nil {
-		return false
-	}
-	decodedBs, err := tools.AesDecrypt(bs, []byte(secureKey))
-	if err != nil {
-		return false
-	}
-	var apikey pbobjs.ApiKey
-	err = tools.PbUnMarshal(decodedBs, &apikey)
-	if err != nil {
-		return false
-	}
-	if apikey.Appkey != appkey {
-		return false
-	}
-	return true
 }

@@ -45,12 +45,12 @@ func AddBot(ctx *gin.Context) {
 			Value: botInfo.BotConf,
 		})
 	}
-	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "add_bot", botInfo.BotId, &pbobjs.UserInfo{
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "add_bot", botInfo.BotId, &pbobjs.UserInfo{
 		UserId:       botInfo.BotId,
 		Nickname:     botInfo.Nickname,
 		UserPortrait: botInfo.Portrait,
 		ExtFields:    commonservices.Map2KvItems(botInfo.ExtFields),
 		Settings:     settings,
-	})
+	}, nil)
 	tools.SuccessHttpResp(ctx, nil)
 }

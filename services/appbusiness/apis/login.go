@@ -13,7 +13,6 @@ import (
 	"im-server/services/appbusiness/services"
 	"im-server/services/appbusiness/storages"
 	storageModels "im-server/services/appbusiness/storages/models"
-	"im-server/services/commonservices/msgdefines"
 	userStorage "im-server/services/usermanager/storages"
 	userModels "im-server/services/usermanager/storages/models"
 	"image/png"
@@ -110,9 +109,7 @@ func SmsLogin(ctx *httputils.HttpContext) {
 					return
 				}
 				//assistant send welcome message
-				services.SendPriMsg(ctx.ToRpcCtx(), "botid15", userId, msgdefines.InnerMsgType_Text, &msgdefines.TextMsg{
-					Content: "欢迎注册JuggleIM，我是您的私人助理，任何问题您都可以问我！",
-				})
+				services.InitUserAssistant(ctx.ToRpcCtx(), userId, nickname, "")
 			}
 		}
 
@@ -198,9 +195,7 @@ func EmailLogin(ctx *httputils.HttpContext) {
 					return
 				}
 				//assistant send welcome message
-				services.SendPriMsg(ctx.ToRpcCtx(), "botid15", userId, msgdefines.InnerMsgType_Text, &msgdefines.TextMsg{
-					Content: "欢迎注册JuggleIM，我是您的私人助理，任何问题您都可以问我！",
-				})
+				services.InitUserAssistant(ctx.ToRpcCtx(), userId, nickname, "")
 			}
 		}
 		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
