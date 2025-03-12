@@ -93,7 +93,7 @@ func init() {
 	userLocks = tools.NewSegmentatedLocks(512)
 }
 
-func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFields []*pbobjs.KvItem, settings []*pbobjs.KvItem, userType pbobjs.UserType) {
+func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFields []*pbobjs.KvItem, settings []*pbobjs.KvItem, userType pbobjs.UserType) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	key := strings.Join([]string{appkey, userId}, "_")
 	userInfo, exist := GetUserInfo(appkey, userId)
@@ -181,6 +181,7 @@ func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFiel
 		}
 		userCache.Remove(key)
 	}
+	return errs.IMErrorCode_SUCCESS
 }
 
 func GetUserInfo(appkey, userId string) (*UserInfo, bool) {

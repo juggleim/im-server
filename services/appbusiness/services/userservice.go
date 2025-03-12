@@ -173,6 +173,7 @@ func GetUser(ctx context.Context, userId string) *pbobjs.UserObj {
 	if user != nil {
 		u.Nickname = user.Nickname
 		u.Avatar = user.UserPortrait
+		u.UserType = user.UserType
 	}
 	return u
 }

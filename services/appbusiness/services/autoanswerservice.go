@@ -22,6 +22,13 @@ func AutoAnswer(ctx context.Context, req *apimodels.AssistantAnswerReq) (errs.IM
 	if req == nil {
 		return errs.IMErrorCode_APP_DEFAULT, nil
 	}
+	if req.ChannelType == int(pbobjs.ChannelType_Private) {
+		targetId := req.ConverId
+		targetUser := GetUser(ctx, targetId)
+		if targetUser.UserType == pbobjs.UserType_Bot {
+			return errs.IMErrorCode_APP_DEFAULT, nil
+		}
+	}
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	promptStr := "你是一个智能回复生成器，能够根据用户提供的聊天记录，生成精彩回复。\n生成回复的一些限制条件：\n1. 只根据提供的聊天记录和上下文，生成回复，不进行无关的话题拓展；\n2. 确保回复的语音恰当、得体，不要产生冒犯性的表达；\n3. 回答简洁，不做过多延伸；\n4. 不要给我建议，直接以我的身份生成我该回复的内容；\n"
 	appkey := bases.GetAppKeyFromCtx(ctx)

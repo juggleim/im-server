@@ -214,6 +214,7 @@ func GetTargetDisplayUserInfo(ctx context.Context, userId string) *pbobjs.UserIn
 		UserPortrait: tUserInfo.UserPortrait,
 		ExtFields:    tUserInfo.ExtFields,
 		UpdatedTime:  tUserInfo.UpdatedTime,
+		UserType:     tUserInfo.UserType,
 	}
 }
 
