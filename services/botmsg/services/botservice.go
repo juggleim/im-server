@@ -3,7 +3,6 @@ package services
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
 	"im-server/commons/pbdefines/pbobjs"
@@ -67,6 +66,12 @@ func GetBotInfo(ctx context.Context, botId string) *BotInfo {
 					botConf = botConfExt.ItemValue
 				}
 				switch botInfo.BotType {
+				case commonservices.BotType_Default:
+					defaultBot := &botengines.DefaultEngine{}
+					err = tools.JsonUnMarshal([]byte(botConf), defaultBot)
+					if err == nil && defaultBot.Webhook != "" {
+						botInfo.BotEngine = defaultBot
+					}
 				case commonservices.BotType_Custom:
 					customBot := &botengines.CustomBotEngine{}
 					err = tools.JsonUnMarshal([]byte(botConf), customBot)
@@ -168,20 +173,12 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 	botId := bases.GetTargetIdFromCtx(ctx)
 	botInfo := GetBotInfo(ctx, botId)
 	if botInfo.BotEngine != nil {
-		converKey := ""
-		if msg.ChannelType == pbobjs.ChannelType_Private {
-			converKey = commonservices.GetConversationId(msg.SenderId, botId, pbobjs.ChannelType_Private)
-			converKey = fmt.Sprintf("%s_%d", converKey, pbobjs.ChannelType_Private)
-		} else if msg.ChannelType == pbobjs.ChannelType_Group {
-			converKey = commonservices.GetConversationId(msg.SenderId, msg.TargetId, pbobjs.ChannelType_Group)
-			converKey = fmt.Sprintf("%s_%d", converKey, pbobjs.ChannelType_Group)
-		}
 		msgFlag := msgdefines.SetStoreMsg(0)
 		msgFlag = msgdefines.SetCountMsg(msgFlag)
 
 		var combiner *Combiner
 		botUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, botId)
-		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, converKey, msg.ChannelType, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
+		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, botId, msg.ChannelType, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
 			if sectionStart {
 				curr := time.Now().UnixMilli()
 				streamFlag := msgdefines.SetStreamMsg(0)

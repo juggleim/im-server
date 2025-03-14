@@ -15,11 +15,11 @@ type DifyBotEngine struct {
 	Url    string `json:"url"`
 }
 
-func (engine *DifyBotEngine) Chat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string) string {
+func (engine *DifyBotEngine) Chat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string) string {
 	return ""
 }
 
-func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string, f func(answerPart string, sectionStart, sectionEnd, isEnd bool)) {
+func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string, f func(answerPart string, sectionStart, sectionEnd, isEnd bool)) {
 	req := &DifyChatMsgReq{
 		Inputs:         map[string]string{},
 		Query:          question,

@@ -9,6 +9,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/botmsg/storages"
 	"im-server/services/botmsg/storages/models"
+	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"net/http"
 	"strings"
@@ -25,7 +26,15 @@ func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converKey strin
 	return ""
 }
 
-func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string, f func(part string, sectionStart, sectionEnd, isEnd bool)) {
+func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string, f func(part string, sectionStart, sectionEnd, isEnd bool)) {
+	converKey := ""
+	if channelType == pbobjs.ChannelType_Private {
+		converKey = commonservices.GetConversationId(senderId, targetId, pbobjs.ChannelType_Private)
+		converKey = fmt.Sprintf("%s_%d", converKey, pbobjs.ChannelType_Private)
+	} else if channelType == pbobjs.ChannelType_Group {
+		converKey = commonservices.GetConversationId(senderId, targetId, pbobjs.ChannelType_Group)
+		converKey = fmt.Sprintf("%s_%d", converKey, pbobjs.ChannelType_Group)
+	}
 	url := engine.Url
 	cozeConverItem := GetCozeConverId(ctx, converKey, engine.Token)
 	if cozeConverItem != nil && cozeConverItem.ConverId != "" {

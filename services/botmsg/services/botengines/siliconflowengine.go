@@ -16,7 +16,7 @@ type SiliconFlowEngine struct {
 	Model  string `json:"model"`
 }
 
-func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string, f func(part string, sectionStart, sectionend, isFinish bool)) {
+func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string, f func(part string, sectionStart, sectionend, isFinish bool)) {
 	headers := map[string]string{}
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", engine.ApiKey)
 	headers["Content-Type"] = "application/json"
@@ -68,7 +68,7 @@ func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, conve
 	}
 }
 
-func (engine *SiliconFlowEngine) Chat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string) string {
+func (engine *SiliconFlowEngine) Chat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string) string {
 	headers := map[string]string{}
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", engine.ApiKey)
 	headers["Content-Type"] = "application/json"
