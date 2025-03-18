@@ -99,6 +99,9 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 
 	group.POST("/push", apis.PushWithTags)
 
+	group.POST("/friends/add", apis.AddFriends)
+	group.POST("/friends/del", apis.DelFriends)
+
 	httpPort := configures.Config.ApiGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
 	fmt.Println("Start apigateway with port:", httpPort)
