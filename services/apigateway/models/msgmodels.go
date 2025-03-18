@@ -108,6 +108,15 @@ type RecallHisMsgsReq struct {
 	Exts        map[string]string `json:"exts"`
 }
 
+type ModifyHisMsgReq struct {
+	FromId      string `json:"from_id"`
+	TargetId    string `json:"target_id"`
+	ChannelType int32  `json:"channel_type"`
+	MsgId       string `json:"msg_id"`
+	MsgType     string `json:"msg_type"`
+	MsgContent  string `json:"msg_content"`
+}
+
 type DelHisMsgsReq struct {
 	FromId      string       `json:"from_id"`
 	TargetId    string       `json:"target_id"`
