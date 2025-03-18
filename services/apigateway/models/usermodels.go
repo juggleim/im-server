@@ -100,7 +100,7 @@ type UndisturbConverItem struct {
 	UndisturbType int32  `json:"undisturb_type"`
 }
 
-type SetUserSettingReq struct {
+type UserSettings struct {
 	UserId   string                 `json:"user_id"`
 	Settings map[string]interface{} `json:"settings"`
 }

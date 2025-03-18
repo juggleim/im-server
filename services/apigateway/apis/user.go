@@ -74,7 +74,7 @@ func UpdateUser(ctx *gin.Context) {
 }
 
 func SetUserSettings(ctx *gin.Context) {
-	var req models.SetUserSettingReq
+	var req models.UserSettings
 	if err := ctx.BindJSON(&req); err != nil || req.UserId == "" {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
@@ -113,7 +113,19 @@ func GetUserSettings(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, code)
 		return
 	}
-	tools.SuccessHttpResp(ctx, userInfo)
+	ret := &models.UserSettings{
+		UserId:   userId,
+		Settings: map[string]interface{}{},
+	}
+	if userInfo != nil {
+		uInfo, ok := userInfo.(*pbobjs.UserInfo)
+		if ok && uInfo != nil {
+			for _, setting := range uInfo.Settings {
+				ret.Settings[setting.Key] = setting.Value
+			}
+		}
+	}
+	tools.SuccessHttpResp(ctx, ret)
 }
 
 func QryUserInfo(ctx *gin.Context) {
