@@ -31,6 +31,8 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.Use(apis.Signature)
 	group.POST("/users/register", apis.Register)
 	group.POST("/users/update", apis.UpdateUser)
+	group.POST("/users/settings/set", apis.SetUserSettings)
+	group.GET("/users/settings/get", apis.GetUserSettings)
 	group.GET("/users/info", apis.QryUserInfo)
 	group.POST("/users/kick", apis.KickUsers)
 	group.POST("/users/onlinestatus/query", apis.QryUserOnlineStatus)
