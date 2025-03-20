@@ -1,15 +1,14 @@
 package apis
 
 import (
-	"im-server/commons/errs"
-	"im-server/commons/pbdefines/pbobjs"
-	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/services"
+	"github.com/juggleim/jugglechat-server/apimodels"
+	"github.com/juggleim/jugglechat-server/errs"
+	"github.com/juggleim/jugglechat-server/services"
 )
 
-func ChgGroupOwner(ctx *httputils.HttpContext) {
-	req := &pbobjs.GroupOwnerChgReq{}
-	if err := ctx.BindJson(&req); err != nil {
+func ChgGroupOwner(ctx *HttpContext) {
+	req := &apimodels.GroupOwnerChgReq{}
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -21,9 +20,9 @@ func ChgGroupOwner(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func AddGrpAdministrator(ctx *httputils.HttpContext) {
-	req := &pbobjs.GroupAdministratorsReq{}
-	if err := ctx.BindJson(&req); err != nil {
+func AddGrpAdministrator(ctx *HttpContext) {
+	req := &apimodels.GroupAdministratorsReq{}
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -35,9 +34,9 @@ func AddGrpAdministrator(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func DelGrpAdministrator(ctx *httputils.HttpContext) {
-	req := &pbobjs.GroupAdministratorsReq{}
-	if err := ctx.BindJson(&req); err != nil {
+func DelGrpAdministrator(ctx *HttpContext) {
+	req := &apimodels.GroupAdministratorsReq{}
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -49,7 +48,7 @@ func DelGrpAdministrator(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func QryGrpAdministrators(ctx *httputils.HttpContext) {
+func QryGrpAdministrators(ctx *HttpContext) {
 	groupId := ctx.Query("group_id")
 	code, resp := services.QryGroupAdministrators(ctx.ToRpcCtx(), groupId)
 	if code != errs.IMErrorCode_SUCCESS {
@@ -59,9 +58,9 @@ func QryGrpAdministrators(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(resp)
 }
 
-func SetGroupMute(ctx *httputils.HttpContext) {
-	req := &pbobjs.SetGroupMuteReq{}
-	if err := ctx.BindJson(&req); err != nil {
+func SetGroupMute(ctx *HttpContext) {
+	req := &apimodels.SetGroupMuteReq{}
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -73,9 +72,9 @@ func SetGroupMute(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func SetGrpVerifyType(ctx *httputils.HttpContext) {
-	req := &pbobjs.SetGroupVerifyTypeReq{}
-	if err := ctx.BindJson(&req); err != nil {
+func SetGrpVerifyType(ctx *HttpContext) {
+	req := &apimodels.SetGroupVerifyTypeReq{}
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -87,9 +86,9 @@ func SetGrpVerifyType(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func SetGrpHisMsgVisible(ctx *httputils.HttpContext) {
-	req := &pbobjs.SetGroupHisMsgVisibleReq{}
-	if err := ctx.BindJson(&req); err != nil {
+func SetGrpHisMsgVisible(ctx *HttpContext) {
+	req := &apimodels.SetGroupHisMsgVisibleReq{}
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}

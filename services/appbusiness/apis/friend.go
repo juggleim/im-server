@@ -1,16 +1,15 @@
 package apis
 
 import (
-	"im-server/commons/errs"
-	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
-	"im-server/services/appbusiness/apimodels"
-	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/services"
 	"strconv"
+
+	"github.com/juggleim/jugglechat-server/apimodels"
+	"github.com/juggleim/jugglechat-server/errs"
+	"github.com/juggleim/jugglechat-server/services"
+	"github.com/juggleim/jugglechat-server/utils"
 )
 
-func QryFriends(ctx *httputils.HttpContext) {
+func QryFriends(ctx *HttpContext) {
 	offset := ctx.Query("offset")
 	count := 20
 	var err error
@@ -21,20 +20,17 @@ func QryFriends(ctx *httputils.HttpContext) {
 			count = 20
 		}
 	}
-	code, friends := services.QryFriends(ctx.ToRpcCtx(), &pbobjs.FriendListReq{
-		Limit:  int64(count),
-		Offset: offset,
-	})
+	code, friends := services.QryFriends(ctx.ToRpcCtx(), int64(count), offset)
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
 	ret := &apimodels.Friends{
-		Items:  []*pbobjs.UserObj{},
+		Items:  []*apimodels.UserObj{},
 		Offset: friends.Offset,
 	}
 	for _, friend := range friends.Items {
-		ret.Items = append(ret.Items, &pbobjs.UserObj{
+		ret.Items = append(ret.Items, &apimodels.UserObj{
 			UserId:   friend.UserId,
 			Nickname: friend.Nickname,
 			Avatar:   friend.Avatar,
@@ -42,10 +38,10 @@ func QryFriends(ctx *httputils.HttpContext) {
 			IsFriend: true,
 		})
 	}
-	ctx.ResponseSucc(ret)
+	SuccessHttpResp(ctx, ret)
 }
 
-func QryFriendsWithPage(ctx *httputils.HttpContext) {
+func QryFriendsWithPage(ctx *HttpContext) {
 	var err error
 	page := 1
 	pageStr := ctx.Query("page")
@@ -65,20 +61,16 @@ func QryFriendsWithPage(ctx *httputils.HttpContext) {
 		}
 	}
 	orderTag := ctx.Query("order_tag")
-	code, friends := services.QryFriendsWithPage(ctx.ToRpcCtx(), &pbobjs.FriendListWithPageReq{
-		Page:     int64(page),
-		Size:     int64(size),
-		OrderTag: orderTag,
-	})
+	code, friends := services.QryFriendsWithPage(ctx.ToRpcCtx(), int64(page), int64(size), orderTag)
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
 	ret := &apimodels.Friends{
-		Items: []*pbobjs.UserObj{},
+		Items: []*apimodels.UserObj{},
 	}
 	for _, friend := range friends.Items {
-		ret.Items = append(ret.Items, &pbobjs.UserObj{
+		ret.Items = append(ret.Items, &apimodels.UserObj{
 			UserId:   friend.UserId,
 			Nickname: friend.Nickname,
 			Avatar:   friend.Avatar,
@@ -86,80 +78,78 @@ func QryFriendsWithPage(ctx *httputils.HttpContext) {
 			IsFriend: true,
 		})
 	}
-	ctx.ResponseSucc(ret)
+	SuccessHttpResp(ctx, ret)
 }
 
-func AddFriend(ctx *httputils.HttpContext) {
+func AddFriend(ctx *HttpContext) {
 	req := apimodels.Friend{}
-	if err := ctx.BindJson(&req); err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(&req); err != nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.AddFriends(ctx.ToRpcCtx(), &pbobjs.FriendIdsReq{
+	code := services.AddFriends(ctx.ToRpcCtx(), &apimodels.FriendIdsReq{
 		FriendIds: []string{req.FriendId},
 	})
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	SuccessHttpResp(ctx, nil)
 }
 
-func DelFriend(ctx *httputils.HttpContext) {
+func DelFriend(ctx *HttpContext) {
 	req := apimodels.FriendIds{}
-	if err := ctx.BindJson(&req); err != nil {
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.DelFriends(ctx.ToRpcCtx(), &pbobjs.FriendIdsReq{
+	code := services.DelFriends(ctx.ToRpcCtx(), &apimodels.FriendIdsReq{
 		FriendIds: req.FriendIds,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	SuccessHttpResp(ctx, nil)
 }
 
-func ApplyFriend(ctx *httputils.HttpContext) {
-	req := pbobjs.ApplyFriend{}
-	if err := ctx.BindJson(&req); err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+func ApplyFriend(ctx *HttpContext) {
+	req := apimodels.ApplyFriend{}
+	if err := ctx.BindJSON(&req); err != nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.ApplyFriend(ctx.ToRpcCtx(), &pbobjs.ApplyFriend{
-		FriendId: req.FriendId,
-	})
+	code := services.ApplyFriend(ctx.ToRpcCtx(), &req)
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	SuccessHttpResp(ctx, nil)
 }
 
-func ConfirmFriend(ctx *httputils.HttpContext) {
-	req := pbobjs.ConfirmFriend{}
-	if err := ctx.BindJson(&req); err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+func ConfirmFriend(ctx *HttpContext) {
+	req := apimodels.ConfirmFriend{}
+	if err := ctx.BindJSON(&req); err != nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	code := services.ConfirmFriend(ctx.ToRpcCtx(), &req)
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	SuccessHttpResp(ctx, nil)
 }
 
-func MyFriendApplications(ctx *httputils.HttpContext) {
+func MyFriendApplications(ctx *HttpContext) {
 	startTimeStr := ctx.Query("start")
-	start, err := tools.String2Int64(startTimeStr)
+	start, err := utils.String2Int64(startTimeStr)
 	if err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	countStr := ctx.Query("count")
-	count, err := tools.String2Int64(countStr)
+	count, err := utils.String2Int64(countStr)
 	if err != nil {
 		count = 20
 	} else {
@@ -168,31 +158,27 @@ func MyFriendApplications(ctx *httputils.HttpContext) {
 		}
 	}
 	orderStr := ctx.Query("order")
-	order, err := tools.String2Int64(orderStr)
+	order, err := utils.String2Int64(orderStr)
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryMyFriendApplications(ctx.ToRpcCtx(), &pbobjs.QryFriendApplicationsReq{
-		StartTime: start,
-		Count:     int32(count),
-		Order:     int32(order),
-	})
+	code, resp := services.QryMyFriendApplications(ctx.ToRpcCtx(), start, int32(count), int32(order))
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(resp)
+	SuccessHttpResp(ctx, resp)
 }
 
-func MyPendingFriendApplications(ctx *httputils.HttpContext) {
+func MyPendingFriendApplications(ctx *HttpContext) {
 	startTimeStr := ctx.Query("start")
-	start, err := tools.String2Int64(startTimeStr)
+	start, err := utils.String2Int64(startTimeStr)
 	if err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	countStr := ctx.Query("count")
-	count, err := tools.String2Int64(countStr)
+	count, err := utils.String2Int64(countStr)
 	if err != nil {
 		count = 20
 	} else {
@@ -201,31 +187,27 @@ func MyPendingFriendApplications(ctx *httputils.HttpContext) {
 		}
 	}
 	orderStr := ctx.Query("order")
-	order, err := tools.String2Int64(orderStr)
+	order, err := utils.String2Int64(orderStr)
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryMyPendingFriendApplications(ctx.ToRpcCtx(), &pbobjs.QryFriendApplicationsReq{
-		StartTime: start,
-		Count:     int32(count),
-		Order:     int32(order),
-	})
+	code, resp := services.QryMyPendingFriendApplications(ctx.ToRpcCtx(), start, int32(count), int32(order))
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(resp)
+	SuccessHttpResp(ctx, resp)
 }
 
-func FriendApplications(ctx *httputils.HttpContext) {
+func FriendApplications(ctx *HttpContext) {
 	startTimeStr := ctx.Query("start")
-	start, err := tools.String2Int64(startTimeStr)
+	start, err := utils.String2Int64(startTimeStr)
 	if err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	countStr := ctx.Query("count")
-	count, err := tools.String2Int64(countStr)
+	count, err := utils.String2Int64(countStr)
 	if err != nil {
 		count = 20
 	} else {
@@ -234,18 +216,14 @@ func FriendApplications(ctx *httputils.HttpContext) {
 		}
 	}
 	orderStr := ctx.Query("order")
-	order, err := tools.String2Int64(orderStr)
+	order, err := utils.String2Int64(orderStr)
 	if err != nil || order > 1 || order < 0 {
 		order = 0
 	}
-	code, resp := services.QryFriendApplications(ctx.ToRpcCtx(), &pbobjs.QryFriendApplicationsReq{
-		StartTime: start,
-		Count:     int32(count),
-		Order:     int32(order),
-	})
+	code, resp := services.QryFriendApplications(ctx.ToRpcCtx(), start, count, int32(order))
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(resp)
+	SuccessHttpResp(ctx, resp)
 }

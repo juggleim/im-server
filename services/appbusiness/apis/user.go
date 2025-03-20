@@ -3,18 +3,18 @@ package apis
 import (
 	"bytes"
 	"encoding/base64"
-	"im-server/commons/errs"
-	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
-	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/services"
 	"image/png"
+
+	"github.com/juggleim/jugglechat-server/apimodels"
+	"github.com/juggleim/jugglechat-server/errs"
+	"github.com/juggleim/jugglechat-server/services"
+	"github.com/juggleim/jugglechat-server/utils"
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
 )
 
-func QryUserInfo(ctx *httputils.HttpContext) {
+func QryUserInfo(ctx *HttpContext) {
 	userId := ctx.Query("user_id")
 	rpcCtx := ctx.ToRpcCtx()
 	code, user := services.QryUserInfo(rpcCtx, userId)
@@ -25,9 +25,9 @@ func QryUserInfo(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(user)
 }
 
-func UpdateUser(ctx *httputils.HttpContext) {
-	req := &pbobjs.UserObj{}
-	if err := ctx.BindJson(req); err != nil {
+func UpdateUser(ctx *HttpContext) {
+	req := &apimodels.UserObj{}
+	if err := ctx.BindJSON(req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -36,9 +36,9 @@ func UpdateUser(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func UpdateUserSettings(ctx *httputils.HttpContext) {
-	req := &pbobjs.UserSettings{}
-	if err := ctx.BindJson(req); err != nil {
+func UpdateUserSettings(ctx *HttpContext) {
+	req := &apimodels.UserSettings{}
+	if err := ctx.BindJSON(req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -50,9 +50,9 @@ func UpdateUserSettings(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func SearchByPhone(ctx *httputils.HttpContext) {
-	req := &pbobjs.UserObj{}
-	if err := ctx.BindJson(req); err != nil {
+func SearchByPhone(ctx *HttpContext) {
+	req := &apimodels.UserObj{}
+	if err := ctx.BindJSON(req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -65,7 +65,7 @@ func SearchByPhone(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(users)
 }
 
-func QryUserQrCode(ctx *httputils.HttpContext) {
+func QryUserQrCode(ctx *HttpContext) {
 	userId := ctx.CurrentUserId
 
 	m := map[string]interface{}{
@@ -73,7 +73,7 @@ func QryUserQrCode(ctx *httputils.HttpContext) {
 		"user_id": userId,
 	}
 	buf := bytes.NewBuffer([]byte{})
-	qrCode, _ := qr.Encode(tools.ToJson(m), qr.M, qr.Auto)
+	qrCode, _ := qr.Encode(utils.ToJson(m), qr.M, qr.Auto)
 	qrCode, _ = barcode.Scale(qrCode, 400, 400)
 	err := png.Encode(buf, qrCode)
 	if err != nil {

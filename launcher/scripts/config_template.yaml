@@ -30,3 +30,5 @@ navGateway:
 
 adminGateway:
   httpPort: {{ ADMIN_HTTP_PORT }}
+
+imApiDomain: http://127.0.0.1:{{ API_HTTP_PORT }}
