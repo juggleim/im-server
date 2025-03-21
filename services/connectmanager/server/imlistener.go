@@ -41,6 +41,7 @@ func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, c
 func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imcontext.WsHandleContext) {
 	if msg == nil {
 		logs.Error("connect body is nil")
+		ctx.Close(errors.New("connect body is nil"))
 		return
 	}
 	if msg.InstanceId != "" {
