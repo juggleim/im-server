@@ -16,7 +16,7 @@ type BdSmsEngine struct {
 	SignatureId string `json:"signature_id"`
 }
 
-func (eng *BdSmsEngine) SmsSend(phone, content string) error {
+func (eng *BdSmsEngine) SmsSend(phone string, params map[string]interface{}) error {
 	if eng.smsClient == nil {
 		var err error
 		eng.smsClient, err = sms.NewClient(eng.ApiKey, eng.SecretKey, eng.Endpoint)
@@ -25,13 +25,11 @@ func (eng *BdSmsEngine) SmsSend(phone, content string) error {
 			return err
 		}
 	}
-	contentMap := make(map[string]interface{})
-	contentMap["code"] = content
 	sendSmsArgs := &api.SendSmsArgs{
 		Mobile:      phone,
 		Template:    eng.Template,
 		SignatureId: eng.SignatureId,
-		ContentVar:  contentMap,
+		ContentVar:  params,
 	}
 	result, err := eng.smsClient.SendSms(sendSmsArgs)
 	if err != nil {

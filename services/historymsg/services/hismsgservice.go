@@ -163,7 +163,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 
 	if channelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
-		msgs, err := storage.QryHisMsgs(appkey, converId, startTime, 0, count, true, 0, []string{}, []string{})
+		msgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, true, 0, []string{}, []string{})
 		if err == nil {
 			for _, msg := range msgs {
 				downMsg := &pbobjs.DownMsg{}
@@ -213,7 +213,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 		}
 	} else if channelType == pbobjs.ChannelType_Group {
 		storage := storages.NewGroupHisMsgStorage()
-		dbMsgs, err := storage.QryHisMsgs(appkey, converId, startTime, 0, count, true, 0, []string{}, []string{})
+		dbMsgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, true, 0, []string{}, []string{})
 		if err == nil {
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}

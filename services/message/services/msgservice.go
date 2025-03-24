@@ -32,11 +32,15 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	}
 	//check msg interceptor
 	var modifiedMsg *pbobjs.DownMsg = nil
-	result := commonservices.CheckMsgInterceptor(ctx, senderId, receiverId, pbobjs.ChannelType_Private, upMsg)
+	result, interceptorCode := commonservices.CheckMsgInterceptor(ctx, senderId, receiverId, pbobjs.ChannelType_Private, upMsg)
 	if result == interceptors.InterceptorResult_Reject {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
-		return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, nil
+		if interceptorCode == 0 {
+			return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, nil
+		} else {
+			return errs.IMErrorCode(interceptorCode), msgId, sendTime, 0, upMsg.ClientUid, nil
+		}
 	} else if result == interceptors.InterceptorResult_Replace {
 		modifiedMsg = &pbobjs.DownMsg{
 			MsgType:    upMsg.MsgType,

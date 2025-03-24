@@ -82,3 +82,12 @@ func (msg GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, star
 	}
 	return retItems, err
 }
+
+func (msg GroupDelHisMsgDao) ExistDelHisMsg(appkey, userId, targetId string) bool {
+	var items []*GroupDelHisMsgDao
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=?", appkey, userId, targetId).Order("msg_time desc").Limit(1).Find(&items).Error
+	if err == nil && len(items) <= 0 {
+		return false
+	}
+	return true
+}

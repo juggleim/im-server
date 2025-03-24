@@ -47,11 +47,15 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 
 	//check msg interceptor
 	var modifiedMsg *pbobjs.DownMsg
-	result := commonservices.CheckMsgInterceptor(ctx, senderId, groupId, pbobjs.ChannelType_Group, upMsg)
+	result, interceptorCode := commonservices.CheckMsgInterceptor(ctx, senderId, groupId, pbobjs.ChannelType_Group, upMsg)
 	if result == interceptors.InterceptorResult_Reject {
 		sendTime := time.Now().UnixMilli()
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
-		return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
+		if interceptorCode == 0 {
+			return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
+		} else {
+			return errs.IMErrorCode(interceptorCode), msgId, sendTime, 0, upMsg.ClientUid, 0, nil
+		}
 	} else if result == interceptors.InterceptorResult_Replace {
 		modifiedMsg = &pbobjs.DownMsg{
 			MsgType:    upMsg.MsgType,

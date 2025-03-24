@@ -15,6 +15,32 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+func ModifyHisMsg(ctx *gin.Context) {
+	var req models.ModifyHisMsgReq
+	if err := ctx.BindJSON(&req); err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+
+	converId := commonservices.GetConversationId(req.FromId, req.TargetId, pbobjs.ChannelType(req.ChannelType))
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, req.FromId), "modify_msg", converId, &pbobjs.ModifyMsgReq{
+		TargetId:    req.TargetId,
+		ChannelType: pbobjs.ChannelType(req.ChannelType),
+		MsgId:       req.MsgId,
+		MsgType:     req.MsgType,
+		MsgContent:  []byte(req.MsgContent),
+	}, nil)
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+		return
+	}
+	tools.SuccessHttpResp(ctx, nil)
+}
+
 func RecallHisMsgs(ctx *gin.Context) {
 	var req models.RecallHisMsgsReq
 	if err := ctx.BindJSON(&req); err != nil {

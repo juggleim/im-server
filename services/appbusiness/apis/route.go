@@ -3,10 +3,12 @@ package apis
 import (
 	"im-server/commons/errs"
 	"im-server/services/appbusiness/httputils"
+	"im-server/services/appbusiness/services"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/tokens"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func LoadAppApis(mux *http.ServeMux) {
@@ -15,12 +17,22 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/login/qrcode/check", CheckQrCode)
 	RouteRegiste(mux, http.MethodPost, "/jim/sms/send", SmsSend)
 	RouteRegiste(mux, http.MethodPost, "/jim/sms_login", SmsLogin)
+	RouteRegiste(mux, http.MethodPost, "/jim/sms/login", SmsLogin)
+	RouteRegiste(mux, http.MethodPost, "/jim/email/send", EmailSend)
+	RouteRegiste(mux, http.MethodPost, "/jim/email/login", EmailLogin)
 	RouteRegiste(mux, http.MethodPost, "/jim/login/qrcode/confirm", ConfirmQrCode)
 	RouteRegiste(mux, http.MethodPost, "/jim/file_cred", GetFileCred)
 
 	RouteRegiste(mux, http.MethodGet, "/jim/bots/list", QryBots)
 
 	RouteRegiste(mux, http.MethodPost, "/jim/assistants/answer", AssistantAnswer)
+	RouteRegiste(mux, http.MethodPost, "/jim/assistants/prompts/add", PromptAdd)
+	RouteRegiste(mux, http.MethodPost, "/jim/assistants/prompts/update", PromptUpdate)
+	RouteRegiste(mux, http.MethodPost, "/jim/assistants/prompts/del", PromptDel)
+	RouteRegiste(mux, http.MethodPost, "/jim/assistants/prompts/batchdel", PromptBatchDel)
+	RouteRegiste(mux, http.MethodGet, "/jim/assistants/prompts/list", QryPrompts)
+
+	RouteRegiste(mux, http.MethodPost, "/jim/bots/messages/listener", BotMsgListener)
 
 	RouteRegiste(mux, http.MethodPost, "/jim/users/update", UpdateUser)
 	RouteRegiste(mux, http.MethodPost, "/jim/users/updsettings", UpdateUserSettings)
@@ -103,7 +115,7 @@ func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *htt
 			return
 		}
 		urlPath := r.URL.Path
-		if urlPath != "/jim/login" && urlPath != "/jim/sms/send" && urlPath != "/jim/sms_login" {
+		if urlPath != "/jim/login" && urlPath != "/jim/sms/send" && urlPath != "/jim/sms_login" && urlPath != "/jim/sms/login" && urlPath != "/jim/email/send" && urlPath != "/jim/email/login" && urlPath != "/jim/login/qrcode" && urlPath != "/jim/login/qrcode/check" {
 			//current userId
 			tokenStr := r.Header.Get("Authorization")
 			if tokenStr == "" {
@@ -111,17 +123,25 @@ func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *htt
 				return
 			}
 			if tokenStr != "" {
-				tokenWrap, err := tokens.ParseTokenString(tokenStr)
-				if err != nil {
-					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
-					return
+				if strings.HasPrefix(tokenStr, "Bearer ") {
+					tokenStr = tokenStr[7:]
+					if !services.CheckApiKey(tokenStr, appkey, appInfo.AppSecureKey) {
+						ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+						return
+					}
+				} else {
+					tokenWrap, err := tokens.ParseTokenString(tokenStr)
+					if err != nil {
+						ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+						return
+					}
+					token, err := tokens.ParseToken(tokenWrap, []byte(appInfo.AppSecureKey))
+					if err != nil {
+						ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+						return
+					}
+					ctx.CurrentUserId = token.UserId
 				}
-				token, err := tokens.ParseToken(tokenWrap, []byte(appInfo.AppSecureKey))
-				if err != nil {
-					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
-					return
-				}
-				ctx.CurrentUserId = token.UserId
 			}
 		}
 		handler(ctx)

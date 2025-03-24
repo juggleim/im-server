@@ -156,8 +156,8 @@ func QryConversation(ctx context.Context, userId, targetId string, channelType p
 func HandleDownMsgByConver(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType, downMsg *pbobjs.DownMsg) {
 	conver := GetConversation(ctx, userId, targetId, channelType)
 	if conver.UndisturbType == UndisturbType_Normal {
+		downMsg.UndisturbType = UndisturbType_Normal
 		if !commonservices.IsMentionedMe(userId, downMsg) {
-			downMsg.UndisturbType = UndisturbType_Normal
 			downMsg.Flags = msgdefines.SetUndisturbMsg(downMsg.Flags)
 		}
 	} else {

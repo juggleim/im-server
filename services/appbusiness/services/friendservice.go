@@ -6,7 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	apiModels "im-server/services/appbusiness/models"
+	apiModels "im-server/services/appbusiness/apimodels"
 	"im-server/services/appbusiness/storages"
 	"im-server/services/appbusiness/storages/models"
 	"im-server/services/commonservices"

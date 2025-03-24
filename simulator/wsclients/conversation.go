@@ -108,3 +108,9 @@ func (client *WsImClient) MarkUnRead(req *pbobjs.ConversationsReq) utils.ClientE
 	code, _ := client.Query("mark_unread", client.UserId, data)
 	return code
 }
+
+func (client *WsImClient) TagAddConvers(req *pbobjs.TagConvers) utils.ClientErrorCode {
+	data, _ := tools.PbMarshal(req)
+	code, _ := client.Query("tag_add_convers", client.UserId, data)
+	return code
+}

@@ -41,14 +41,16 @@ func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, c
 func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imcontext.WsHandleContext) {
 	if msg == nil {
 		logs.Error("connect body is nil")
+		ctx.Close(errors.New("connect body is nil"))
 		return
 	}
 	if msg.InstanceId != "" {
 		imcontext.SetContextAttr(ctx, imcontext.StateKey_InstanceId, msg.InstanceId)
 	}
-	clientIp := msg.ClientIp
-	if clientIp == "" {
-		clientIp = GetRemoteAddr(ctx)
+	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
+	if msg.ClientIp != "" {
+		clientIp = msg.ClientIp
+		imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientIp, msg.ClientIp)
 	}
 	ucLog := &pbobjs.UserConnectLog{
 		AppKey:   msg.Appkey,
@@ -78,20 +80,19 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 			time.Sleep(50 * time.Millisecond)
 			ctx.Close(errors.New("failed to login"))
 		}()
-		logs.Infof("session:%s\taction:%s\tappkey:%s\tuser_id:%s\tclient_ip:%s\tplatform:%s\tdevice_id:%s\tpush_token:%s\tinstance_id:%s\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_Connect, msg.Appkey, ucLog.UserId, clientIp, msg.Platform, msg.DeviceId, msg.PushToken, msg.InstanceId, ucLog.Code)
+		logs.Infof("session:%s\taction:%s\tappkey:%s\tuser_id:%s\tclient_ip:%s\tplatform:%s\tversion:%s\tdevice_id:%s\tpush_token:%s\tinstance_id:%s\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_Connect, msg.Appkey, ucLog.UserId, clientIp, msg.Platform, msg.SdkVersion, msg.DeviceId, msg.PushToken, msg.InstanceId, ucLog.Code)
 		return
 	}
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Connected, "1")
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	//success
-	logs.Infof("session:%s\taction:%s\tappkey:%s\tuser_id:%s\tclient_ip:%s\tplatform:%s\tdevice_id:%s\tpush_token:%s\tinstance_id:%s", imcontext.GetConnSession(ctx), imcontext.Action_Connect, msg.Appkey, userId, clientIp, msg.Platform, msg.DeviceId, msg.PushToken, msg.InstanceId)
+	logs.Infof("session:%s\taction:%s\tappkey:%s\tuser_id:%s\tclient_ip:%s\tplatform:%s\tversion:%s\tdevice_id:%s\tpush_token:%s\tinstance_id:%s", imcontext.GetConnSession(ctx), imcontext.Action_Connect, msg.Appkey, userId, clientIp, msg.Platform, msg.SdkVersion, msg.DeviceId, msg.PushToken, msg.InstanceId)
 	commonservices.ReportUserLogin(msg.Appkey, userId)
 
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Appkey, msg.Appkey)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_DeviceID, msg.DeviceId)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Platform, msg.Platform)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Version, msg.SdkVersion)
-	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientIp, clientIp)
 	services.PutInContextCache(ctx)
 
 	//reg push token

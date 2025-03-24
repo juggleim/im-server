@@ -127,7 +127,7 @@ func initIosPushConf(ctx context.Context, appkey, packageName string) *IosPushCo
 		}
 		return iosPushConf
 	} else {
-		logs.WithContext(ctx).Errorf("qry ios push conf failed. %v", err)
+		logs.WithContext(ctx).Errorf("qry ios push conf failed.app_key:%s\tpackage:%s\terr:%v", appkey, packageName, err)
 	}
 	return noExistIosPushConf
 }

@@ -3,7 +3,8 @@ package dbs
 import (
 	"fmt"
 	"im-server/commons/dbcommons"
-	"im-server/services/botmsg/storages/models"
+	"im-server/services/appbusiness/storages/models"
+	"im-server/services/commonservices"
 )
 
 type BotConfDao struct {
@@ -39,7 +40,7 @@ func (conf BotConfDao) FindById(appkey, botId string) (*models.BotConf, error) {
 		Nickname:    item.Nickname,
 		BotPortrait: item.BotPortrait,
 		Description: item.Description,
-		BotType:     models.BotType(item.BotType),
+		BotType:     commonservices.BotType(item.BotType),
 		BotConf:     item.BotConf,
 		Status:      models.BotStatus(item.Status),
 	}, err
@@ -60,7 +61,7 @@ func (conf BotConfDao) QryBotConfs(appkey string, startId, limit int64) ([]*mode
 			Nickname:    item.Nickname,
 			BotPortrait: item.BotPortrait,
 			Description: item.Description,
-			BotType:     models.BotType(item.BotType),
+			BotType:     commonservices.BotType(item.BotType),
 			BotConf:     item.BotConf,
 			Status:      models.BotStatus(item.Status),
 		})
@@ -83,7 +84,7 @@ func (conf BotConfDao) QryBotConfsWithStatus(appkey string, status models.BotSta
 			Nickname:    item.Nickname,
 			BotPortrait: item.BotPortrait,
 			Description: item.Description,
-			BotType:     models.BotType(item.BotType),
+			BotType:     commonservices.BotType(item.BotType),
 			BotConf:     item.BotConf,
 			Status:      models.BotStatus(item.Status),
 		})

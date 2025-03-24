@@ -28,28 +28,28 @@ func init() {
 	interceptorLocks = tools.NewSegmentatedLocks(128)
 }
 
-func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, upMsg *pbobjs.UpMsg) interceptors.InterceptorResult {
+func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, upMsg *pbobjs.UpMsg) (interceptors.InterceptorResult, int64) {
 	if msgdefines.IsCmdMsg(upMsg.Flags) || msgdefines.IsStateMsg(upMsg.Flags) {
-		return interceptors.InterceptorResult_Pass
+		return interceptors.InterceptorResult_Pass, 0
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, exist := GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.OpenSensitive {
-		result := sensitiveInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg)
+		result, code := sensitiveInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg)
 		if result != interceptors.InterceptorResult_Pass {
-			return result
+			return result, code
 		}
 	}
 
 	//other
 	msgInterceptors := GetMsgInterceptors(appkey)
 	for _, msgInterceptor := range msgInterceptors.Interceptors {
-		result := msgInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg)
+		result, code := msgInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg)
 		if result != interceptors.InterceptorResult_Pass {
-			return result
+			return result, code
 		}
 	}
-	return interceptors.InterceptorResult_Pass
+	return interceptors.InterceptorResult_Pass, 0
 }
 
 func GetMsgInterceptors(appkey string) *MsgInterceptors {

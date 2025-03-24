@@ -1,4 +1,4 @@
-package models
+package apimodels
 
 type LoginReq struct {
 	Account  string `json:"account"`
@@ -7,6 +7,11 @@ type LoginReq struct {
 
 type SmsLoginReq struct {
 	Phone string `json:"phone"`
+	Code  string `json:"code"`
+}
+
+type EmailLoginReq struct {
+	Email string `json:"email"`
 	Code  string `json:"code"`
 }
 

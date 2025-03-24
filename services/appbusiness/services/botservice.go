@@ -6,8 +6,8 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	"im-server/services/botmsg/storages"
-	"im-server/services/botmsg/storages/models"
+	"im-server/services/appbusiness/storages"
+	"im-server/services/appbusiness/storages/models"
 )
 
 func QryAiBots(ctx context.Context, req *pbobjs.QryAiBotsReq) (errs.IMErrorCode, *pbobjs.AiBotInfos) {

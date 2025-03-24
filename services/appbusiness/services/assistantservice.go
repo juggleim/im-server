@@ -1,31 +1,49 @@
 package services
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"im-server/commons/bases"
-	"im-server/commons/errs"
-	"im-server/services/appbusiness/models"
-	"im-server/services/botmsg/services"
+	"im-server/commons/configures"
+	"im-server/commons/tools"
+	"im-server/services/appbusiness/services/imsdk"
+	"im-server/services/commonservices"
+
+	juggleimsdk "github.com/juggleim/imserver-sdk-go"
 )
 
-func AssistantAnswer(ctx context.Context, req *models.AssistantAnswerReq) (errs.IMErrorCode, *models.AssistantAnswerResp) {
-	if req == nil || len(req.Msgs) <= 0 {
-		return errs.IMErrorCode_APP_DEFAULT, nil
-	}
-	buf := bytes.NewBuffer([]byte{})
-	userId := bases.GetRequesterIdFromCtx(ctx)
-	for _, msg := range req.Msgs {
-		if msg.SenderId != userId {
-			buf.WriteString(fmt.Sprintf("对方:%s\n", msg.Content))
-		} else {
-			buf.WriteString(fmt.Sprintf("我:%s\n", msg.Content))
+func InitUserAssistant(ctx context.Context, userId, nickname, portrait string) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	sdk := imsdk.GetImSdk(appkey)
+	if sdk != nil {
+		if appinfo, exist := commonservices.GetAppInfo(appkey); exist {
+			apikey, err := GenerateApiKey(appkey, appinfo.AppSecureKey)
+			if err == nil {
+				botId := GetAssistantId(userId)
+				sdk.AddBot(juggleimsdk.BotInfo{
+					BotId:    botId,
+					Nickname: GetAssistantNickname(nickname),
+					Portrait: portrait,
+					BotType:  int(commonservices.BotType_Custom),
+					BotConf:  fmt.Sprintf(`{"url":"http://127.0.0.1:%d/jim/bots/messages/listener","api_key":"%s","bot_id":"%s"}`, configures.Config.ConnectManager.WsPort, apikey, botId),
+				})
+				sdk.SendPrivateMsg(juggleimsdk.Message{
+					SenderId:       botId,
+					TargetIds:      []string{userId},
+					MsgType:        "jg:text",
+					MsgContent:     `{"content":"欢迎注册JuggleIM，我是您的私人助理，任何问题都可以问我！"}`,
+					IsNotifySender: tools.BoolPtr(false),
+				})
+			}
 		}
 	}
-	buf.WriteString("帮我生成回复")
-	answer := services.GenerateAnswer(ctx, buf.String())
-	return errs.IMErrorCode_SUCCESS, &models.AssistantAnswerResp{
-		Answer: answer,
-	}
+}
+
+func GetAssistantId(userId string) string {
+	botId := fmt.Sprintf("ass_%s", userId)
+	return botId
+}
+
+func GetAssistantNickname(nickname string) string {
+	return fmt.Sprintf("%s 的助理", nickname)
 }

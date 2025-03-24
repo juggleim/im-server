@@ -56,6 +56,8 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					} else {
 						logs.WithContext(ctx).Infof("[IOS_ERR]user_id:%s\tnot init apns client")
 					}
+				} else {
+					logs.WithContext(ctx).Infof("[IOS_CONF_NIL]app_key=%s\tpackage:%s", appkey, pushToken.PackageName)
 				}
 			}
 		} else if pushToken.Platform == pbobjs.Platform_Android {

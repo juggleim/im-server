@@ -5,38 +5,49 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	"im-server/services/appbusiness/models"
+	"im-server/services/appbusiness/apimodels"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/msgdefines"
 )
 
-func SendGrpNotify(ctx context.Context, grpId string, notify *models.GroupNotify) {
+func SendGrpNotify(ctx context.Context, grpId string, notify *apimodels.GroupNotify) {
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	bs, _ := tools.JsonMarshal(notify)
 	flag := msgdefines.SetStoreMsg(0)
 	commonservices.AsyncGroupMsgOverUpstream(ctx, requestId, grpId, &pbobjs.UpMsg{
-		MsgType:    models.GroupNotifyMsgType,
+		MsgType:    apimodels.GroupNotifyMsgType,
 		MsgContent: bs,
 		Flags:      flag,
 	}, &bases.MarkFromApiOption{})
 }
 
-func SendFriendNotify(ctx context.Context, targetId string, notify *models.FriendNotify) {
+func SendFriendNotify(ctx context.Context, targetId string, notify *apimodels.FriendNotify) {
 	bs, _ := tools.JsonMarshal(notify)
 	flag := msgdefines.SetStoreMsg(0)
 	commonservices.AsyncPrivateMsgOverUpstream(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, &pbobjs.UpMsg{
-		MsgType:    models.FriendNotifyMsgType,
+		MsgType:    apimodels.FriendNotifyMsgType,
 		MsgContent: bs,
 		Flags:      flag,
 	})
 }
 
-func SendFriendApplyNotify(ctx context.Context, targetId string, notify *models.FriendApplyNotify) {
+func SendFriendApplyNotify(ctx context.Context, targetId string, notify *apimodels.FriendApplyNotify) {
 	bs, _ := tools.JsonMarshal(notify)
 	flag := msgdefines.SetStoreMsg(0)
 	flag = msgdefines.SetCountMsg(flag)
-	commonservices.AsyncSystemMsg(ctx, models.SystemFriendApplyConverId, targetId, &pbobjs.UpMsg{
-		MsgType:    models.FriendApplicationMsgType,
+	commonservices.AsyncSystemMsg(ctx, apimodels.SystemFriendApplyConverId, targetId, &pbobjs.UpMsg{
+		MsgType:    apimodels.FriendApplicationMsgType,
+		MsgContent: bs,
+		Flags:      flag,
+	})
+}
+
+func SendPriMsg(ctx context.Context, senderId, targetId string, msgType string, msg interface{}) {
+	bs, _ := tools.JsonMarshal(msg)
+	flag := msgdefines.SetStoreMsg(0)
+	flag = msgdefines.SetCountMsg(flag)
+	commonservices.AsyncPrivateMsgOverUpstream(ctx, senderId, targetId, &pbobjs.UpMsg{
+		MsgType:    msgType,
 		MsgContent: bs,
 		Flags:      flag,
 	})

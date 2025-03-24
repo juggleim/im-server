@@ -31,6 +31,8 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.Use(apis.Signature)
 	group.POST("/users/register", apis.Register)
 	group.POST("/users/update", apis.UpdateUser)
+	group.POST("/users/settings/set", apis.SetUserSettings)
+	group.GET("/users/settings/get", apis.GetUserSettings)
 	group.GET("/users/info", apis.QryUserInfo)
 	group.POST("/users/kick", apis.KickUsers)
 	group.POST("/users/onlinestatus/query", apis.QryUserOnlineStatus)
@@ -57,6 +59,7 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.POST("/hismsgs/clean", apis.CleanHisMsgs)
 	group.POST("/hismsgs/recall", apis.RecallHisMsgs)
 	group.POST("/hismsgs/del", apis.DelHisMsgs)
+	group.POST("/hismsgs/modify", apis.ModifyHisMsg)
 	group.POST("/hismsgs/import", apis.ImportHisMsg)
 
 	group.POST("/private/globalmutemembers/add", apis.AddPrivateGlobalMuteMembers)
@@ -96,6 +99,9 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.POST("/usertags/clear", apis.ClearUserTags)
 
 	group.POST("/push", apis.PushWithTags)
+
+	group.POST("/friends/add", apis.AddFriends)
+	group.POST("/friends/del", apis.DelFriends)
 
 	httpPort := configures.Config.ApiGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))

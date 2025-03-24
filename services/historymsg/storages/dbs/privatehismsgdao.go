@@ -143,7 +143,7 @@ func (msg PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targe
 	return retItems, err
 }
 
-func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime, endTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
+func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
 	var items []*PrivateHisMsgDao
 	params := []interface{}{}
 	condition := "app_key=? and conver_id=?"
@@ -151,7 +151,6 @@ func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime, endTi
 	params = append(params, converId)
 	orderStr := "send_time desc"
 	start := startTime
-	end := endTime
 	if isPositiveOrder {
 		orderStr = "send_time asc"
 
@@ -160,20 +159,16 @@ func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime, endTi
 		}
 		condition = condition + " and send_time>?"
 		params = append(params, start)
-		if end > 0 {
-			condition = condition + " and send_time<?"
-			params = append(params, end)
-		}
 	} else {
 		if start <= 0 {
 			start = time.Now().UnixMilli()
 		}
-		if end < cleanTime {
-			end = cleanTime
-		}
-		condition = condition + " and send_time<? and send_time>?"
+		condition = condition + " and send_time<?"
 		params = append(params, start)
-		params = append(params, end)
+		if cleanTime > 0 {
+			condition = condition + " and send_time>?"
+			params = append(params, cleanTime)
+		}
 	}
 
 	if len(excludeMsgIds) > 0 {

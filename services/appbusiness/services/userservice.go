@@ -6,12 +6,14 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
-	"im-server/services/appbusiness/models"
+	"im-server/services/appbusiness/apimodels"
+	"im-server/services/appbusiness/services/imsdk"
 	"im-server/services/commonservices"
 	"im-server/services/friends/storages"
 	"im-server/services/group/dbs"
 	userStorage "im-server/services/usermanager/storages"
 
+	juggleimsdk "github.com/juggleim/imserver-sdk-go"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -34,14 +36,14 @@ func QryUserInfo(ctx context.Context, userId string) (errs.IMErrorCode, *pbobjs.
 func GetUserSettings(userInfo *commonservices.TargetUserInfo) *pbobjs.UserSettings {
 	settings := &pbobjs.UserSettings{}
 	for _, setting := range userInfo.SettingsFields {
-		if setting.Key == models.UserExtKey_Language {
+		if setting.Key == apimodels.UserExtKey_Language {
 			settings.Language = setting.Value
-		} else if setting.Key == models.UserExtKey_Undisturb {
+		} else if setting.Key == apimodels.UserExtKey_Undisturb {
 			settings.Undisturb = setting.Value
-		} else if setting.Key == models.UserExtKey_FriendVerifyType {
+		} else if setting.Key == apimodels.UserExtKey_FriendVerifyType {
 			verifyType := tools.ToInt(setting.Value)
 			settings.FriendVerifyType = pbobjs.FriendVerifyType(verifyType)
-		} else if setting.Key == models.UserExtKey_GrpVerifyType {
+		} else if setting.Key == apimodels.UserExtKey_GrpVerifyType {
 			verifyType := tools.ToInt(setting.Value)
 			settings.GrpVerifyType = pbobjs.GrpVerifyType(verifyType)
 		}
@@ -81,12 +83,23 @@ func SearchByPhone(ctx context.Context, phone string) (errs.IMErrorCode, *pbobjs
 }
 
 func UpdateUser(ctx context.Context, req *pbobjs.UserObj) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
 	bases.SyncRpcCall(ctx, "upd_user_info", req.UserId, &pbobjs.UserInfo{
 		UserId:       req.UserId,
 		Nickname:     req.Nickname,
 		UserPortrait: req.Avatar,
 	}, nil)
 	if req.Nickname != "" {
+		//update assistant
+		sdk := imsdk.GetImSdk(appkey)
+		if sdk != nil {
+			sdk.AddBot(juggleimsdk.BotInfo{
+				BotId:    GetAssistantId(req.UserId),
+				Nickname: GetAssistantNickname(req.Nickname),
+				Portrait: req.Avatar,
+				BotType:  int(commonservices.BotType_Custom),
+			})
+		}
 		// update order tag for friends
 		storage := storages.NewFriendRelStorage()
 		appkey := bases.GetAppKeyFromCtx(ctx)
@@ -99,19 +112,19 @@ func UpdateUserSettings(ctx context.Context, req *pbobjs.UserSettings) errs.IMEr
 	requestId := bases.GetRequesterIdFromCtx(ctx)
 	settings := []*pbobjs.KvItem{
 		{
-			Key:   models.UserExtKey_Language,
+			Key:   apimodels.UserExtKey_Language,
 			Value: req.Language,
 		},
 		{
-			Key:   models.UserExtKey_Undisturb,
+			Key:   apimodels.UserExtKey_Undisturb,
 			Value: req.Undisturb,
 		},
 		{
-			Key:   models.UserExtKey_FriendVerifyType,
+			Key:   apimodels.UserExtKey_FriendVerifyType,
 			Value: tools.Int642String(int64(req.FriendVerifyType)),
 		},
 		{
-			Key:   models.UserExtKey_GrpVerifyType,
+			Key:   apimodels.UserExtKey_GrpVerifyType,
 			Value: tools.Int642String(int64(req.GrpVerifyType)),
 		},
 	}
@@ -160,6 +173,7 @@ func GetUser(ctx context.Context, userId string) *pbobjs.UserObj {
 	if user != nil {
 		u.Nickname = user.Nickname
 		u.Avatar = user.UserPortrait
+		u.UserType = user.UserType
 	}
 	return u
 }

@@ -99,3 +99,8 @@ type UndisturbConverItem struct {
 	ChannelType   int    `json:"channel_type"`
 	UndisturbType int32  `json:"undisturb_type"`
 }
+
+type UserSettings struct {
+	UserId   string                 `json:"user_id"`
+	Settings map[string]interface{} `json:"settings"`
+}

@@ -228,3 +228,8 @@ message AiBotInfos{
     repeated AiBotInfo items =1;
     string offset = 2;
 }
+
+message ApiKey{
+    string appkey = 1;
+    int64 created_time = 2;
+}

@@ -39,6 +39,7 @@ const (
 	AttItemKey_Bot_Type    AttItemKey = "bot_type"
 	AttItemKey_Bot_WebHook AttItemKey = "bot_webhook"
 	AttItemKey_Bot_ApiKey  AttItemKey = "bot_api_key"
+	AttItemKey_Bot_BotConf AttItemKey = "bot_conf"
 )
 
 type GroupSettings struct {

@@ -52,6 +52,9 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 			newDownMsg := &pbobjs.DownMsg{}
 			err = tools.PbUnMarshal(dbMsg.MsgBody, newDownMsg)
 			if err == nil {
+				if modifyReq.MsgType != "" {
+					newDownMsg.MsgType = modifyReq.MsgType
+				}
 				newDownMsg.MsgContent = modifyReq.MsgContent
 				newDownMsg.Flags = msgdefines.SetModifiedMsg(newDownMsg.Flags)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
@@ -69,6 +72,9 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 			newDownMsg := &pbobjs.DownMsg{}
 			err = tools.PbUnMarshal(dbMsg.MsgBody, newDownMsg)
 			if err == nil {
+				if modifyReq.MsgType != "" {
+					newDownMsg.MsgType = modifyReq.MsgType
+				}
 				newDownMsg.MsgContent = modifyReq.MsgContent
 				newDownMsg.Flags = msgdefines.SetModifiedMsg(newDownMsg.Flags)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)

@@ -25,6 +25,7 @@ type IUserStorage interface {
 	Create(item User) error
 	Upsert(item User) error
 	FindByPhone(appkey, phone string) (*User, error)
+	FindByEmail(appkey, email string) (*User, error)
 	FindByUserId(appkey, userId string) (*User, error)
 	Update(appkey, userId, nickname, userPortrait string) error
 	Count(appkey string) int
@@ -46,5 +47,6 @@ type IUserExtStorage interface {
 	BatchUpsert(items []UserExt) error
 	BatchDelete(appkey, itemKey string, userIds []string) error
 	QryExtFields(appkey, userId string) ([]*UserExt, error)
+	QryExtFieldsByItemKeys(appkey, userId string, itemKeys []string) (map[string]*UserExt, error)
 	QryExtsBaseItemKey(appkey, itemKey string, startId, limit int64) ([]*UserExt, error)
 }

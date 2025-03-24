@@ -1,4 +1,4 @@
-package models
+package apimodels
 
 type CommonError struct {
 	Code     int    `json:"code"`

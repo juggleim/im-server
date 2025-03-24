@@ -8,8 +8,8 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/appbusiness/apimodels"
 	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/models"
 	"im-server/services/appbusiness/services"
 	"im-server/services/appbusiness/storages"
 	storageModels "im-server/services/appbusiness/storages/models"
@@ -25,7 +25,7 @@ import (
 )
 
 func Login(ctx *httputils.HttpContext) {
-	req := &models.LoginReq{}
+	req := &apimodels.LoginReq{}
 	if err := ctx.BindJson(req); err != nil || req.Account == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -39,7 +39,7 @@ func Login(ctx *httputils.HttpContext) {
 		NoCover:  true,
 		Settings: []*pbobjs.KvItem{
 			{
-				Key:   models.UserExtKey_FriendVerifyType,
+				Key:   apimodels.UserExtKey_FriendVerifyType,
 				Value: tools.Int642String(int64(pbobjs.FriendVerifyType_NeedFriendVerify)),
 			},
 		},
@@ -58,7 +58,7 @@ func Login(ctx *httputils.HttpContext) {
 }
 
 func SmsSend(ctx *httputils.HttpContext) {
-	req := &models.SmsLoginReq{}
+	req := &apimodels.SmsLoginReq{}
 	if err := ctx.BindJson(req); err != nil || req.Phone == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -72,7 +72,7 @@ func SmsSend(ctx *httputils.HttpContext) {
 }
 
 func SmsLogin(ctx *httputils.HttpContext) {
-	req := &models.SmsLoginReq{}
+	req := &apimodels.SmsLoginReq{}
 	if err := ctx.BindJson(req); err != nil || req.Phone == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -108,6 +108,8 @@ func SmsLogin(ctx *httputils.HttpContext) {
 					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
 					return
 				}
+				//assistant send welcome message
+				services.InitUserAssistant(ctx.ToRpcCtx(), userId, nickname, "")
 			}
 		}
 
@@ -127,7 +129,98 @@ func SmsLogin(ctx *httputils.HttpContext) {
 			return
 		}
 		regResp := resp.(*pbobjs.UserRegResp)
-		ctx.ResponseSucc(&models.LoginUserResp{
+		ctx.ResponseSucc(&apimodels.LoginUserResp{
+			UserId:        userId,
+			Authorization: regResp.Token,
+			NickName:      regResp.Nickname,
+			Avatar:        regResp.UserPortrait,
+			Status:        0,
+			ImToken:       regResp.Token,
+		})
+	} else {
+		ctx.ResponseErr(code)
+		return
+	}
+}
+
+func EmailSend(ctx *httputils.HttpContext) {
+	req := &apimodels.EmailLoginReq{}
+	if err := ctx.BindJson(req); err != nil || req.Email == "" {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	// code := services.SmsSend(ctx.ToRpcCtx(), req.Email)
+	// if code != errs.IMErrorCode_SUCCESS {
+	// 	ctx.ResponseErr(code)
+	// 	return
+	// }
+	ctx.ResponseSucc(nil)
+}
+
+func EmailLogin(ctx *httputils.HttpContext) {
+	req := &apimodels.EmailLoginReq{}
+	if err := ctx.BindJson(req); err != nil || req.Email == "" {
+		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+		return
+	}
+	code := services.CheckEmailCode(ctx.ToRpcCtx(), req.Email, req.Code)
+	if code == errs.IMErrorCode_SUCCESS {
+		appkey := ctx.AppKey
+		userId := tools.ShortMd5(req.Email)
+		nickname := fmt.Sprintf("user%05d", tools.RandInt(100000))
+		storage := userStorage.NewUserStorage()
+		user, err := storage.FindByPhone(appkey, req.Email)
+		if err == nil && user != nil {
+			userId = user.UserId
+			nickname = user.Nickname
+		} else {
+			user, err = storage.FindByUserId(appkey, userId)
+			if err == nil && user != nil {
+				userId = user.UserId
+				nickname = user.Nickname
+			} else {
+				if err != gorm.ErrRecordNotFound {
+					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+					return
+				}
+				userId = tools.GenerateUUIDShort11()
+				err = storage.Create(userModels.User{
+					UserId:   userId,
+					Nickname: nickname,
+					Email:    req.Email,
+					AppKey:   appkey,
+				})
+				if err != nil {
+					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+					return
+				}
+				//assistant send welcome message
+				services.InitUserAssistant(ctx.ToRpcCtx(), userId, nickname, "")
+			}
+		}
+		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
+			UserId:   userId,
+			Nickname: nickname,
+			NoCover:  true,
+			Settings: []*pbobjs.KvItem{
+				{
+					Key:   apimodels.UserExtKey_FriendVerifyType,
+					Value: tools.Int642String(int64(pbobjs.FriendVerifyType_NeedFriendVerify)),
+				},
+			},
+		}, func() proto.Message {
+			return &pbobjs.UserRegResp{}
+		})
+		if err != nil {
+			ctx.ResponseErr(errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
+			return
+		}
+		if code != errs.IMErrorCode_SUCCESS {
+			ctx.ResponseErr(code)
+			return
+		}
+		regResp := resp.(*pbobjs.UserRegResp)
+		ctx.ResponseSucc(&apimodels.LoginUserResp{
 			UserId:        userId,
 			Authorization: regResp.Token,
 			NickName:      regResp.Nickname,
@@ -169,7 +262,7 @@ func GenerateQrCode(ctx *httputils.HttpContext) {
 }
 
 func CheckQrCode(ctx *httputils.HttpContext) {
-	req := &models.QrCode{}
+	req := &apimodels.QrCode{}
 	if err := ctx.BindJson(req); err != nil || req.Id == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
@@ -201,7 +294,7 @@ func CheckQrCode(ctx *httputils.HttpContext) {
 			return
 		}
 		regResp := resp.(*pbobjs.UserRegResp)
-		ctx.ResponseSucc(&models.LoginUserResp{
+		ctx.ResponseSucc(&apimodels.LoginUserResp{
 			UserId:        userId,
 			Authorization: regResp.Token,
 			NickName:      regResp.Nickname,
@@ -216,7 +309,7 @@ func CheckQrCode(ctx *httputils.HttpContext) {
 }
 
 func ConfirmQrCode(ctx *httputils.HttpContext) {
-	req := &models.QrCode{}
+	req := &apimodels.QrCode{}
 	if err := ctx.BindJson(req); err != nil || req.Id == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return

@@ -3,17 +3,15 @@ package services
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/botmsg/services/botengines"
-	"im-server/services/botmsg/storages"
-	"im-server/services/botmsg/storages/models"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
+	userStorages "im-server/services/usermanager/storages"
 	"strings"
 	"time"
 )
@@ -29,9 +27,7 @@ func init() {
 type BotInfo struct {
 	AppKey    string
 	BotId     string
-	Nickname  string
-	Portrait  string
-	BotType   models.BotType
+	BotType   commonservices.BotType
 	BotEngine botengines.IBotEngine
 }
 
@@ -52,24 +48,53 @@ func GetBotInfo(ctx context.Context, botId string) *BotInfo {
 				BotId:     botId,
 				BotEngine: &botengines.NilBotEngine{},
 			}
-			storage := storages.NewBotConfStorage()
-			bot, err := storage.FindById(appkey, botId)
+			storage := userStorages.NewUserExtStorage()
+			confMap, err := storage.QryExtFieldsByItemKeys(appkey, botId, []string{
+				string(commonservices.AttItemKey_Bot_Type),
+				string(commonservices.AttItemKey_Bot_BotConf),
+			})
 			if err == nil {
-				botInfo.Nickname = bot.Nickname
-				botInfo.Portrait = bot.BotPortrait
-				botInfo.BotType = bot.BotType
+				botType := commonservices.BotType_Default
+				botTypeExt := confMap[string(commonservices.AttItemKey_Bot_Type)]
+				if botTypeExt != nil {
+					botType = commonservices.BotType(tools.ToInt(botTypeExt.ItemValue))
+				}
+				botInfo.BotType = botType
+				botConf := ""
+				botConfExt := confMap[string(commonservices.AttItemKey_Bot_BotConf)]
+				if botConfExt != nil {
+					botConf = botConfExt.ItemValue
+				}
 				switch botInfo.BotType {
-				case models.BotType_Dify:
+				case commonservices.BotType_Default:
+					defaultBot := &botengines.DefaultEngine{}
+					err = tools.JsonUnMarshal([]byte(botConf), defaultBot)
+					if err == nil && defaultBot.Webhook != "" {
+						botInfo.BotEngine = defaultBot
+					}
+				case commonservices.BotType_Custom:
+					customBot := &botengines.CustomBotEngine{}
+					err = tools.JsonUnMarshal([]byte(botConf), customBot)
+					if err == nil && customBot.Url != "" {
+						botInfo.BotEngine = customBot
+					}
+				case commonservices.BotType_Dify:
 					difyBot := &botengines.DifyBotEngine{}
-					err = tools.JsonUnMarshal([]byte(bot.BotConf), difyBot)
+					err = tools.JsonUnMarshal([]byte(botConf), difyBot)
 					if err == nil && difyBot.ApiKey != "" && difyBot.Url != "" {
 						botInfo.BotEngine = difyBot
 					}
-				case models.BotType_Coze:
+				case commonservices.BotType_Coze:
 					cozeBot := &botengines.CozeBotEngine{}
-					err = tools.JsonUnMarshal([]byte(bot.BotConf), cozeBot)
+					err = tools.JsonUnMarshal([]byte(botConf), cozeBot)
 					if err == nil && cozeBot.BotId != "" && cozeBot.Url != "" && cozeBot.Token != "" {
 						botInfo.BotEngine = cozeBot
+					}
+				case commonservices.BotType_SiliconFlow:
+					sfBot := &botengines.SiliconFlowEngine{}
+					err = tools.JsonUnMarshal([]byte(botConf), sfBot)
+					if err == nil && sfBot.ApiKey != "" && sfBot.Model != "" && sfBot.Url != "" {
+						botInfo.BotEngine = sfBot
 					}
 				}
 			} else {
@@ -148,20 +173,12 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 	botId := bases.GetTargetIdFromCtx(ctx)
 	botInfo := GetBotInfo(ctx, botId)
 	if botInfo.BotEngine != nil {
-		converKey := ""
-		if msg.ChannelType == pbobjs.ChannelType_Private {
-			converKey = commonservices.GetConversationId(msg.SenderId, botId, pbobjs.ChannelType_Private)
-			converKey = fmt.Sprintf("%s_%d", converKey, pbobjs.ChannelType_Private)
-		} else if msg.ChannelType == pbobjs.ChannelType_Group {
-			converKey = commonservices.GetConversationId(msg.SenderId, msg.TargetId, pbobjs.ChannelType_Group)
-			converKey = fmt.Sprintf("%s_%d", converKey, pbobjs.ChannelType_Group)
-		}
 		msgFlag := msgdefines.SetStoreMsg(0)
 		msgFlag = msgdefines.SetCountMsg(msgFlag)
 
 		var combiner *Combiner
 		botUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, botId)
-		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, converKey, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
+		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, botId, msg.ChannelType, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
 			if sectionStart {
 				curr := time.Now().UnixMilli()
 				streamFlag := msgdefines.SetStreamMsg(0)

@@ -73,6 +73,61 @@ func UpdateUser(ctx *gin.Context) {
 	tools.SuccessHttpResp(ctx, nil)
 }
 
+func SetUserSettings(ctx *gin.Context) {
+	var req models.UserSettings
+	if err := ctx.BindJSON(&req); err != nil || req.UserId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	kvMap := make(map[string]string)
+	for k, v := range req.Settings {
+		if commonservices.CheckUserSettingKey(k) {
+			kvMap[k] = fmt.Sprintf("%v", v)
+		}
+	}
+	if len(kvMap) <= 0 {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "set_user_settings", req.UserId, &pbobjs.UserInfo{
+		UserId:   req.UserId,
+		Settings: commonservices.Map2KvItems(kvMap),
+	})
+	tools.SuccessHttpResp(ctx, nil)
+}
+
+func GetUserSettings(ctx *gin.Context) {
+	userId := ctx.Query("user_id")
+	if userId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	code, userInfo, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "get_user_settings", userId, &pbobjs.Nil{}, func() proto.Message {
+		return &pbobjs.UserInfo{}
+	})
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, code)
+		return
+	}
+	ret := &models.UserSettings{
+		UserId:   userId,
+		Settings: map[string]interface{}{},
+	}
+	if userInfo != nil {
+		uInfo, ok := userInfo.(*pbobjs.UserInfo)
+		if ok && uInfo != nil {
+			for _, setting := range uInfo.Settings {
+				ret.Settings[setting.Key] = setting.Value
+			}
+		}
+	}
+	tools.SuccessHttpResp(ctx, ret)
+}
+
 func QryUserInfo(ctx *gin.Context) {
 	userid := ctx.Query("user_id")
 	if userid == "" {
