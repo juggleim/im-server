@@ -1,6 +1,6 @@
 nodeName: testNode
 nodeHost: 127.0.0.1
-msgStoreEngine: mysql 
+msgStoreEngine: mysql
 
 log:
   logPath: ./logs
@@ -10,10 +10,10 @@ kvdb:
   isOpen: true
 
 mysql:
-  user: root
-  password: 123456
-  address: 127.0.0.1:3306
-  name: im_db
+  user: jim_db
+  password: nzHn75wZabA2HhN3
+  address: 47.98.183.247:3306
+  name: jim_db
 
 mongodb:
   address: 127.0.0.1:27017
