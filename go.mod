@@ -138,7 +138,7 @@ require (
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/jinzhu/gorm v1.9.16
 	github.com/juggleim/imserver-sdk-go v1.0.5
-	github.com/juggleim/jugglechat-server v1.0.3
+	github.com/juggleim/jugglechat-server v1.0.4
 	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mozillazg/go-pinyin v0.20.0

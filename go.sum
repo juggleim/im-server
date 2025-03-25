@@ -199,6 +199,8 @@ github.com/juggleim/imserver-sdk-go v1.0.5 h1:KtIocIYSUsXafeSAmCxYRsv0DXn3336aV0
 github.com/juggleim/imserver-sdk-go v1.0.5/go.mod h1:xdxsGeW0b4GOYJvKJwnaU04Z+jGaUSrBvzeSbNvNOFk=
 github.com/juggleim/jugglechat-server v1.0.3 h1:cEkB+fXpeVZ91ZRvytz0YmRgJNm+agiP794pp9qWgaA=
 github.com/juggleim/jugglechat-server v1.0.3/go.mod h1:Edd6gITVpTv5JRGHdU4SYi7cto6vRO5zNxco2TyUsYM=
+github.com/juggleim/jugglechat-server v1.0.4 h1:7/F705Hetu7gcWZLXa6pneewwpqGO10aUCVHVlbSu7g=
+github.com/juggleim/jugglechat-server v1.0.4/go.mod h1:Edd6gITVpTv5JRGHdU4SYi7cto6vRO5zNxco2TyUsYM=
 github.com/kataras/i18n v0.0.8 h1:thiDRqq4fN2sQOK5CwR5Yh1yT7swP6B3wnadILhqjhk=
 github.com/kataras/i18n v0.0.8/go.mod h1:M/yRAqQ3Y7z2oSpotxG/+nPrgsJLas6t0kEJfIJk98E=
 github.com/klauspost/compress v1.13.6/go.mod h1:/3/Vjq9QcHkK5uEr5lBEmyoZ1iFhe47etQ6QUkpK6sk=
