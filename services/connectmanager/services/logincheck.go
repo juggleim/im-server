@@ -19,6 +19,7 @@ func init() {
 	supportPlatforms[string(commonservices.Platform_IOS)] = true
 	supportPlatforms[string(commonservices.Platform_Web)] = true
 	supportPlatforms[string(commonservices.Platform_PC)] = true
+	supportPlatforms[string(commonservices.Platform_Harmony)] = true
 }
 
 func CheckLogin(ctx imcontext.WsHandleContext, msg *codec.ConnectMsgBody) (int32, string) {
