@@ -10,6 +10,7 @@ const (
 	Platform_IOS     Platform = "iOS"
 	Platform_Web     Platform = "Web"
 	Platform_PC      Platform = "PC"
+	Platform_Harmony Platform = "Harmony"
 	Platform_Server  Platform = "Server"
 
 	PushChannel_Apple  PushChannel = "Apple"
