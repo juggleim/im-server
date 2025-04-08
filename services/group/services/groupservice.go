@@ -193,7 +193,7 @@ func QryGroupInfo(ctx context.Context, req *pbobjs.GroupInfoReq) (errs.IMErrorCo
 			GroupId:   req.GroupId,
 			ExtFields: []*pbobjs.KvItem{},
 		}
-		memberContainer, exist := GetGroupMembersFromCache(ctx, appkey, commonservices.GroupField_MemberCount)
+		memberContainer, exist := GetGroupMembersFromCache(ctx, appkey, req.GroupId)
 		for _, field := range req.CareFields {
 			if field == commonservices.GroupField_MemberCount {
 				if exist {
