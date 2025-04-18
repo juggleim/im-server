@@ -61,7 +61,12 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 			MsgType:    upMsg.MsgType,
 			MsgContent: upMsg.MsgContent,
 		}
+	} else if result == interceptors.InterceptorResult_Silent {
+		sendTime := time.Now().UnixMilli()
+		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
+		return errs.IMErrorCode_SUCCESS, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 	}
+
 	msgConverCache := commonservices.GetMsgConverCache(ctx, groupId, pbobjs.ChannelType_Group)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(groupId, pbobjs.ChannelType_Group, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)

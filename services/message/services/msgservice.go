@@ -46,7 +46,12 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 			MsgType:    upMsg.MsgType,
 			MsgContent: upMsg.MsgContent,
 		}
+	} else if result == interceptors.InterceptorResult_Silent {
+		sendTime := time.Now().UnixMilli()
+		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
+		return errs.IMErrorCode_SUCCESS, msgId, sendTime, 0, upMsg.ClientUid, nil
 	}
+
 	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)

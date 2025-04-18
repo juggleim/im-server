@@ -79,6 +79,8 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 		return InterceptorResult_Pass, customCode
 	} else if result == "reject" {
 		return InterceptorResult_Reject, customCode
+	} else if result == "silent" {
+		return InterceptorResult_Silent, customCode
 	} else {
 		return InterceptorResult_Pass, customCode
 	}
