@@ -20,7 +20,7 @@ var groupInfoCache *caches.LruCache
 var groupLocks *tools.SegmentatedLocks
 
 func init() {
-	groupInfoCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 10*time.Minute, 10*time.Minute)
+	groupInfoCache = caches.NewLruCacheWithAddReadTimeout("groupinfo_cache", 10000, nil, 10*time.Minute, 10*time.Minute)
 	groupLocks = tools.NewSegmentatedLocks(128)
 }
 

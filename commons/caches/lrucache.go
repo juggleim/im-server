@@ -14,6 +14,8 @@ type lruCacheItem struct {
 }
 
 type LruCache struct {
+	name               string
+	lastRecord         int64
 	lru                simplelru.LRUCache
 	lock               sync.RWMutex
 	readTimeoutChecker *time.Ticker
@@ -29,20 +31,20 @@ type CacheItem struct {
 	Value interface{}
 }
 
-func NewLruCacheWithAddReadTimeout(size int, onEvict simplelru.EvictCallback, timeoutAfterRead time.Duration, timeoutAfterCreate time.Duration) *LruCache {
-	cache := NewLruCache(size, onEvict)
+func NewLruCacheWithAddReadTimeout(name string, size int, onEvict simplelru.EvictCallback, timeoutAfterRead time.Duration, timeoutAfterCreate time.Duration) *LruCache {
+	cache := NewLruCache(name, size, onEvict)
 	cache.AddTimeoutAfterRead(timeoutAfterRead)
 	cache.AddTimeoutAfterCreate(timeoutAfterCreate)
 	return cache
 }
 
-func NewLruCacheWithReadTimeout(size int, onEvict simplelru.EvictCallback, timeoutAfterRead time.Duration) *LruCache {
-	cache := NewLruCache(size, onEvict)
+func NewLruCacheWithReadTimeout(name string, size int, onEvict simplelru.EvictCallback, timeoutAfterRead time.Duration) *LruCache {
+	cache := NewLruCache(name, size, onEvict)
 	cache.AddTimeoutAfterRead(timeoutAfterRead)
 	return cache
 }
 
-func NewLruCache(size int, onEvict simplelru.EvictCallback) *LruCache {
+func NewLruCache(name string, size int, onEvict simplelru.EvictCallback) *LruCache {
 	myLru, _ := simplelru.NewLRU(size, func(key, value interface{}) {
 		if onEvict != nil && value != nil {
 			cacheItem, ok := value.(*lruCacheItem)
@@ -52,7 +54,8 @@ func NewLruCache(size int, onEvict simplelru.EvictCallback) *LruCache {
 		}
 	})
 	cache := &LruCache{
-		lru: myLru,
+		name: name,
+		lru:  myLru,
 	}
 	return cache
 }

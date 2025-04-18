@@ -24,7 +24,7 @@ var (
 )
 
 func init() {
-	interceptorCache = caches.NewLruCacheWithAddReadTimeout(1000, nil, 10*time.Minute, 10*time.Minute)
+	interceptorCache = caches.NewLruCacheWithAddReadTimeout("interceptor_cache", 1000, nil, 10*time.Minute, 10*time.Minute)
 	interceptorLocks = tools.NewSegmentatedLocks(128)
 }
 

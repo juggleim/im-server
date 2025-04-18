@@ -27,7 +27,7 @@ var (
 )
 
 func init() {
-	pushConfCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 5*time.Minute, 5*time.Minute)
+	pushConfCache = caches.NewLruCacheWithAddReadTimeout("pushconf_cache", 10000, nil, 5*time.Minute, 5*time.Minute)
 	pushConfLocks = tools.NewSegmentatedLocks(128)
 }
 

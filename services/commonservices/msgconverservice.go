@@ -18,7 +18,7 @@ var msgConverCache *caches.LruCache
 var msgConverLocks *tools.SegmentatedLocks
 
 func init() {
-	msgConverCache = caches.NewLruCacheWithReadTimeout(100000, nil, 10*time.Minute)
+	msgConverCache = caches.NewLruCacheWithReadTimeout("msgconver_cache", 100000, nil, 10*time.Minute)
 	msgConverLocks = tools.NewSegmentatedLocks(512)
 }
 

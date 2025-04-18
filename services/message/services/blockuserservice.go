@@ -18,7 +18,7 @@ var (
 )
 
 func init() {
-	blockUserCache = caches.NewLruCacheWithAddReadTimeout(100000, nil, 10*time.Minute, 10*time.Minute)
+	blockUserCache = caches.NewLruCacheWithAddReadTimeout("blockuser_cache", 100000, nil, 10*time.Minute, 10*time.Minute)
 	blockUserLock = tools.NewSegmentatedLocks(256)
 }
 

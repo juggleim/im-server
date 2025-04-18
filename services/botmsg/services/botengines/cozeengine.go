@@ -134,7 +134,7 @@ type CozeConverItem struct {
 }
 
 func init() {
-	cozeConverCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 10*time.Minute, 10*time.Minute)
+	cozeConverCache = caches.NewLruCacheWithAddReadTimeout("coze_conver_cache", 10000, nil, 10*time.Minute, 10*time.Minute)
 	cozeConverLock = tools.NewSegmentatedLocks(128)
 }
 

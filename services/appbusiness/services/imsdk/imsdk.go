@@ -15,7 +15,7 @@ var sdkCache *caches.LruCache
 var lock *sync.RWMutex
 
 func init() {
-	sdkCache = caches.NewLruCacheWithAddReadTimeout(1000, nil, 5*time.Minute, 5*time.Minute)
+	sdkCache = caches.NewLruCacheWithAddReadTimeout("jimsdk_cache", 1000, nil, 5*time.Minute, 5*time.Minute)
 	lock = &sync.RWMutex{}
 }
 

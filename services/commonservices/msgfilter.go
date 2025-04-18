@@ -8,7 +8,7 @@ import (
 var msgClientIdCache *caches.LruCache
 
 func init() {
-	msgClientIdCache = caches.NewLruCacheWithReadTimeout(10000, nil, 10*time.Minute)
+	msgClientIdCache = caches.NewLruCacheWithReadTimeout("msgclientid_cache", 10000, nil, 10*time.Minute)
 }
 
 type MsgAck struct {

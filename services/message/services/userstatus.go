@@ -36,7 +36,7 @@ var userOnlineStatusCache *caches.LruCache
 var userLocks *tools.SegmentatedLocks
 
 func init() {
-	userOnlineStatusCache = caches.NewLruCacheWithReadTimeout(100000, func(key, value interface{}) {}, time.Hour)
+	userOnlineStatusCache = caches.NewLruCacheWithReadTimeout("useronlinestatus_cache", 100000, func(key, value interface{}) {}, time.Hour)
 	userLocks = tools.NewSegmentatedLocks(512)
 }
 

@@ -20,7 +20,7 @@ var botCache *caches.LruCache
 var botLocks *tools.SegmentatedLocks
 
 func init() {
-	botCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 5*time.Second, 5*time.Second)
+	botCache = caches.NewLruCacheWithAddReadTimeout("bot_cache", 10000, nil, 5*time.Second, 5*time.Second)
 	botLocks = tools.NewSegmentatedLocks(128)
 }
 

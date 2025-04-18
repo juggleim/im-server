@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	filterCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 8*time.Minute, 10*time.Minute)
+	filterCache = caches.NewLruCacheWithAddReadTimeout("filter_cache", 10000, nil, 8*time.Minute, 10*time.Minute)
 	filterLocks = tools.NewSegmentatedLocks(128)
 
 	filterCache.SetValueCreator(func(key interface{}) interface{} {

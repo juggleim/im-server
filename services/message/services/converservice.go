@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	converCache = caches.NewLruCacheWithAddReadTimeout(100000, nil, 10*time.Minute, 10*time.Minute)
+	converCache = caches.NewLruCacheWithAddReadTimeout("msg_conver_cache", 100000, nil, 10*time.Minute, 10*time.Minute)
 	batchExecutorPool = tools.NewBatchExecutorPool(128, 100, 5*time.Second, batchSaveConver)
 }
 

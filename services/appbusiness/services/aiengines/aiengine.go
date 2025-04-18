@@ -24,7 +24,7 @@ var aiEngineCache *caches.LruCache
 var aiEngineLocks *tools.SegmentatedLocks
 
 func init() {
-	aiEngineCache = caches.NewLruCacheWithAddReadTimeout(1000, nil, 5*time.Minute, 5*time.Minute)
+	aiEngineCache = caches.NewLruCacheWithAddReadTimeout("assistant_cache", 1000, nil, 5*time.Minute, 5*time.Minute)
 	aiEngineLocks = tools.NewSegmentatedLocks(32)
 }
 
