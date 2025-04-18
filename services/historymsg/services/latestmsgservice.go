@@ -15,7 +15,7 @@ var latestMsgCache *caches.LruCache
 var latestMsgLocks *tools.SegmentatedLocks
 
 func init() {
-	latestMsgCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 5*time.Minute, 5*time.Minute)
+	latestMsgCache = caches.NewLruCacheWithAddReadTimeout("latestmsg_cache", 10000, nil, 5*time.Minute, 5*time.Minute)
 	latestMsgLocks = tools.NewSegmentatedLocks(128)
 }
 

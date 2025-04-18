@@ -13,7 +13,7 @@ import (
 var confCache *caches.LruCache
 
 func init() {
-	confCache = caches.NewLruCache(1000, nil)
+	confCache = caches.NewLruCache("globalconf_cache", 1000, nil)
 	confCache.AddTimeoutAfterCreate(time.Minute)
 	confCache.SetValueCreator(func(key interface{}) interface{} {
 		if key != nil {

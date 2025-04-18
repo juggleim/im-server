@@ -18,7 +18,7 @@ var (
 )
 
 func init() {
-	memberCache = caches.NewLruCacheWithReadTimeout(10000, nil, time.Hour)
+	memberCache = caches.NewLruCacheWithReadTimeout("rtcmember_cache", 10000, nil, time.Hour)
 	memberLocks = tools.NewSegmentatedLocks(128)
 }
 

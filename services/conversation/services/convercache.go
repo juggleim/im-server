@@ -28,7 +28,7 @@ type ConverPersistIndex struct {
 }
 
 func init() {
-	userConverCache = caches.NewLruCacheWithReadTimeout(100000, nil, time.Hour)
+	userConverCache = caches.NewLruCacheWithReadTimeout("userconver_cache", 100000, nil, time.Hour)
 	userLocks = tools.NewSegmentatedLocks(512)
 
 	persistCache = caches.NewEphemeralCache(time.Second, 5*time.Second, func(key, value interface{}) {

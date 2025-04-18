@@ -19,7 +19,7 @@ var tempCache *caches.LruCache
 
 func init() {
 	tempParamsReg, _ = regexp.Compile("{{.([^}]*)}}")
-	tempCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 10*time.Minute, 10*time.Minute)
+	tempCache = caches.NewLruCacheWithAddReadTimeout("temp_cache", 10000, nil, 10*time.Minute, 10*time.Minute)
 }
 
 func FetchTemplateParams(template string) []string {

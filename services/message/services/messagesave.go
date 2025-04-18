@@ -129,7 +129,7 @@ func purgeMsgs(key string, currentTime int64, f func()) {
 	if configures.Config.MsgStoreEngine == "" || configures.Config.MsgStoreEngine == configures.MsgStoreEngine_MySQL {
 		if pool == nil || taskCache == nil {
 			pool = tunny.NewCallback(64)
-			taskCache = caches.NewLruCacheWithReadTimeout(10000, nil, 30*time.Minute)
+			taskCache = caches.NewLruCacheWithReadTimeout("msgpure_cache", 10000, nil, 30*time.Minute)
 		}
 		if val, exist := taskCache.Get(key); exist {
 			time := val.(int64)

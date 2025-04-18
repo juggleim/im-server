@@ -89,7 +89,7 @@ var notExistUser *UserInfo
 
 func init() {
 	notExistUser = &UserInfo{}
-	userCache = caches.NewLruCacheWithAddReadTimeout(100000, nil, 10*time.Minute, 10*time.Minute)
+	userCache = caches.NewLruCacheWithAddReadTimeout("user_cache", 100000, nil, 10*time.Minute, 10*time.Minute)
 	userLocks = tools.NewSegmentatedLocks(512)
 }
 

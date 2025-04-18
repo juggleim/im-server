@@ -21,7 +21,7 @@ var (
 )
 
 func init() {
-	pushTokenCache = caches.NewLruCacheWithAddReadTimeout(100000, nil, 5*time.Minute, 5*time.Minute)
+	pushTokenCache = caches.NewLruCacheWithAddReadTimeout("pushtoken_cache", 100000, nil, 5*time.Minute, 5*time.Minute)
 	pushTokenLocks = tools.NewSegmentatedLocks(512)
 	notExistPushToken = &UserPushToken{DeviceId: ""}
 }

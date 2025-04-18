@@ -15,7 +15,7 @@ import (
 var groupMembersCache *caches.LruCache
 
 func init() {
-	groupMembersCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 8*time.Minute, 10*time.Minute)
+	groupMembersCache = caches.NewLruCacheWithAddReadTimeout("grpmembers_cache", 10000, nil, 8*time.Minute, 10*time.Minute)
 }
 
 func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait string, memberIds []string, extFields []*pbobjs.KvItem, settings []*pbobjs.KvItem) errs.IMErrorCode {

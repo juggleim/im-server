@@ -31,7 +31,7 @@ const (
 )
 
 func init() {
-	rtcroomCache = caches.NewLruCacheWithReadTimeout(10000, nil, time.Hour)
+	rtcroomCache = caches.NewLruCacheWithReadTimeout("rtcroom_cache", 10000, nil, time.Hour)
 	rtcroomLocks = tools.NewSegmentatedLocks(128)
 	checkTimer, _ = timewheel.NewTimeWheel(1*time.Second, 360)
 	checkTimer.Start()

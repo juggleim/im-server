@@ -15,7 +15,7 @@ var subRelCache *caches.LruCache
 var userLocks *tools.SegmentatedLocks
 
 func init() {
-	subRelCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 10*time.Minute, 10*time.Minute)
+	subRelCache = caches.NewLruCacheWithAddReadTimeout("subrel_cache", 10000, nil, 10*time.Minute, 10*time.Minute)
 	userLocks = tools.NewSegmentatedLocks(256)
 }
 

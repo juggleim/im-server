@@ -28,12 +28,12 @@ var (
 )
 
 func init() {
-	statCache = caches.NewLruCacheWithAddReadTimeout(1000, func(key, value interface{}) {
+	statCache = caches.NewLruCacheWithAddReadTimeout("msgstat_cache", 1000, func(key, value interface{}) {
 		counter := value.(*Counter)
 		dao := dbs.MsgStatDao{}
 		dao.IncrByStep(counter.Appkey, int(counter.StateType), int(counter.ChannelType), getDbTimeMark(), counter.Count)
 	}, 10*time.Minute, 10*time.Minute)
-	userActivitiesCache = caches.NewLruCacheWithAddReadTimeout(10000, func(key, value interface{}) {
+	userActivitiesCache = caches.NewLruCacheWithAddReadTimeout("useractivity_cache", 10000, func(key, value interface{}) {
 		counter := value.(*UserActivityCounter)
 		dao := dbs.UserActivityDao{}
 		dao.IncrByStep(counter.Appkey, counter.UserId, getDbTimeMark(), counter.Count)
