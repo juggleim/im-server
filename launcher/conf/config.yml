@@ -30,3 +30,5 @@ navGateway:
 
 adminGateway:
   httpPort: 8090
+
+imApiDomain: http://127.0.0.1:8082

@@ -4,62 +4,58 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"im-server/commons/bases"
-	"im-server/commons/errs"
-	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
-	"im-server/services/appbusiness/apimodels"
-	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/services"
-	"im-server/services/appbusiness/storages"
-	storageModels "im-server/services/appbusiness/storages/models"
-	userStorage "im-server/services/usermanager/storages"
-	userModels "im-server/services/usermanager/storages/models"
+
 	"image/png"
 	"time"
+
+	"github.com/juggleim/jugglechat-server/errs"
+	"github.com/juggleim/jugglechat-server/services/imsdk"
+	"github.com/juggleim/jugglechat-server/storages/models"
+	"github.com/juggleim/jugglechat-server/utils"
+
+	juggleimsdk "github.com/juggleim/imserver-sdk-go"
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
 	"github.com/jinzhu/gorm"
-	"google.golang.org/protobuf/proto"
+	"github.com/juggleim/jugglechat-server/apimodels"
+	"github.com/juggleim/jugglechat-server/services"
+	"github.com/juggleim/jugglechat-server/storages"
 )
 
-func Login(ctx *httputils.HttpContext) {
+func Login(ctx *HttpContext) {
 	req := &apimodels.LoginReq{}
-	if err := ctx.BindJson(req); err != nil || req.Account == "" {
+	if err := ctx.BindJSON(req); err != nil || req.Account == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	userId := tools.ShortMd5(req.Account)
-	nickname := fmt.Sprintf("user%05d", tools.RandInt(100000))
+	userId := utils.ShortMd5(req.Account)
+	nickname := fmt.Sprintf("user%05d", utils.RandInt(100000))
+	appkey := ctx.AppKey
 
-	code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
+	sdk := imsdk.GetImSdk(appkey)
+	if sdk == nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_NOT_EXISTED)
+		return
+	}
+	resp, code, _, err := sdk.Register(juggleimsdk.User{
 		UserId:   userId,
 		Nickname: nickname,
-		NoCover:  true,
-		Settings: []*pbobjs.KvItem{
-			{
-				Key:   apimodels.UserExtKey_FriendVerifyType,
-				Value: tools.Int642String(int64(pbobjs.FriendVerifyType_NeedFriendVerify)),
-			},
-		},
-	}, func() proto.Message {
-		return &pbobjs.UserRegResp{}
 	})
 	if err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
 		return
 	}
-	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+	if code != juggleimsdk.ApiCode(errs.IMErrorCode_SUCCESS) {
+		ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
-	ctx.ResponseSucc(resp)
+	SuccessHttpResp(ctx, resp)
 }
 
-func SmsSend(ctx *httputils.HttpContext) {
+func SmsSend(ctx *HttpContext) {
 	req := &apimodels.SmsLoginReq{}
-	if err := ctx.BindJson(req); err != nil || req.Phone == "" {
+	if err := ctx.BindJSON(req); err != nil || req.Phone == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -71,18 +67,18 @@ func SmsSend(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func SmsLogin(ctx *httputils.HttpContext) {
+func SmsLogin(ctx *HttpContext) {
 	req := &apimodels.SmsLoginReq{}
-	if err := ctx.BindJson(req); err != nil || req.Phone == "" {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(req); err != nil || req.Phone == "" {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	code := services.CheckPhoneSmsCode(ctx.ToRpcCtx(), req.Phone, req.Code)
 	if code == errs.IMErrorCode_SUCCESS {
 		appkey := ctx.AppKey
-		userId := tools.ShortMd5(req.Phone)
-		nickname := fmt.Sprintf("user%05d", tools.RandInt(100000))
-		storage := userStorage.NewUserStorage()
+		userId := utils.ShortMd5(req.Phone)
+		nickname := fmt.Sprintf("user%05d", utils.RandInt(100000))
+		storage := storages.NewUserStorage()
 		user, err := storage.FindByPhone(appkey, req.Phone)
 		if err == nil && user != nil {
 			userId = user.UserId
@@ -94,58 +90,57 @@ func SmsLogin(ctx *httputils.HttpContext) {
 				nickname = user.Nickname
 			} else {
 				if err != gorm.ErrRecordNotFound {
-					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+					ErrorHttpResp(ctx, errs.IMErrorCode_APP_NOT_LOGIN)
 					return
 				}
-				userId = tools.GenerateUUIDShort11()
-				err = storage.Create(userModels.User{
+				userId = utils.GenerateUUIDShort11()
+				err = storage.Create(models.User{
 					UserId:   userId,
 					Nickname: nickname,
 					Phone:    req.Phone,
 					AppKey:   appkey,
 				})
 				if err != nil {
-					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+					ErrorHttpResp(ctx, errs.IMErrorCode_APP_NOT_LOGIN)
 					return
 				}
 				//assistant send welcome message
 				services.InitUserAssistant(ctx.ToRpcCtx(), userId, nickname, "")
 			}
 		}
-
-		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
+		sdk := imsdk.GetImSdk(appkey)
+		if sdk == nil {
+			ErrorHttpResp(ctx, errs.IMErrorCode_APP_NOT_EXISTED)
+			return
+		}
+		resp, code, _, err := sdk.Register(juggleimsdk.User{
 			UserId:   userId,
 			Nickname: nickname,
-			NoCover:  true,
-		}, func() proto.Message {
-			return &pbobjs.UserRegResp{}
 		})
 		if err != nil {
-			ctx.ResponseErr(errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
+			ErrorHttpResp(ctx, errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
 			return
 		}
-		if code != errs.IMErrorCode_SUCCESS {
-			ctx.ResponseErr(code)
+		if code != juggleimsdk.ApiCode(errs.IMErrorCode_SUCCESS) {
+			ErrorHttpResp(ctx, errs.IMErrorCode(code))
 			return
 		}
-		regResp := resp.(*pbobjs.UserRegResp)
-		ctx.ResponseSucc(&apimodels.LoginUserResp{
+
+		SuccessHttpResp(ctx, &apimodels.LoginUserResp{
 			UserId:        userId,
-			Authorization: regResp.Token,
-			NickName:      regResp.Nickname,
-			Avatar:        regResp.UserPortrait,
-			Status:        0,
-			ImToken:       regResp.Token,
+			NickName:      nickname,
+			Authorization: services.GenerateToken(appkey, userId),
+			ImToken:       resp.Token,
 		})
 	} else {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
 }
 
-func EmailSend(ctx *httputils.HttpContext) {
+func EmailSend(ctx *HttpContext) {
 	req := &apimodels.EmailLoginReq{}
-	if err := ctx.BindJson(req); err != nil || req.Email == "" {
+	if err := ctx.BindJSON(req); err != nil || req.Email == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -157,18 +152,18 @@ func EmailSend(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func EmailLogin(ctx *httputils.HttpContext) {
+func EmailLogin(ctx *HttpContext) {
 	req := &apimodels.EmailLoginReq{}
-	if err := ctx.BindJson(req); err != nil || req.Email == "" {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(req); err != nil || req.Email == "" {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	code := services.CheckEmailCode(ctx.ToRpcCtx(), req.Email, req.Code)
 	if code == errs.IMErrorCode_SUCCESS {
 		appkey := ctx.AppKey
-		userId := tools.ShortMd5(req.Email)
-		nickname := fmt.Sprintf("user%05d", tools.RandInt(100000))
-		storage := userStorage.NewUserStorage()
+		userId := utils.ShortMd5(req.Email)
+		nickname := fmt.Sprintf("user%05d", utils.RandInt(100000))
+		storage := storages.NewUserStorage()
 		user, err := storage.FindByPhone(appkey, req.Email)
 		if err == nil && user != nil {
 			userId = user.UserId
@@ -180,147 +175,141 @@ func EmailLogin(ctx *httputils.HttpContext) {
 				nickname = user.Nickname
 			} else {
 				if err != gorm.ErrRecordNotFound {
-					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+					ErrorHttpResp(ctx, errs.IMErrorCode_APP_NOT_LOGIN)
 					return
 				}
-				userId = tools.GenerateUUIDShort11()
-				err = storage.Create(userModels.User{
+				userId = utils.GenerateUUIDShort11()
+				err = storage.Create(models.User{
 					UserId:   userId,
 					Nickname: nickname,
 					Email:    req.Email,
 					AppKey:   appkey,
 				})
 				if err != nil {
-					ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
+					ErrorHttpResp(ctx, errs.IMErrorCode_APP_NOT_LOGIN)
 					return
 				}
 				//assistant send welcome message
 				services.InitUserAssistant(ctx.ToRpcCtx(), userId, nickname, "")
 			}
 		}
-		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
+		sdk := imsdk.GetImSdk(appkey)
+		if sdk == nil {
+			ErrorHttpResp(ctx, errs.IMErrorCode_APP_NOT_EXISTED)
+			return
+		}
+		resp, code, _, err := sdk.Register(juggleimsdk.User{
 			UserId:   userId,
 			Nickname: nickname,
-			NoCover:  true,
-			Settings: []*pbobjs.KvItem{
-				{
-					Key:   apimodels.UserExtKey_FriendVerifyType,
-					Value: tools.Int642String(int64(pbobjs.FriendVerifyType_NeedFriendVerify)),
-				},
-			},
-		}, func() proto.Message {
-			return &pbobjs.UserRegResp{}
 		})
 		if err != nil {
-			ctx.ResponseErr(errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
+			ErrorHttpResp(ctx, errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
 			return
 		}
-		if code != errs.IMErrorCode_SUCCESS {
-			ctx.ResponseErr(code)
+		if code != juggleimsdk.ApiCode(errs.IMErrorCode_SUCCESS) {
+			ErrorHttpResp(ctx, errs.IMErrorCode(code))
 			return
 		}
-		regResp := resp.(*pbobjs.UserRegResp)
-		ctx.ResponseSucc(&apimodels.LoginUserResp{
+
+		SuccessHttpResp(ctx, &apimodels.LoginUserResp{
 			UserId:        userId,
-			Authorization: regResp.Token,
-			NickName:      regResp.Nickname,
-			Avatar:        regResp.UserPortrait,
-			Status:        0,
-			ImToken:       regResp.Token,
+			NickName:      nickname,
+			Authorization: services.GenerateToken(appkey, userId),
+			ImToken:       resp.Token,
 		})
 	} else {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
 }
 
-func GenerateQrCode(ctx *httputils.HttpContext) {
-	uuidStr := tools.GenerateUUIDString()
+func GenerateQrCode(ctx *HttpContext) {
+	uuidStr := utils.GenerateUUIDString()
 	m := map[string]interface{}{
 		"action": "login",
 		"code":   uuidStr,
 	}
-	qrCode, _ := qr.Encode(tools.ToJson(m), qr.M, qr.Auto)
+	qrCode, _ := qr.Encode(utils.ToJson(m), qr.M, qr.Auto)
 	qrCode, _ = barcode.Scale(qrCode, 400, 400)
 	buf := bytes.NewBuffer([]byte{})
 	err := png.Encode(buf, qrCode)
 	if err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_DEFAULT)
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_DEFAULT)
 		return
 	}
 	storage := storages.NewQrCodeRecordStorage()
-	storage.Create(storageModels.QrCodeRecord{
+	storage.Create(models.QrCodeRecord{
 		CodeId:      uuidStr,
 		AppKey:      ctx.AppKey,
 		CreatedTime: time.Now().UnixMilli(),
 	})
-
-	ctx.ResponseSucc(map[string]string{
+	SuccessHttpResp(ctx, map[string]string{
 		"id":      uuidStr,
 		"qr_code": base64.StdEncoding.EncodeToString(buf.Bytes()),
 	})
 }
 
-func CheckQrCode(ctx *httputils.HttpContext) {
+func CheckQrCode(ctx *HttpContext) {
 	req := &apimodels.QrCode{}
-	if err := ctx.BindJson(req); err != nil || req.Id == "" {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(req); err != nil || req.Id == "" {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	storage := storages.NewQrCodeRecordStorage()
 	record, err := storage.FindById(ctx.AppKey, req.Id)
 	if err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_DEFAULT)
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_DEFAULT)
 		return
 	}
 	if time.Now().UnixMilli()-record.CreatedTime > 10*60*1000 {
-		ctx.ResponseErr(errs.IMErrorCode_APP_QRCODE_EXPIRED)
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_QRCODE_EXPIRED)
 		return
 	}
-	if record.Status == storageModels.QrCodeRecordStatus_OK {
+	appkey := ctx.AppKey
+	if record.Status == models.QrCodeRecordStatus_OK {
 		userId := record.UserId
-		code, resp, err := bases.SyncRpcCall(ctx.ToRpcCtx(), "reg_user", userId, &pbobjs.UserInfo{
-			UserId:  userId,
-			NoCover: true,
-		}, func() proto.Message {
-			return &pbobjs.UserRegResp{}
+		sdk := imsdk.GetImSdk(appkey)
+		if sdk == nil {
+			ErrorHttpResp(ctx, errs.IMErrorCode_APP_NOT_EXISTED)
+			return
+		}
+		resp, code, _, err := sdk.Register(juggleimsdk.User{
+			UserId:   userId,
+			Nickname: "",
 		})
 		if err != nil {
-			ctx.ResponseErr(errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
+			ErrorHttpResp(ctx, errs.IMErrorCode_APP_INTERNAL_TIMEOUT)
 			return
 		}
-		if code != errs.IMErrorCode_SUCCESS {
-			ctx.ResponseErr(code)
+		if code != juggleimsdk.ApiCode(errs.IMErrorCode_SUCCESS) {
+			ErrorHttpResp(ctx, errs.IMErrorCode(code))
 			return
 		}
-		regResp := resp.(*pbobjs.UserRegResp)
-		ctx.ResponseSucc(&apimodels.LoginUserResp{
+		SuccessHttpResp(ctx, &apimodels.LoginUserResp{
 			UserId:        userId,
-			Authorization: regResp.Token,
-			NickName:      regResp.Nickname,
-			Avatar:        regResp.UserPortrait,
-			Status:        0,
-			ImToken:       regResp.Token,
+			NickName:      "",
+			Authorization: services.GenerateToken(appkey, userId),
+			ImToken:       resp.Token,
 		})
-	} else if record.Status == storageModels.QrCodeRecordStatus_Default {
-		ctx.ResponseErr(errs.IMErrorCode_APP_CONTINUE)
+	} else if record.Status == models.QrCodeRecordStatus_Default {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_CONTINUE)
 		return
 	}
 }
 
-func ConfirmQrCode(ctx *httputils.HttpContext) {
+func ConfirmQrCode(ctx *HttpContext) {
 	req := &apimodels.QrCode{}
-	if err := ctx.BindJson(req); err != nil || req.Id == "" {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(req); err != nil || req.Id == "" {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	appkey := ctx.AppKey
 	userId := ctx.CurrentUserId
 	storage := storages.NewQrCodeRecordStorage()
-	err := storage.UpdateStatus(appkey, req.Id, storageModels.QrCodeRecordStatus_OK, userId)
+	err := storage.UpdateStatus(appkey, req.Id, models.QrCodeRecordStatus_OK, userId)
 	if err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_DEFAULT)
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_DEFAULT)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	SuccessHttpResp(ctx, nil)
 }
