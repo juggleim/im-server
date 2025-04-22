@@ -236,19 +236,11 @@ func Read2String(read io.ReadCloser) string {
 }
 
 func Read2Bytes(read io.ReadCloser) []byte {
-	buf := bytes.NewBuffer([]byte{})
-	for {
-		bs := make([]byte, 1024)
-		c, err := read.Read(bs)
-		if err != nil || c < 1024 {
-			if c > 0 {
-				buf.Write(bs[:c])
-			}
-			break
-		}
-		buf.Write(bs)
+	bs, err := io.ReadAll(read)
+	if err == nil {
+		return bs
 	}
-	return buf.Bytes()
+	return []byte{}
 }
 
 func Body2Obj(read io.ReadCloser, obj interface{}) error {
