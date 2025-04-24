@@ -90,6 +90,7 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	group.POST("/convers/del", apis.DelConversation)
 	group.POST("/convers/add", apis.AddConversation)
 	group.POST("/convers/clearunread", apis.ClearConverUnread)
+	group.POST("/convers/top", apis.TopConversations)
 
 	group.GET("/globalconvers/query", apis.QryGlobalConvers)
 

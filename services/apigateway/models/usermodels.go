@@ -104,3 +104,15 @@ type UserSettings struct {
 	UserId   string                 `json:"user_id"`
 	Settings map[string]interface{} `json:"settings"`
 }
+
+// top convers
+type TopConversReq struct {
+	UserId string
+	Items  []*TopConverReqItem `json:"items"`
+}
+
+type TopConverReqItem struct {
+	TargetId    string `json:"target_id"`
+	ChannelType int    `json:"channel_type"`
+	IsTop       bool   `json:"is_top"`
+}
