@@ -109,7 +109,7 @@ func TopConversations(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	if len(topConversReq.Items) <= 0 {
+	if topConversReq.UserId == "" || len(topConversReq.Items) <= 0 {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
 		return
 	}

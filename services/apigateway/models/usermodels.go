@@ -107,7 +107,7 @@ type UserSettings struct {
 
 // top convers
 type TopConversReq struct {
-	UserId string
+	UserId string              `json:"user_id"`
 	Items  []*TopConverReqItem `json:"items"`
 }
 
