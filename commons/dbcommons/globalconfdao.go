@@ -1,8 +1,6 @@
-package dbs
+package dbcommons
 
 import (
-	"im-server/commons/dbcommons"
-
 	"github.com/jinzhu/gorm"
 )
 
@@ -25,14 +23,18 @@ func (conf GlobalConfDao) TableName() string {
 }
 
 func (conf GlobalConfDao) Create(item GlobalConfDao) error {
-	return dbcommons.GetDb().Create(&item).Error
+	return GetDb().Create(&item).Error
 }
 
 func (conf GlobalConfDao) FindByKey(key string) (*GlobalConfDao, error) {
 	var item GlobalConfDao
-	err := dbcommons.GetDb().Where("conf_key=?", key).Take(&item).Error
+	err := GetDb().Where("conf_key=?", key).Take(&item).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, err
 	}
 	return &item, nil
+}
+
+func (conf GlobalConfDao) UpdateValue(key, val string) error {
+	return GetDb().Model(&GlobalConfDao{}).Where("conf_key=?", key).Update("conf_value", val).Error
 }
