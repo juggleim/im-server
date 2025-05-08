@@ -9,16 +9,20 @@ import (
 
 type FileHandler struct {
 	reader *bytes.Buffer
+	isSkip bool
 }
 
 func NewFileHandlerWithReader(reader *bytes.Buffer) *FileHandler {
 	return &FileHandler{
 		reader: reader,
+		isSkip: false,
 	}
 }
 
 func NewFileHandler() *FileHandler {
-	return &FileHandler{}
+	return &FileHandler{
+		isSkip: false,
+	}
 }
 
 func (handler *FileHandler) Result() string {
@@ -43,98 +47,118 @@ func (handler *FileHandler) ResultLines() []string {
 	return retArr
 }
 
-func (handler *FileHandler) GreapWithFile(patten string, filePath string) error {
+func (handler *FileHandler) GreapWithFile(patten string, filePath string) (bool, error) {
+	if handler.isSkip {
+		return handler.isSkip, nil
+	}
 	cmd := exec.Command("grep", patten, filePath)
 	var out bytes.Buffer
 	handler.reader = &bytes.Buffer{}
 	cmd.Stdout = &out
 	err := cmd.Run()
+	handler.reader = &out
 	if err != nil {
 		if existErr, ok := err.(*exec.ExitError); ok {
 			if existErr.ExitCode() == 1 {
 				fmt.Println("未匹配到")
+				handler.isSkip = true
+				return handler.isSkip, nil
 			} else {
 				fmt.Printf("执行 grep 错误：%v\n", err)
 			}
 		} else {
 			fmt.Printf("执行 grep 命令出错：%v\n", err)
 		}
-		return err
+		return false, err
 	}
-	handler.reader = &out
-	return nil
+	return false, nil
 }
 
-func (handler *FileHandler) Greap(patten string) error {
+func (handler *FileHandler) Greap(patten string) (bool, error) {
+	if handler.isSkip {
+		return handler.isSkip, nil
+	}
 	if handler.reader != nil {
 		cmd := exec.Command("grep", patten)
 		var out bytes.Buffer
 		cmd.Stdin = handler.reader
 		cmd.Stdout = &out
 		err := cmd.Run()
+		handler.reader = &out
 		if err != nil {
 			if existErr, ok := err.(*exec.ExitError); ok {
 				if existErr.ExitCode() == 1 {
 					fmt.Println("未匹配到")
+					handler.isSkip = true
+					return handler.isSkip, nil
 				} else {
 					fmt.Printf("执行 grep 错误：%v\n", err)
 				}
 			} else {
 				fmt.Printf("执行 grep 命令出错：%v\n", err)
 			}
-			return err
+			return false, err
 		}
-		handler.reader = &out
 	}
-	return nil
+	return false, nil
 }
 
-func (handler *FileHandler) Awk(expression string) error {
+func (handler *FileHandler) Awk(expression string) (bool, error) {
+	if handler.isSkip {
+		return handler.isSkip, nil
+	}
 	if handler.reader != nil {
 		cmd := exec.Command("awk", expression)
 		cmd.Stdin = handler.reader
 		var out bytes.Buffer
 		cmd.Stdout = &out
 		err := cmd.Run()
+		handler.reader = &out
 		if err != nil {
 			if existErr, ok := err.(*exec.ExitError); ok {
 				if existErr.ExitCode() == 1 {
 					fmt.Println("未匹配到")
+					handler.isSkip = true
+					return handler.isSkip, nil
 				} else {
 					fmt.Printf("执行 grep 错误：%v\n", err)
 				}
 			} else {
 				fmt.Printf("执行 grep 命令出错：%v\n", err)
 			}
-			return err
+			return false, err
 		}
-		handler.reader = &out
 	}
-	return nil
+	return false, nil
 }
 
-func (handler *FileHandler) Head(count int) error {
+func (handler *FileHandler) Head(count int) (bool, error) {
+	if handler.isSkip {
+		return handler.isSkip, nil
+	}
 	if handler.reader != nil {
 		cmd := exec.Command("head", fmt.Sprintf("-n %d", count))
 		cmd.Stdin = handler.reader
 		var out bytes.Buffer
 		cmd.Stdout = &out
 		err := cmd.Run()
+		handler.reader = &out
 		if err != nil {
 			if existErr, ok := err.(*exec.ExitError); ok {
 				if existErr.ExitCode() == 1 {
 					fmt.Println("未匹配到")
+					handler.isSkip = true
+					return handler.isSkip, nil
 				} else {
 					fmt.Printf("执行 grep 错误：%v\n", err)
 				}
 			} else {
 				fmt.Printf("执行 grep 命令出错：%v\n", err)
 			}
-			return err
+			return false, err
 		}
-		handler.reader = &out
 	}
-	return nil
+	return false, nil
 }
 
 func ListDir(dir string) []string {
