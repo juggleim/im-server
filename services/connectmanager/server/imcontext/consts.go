@@ -1,5 +1,7 @@
 package imcontext
 
+var ServiceName string = "connectmanager"
+
 type ActionType string
 
 const (

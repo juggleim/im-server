@@ -28,6 +28,8 @@ func (actor *QryLogsActor) OnReceive(ctx context.Context, input proto.Message) {
 			logs, err = services.QryUserConnectLogs(appkey, req.UserId, req.Start, req.Count)
 		} else if req.LogType == string(services.ServerLogType_Connect) {
 			logs, err = services.QryConnectLogs(appkey, req.Session, req.Start, req.Count)
+		} else if req.LogType == string(services.ServerLogType_Business) {
+			logs, err = services.QryBusinessLogs(appkey, req.Session, req.Index, req.Start, req.Count)
 		}
 		if err == nil {
 			for _, log := range logs {

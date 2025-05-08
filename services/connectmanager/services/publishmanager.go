@@ -5,10 +5,10 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices/logs"
 	"im-server/services/logmanager"
 	"time"
 
-	"im-server/commons/logs"
 	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
@@ -21,7 +21,7 @@ var callbackTimeoutTimer *timewheel.TimeWheel
 func init() {
 	t, err := timewheel.NewTimeWheel(1*time.Second, 360)
 	if err != nil {
-		logs.Error("can not init timeWheel for publish callback.")
+		logs.NewLogEntity().Error("can not init timeWheel for publish callback.")
 	} else {
 		callbackTimeoutTimer = t
 		callbackTimeoutTimer.Start()
@@ -86,7 +86,14 @@ func PublishServerPubMessage(appkey, userid, session string, msgId string, msgTi
 				}
 			}
 			vCtx.Write(tmpPubMsg)
-			logs.Infof("session:%s\taction:%s\tseq_index:%d\ttopic:%s\tlen:%d", imcontext.GetConnSession(vCtx), imcontext.Action_ServerPub, tmpPubMsg.MsgBody.Index, tmpPubMsg.MsgBody.Topic, len(tmpPubMsg.MsgBody.Data))
+			logs.NewLogEntity().WithFields(map[string]interface{}{
+				"service_name": imcontext.ServiceName,
+				"session":      imcontext.GetConnSession(vCtx),
+				"action":       imcontext.Action_ServerPub,
+				"seq_index":    tmpPubMsg.MsgBody.Index,
+				"method":       tmpPubMsg.MsgBody.Topic,
+				"len":          len(tmpPubMsg.MsgBody.Data),
+			}).Info("")
 			logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 				AppKey:   appkey,
 				Session:  imcontext.GetConnSession(vCtx),
@@ -121,7 +128,14 @@ func PublishQryAckMessage(session string, qryAckMsg *codec.QueryAckMsgBody, call
 		}
 		tmpQryAckMsg := codec.NewQueryAckMessage(qryAckMsg, qos)
 		ctx.Write(tmpQryAckMsg)
-		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d\tlen:%d", imcontext.GetConnSession(ctx), imcontext.Action_QueryAck, qryAckMsg.Index, qryAckMsg.Code, len(qryAckMsg.Data))
+		logs.NewLogEntity().WithFields(map[string]interface{}{
+			"service_name": imcontext.ServiceName,
+			"session":      imcontext.GetConnSession(ctx),
+			"action":       imcontext.Action_QueryAck,
+			"seq_index":    qryAckMsg.Index,
+			"code":         qryAckMsg.Code,
+			"len":          len(qryAckMsg.Data),
+		}).Info("")
 		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
@@ -142,7 +156,13 @@ func PublishUserPubAckMessage(appkey, userid, session string, pubAckMsg *codec.P
 	if ctx != nil {
 		tmpPubAckMsg := codec.NewUserPublishAckMessage(pubAckMsg)
 		ctx.Write(tmpPubAckMsg)
-		logs.Infof("session:%s\taction:%s\tseq_index:%d\tcode:%d", imcontext.GetConnSession(ctx), imcontext.Action_UserPubAck, pubAckMsg.Index, pubAckMsg.Code)
+		logs.NewLogEntity().WithFields(map[string]interface{}{
+			"service_name": imcontext.ServiceName,
+			"session":      imcontext.GetConnSession(ctx),
+			"action":       imcontext.Action_UserPubAck,
+			"seq_index":    pubAckMsg.Index,
+			"code":         pubAckMsg.Code,
+		}).Info("")
 		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
