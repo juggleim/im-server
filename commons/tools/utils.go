@@ -8,6 +8,7 @@ import (
 	"hash/crc32"
 	"math/rand"
 	"net"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -176,4 +177,14 @@ func TruncateText(str string, length int) string {
 		return string(charArr[:length])
 	}
 	return str
+}
+
+func CreateDirs(path string) error {
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		if !os.IsExist(err) {
+			return err
+		}
+	}
+	return nil
 }

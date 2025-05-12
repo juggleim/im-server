@@ -9,6 +9,7 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/interceptors"
 	"im-server/services/commonservices/msgdefines"
+	"im-server/services/logmanager/msglogs"
 	"time"
 )
 
@@ -130,6 +131,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		GrpMemberInfo:  grpMemberInfo,
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
+	msglogs.LogMsg(ctx, downMsg4Sendbox)
 
 	if bases.GetOnlySendboxFromCtx(ctx) {
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, int32(memberCount), modifiedMsg

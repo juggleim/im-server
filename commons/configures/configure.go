@@ -32,6 +32,12 @@ type ImConfig struct {
 		DataPath string `yaml:"dataPath"`
 	} `ymal:"kvdb"`
 
+	MsgLogs struct {
+		LogPath    string `yaml:"logPath"`
+		MaxBackups int    `yaml:"maxBackups"`
+		IsCompress bool   `yaml:"isCompress"`
+	}
+
 	Mysql struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`

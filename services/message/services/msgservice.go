@@ -13,6 +13,7 @@ import (
 	"im-server/services/commonservices/interceptors"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
+	"im-server/services/logmanager/msglogs"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -90,6 +91,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		SearchText:     upMsg.SearchText,
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
+	msglogs.LogMsg(ctx, downMsg4Sendbox)
 
 	if bases.GetOnlySendboxFromCtx(ctx) {
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, modifiedMsg

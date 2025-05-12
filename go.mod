@@ -142,6 +142,7 @@ require (
 	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mozillazg/go-pinyin v0.20.0
+	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tidwall/sjson v1.2.5
 	github.com/tsuna/gohbase v0.0.0-20240604184322-67d205cb2079

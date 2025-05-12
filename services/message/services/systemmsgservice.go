@@ -7,6 +7,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/msgdefines"
+	"im-server/services/logmanager/msglogs"
 	"time"
 )
 
@@ -24,22 +25,23 @@ func SendSystemMsg(ctx context.Context, senderId, receiverId string, upMsg *pbob
 		msgId = preMsgId
 	}
 
-	// downMsg4Sendbox := &pbobjs.DownMsg{
-	// 	SenderId:       senderId,
-	// 	TargetId:       receiverId,
-	// 	ChannelType:    pbobjs.ChannelType_System,
-	// 	MsgType:        upMsg.MsgType,
-	// 	MsgId:          msgId,
-	// 	MsgSeqNo:       msgSeq,
-	// 	MsgContent:     upMsg.MsgContent,
-	// 	MsgTime:        sendTime,
-	// 	Flags:          upMsg.Flags,
-	// 	ClientUid:      upMsg.ClientUid,
-	// 	IsSend:         true,
-	// 	MentionInfo:    upMsg.MentionInfo,
-	// 	ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
-	// 	TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
-	// }
+	downMsg4Sendbox := &pbobjs.DownMsg{
+		SenderId:       senderId,
+		TargetId:       receiverId,
+		ChannelType:    pbobjs.ChannelType_System,
+		MsgType:        upMsg.MsgType,
+		MsgId:          msgId,
+		MsgSeqNo:       msgSeq,
+		MsgContent:     upMsg.MsgContent,
+		MsgTime:        sendTime,
+		Flags:          upMsg.Flags,
+		ClientUid:      upMsg.ClientUid,
+		IsSend:         true,
+		MentionInfo:    upMsg.MentionInfo,
+		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
+		TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
+	}
+	msglogs.LogMsg(ctx, downMsg4Sendbox)
 	//send to sender's other device
 	// if !commonservices.IsStateMsg(upMsg.Flags) {
 	// 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
