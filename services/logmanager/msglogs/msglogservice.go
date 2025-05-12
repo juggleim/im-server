@@ -7,6 +7,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/msgdefines"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -40,6 +41,11 @@ func getMsgLogger(appkey string) *zerolog.Logger {
 }
 
 func LogMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
+	isState := msgdefines.IsStateMsg(downMsg.Flags)
+	isCmd := msgdefines.IsCmdMsg(downMsg.Flags)
+	if isState || isCmd {
+		return
+	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appinfo, exist := commonservices.GetAppInfo(appkey)
 	if exist && appinfo != nil && appinfo.RecordMsgLogs {
