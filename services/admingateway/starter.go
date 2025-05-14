@@ -77,7 +77,7 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	group.GET("/apps/clientlogs/download", apis.ClientLogDownload)
 	group.GET("/apps/serverlogs/userconnect", apis.QryUserConnectLogs)
 	group.GET("/apps/serverlogs/connect", apis.QryConnectLogs)
-	group.GET("/apps/serverlogs/business", apis.QryUserConnectLogs)
+	group.GET("/apps/serverlogs/business", apis.QryBusinessLogs)
 
 	//statistic
 	group.GET("/apps/statistic/msg", apis.QryMsgStatistic)

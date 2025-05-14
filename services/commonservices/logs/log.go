@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/logs"
+	"im-server/commons/tools"
 )
 
 var (
@@ -12,52 +13,58 @@ var (
 )
 
 type LogEntity struct {
-	fields []string
+	kvPairs map[string]interface{}
 }
 
 func NewLogEntity() *LogEntity {
 	return &LogEntity{
-		fields: []string{},
+		kvPairs: make(map[string]interface{}),
 	}
 }
 
 func WithContext(ctx context.Context) *LogEntity {
 	log := &LogEntity{
-		fields: []string{},
+		kvPairs: make(map[string]interface{}),
 	}
 	if openLog {
 		//handle service tags
 		tags := bases.GetTagsFromCtx(ctx)
 		if len(tags) > 0 {
 			for k, v := range tags {
-				log.fields = append(log.fields, fmt.Sprintf("%s:%s", k, v))
+				log.kvPairs[k] = v
 			}
 		}
 		//handle ctx
-		log.fields = append(log.fields, fmt.Sprintf("%s:%v", "session", bases.GetSessionFromCtx(ctx)))
-		log.fields = append(log.fields, fmt.Sprintf("%s:%v", "method", bases.GetMethodFromCtx(ctx)))
-		log.fields = append(log.fields, fmt.Sprintf("%s:%v", "expend", bases.GetExpendFromCtx(ctx)))
-		log.fields = append(log.fields, fmt.Sprintf("%s:%v", "seq_index", bases.GetSeqIndexFromCtx(ctx)))
+		log.kvPairs["session"] = bases.GetSessionFromCtx(ctx)
+		log.kvPairs["method"] = bases.GetMethodFromCtx(ctx)
+		log.kvPairs["expend"] = bases.GetExpendFromCtx(ctx)
+		log.kvPairs["seq_index"] = bases.GetSeqIndexFromCtx(ctx)
 	}
 	return log
 }
 
 func (log *LogEntity) WithField(key string, value interface{}) *LogEntity {
 	if openLog {
-		log.fields = append(log.fields, fmt.Sprintf("%s:%v", key, value))
+		log.kvPairs[key] = value
+	}
+	return log
+}
+
+func (log *LogEntity) WithFields(kvPairs map[string]interface{}) *LogEntity {
+	if openLog {
+		for k, v := range kvPairs {
+			log.kvPairs[k] = v
+		}
 	}
 	return log
 }
 
 func (log *LogEntity) Errorf(format string, v ...interface{}) {
 	if openLog {
-		arr := []interface{}{}
-		initFormat := ""
-		for _, field := range log.fields {
-			initFormat = initFormat + field + "\t"
+		if format != "" {
+			log.kvPairs["msg"] = fmt.Sprintf(format, v...)
 		}
-		arr = append(arr, v...)
-		logs.Errorf(initFormat+format, arr...)
+		logs.Error(tools.ToJson(log.kvPairs))
 	}
 }
 
@@ -67,13 +74,10 @@ func (log *LogEntity) Error(errMsg string) {
 
 func (log *LogEntity) Warnf(format string, v ...interface{}) {
 	if openLog {
-		arr := []interface{}{}
-		initFormat := ""
-		for _, field := range log.fields {
-			initFormat = initFormat + field + "\t"
+		if format != "" {
+			log.kvPairs["msg"] = fmt.Sprintf(format, v...)
 		}
-		arr = append(arr, v...)
-		logs.Warnf(initFormat+format, arr...)
+		logs.Warn(tools.ToJson(log.kvPairs))
 	}
 }
 
@@ -83,13 +87,10 @@ func (log *LogEntity) Warn(warnMsg string) {
 
 func (log *LogEntity) Infof(format string, v ...interface{}) {
 	if openLog {
-		arr := []interface{}{}
-		initFormat := ""
-		for _, field := range log.fields {
-			initFormat = initFormat + field + "\t"
+		if format != "" {
+			log.kvPairs["msg"] = fmt.Sprintf(format, v...)
 		}
-		arr = append(arr, v...)
-		logs.Infof(initFormat+format, arr...)
+		logs.Info(tools.ToJson(log.kvPairs))
 	}
 }
 

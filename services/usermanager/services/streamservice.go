@@ -19,7 +19,7 @@ var streamMsgCache *caches.LruCache
 var streamMsgLocks *tools.SegmentatedLocks
 
 func init() {
-	streamMsgCache = caches.NewLruCacheWithReadTimeout(10000, nil, 1*time.Minute)
+	streamMsgCache = caches.NewLruCacheWithReadTimeout("streammsg_cache", 10000, nil, 1*time.Minute)
 	streamMsgLocks = tools.NewSegmentatedLocks(128)
 }
 

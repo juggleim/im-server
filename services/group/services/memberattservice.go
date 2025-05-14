@@ -14,7 +14,7 @@ var memberAttCache *caches.LruCache
 var memberLocks *tools.SegmentatedLocks
 
 func init() {
-	memberAttCache = caches.NewLruCacheWithAddReadTimeout(100000, nil, 8*time.Minute, 10*time.Minute)
+	memberAttCache = caches.NewLruCacheWithAddReadTimeout("grpmemberatt_cache", 100000, nil, 8*time.Minute, 10*time.Minute)
 	memberLocks = tools.NewSegmentatedLocks(512)
 }
 

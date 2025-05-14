@@ -28,7 +28,7 @@ func (item *TsdbCacheItem) GetTimestamp(curr int64) int64 {
 }
 
 func init() {
-	tsdbCache = caches.NewLruCacheWithReadTimeout(100000, nil, 30*time.Second)
+	tsdbCache = caches.NewLruCacheWithReadTimeout("tsdb_cache", 100000, nil, 30*time.Second)
 }
 
 func getTsdbCache(keyBs []byte) *TsdbCacheItem {

@@ -13,6 +13,7 @@ import (
 	"im-server/services/commonservices/interceptors"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
+	"im-server/services/logmanager/msglogs"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -22,7 +23,6 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	converId := commonservices.GetConversationId(senderId, receiverId, pbobjs.ChannelType_Private)
 	//statistic
 	commonservices.ReportUpMsg(appkey, pbobjs.ChannelType_Private, 1)
-	commonservices.ReportDispatchMsg(appkey, pbobjs.ChannelType_Private, 1)
 	//check block user
 	blockUser := GetBlockUserItem(appkey, receiverId, senderId)
 	if blockUser.IsBlock {
@@ -46,7 +46,12 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 			MsgType:    upMsg.MsgType,
 			MsgContent: upMsg.MsgContent,
 		}
+	} else if result == interceptors.InterceptorResult_Silent {
+		sendTime := time.Now().UnixMilli()
+		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
+		return errs.IMErrorCode_SUCCESS, msgId, sendTime, 0, upMsg.ClientUid, nil
 	}
+
 	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)
@@ -86,6 +91,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		SearchText:     upMsg.SearchText,
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
+	msglogs.LogMsg(ctx, downMsg4Sendbox)
 
 	if bases.GetOnlySendboxFromCtx(ctx) {
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, modifiedMsg
@@ -127,6 +133,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	//dispatch to receiver
 	if senderId != receiverId {
 		dispatchMsg(ctx, receiverId, downMsg)
+		commonservices.ReportDispatchMsg(appkey, pbobjs.ChannelType_Private, 1)
 	}
 
 	return errs.IMErrorCode_SUCCESS, msgId, sendTime, msgSeq, upMsg.ClientUid, modifiedMsg

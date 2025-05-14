@@ -20,7 +20,7 @@ var groupInfoCache *caches.LruCache
 var groupLocks *tools.SegmentatedLocks
 
 func init() {
-	groupInfoCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 10*time.Minute, 10*time.Minute)
+	groupInfoCache = caches.NewLruCacheWithAddReadTimeout("groupinfo_cache", 10000, nil, 10*time.Minute, 10*time.Minute)
 	groupLocks = tools.NewSegmentatedLocks(128)
 }
 
@@ -193,7 +193,7 @@ func QryGroupInfo(ctx context.Context, req *pbobjs.GroupInfoReq) (errs.IMErrorCo
 			GroupId:   req.GroupId,
 			ExtFields: []*pbobjs.KvItem{},
 		}
-		memberContainer, exist := GetGroupMembersFromCache(ctx, appkey, commonservices.GroupField_MemberCount)
+		memberContainer, exist := GetGroupMembersFromCache(ctx, appkey, req.GroupId)
 		for _, field := range req.CareFields {
 			if field == commonservices.GroupField_MemberCount {
 				if exist {

@@ -42,6 +42,7 @@ type AppInfo struct {
 	OpenVisualLog         bool   `default:"false"`
 	RecordGlobalConvers   bool   `default:"false"`
 	OpenSensitive         bool   `default:"false"`
+	RecordMsgLogs         bool   `default:"false"`
 
 	//group
 	IsHideMsgBeforeJoinGroup bool `default:"false"`
@@ -79,7 +80,7 @@ func init() {
 	appLocks = tools.NewSegmentatedLocks(64)
 	notExistAppInfo = &AppInfo{}
 
-	appInfoCache = caches.NewLruCache(10000, nil)
+	appInfoCache = caches.NewLruCache("appinfo_cache", 10000, nil)
 	appInfoCache.AddTimeoutAfterRead(5 * time.Minute)
 	appInfoCache.AddTimeoutAfterCreate(10 * time.Minute)
 	appInfoCache.SetValueCreator(func(key interface{}) interface{} {

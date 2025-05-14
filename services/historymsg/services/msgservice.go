@@ -16,7 +16,7 @@ var (
 )
 
 func init() {
-	messageCache = caches.NewLruCacheWithReadTimeout(100000, nil, 10*time.Minute)
+	messageCache = caches.NewLruCacheWithReadTimeout("hismessage_cache", 100000, nil, 10*time.Minute)
 	messageLocks = tools.NewSegmentatedLocks(512)
 }
 

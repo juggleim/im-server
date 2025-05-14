@@ -102,6 +102,35 @@ func UndisturbConvers(ctx *gin.Context) {
 	tools.SuccessHttpResp(ctx, nil)
 }
 
+// top convers
+func TopConversations(ctx *gin.Context) {
+	var topConversReq models.TopConversReq
+	if err := ctx.BindJSON(&topConversReq); err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	if topConversReq.UserId == "" || len(topConversReq.Items) <= 0 {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_PARAM_REQUIRED)
+		return
+	}
+	items := []*pbobjs.Conversation{}
+	for _, reqItem := range topConversReq.Items {
+		isTopInt := 0
+		if reqItem.IsTop {
+			isTopInt = 1
+		}
+		items = append(items, &pbobjs.Conversation{
+			TargetId:    reqItem.TargetId,
+			ChannelType: pbobjs.ChannelType(reqItem.ChannelType),
+			IsTop:       int32(isTopInt),
+		})
+	}
+	bases.SyncRpcCall(services.ToRpcCtx(ctx, topConversReq.UserId), "top_convers", topConversReq.UserId, &pbobjs.ConversationsReq{
+		Conversations: items,
+	}, nil)
+	tools.SuccessHttpResp(ctx, nil)
+}
+
 func QryGlobalConvers(ctx *gin.Context) {
 	start := ctx.Query("start")
 	var startTime int64 = 0

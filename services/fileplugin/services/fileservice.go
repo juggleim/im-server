@@ -29,7 +29,7 @@ type FileConfItem struct {
 }
 
 func init() {
-	fileConfCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 5*time.Minute, 10*time.Minute)
+	fileConfCache = caches.NewLruCacheWithAddReadTimeout("fileconf_cache", 10000, nil, 5*time.Minute, 10*time.Minute)
 	fileConfLocks = tools.NewSegmentatedLocks(128)
 	notExistFileConf = &FileConfItem{}
 }

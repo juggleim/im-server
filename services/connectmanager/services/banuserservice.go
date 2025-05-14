@@ -17,7 +17,7 @@ var userLocks *tools.SegmentatedLocks
 var notBanUser *BanUserItem
 
 func init() {
-	banUserCache = caches.NewLruCacheWithAddReadTimeout(100000, nil, 8*time.Minute, 10*time.Minute)
+	banUserCache = caches.NewLruCacheWithAddReadTimeout("banuser_cache", 100000, nil, 8*time.Minute, 10*time.Minute)
 	userLocks = tools.NewSegmentatedLocks(512)
 
 	notBanUser = &BanUserItem{}

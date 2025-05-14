@@ -21,7 +21,7 @@ const (
 
 func init() {
 	brdLocks = tools.NewSegmentatedLocks(128)
-	brdMsgCache = caches.NewLruCacheWithReadTimeout(10000, nil, 10*time.Minute)
+	brdMsgCache = caches.NewLruCacheWithReadTimeout("brdmsg_cache", 10000, nil, 10*time.Minute)
 }
 
 func SyncBrdMsgs(ctx context.Context, appkey string, startTime int64, count int) []*pbobjs.DownMsg {

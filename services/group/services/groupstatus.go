@@ -15,7 +15,7 @@ var groupStatusCache *caches.LruCache
 var groupStatusLocks *tools.SegmentatedLocks
 
 func init() {
-	groupStatusCache = caches.NewLruCacheWithReadTimeout(100000, func(key, value interface{}) {}, 10*time.Minute)
+	groupStatusCache = caches.NewLruCacheWithReadTimeout("groupstatus_cache", 100000, func(key, value interface{}) {}, 10*time.Minute)
 	groupStatusLocks = tools.NewSegmentatedLocks(512)
 }
 

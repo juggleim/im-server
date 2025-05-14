@@ -3,23 +3,22 @@ package apis
 import (
 	"bytes"
 	"encoding/base64"
-	"im-server/commons/errs"
-	"im-server/commons/pbdefines/pbobjs"
-	"im-server/commons/tools"
-	"im-server/services/appbusiness/apimodels"
-	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/services"
 	"image/png"
 	"strconv"
+
+	"github.com/juggleim/jugglechat-server/apimodels"
+	"github.com/juggleim/jugglechat-server/errs"
+	"github.com/juggleim/jugglechat-server/services"
+	"github.com/juggleim/jugglechat-server/utils"
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/qr"
 )
 
-func CreateGroup(ctx *httputils.HttpContext) {
+func CreateGroup(ctx *HttpContext) {
 	req := apimodels.Group{}
-	if err := ctx.BindJson(&req); err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(&req); err != nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	memberIds := req.MemberIds
@@ -30,7 +29,7 @@ func CreateGroup(ctx *httputils.HttpContext) {
 		}
 		memberIds = ids
 	}
-	code, grpInfo := services.CreateGroup(ctx.ToRpcCtx(), &pbobjs.GroupMembersReq{
+	code, grpInfo := services.CreateGroup(ctx.ToRpcCtx(), &apimodels.GroupMembersReq{
 		GroupName:     req.GroupName,
 		GroupPortrait: req.GroupPortrait,
 		MemberIds:     memberIds,
@@ -46,63 +45,63 @@ func CreateGroup(ctx *httputils.HttpContext) {
 	})
 }
 
-func UpdateGroup(ctx *httputils.HttpContext) {
+func UpdateGroup(ctx *HttpContext) {
 	req := apimodels.Group{}
-	if err := ctx.BindJson(&req); err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(&req); err != nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.UpdateGroup(ctx.ToRpcCtx(), &pbobjs.GroupInfo{
+	code := services.UpdateGroup(ctx.ToRpcCtx(), &apimodels.GroupInfo{
 		GroupId:       req.GroupId,
 		GroupName:     req.GroupName,
 		GroupPortrait: req.GroupPortrait,
 	})
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	SuccessHttpResp(ctx, nil)
 }
 
-func DissolveGroup(ctx *httputils.HttpContext) {
+func DissolveGroup(ctx *HttpContext) {
 	req := apimodels.Group{}
-	if err := ctx.BindJson(&req); err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(&req); err != nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	code := services.DissolveGroup(ctx.ToRpcCtx(), req.GroupId)
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	SuccessHttpResp(ctx, nil)
 }
 
-func QuitGroup(ctx *httputils.HttpContext) {
+func QuitGroup(ctx *HttpContext) {
 	req := apimodels.Group{}
-	if err := ctx.BindJson(&req); err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(&req); err != nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	code := services.QuitGroup(ctx.ToRpcCtx(), req.GroupId)
 	if code != errs.IMErrorCode_SUCCESS {
-		ctx.ResponseErr(code)
+		ErrorHttpResp(ctx, code)
 		return
 	}
-	ctx.ResponseSucc(nil)
+	SuccessHttpResp(ctx, nil)
 }
 
-func AddGrpMembers(ctx *httputils.HttpContext) {
+func AddGrpMembers(ctx *HttpContext) {
 	req := apimodels.Group{}
-	if err := ctx.BindJson(&req); err != nil {
-		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
+	if err := ctx.BindJSON(&req); err != nil {
+		ErrorHttpResp(ctx, errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
 	memberIds := []string{}
 	for _, user := range req.GrpMembers {
 		memberIds = append(memberIds, user.UserId)
 	}
-	code := services.AddGrpMembers(ctx.ToRpcCtx(), &pbobjs.GroupMembersReq{
+	code := services.AddGrpMembers(ctx.ToRpcCtx(), &apimodels.GroupMembersReq{
 		GroupId:   req.GroupId,
 		MemberIds: memberIds,
 	})
@@ -113,13 +112,13 @@ func AddGrpMembers(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func DelGrpMembers(ctx *httputils.HttpContext) {
+func DelGrpMembers(ctx *HttpContext) {
 	req := apimodels.Group{}
-	if err := ctx.BindJson(&req); err != nil || req.GroupId == "" || len(req.MemberIds) <= 0 {
+	if err := ctx.BindJSON(&req); err != nil || req.GroupId == "" || len(req.MemberIds) <= 0 {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.DelGrpMembers(ctx.ToRpcCtx(), &pbobjs.GroupMembersReq{
+	code := services.DelGrpMembers(ctx.ToRpcCtx(), &apimodels.GroupMembersReq{
 		GroupId:   req.GroupId,
 		MemberIds: req.MemberIds,
 	})
@@ -130,7 +129,7 @@ func DelGrpMembers(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func QryGroupInfo(ctx *httputils.HttpContext) {
+func QryGroupInfo(ctx *HttpContext) {
 	groupId := ctx.Query("group_id")
 	rpcCtx := ctx.ToRpcCtx()
 	code, grpInfo := services.QryGroupInfo(rpcCtx, groupId)
@@ -141,7 +140,7 @@ func QryGroupInfo(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(grpInfo)
 }
 
-func QryMyGroups(ctx *httputils.HttpContext) {
+func QryMyGroups(ctx *HttpContext) {
 	offset := ctx.Query("offset")
 	count := 20
 	countStr := ctx.Query("count")
@@ -152,10 +151,7 @@ func QryMyGroups(ctx *httputils.HttpContext) {
 			count = 20
 		}
 	}
-	code, grps := services.QueryMyGroups(ctx.ToRpcCtx(), &pbobjs.GroupInfoListReq{
-		Limit:  int64(count),
-		Offset: offset,
-	})
+	code, grps := services.QueryMyGroups(ctx.ToRpcCtx(), int64(count), offset)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -174,7 +170,7 @@ func QryMyGroups(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(ret)
 }
 
-func QryGrpMembers(ctx *httputils.HttpContext) {
+func QryGrpMembers(ctx *HttpContext) {
 	groupId := ctx.Query("group_id")
 	offset := ctx.Query("offset")
 	limit := 100
@@ -186,11 +182,7 @@ func QryGrpMembers(ctx *httputils.HttpContext) {
 			limit = 100
 		}
 	}
-	code, members := services.QueryGrpMembers(ctx.ToRpcCtx(), &pbobjs.QryGroupMembersReq{
-		GroupId: groupId,
-		Limit:   int64(limit),
-		Offset:  offset,
-	})
+	code, members := services.QueryGrpMembers(ctx.ToRpcCtx(), groupId, int64(limit), offset)
 	if code != errs.IMErrorCode_SUCCESS {
 		ctx.ResponseErr(code)
 		return
@@ -200,7 +192,7 @@ func QryGrpMembers(ctx *httputils.HttpContext) {
 	}
 	for _, member := range members.Items {
 		ret.Items = append(ret.Items, &apimodels.GroupMember{
-			UserObj: pbobjs.UserObj{
+			UserObj: apimodels.UserObj{
 				UserId:   member.UserId,
 				Nickname: member.Nickname,
 				Avatar:   member.Avatar,
@@ -211,9 +203,9 @@ func QryGrpMembers(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(ret)
 }
 
-func CheckGroupMembers(ctx *httputils.HttpContext) {
+func CheckGroupMembers(ctx *HttpContext) {
 	req := apimodels.CheckGroupMembersReq{}
-	if err := ctx.BindJson(&req); err != nil {
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -225,13 +217,13 @@ func CheckGroupMembers(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(resp)
 }
 
-func SetGrpAnnouncement(ctx *httputils.HttpContext) {
+func SetGrpAnnouncement(ctx *HttpContext) {
 	req := apimodels.GroupAnnouncement{}
-	if err := ctx.BindJson(&req); err != nil {
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
-	code := services.SetGrpAnnouncement(ctx.ToRpcCtx(), &pbobjs.GrpAnnouncement{
+	code := services.SetGrpAnnouncement(ctx.ToRpcCtx(), &apimodels.GroupAnnouncement{
 		GroupId: req.GroupId,
 		Content: req.Content,
 	})
@@ -242,7 +234,7 @@ func SetGrpAnnouncement(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func GetGrpAnnouncement(ctx *httputils.HttpContext) {
+func GetGrpAnnouncement(ctx *HttpContext) {
 	groupId := ctx.Query("group_id")
 	code, grpAnnounce := services.GetGrpAnnouncement(ctx.ToRpcCtx(), groupId)
 	if code != errs.IMErrorCode_SUCCESS {
@@ -255,9 +247,9 @@ func GetGrpAnnouncement(ctx *httputils.HttpContext) {
 	})
 }
 
-func SetGrpDisplayName(ctx *httputils.HttpContext) {
-	req := pbobjs.SetGroupDisplayNameReq{}
-	if err := ctx.BindJson(&req); err != nil {
+func SetGrpDisplayName(ctx *HttpContext) {
+	req := apimodels.SetGroupDisplayNameReq{}
+	if err := ctx.BindJSON(&req); err != nil {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
 		return
 	}
@@ -269,7 +261,7 @@ func SetGrpDisplayName(ctx *httputils.HttpContext) {
 	ctx.ResponseSucc(nil)
 }
 
-func QryGrpQrCode(ctx *httputils.HttpContext) {
+func QryGrpQrCode(ctx *HttpContext) {
 	grpId := ctx.Query("group_id")
 	if grpId == "" {
 		ctx.ResponseErr(errs.IMErrorCode_APP_REQ_BODY_ILLEGAL)
@@ -283,7 +275,7 @@ func QryGrpQrCode(ctx *httputils.HttpContext) {
 		"user_id":  userId,
 	}
 	buf := bytes.NewBuffer([]byte{})
-	qrCode, _ := qr.Encode(tools.ToJson(m), qr.M, qr.Auto)
+	qrCode, _ := qr.Encode(utils.ToJson(m), qr.M, qr.Auto)
 	qrCode, _ = barcode.Scale(qrCode, 400, 400)
 	err := png.Encode(buf, qrCode)
 	if err != nil {

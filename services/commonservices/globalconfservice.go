@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
+	"im-server/commons/dbcommons"
 	"im-server/commons/tools"
-	"im-server/services/commonservices/dbs"
 	"time"
 )
 
 var confCache *caches.LruCache
 
 func init() {
-	confCache = caches.NewLruCache(1000, nil)
+	confCache = caches.NewLruCache("globalconf_cache", 1000, nil)
 	confCache.AddTimeoutAfterCreate(time.Minute)
 	confCache.SetValueCreator(func(key interface{}) interface{} {
 		if key != nil {
-			confDao := dbs.GlobalConfDao{}
+			confDao := dbcommons.GlobalConfDao{}
 			conf, err := confDao.FindByKey(key.(string))
 			if err == nil {
 				return conf.ConfValue
@@ -61,7 +61,7 @@ func GetProxyNavAddress() *AddressConf {
 	ret := &AddressConf{
 		NodeConfs: map[string]string{},
 	}
-	adds := GetGlobalConf(string(dbs.GlobalConfKey_NaviAddress))
+	adds := GetGlobalConf(string(dbcommons.GlobalConfKey_NaviAddress))
 	if adds != "" {
 		err := json.Unmarshal([]byte(adds), ret)
 		if err == nil {
@@ -100,7 +100,7 @@ func GetOriginalApiAddress() *AddressConf {
 
 func GetProxyApiAddress() *AddressConf {
 	ret := &AddressConf{}
-	adds := GetGlobalConf(string(dbs.GlobalConfKey_ApiAddress))
+	adds := GetGlobalConf(string(dbcommons.GlobalConfKey_ApiAddress))
 	if adds != "" {
 		err := json.Unmarshal([]byte(adds), ret)
 		if err == nil {
@@ -139,7 +139,7 @@ func GetOriginalConnectAddress() *AddressConf {
 
 func GetProxyConnectAddress() *AddressConf {
 	ret := &AddressConf{}
-	adds := GetGlobalConf(string(dbs.GlobalConfKey_ConnectAddress))
+	adds := GetGlobalConf(string(dbcommons.GlobalConfKey_ConnectAddress))
 	if adds != "" {
 		err := json.Unmarshal([]byte(adds), ret)
 		if err == nil {

@@ -1,7 +1,6 @@
 
 
-DROP TABLE IF EXISTS `accounts`;
-CREATE TABLE `accounts` (
+CREATE TABLE IF NOT EXISTS `accounts` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `account` varchar(45) DEFAULT NULL COMMENT '登录名',
   `password` varchar(45) DEFAULT NULL COMMENT '密码',
@@ -15,8 +14,7 @@ CREATE TABLE `accounts` (
   KEY `idx_parent` (`parent_account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '管理端-账号';
 
-DROP TABLE IF EXISTS `androidpushconfs`;
-CREATE TABLE `androidpushconfs` (
+CREATE TABLE IF NOT EXISTS `androidpushconfs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(20) DEFAULT NULL COMMENT 'appKey',
   `push_channel` varchar(10) DEFAULT NULL COMMENT '推送渠道',
@@ -29,8 +27,7 @@ CREATE TABLE `androidpushconfs` (
   UNIQUE KEY `uniq_channel` (`app_key`,`push_channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'android推送配置';
 
-DROP TABLE IF EXISTS `appexts`;
-CREATE TABLE `appexts` (
+CREATE TABLE IF NOT EXISTS `appexts` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(50) DEFAULT NULL COMMENT '应用key',
   `app_item_key` varchar(50) DEFAULT NULL COMMENT '参数key',
@@ -40,8 +37,7 @@ CREATE TABLE `appexts` (
   UNIQUE KEY `IDX_APPKEY_APPITEMKEY` (`app_key`,`app_item_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'app应用-补充配置';
 
-DROP TABLE IF EXISTS `apps`;
-CREATE TABLE `apps` (
+CREATE TABLE IF NOT EXISTS `apps` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(45) NOT NULL COMMENT '应用key',
   `app_secret` varchar(45) NOT NULL COMMENT '应用密钥 16位',
@@ -55,8 +51,7 @@ CREATE TABLE `apps` (
   UNIQUE KEY `uniq_appkey` (`app_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'app应用';
 
-DROP TABLE IF EXISTS `banusers`;
-CREATE TABLE `banusers` (
+CREATE TABLE IF NOT EXISTS `banusers` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) NOT NULL COMMENT '用户id',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
@@ -69,8 +64,7 @@ CREATE TABLE `banusers` (
   UNIQUE KEY `uniq_appkey_userid` (`app_key`,`user_id`,`scope_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '禁用用户';
 
-DROP TABLE IF EXISTS `bc_hismsgs`;
-CREATE TABLE `bc_hismsgs` (
+CREATE TABLE IF NOT EXISTS `bc_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) NOT NULL COMMENT '会话id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
@@ -85,8 +79,7 @@ CREATE TABLE `bc_hismsgs` (
   KEY `idx_msgid` (`app_key`,`conver_id`,`msg_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '广播-历史消息表';
 
-DROP TABLE IF EXISTS `blocks`;
-CREATE TABLE `blocks` (
+CREATE TABLE IF NOT EXISTS `blocks` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '操作人',
   `block_user_id` varchar(32) DEFAULT NULL   COMMENT '被锁定者id',
@@ -96,8 +89,7 @@ CREATE TABLE `blocks` (
   UNIQUE KEY `uniq_appkey_userid` (`app_key`,`user_id`,`block_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '锁定记录';
 
-DROP TABLE IF EXISTS `brdinboxmsgs`;
-CREATE TABLE `brdinboxmsgs` (
+CREATE TABLE IF NOT EXISTS `brdinboxmsgs` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
@@ -110,8 +102,7 @@ CREATE TABLE `brdinboxmsgs` (
   KEY `idx_msg_id` (`app_key`,`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '广播-收件箱';
 
-DROP TABLE IF EXISTS `chatroominfos`;
-CREATE TABLE `chatroominfos` (
+CREATE TABLE IF NOT EXISTS `chatroominfos` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `chat_id` varchar(32) DEFAULT NULL COMMENT '聊天室id',
   `chat_name` varchar(45) DEFAULT NULL COMMENT '聊天室名称',
@@ -121,8 +112,7 @@ CREATE TABLE `chatroominfos` (
   UNIQUE KEY `uniq_chatid` (`app_key`,`chat_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '聊天室信息';
 
-DROP TABLE IF EXISTS `cmdinboxmsgs`;
-CREATE TABLE `cmdinboxmsgs` (
+CREATE TABLE IF NOT EXISTS `cmdinboxmsgs` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
@@ -140,8 +130,7 @@ CREATE TABLE `cmdinboxmsgs` (
   KEY `idx_appkey` (`app_key`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'cmd收件箱';
 
-DROP TABLE IF EXISTS `cmdsendboxmsgs`;
-CREATE TABLE `cmdsendboxmsgs` (
+CREATE TABLE IF NOT EXISTS `cmdsendboxmsgs` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
@@ -159,8 +148,7 @@ CREATE TABLE `cmdsendboxmsgs` (
   KEY `idx_appkey` (`app_key`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'cmd发件箱';
 
-DROP TABLE IF EXISTS `convercleantimes`;
-CREATE TABLE `convercleantimes` (
+CREATE TABLE IF NOT EXISTS `convercleantimes` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
   `channel_type` tinyint DEFAULT '0' COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
@@ -170,8 +158,7 @@ CREATE TABLE `convercleantimes` (
   UNIQUE KEY `uniq_destroy` (`app_key`,`conver_id`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话清理记录';
 
-DROP TABLE IF EXISTS `conversations`;
-CREATE TABLE `conversations` (
+CREATE TABLE IF NOT EXISTS `conversations` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
@@ -198,8 +185,7 @@ CREATE TABLE `conversations` (
   KEY `idx_group` (`app_key`,`user_id`,`group`,`sort_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话';
 
-DROP TABLE IF EXISTS `userconvertags`;
-CREATE TABLE `userconvertags` (
+CREATE TABLE IF NOT EXISTS `userconvertags` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` VARCHAR(32) NULL COMMENT '用户id',
   `tag` VARCHAR(50) NULL COMMENT 'tag',
@@ -211,8 +197,7 @@ CREATE TABLE `userconvertags` (
   UNIQUE INDEX `uniq_tag` (`app_key`, `user_id`, `tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话-分组';
 
-DROP TABLE IF EXISTS `convertagrels`;
-CREATE TABLE `convertagrels` (
+CREATE TABLE IF NOT EXISTS `convertagrels` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` VARCHAR(32) NULL COMMENT '用户id',
   `tag` VARCHAR(50) NULL COMMENT 'tag',
@@ -225,9 +210,7 @@ CREATE TABLE `convertagrels` (
   KEY `idx_target` (`app_key`, `user_id`, `target_id`, `channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话-分组绑定关系表';
 
-
-DROP TABLE IF EXISTS `msgstats`;
-CREATE TABLE `msgstats` (
+CREATE TABLE IF NOT EXISTS `msgstats` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `stat_type` TINYINT NULL DEFAULT 0 COMMENT '统计类型 1上行消息，2分发，3下行消息',
   `channel_type` TINYINT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
@@ -238,8 +221,7 @@ CREATE TABLE `msgstats` (
   UNIQUE INDEX `uniq_mark` (`app_key` ASC, `stat_type` ASC, `channel_type` ASC, `time_mark` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-消息统计';
 
-DROP TABLE IF EXISTS `useractivities`;
-CREATE TABLE `useractivities` (
+CREATE TABLE IF NOT EXISTS `useractivities` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` VARCHAR(32) NULL COMMENT '用户id',
   `time_mark` BIGINT NULL COMMENT '标记点',
@@ -250,8 +232,7 @@ CREATE TABLE `useractivities` (
   UNIQUE INDEX `uniq_userid` (`app_key` ASC, `time_mark` ASC, `user_id` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-用户活跃统计';
 
-DROP TABLE IF EXISTS `connectcounts`;
-CREATE TABLE `connectcounts` (
+CREATE TABLE IF NOT EXISTS `connectcounts` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `connect_type` TINYINT NULL DEFAULT 0,
   `time_mark` BIGINT NULL,
@@ -261,8 +242,7 @@ CREATE TABLE `connectcounts` (
   UNIQUE INDEX `uniq_mark` (`app_key`, `connect_type`, `time_mark`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `fileconfs`;
-CREATE TABLE `fileconfs` (
+CREATE TABLE IF NOT EXISTS `fileconfs` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '应用key',
   `channel` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'oss供应商',
@@ -274,8 +254,7 @@ CREATE TABLE `fileconfs` (
   UNIQUE KEY `app_key` (`app_key`,`channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT = '文件配置';
 
-DROP TABLE IF EXISTS `g_delhismsgs`;
-CREATE TABLE `g_delhismsgs` (
+CREATE TABLE IF NOT EXISTS `g_delhismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '目标id',
@@ -288,8 +267,7 @@ CREATE TABLE `g_delhismsgs` (
   KEY `idx_target` (`app_key`,`user_id`,`target_id`,`msg_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群聊-历史消息已删记录表';
 
-DROP TABLE IF EXISTS `g_hismsgs`;
-CREATE TABLE `g_hismsgs` (
+CREATE TABLE IF NOT EXISTS `g_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
@@ -313,8 +291,7 @@ CREATE TABLE `g_hismsgs` (
   KEY `idx_conver_time` (`app_key`,`conver_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群聊-历史消息表';
 
-DROP TABLE IF EXISTS `gc_hismsgs`;
-CREATE TABLE `gc_hismsgs` (
+CREATE TABLE IF NOT EXISTS `gc_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
@@ -330,8 +307,7 @@ CREATE TABLE `gc_hismsgs` (
   KEY `idx_msg` (`app_key`,`conver_id`,`channel_type`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群聊-公告消息表';
 
-DROP TABLE IF EXISTS `globalconfs`;
-CREATE TABLE `globalconfs` (
+CREATE TABLE IF NOT EXISTS `globalconfs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conf_key` varchar(50) DEFAULT NULL COMMENT '配置key',
   `conf_value` varchar(2000) DEFAULT NULL COMMENT '配置value',
@@ -341,8 +317,7 @@ CREATE TABLE `globalconfs` (
   UNIQUE KEY `uniq_key` (`conf_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '全局配置';
 
-DROP TABLE IF EXISTS `globalconvers`;
-CREATE TABLE `globalconvers` (
+CREATE TABLE IF NOT EXISTS `globalconvers` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者',
@@ -356,8 +331,7 @@ CREATE TABLE `globalconvers` (
   KEY `idx_targetid` (`app_key`,`channel_type`,`target_id`,`updated_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '全局会话表';
 
-DROP TABLE IF EXISTS `groupinfoexts`;
-CREATE TABLE `groupinfoexts` (
+CREATE TABLE IF NOT EXISTS `groupinfoexts` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `group_id` varchar(32) DEFAULT NULL COMMENT '群id',
   `item_key` varchar(50) DEFAULT NULL COMMENT '参数key',
@@ -369,8 +343,7 @@ CREATE TABLE `groupinfoexts` (
   UNIQUE KEY `uniq_appkey_groupid` (`app_key`,`group_id`,`item_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群补充信息';
 
-DROP TABLE IF EXISTS `groupinfos`;
-CREATE TABLE `groupinfos` (
+CREATE TABLE IF NOT EXISTS `groupinfos` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `group_id` varchar(64) DEFAULT NULL COMMENT '群id',
   `group_name` varchar(64) DEFAULT NULL COMMENT '群名称',
@@ -383,8 +356,7 @@ CREATE TABLE `groupinfos` (
   UNIQUE KEY `uniq_appkey_groupid` (`app_key`,`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群基本信息';
 
-DROP TABLE IF EXISTS `groupmemberexts`;
-CREATE TABLE `groupmemberexts` (
+CREATE TABLE IF NOT EXISTS `groupmemberexts` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `group_id` varchar(32) DEFAULT NULL COMMENT '群id',
   `member_id` varchar(32) DEFAULT NULL COMMENT '群成员id',
@@ -397,8 +369,7 @@ CREATE TABLE `groupmemberexts` (
   UNIQUE KEY `uniq_item_key` (`app_key`,`group_id`,`member_id`,`item_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群成员-补充信息';
 
-DROP TABLE IF EXISTS `groupmembers`;
-CREATE TABLE `groupmembers` (
+CREATE TABLE IF NOT EXISTS `groupmembers` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `group_id` varchar(64) DEFAULT NULL COMMENT '群id',
   `member_id` varchar(64) DEFAULT NULL COMMENT '成员id',
@@ -413,8 +384,7 @@ CREATE TABLE `groupmembers` (
   KEY `idx_memberid` (`app_key`,`member_id`,`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群成员';
 
-DROP TABLE IF EXISTS `grpassistantrels`;
-CREATE TABLE `grpassistantrels` (
+CREATE TABLE IF NOT EXISTS `grpassistantrels` (
   `id` int NOT NULL COMMENT '主键id',
   `assistant_id` varchar(32) DEFAULT NULL COMMENT '助手id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
@@ -425,8 +395,7 @@ CREATE TABLE `grpassistantrels` (
   UNIQUE KEY `uniq_target` (`assistant_id`,`target_id`,`channel_type`,`app_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `grpsnapshots`;
-CREATE TABLE `grpsnapshots` (
+CREATE TABLE IF NOT EXISTS `grpsnapshots` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(20) NOT NULL COMMENT '应用key',
   `group_id` varchar(32) NOT NULL COMMENT '群id',
@@ -436,8 +405,7 @@ CREATE TABLE `grpsnapshots` (
   KEY `idx_group_id` (`app_key`,`group_id`,`created_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群快照';
 
-DROP TABLE IF EXISTS `ic_conditions`;
-CREATE TABLE `ic_conditions` (
+CREATE TABLE IF NOT EXISTS `ic_conditions` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `channel_type` varchar(100) DEFAULT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
   `msg_type` varchar(1000) DEFAULT NULL COMMENT '消息类型',
@@ -451,8 +419,7 @@ CREATE TABLE `ic_conditions` (
   KEY `idx_icid` (`app_key`,`interceptor_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `inboxmsgs`;
-CREATE TABLE `inboxmsgs` (
+CREATE TABLE IF NOT EXISTS `inboxmsgs` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
@@ -468,8 +435,7 @@ CREATE TABLE `inboxmsgs` (
   KEY `idx_appkey` (`app_key`,`send_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=45612 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '收件箱';
 
-DROP TABLE IF EXISTS `interceptors`;
-CREATE TABLE `interceptors` (
+CREATE TABLE IF NOT EXISTS `interceptors` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `name` varchar(50) DEFAULT NULL COMMENT '名称',
   `sort` int NOT NULL DEFAULT '0',
@@ -486,8 +452,7 @@ CREATE TABLE `interceptors` (
   KEY `idx_sort` (`app_key`,`sort`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `ioscertificates`;
-CREATE TABLE `ioscertificates` (
+CREATE TABLE IF NOT EXISTS `ioscertificates` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `package` varchar(100) DEFAULT NULL,
   `certificate` mediumblob,
@@ -504,8 +469,7 @@ CREATE TABLE `ioscertificates` (
   UNIQUE KEY `uniq_package` (`app_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `mentionmsgs`;
-CREATE TABLE `mentionmsgs` (
+CREATE TABLE IF NOT EXISTS `mentionmsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
@@ -524,8 +488,7 @@ CREATE TABLE `mentionmsgs` (
   KEY `idx_target_msgid` (`app_key`, `msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '@消息记录';
 
-DROP TABLE IF EXISTS `mergedmsgs`;
-CREATE TABLE `mergedmsgs` (
+CREATE TABLE IF NOT EXISTS `mergedmsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `parent_msg_id` varchar(20) DEFAULT NULL COMMENT '父消息id',
   `from_id` varchar(32) DEFAULT NULL COMMENT '发送者',
@@ -540,8 +503,7 @@ CREATE TABLE `mergedmsgs` (
   UNIQUE KEY `idx_appkey_pmsg` (`app_key`,`parent_msg_id`,`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '聚合消息';
 
-DROP TABLE IF EXISTS `msgexts`;
-CREATE TABLE `msgexts` (
+CREATE TABLE IF NOT EXISTS `msgexts` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
   `key` varchar(50) DEFAULT NULL COMMENT '参数key',
@@ -553,8 +515,7 @@ CREATE TABLE `msgexts` (
   UNIQUE KEY `uniq_msgid` (`app_key`,`msg_id`,`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '消息-补充内容';
 
-DROP TABLE IF EXISTS `msgexsets`;
-CREATE TABLE `msgexsets` (
+CREATE TABLE IF NOT EXISTS `msgexsets` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `msg_id` VARCHAR(20) NULL COMMENT '消息id',
   `key` VARCHAR(50) NULL COMMENT 'key',
@@ -566,8 +527,7 @@ CREATE TABLE `msgexsets` (
   UNIQUE INDEX `uniq_item` (`app_key`, `msg_id`, `key`, `item`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `p_delhismsgs`;
-CREATE TABLE `p_delhismsgs` (
+CREATE TABLE IF NOT EXISTS `p_delhismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者',
@@ -580,8 +540,7 @@ CREATE TABLE `p_delhismsgs` (
   KEY `idx_target` (`app_key`,`user_id`,`target_id`,`msg_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '单聊-历史消息已删记录表';
 
-DROP TABLE IF EXISTS `p_hismsgs`;
-CREATE TABLE `p_hismsgs` (
+CREATE TABLE IF NOT EXISTS `p_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者',
@@ -604,8 +563,7 @@ CREATE TABLE `p_hismsgs` (
   KEY `idx_conver_time` (`app_key`,`conver_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '单聊-历史消息';
 
-DROP TABLE IF EXISTS `pushtokens`;
-CREATE TABLE `pushtokens` (
+CREATE TABLE IF NOT EXISTS `pushtokens` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `device_id` varchar(200) DEFAULT NULL COMMENT '设备id',
@@ -621,8 +579,7 @@ CREATE TABLE `pushtokens` (
   UNIQUE KEY `idx_user_id` (`app_key`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '推送token';
 
-DROP TABLE IF EXISTS `readinfos`;
-CREATE TABLE `readinfos` (
+CREATE TABLE IF NOT EXISTS `readinfos` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(20) NOT NULL COMMENT '应用key',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -636,8 +593,7 @@ CREATE TABLE `readinfos` (
   KEY `idx_msgid` (`app_key`,`channel_type`,`group_id`,`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群已读表';
 
-DROP TABLE IF EXISTS `s_hismsgs`;
-CREATE TABLE `s_hismsgs` (
+CREATE TABLE IF NOT EXISTS `s_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
@@ -654,8 +610,7 @@ CREATE TABLE `s_hismsgs` (
   KEY `idx_appkey_converid` (`app_key`,`conver_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `sendboxmsgs`;
-CREATE TABLE `sendboxmsgs` (
+CREATE TABLE IF NOT EXISTS `sendboxmsgs` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `send_time` bigint DEFAULT NULL COMMENT '发送时间',
@@ -671,8 +626,7 @@ CREATE TABLE `sendboxmsgs` (
   KEY `idx_appkey` (`app_key`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '发件箱';
 
-DROP TABLE IF EXISTS `sensitivewords`;
-CREATE TABLE `sensitivewords` (
+CREATE TABLE IF NOT EXISTS `sensitivewords` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用key',
   `word` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '敏感词',
@@ -684,8 +638,7 @@ CREATE TABLE `sensitivewords` (
   KEY `idx_appkey` (`app_key`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT = '敏感词';
 
-DROP TABLE IF EXISTS `subrelations`;
-CREATE TABLE `subrelations` (
+CREATE TABLE IF NOT EXISTS `subrelations` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `subscriber` varchar(32) DEFAULT NULL COMMENT '订阅者',
@@ -695,8 +648,7 @@ CREATE TABLE `subrelations` (
   UNIQUE KEY `uniq_sub` (`app_key`,`user_id`,`subscriber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `usercleantimes`;
-CREATE TABLE `usercleantimes` (
+CREATE TABLE IF NOT EXISTS `usercleantimes` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
@@ -707,8 +659,7 @@ CREATE TABLE `usercleantimes` (
   UNIQUE KEY `uniq_app_key_user_id_target_id` (`app_key`,`user_id`,`target_id`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `userexts`;
-CREATE TABLE `userexts` (
+CREATE TABLE IF NOT EXISTS `userexts` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `item_key` varchar(50) DEFAULT NULL COMMENT '参数key',
@@ -721,8 +672,7 @@ CREATE TABLE `userexts` (
   KEY `idx_item_key` (`app_key`,`item_key`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '用户-补充信息表';
 
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_type` tinyint DEFAULT '0' COMMENT '用户类型 0用户, 1机器人',
   `user_id` varchar(32) NOT NULL COMMENT '用户id',
@@ -744,8 +694,7 @@ CREATE TABLE `users` (
   KEY `idx_userid` (`app_key`,`user_type`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '用户-基本信息表';
 
-DROP TABLE IF EXISTS `clientlogs`;
-CREATE TABLE `clientlogs` (
+CREATE TABLE IF NOT EXISTS `clientlogs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` VARCHAR(20) NULL COMMENT '应用key',
   `user_id` VARCHAR(32) NULL COMMENT '用户id',
@@ -766,8 +715,7 @@ CREATE TABLE `clientlogs` (
   UNIQUE KEY `uniq_msgid` (`app_key`,`msg_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '客户端日志表';
 
-DROP TABLE IF EXISTS `rtcrooms`;
-CREATE TABLE `rtcrooms` (
+CREATE TABLE IF NOT EXISTS `rtcrooms` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `room_id` varchar(50) DEFAULT NULL COMMENT '房间id',
   `room_type` tinyint DEFAULT '0' COMMENT '房间类型',
@@ -781,8 +729,7 @@ CREATE TABLE `rtcrooms` (
   UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'rtc-房间表';
 
-DROP TABLE IF EXISTS `rtcmembers`;
-CREATE TABLE `rtcmembers` (
+CREATE TABLE IF NOT EXISTS `rtcmembers` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `room_id` varchar(50) DEFAULT NULL COMMENT '房间id',
   `member_id` varchar(32) DEFAULT NULL COMMENT '成员id',
@@ -801,8 +748,7 @@ CREATE TABLE `rtcmembers` (
   KEY `idx_room` (`app_key`,`member_id`,`room_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'rtc-成员表';
 
-DROP TABLE IF EXISTS `msgtransconfs`;
-CREATE TABLE `msgtransconfs` (
+CREATE TABLE IF NOT EXISTS `msgtransconfs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `msg_type` varchar(50) DEFAULT NULL COMMENT '消息类型',
   `json_path` varchar(200) DEFAULT NULL,
@@ -813,8 +759,7 @@ CREATE TABLE `msgtransconfs` (
   UNIQUE KEY `uniq_path` (`app_key`,`msg_type`,`json_path`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `i18nkeys`;
-CREATE TABLE `i18nkeys` (
+CREATE TABLE IF NOT EXISTS `i18nkeys` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `lang` VARCHAR(20) NULL,
   `key` VARCHAR(50) NULL COMMENT 'key',
@@ -826,8 +771,7 @@ CREATE TABLE `i18nkeys` (
   UNIQUE INDEX `uniq_key` (`app_key`, `lang`, `key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `friendrels`;
-CREATE TABLE `friendrels` (
+CREATE TABLE IF NOT EXISTS `friendrels` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `friend_id` varchar(32) DEFAULT NULL COMMENT '朋友userId',
@@ -840,58 +784,7 @@ CREATE TABLE `friendrels` (
   KEY `idx_order` (`app_key`, `user_id`, `order_tag`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT '好友绑定关系表';
 
-DROP TABLE IF EXISTS `friendapplications`;
-CREATE TABLE `friendapplications` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `recipient_id` varchar(32) DEFAULT NULL COMMENT '接收人',
-  `sponsor_id` varchar(32) DEFAULT NULL COMMENT '发起人',
-  `apply_time` bigint DEFAULT NULL COMMENT '申请时间',
-  `status` tinyint DEFAULT '0' COMMENT '状态' ,
-  `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_apply` (`app_key`,`recipient_id`,`sponsor_id`),
-  KEY `idx_recipient` (`app_key`,`recipient_id`,`apply_time`),
-  KEY `idx_sponsor` (`app_key`,`sponsor_id`,`apply_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT '好友申请表';
-
-DROP TABLE IF EXISTS `grpapplications`;
-CREATE TABLE `grpapplications` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `group_id` varchar(32) DEFAULT NULL COMMENT '群id',
-  `apply_type` tinyint DEFAULT '0' COMMENT '申请类型',
-  `sponsor_id` varchar(32) DEFAULT NULL COMMENT '发起人',
-  `recipient_id` varchar(32) DEFAULT NULL,
-  `inviter_id` varchar(32) DEFAULT NULL COMMENT '邀请人',
-  `operator_id` varchar(32) DEFAULT NULL COMMENT '操作人',
-  `apply_time` bigint DEFAULT '0' COMMENT '申请时间',
-  `status` tinyint DEFAULT '0' COMMENT '状态',
-  `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_apply` (`app_key`,`group_id`,`apply_type`,`sponsor_id`,`recipient_id`),
-  KEY `idx_sponsor` (`app_key`,`apply_type`,`sponsor_id`,`apply_time`),
-  KEY `idx_group` (`app_key`,`apply_type`,`group_id`,`apply_time`),
-  KEY `idx_recipient` (`app_key`,`apply_type`,`recipient_id`,`apply_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT '群申请表';
-
-DROP TABLE IF EXISTS `botconfs`;
-CREATE TABLE `botconfs` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `bot_id` varchar(32) NULL COMMENT 'bot id',
-  `nickname` varchar(50) DEFAULT NULL COMMENT '昵称',
-  `bot_portrait` varchar(200) DEFAULT NULL COMMENT '头像',
-  `description` varchar(500) DEFAULT NULL COMMENT '描述',
-  `bot_type` tinyint DEFAULT '0' COMMENT '机器人类型',
-  `bot_conf` varchar(2000) NULL COMMENT '配置',
-  `status` tinyint DEFAULT '0' COMMENT '状态',
-  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
-  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
-  `app_key` varchar(20) NULL COMMENT '租户key',
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `uniq_botid` (`app_key`, `bot_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-DROP TABLE IF EXISTS `botconvers`;
-CREATE TABLE `botconvers` (
+CREATE TABLE IF NOT EXISTS `botconvers` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `conver_key` VARCHAR(100) NULL DEFAULT '',
   `conver_type` TINYINT NULL DEFAULT 0,
@@ -902,31 +795,7 @@ CREATE TABLE `botconvers` (
   UNIQUE INDEX `uniq_key` (`app_key`, `conver_type`, `conver_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `qrcoderecords`;
-CREATE TABLE `qrcoderecords` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `code_id` varchar(50) DEFAULT NULL,
-  `status` tinyint DEFAULT NULL COMMENT '状态',
-  `created_time` bigint DEFAULT NULL COMMENT '创建时间',
-  `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
-  `app_key` varchar(20) DEFAULT NULL COMMENT '租户key',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_id` (`app_key`,`code_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '二维码扫码记录表';
-
-DROP TABLE IF EXISTS `smsrecords`;
-CREATE TABLE `smsrecords` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `phone` varchar(50) DEFAULT NULL,
-  `code` varchar(10) DEFAULT NULL,
-  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
-  `app_key` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_phone` (`app_key`,`phone`,`created_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-DROP TABLE IF EXISTS `favoritemsgs`;
-CREATE TABLE `favoritemsgs` (
+CREATE TABLE IF NOT EXISTS `favoritemsgs` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` VARCHAR(50) NULL,
   `sender_id` VARCHAR(50) NULL,
@@ -943,8 +812,7 @@ CREATE TABLE `favoritemsgs` (
   UNIQUE KEY `uniq_msgid` (`app_key`, `user_id`, `msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-DROP TABLE IF EXISTS `topmsgs`;
-CREATE TABLE `topmsgs` (
+CREATE TABLE IF NOT EXISTS `topmsgs` (
   `id` int NOT NULL AUTO_INCREMENT,
   `conver_id` varchar(100) DEFAULT '',
   `channel_type` tinyint DEFAULT '0',
@@ -954,30 +822,6 @@ CREATE TABLE `topmsgs` (
   `app_key` varchar(20) DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`channel_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-DROP TABLE IF EXISTS `ai_engines`;
-CREATE TABLE `ai_engines` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `engine_type` tinyint DEFAULT '0',
-  `engine_conf` varchar(5000) DEFAULT NULL,
-  `status` tinyint DEFAULT '0',
-  `app_key` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_appkey` (`app_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-DROP TABLE IF EXISTS `assistant_prompts`;
-CREATE TABLE `assistant_prompts` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(32) DEFAULT NULL,
-  `prompts` varchar(2000) DEFAULT NULL,
-  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-  `app_key` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_id` (`app_key`,`id`),
-  KEY `idx_user` (`app_key`,`user_id`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

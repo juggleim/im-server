@@ -32,7 +32,7 @@ func initInfoLogger() {
 		rotatelogs.WithLinkName(fmt.Sprintf(`%s/%s.log`, configures.Config.Log.LogPath, configures.Config.Log.LogName)),
 		rotatelogs.WithMaxAge(24*time.Hour),
 		rotatelogs.WithRotationTime(time.Hour),
-		rotatelogs.WithRotationSize(512*1024*1024),
+		// rotatelogs.WithRotationSize(512*1024*1024),
 	)
 	if err != nil {
 		log.Printf("init log error: %s", err)

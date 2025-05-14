@@ -1,14 +1,20 @@
 package apis
 
 import (
-	"im-server/commons/errs"
-	"im-server/services/appbusiness/httputils"
-	"im-server/services/appbusiness/services"
-	"im-server/services/commonservices"
-	"im-server/services/commonservices/tokens"
+	"bytes"
+	"context"
+	"errors"
+	"fmt"
+
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/juggleim/jugglechat-server/apimodels"
+	"github.com/juggleim/jugglechat-server/errs"
+	"github.com/juggleim/jugglechat-server/services"
+	"github.com/juggleim/jugglechat-server/utils"
 )
 
 func LoadAppApis(mux *http.ServeMux) {
@@ -39,6 +45,11 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodPost, "/jim/users/search", SearchByPhone)
 	RouteRegiste(mux, http.MethodGet, "/jim/users/info", QryUserInfo)
 	RouteRegiste(mux, http.MethodGet, "/jim/users/qrcode", QryUserQrCode)
+
+	RouteRegiste(mux, http.MethodPost, "/jim/telegrambots/add", TelegramBotAdd)
+	RouteRegiste(mux, http.MethodPost, "/jim/telegrambots/del", TelegramBotDel)
+	RouteRegiste(mux, http.MethodPost, "/jim/telegrambots/batchdel", TelegramBotBatchDel)
+	RouteRegiste(mux, http.MethodGet, "/jim/telegrambots/list", TelegramBotList)
 
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/add", CreateGroup)
 	RouteRegiste(mux, http.MethodPost, "/jim/groups/create", CreateGroup)
@@ -79,9 +90,23 @@ func LoadAppApis(mux *http.ServeMux) {
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/applications", FriendApplications)
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/myapplications", MyFriendApplications)
 	RouteRegiste(mux, http.MethodGet, "/jim/friends/mypendingapplications", MyPendingFriendApplications)
+
+	//post
+	RouteRegiste(mux, http.MethodGet, "/jim/posts/list", QryPosts)
+	RouteRegiste(mux, http.MethodGet, "/jim/posts/info", PostInfo)
+	RouteRegiste(mux, http.MethodPost, "/jim/posts/add", PostAdd)
+	// RouteRegiste(mux, http.MethodPost, "/jim/posts/update", nil)
+	// RouteRegiste(mux, http.MethodPost, "/jim/posts/del", nil)
+	// RouteRegiste(mux, http.MethodPost, "/jim/posts/reactions/add", nil)
+	// RouteRegiste(mux, http.MethodGet, "/jim/posts/reactions/list", nil)
+
+	RouteRegiste(mux, http.MethodGet, "/jim/posts/comments/list", QryPostComments)
+	RouteRegiste(mux, http.MethodPost, "/jim/posts/comments/add", PostCommentAdd)
+	// RouteRegiste(mux, http.MethodPost, "/jim/posts/comments/update", nil)
+	// RouteRegiste(mux, http.MethodPost, "/jim/posts/comments/del", nil)
 }
 
-func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *httputils.HttpContext)) {
+func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *HttpContext)) {
 	mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
@@ -97,7 +122,7 @@ func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *htt
 			return
 		}
 		qryParams, _ := url.ParseQuery(r.URL.RawQuery)
-		ctx := &httputils.HttpContext{
+		ctx := &HttpContext{
 			Writer:      w,
 			Request:     r,
 			QueryParams: qryParams,
@@ -109,7 +134,7 @@ func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *htt
 			return
 		}
 		ctx.AppKey = appkey
-		appInfo, exist := commonservices.GetAppInfo(appkey)
+		appInfo, exist := services.GetAppInfo(appkey)
 		if !exist || appInfo == nil {
 			ctx.ResponseErr(errs.IMErrorCode_APP_NOT_EXISTED)
 			return
@@ -130,12 +155,12 @@ func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *htt
 						return
 					}
 				} else {
-					tokenWrap, err := tokens.ParseTokenString(tokenStr)
+					tokenWrap, err := services.ParseTokenString(tokenStr)
 					if err != nil {
 						ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
 						return
 					}
-					token, err := tokens.ParseToken(tokenWrap, []byte(appInfo.AppSecureKey))
+					token, err := services.ParseToken(tokenWrap, []byte(appInfo.AppSecureKey))
 					if err != nil {
 						ctx.ResponseErr(errs.IMErrorCode_APP_NOT_LOGIN)
 						return
@@ -146,4 +171,90 @@ func RouteRegiste(mux *http.ServeMux, method, path string, handler func(ctx *htt
 		}
 		handler(ctx)
 	})
+}
+
+type HttpContext struct {
+	Writer      http.ResponseWriter
+	Request     *http.Request
+	QueryParams url.Values
+
+	AppKey        string
+	CurrentUserId string
+}
+
+func (ctx *HttpContext) BindJSON(req interface{}) error {
+	return Body2Obj(ctx.Request.Body, req)
+}
+
+func (ctx *HttpContext) Query(key string) string {
+	if ctx.QueryParams != nil {
+		return ctx.QueryParams.Get(key)
+	}
+	return ""
+}
+
+func (ctx *HttpContext) ResponseErr(code errs.IMErrorCode) {
+	appErr := errs.GetApiErrorByCode(code)
+	ctx.Writer.WriteHeader(appErr.HttpCode)
+	bs, _ := utils.JsonMarshal(appErr)
+	ctx.Writer.Write(bs)
+}
+
+func (ctx *HttpContext) ResponseSucc(resp interface{}) {
+	connonResp := &apimodels.CommonResp{
+		CommonError: apimodels.CommonError{
+			ErrorMsg: "success",
+		},
+		Data: resp,
+	}
+	ctx.Writer.WriteHeader(http.StatusOK)
+	bs, _ := utils.JsonMarshal(connonResp)
+	ctx.Writer.Write(bs)
+}
+
+func (ctx *HttpContext) ToRpcCtx() context.Context {
+	rpcCtx := context.Background()
+	rpcCtx = context.WithValue(rpcCtx, services.CtxKey_AppKey, ctx.AppKey)
+	rpcCtx = context.WithValue(rpcCtx, services.CtxKey_Session, fmt.Sprintf("app_%s", utils.GenerateUUIDShort11()))
+	if ctx.CurrentUserId != "" {
+		rpcCtx = context.WithValue(rpcCtx, services.CtxKey_RequesterId, ctx.CurrentUserId)
+	}
+	return rpcCtx
+}
+
+func Read2String(read io.ReadCloser) string {
+	buf := bytes.NewBuffer([]byte{})
+	for {
+		bs := make([]byte, 1024)
+		c, err := read.Read(bs)
+		buf.Write(bs)
+		if err != nil || c < 1024 {
+			break
+		}
+	}
+	return buf.String()
+}
+
+func Read2Bytes(read io.ReadCloser) []byte {
+	bs, err := io.ReadAll(read)
+	if err == nil {
+		return bs
+	}
+	return []byte{}
+}
+
+func Body2Obj(read io.ReadCloser, obj interface{}) error {
+	bs := Read2Bytes(read)
+	if len(bs) <= 0 {
+		return errors.New("no value")
+	}
+	return utils.JsonUnMarshal(bs, obj)
+}
+
+func ErrorHttpResp(ctx *HttpContext, code errs.IMErrorCode) {
+	ctx.ResponseErr(code)
+}
+
+func SuccessHttpResp(ctx *HttpContext, resp interface{}) {
+	ctx.ResponseSucc(resp)
 }

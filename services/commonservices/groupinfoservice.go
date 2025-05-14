@@ -23,7 +23,7 @@ func getGrpKey(appkey, userId string) string {
 	return strings.Join([]string{appkey, userId}, "_")
 }
 func init() {
-	groupInfoCache = caches.NewLruCacheWithAddReadTimeout(10000, nil, 5*time.Second, 5*time.Second)
+	groupInfoCache = caches.NewLruCacheWithAddReadTimeout("grpinfo_cache", 10000, nil, 5*time.Second, 5*time.Second)
 	groupInfoLocks = tools.NewSegmentatedLocks(256)
 }
 

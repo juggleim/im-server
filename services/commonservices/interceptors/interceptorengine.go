@@ -11,6 +11,7 @@ var (
 	InterceptorResult_Pass    InterceptorResult = 0
 	InterceptorResult_Reject  InterceptorResult = 1
 	InterceptorResult_Replace InterceptorResult = 2
+	InterceptorResult_Silent  InterceptorResult = 3
 )
 
 type IInterceptor interface {

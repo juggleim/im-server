@@ -7,6 +7,7 @@ import (
 	"im-server/commons/gmicro/utils"
 	"im-server/commons/tools"
 	"im-server/services/appbusiness/apis"
+	"im-server/services/connectmanager/navigator"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 	"net/http"
@@ -35,6 +36,7 @@ func (server *ImWebsocketServer) SyncStart(port int) {
 	})
 
 	apis.LoadAppApis(mux)
+	navigator.LoadClientLogUploadApis(mux)
 	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 }
 
