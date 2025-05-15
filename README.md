@@ -39,7 +39,7 @@ _备注：由于微信群二维码有时间限制，加入微信讨论可优先�
 
 ## 快速部署体验
 
-部署文档(https://www.juggle.im/docs/guide/quickdeploy/)
+部署文档(https://www.juggle.im/docs/guide/deploy/quickdeploy/)
 
 ## 手动部署
 

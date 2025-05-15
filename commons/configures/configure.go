@@ -1,6 +1,7 @@
 package configures
 
 import (
+	"flag"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -71,7 +72,9 @@ type ImConfig struct {
 var Config ImConfig
 
 func InitConfigures() error {
-	cfBytes, err := os.ReadFile("conf/config.yml")
+	configFile := flag.String("config", "conf/config.yml", "Path to the configuration file")
+	flag.Parse()
+	cfBytes, err := os.ReadFile(*configFile)
 	if err == nil {
 		var conf ImConfig
 		yaml.Unmarshal(cfBytes, &conf)
