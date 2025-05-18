@@ -59,7 +59,7 @@ func CorsHandler() gin.HandlerFunc {
 	}
 }
 
-func (ser *Navigator) Shutdown() {
+func (ser *Navigator) Shutdown(force bool) {
 
 }
 

@@ -31,6 +31,6 @@ func (manager *SensitiveManager) RegisterActors(register gmicro.IActorRegister) 
 func (manager *SensitiveManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup SensitiveManager.")
 }
-func (manager *SensitiveManager) Shutdown() {
+func (manager *SensitiveManager) Shutdown(force bool) {
 	fmt.Println("Shutdown SensitiveManager.")
 }

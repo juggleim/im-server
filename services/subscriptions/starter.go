@@ -24,6 +24,6 @@ func (manager *SubscriptionManager) RegisterActors(register gmicro.IActorRegiste
 func (manager *SubscriptionManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup subscriptions.")
 }
-func (manager *SubscriptionManager) Shutdown() {
+func (manager *SubscriptionManager) Shutdown(force bool) {
 	fmt.Println("Shutdown subscriptions.")
 }

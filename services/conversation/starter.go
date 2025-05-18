@@ -81,6 +81,6 @@ func (manager *ConversationManager) RegisterActors(register gmicro.IActorRegiste
 func (manager *ConversationManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup conversation.")
 }
-func (manager *ConversationManager) Shutdown() {
+func (manager *ConversationManager) Shutdown(force bool) {
 	fmt.Println("Shutdown conversation.")
 }

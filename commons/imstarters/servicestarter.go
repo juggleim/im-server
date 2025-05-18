@@ -16,7 +16,7 @@ type IStartupHandler interface {
 }
 
 type IShutdownHandler interface {
-	Shutdown()
+	Shutdown(force bool)
 }
 
 var serverList []IServiceStarter
@@ -41,12 +41,12 @@ func Startup() {
 	bases.Startup()
 }
 
-func Shutdown() {
+func Shutdown(force bool) {
 	//remove self from zk TODO
 	for _, server := range serverList {
 		//execute startup
 		if shutdownHandler, ok := server.(IShutdownHandler); ok {
-			shutdownHandler.Shutdown()
+			shutdownHandler.Shutdown(force)
 		}
 	}
 }

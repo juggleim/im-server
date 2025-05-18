@@ -36,6 +36,6 @@ func (bus *AppBusiness) Startup(args map[string]interface{}) {
 	fmt.Println("Startup appbusiness.")
 }
 
-func (bus *AppBusiness) Shutdown() {
+func (bus *AppBusiness) Shutdown(force bool) {
 	fmt.Println("Shutdown appbusiness.")
 }

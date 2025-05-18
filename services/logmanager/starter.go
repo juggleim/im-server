@@ -23,6 +23,6 @@ func (manager *LogManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup logmanager.")
 }
 
-func (manager *LogManager) Shutdown() {
+func (manager *LogManager) Shutdown(force bool) {
 	fmt.Println("Shutdown logmanager.")
 }

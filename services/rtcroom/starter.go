@@ -62,6 +62,6 @@ func (manager *RtcRoomManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup rtcroom.")
 }
 
-func (manager *RtcRoomManager) Shutdown() {
+func (manager *RtcRoomManager) Shutdown(force bool) {
 	fmt.Println("Shutdown rtcroom.")
 }

@@ -67,6 +67,6 @@ func (manager *UserManager) RegisterActors(register gmicro.IActorRegister) {
 func (manager *UserManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup usermanager.")
 }
-func (manager *UserManager) Shutdown() {
+func (manager *UserManager) Shutdown(force bool) {
 	fmt.Println("Shutdown usermanager.")
 }

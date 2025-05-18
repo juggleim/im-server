@@ -34,6 +34,6 @@ func (manager *FriendManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup friendmanager.")
 }
 
-func (manager *FriendManager) Shutdown() {
+func (manager *FriendManager) Shutdown(force bool) {
 	fmt.Println("Shutdown friendmanager.")
 }

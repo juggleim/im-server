@@ -43,7 +43,7 @@ func (ser *ConnectManager) Startup(args map[string]interface{}) {
 	fmt.Println("Start connectmanager with port:", wsPort)
 }
 
-func (ser *ConnectManager) Shutdown() {
+func (ser *ConnectManager) Shutdown(force bool) {
 	if ser.wsServer != nil {
 		ser.wsServer.Stop()
 	}

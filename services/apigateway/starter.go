@@ -109,6 +109,6 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 	fmt.Println("Start apigateway with port:", httpPort)
 }
 
-func (ser *ApiGateway) Shutdown() {
+func (ser *ApiGateway) Shutdown(force bool) {
 
 }

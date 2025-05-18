@@ -34,6 +34,6 @@ func (manager *UserStatusSubManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup userstatussub.")
 }
 
-func (manager *UserStatusSubManager) Shutdown() {
+func (manager *UserStatusSubManager) Shutdown(force bool) {
 	fmt.Println("Shutdown userstatussub.")
 }

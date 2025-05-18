@@ -24,6 +24,6 @@ func (manager *FilePlugin) RegisterActors(register gmicro.IActorRegister) {
 func (manager *FilePlugin) Startup(args map[string]interface{}) {
 	fmt.Println("Startup fileplugin.")
 }
-func (manager *FilePlugin) Shutdown() {
+func (manager *FilePlugin) Shutdown(force bool) {
 	fmt.Println("Shutdown fileplugin.")
 }

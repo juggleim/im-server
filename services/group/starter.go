@@ -73,6 +73,6 @@ func (manager *GroupManager) RegisterActors(register gmicro.IActorRegister) {
 func (manager *GroupManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup group.")
 }
-func (manager *GroupManager) Shutdown() {
+func (manager *GroupManager) Shutdown(force bool) {
 	fmt.Println("Shutdown group.")
 }

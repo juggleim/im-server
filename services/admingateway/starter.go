@@ -96,7 +96,7 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	fmt.Println("Start admingateway with port:", httpPort)
 }
 
-func (ser *AdminGateway) Shutdown() {
+func (ser *AdminGateway) Shutdown(force bool) {
 
 }
 

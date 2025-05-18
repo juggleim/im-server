@@ -13,7 +13,10 @@ import (
 	"im-server/services/userstatussub"
 	"net/http"
 	_ "net/http/pprof"
-	"sync"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"im-server/commons/bases"
 	"im-server/commons/configures"
@@ -41,12 +44,11 @@ import (
 )
 
 func main() {
+	start := time.Now()
 	go func() {
 		fmt.Println(http.ListenAndServe(":6060", nil))
 	}()
 
-	var waitgroup sync.WaitGroup
-	waitgroup.Add(1)
 	//init configures
 	if err := configures.InitConfigures(); err != nil {
 		//logs.Error("Init Configures failed.", err)
@@ -120,6 +122,17 @@ func main() {
 	imstarters.Loaded(&friends.FriendManager{})
 
 	imstarters.Startup()
+	fmt.Println("expand:", time.Since(start))
 
-	waitgroup.Wait()
+	closeChan := make(chan struct{})
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		<-sigChan
+		imstarters.Shutdown(true)
+		signal.Stop(sigChan)
+		close(closeChan)
+	}()
+
+	<-closeChan
 }

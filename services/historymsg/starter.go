@@ -102,6 +102,6 @@ func (manager *HistoryMsgManager) RegisterActors(register gmicro.IActorRegister)
 func (manager *HistoryMsgManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup historymsg.")
 }
-func (manager *HistoryMsgManager) Shutdown() {
+func (manager *HistoryMsgManager) Shutdown(force bool) {
 	fmt.Println("Shutdown historymsg.")
 }
