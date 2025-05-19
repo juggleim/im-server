@@ -38,14 +38,16 @@ func (utag *ConverTagRelDao) BatchCreate(items []models.ConverTagRel) error {
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("INSERT IGNORE INTO %s (`user_id`,`tag`,`target_id`,`channel_type`,`app_key`) VALUES ", utag.TableName())
 	buffer.WriteString(sql)
+	params := []interface{}{}
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s',%d,'%s');", item.UserId, item.Tag, item.TargetId, item.ChannelType, item.AppKey))
+			buffer.WriteString("(?,?,?,?,?);")
 		} else {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s',%d,'%s'),", item.UserId, item.Tag, item.TargetId, item.ChannelType, item.AppKey))
+			buffer.WriteString("(?,?,?,?,?),")
 		}
+		params = append(params, item.UserId, item.Tag, item.TargetId, item.ChannelType, item.AppKey)
 	}
-	return dbcommons.GetDb().Exec(buffer.String()).Error
+	return dbcommons.GetDb().Exec(buffer.String(), params...).Error
 }
 
 func (utag *ConverTagRelDao) Delete(appkey, userId, tag, targetId string, channelType pbobjs.ChannelType) error {

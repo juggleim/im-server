@@ -42,15 +42,17 @@ func (member GroupMemberDao) BatchCreate(items []GroupMemberDao) error {
 	sql := fmt.Sprintf("insert into %s (`group_id`,`member_id`,`app_key`)values", member.TableName())
 
 	buffer.WriteString(sql)
+	params := []interface{}{}
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s');", item.GroupId, item.MemberId, item.AppKey))
+			buffer.WriteString("(?,?,?);")
 		} else {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s'),", item.GroupId, item.MemberId, item.AppKey))
+			buffer.WriteString("(?,?,?),")
 		}
+		params = append(params, item.GroupId, item.MemberId, item.AppKey)
 	}
 
-	err := dbcommons.GetDb().Exec(buffer.String()).Error
+	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
 	return err
 }
 

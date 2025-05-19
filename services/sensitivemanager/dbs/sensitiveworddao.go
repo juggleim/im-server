@@ -20,17 +20,19 @@ func (word SensitiveWordDao) TableName() string {
 func (word SensitiveWordDao) BatchUpsert(items []SensitiveWordDao) error {
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("insert into %s (`word`,`word_type`,`app_key`)values", word.TableName())
+	params := []interface{}{}
 
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString(fmt.Sprintf("('%s',%d,'%s');", item.Word, item.WordType, item.AppKey))
+			buffer.WriteString("(?,?,?);")
 		} else {
-			buffer.WriteString(fmt.Sprintf("('%s',%d,'%s'),", item.Word, item.WordType, item.AppKey))
+			buffer.WriteString("(?,?,?),")
 		}
+		params = append(params, item.Word, item.WordType, item.AppKey)
 	}
 
-	err := dbcommons.GetDb().Exec(buffer.String()).Error
+	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
 	return err
 }
 

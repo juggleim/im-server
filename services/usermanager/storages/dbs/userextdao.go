@@ -29,15 +29,17 @@ func (ext UserExtDao) Upsert(item models.UserExt) error {
 func (ext UserExtDao) BatchUpsert(items []models.UserExt) error {
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("INSERT INTO %s (app_key,user_id,item_key,item_value,item_type)VALUES", ext.TableName())
+	params := []interface{}{}
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%d) ON DUPLICATE KEY UPDATE item_value=VALUES(item_value);", item.AppKey, item.UserId, item.ItemKey, item.ItemValue, item.ItemType))
+			buffer.WriteString("(?,?,?,?,?) ON DUPLICATE KEY UPDATE item_value=VALUES(item_value);")
 		} else {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%d),", item.AppKey, item.UserId, item.ItemKey, item.ItemValue, item.ItemType))
+			buffer.WriteString("(?,?,?,?,?),")
 		}
+		params = append(params, item.AppKey, item.UserId, item.ItemKey, item.ItemValue, item.ItemType)
 	}
-	return dbcommons.GetDb().Exec(buffer.String()).Error
+	return dbcommons.GetDb().Exec(buffer.String(), params...).Error
 }
 
 func (ext UserExtDao) BatchDelete(appkey, itemKey string, userIds []string) error {

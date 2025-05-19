@@ -37,17 +37,19 @@ func (msg PrivateDelHisMsgDao) Create(item models.PrivateDelHisMsg) error {
 func (msg PrivateDelHisMsgDao) BatchCreate(items []models.PrivateDelHisMsg) error {
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("insert into %s (`user_id`,`target_id`,`msg_id`,`msg_time`,`msg_seq`,`app_key`)values", msg.TableName())
+	params := []interface{}{}
 
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s',%d,%d,'%s');", item.UserId, item.TargetId, item.MsgId, item.MsgTime, item.MsgSeq, item.AppKey))
+			buffer.WriteString("(?,?,?,?,?,?);")
 		} else {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s',%d,%d,'%s'),", item.UserId, item.TargetId, item.MsgId, item.MsgTime, item.MsgSeq, item.AppKey))
+			buffer.WriteString("(?,?,?,?,?,?),")
 		}
+		params = append(params, item.UserId, item.TargetId, item.MsgId, item.MsgTime, item.MsgSeq, item.AppKey)
 	}
 
-	err := dbcommons.GetDb().Exec(buffer.String()).Error
+	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
 	return err
 }
 

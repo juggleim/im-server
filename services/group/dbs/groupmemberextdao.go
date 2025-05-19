@@ -25,17 +25,19 @@ func (ext GroupMemberExtDao) TableName() string {
 func (ext GroupMemberExtDao) BatchCreate(items []GroupMemberExtDao) error {
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("insert into %s (`app_key`,`group_id`,`member_id`,`item_key`,`item_value`,`item_type`)values", ext.TableName())
+	params := []interface{}{}
 
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s',%d);", item.AppKey, item.GroupId, item.MemberId, item.ItemKey, item.ItemValue, item.ItemType))
+			buffer.WriteString("(?,?,?,?,?,?);")
 		} else {
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s',%d),", item.AppKey, item.GroupId, item.MemberId, item.ItemKey, item.ItemValue, item.ItemType))
+			buffer.WriteString("(?,?,?,?,?,?),")
 		}
+		params = append(params, item.AppKey, item.GroupId, item.MemberId, item.ItemKey, item.ItemValue, item.ItemType)
 	}
 
-	err := dbcommons.GetDb().Exec(buffer.String()).Error
+	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
 	return err
 }
 

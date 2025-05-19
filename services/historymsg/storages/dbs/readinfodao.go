@@ -45,16 +45,18 @@ func (info ReadInfoDao) Create(item models.ReadInfo) error {
 func (info ReadInfoDao) BatchCreate(items []models.ReadInfo) error {
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("insert into %s (`app_key`,`msg_id`,`channel_type`,`group_id`,`member_id`)values", info.TableName())
+	params := []interface{}{}
 
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString(fmt.Sprintf("('%s','%s',%d,'%s','%s');", item.AppKey, item.MsgId, item.ChannelType, item.GroupId, item.MemberId))
+			buffer.WriteString("(?,?,?,?,?);")
 		} else {
-			buffer.WriteString(fmt.Sprintf("('%s','%s',%d,'%s','%s'),", item.AppKey, item.MsgId, item.ChannelType, item.GroupId, item.MemberId))
+			buffer.WriteString("(?,?,?,?,?),")
 		}
+		params = append(params, item.AppKey, item.MsgId, item.ChannelType, item.GroupId, item.MemberId)
 	}
-	err := dbcommons.GetDb().Exec(buffer.String()).Error
+	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
 	return err
 }
 
