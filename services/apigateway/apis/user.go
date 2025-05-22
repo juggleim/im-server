@@ -18,7 +18,7 @@ import (
 
 func Register(ctx *gin.Context) {
 	var userInfo models.UserInfo
-	if err := ctx.BindJSON(&userInfo); err != nil {
+	if err := ctx.BindJSON(&userInfo); err != nil || userInfo.UserId == "" {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
