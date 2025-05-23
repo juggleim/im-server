@@ -18,7 +18,7 @@ type QryGlobalConversActor struct {
 
 func (actor *QryGlobalConversActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.QryGlobalConversReq); ok {
-		logs.WithContext(ctx).Infof("start:%s\torder:%d\tcount:%d\ttarget_id:%s\tchannel_type:%d", req.Start, req.Order, req.Count, req.TargetId, req.ChannelType)
+		logs.WithContext(ctx).Infof("start:%d\torder:%d\tcount:%d\ttarget_id:%s\tchannel_type:%d", req.Start, req.Order, req.Count, req.TargetId, req.ChannelType)
 		resp := services.QryGlobalConvers(ctx, req)
 		qryAck := bases.CreateQueryAckWraper(ctx, 0, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
