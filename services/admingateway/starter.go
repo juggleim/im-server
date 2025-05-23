@@ -127,11 +127,13 @@ func loadAdminWeb(httpServer *gin.Engine) {
 			httpServer.GET("/assets/"+f.Name(), assetsFile)
 		}
 	}
-	httpServer.GET("/dashboard", dashboardPage)
+
 	httpServer.GET("/", dashboardPage)
-	httpServer.GET("/:param1", dashboardPage)
-	httpServer.GET("/:param1/:param2", dashboardPage)
-	httpServer.GET("/:param1/:param2/:param3", dashboardPage)
+	httpServer.GET("/dashboard", dashboardPage)
+	httpServer.GET("/login", dashboardPage)
+	// httpServer.GET("/:param1", dashboardPage)
+	// httpServer.GET("/:param1/:param2", dashboardPage)
+	// httpServer.GET("/:param1/:param2/:param3", dashboardPage)
 }
 
 func dashboardPage(ctx *gin.Context) {
@@ -201,5 +203,6 @@ func InjectCtx() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		appKey := ctx.Request.Header.Get("appkey")
 		ctx.Set(services.CtxKey_AppKey, appKey)
+		ctx.Next()
 	}
 }

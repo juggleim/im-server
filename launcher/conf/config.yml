@@ -11,7 +11,7 @@ kvdb:
 
 mysql:
   user: root
-  password: 123456
+  password: xiaoguang
   address: 127.0.0.1:3306
   name: im_db
 
