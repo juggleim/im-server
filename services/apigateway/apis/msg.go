@@ -41,6 +41,9 @@ func SendPrivateMsg(ctx *gin.Context) {
 	msgIdMap := map[string]string{}
 	for _, targetId := range targetIds {
 		msgId := tools.GenerateMsgId(time.Now().UnixMilli(), int32(pbobjs.ChannelType_Private), targetId)
+		if sendMsgReq.MsgId != nil && *sendMsgReq.MsgId != "" && len(*sendMsgReq.MsgId) <= 20 {
+			msgId = *sendMsgReq.MsgId
+		}
 		ret = append(ret, &models.SendMsgRespItem{
 			TargetId: targetId,
 			MsgId:    msgId,
@@ -90,6 +93,9 @@ func SendSystemMsg(ctx *gin.Context) {
 	msgIdMap := map[string]string{}
 	for _, targetId := range targetIds {
 		msgId := tools.GenerateMsgId(time.Now().UnixMilli(), int32(pbobjs.ChannelType_System), targetId)
+		if sendMsgReq.MsgId != nil && *sendMsgReq.MsgId != "" && len(*sendMsgReq.MsgId) <= 20 {
+			msgId = *sendMsgReq.MsgId
+		}
 		ret = append(ret, &models.SendMsgRespItem{
 			TargetId: targetId,
 			MsgId:    msgId,
@@ -132,6 +138,9 @@ func SendGroupMsg(ctx *gin.Context) {
 	msgIdMap := map[string]string{}
 	for _, targetId := range targetIds {
 		msgId := tools.GenerateMsgId(time.Now().UnixMilli(), int32(pbobjs.ChannelType_Group), targetId)
+		if sendMsgReq.MsgId != nil && *sendMsgReq.MsgId != "" && len(*sendMsgReq.MsgId) <= 20 {
+			msgId = *sendMsgReq.MsgId
+		}
 		ret = append(ret, &models.SendMsgRespItem{
 			TargetId: targetId,
 			MsgId:    msgId,

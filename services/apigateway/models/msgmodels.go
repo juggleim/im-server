@@ -15,6 +15,8 @@ type SendMsgReq struct {
 	MentionInfo    *MentionInfo `json:"mention_info"`
 	ReferMsg       *ReferMsg    `json:"refer_msg"`
 	PushData       *PushData    `json:"push_data"`
+
+	MsgId *string `json:"msg_id,omitempty"`
 }
 
 type PushData struct {
