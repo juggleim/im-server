@@ -19,14 +19,11 @@ mongodb:
   address: 127.0.0.1:27017
   name: jim_msgs
 
+apiGateway:
+  httpPort: 9001
+
 connectManager:
   wsPort: 9002
-
-apiGateway:
-  httpPort: 8082
-
-navGateway:
-  httpPort: 8081
 
 adminGateway:
   httpPort: 8090

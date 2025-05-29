@@ -22,25 +22,27 @@ func (ser *Navigator) RegisterActors(register gmicro.IActorRegister) {
 
 }
 func (ser *Navigator) Startup(args map[string]interface{}) {
-	ser.httpServer = gin.Default()
-	ser.httpServer.Use(CorsHandler())
-	ser.httpServer.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, "ok")
-	})
-	ser.httpServer.HEAD("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, nil)
-	})
-	group := ser.httpServer.Group("/navigator")
-	group.Use(apis.CheckToken)
-	group.GET("/general", apis.NaviGet)
+	if configures.Config.NavGateway.HttpPort > 0 {
+		ser.httpServer = gin.Default()
+		ser.httpServer.Use(CorsHandler())
+		ser.httpServer.GET("/", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, "ok")
+		})
+		ser.httpServer.HEAD("/", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, nil)
+		})
+		group := ser.httpServer.Group("/navigator")
+		group.Use(apis.CheckToken)
+		group.GET("/general", apis.NaviGet)
 
-	group.POST("/upload-log", apis.UploadClientLog)
-	group.POST("/upload-log-plain", apis.UploadClientLogPlain, GzipDecompress())
-	group.POST("/log-status", apis.UploadLogStatus)
+		group.POST("/upload-log", apis.UploadClientLog)
+		group.POST("/upload-log-plain", apis.UploadClientLogPlain, GzipDecompress())
+		group.POST("/log-status", apis.UploadLogStatus)
 
-	httpPort := configures.Config.NavGateway.HttpPort
-	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
-	fmt.Println("Start navitor with port:", httpPort)
+		httpPort := configures.Config.NavGateway.HttpPort
+		go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
+		fmt.Println("Start navitor with port:", httpPort)
+	}
 }
 
 func CorsHandler() gin.HandlerFunc {
