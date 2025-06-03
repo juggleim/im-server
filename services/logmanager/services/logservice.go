@@ -72,17 +72,14 @@ func appendTimestamp(log string) string {
 	if len(log) > 16 {
 		timeStr := log[0:16]
 		logStr := strings.TrimSpace(log[16:])
-		tmpMap := make(map[string]interface{})
-		err := tools.JsonUnMarshal([]byte(logStr), &tmpMap)
-		if err == nil {
-			t, e := time.ParseInLocation(timeFormat, timeStr, time.Local)
-			if e == nil {
-				tmpMap["timestamp"] = t.UnixMilli()
-			} else {
-				fmt.Println(e)
-			}
-			return tools.ToJson(tmpMap)
+		tmpMap := formatLog2Map(logStr)
+		t, e := time.ParseInLocation(timeFormat, timeStr, time.Local)
+		if e == nil {
+			tmpMap["timestamp"] = t.UnixMilli()
+		} else {
+			fmt.Println(e)
 		}
+		return tools.ToJson(tmpMap)
 	}
 	return ""
 }
@@ -125,7 +122,6 @@ func QryConnectLogs(appkey, session string, start, count int64) ([]LogEntity, er
 
 	ret := []LogEntity{}
 	for _, item := range resultLines {
-		fmt.Println(item)
 		if len(item) > 16 {
 			ret = append(ret, LogEntity{
 				Key:   "",
@@ -173,7 +169,6 @@ func QryBusinessLogs(appkey, session string, seqIndex int32, start, count int64)
 	}
 	ret := []LogEntity{}
 	for _, item := range resultLines {
-		fmt.Println(item)
 		if len(item) > 16 {
 			ret = append(ret, LogEntity{
 				Key:   "",
@@ -209,6 +204,21 @@ func getLogFiles(start int64, isEqual bool) []string {
 		return retFile
 	}
 	return []string{}
+}
+
+func formatLog2Map(line string) map[string]interface{} {
+	line = strings.TrimSpace(line)
+	kvs := strings.Split(line, "\t")
+	m := map[string]interface{}{}
+	if len(kvs) > 0 {
+		for _, kv := range kvs {
+			pairs := strings.Split(kv, ":")
+			if len(pairs) >= 2 {
+				m[pairs[0]] = pairs[1]
+			}
+		}
+	}
+	return m
 }
 
 type LogFilesArray []string
