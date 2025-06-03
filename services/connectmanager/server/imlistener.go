@@ -31,13 +31,11 @@ type ImListener interface {
 type ImListenerImpl struct{}
 
 func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, code errs.IMErrorCode, e error) {
-	logs.NewLogEntity().WithFields(map[string]interface{}{
-		"service_name": imcontext.ServiceName,
-		"session":      imcontext.GetConnSession(ctx),
-		"action":       imcontext.Action_Disconnect,
-		"code":         code,
-		"err":          e,
-	}).Info("")
+	logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+		WithField("session", imcontext.GetConnSession(ctx)).
+		WithField("action", imcontext.Action_Disconnect).
+		WithField("code", code).
+		WithField("err", e).Info("")
 	services.Offline(ctx, code)
 
 	services.RemoveFromContextCache(ctx)
@@ -85,38 +83,34 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 			time.Sleep(50 * time.Millisecond)
 			ctx.Close(errors.New("failed to login"))
 		}()
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_Connect,
-			"appkey":       msg.Appkey,
-			"user_id":      ucLog.UserId,
-			"client_ip":    clientIp,
-			"platform":     msg.Platform,
-			"version":      msg.SdkVersion,
-			"device_id":    msg.DeviceId,
-			"push_token":   msg.PushToken,
-			"instance_id":  msg.InstanceId,
-			"code":         ucLog.Code,
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_Connect).
+			WithField("appkey", msg.Appkey).
+			WithField("user_id", ucLog.UserId).
+			WithField("client_ip", clientIp).
+			WithField("platform", msg.Platform).
+			WithField("version", msg.SdkVersion).
+			WithField("device_id", msg.DeviceId).
+			WithField("push_token", msg.PushToken).
+			WithField("instance_id", msg.InstanceId).
+			WithField("code", ucLog.Code).Info("")
 		return
 	}
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Connected, "1")
 	userId := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 	//success
-	logs.NewLogEntity().WithFields(map[string]interface{}{
-		"service_name": imcontext.ServiceName,
-		"session":      imcontext.GetConnSession(ctx),
-		"action":       imcontext.Action_Connect,
-		"appkey":       msg.Appkey,
-		"user_id":      userId,
-		"client_ip":    clientIp,
-		"platform":     msg.Platform,
-		"version":      msg.SdkVersion,
-		"device_id":    msg.DeviceId,
-		"push_token":   msg.PushToken,
-		"instance_id":  msg.InstanceId,
-	}).Info("")
+	logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+		WithField("session", imcontext.GetConnSession(ctx)).
+		WithField("action", imcontext.Action_Connect).
+		WithField("appkey", msg.Appkey).
+		WithField("user_id", userId).
+		WithField("client_ip", clientIp).
+		WithField("platform", msg.Platform).
+		WithField("version", msg.SdkVersion).
+		WithField("device_id", msg.DeviceId).
+		WithField("push_token", msg.PushToken).
+		WithField("instance_id", msg.InstanceId).Info("")
 	commonservices.ReportUserLogin(msg.Appkey, userId)
 
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Appkey, msg.Appkey)
@@ -148,12 +142,10 @@ func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx im
 		logs.NewLogEntity().Error("disconnect body is nil")
 		return
 	}
-	logs.NewLogEntity().WithFields(map[string]interface{}{
-		"service_name": imcontext.ServiceName,
-		"session":      imcontext.GetConnSession(ctx),
-		"action":       imcontext.Action_Disconnect,
-		"code":         msg.Code,
-	}).Info("")
+	logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+		WithField("session", imcontext.GetConnSession(ctx)).
+		WithField("action", imcontext.Action_Disconnect).
+		WithField("code", msg.Code).Info("")
 
 	services.Offline(ctx, errs.IMErrorCode(msg.Code))
 	if msg.Code == 1 || msg.Code == int32(errs.IMErrorCode_CONNECT_LOGOUT) {
@@ -169,15 +161,13 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 		logs.NewLogEntity().Error("pub body is nil")
 		return
 	}
-	logs.NewLogEntity().WithFields(map[string]interface{}{
-		"service_name": imcontext.ServiceName,
-		"session":      imcontext.GetConnSession(ctx),
-		"action":       imcontext.Action_UserPub,
-		"seq_index":    msg.Index,
-		"method":       msg.Topic,
-		"target_id":    msg.TargetId,
-		"len":          len(msg.Data),
-	}).Info("")
+	logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+		WithField("session", imcontext.GetConnSession(ctx)).
+		WithField("action", imcontext.Action_UserPub).
+		WithField("seq_index", msg.Index).
+		WithField("method", msg.Topic).
+		WithField("target_id", msg.TargetId).
+		WithField("len", len(msg.Data)).Info("")
 	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:   imcontext.GetAppkey(ctx),
 		Session:  imcontext.GetConnSession(ctx),
@@ -195,13 +185,11 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 			MsgId: "",
 		})
 		ctx.Write(ack)
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_UserPubAck,
-			"seq_index":    msg.Index,
-			"code":         errs.IMErrorCode_CONNECT_PARAM_REQUIRED,
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_UserPubAck).
+			WithField("seq_index", msg.Index).
+			WithField("code", errs.IMErrorCode_CONNECT_PARAM_REQUIRED).Info("")
 		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:   imcontext.GetAppkey(ctx),
 			Session:  imcontext.GetConnSession(ctx),
@@ -223,13 +211,11 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 			Timestamp: time.Now().UnixMilli(),
 		})
 		ctx.Write(ack)
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_UserPubAck,
-			"seq_index":    msg.Index,
-			"code":         errs.IMErrorCode_CONNECT_EXCEEDLIMITED,
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_UserPubAck).
+			WithField("seq_index", msg.Index).
+			WithField("code", errs.IMErrorCode_CONNECT_EXCEEDLIMITED).Info("")
 		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:   imcontext.GetAppkey(ctx),
 			Session:  imcontext.GetConnSession(ctx),
@@ -268,13 +254,11 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 			Timestamp: time.Now().UnixMilli(),
 		})
 		ctx.Write(ack)
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_UserPubAck,
-			"seq_index":    msg.Index,
-			"code":         errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC,
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_UserPubAck).
+			WithField("seq_index", msg.Index).
+			WithField("code", errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC).Info("")
 		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:   imcontext.GetAppkey(ctx),
 			Session:  imcontext.GetConnSession(ctx),
@@ -297,12 +281,10 @@ func (*ImListenerImpl) PubAckArrived(msg *codec.PublishAckMsgBody, ctx imcontext
 	if callback != nil {
 		callback()
 	}
-	logs.NewLogEntity().WithFields(map[string]interface{}{
-		"service_name": imcontext.ServiceName,
-		"session":      imcontext.GetConnSession(ctx),
-		"action":       imcontext.Action_ServerPubAck,
-		"seq_index":    msg.Index,
-	}).Info("")
+	logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+		WithField("session", imcontext.GetConnSession(ctx)).
+		WithField("action", imcontext.Action_ServerPubAck).
+		WithField("seq_index", msg.Index).Info("")
 	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:  imcontext.GetAppkey(ctx),
 		Session: imcontext.GetConnSession(ctx),
@@ -316,15 +298,13 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 		logs.NewLogEntity().Error("qry body is nil")
 		return
 	}
-	logs.NewLogEntity().WithFields(map[string]interface{}{
-		"service_name": imcontext.ServiceName,
-		"session":      imcontext.GetConnSession(ctx),
-		"action":       imcontext.Action_Query,
-		"seq_index":    msg.Index,
-		"method":       msg.Topic,
-		"target_id":    msg.TargetId,
-		"len":          len(msg.Data),
-	}).Info("")
+	logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+		WithField("session", imcontext.GetConnSession(ctx)).
+		WithField("action", imcontext.Action_Query).
+		WithField("seq_index", msg.Index).
+		WithField("method", msg.Topic).
+		WithField("target_id", msg.TargetId).
+		WithField("len", len(msg.Data)).Info("")
 	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:   imcontext.GetAppkey(ctx),
 		Session:  imcontext.GetConnSession(ctx),
@@ -342,13 +322,11 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 			Timestamp: time.Now().UnixMilli(),
 		}, codec.QoS_NoAck)
 		ctx.Write(ack)
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_QueryAck,
-			"seq_index":    msg.Index,
-			"code":         errs.IMErrorCode_CONNECT_PARAM_REQUIRED,
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_QueryAck).
+			WithField("seq_index", msg.Index).
+			WithField("code", errs.IMErrorCode_CONNECT_PARAM_REQUIRED).Info("")
 		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
@@ -367,13 +345,11 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 			Timestamp: time.Now().UnixMilli(),
 		}, codec.QoS_NoAck)
 		ctx.Write(ack)
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_QueryAck,
-			"seq_index":    msg.Index,
-			"code":         errs.IMErrorCode_CONNECT_EXCEEDLIMITED,
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_QueryAck).
+			WithField("seq_index", msg.Index).
+			WithField("code", errs.IMErrorCode_CONNECT_EXCEEDLIMITED).Info("")
 		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
@@ -418,13 +394,11 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 			Timestamp: time.Now().UnixMilli(),
 		}, codec.QoS_NoAck)
 		ctx.Write(ack)
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_QueryAck,
-			"seq_index":    msg.Index,
-			"code":         errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC,
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_QueryAck).
+			WithField("seq_index", msg.Index).
+			WithField("code", errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC).Info("")
 		logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
@@ -445,12 +419,10 @@ func (*ImListenerImpl) QueryConfirmArrived(msg *codec.QueryConfirmMsgBody, ctx i
 	if callback != nil {
 		callback()
 	}
-	logs.NewLogEntity().WithFields(map[string]interface{}{
-		"service_name": imcontext.ServiceName,
-		"session":      imcontext.GetConnSession(ctx),
-		"action":       imcontext.Action_QueryConfirm,
-		"seq_index":    msg.Index,
-	}).Info("")
+	logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+		WithField("session", imcontext.GetConnSession(ctx)).
+		WithField("action", imcontext.Action_QueryConfirm).
+		WithField("seq_index", msg.Index).Info("")
 	logmanager.WriteConnectionLog(imcontext.GetRpcContext(ctx), &pbobjs.ConnectionLog{
 		AppKey:  imcontext.GetAppkey(ctx),
 		Session: imcontext.GetConnSession(ctx),

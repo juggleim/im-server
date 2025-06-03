@@ -26,15 +26,15 @@ func QryUserConnectLogs(appkey, userId string, start, count int64) ([]LogEntity,
 
 	for _, candidateLogFile := range candidateFiles {
 		fileHandler := tools.NewFileHandler()
-		_, err := fileHandler.GreapWithFile(`"action":"connect"`, fmt.Sprintf("logs/%s", candidateLogFile))
+		_, err := fileHandler.GreapWithFile(`action:connect`, fmt.Sprintf("logs/%s", candidateLogFile))
 		if err != nil {
 			break
 		}
-		_, err = fileHandler.Greap(fmt.Sprintf(`"appkey":"%s"`, appkey))
+		_, err = fileHandler.Greap(fmt.Sprintf(`appkey:%s`, appkey))
 		if err != nil {
 			break
 		}
-		_, err = fileHandler.Greap(fmt.Sprintf(`"user_id":"%s"`, userId))
+		_, err = fileHandler.Greap(fmt.Sprintf(`user_id:%s`, userId))
 		if err != nil {
 			break
 		}
@@ -96,11 +96,11 @@ func QryConnectLogs(appkey, session string, start, count int64) ([]LogEntity, er
 	for _, candidateLogFile := range candidateFiles {
 		fileHandler := tools.NewFileHandler()
 
-		_, err := fileHandler.GreapWithFile(fmt.Sprintf(`"session":"%s"`, session), fmt.Sprintf("logs/%s", candidateLogFile))
+		_, err := fileHandler.GreapWithFile(fmt.Sprintf(`session:%s`, session), fmt.Sprintf("logs/%s", candidateLogFile))
 		if err != nil {
 			break
 		}
-		_, err = fileHandler.Greap(`"service_name":"connectmanager"`) //"action":
+		_, err = fileHandler.Greap(`service_name:connectmanager`) //"action":
 		if err != nil {
 			break
 		}
@@ -145,11 +145,11 @@ func QryBusinessLogs(appkey, session string, seqIndex int32, start, count int64)
 	for _, candidateLogFile := range candidateFiles {
 		fileHandler := tools.NewFileHandler()
 
-		_, err := fileHandler.GreapWithFile(fmt.Sprintf(`"session":"%s"`, session), fmt.Sprintf("logs/%s", candidateLogFile))
+		_, err := fileHandler.GreapWithFile(fmt.Sprintf(`session:%s`, session), fmt.Sprintf("logs/%s", candidateLogFile))
 		if err != nil {
 			break
 		}
-		_, err = fileHandler.Greap(fmt.Sprintf(`"seq_index":%d,`, seqIndex)) //"action":
+		_, err = fileHandler.Greap(fmt.Sprintf(`seq_index:%d,`, seqIndex)) //"action":
 		if err != nil {
 			break
 		}

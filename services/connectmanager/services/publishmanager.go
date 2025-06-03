@@ -86,14 +86,12 @@ func PublishServerPubMessage(appkey, userid, session string, msgId string, msgTi
 				}
 			}
 			vCtx.Write(tmpPubMsg)
-			logs.NewLogEntity().WithFields(map[string]interface{}{
-				"service_name": imcontext.ServiceName,
-				"session":      imcontext.GetConnSession(vCtx),
-				"action":       imcontext.Action_ServerPub,
-				"seq_index":    tmpPubMsg.MsgBody.Index,
-				"method":       tmpPubMsg.MsgBody.Topic,
-				"len":          len(tmpPubMsg.MsgBody.Data),
-			}).Info("")
+			logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+				WithField("session", imcontext.GetConnSession(vCtx)).
+				WithField("action", imcontext.Action_ServerPub).
+				WithField("seq_index", tmpPubMsg.MsgBody.Index).
+				WithField("method", tmpPubMsg.MsgBody.Topic).
+				WithField("len", len(tmpPubMsg.MsgBody.Data)).Info("")
 			logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 				AppKey:   appkey,
 				Session:  imcontext.GetConnSession(vCtx),
@@ -128,14 +126,12 @@ func PublishQryAckMessage(session string, qryAckMsg *codec.QueryAckMsgBody, call
 		}
 		tmpQryAckMsg := codec.NewQueryAckMessage(qryAckMsg, qos)
 		ctx.Write(tmpQryAckMsg)
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_QueryAck,
-			"seq_index":    qryAckMsg.Index,
-			"code":         qryAckMsg.Code,
-			"len":          len(qryAckMsg.Data),
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_QueryAck).
+			WithField("seq_index", qryAckMsg.Index).
+			WithField("code", qryAckMsg.Code).
+			WithField("len", len(qryAckMsg.Data)).Info("")
 		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
@@ -156,13 +152,11 @@ func PublishUserPubAckMessage(appkey, userid, session string, pubAckMsg *codec.P
 	if ctx != nil {
 		tmpPubAckMsg := codec.NewUserPublishAckMessage(pubAckMsg)
 		ctx.Write(tmpPubAckMsg)
-		logs.NewLogEntity().WithFields(map[string]interface{}{
-			"service_name": imcontext.ServiceName,
-			"session":      imcontext.GetConnSession(ctx),
-			"action":       imcontext.Action_UserPubAck,
-			"seq_index":    pubAckMsg.Index,
-			"code":         pubAckMsg.Code,
-		}).Info("")
+		logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
+			WithField("session", imcontext.GetConnSession(ctx)).
+			WithField("action", imcontext.Action_UserPubAck).
+			WithField("seq_index", pubAckMsg.Index).
+			WithField("code", pubAckMsg.Code).Info("")
 		logmanager.WriteConnectionLog(context.TODO(), &pbobjs.ConnectionLog{
 			AppKey:  imcontext.GetAppkey(ctx),
 			Session: imcontext.GetConnSession(ctx),
