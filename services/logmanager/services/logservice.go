@@ -61,27 +61,11 @@ func QryUserConnectLogs(appkey, userId string, start, count int64) ([]LogEntity,
 		if len(item) > 16 {
 			ret = append(ret, LogEntity{
 				Key:   "",
-				Value: appendTimestamp(item),
+				Value: formatLog(item, false),
 			})
 		}
 	}
 	return ret, nil
-}
-
-func appendTimestamp(log string) string {
-	if len(log) > 16 {
-		timeStr := log[0:16]
-		logStr := strings.TrimSpace(log[16:])
-		tmpMap := formatLog2Map(logStr)
-		t, e := time.ParseInLocation(timeFormat, timeStr, time.Local)
-		if e == nil {
-			tmpMap["timestamp"] = t.UnixMilli()
-		} else {
-			fmt.Println(e)
-		}
-		return tools.ToJson(tmpMap)
-	}
-	return ""
 }
 
 func QryConnectLogs(appkey, session string, start, count int64) ([]LogEntity, error) {
@@ -125,7 +109,7 @@ func QryConnectLogs(appkey, session string, start, count int64) ([]LogEntity, er
 		if len(item) > 16 {
 			ret = append(ret, LogEntity{
 				Key:   "",
-				Value: appendTimestamp(item),
+				Value: formatLog(item, false),
 			})
 		}
 	}
@@ -172,11 +156,41 @@ func QryBusinessLogs(appkey, session string, seqIndex int32, start, count int64)
 		if len(item) > 16 {
 			ret = append(ret, LogEntity{
 				Key:   "",
-				Value: appendTimestamp(item),
+				Value: formatLog(item, true),
 			})
 		}
 	}
 	return ret, nil
+}
+
+func formatLog(log string, isBusLog bool) string {
+	if len(log) > 16 {
+		timeStr := log[0:16]
+		logStr := strings.TrimSpace(log[16:])
+		tmpMap := formatLog2Map(logStr)
+		t, e := time.ParseInLocation(timeFormat, timeStr, time.Local)
+		if e == nil {
+			tmpMap["timestamp"] = t.UnixMilli()
+		} else {
+			fmt.Println(e)
+		}
+		if isBusLog {
+			retMap := map[string]interface{}{}
+			parms := map[string]interface{}{}
+			for k, v := range tmpMap {
+				if k == "service_name" || k == "session" || k == "method" || k == "expend" || k == "seq_index" {
+					retMap[k] = v
+				} else {
+					parms[k] = v
+				}
+			}
+			retMap["parms"] = parms
+			return tools.ToJson(retMap)
+		} else {
+			return tools.ToJson(tmpMap)
+		}
+	}
+	return ""
 }
 
 func getLogFiles(start int64, isEqual bool) []string {
