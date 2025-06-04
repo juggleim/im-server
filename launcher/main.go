@@ -34,7 +34,6 @@ import (
 	"im-server/services/group"
 	"im-server/services/historymsg"
 	"im-server/services/message"
-	"im-server/services/navigator"
 	push "im-server/services/pushmanager"
 	"im-server/services/usermanager"
 
@@ -101,9 +100,9 @@ func main() {
 	}
 
 	imstarters.Loaded(&admingateway.AdminGateway{})
-	imstarters.Loaded(&connectmanager.ConnectManager{})
 	imstarters.Loaded(&apigateway.ApiGateway{})
-	imstarters.Loaded(&navigator.Navigator{})
+	imstarters.Loaded(&connectmanager.ConnectManager{})
+	// imstarters.Loaded(&navigator.Navigator{})
 	imstarters.Loaded(&message.MessageManager{})
 	imstarters.Loaded(&conversation.ConversationManager{})
 	imstarters.Loaded(&usermanager.UserManager{})

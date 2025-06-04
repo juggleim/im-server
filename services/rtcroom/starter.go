@@ -59,9 +59,9 @@ func (manager *RtcRoomManager) RegisterActors(register gmicro.IActorRegister) {
 }
 
 func (manager *RtcRoomManager) Startup(args map[string]interface{}) {
-	fmt.Println("Startup rtcroom.")
+	fmt.Println("Startup", serviceName)
 }
 
 func (manager *RtcRoomManager) Shutdown(force bool) {
-	fmt.Println("Shutdown rtcroom.")
+	fmt.Println("Shutdown", serviceName)
 }

@@ -132,7 +132,6 @@ func GetIps() (ips []string) {
 			}
 		}
 	}
-	fmt.Println("ips = ", ips)
 	return ips
 }
 

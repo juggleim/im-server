@@ -11,7 +11,7 @@ import (
 
 type AppBusiness struct{}
 
-// var serviceName string = "appbusiness"
+var serviceName string = "appbusiness"
 
 func (bus *AppBusiness) RegisterActors(register gmicro.IActorRegister) {
 	// register.RegisterActor("app_upd_user", func() actorsystem.IUntypedActor {
@@ -33,9 +33,9 @@ func (bus *AppBusiness) Startup(args map[string]interface{}) {
 		return
 	}
 
-	fmt.Println("Startup appbusiness.")
+	fmt.Println("Startup", serviceName)
 }
 
 func (bus *AppBusiness) Shutdown(force bool) {
-	fmt.Println("Shutdown appbusiness.")
+	fmt.Println("Shutdown", serviceName)
 }

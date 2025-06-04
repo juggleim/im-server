@@ -31,9 +31,9 @@ func (manager *FriendManager) RegisterActors(register gmicro.IActorRegister) {
 }
 
 func (manager *FriendManager) Startup(args map[string]interface{}) {
-	fmt.Println("Startup friendmanager.")
+	fmt.Println("Startup", serviceName)
 }
 
 func (manager *FriendManager) Shutdown(force bool) {
-	fmt.Println("Shutdown friendmanager.")
+	fmt.Println("Shutdown", serviceName)
 }

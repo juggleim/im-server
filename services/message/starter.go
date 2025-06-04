@@ -65,8 +65,8 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 }
 
 func (manager *MessageManager) Startup(args map[string]interface{}) {
-	fmt.Println("Startup message.")
+	fmt.Println("Startup", serviceName)
 }
 func (manager *MessageManager) Shutdown(force bool) {
-	fmt.Println("Shutdown message.")
+	fmt.Println("Shutdown", serviceName)
 }

@@ -40,8 +40,8 @@ func (manager *PushManager) RegisterActors(register gmicro.IActorRegister) {
 }
 
 func (manager *PushManager) Startup(args map[string]interface{}) {
-	fmt.Println("Startup pushmanager.")
+	fmt.Println("Startup", serviceName)
 }
 func (manager *PushManager) Shutdown(force bool) {
-	fmt.Println("Shutdown pushmanager.")
+	fmt.Println("Shutdown", serviceName)
 }

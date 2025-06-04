@@ -20,9 +20,9 @@ func (manager *LogManager) RegisterActors(register gmicro.IActorRegister) {
 }
 
 func (manager *LogManager) Startup(args map[string]interface{}) {
-	fmt.Println("Startup logmanager.")
+	fmt.Println("Startup", serviceName)
 }
 
 func (manager *LogManager) Shutdown(force bool) {
-	fmt.Println("Shutdown logmanager.")
+	fmt.Println("Shutdown", serviceName)
 }

@@ -31,9 +31,9 @@ func (manager *UserStatusSubManager) RegisterActors(register gmicro.IActorRegist
 }
 
 func (manager *UserStatusSubManager) Startup(args map[string]interface{}) {
-	fmt.Println("Startup userstatussub.")
+	fmt.Println("Startup", serviceName)
 }
 
 func (manager *UserStatusSubManager) Shutdown(force bool) {
-	fmt.Println("Shutdown userstatussub.")
+	fmt.Println("Shutdown", serviceName)
 }

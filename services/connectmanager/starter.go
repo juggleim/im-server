@@ -40,11 +40,12 @@ func (ser *ConnectManager) Startup(args map[string]interface{}) {
 		MessageListener: &server.ImListenerImpl{},
 	}
 	go ser.wsServer.SyncStart(wsPort)
-	fmt.Println("Start connectmanager with port:", wsPort)
+	fmt.Println("Start", serviceName, "with port:", wsPort)
 }
 
 func (ser *ConnectManager) Shutdown(force bool) {
 	if ser.wsServer != nil {
 		ser.wsServer.Stop()
+		fmt.Println("Shutdown", serviceName)
 	}
 }

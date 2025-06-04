@@ -82,6 +82,10 @@ func InitConfigures() error {
 		if Config.MsgStoreEngine == "" {
 			Config.MsgStoreEngine = MsgStoreEngine_MySQL
 		}
+		//check node host
+		if Config.NodeHost == "" {
+			Config.NodeHost = "127.0.0.1"
+		}
 		return nil
 	} else {
 		return err

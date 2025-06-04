@@ -22,8 +22,8 @@ func (manager *BroadcastManager) RegisterActors(register gmicro.IActorRegister) 
 }
 
 func (manager *BroadcastManager) Startup(args map[string]interface{}) {
-	fmt.Println("Startup broadcast.")
+	fmt.Println("Startup", serviceName)
 }
 func (manager *BroadcastManager) Shutdown(force bool) {
-	fmt.Println("Shutdown broadcast.")
+	fmt.Println("Shutdown", serviceName)
 }
