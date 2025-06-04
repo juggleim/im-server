@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"im-server/commons/configures"
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
 	"im-server/commons/tools"
@@ -11,6 +12,8 @@ import (
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -34,10 +37,30 @@ func (server *ImWebsocketServer) SyncStart(port int) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, `{"status":"ok"}`)
 	})
-
+	BindApiProxy(mux)
 	apis.LoadAppApis(mux)
 	navigator.LoadClientLogUploadApis(mux)
 	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+}
+
+func BindApiProxy(mux *http.ServeMux) {
+	apiUrl, err := url.Parse(fmt.Sprintf("http://127.0.0.1:%d", configures.Config.ApiGateway.HttpPort))
+	if err == nil {
+		proxy := httputil.NewSingleHostReverseProxy(apiUrl)
+		proxy.Director = func(r *http.Request) {
+			r.URL.Scheme = apiUrl.Scheme
+			r.URL.Host = apiUrl.Host
+			r.Host = apiUrl.Host
+
+			r.Header.Set("X-Forwared-For", r.RemoteAddr)
+		}
+		proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, "Internal error", http.StatusServiceUnavailable)
+		}
+		mux.HandleFunc("/apigateway/", func(w http.ResponseWriter, r *http.Request) {
+			proxy.ServeHTTP(w, r)
+		})
+	}
 }
 
 var upgrader = websocket.Upgrader{
