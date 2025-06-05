@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"im-server/commons/configures"
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
 	"im-server/commons/logs"
@@ -64,6 +65,11 @@ func RouteJuggleChat(mux *http.ServeMux) {
 		fmt.Println("Init Jim Configures failed", err)
 		return
 	}
+	imApiPort := configures.Config.ApiGateway.HttpPort
+	if imApiPort <= 0 {
+		imApiPort = configures.Config.ConnectManager.WsPort
+	}
+	jimConfigures.Config.ImApiDomain = fmt.Sprintf("http://127.0.0.1:%d", imApiPort)
 	jimLog.SetLogger(logs.GetInfoLogger(), logs.GetErrorLogger())
 	if err := jimDb.InitMysql(); err != nil {
 		fmt.Println("Init Jim Mysql failed")
