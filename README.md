@@ -185,5 +185,5 @@ curl --request POST \
 
 | 配置项 | 示例|备注 | 
 | ----: |:-----:|:----|
-|IM 服务的连接地址| ws://127.0.0.1:9002| IM 的连接地址，客户端SDK初始化时需要传入，参考文档：https://www.juggle.im/docs/client/quickstart/android/ |
+|IM 服务的连接地址| ws://127.0.0.1:9003| IM 的连接地址，客户端SDK初始化时需要传入，参考文档：https://www.juggle.im/docs/client/quickstart/android/ |
 |app_key|appkey1|应用的租户标识，确保与业务服务器端配置的保持一致。|
