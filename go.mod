@@ -130,15 +130,15 @@ require (
 
 require (
 	github.com/baidubce/bce-sdk-go v0.9.220
-	github.com/boombuler/barcode v1.0.2
+	github.com/boombuler/barcode v1.0.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20230728082804-614d0af6619b
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/jinzhu/gorm v1.9.16
-	github.com/juggleim/imserver-sdk-go v1.0.5
-	github.com/juggleim/jugglechat-server v1.0.6
+	github.com/juggleim/imserver-sdk-go v1.0.5 // indirect
+	github.com/juggleim/jugglechat-server v1.0.7
 	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/mozillazg/go-pinyin v0.20.0

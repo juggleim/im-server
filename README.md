@@ -71,6 +71,7 @@ mysql -u{db_user} -p{db_password} jim_db < jim.sql
 
 配置文件位置：im-server/launcher/conf/config.yml
 ```
+defaultPort: 9003       # im-server 默认监听端口
 nodeName: testNode      # im-server 的节点名称
 nodeHost: 127.0.0.1     # im-server 的节点IP
 msgStoreEngine: mysql   # 配置用什么存储来存消息数据，有两种存储引擎可选。mysql：使用mysql存储消息数据(默认)；mongo：使用MongoDB存储消息数据
@@ -90,11 +91,11 @@ mongodb:                # im-server 所用的MongoDB相关配置，用于存储�
   address: 127.0.0.1:27017
   name: jim_msgs        # mongodb 表空间名称，im-server启动后，会自动在这个空间下初始化collection；
 
-apiGateway:             # im-server 的服务端 API 端口, 供业务APP的服务端调用；
-  httpPort: 9001
+# apiGateway:             # im-server 的服务端 API 端口, 供业务APP的服务端调用；非必填项，默认复用 defaultPort 作为默认端口
+#   httpPort: 9001
 
-connectManager:         # im-server 长连接端口
-  wsPort: 9002
+# connectManager:         # im-server 长连接端口；非必填项，默认复用 defaultPort 作为默认端口
+#   wsPort: 9003
 
 adminGateway:           # im-server 自带的管理后台地址，默认账号密码是：admin/123456
   httpPort: 8090

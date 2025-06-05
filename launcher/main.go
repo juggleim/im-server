@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"im-server/services/appbusiness"
 	"im-server/services/botmsg"
 	"im-server/services/broadcast"
 	"im-server/services/friends"
@@ -102,7 +101,6 @@ func main() {
 	imstarters.Loaded(&admingateway.AdminGateway{})
 	imstarters.Loaded(&apigateway.ApiGateway{})
 	imstarters.Loaded(&connectmanager.ConnectManager{})
-	// imstarters.Loaded(&navigator.Navigator{})
 	imstarters.Loaded(&message.MessageManager{})
 	imstarters.Loaded(&conversation.ConversationManager{})
 	imstarters.Loaded(&usermanager.UserManager{})
@@ -117,7 +115,6 @@ func main() {
 	imstarters.Loaded(&userstatussub.UserStatusSubManager{})
 	imstarters.Loaded(&botmsg.BotMsgManager{})
 	imstarters.Loaded(&rtcroom.RtcRoomManager{})
-	imstarters.Loaded(&appbusiness.AppBusiness{})
 	imstarters.Loaded(&friends.FriendManager{})
 
 	imstarters.Startup()

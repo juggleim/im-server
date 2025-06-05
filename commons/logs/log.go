@@ -25,6 +25,14 @@ func InitLogs() {
 	initInfoLogger()
 }
 
+func GetInfoLogger() *logrus.Logger {
+	return infoLogger
+}
+
+func GetErrorLogger() *logrus.Logger {
+	return errorLogger
+}
+
 func initInfoLogger() {
 	infoLogger = logrus.New()
 	writer, err := rotatelogs.New(

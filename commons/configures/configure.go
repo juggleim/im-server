@@ -2,6 +2,7 @@ package configures
 
 import (
 	"flag"
+	"im-server/commons/tools"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -19,6 +20,7 @@ const (
 )
 
 type ImConfig struct {
+	DefaultPort    int    `yaml:"defaultPort"`
 	NodeName       string `yaml:"nodeName"`
 	NodeHost       string `yaml:"nodeHost"`
 	MsgStoreEngine string `yaml:"msgStoreEngine"`
@@ -79,12 +81,24 @@ func InitConfigures() error {
 		var conf ImConfig
 		yaml.Unmarshal(cfBytes, &conf)
 		Config = conf
+		//check
+		if Config.NodeName == "" {
+			Config.NodeName = tools.GenerateUUIDShort11()
+		}
+		if Config.NodeHost == "" {
+			Config.NodeHost = "127.0.0.1"
+		}
 		if Config.MsgStoreEngine == "" {
 			Config.MsgStoreEngine = MsgStoreEngine_MySQL
 		}
-		//check node host
-		if Config.NodeHost == "" {
-			Config.NodeHost = "127.0.0.1"
+		if Config.ConnectManager.WsPort <= 0 {
+			Config.ConnectManager.WsPort = Config.DefaultPort
+		}
+		if Config.ConnectManager.WsPort <= 0 {
+			Config.ConnectManager.WsPort = 9003
+		}
+		if Config.AdminGateway.HttpPort <= 0 {
+			Config.AdminGateway.HttpPort = 8090
 		}
 		return nil
 	} else {

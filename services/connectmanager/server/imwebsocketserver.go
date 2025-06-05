@@ -3,21 +3,25 @@ package server
 import (
 	"errors"
 	"fmt"
-	"im-server/commons/configures"
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
+	"im-server/commons/logs"
 	"im-server/commons/tools"
-	"im-server/services/appbusiness/apis"
-	"im-server/services/connectmanager/navigator"
+	apiRouters "im-server/services/apigateway/routers"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
+	navRouters "im-server/services/navigator/routers"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strings"
 	"sync"
 	"time"
 
+	jimConfigures "github.com/juggleim/jugglechat-server/configures"
+	jimLog "github.com/juggleim/jugglechat-server/log"
+	jimRouters "github.com/juggleim/jugglechat-server/routers"
+	jimDb "github.com/juggleim/jugglechat-server/storages/dbs/dbcommons"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"golang.org/x/time/rate"
 )
@@ -37,30 +41,37 @@ func (server *ImWebsocketServer) SyncStart(port int) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, `{"status":"ok"}`)
 	})
-	BindApiProxy(mux)
-	apis.LoadAppApis(mux)
-	navigator.LoadClientLogUploadApis(mux)
+	RouteApi(mux)
+	RouteNav(mux)
+	RouteJuggleChat(mux)
 	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 }
 
-func BindApiProxy(mux *http.ServeMux) {
-	apiUrl, err := url.Parse(fmt.Sprintf("http://127.0.0.1:%d", configures.Config.ApiGateway.HttpPort))
-	if err == nil {
-		proxy := httputil.NewSingleHostReverseProxy(apiUrl)
-		proxy.Director = func(r *http.Request) {
-			r.URL.Scheme = apiUrl.Scheme
-			r.URL.Host = apiUrl.Host
-			r.Host = apiUrl.Host
+func RouteApi(mux *http.ServeMux) {
+	ginEngine := gin.Default()
+	apiRouters.Route(ginEngine, "apigateway")
+	mux.Handle("/apigateway/", ginEngine)
+}
 
-			r.Header.Set("X-Forwared-For", r.RemoteAddr)
-		}
-		proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
-			http.Error(w, "Internal error", http.StatusServiceUnavailable)
-		}
-		mux.HandleFunc("/apigateway/", func(w http.ResponseWriter, r *http.Request) {
-			proxy.ServeHTTP(w, r)
-		})
+func RouteNav(mux *http.ServeMux) {
+	ginEngine := gin.Default()
+	navRouters.Route(ginEngine, "navigator")
+	mux.Handle("/navigator/", ginEngine)
+}
+
+func RouteJuggleChat(mux *http.ServeMux) {
+	if err := jimConfigures.InitConfigures(); err != nil {
+		fmt.Println("Init Jim Configures failed", err)
+		return
 	}
+	jimLog.SetLogger(logs.GetInfoLogger(), logs.GetErrorLogger())
+	if err := jimDb.InitMysql(); err != nil {
+		fmt.Println("Init Jim Mysql failed")
+		return
+	}
+	ginEngine := gin.Default()
+	jimRouters.Route(ginEngine, "jim")
+	mux.Handle("/jim/", ginEngine)
 }
 
 var upgrader = websocket.Upgrader{
