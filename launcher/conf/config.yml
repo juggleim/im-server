@@ -17,15 +17,9 @@ mysql:
   address: 127.0.0.1:3306
   name: im_db
 
-mongodb:
-  address: 127.0.0.1:27017
-  name: jim_msgs
-
-apiGateway:
-  httpPort: 9001
-
-connectManager:
-  wsPort: 9003
+# mongodb:
+#   address: 127.0.0.1:27017
+#   name: jim_msgs
 
 adminGateway:
   httpPort: 8090

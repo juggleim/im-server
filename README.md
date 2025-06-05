@@ -87,9 +87,9 @@ mysql:                  # im-server 所用的MySQL相关配置
   address: 127.0.0.1:3306
   name: im_db
 
-mongodb:                # im-server 所用的MongoDB相关配置，用于存储消息数据。该配置为可选，在 msgStoreEngine 配置为 "mongo" 时生效；
-  address: 127.0.0.1:27017
-  name: jim_msgs        # mongodb 表空间名称，im-server启动后，会自动在这个空间下初始化collection；
+# mongodb:                # im-server 所用的MongoDB相关配置，用于存储消息数据。该配置为可选，在 msgStoreEngine 配置为 "mongo" 时生效；
+#   address: 127.0.0.1:27017
+#   name: jim_msgs        # mongodb 表空间名称，im-server启动后，会自动在这个空间下初始化collection；
 
 # apiGateway:             # im-server 的服务端 API 端口, 供业务APP的服务端调用；非必填项，默认复用 defaultPort 作为默认端口
 #   httpPort: 9001
@@ -113,8 +113,8 @@ go run main.go
 需要配置外网地址的端口列表：
 | 端口 | 协议类型 | 说明 | 
 | ----:|:-----:|:----|
-| 9001| http | 服务端 API 服务监听端口，用于业务服务器，例如 jugglechat-server 配置文件中需要配置这个地址；|
-| 9002| websocket | IM 长连接监听端口，用于客户端SDK与IM 服务建立长连接(websocket) |
+| 9003| http | 服务端 API 服务监听端口，用于业务服务器，例如 jugglechat-server 配置文件中需要配置这个地址；|
+| 9003| websocket | IM 长连接监听端口，用于客户端SDK与IM 服务建立长连接(websocket) |
 | 8090| http | IM 服务的管理后台监听端口，默认账号和密码：admin/123456 |
 
 配置外网地址的方法，这里不详细描述，大家可以根据自身环境来灵活配置(常用方式: 挂公网ip，nginx反向代理，负载均衡等).
@@ -177,7 +177,7 @@ curl --request POST \
 
 | 配置项 | 示例|备注 | 
 | ----: |:-----:|:----|
-|IM 服务端 API 地址 |  http://127.0.0.1:9001 | 供业务服务器访问IM服务的API接口地址，使用该接口可以注册IM用户，创建群，发送系统消息等，接口文档参考：https://www.juggle.im/docs/server/api/|
+|IM 服务端 API 地址 |  http://127.0.0.1:9003 | 供业务服务器访问IM服务的API接口地址，使用该接口可以注册IM用户，创建群，发送系统消息等，接口文档参考：https://www.juggle.im/docs/server/api/|
 |app_key | appkey1 |应用的租户标识，在第4步中创建，可自定义，但要保证在系统内唯一 |
 |app_secret| hciKcc6sXRDjYUQp | 应用对应的鉴权秘钥，创建应用时自动生成。如果想自定义的话，确保配置为16位的字符串。注意：确保该秘钥仅在业务服务器端使用，不要泄露到客户端。 |
 
