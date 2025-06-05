@@ -11,9 +11,9 @@ import (
 )
 
 func Route(eng *gin.Engine, prefix string) {
+	eng.Use(corsHandler())
 	group := eng.Group("/" + prefix)
 	group.Use(apis.CheckToken)
-	group.Use(corsHandler())
 	group.GET("/general", apis.NaviGet)
 
 	group.POST("/upload-log", apis.UploadClientLog)
