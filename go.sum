@@ -197,8 +197,8 @@ github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnr
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/juggleim/imserver-sdk-go v1.0.5 h1:KtIocIYSUsXafeSAmCxYRsv0DXn3336aV0oGE1TCtxg=
 github.com/juggleim/imserver-sdk-go v1.0.5/go.mod h1:xdxsGeW0b4GOYJvKJwnaU04Z+jGaUSrBvzeSbNvNOFk=
-github.com/juggleim/jugglechat-server v1.0.8 h1:jX6E3X/nXByIR8YC4FUz9MSFCwcRNr/ONHzFSsJqTqo=
-github.com/juggleim/jugglechat-server v1.0.8/go.mod h1:Edd6gITVpTv5JRGHdU4SYi7cto6vRO5zNxco2TyUsYM=
+github.com/juggleim/jugglechat-server v1.0.9 h1:RYDH24Y3ZyqnZlKcyF2K79sbVwznqwmRXs7wdk4/jEU=
+github.com/juggleim/jugglechat-server v1.0.9/go.mod h1:Edd6gITVpTv5JRGHdU4SYi7cto6vRO5zNxco2TyUsYM=
 github.com/kataras/i18n v0.0.8 h1:thiDRqq4fN2sQOK5CwR5Yh1yT7swP6B3wnadILhqjhk=
 github.com/kataras/i18n v0.0.8/go.mod h1:M/yRAqQ3Y7z2oSpotxG/+nPrgsJLas6t0kEJfIJk98E=
 github.com/klauspost/compress v1.13.6/go.mod h1:/3/Vjq9QcHkK5uEr5lBEmyoZ1iFhe47etQ6QUkpK6sk=
