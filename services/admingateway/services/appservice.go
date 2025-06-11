@@ -6,6 +6,7 @@ import (
 	"im-server/services/commonservices/dbs"
 	userStorage "im-server/services/usermanager/storages"
 	"math"
+	"time"
 )
 
 var appFieldsMap map[string]bool
@@ -18,6 +19,44 @@ func init() {
 	appFieldsMap["event_sub_switch"] = true
 	appFieldsMap["his_msg_save_day"] = true
 	appFieldsMap["kick_mode"] = true
+}
+
+func CreateApp(appInfo AppInfo) (AdminErrorCode, *AppInfo) {
+	dao := dbs.AppInfoDao{}
+	if appInfo.AppKey == "" {
+		appInfo.AppKey = tools.RandStr(16)
+	}
+	dbAppInfo := dao.FindByAppkey(appInfo.AppKey)
+	if dbAppInfo != nil && dbAppInfo.AppKey == appInfo.AppKey {
+		return AdminErrorCode_AppHasExisted, &AppInfo{
+			AppName:     dbAppInfo.AppName,
+			AppKey:      dbAppInfo.AppKey,
+			AppSecret:   dbAppInfo.AppSecret,
+			CreatedTime: dbAppInfo.CreatedTime.UnixMilli(),
+		}
+	}
+	if len(appInfo.AppSecret) != 16 {
+		appInfo.AppSecret = tools.RandStr(16)
+	}
+	newApp := dbs.AppInfoDao{
+		AppName:      appInfo.AppName,
+		AppKey:       appInfo.AppKey,
+		AppSecret:    appInfo.AppSecret,
+		AppSecureKey: tools.RandStr(16),
+		AppType:      appInfo.AppType,
+		CreatedTime:  time.Now(),
+		UpdatedTime:  time.Now(),
+	}
+	err := dao.Upsert(newApp)
+	if err != nil {
+		return AdminErrorCode_AddAppFail, nil
+	}
+	return AdminErrorCode_Success, &AppInfo{
+		AppType:   newApp.AppType,
+		AppName:   newApp.AppName,
+		AppKey:    newApp.AppKey,
+		AppSecret: newApp.AppSecret,
+	}
 }
 
 func QryApps(limit int64, offset string) *Apps {
