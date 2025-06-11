@@ -13,7 +13,8 @@ import (
 var sqlFs embed.FS
 
 const (
-	JimDbVersionKey = "jimdb_versaion"
+	JimDbVersionKey       = "jimdb_versaion"
+	initVersion     int64 = 20240716
 )
 
 type CountResult struct {
@@ -30,10 +31,13 @@ func Upgrade() {
 			currVersion = ver
 		}
 	} else {
-		dao.Create(GlobalConfDao{
+		err = dao.Create(GlobalConfDao{
 			ConfKey:   JimDbVersionKey,
-			ConfValue: "20240716",
+			ConfValue: fmt.Sprintf("%d", initVersion),
 		})
+		if err == nil {
+			currVersion = initVersion
+		}
 	}
 	fmt.Println("[DbMigration]current version:", currVersion)
 	sqlFiles, err := sqlFs.ReadDir("sqls")
