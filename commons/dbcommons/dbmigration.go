@@ -16,6 +16,10 @@ const (
 	JimDbVersionKey = "jimdb_versaion"
 )
 
+type CountResult struct {
+	Count int64 `gorm:"count"`
+}
+
 func Upgrade() {
 	var currVersion int64 = 0
 	dao := GlobalConfDao{}
@@ -56,7 +60,10 @@ func Upgrade() {
 				err := executeSqlFile(sqlFileName)
 				if err == nil {
 					fmt.Println("[DbMigration]execute sql file success:", sqlFileName)
-					dao.UpdateValue(JimDbVersionKey, fmt.Sprintf("%d", ver))
+					dao.Upsert(GlobalConfDao{
+						ConfKey:   JimDbVersionKey,
+						ConfValue: fmt.Sprintf("%d", ver),
+					})
 				}
 			}
 		}

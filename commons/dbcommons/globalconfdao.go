@@ -1,6 +1,8 @@
 package dbcommons
 
 import (
+	"fmt"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -20,6 +22,10 @@ type GlobalConfDao struct {
 
 func (conf GlobalConfDao) TableName() string {
 	return "globalconfs"
+}
+
+func (conf GlobalConfDao) Upsert(item GlobalConfDao) error {
+	return GetDb().Exec(fmt.Sprintf("INSERT INTO %s (conf_key,conf_value)VALUES(?,?) ON DUPLICATE KEY UPDATE conf_value=VALUES(conf_value)", conf.TableName()), item.ConfKey, item.ConfValue).Error
 }
 
 func (conf GlobalConfDao) Create(item GlobalConfDao) error {
