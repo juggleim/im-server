@@ -539,11 +539,17 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 					conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, downMsg.TargetId)
 				}
 			}
+			if conversation.TargetUserInfo == nil {
+				conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conver.TargetId)
+			}
 		} else if conver.ChannelType == pbobjs.ChannelType_Group {
 			if msg, exist := grpMsgs[conver.LatestMsgId]; exist {
 				downMsg = msg
 				conversation.GroupInfo = msg.GroupInfo
 				conversation.TargetUserInfo = msg.TargetUserInfo
+			}
+			if conversation.GroupInfo == nil {
+				conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conver.TargetId)
 			}
 		}
 		conversation.Msg = downMsg
