@@ -13,7 +13,7 @@ import (
 var sqlFs embed.FS
 
 const (
-	JimDbVersionKey       = "jimdb_versaion"
+	JimDbVersionKey       = "jimdb_version"
 	initVersion     int64 = 20240716
 )
 
