@@ -17,10 +17,11 @@ import (
 	"sync"
 	"time"
 
-	jimConfigures "github.com/juggleim/jugglechat-server/configures"
+	jimConfigures "github.com/juggleim/commons/configures"
+	jimDb "github.com/juggleim/commons/dbcommons"
 	jimLog "github.com/juggleim/jugglechat-server/log"
 	jimRouters "github.com/juggleim/jugglechat-server/routers"
-	jimDb "github.com/juggleim/jugglechat-server/storages/dbs/dbcommons"
+	jimDbMigrations "github.com/juggleim/jugglechat-server/storages/dbs/dbmigrations"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -75,6 +76,7 @@ func RouteJuggleChat(mux *http.ServeMux) {
 		fmt.Println("Init Jim Mysql failed")
 		return
 	}
+	jimDbMigrations.Upgrade()
 	ginEngine := gin.Default()
 	jimRouters.Route(ginEngine, "jim")
 	mux.Handle("/jim/", ginEngine)
