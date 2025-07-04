@@ -774,6 +774,7 @@ CREATE TABLE IF NOT EXISTS `friendrels` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `friend_id` varchar(32) DEFAULT NULL COMMENT '朋友userId',
+  `display_name` varchar(50) DEFAULT '' COMMENT '好友备注名',
   `order_tag` varchar(20) NULL DEFAULT '' COMMENT '好友的排序标识',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',

@@ -8,11 +8,12 @@ import (
 )
 
 type FriendRelDao struct {
-	ID       int64  `gorm:"primary_key"`
-	UserId   string `gorm:"user_id"`
-	FriendId string `gorm:"friend_id"`
-	OrderTag string `gorm:"order_tag"`
-	AppKey   string `gorm:"app_key"`
+	ID          int64  `gorm:"primary_key"`
+	UserId      string `gorm:"user_id"`
+	FriendId    string `gorm:"friend_id"`
+	OrderTag    string `gorm:"order_tag"`
+	DisplayName string `gorm:"display_name"`
+	AppKey      string `gorm:"app_key"`
 }
 
 func (rel FriendRelDao) TableName() string {
@@ -20,23 +21,23 @@ func (rel FriendRelDao) TableName() string {
 }
 
 func (rel FriendRelDao) Upsert(item models.FriendRel) error {
-	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id,order_tag)VALUES(?,?,?,?)", rel.TableName())
-	return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.FriendId, item.OrderTag).Error
+	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id,display_name,order_tag)VALUES(?,?,?,?,?)", rel.TableName())
+	return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.FriendId, item.DisplayName, item.OrderTag).Error
 }
 
 func (rel FriendRelDao) BatchUpsert(items []models.FriendRel) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id,order_tag)VALUES", rel.TableName())
+	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id,display_name,order_tag)VALUES", rel.TableName())
 	buffer.WriteString(sql)
 	length := len(items)
 	params := []interface{}{}
 	for i, item := range items {
 		if i == length-1 {
-			buffer.WriteString("(?,?,?,?)")
+			buffer.WriteString("(?,?,?,?,?)")
 		} else {
-			buffer.WriteString("(?,?,?,?),")
+			buffer.WriteString("(?,?,?,?,?),")
 		}
-		params = append(params, item.AppKey, item.UserId, item.FriendId, item.OrderTag)
+		params = append(params, item.AppKey, item.UserId, item.FriendId, item.DisplayName, item.OrderTag)
 	}
 	return dbcommons.GetDb().Exec(buffer.String(), params...).Error
 }
@@ -59,11 +60,12 @@ func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit in
 	ret := []*models.FriendRel{}
 	for _, rel := range items {
 		ret = append(ret, &models.FriendRel{
-			ID:       rel.ID,
-			AppKey:   rel.AppKey,
-			UserId:   rel.UserId,
-			FriendId: rel.FriendId,
-			OrderTag: rel.OrderTag,
+			ID:          rel.ID,
+			AppKey:      rel.AppKey,
+			UserId:      rel.UserId,
+			FriendId:    rel.FriendId,
+			DisplayName: rel.DisplayName,
+			OrderTag:    rel.OrderTag,
 		})
 	}
 	return ret, nil
@@ -85,11 +87,12 @@ func (rel FriendRelDao) QueryFriendRelsWithPage(appkey, userId string, orderTag 
 	ret := []*models.FriendRel{}
 	for _, rel := range items {
 		ret = append(ret, &models.FriendRel{
-			ID:       rel.ID,
-			AppKey:   rel.AppKey,
-			UserId:   rel.UserId,
-			FriendId: rel.FriendId,
-			OrderTag: rel.OrderTag,
+			ID:          rel.ID,
+			AppKey:      rel.AppKey,
+			UserId:      rel.UserId,
+			FriendId:    rel.FriendId,
+			DisplayName: rel.DisplayName,
+			OrderTag:    rel.OrderTag,
 		})
 	}
 	return ret, nil
@@ -97,6 +100,22 @@ func (rel FriendRelDao) QueryFriendRelsWithPage(appkey, userId string, orderTag 
 
 func (rel FriendRelDao) BatchDelete(appkey, userId string, friendIds []string) error {
 	return dbcommons.GetDb().Where("app_key=? and user_id=? and friend_id in (?)", appkey, userId, friendIds).Delete(&FriendRelDao{}).Error
+}
+
+func (rel FriendRelDao) GetFriendRel(appkey, userId, friendId string) (*models.FriendRel, error) {
+	var item FriendRelDao
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and friend_id=?", appkey, userId, friendId).Take(&item).Error
+	if err != nil {
+		return nil, err
+	}
+	return &models.FriendRel{
+		ID:          item.ID,
+		AppKey:      item.AppKey,
+		UserId:      item.UserId,
+		FriendId:    item.FriendId,
+		DisplayName: item.DisplayName,
+		OrderTag:    item.OrderTag,
+	}, nil
 }
 
 func (rel FriendRelDao) QueryFriendRelsByFriendIds(appkey, userId string, friendIds []string) ([]*models.FriendRel, error) {
@@ -108,11 +127,12 @@ func (rel FriendRelDao) QueryFriendRelsByFriendIds(appkey, userId string, friend
 	ret := []*models.FriendRel{}
 	for _, rel := range items {
 		ret = append(ret, &models.FriendRel{
-			ID:       rel.ID,
-			AppKey:   rel.AppKey,
-			UserId:   rel.UserId,
-			FriendId: rel.FriendId,
-			OrderTag: rel.OrderTag,
+			ID:          rel.ID,
+			AppKey:      rel.AppKey,
+			UserId:      rel.UserId,
+			FriendId:    rel.FriendId,
+			DisplayName: rel.DisplayName,
+			OrderTag:    rel.OrderTag,
 		})
 	}
 	return ret, nil
@@ -120,4 +140,8 @@ func (rel FriendRelDao) QueryFriendRelsByFriendIds(appkey, userId string, friend
 
 func (rel FriendRelDao) UpdateOrderTag(appkey, friendId string, orderTag string) error {
 	return dbcommons.GetDb().Model(&FriendRelDao{}).Where("app_key=? and friend_id=?", appkey, friendId).Update("order_tag", orderTag).Error
+}
+
+func (rel FriendRelDao) UpdateDisplayName(appkey, userId, friendId, displayName string) error {
+	return dbcommons.GetDb().Model(&FriendRelDao{}).Where("app_key=? and user_id=? and friend_id=?", appkey, userId, friendId).Update("display_name", displayName).Error
 }

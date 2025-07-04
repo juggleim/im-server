@@ -147,6 +147,14 @@ message DownMsg{
   GrpMemberInfo grpMemberInfo = 30;
 }
 
+message PriMsgPostReq{
+  UpMsg upMsg = 1;
+  string msgId = 2;
+  int64 sendTime = 3;
+  int64 msgSeq = 4;
+  DownMsg modifiedMsg = 5;
+}
+
 message TransMsgContent{
   string lang = 1;
   bytes msgContent = 2;

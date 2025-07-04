@@ -43,6 +43,7 @@ type AppInfo struct {
 	RecordGlobalConvers   bool   `default:"false"`
 	OpenSensitive         bool   `default:"false"`
 	RecordMsgLogs         bool   `default:"false"`
+	MsgFriendCheck        bool   `default:"false"`
 
 	//group
 	IsHideMsgBeforeJoinGroup bool `default:"false"`
