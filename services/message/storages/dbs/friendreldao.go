@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"im-server/commons/dbcommons"
-	"im-server/services/friends/storages/models"
+	"im-server/services/message/storages/models"
 )
 
 type FriendRelDao struct {
@@ -21,19 +21,19 @@ func (rel FriendRelDao) TableName() string {
 }
 
 func (rel FriendRelDao) Upsert(item models.FriendRel) error {
-	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id,display_name,order_tag)VALUES(?,?,?,?,?)", rel.TableName())
+	sql := fmt.Sprintf("INSERT INTO %s (app_key,user_id,friend_id,display_name,order_tag)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE display_name=VALUES(display_name)", rel.TableName())
 	return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.FriendId, item.DisplayName, item.OrderTag).Error
 }
 
 func (rel FriendRelDao) BatchUpsert(items []models.FriendRel) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,friend_id,display_name,order_tag)VALUES", rel.TableName())
+	sql := fmt.Sprintf("INSERT INTO %s (app_key,user_id,friend_id,display_name,order_tag)VALUES", rel.TableName())
 	buffer.WriteString(sql)
 	length := len(items)
 	params := []interface{}{}
 	for i, item := range items {
 		if i == length-1 {
-			buffer.WriteString("(?,?,?,?,?)")
+			buffer.WriteString("(?,?,?,?,?) ON DUPLICATE KEY UPDATE display_name=VALUES(display_name)")
 		} else {
 			buffer.WriteString("(?,?,?,?,?),")
 		}
@@ -42,18 +42,23 @@ func (rel FriendRelDao) BatchUpsert(items []models.FriendRel) error {
 	return dbcommons.GetDb().Exec(buffer.String(), params...).Error
 }
 
-func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit int64) ([]*models.FriendRel, error) {
+func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit int64, isPositive bool) ([]*models.FriendRel, error) {
 	var items []*FriendRelDao
 	params := []interface{}{}
-	condition := "app_key=?"
-	params = append(params, appkey)
-	if userId != "" {
-		condition = condition + " and user_id=?"
-		params = append(params, userId)
+	condition := "app_key=? and user_id=?"
+	params = append(params, appkey, userId)
+	orderBy := "id asc"
+	if isPositive {
+		condition = condition + " and id>?"
+		params = append(params, startId)
+	} else {
+		orderBy = "id desc"
+		if startId > 0 {
+			condition = condition + " and id<?"
+			params = append(params, startId)
+		}
 	}
-	condition = condition + " and id>?"
-	params = append(params, startId)
-	err := dbcommons.GetDb().Where(condition, params...).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where(condition, params...).Order(orderBy).Limit(limit).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}

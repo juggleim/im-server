@@ -62,6 +62,19 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("user_push", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.UserPushActor{}, serviceName)
 	})
+	//friends
+	register.RegisterActor("add_friends", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.AddFriendActor{}, serviceName)
+	})
+	register.RegisterActor("del_friends", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.DelFriendActor{}, serviceName)
+	})
+	register.RegisterActor("qry_friends", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryFriendsActor{}, serviceName)
+	})
+	register.RegisterActor("check_friends", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.CheckFriendActor{}, serviceName)
+	})
 }
 
 func (manager *MessageManager) Startup(args map[string]interface{}) {

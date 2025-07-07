@@ -291,6 +291,10 @@ func GroupMemberAllow(ctx *gin.Context) {
 
 func GroupMembers(ctx *gin.Context) {
 	groupId := ctx.Query("group_id")
+	if groupId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
 	offsetStr := ctx.Query("offset")
 	limitStr := ctx.Query("limit")
 	var limit int64 = 100

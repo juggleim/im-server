@@ -12,7 +12,7 @@ type FriendRel struct {
 type IFriendRelStorage interface {
 	Upsert(item FriendRel) error
 	BatchUpsert(items []FriendRel) error
-	QueryFriendRels(appkey, userId string, startId, limit int64) ([]*FriendRel, error)
+	QueryFriendRels(appkey, userId string, startId, limit int64, isPositive bool) ([]*FriendRel, error)
 	QueryFriendRelsWithPage(appkey, userId string, orderTag string, page, size int64) ([]*FriendRel, error)
 	BatchDelete(appkey, userId string, friendIds []string) error
 	GetFriendRel(appkey, userId, friendId string) (*FriendRel, error)

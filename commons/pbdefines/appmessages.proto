@@ -810,6 +810,7 @@ message FriendMembersReq{
 message QryFriendsReq{
   int64 limit = 1;
   string offset = 2;
+  int32 order = 3;
 }
 
 message QryFriendsWithPageReq{
@@ -826,6 +827,7 @@ message QryFriendsResp{
 message FriendMember{
   string friendId = 1;
   string orderTag = 2;
+  string displayName = 3;
 }
 
 message CheckFriendsReq{
