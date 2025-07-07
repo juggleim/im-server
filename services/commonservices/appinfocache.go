@@ -30,6 +30,7 @@ type AppInfo struct {
 	EventSubSwitchObj  *EventSubSwitchObj `default:"-"`
 	SecurityDomainsObj *SecurityDomains   `default:"-"`
 	ZegoConfigObj      *ZegoConfigObj     `default:"-"`
+	LivekitConfigObj   *LivekitConfigObj  `default:"-"`
 
 	TokenEffectiveMinute  int    `default:"0"`
 	OfflineMsgSaveTime    int    `default:"1440"`
@@ -60,6 +61,7 @@ type AppInfo struct {
 	EventSubSwitch  string `default:""`
 	SecurityDomains string `default:""`
 	ZegoConfig      string `default:""`
+	LivekitConfig   string `default:""`
 	TransEngineConf string `default:""`
 	SmsEngineConf   string `default:""`
 
@@ -133,6 +135,13 @@ func init() {
 				err := json.Unmarshal([]byte(appInfo.ZegoConfig), zegoConfig)
 				if err == nil {
 					appInfo.ZegoConfigObj = zegoConfig
+				}
+			}
+			if appInfo.LivekitConfigObj == nil && appInfo.LivekitConfig != "" {
+				livekitConfig := &LivekitConfigObj{}
+				err := json.Unmarshal([]byte(appInfo.LivekitConfig), livekitConfig)
+				if err == nil {
+					appInfo.LivekitConfigObj = livekitConfig
 				}
 			}
 			return appInfo
@@ -234,4 +243,10 @@ type SecurityDomains struct {
 type ZegoConfigObj struct {
 	AppId  int64  `json:"app_id"`
 	Secret string `json:"secret"`
+}
+
+type LivekitConfigObj struct {
+	AppKey     string `json:"app_key"`
+	AppSecret  string `json:"app_secret"`
+	ServiceUrl string `json:"service_url"`
 }

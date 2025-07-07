@@ -38,7 +38,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 		}
 	}
 	//auth
-	code, auth := GenerateAuth(appkey, userId, req.RtcChannel)
+	code, auth := GenerateAuth(appkey, userId, roomId, req.RtcChannel)
 	if code != errs.IMErrorCode_SUCCESS {
 		return code, auth
 	}
@@ -289,7 +289,7 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 		}
 	})
 	//auth
-	code, auth := GenerateAuth(appkey, userId, container.RtcChannel)
+	code, auth := GenerateAuth(appkey, userId, roomId, container.RtcChannel)
 	return code, auth
 }
 

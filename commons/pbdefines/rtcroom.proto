@@ -23,6 +23,7 @@ message RtcRoom{
 
 enum RtcChannel {
     Zego = 0;
+    LivekitRtc = 1;
 }
 
 enum RtcRoomType{
@@ -111,10 +112,16 @@ message RtcMemberRoom{
 
 message RtcAuth{
     ZegoAuth zegoAuth = 1;
+    LivekitRtcAuth livekitRtcAuth = 2;
 }
 
 message ZegoAuth{
     string token = 1;
+}
+
+message LivekitRtcAuth{
+    string token = 1;
+    string serviceUrl = 2;
 }
 
 message RtcInviteEvent{
