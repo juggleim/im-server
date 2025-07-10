@@ -39,30 +39,30 @@ _备注：由于微信群二维码有时间限制，加入微信讨论可优先�
 
 ## JuggleIM 项目说明
 
-对接文档：https://juggle.im/docs/client/import(https://juggle.im/docs/client/import/)
+对接文档：[https://juggle.im/docs/client/import](https://juggle.im/docs/client/import/)
 
 |  仓库地址 | 说明 |
 | -------: | :----- |
-| im-server(https://github.com/juggleim/im-server/) | 底层 IM 核心服务，负责消息分发，存储等IM相关业务 |
-| jugglechat-server(https://github.com/juggleim/jugglechat-server) | Demo的业务服务，负责处理用户注册/登录，创建群组，添加好友等业务，可以在这个基础上二开自己特色的业务能力 |
-| jugglechat-server-java(https://github.com/juggleim/jugglechat-server-java)| Demo 业务服务的 Java 版本 | 
-| imserver-console(https://github.com/juggleim/imserver-console) | IM 服务的管理后台，用于操作IM相关配置，监控IM业务量 |
-| imsdk-android(https://github.com/juggleim/imsdk-android) | 安卓端 imsdk，内含一个 UI Demo，可用于二开 |
-| imsdk-ios(https://github.com/juggleim/imsdk-ios) | iOS 端 imsdk，内含一个 UI Demo，可用于二开|
-| imsdk-web(https://github.com/juggleim/imsdk-web) | web 端 imsdk |
-| imsdk-pc | 桌面端 imsdk，暂未开源，可联系客服了解 |
-| imsdk-flutter(https://github.com/juggleim/imsdk-flutter)| imsdk 的 flutter 版本 |
-| imsdk-harmony(https://github.com/juggleim/imsdk-harmony) | 鸿蒙版本 imsdk，内含一个 UI Demo，可用于二开 |
-| jugglechat-web(https://github.com/juggleim/jugglechat-web) | 集成 imsdk-web 的 web 版 Demo，可用于二开 |
-| jugglechat-desktop(https://github.com/juggleim/jugglechat-desktop) | 集成 imsdk-pc 的桌面版 Demo，可用于二开 |
-| jugglelive-web(https://github.com/juggleim/jugglelive-web)| 集成 imsdk-web 的一个聊天室场景Demo，可用于二开 |
+| [im-server](https://github.com/juggleim/im-server/) | 底层 IM 核心服务，负责消息分发，存储等IM相关业务 |
+| [jugglechat-server](https://github.com/juggleim/jugglechat-server) | Demo的业务服务，负责处理用户注册/登录，创建群组，添加好友等业务，可以在这个基础上二开自己特色的业务能力 |
+| [jugglechat-server-java](https://github.com/juggleim/jugglechat-server-java)| Demo 业务服务的 Java 版本 | 
+| [imserver-console](https://github.com/juggleim/imserver-console) | IM 服务的管理后台，用于操作IM相关配置，监控IM业务量 |
+| [imsdk-android](https://github.com/juggleim/imsdk-android) | 安卓端 imsdk，内含一个 UI Demo，可用于二开 |
+| [imsdk-ios](https://github.com/juggleim/imsdk-ios) | iOS 端 imsdk，内含一个 UI Demo，可用于二开|
+| [imsdk-web](https://github.com/juggleim/imsdk-web) | web 端 imsdk |
+| [imsdk-pc] | 桌面端 imsdk，暂未开源，可联系客服了解 |
+| [imsdk-flutter](https://github.com/juggleim/imsdk-flutter)| imsdk 的 flutter 版本 |
+| [imsdk-harmony](https://github.com/juggleim/imsdk-harmony) | 鸿蒙版本 imsdk，内含一个 UI Demo，可用于二开 |
+| [jugglechat-web](https://github.com/juggleim/jugglechat-web) | 集成 imsdk-web 的 web 版 Demo，可用于二开 |
+| [jugglechat-desktop](https://github.com/juggleim/jugglechat-desktop) | 集成 imsdk-pc 的桌面版 Demo，可用于二开 |
+| [jugglelive-web](https://github.com/juggleim/jugglelive-web)| 集成 imsdk-web 的一个聊天室场景Demo，可用于二开 |
 
 其他：
 | 仓库地址 | 说明 |
 | ------: | :----- |
-| bot-connector(https://github.com/juggleim/bot-connector) | 机器人对接服务，用于打通 im-server 和 三方机器人 | 
-| imserver-sdk-go(https://github.com/juggleim/imserver-sdk-go) | 封装 im-server 服务端 API 的 SDK，供业务方集成到自己业务系统中 |
-| imserver-sdk-java(https://github.com/juggleim/imserver-sdk-java) | imserver-sdk 的 java 版本|
+| [bot-connector](https://github.com/juggleim/bot-connector) | 机器人对接服务，用于打通 im-server 和 三方机器人 | 
+| [imserver-sdk-go](https://github.com/juggleim/imserver-sdk-go) | 封装 im-server 服务端 API 的 SDK，供业务方集成到自己业务系统中 |
+| [imserver-sdk-java](https://github.com/juggleim/imserver-sdk-java) | imserver-sdk 的 java 版本|
 
 
 
