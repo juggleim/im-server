@@ -655,6 +655,9 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 			convercallers.UpdLatestMsgBody(ctx, userId, req.TargetId, req.ChannelType, latestMsg.LatestMsgId, &pbobjs.DownMsg{})
 		}
 	} else if req.CleanScope == 1 { //conver clean time
+		if !bases.GetIsFromApiFromCtx(ctx) {
+			return errs.IMErrorCode_MSG_NO_Permission
+		}
 		converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 		if req.SenderId == "" {
 			storage := storages.NewHisMsgConverCleanTimeStorage()
@@ -736,9 +739,9 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 	if len(req.Msgs) <= 0 {
 		return errs.IMErrorCode_SUCCESS
 	}
+	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 	if req.DelScope == 0 { //one-way
 		if req.ChannelType == pbobjs.ChannelType_Private {
-			pDelStorage := storages.NewPrivateDelHisMsgStorage()
 			items := []models.PrivateDelHisMsg{}
 			for _, msg := range req.Msgs {
 				items = append(items, models.PrivateDelHisMsg{
@@ -754,6 +757,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 				delMsgIds = append(delMsgIds, msg.MsgId)
 			}
 			if len(items) > 0 {
+				pDelStorage := storages.NewPrivateDelHisMsgStorage()
 				pDelStorage.BatchCreate(items)
 			}
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
@@ -812,7 +816,19 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					MsgId: msg.MsgId,
 				})
 			}
-			converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
+			//check permission
+			if !bases.GetIsFromApiFromCtx(ctx) {
+				delMsgs, err := pStorage.FindByIds(appkey, converId, delMsgIds, 0)
+				if err == nil {
+					for _, delMsg := range delMsgs {
+						if delMsg.SenderId != userId {
+							return errs.IMErrorCode_MSG_NO_Permission
+						}
+					}
+				} else {
+					return errs.IMErrorCode_MSG_NO_Permission
+				}
+			}
 			pStorage.DelMsgs(appkey, converId, delMsgIds)
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
 			gStorage := storages.NewGroupHisMsgStorage()
@@ -822,7 +838,19 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					MsgId: msg.MsgId,
 				})
 			}
-			converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
+			//check permission
+			if !bases.GetIsFromApiFromCtx(ctx) {
+				delMsgs, err := gStorage.FindByIds(appkey, converId, delMsgIds, 0)
+				if err == nil {
+					for _, delMsg := range delMsgs {
+						if delMsg.SenderId != userId {
+							return errs.IMErrorCode_MSG_NO_Permission
+						}
+					}
+				} else {
+					return errs.IMErrorCode_MSG_NO_Permission
+				}
+			}
 			gStorage.DelMsgs(appkey, converId, delMsgIds)
 		}
 		//notify all people of conversation

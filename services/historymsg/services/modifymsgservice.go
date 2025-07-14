@@ -49,6 +49,10 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 		storage := storages.NewPrivateHisMsgStorage()
 		dbMsg, err := storage.FindById(appkey, converId, modifyReq.MsgId)
 		if err == nil {
+			//check permission
+			if !bases.GetIsFromApiFromCtx(ctx) && dbMsg.SenderId != fromUserId {
+				return errs.IMErrorCode_MSG_NO_Permission
+			}
 			newDownMsg := &pbobjs.DownMsg{}
 			err = tools.PbUnMarshal(dbMsg.MsgBody, newDownMsg)
 			if err == nil {
@@ -69,6 +73,10 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 		storage := storages.NewGroupHisMsgStorage()
 		dbMsg, err := storage.FindById(appkey, converId, modifyReq.MsgId)
 		if err == nil {
+			//check permission
+			if !bases.GetIsFromApiFromCtx(ctx) && dbMsg.SenderId != fromUserId {
+				return errs.IMErrorCode_MSG_NO_Permission
+			}
 			newDownMsg := &pbobjs.DownMsg{}
 			err = tools.PbUnMarshal(dbMsg.MsgBody, newDownMsg)
 			if err == nil {

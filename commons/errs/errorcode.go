@@ -80,6 +80,7 @@ var (
 	IMErrorCode_MSG_Hit_Sensitive   IMErrorCode = 12007
 	IMErrorCode_MSG_MSGEXTOVERLIMIT IMErrorCode = 12008
 	IMErrorCode_MSG_NOT_FRIEND      IMErrorCode = 12009
+	IMErrorCode_MSG_NO_Permission   IMErrorCode = 12010
 )
 
 // conversation

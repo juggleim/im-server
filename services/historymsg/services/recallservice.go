@@ -46,6 +46,13 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 	if recallMsg.ChannelType == pbobjs.ChannelType_Private {
 		//replace history msg
 		storage := storages.NewPrivateHisMsgStorage()
+		//check permission
+		if !bases.GetIsFromApiFromCtx(ctx) {
+			dbMsg, err := storage.FindById(appkey, converId, recallMsg.MsgId)
+			if err != nil || dbMsg.SenderId != userId {
+				return errs.IMErrorCode_MSG_NO_Permission
+			}
+		}
 		flag := msgdefines.SetStoreMsg(0)
 		flag = msgdefines.SetCountMsg(flag)
 		replaceMsg := &pbobjs.DownMsg{
@@ -67,6 +74,13 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 	} else if recallMsg.ChannelType == pbobjs.ChannelType_Group {
 		//replace history msg
 		storage := storages.NewGroupHisMsgStorage()
+		//check permission
+		if !bases.GetIsFromApiFromCtx(ctx) {
+			dbMsg, err := storage.FindById(appkey, converId, recallMsg.MsgId)
+			if err != nil || dbMsg.SenderId != userId {
+				return errs.IMErrorCode_MSG_NO_Permission
+			}
+		}
 		flag := msgdefines.SetStoreMsg(0)
 		flag = msgdefines.SetCountMsg(flag)
 		replaceMsg := &pbobjs.DownMsg{
