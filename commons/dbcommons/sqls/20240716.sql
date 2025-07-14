@@ -721,6 +721,7 @@ CREATE TABLE IF NOT EXISTS `rtcrooms` (
   `rtc_channel` tinyint DEFAULT '0',
   `rtc_media_type` tinyint DEFAULT '0',
   `owner_id` varchar(32) DEFAULT NULL COMMENT '创建者',
+  `ext` varchar(2000) DEFAULT NULL COMMENT '扩展字段',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `accepted_time` bigint DEFAULT '0' COMMENT '1v1 接通时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',

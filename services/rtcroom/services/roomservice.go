@@ -55,6 +55,7 @@ type RtcRoomContainer struct {
 	CreatedTime  int64
 	AcceptedTime int64
 	Status       RtcRoomStatus // 0:normal; 1: destroy; 2: not exist;
+	Ext          string
 
 	Members map[string]*models.RtcRoomMember
 }
@@ -300,6 +301,7 @@ func createRtcRoomContainer2Cache(ctx context.Context, appkey string, room *mode
 		RtcMediaType: room.RtcMediaType,
 		CreatedTime:  time.Now().UnixMilli(),
 		Owner:        commonservices.GetTargetDisplayUserInfo(ctx, room.OwnerId),
+		Ext:          room.Ext,
 		Status:       RtcRoomStatus_Normal,
 		Members:      make(map[string]*models.RtcRoomMember),
 	}

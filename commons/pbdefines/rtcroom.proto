@@ -9,6 +9,7 @@ message RtcRoomReq{
     RtcMember joinMember = 3;
     RtcChannel rtcChannel = 4;
     RtcMediaType rtcMediaType = 5;
+    string ext = 6;
 }
 
 message RtcRoom{
@@ -17,6 +18,7 @@ message RtcRoom{
     UserInfo owner = 3;
     RtcChannel rtcChannel = 4;
     RtcMediaType rtcMediaType = 5;
+    string ext = 6;
     
     repeated RtcMember members = 51;
 }
@@ -94,6 +96,7 @@ message RtcInviteReq{
     string roomId = 3;
     RtcChannel rtcChannel = 4;
     RtcMediaType rtcMediaType = 5;
+    string ext = 6;
 }
 
 message RtcMemberRooms{

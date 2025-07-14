@@ -10,6 +10,7 @@ type RtcRoom struct {
 	CreatedTime  int64
 	AcceptedTime int64
 	OwnerId      string
+	Ext          string
 	AppKey       string
 }
 

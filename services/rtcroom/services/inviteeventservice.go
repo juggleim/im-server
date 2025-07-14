@@ -48,6 +48,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 		RtcChannel:   req.RtcChannel,
 		RtcMediaType: req.RtcMediaType,
 		OwnerId:      userId,
+		Ext:          req.Ext,
 		AppKey:       appkey,
 	}
 	container, succ := createRtcRoomContainer2Cache(ctx, appkey, rtcRoom)
@@ -129,6 +130,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				Owner:        container.Owner,
 				RtcChannel:   container.RtcChannel,
 				RtcMediaType: container.RtcMediaType,
+				Ext:          container.Ext,
 				Members:      members,
 			},
 			TargetUsers: []*pbobjs.UserInfo{
@@ -188,6 +190,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			Owner:        container.Owner,
 			RtcChannel:   container.RtcChannel,
 			RtcMediaType: container.RtcMediaType,
+			Ext:          container.Ext,
 			Members:      []*pbobjs.RtcMember{},
 		}
 		container.ForeachMembers(func(member *models.RtcRoomMember) {
