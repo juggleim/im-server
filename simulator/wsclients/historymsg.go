@@ -107,3 +107,21 @@ func (client *WsImClient) BatchTranslate(req *pbobjs.TransReq) (utils.ClientErro
 		return utils.ClientErrorCode(code), nil
 	}
 }
+
+func (client *WsImClient) SetTopMsg(req *pbobjs.TopMsgReq) utils.ClientErrorCode {
+	data, _ := tools.PbMarshal(req)
+	code, qryAck := client.Query("set_top_msg", req.TargetId, data)
+	if code == utils.ClientErrorCode_Success && qryAck != nil && qryAck.Code != 0 {
+		return utils.ClientErrorCode(qryAck.Code)
+	}
+	return utils.ClientErrorCode(code)
+}
+
+func (client *WsImClient) DelTopMsg(req *pbobjs.TopMsgReq) utils.ClientErrorCode {
+	data, _ := tools.PbMarshal(req)
+	code, qryAck := client.Query("del_top_msg", req.TargetId, data)
+	if code == utils.ClientErrorCode_Success && qryAck != nil && qryAck.Code != 0 {
+		return utils.ClientErrorCode(qryAck.Code)
+	}
+	return utils.ClientErrorCode(code)
+}
