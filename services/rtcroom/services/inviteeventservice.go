@@ -278,18 +278,16 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 		return errs.IMErrorCode_RTCROOM_UPDATEFAILED, nil
 	}
 	container.ForeachMembers(func(member *models.RtcRoomMember) {
-		if member.MemberId != userId {
-			SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
-				InviteType: pbobjs.InviteType_RtcAccept,
-				User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
-				Room: &pbobjs.RtcRoom{
-					RoomType: container.RoomType,
-					RoomId:   container.RoomId,
-					Owner:    container.Owner,
-				},
-				EventTime: acceptedTime,
-			})
-		}
+		SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
+			InviteType: pbobjs.InviteType_RtcAccept,
+			User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
+			Room: &pbobjs.RtcRoom{
+				RoomType: container.RoomType,
+				RoomId:   container.RoomId,
+				Owner:    container.Owner,
+			},
+			EventTime: acceptedTime,
+		})
 	})
 	//auth
 	code, auth := GenerateAuth(appkey, userId, roomId, container.RtcChannel)
@@ -322,18 +320,16 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 					DeviceId: member.DeviceId,
 				},
 			})
-			if member.MemberId != userId {
-				SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
-					InviteType: pbobjs.InviteType_RtcHangup,
-					User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
-					Room: &pbobjs.RtcRoom{
-						RoomType: container.RoomType,
-						RoomId:   container.RoomId,
-						Owner:    container.Owner,
-					},
-					EventTime: eventTime,
-				})
-			}
+			SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
+				InviteType: pbobjs.InviteType_RtcHangup,
+				User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
+				Room: &pbobjs.RtcRoom{
+					RoomType: container.RoomType,
+					RoomId:   container.RoomId,
+					Owner:    container.Owner,
+				},
+				EventTime: eventTime,
+			})
 			if member.MemberId != container.Owner.UserId {
 				calleeId = member.MemberId
 			}
