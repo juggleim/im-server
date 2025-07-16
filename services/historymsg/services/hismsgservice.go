@@ -255,6 +255,8 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
 		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
 		if err == nil {
+			referMsgIds := []string{}
+			haveReferMsgs := []*pbobjs.DownMsg{}
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
@@ -303,8 +305,17 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 							})
 						}
 					}
+					//reference msg
+					if downMsg.ReferMsg != nil && downMsg.ReferMsg.MsgId != "" {
+						referMsgIds = append(referMsgIds, downMsg.ReferMsg.MsgId)
+						haveReferMsgs = append(haveReferMsgs, downMsg)
+					}
 					resp.Msgs = append(resp.Msgs, downMsg)
 				}
+			}
+			//retrieve referenced msg
+			if len(referMsgIds) > 0 {
+				retrievePrivateReferenceMsg(ctx, targetId, haveReferMsgs, referMsgIds)
 			}
 			//add userinfo
 			targetUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, targetId)
@@ -366,6 +377,8 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		if err == nil {
 			msgMap := map[string]*pbobjs.DownMsg{}
 			msgIds := []string{}
+			referMsgIds := []string{}
+			haveReferMsgs := []*pbobjs.DownMsg{}
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
@@ -417,6 +430,11 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 							})
 						}
 					}
+					//reference msg
+					if downMsg.ReferMsg != nil && downMsg.ReferMsg.MsgId != "" {
+						referMsgIds = append(referMsgIds, downMsg.ReferMsg.MsgId)
+						haveReferMsgs = append(haveReferMsgs, downMsg)
+					}
 					resp.Msgs = append(resp.Msgs, downMsg)
 				}
 			}
@@ -429,6 +447,10 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 						msg.IsRead = readStatus
 					}
 				}
+			}
+			//retrieve referenced msg
+			if len(referMsgIds) > 0 {
+				retrieveGrpReferenceMsg(ctx, targetId, haveReferMsgs, referMsgIds)
 			}
 			//add groupinfo
 			groupInfo := commonservices.GetGroupInfoFromCache(ctx, targetId)
@@ -481,6 +503,90 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, resp
+}
+
+func retrievePrivateReferenceMsg(ctx context.Context, targetId string, haveReferMsgs []*pbobjs.DownMsg, referencedMsgIds []string) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	storage := storages.NewPrivateHisMsgStorage()
+	converId := commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_Private)
+	dbMsgs, err := storage.FindByIds(appkey, converId, referencedMsgIds, 0)
+	if err == nil && len(dbMsgs) > 0 {
+		referencedMsgMap := map[string]*pbobjs.DownMsg{}
+		for _, dbMsg := range dbMsgs {
+			pbMsg := &pbobjs.DownMsg{}
+			err = tools.PbUnMarshal(dbMsg.MsgBody, pbMsg)
+			if err == nil {
+				if pbMsg.ClientUid == "" {
+					pbMsg.ClientUid = tools.GenerateUUIDShort22()
+				}
+				if pbMsg.MsgSeqNo <= 0 {
+					pbMsg.MsgSeqNo = dbMsg.MsgSeqNo
+				}
+				if pbMsg.MsgId == "" {
+					pbMsg.MsgId = dbMsg.MsgId
+				}
+				pbMsg.TargetUserInfo = nil
+				if pbMsg.MsgTime <= 0 {
+					pbMsg.MsgTime = dbMsg.SendTime
+				}
+				if userId == dbMsg.SenderId {
+					pbMsg.IsSend = true
+					pbMsg.TargetId = targetId
+				}
+				pbMsg.IsRead = dbMsg.IsRead > 0
+				referencedMsgMap[pbMsg.MsgId] = pbMsg
+			}
+		}
+		for _, haveReferMsg := range haveReferMsgs {
+			referMsg, ok := referencedMsgMap[haveReferMsg.ReferMsg.MsgId]
+			if ok && referMsg != nil {
+				haveReferMsg.ReferMsg = referMsg
+			}
+		}
+	}
+}
+
+func retrieveGrpReferenceMsg(ctx context.Context, targetId string, haveReferMsgs []*pbobjs.DownMsg, referencedMsgIds []string) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	converId := commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_Group)
+	storage := storages.NewGroupHisMsgStorage()
+	dbMsgs, err := storage.FindByIds(appkey, converId, referencedMsgIds, 0)
+	if err == nil && len(dbMsgs) > 0 {
+		referencedMsgMap := map[string]*pbobjs.DownMsg{}
+		for _, dbMsg := range dbMsgs {
+			pbMsg := &pbobjs.DownMsg{}
+			err = tools.PbUnMarshal(dbMsg.MsgBody, pbMsg)
+			if err == nil {
+				if pbMsg.ClientUid == "" {
+					pbMsg.ClientUid = tools.GenerateUUIDShort22()
+				}
+				if pbMsg.MsgSeqNo <= 0 {
+					pbMsg.MsgSeqNo = dbMsg.MsgSeqNo
+				}
+				if pbMsg.MsgTime <= 0 {
+					pbMsg.MsgTime = dbMsg.SendTime
+				}
+				if pbMsg.MsgId == "" {
+					pbMsg.MsgId = dbMsg.MsgId
+				}
+				pbMsg.GroupInfo = nil
+				if userId == dbMsg.SenderId {
+					pbMsg.IsSend = true
+				}
+				pbMsg.MemberCount = int32(dbMsg.MemberCount)
+				pbMsg.ReadCount = int32(dbMsg.ReadCount)
+				referencedMsgMap[pbMsg.MsgId] = pbMsg
+			}
+		}
+		for _, haveReferMsg := range haveReferMsgs {
+			referMsg, ok := referencedMsgMap[haveReferMsg.ReferMsg.MsgId]
+			if ok && referMsg != nil {
+				haveReferMsg.ReferMsg = referMsg
+			}
+		}
+	}
 }
 
 type GrpMemberSettings struct {
