@@ -184,6 +184,7 @@ type IGroupDelHisMsgStorage interface {
 	Create(item GroupDelHisMsg) error
 	BatchCreate(items []GroupDelHisMsg) error
 	QryDelHisMsgs(appkey, userId, targetId string, startTime int64, count int32, isPositive bool) ([]*GroupDelHisMsg, error)
+	QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*GroupDelHisMsg, error)
 }
 
 type PrivateDelHisMsg struct {
@@ -199,6 +200,7 @@ type IPrivateDelHisMsgStorage interface {
 	Create(item PrivateDelHisMsg) error
 	BatchCreate(items []PrivateDelHisMsg) error
 	QryDelHisMsgs(appkey, userId, targetId string, startTime int64, count int32, isPositive bool) ([]*PrivateDelHisMsg, error)
+	QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*PrivateDelHisMsg, error)
 }
 
 type ReadInfo struct {

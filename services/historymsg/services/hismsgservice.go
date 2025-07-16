@@ -279,6 +279,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 						downMsg.TargetId = targetId
 					}
 					downMsg.IsRead = dbMsg.IsRead > 0
+					downMsg.IsDelete = dbMsg.IsDelete == 1
 					//msg ext
 					if len(dbMsg.MsgExt) > 0 {
 						extItems := &pbobjs.MsgExtItems{
@@ -404,6 +405,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 					}
 					downMsg.MemberCount = int32(dbMsg.MemberCount)
 					downMsg.ReadCount = int32(dbMsg.ReadCount)
+					downMsg.IsDelete = dbMsg.IsDelete == 1
 					//msg ext
 					if len(dbMsg.MsgExt) > 0 {
 						extItems := &pbobjs.MsgExtItems{
@@ -512,6 +514,14 @@ func retrievePrivateReferenceMsg(ctx context.Context, targetId string, haveRefer
 	converId := commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_Private)
 	dbMsgs, err := storage.FindByIds(appkey, converId, referencedMsgIds, 0)
 	if err == nil && len(dbMsgs) > 0 {
+		delMarkMap := map[string]bool{}
+		delStorage := storages.NewPrivateDelHisMsgStorage()
+		delMsgs, err := delStorage.QryDelHisMsgsByMsgIds(appkey, userId, targetId, referencedMsgIds)
+		if err == nil && len(delMsgs) > 0 {
+			for _, delMsg := range delMsgs {
+				delMarkMap[delMsg.MsgId] = true
+			}
+		}
 		referencedMsgMap := map[string]*pbobjs.DownMsg{}
 		for _, dbMsg := range dbMsgs {
 			pbMsg := &pbobjs.DownMsg{}
@@ -534,6 +544,10 @@ func retrievePrivateReferenceMsg(ctx context.Context, targetId string, haveRefer
 					pbMsg.IsSend = true
 					pbMsg.TargetId = targetId
 				}
+				pbMsg.IsDelete = dbMsg.IsDelete == 1
+				if !pbMsg.IsDelete {
+					pbMsg.IsDelete = delMarkMap[pbMsg.MsgId]
+				}
 				pbMsg.IsRead = dbMsg.IsRead > 0
 				referencedMsgMap[pbMsg.MsgId] = pbMsg
 			}
@@ -554,6 +568,14 @@ func retrieveGrpReferenceMsg(ctx context.Context, targetId string, haveReferMsgs
 	storage := storages.NewGroupHisMsgStorage()
 	dbMsgs, err := storage.FindByIds(appkey, converId, referencedMsgIds, 0)
 	if err == nil && len(dbMsgs) > 0 {
+		delMarkMap := map[string]bool{}
+		delStorage := storages.NewGroupDelHisMsgStorage()
+		delMsgs, err := delStorage.QryDelHisMsgsByMsgIds(appkey, userId, targetId, referencedMsgIds)
+		if err == nil && len(delMsgs) > 0 {
+			for _, delMsg := range delMsgs {
+				delMarkMap[delMsg.MsgId] = true
+			}
+		}
 		referencedMsgMap := map[string]*pbobjs.DownMsg{}
 		for _, dbMsg := range dbMsgs {
 			pbMsg := &pbobjs.DownMsg{}
@@ -574,6 +596,10 @@ func retrieveGrpReferenceMsg(ctx context.Context, targetId string, haveReferMsgs
 				pbMsg.GroupInfo = nil
 				if userId == dbMsg.SenderId {
 					pbMsg.IsSend = true
+				}
+				pbMsg.IsDelete = dbMsg.IsDelete == 1
+				if !pbMsg.IsDelete {
+					pbMsg.IsDelete = delMarkMap[pbMsg.MsgId]
 				}
 				pbMsg.MemberCount = int32(dbMsg.MemberCount)
 				pbMsg.ReadCount = int32(dbMsg.ReadCount)

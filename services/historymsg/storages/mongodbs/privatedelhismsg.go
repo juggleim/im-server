@@ -139,3 +139,7 @@ func (msg *PrivateDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, s
 	}
 	return retItems, nil
 }
+
+func (msg *PrivateDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*models.PrivateDelHisMsg, error) {
+	return nil, nil
+}

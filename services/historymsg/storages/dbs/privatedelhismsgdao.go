@@ -84,3 +84,29 @@ func (msg PrivateDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, st
 	}
 	return retItems, err
 }
+
+func (msg PrivateDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*models.PrivateDelHisMsg, error) {
+	var items []*PrivateDelHisMsgDao
+	params := []interface{}{}
+	condition := "app_key=? and user_id=? and target_id=? and msg_id in (?)"
+	params = append(params, appkey)
+	params = append(params, userId)
+	params = append(params, targetId)
+	params = append(params, msgIds)
+	err := dbcommons.GetDb().Where(condition, params...).Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	retItems := []*models.PrivateDelHisMsg{}
+	for _, item := range items {
+		retItems = append(retItems, &models.PrivateDelHisMsg{
+			UserId:   item.UserId,
+			TargetId: item.TargetId,
+			MsgId:    item.MsgId,
+			MsgTime:  item.MsgTime,
+			MsgSeq:   item.MsgSeq,
+			AppKey:   item.AppKey,
+		})
+	}
+	return retItems, err
+}

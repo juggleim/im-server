@@ -85,6 +85,32 @@ func (msg GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, star
 	return retItems, err
 }
 
+func (msg GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*models.GroupDelHisMsg, error) {
+	var items []*GroupDelHisMsgDao
+	params := []interface{}{}
+	condition := "app_key=? and user_id=? and target_id=? and msg_id in (?)"
+	params = append(params, appkey)
+	params = append(params, userId)
+	params = append(params, targetId)
+	params = append(params, msgIds)
+	err := dbcommons.GetDb().Where(condition, params...).Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	retItems := []*models.GroupDelHisMsg{}
+	for _, item := range items {
+		retItems = append(retItems, &models.GroupDelHisMsg{
+			UserId:   item.UserId,
+			TargetId: item.TargetId,
+			MsgId:    item.MsgId,
+			MsgTime:  item.MsgTime,
+			MsgSeq:   item.MsgSeq,
+			AppKey:   item.AppKey,
+		})
+	}
+	return retItems, err
+}
+
 func (msg GroupDelHisMsgDao) ExistDelHisMsg(appkey, userId, targetId string) bool {
 	var items []*GroupDelHisMsgDao
 	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=?", appkey, userId, targetId).Order("msg_time desc").Limit(1).Find(&items).Error

@@ -137,3 +137,7 @@ func (msg *GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, sta
 	}
 	return retItems, nil
 }
+
+func (msg *GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*models.GroupDelHisMsg, error) {
+	return nil, nil
+}

@@ -145,6 +145,9 @@ message DownMsg{
   map<string, TransMsgContent> transMsgMap = 28;
   string SearchText = 29;
   GrpMemberInfo grpMemberInfo = 30;
+
+
+  bool isDelete = 33;
 }
 
 message PriMsgPostReq{
