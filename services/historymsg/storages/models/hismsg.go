@@ -3,21 +3,23 @@ package models
 import "im-server/commons/pbdefines/pbobjs"
 
 type HisMsg struct {
-	ConverId    string
-	SenderId    string
-	ReceiverId  string
-	ChannelType pbobjs.ChannelType
-	MsgType     string
-	MsgId       string
-	SendTime    int64
-	MsgSeqNo    int64
-	MsgBody     []byte
-	AppKey      string
-	IsExt       int
-	IsExset     int
-	MsgExt      []byte
-	MsgExset    []byte
-	IsDelete    int
+	ConverId          string
+	SenderId          string
+	ReceiverId        string
+	ChannelType       pbobjs.ChannelType
+	MsgType           string
+	MsgId             string
+	SendTime          int64
+	MsgSeqNo          int64
+	MsgBody           []byte
+	AppKey            string
+	IsExt             int
+	IsExset           int
+	MsgExt            []byte
+	MsgExset          []byte
+	IsDelete          int
+	DestroyTime       int64
+	LifeTimeAfterRead int64
 }
 
 type GroupHisMsg struct {
@@ -57,6 +59,7 @@ type IGroupHisMsgStorage interface {
 	UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error
 	UpdateMsgExset(appkey, converId, msgId string, ext []byte) error
 	DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error
+	UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error
 
 	UpdateReadCount(appkey, converId, msgId string, readCount int) error
 }
@@ -80,6 +83,8 @@ type IPrivateHisMsgStorage interface {
 
 	MarkReadByMsgIds(appkey, converId string, msgIds []string) error
 	MarkReadByScope(appkey, converId string, start, end int64) error
+	UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error
+	UpdateDestroyTimeAfterReadByScope(appkey, converId string, start, end int64) error
 }
 
 type ISystemHisMsgStorage interface {
@@ -172,12 +177,13 @@ type IHisMsgUserCleanTimeStorage interface {
 }
 
 type GroupDelHisMsg struct {
-	UserId   string
-	TargetId string
-	MsgId    string
-	MsgTime  int64
-	MsgSeq   int64
-	AppKey   string
+	UserId        string
+	TargetId      string
+	MsgId         string
+	MsgTime       int64
+	MsgSeq        int64
+	EffectiveTime int64
+	AppKey        string
 }
 
 type IGroupDelHisMsgStorage interface {
@@ -188,12 +194,13 @@ type IGroupDelHisMsgStorage interface {
 }
 
 type PrivateDelHisMsg struct {
-	UserId   string
-	TargetId string
-	MsgId    string
-	MsgTime  int64
-	MsgSeq   int64
-	AppKey   string
+	UserId        string
+	TargetId      string
+	MsgId         string
+	MsgTime       int64
+	MsgSeq        int64
+	EffectiveTime int64
+	AppKey        string
 }
 
 type IPrivateDelHisMsgStorage interface {

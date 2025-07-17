@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type GroupHisMsgDao struct {
@@ -27,9 +29,11 @@ type GroupHisMsgDao struct {
 	MsgExt      []byte `gorm:"msg_ext"`
 	MsgExset    []byte `gorm:"msg_exset"`
 
-	MemberCount int `gorm:"member_count"`
-	ReadCount   int `gorm:"read_count"`
-	IsDelete    int `gorm:"is_delete"`
+	MemberCount       int   `gorm:"member_count"`
+	ReadCount         int   `gorm:"read_count"`
+	IsDelete          int   `gorm:"is_delete"`
+	DestroyTime       int64 `gorm:"destroy_time"`
+	LifeTimeAfterRead int64 `gorm:"life_time_after_read"`
 }
 
 func (msg GroupHisMsgDao) TableName() string {
@@ -37,23 +41,25 @@ func (msg GroupHisMsgDao) TableName() string {
 }
 func (msg GroupHisMsgDao) SaveGroupHisMsg(item models.GroupHisMsg) error {
 	gMsg := GroupHisMsgDao{
-		ConverId:    item.ConverId,
-		SenderId:    item.SenderId,
-		ReceiverId:  item.ReceiverId,
-		ChannelType: int(item.ChannelType),
-		MsgType:     item.MsgType,
-		MsgId:       item.MsgId,
-		SendTime:    item.SendTime,
-		MsgSeqNo:    item.MsgSeqNo,
-		MsgBody:     item.MsgBody,
-		AppKey:      item.AppKey,
-		IsExt:       item.IsExt,
-		IsExset:     item.IsExset,
-		MsgExt:      item.MsgExt,
-		MsgExset:    item.MsgExset,
-		MemberCount: item.MemberCount,
-		ReadCount:   item.ReadCount,
-		IsDelete:    item.IsDelete,
+		ConverId:          item.ConverId,
+		SenderId:          item.SenderId,
+		ReceiverId:        item.ReceiverId,
+		ChannelType:       int(item.ChannelType),
+		MsgType:           item.MsgType,
+		MsgId:             item.MsgId,
+		SendTime:          item.SendTime,
+		MsgSeqNo:          item.MsgSeqNo,
+		MsgBody:           item.MsgBody,
+		AppKey:            item.AppKey,
+		IsExt:             item.IsExt,
+		IsExset:           item.IsExset,
+		MsgExt:            item.MsgExt,
+		MsgExset:          item.MsgExset,
+		MemberCount:       item.MemberCount,
+		ReadCount:         item.ReadCount,
+		IsDelete:          item.IsDelete,
+		DestroyTime:       item.DestroyTime,
+		LifeTimeAfterRead: item.LifeTimeAfterRead,
 	}
 	err := dbcommons.GetDb().Create(&gMsg).Error
 	return err
@@ -78,12 +84,14 @@ func (msg GroupHisMsgDao) QryLatestMsg(appkey, converId string) (*models.GroupHi
 }
 
 func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.GroupHisMsg, error) {
+	curr := time.Now().UnixMilli()
 	var items []*GroupHisMsgDao
 	params := []interface{}{}
 	hismsgTableName := msg.TableName()
 	delHismsgTableName := (&GroupDelHisMsgDao{}).TableName()
-	sql := fmt.Sprintf("select his.* from %s as his left join %s as delhis on his.app_key=delhis.app_key and delhis.user_id=? and delhis.target_id=his.conver_id and his.msg_id=delhis.msg_id where his.app_key=? and his.conver_id=?", hismsgTableName, delHismsgTableName)
+	sql := fmt.Sprintf("select his.* from %s as his left join %s as delhis on his.app_key=delhis.app_key and delhis.user_id=? and delhis.target_id=his.conver_id and his.msg_id=delhis.msg_id and (delhis.effective_time=0 or delhis.effective_time<?) where his.app_key=? and his.conver_id=?", hismsgTableName, delHismsgTableName)
 	params = append(params, userId)
+	params = append(params, curr)
 	params = append(params, appkey)
 	params = append(params, converId)
 
@@ -98,7 +106,7 @@ func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targetI
 		params = append(params, start)
 	} else {
 		if start <= 0 {
-			start = time.Now().UnixMilli()
+			start = curr
 		}
 		sql = sql + " and his.send_time<?"
 		params = append(params, start)
@@ -111,7 +119,8 @@ func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targetI
 		sql = sql + " and his.msg_type in (?)"
 		params = append(params, msgTypes)
 	}
-	sql = sql + " and his.is_delete=0 and delhis.msg_id is null"
+	sql = sql + " and his.is_delete=0 and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
+	params = append(params, curr)
 	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if !isPositiveOrder {
 		sort.Slice(items, func(i, j int) bool {
@@ -126,8 +135,8 @@ func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targetI
 }
 
 func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.GroupHisMsg, error) {
+	curr := time.Now().UnixMilli()
 	var items []*GroupHisMsgDao
-
 	params := []interface{}{}
 	condition := "app_key=? and conver_id=?"
 	params = append(params, appkey)
@@ -144,7 +153,7 @@ func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, c
 		params = append(params, start)
 	} else {
 		if start <= 0 {
-			start = time.Now().UnixMilli()
+			start = curr
 		}
 		condition = condition + " and send_time<?"
 		params = append(params, start)
@@ -162,7 +171,8 @@ func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, c
 		condition = condition + " and msg_type in (?)"
 		params = append(params, msgTypes)
 	}
-	condition = condition + " and is_delete=0"
+	condition = condition + " and is_delete=0 and (destroy_time=0 or destroy_time>?)"
+	params = append(params, curr)
 
 	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if !isPositiveOrder {
@@ -256,6 +266,10 @@ func (msg GroupHisMsgDao) UpdateMsgExset(appkey, converId, msgId string, ext []b
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id=?", appkey, converId, msgId).Update("msg_exset", ext).Error
 }
 
+func (msg GroupHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error {
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id in (?)", appkey, converId, msgIds).Update("destroy_time", gorm.Expr("(UNIX_TIMESTAMP(NOW(3))*1000)+life_time_after_read")).Error
+}
+
 // TODO need batch delete
 func (msg GroupHisMsgDao) DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error {
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sender_id=? and send_time<?", appkey, converId, senderId, cleanTime).Update("is_delete", 1).Error
@@ -264,21 +278,23 @@ func (msg GroupHisMsgDao) DelSomeoneMsgsBaseTime(appkey, converId string, cleanT
 func dbMsg2GrpMsg(dbMsg *GroupHisMsgDao) *models.GroupHisMsg {
 	return &models.GroupHisMsg{
 		HisMsg: models.HisMsg{
-			ConverId:    dbMsg.ConverId,
-			SenderId:    dbMsg.SenderId,
-			ReceiverId:  dbMsg.ReceiverId,
-			ChannelType: pbobjs.ChannelType(dbMsg.ChannelType),
-			MsgType:     dbMsg.MsgType,
-			MsgId:       dbMsg.MsgId,
-			SendTime:    dbMsg.SendTime,
-			MsgSeqNo:    dbMsg.MsgSeqNo,
-			MsgBody:     dbMsg.MsgBody,
-			AppKey:      dbMsg.AppKey,
-			IsExt:       dbMsg.IsExt,
-			IsExset:     dbMsg.IsExset,
-			MsgExt:      dbMsg.MsgExt,
-			MsgExset:    dbMsg.MsgExset,
-			IsDelete:    dbMsg.IsDelete,
+			ConverId:          dbMsg.ConverId,
+			SenderId:          dbMsg.SenderId,
+			ReceiverId:        dbMsg.ReceiverId,
+			ChannelType:       pbobjs.ChannelType(dbMsg.ChannelType),
+			MsgType:           dbMsg.MsgType,
+			MsgId:             dbMsg.MsgId,
+			SendTime:          dbMsg.SendTime,
+			MsgSeqNo:          dbMsg.MsgSeqNo,
+			MsgBody:           dbMsg.MsgBody,
+			AppKey:            dbMsg.AppKey,
+			IsExt:             dbMsg.IsExt,
+			IsExset:           dbMsg.IsExset,
+			MsgExt:            dbMsg.MsgExt,
+			MsgExset:          dbMsg.MsgExset,
+			IsDelete:          dbMsg.IsDelete,
+			DestroyTime:       dbMsg.DestroyTime,
+			LifeTimeAfterRead: dbMsg.LifeTimeAfterRead,
 		},
 		MemberCount: dbMsg.MemberCount,
 		ReadCount:   dbMsg.ReadCount,

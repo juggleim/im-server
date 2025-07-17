@@ -8,13 +8,14 @@ import (
 )
 
 type GroupDelHisMsgDao struct {
-	ID       int64  `gorm:"primary_key"`
-	UserId   string `gorm:"user_id"`
-	TargetId string `gorm:"target_id"`
-	MsgId    string `gorm:"msg_id"`
-	MsgTime  int64  `gorm:"msg_time"`
-	MsgSeq   int64  `gorm:"msg_seq"`
-	AppKey   string `gorm:"app_key"`
+	ID            int64  `gorm:"primary_key"`
+	UserId        string `gorm:"user_id"`
+	TargetId      string `gorm:"target_id"`
+	MsgId         string `gorm:"msg_id"`
+	MsgTime       int64  `gorm:"msg_time"`
+	MsgSeq        int64  `gorm:"msg_seq"`
+	EffectiveTime int64  `gorm:"effective_time"`
+	AppKey        string `gorm:"app_key"`
 }
 
 func (msg GroupDelHisMsgDao) TableName() string {
@@ -23,12 +24,13 @@ func (msg GroupDelHisMsgDao) TableName() string {
 
 func (msg GroupDelHisMsgDao) Create(item models.GroupDelHisMsg) error {
 	add := GroupDelHisMsgDao{
-		UserId:   item.UserId,
-		TargetId: item.TargetId,
-		MsgId:    item.MsgId,
-		MsgTime:  item.MsgTime,
-		MsgSeq:   item.MsgSeq,
-		AppKey:   item.AppKey,
+		UserId:        item.UserId,
+		TargetId:      item.TargetId,
+		MsgId:         item.MsgId,
+		MsgTime:       item.MsgTime,
+		MsgSeq:        item.MsgSeq,
+		EffectiveTime: item.EffectiveTime,
+		AppKey:        item.AppKey,
 	}
 	err := dbcommons.GetDb().Create(&add).Error
 	return err
@@ -36,17 +38,17 @@ func (msg GroupDelHisMsgDao) Create(item models.GroupDelHisMsg) error {
 
 func (msg GroupDelHisMsgDao) BatchCreate(items []models.GroupDelHisMsg) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("insert into %s (`user_id`,`target_id`,`msg_id`,`msg_time`,`msg_seq`,`app_key`)values", msg.TableName())
+	sql := fmt.Sprintf("insert into %s (`user_id`,`target_id`,`msg_id`,`msg_time`,`msg_seq`,`effective_time`,`app_key`)values", msg.TableName())
 	params := []interface{}{}
 
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString("(?,?,?,?,?,?);")
+			buffer.WriteString("(?,?,?,?,?,?,?);")
 		} else {
-			buffer.WriteString("(?,?,?,?,?,?),")
+			buffer.WriteString("(?,?,?,?,?,?,?),")
 		}
-		params = append(params, item.UserId, item.TargetId, item.MsgId, item.MsgTime, item.MsgSeq, item.AppKey)
+		params = append(params, item.UserId, item.TargetId, item.MsgId, item.MsgTime, item.MsgSeq, item.EffectiveTime, item.AppKey)
 	}
 
 	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
@@ -74,12 +76,13 @@ func (msg GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, star
 	retItems := []*models.GroupDelHisMsg{}
 	for _, item := range items {
 		retItems = append(retItems, &models.GroupDelHisMsg{
-			UserId:   item.UserId,
-			TargetId: item.TargetId,
-			MsgId:    item.MsgId,
-			MsgTime:  item.MsgTime,
-			MsgSeq:   item.MsgSeq,
-			AppKey:   item.AppKey,
+			UserId:        item.UserId,
+			TargetId:      item.TargetId,
+			MsgId:         item.MsgId,
+			MsgTime:       item.MsgTime,
+			MsgSeq:        item.MsgSeq,
+			EffectiveTime: item.EffectiveTime,
+			AppKey:        item.AppKey,
 		})
 	}
 	return retItems, err
@@ -100,12 +103,13 @@ func (msg GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId stri
 	retItems := []*models.GroupDelHisMsg{}
 	for _, item := range items {
 		retItems = append(retItems, &models.GroupDelHisMsg{
-			UserId:   item.UserId,
-			TargetId: item.TargetId,
-			MsgId:    item.MsgId,
-			MsgTime:  item.MsgTime,
-			MsgSeq:   item.MsgSeq,
-			AppKey:   item.AppKey,
+			UserId:        item.UserId,
+			TargetId:      item.TargetId,
+			MsgId:         item.MsgId,
+			MsgTime:       item.MsgTime,
+			MsgSeq:        item.MsgSeq,
+			EffectiveTime: item.EffectiveTime,
+			AppKey:        item.AppKey,
 		})
 	}
 	return retItems, err

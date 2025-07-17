@@ -445,6 +445,10 @@ func (msg *GroupHisMsgDao) UpdateMsgExset(appkey, converId, msgId string, ext []
 	return err
 }
 
+func (msg *GroupHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error {
+	return nil
+}
+
 // TODO need batch delete
 func (msg *GroupHisMsgDao) DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error {
 	collection := msg.getCollection()

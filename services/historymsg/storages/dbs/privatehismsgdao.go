@@ -8,26 +8,30 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type PrivateHisMsgDao struct {
-	ID          int64  `gorm:"primary_key"`
-	ConverId    string `gorm:"conver_id"`
-	SenderId    string `gorm:"sender_id"`
-	ReceiverId  string `gorm:"receiver_id"`
-	MsgType     string `gorm:"msg_type"`
-	ChannelType int    `gorm:"channel_type"`
-	SendTime    int64  `gorm:"send_time"`
-	MsgId       string `gorm:"msg_id"`
-	MsgSeqNo    int64  `gorm:"msg_seq_no"`
-	MsgBody     []byte `gorm:"msg_body"`
-	IsRead      int    `gorm:"is_read"`
-	AppKey      string `gorm:"app_key"`
-	IsDelete    int    `gorm:"is_delete"`
-	IsExt       int    `gorm:"is_ext"`
-	IsExset     int    `gorm:"is_exset"`
-	MsgExt      []byte `hbase:"msg_ext"`
-	MsgExset    []byte `hbase:"msg_exset"`
+	ID                int64  `gorm:"primary_key"`
+	ConverId          string `gorm:"conver_id"`
+	SenderId          string `gorm:"sender_id"`
+	ReceiverId        string `gorm:"receiver_id"`
+	MsgType           string `gorm:"msg_type"`
+	ChannelType       int    `gorm:"channel_type"`
+	SendTime          int64  `gorm:"send_time"`
+	MsgId             string `gorm:"msg_id"`
+	MsgSeqNo          int64  `gorm:"msg_seq_no"`
+	MsgBody           []byte `gorm:"msg_body"`
+	IsRead            int    `gorm:"is_read"`
+	AppKey            string `gorm:"app_key"`
+	IsDelete          int    `gorm:"is_delete"`
+	IsExt             int    `gorm:"is_ext"`
+	IsExset           int    `gorm:"is_exset"`
+	MsgExt            []byte `hbase:"msg_ext"`
+	MsgExset          []byte `hbase:"msg_exset"`
+	DestroyTime       int64  `gorm:"destroy_time"`
+	LifeTimeAfterRead int64  `gorm:"life_time_after_read"`
 }
 
 func (msg PrivateHisMsgDao) TableName() string {
@@ -36,22 +40,24 @@ func (msg PrivateHisMsgDao) TableName() string {
 
 func (msg PrivateHisMsgDao) SavePrivateHisMsg(item models.PrivateHisMsg) error {
 	pMsg := PrivateHisMsgDao{
-		ConverId:    item.ConverId,
-		SenderId:    item.SenderId,
-		ReceiverId:  item.ReceiverId,
-		ChannelType: int(item.ChannelType),
-		MsgType:     item.MsgType,
-		MsgId:       item.MsgId,
-		SendTime:    item.SendTime,
-		MsgSeqNo:    item.MsgSeqNo,
-		MsgBody:     item.MsgBody,
-		AppKey:      item.AppKey,
-		IsExt:       item.IsExt,
-		IsExset:     item.IsExset,
-		MsgExt:      item.MsgExt,
-		MsgExset:    item.MsgExset,
-		IsDelete:    item.IsDelete,
-		IsRead:      item.IsRead,
+		ConverId:          item.ConverId,
+		SenderId:          item.SenderId,
+		ReceiverId:        item.ReceiverId,
+		ChannelType:       int(item.ChannelType),
+		MsgType:           item.MsgType,
+		MsgId:             item.MsgId,
+		SendTime:          item.SendTime,
+		MsgSeqNo:          item.MsgSeqNo,
+		MsgBody:           item.MsgBody,
+		AppKey:            item.AppKey,
+		IsExt:             item.IsExt,
+		IsExset:           item.IsExset,
+		MsgExt:            item.MsgExt,
+		MsgExset:          item.MsgExset,
+		IsDelete:          item.IsDelete,
+		IsRead:            item.IsRead,
+		DestroyTime:       item.DestroyTime,
+		LifeTimeAfterRead: item.LifeTimeAfterRead,
 	}
 	err := dbcommons.GetDb().Create(&pMsg).Error
 	return err
@@ -92,45 +98,46 @@ func (msg PrivateHisMsgDao) QryLatestMsg(appkey, converId string) (*models.Priva
 }
 
 func (msg PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.PrivateHisMsg, error) {
+	curr := time.Now().UnixMilli()
 	var items []*PrivateHisMsgDao
 	params := []interface{}{}
-	condition := "app_key=? and conver_id=?"
+	hismsgTableName := msg.TableName()
+	delHismsgTableName := (&PrivateDelHisMsgDao{}).TableName()
+	sql := fmt.Sprintf("select his.* from %s as his left join %s as delhis on his.app_key=delhis.app_key and delhis.user_id=? and delhis.target_id=? and his.msg_id=delhis.msg_id where his.app_key=? and his.conver_id=?", hismsgTableName, delHismsgTableName)
+	params = append(params, userId)
+	params = append(params, targetId)
 	params = append(params, appkey)
 	params = append(params, converId)
 
-	hismsgsTable := msg.TableName()
-	delHismsgsTable := (&PrivateDelHisMsgDao{}).TableName()
-	condition = condition + fmt.Sprintf(" and not exists (select msg_id from %s where app_key=? and user_id=? and target_id=? and %s.msg_id=%s.msg_id)", delHismsgsTable, hismsgsTable, delHismsgsTable)
-	params = append(params, appkey)
-	params = append(params, userId)
-	params = append(params, targetId)
-
-	orderStr := "send_time desc"
+	orderStr := "his.send_time desc"
 	start := startTime
 	if isPositiveOrder {
-		orderStr = "send_time asc"
+		orderStr = "his.send_time asc"
 		if start < cleanTime {
 			start = cleanTime
 		}
-		condition = condition + " and send_time>?"
+		sql = sql + " and his.send_time>?"
 		params = append(params, start)
 	} else {
 		if start <= 0 {
 			start = time.Now().UnixMilli()
+			start = curr
 		}
-		condition = condition + " and send_time<?"
+		sql = sql + " and his.send_time<?"
 		params = append(params, start)
 		if cleanTime > 0 {
-			condition = condition + " and send_time>?"
+			sql = sql + " and his.send_time>?"
 			params = append(params, cleanTime)
 		}
 	}
 	if len(msgTypes) > 0 {
-		condition = condition + " and msg_type in (?)"
+		sql = sql + " and his.msg_type in (?)"
 		params = append(params, msgTypes)
 	}
-	condition = condition + " and is_delete=0"
-	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	sql = sql + " and his.is_delete=0 and delhis.msg_id is null"
+	sql = sql + " and his.is_delete=0 and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
+	params = append(params, curr)
+	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if !isPositiveOrder {
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].SendTime < items[j].SendTime
@@ -144,6 +151,7 @@ func (msg PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targe
 }
 
 func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
+	curr := time.Now().UnixMilli()
 	var items []*PrivateHisMsgDao
 	params := []interface{}{}
 	condition := "app_key=? and conver_id=?"
@@ -161,7 +169,7 @@ func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64,
 		params = append(params, start)
 	} else {
 		if start <= 0 {
-			start = time.Now().UnixMilli()
+			start = curr
 		}
 		condition = condition + " and send_time<?"
 		params = append(params, start)
@@ -179,7 +187,8 @@ func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64,
 		condition = condition + " and msg_type in (?)"
 		params = append(params, msgTypes)
 	}
-	condition = condition + " and is_delete=0"
+	condition = condition + " and is_delete=0 and (destroy_time=0 or destroy_time>?)"
+	params = append(params, curr)
 
 	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if !isPositiveOrder {
@@ -198,8 +207,16 @@ func (msg PrivateHisMsgDao) MarkReadByMsgIds(appkey, converId string, msgIds []s
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id in (?)", appkey, converId, msgIds).Update("is_read", 1).Error
 }
 
+func (msg PrivateHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error {
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_id in (?) and life_time_after_read>0", appkey, converId, msgIds).Update("destroy_time", gorm.Expr("(UNIX_TIMESTAMP(NOW(3))*1000)+life_time_after_read")).Error
+}
+
 func (msg PrivateHisMsgDao) MarkReadByScope(appkey, converId string, start, end int64) error {
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_index>=? and msg_index<=?", appkey, converId, start, end).Update("is_read", 1).Error
+}
+
+func (msg PrivateHisMsgDao) UpdateDestroyTimeAfterReadByScope(appkey, converId string, start, end int64) error {
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and msg_index>=? and msg_index<=? and life_time_after_read>0", appkey, converId, start, end).Update("destroy_time", gorm.Expr("(UNIX_TIMESTAMP(NOW(3))*1000)+life_time_after_read")).Error
 }
 
 func (msg PrivateHisMsgDao) FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*models.PrivateHisMsg, error) {
@@ -270,21 +287,23 @@ func (msg PrivateHisMsgDao) DelSomeoneMsgsBaseTime(appkey, converId string, clea
 func dbMsg2PrivateMsg(dbMsg *PrivateHisMsgDao) *models.PrivateHisMsg {
 	return &models.PrivateHisMsg{
 		HisMsg: models.HisMsg{
-			ConverId:    dbMsg.ConverId,
-			SenderId:    dbMsg.SenderId,
-			ReceiverId:  dbMsg.ReceiverId,
-			ChannelType: pbobjs.ChannelType(dbMsg.ChannelType),
-			MsgType:     dbMsg.MsgType,
-			MsgId:       dbMsg.MsgId,
-			SendTime:    dbMsg.SendTime,
-			MsgSeqNo:    dbMsg.MsgSeqNo,
-			MsgBody:     dbMsg.MsgBody,
-			AppKey:      dbMsg.AppKey,
-			IsExt:       dbMsg.IsExt,
-			IsExset:     dbMsg.IsExset,
-			MsgExt:      dbMsg.MsgExt,
-			MsgExset:    dbMsg.MsgExset,
-			IsDelete:    dbMsg.IsDelete,
+			ConverId:          dbMsg.ConverId,
+			SenderId:          dbMsg.SenderId,
+			ReceiverId:        dbMsg.ReceiverId,
+			ChannelType:       pbobjs.ChannelType(dbMsg.ChannelType),
+			MsgType:           dbMsg.MsgType,
+			MsgId:             dbMsg.MsgId,
+			SendTime:          dbMsg.SendTime,
+			MsgSeqNo:          dbMsg.MsgSeqNo,
+			MsgBody:           dbMsg.MsgBody,
+			AppKey:            dbMsg.AppKey,
+			IsExt:             dbMsg.IsExt,
+			IsExset:           dbMsg.IsExset,
+			MsgExt:            dbMsg.MsgExt,
+			MsgExset:          dbMsg.MsgExset,
+			IsDelete:          dbMsg.IsDelete,
+			DestroyTime:       dbMsg.DestroyTime,
+			LifeTimeAfterRead: dbMsg.LifeTimeAfterRead,
 		},
 		IsRead: dbMsg.IsRead,
 	}

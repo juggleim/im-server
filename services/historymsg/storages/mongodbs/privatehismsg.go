@@ -301,6 +301,10 @@ func (msg *PrivateHisMsgDao) MarkReadByMsgIds(appkey, converId string, msgIds []
 	return err
 }
 
+func (msg *PrivateHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error {
+	return nil
+}
+
 func (msg *PrivateHisMsgDao) MarkReadByScope(appkey, converId string, start, end int64) error {
 	collection := msg.getCollection()
 	if collection == nil {
@@ -317,6 +321,10 @@ func (msg *PrivateHisMsgDao) MarkReadByScope(appkey, converId string, start, end
 	}
 	_, err := collection.UpdateMany(context.TODO(), filter, update)
 	return err
+}
+
+func (msg *PrivateHisMsgDao) UpdateDestroyTimeAfterReadByScope(appkey, converId string, start, end int64) error {
+	return nil
 }
 
 func (msg *PrivateHisMsgDao) FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*models.PrivateHisMsg, error) {

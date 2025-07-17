@@ -25,6 +25,8 @@ type MsgInfo struct {
 	ChannelType pbobjs.ChannelType
 	ConverId    string
 	MsgId       string
+	MsgTime     int64
+	MsgSeq      int64
 	SenderId    string
 	//readinfo
 	ReadMembers map[string]int64
@@ -34,6 +36,9 @@ type MsgInfo struct {
 	//exset
 	MsgExsetMap     map[string][]*pbobjs.MsgExtItem
 	MsgExsetUniqMap map[string]bool
+
+	DestroyTime       int64
+	LifeTimeAfterRead int64
 }
 
 func (info *MsgInfo) AddReadMembers(members map[string]int64) (bool, int) {
@@ -205,6 +210,10 @@ func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) 
 					msgExset = grpMsg.MsgExset
 					msgInfo.MemberCount = grpMsg.MemberCount
 					msgInfo.SenderId = grpMsg.SenderId
+					msgInfo.MsgTime = grpMsg.SendTime
+					msgInfo.MsgSeq = grpMsg.MsgSeqNo
+					msgInfo.DestroyTime = grpMsg.DestroyTime
+					msgInfo.LifeTimeAfterRead = grpMsg.LifeTimeAfterRead
 
 					//readinfo
 					readInfoStorage := storages.NewReadInfoStorage()
@@ -224,6 +233,10 @@ func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) 
 					msgExt = priMsg.MsgExt
 					msgExset = priMsg.MsgExset
 					msgInfo.SenderId = priMsg.SenderId
+					msgInfo.MsgTime = priMsg.SendTime
+					msgInfo.MsgSeq = priMsg.MsgSeqNo
+					msgInfo.DestroyTime = priMsg.DestroyTime
+					msgInfo.LifeTimeAfterRead = priMsg.LifeTimeAfterRead
 				}
 			}
 			if len(msgExt) > 0 {

@@ -24,6 +24,10 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	addedTime := time.Now()
+
+	grpHisStorage := storages.NewGroupHisMsgStorage()
+	grpDelMsgs := []models.GroupDelHisMsg{}
+	allReadedMsgIds := []string{}
 	for _, msgId := range req.MsgIds {
 		readInfo := GetMsgInfo(appkey, req.GroupId, msgId, req.ChannelType)
 		if readInfo.SenderId == userId {
@@ -42,8 +46,22 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 				CreatedTime: addedTime.UnixMilli(),
 			})
 			//update hismsg
-			grpHisStorage := storages.NewGroupHisMsgStorage()
 			grpHisStorage.UpdateReadCount(appkey, req.GroupId, msgId, readCount)
+			//update msg destroy time after read
+			if readInfo.LifeTimeAfterRead > 0 {
+				grpDelMsgs = append(grpDelMsgs, models.GroupDelHisMsg{
+					UserId:        userId,
+					TargetId:      req.GroupId,
+					MsgId:         msgId,
+					MsgTime:       readInfo.MsgTime,
+					MsgSeq:        readInfo.MsgSeq,
+					EffectiveTime: addedTime.UnixMilli() + readInfo.LifeTimeAfterRead,
+					AppKey:        appkey,
+				})
+				if readCount >= readInfo.MemberCount {
+					allReadedMsgIds = append(allReadedMsgIds, msgId)
+				}
+			}
 			ntf := &GrpReadNtf{
 				Msgs: []*GrpReadMsg{},
 			}
@@ -59,8 +77,14 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 				Flags:      msgdefines.SetCmdMsg(0),
 				ToUserIds:  []string{readInfo.SenderId},
 			}, &bases.NoNotifySenderOption{}, &bases.MarkFromApiOption{})
-
 		}
+	}
+	if len(grpDelMsgs) > 0 {
+		grpDelMsgStorage := storages.NewGroupDelHisMsgStorage()
+		grpDelMsgStorage.BatchCreate(grpDelMsgs)
+	}
+	if len(allReadedMsgIds) > 0 {
+		grpHisStorage.UpdateDestroyTimeAfterReadByMsgIds(appkey, req.GroupId, allReadedMsgIds)
 	}
 }
 

@@ -114,6 +114,7 @@ func markReadPrivateMsgs(ctx context.Context, userId string, req *pbobjs.MarkRea
 		}
 		if len(msgIds) > 0 {
 			storage.MarkReadByMsgIds(appkey, converId, msgIds)
+			storage.UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, msgIds)
 		}
 	}
 	if len(req.IndexScopes) > 0 {
@@ -128,6 +129,7 @@ func markReadPrivateMsgs(ctx context.Context, userId string, req *pbobjs.MarkRea
 				latestReadMsgIndex = end
 			}
 			storage.MarkReadByScope(appkey, converId, start, end)
+			storage.UpdateDestroyTimeAfterReadByScope(appkey, converId, start, end)
 			markReadMsg.IndexScopes = append(markReadMsg.IndexScopes, &IndexScope{
 				StartIndex: start,
 				EndIndex:   end,

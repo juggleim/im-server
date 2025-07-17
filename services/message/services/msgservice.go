@@ -72,24 +72,30 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 			return errs.IMErrorCode_MSG_NOT_FRIEND, msgId, sendTime, 0, upMsg.ClientUid, nil
 		}
 	}
+	var destroyTime int64 = 0
+	if upMsg.LifeTime > 0 {
+		destroyTime = sendTime + upMsg.LifeTime
+	}
 	downMsg4Sendbox := &pbobjs.DownMsg{
-		SenderId:       senderId,
-		TargetId:       receiverId,
-		ChannelType:    pbobjs.ChannelType_Private,
-		MsgType:        upMsg.MsgType,
-		MsgId:          msgId,
-		MsgSeqNo:       msgSeq,
-		MsgContent:     upMsg.MsgContent,
-		MsgTime:        sendTime,
-		Flags:          upMsg.Flags,
-		ClientUid:      upMsg.ClientUid,
-		IsSend:         true,
-		MentionInfo:    upMsg.MentionInfo,
-		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
-		TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
-		MergedMsgs:     upMsg.MergedMsgs,
-		PushData:       upMsg.PushData,
-		SearchText:     upMsg.SearchText,
+		SenderId:          senderId,
+		TargetId:          receiverId,
+		ChannelType:       pbobjs.ChannelType_Private,
+		MsgType:           upMsg.MsgType,
+		MsgId:             msgId,
+		MsgSeqNo:          msgSeq,
+		MsgContent:        upMsg.MsgContent,
+		MsgTime:           sendTime,
+		Flags:             upMsg.Flags,
+		ClientUid:         upMsg.ClientUid,
+		IsSend:            true,
+		MentionInfo:       upMsg.MentionInfo,
+		ReferMsg:          commonservices.FillReferMsg(ctx, upMsg),
+		TargetUserInfo:    commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
+		MergedMsgs:        upMsg.MergedMsgs,
+		PushData:          upMsg.PushData,
+		SearchText:        upMsg.SearchText,
+		DestroyTime:       destroyTime,
+		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 	msglogs.LogMsg(ctx, downMsg4Sendbox)
@@ -100,22 +106,24 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	commonservices.SubPrivateMsg(ctx, msgId, downMsg4Sendbox)
 
 	downMsg := &pbobjs.DownMsg{
-		SenderId:       senderId,
-		TargetId:       senderId,
-		ChannelType:    pbobjs.ChannelType_Private,
-		MsgType:        upMsg.MsgType,
-		MsgId:          msgId,
-		MsgSeqNo:       msgSeq,
-		MsgContent:     upMsg.MsgContent,
-		MsgTime:        sendTime,
-		Flags:          upMsg.Flags,
-		ClientUid:      upMsg.ClientUid,
-		MentionInfo:    upMsg.MentionInfo,
-		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
-		TargetUserInfo: commonservices.GetSenderUserInfo(ctx),
-		MergedMsgs:     upMsg.MergedMsgs,
-		PushData:       upMsg.PushData,
-		SearchText:     upMsg.SearchText,
+		SenderId:          senderId,
+		TargetId:          senderId,
+		ChannelType:       pbobjs.ChannelType_Private,
+		MsgType:           upMsg.MsgType,
+		MsgId:             msgId,
+		MsgSeqNo:          msgSeq,
+		MsgContent:        upMsg.MsgContent,
+		MsgTime:           sendTime,
+		Flags:             upMsg.Flags,
+		ClientUid:         upMsg.ClientUid,
+		MentionInfo:       upMsg.MentionInfo,
+		ReferMsg:          commonservices.FillReferMsg(ctx, upMsg),
+		TargetUserInfo:    commonservices.GetSenderUserInfo(ctx),
+		MergedMsgs:        upMsg.MergedMsgs,
+		PushData:          upMsg.PushData,
+		SearchText:        upMsg.SearchText,
+		DestroyTime:       destroyTime,
+		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
 	}
 
 	//check merged msg

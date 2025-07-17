@@ -24,19 +24,20 @@ func SavePrivateHisMsg(ctx context.Context, converId, senderId, receiverId strin
 	privateHisMsgStorage := storages.NewPrivateHisMsgStorage()
 	var index int64 = downMsg.MsgSeqNo
 	msgBs, _ := tools.PbMarshal(downMsg)
-
 	privateHisMsgStorage.SavePrivateHisMsg(models.PrivateHisMsg{
 		HisMsg: models.HisMsg{
-			ConverId:    converId,
-			SenderId:    senderId,
-			ReceiverId:  receiverId,
-			ChannelType: pbobjs.ChannelType_Private,
-			MsgType:     downMsg.MsgType,
-			MsgId:       downMsg.MsgId,
-			SendTime:    downMsg.MsgTime,
-			MsgSeqNo:    index,
-			MsgBody:     msgBs,
-			AppKey:      appkey,
+			ConverId:          converId,
+			SenderId:          senderId,
+			ReceiverId:        receiverId,
+			ChannelType:       pbobjs.ChannelType_Private,
+			MsgType:           downMsg.MsgType,
+			MsgId:             downMsg.MsgId,
+			SendTime:          downMsg.MsgTime,
+			MsgSeqNo:          index,
+			MsgBody:           msgBs,
+			DestroyTime:       downMsg.DestroyTime,
+			LifeTimeAfterRead: downMsg.LifeTimeAfterRead,
+			AppKey:            appkey,
 		},
 	})
 }
@@ -46,16 +47,18 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 
 	err := grpHisMsgStorage.SaveGroupHisMsg(models.GroupHisMsg{
 		HisMsg: models.HisMsg{
-			ConverId:    converId,
-			SenderId:    bases.GetRequesterIdFromCtx(ctx),
-			ReceiverId:  bases.GetTargetIdFromCtx(ctx),
-			ChannelType: pbobjs.ChannelType_Group,
-			MsgType:     downMsg.MsgType,
-			MsgId:       downMsg.MsgId,
-			SendTime:    downMsg.MsgTime,
-			MsgSeqNo:    downMsg.MsgSeqNo,
-			MsgBody:     msgBs,
-			AppKey:      bases.GetAppKeyFromCtx(ctx),
+			ConverId:          converId,
+			SenderId:          bases.GetRequesterIdFromCtx(ctx),
+			ReceiverId:        bases.GetTargetIdFromCtx(ctx),
+			ChannelType:       pbobjs.ChannelType_Group,
+			MsgType:           downMsg.MsgType,
+			MsgId:             downMsg.MsgId,
+			SendTime:          downMsg.MsgTime,
+			MsgSeqNo:          downMsg.MsgSeqNo,
+			MsgBody:           msgBs,
+			DestroyTime:       downMsg.DestroyTime,
+			LifeTimeAfterRead: downMsg.LifeTimeAfterRead,
+			AppKey:            bases.GetAppKeyFromCtx(ctx),
 		},
 		MemberCount: groupMemberCount,
 	})
