@@ -9,7 +9,7 @@ require (
 	github.com/avast/retry-go/v4 v4.5.1
 	github.com/aws/aws-sdk-go v1.55.7
 	github.com/google/uuid v1.6.0
-	github.com/juggleim/commons v1.0.11
+	github.com/juggleim/commons v1.0.12
 	github.com/levigross/grequests v0.0.0-20231203190023-9c307ef1f48d
 	github.com/minio/minio-go/v7 v7.0.93
 	github.com/qiniu/go-sdk/v7 v7.25.4
@@ -206,7 +206,7 @@ require (
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/jinzhu/gorm v1.9.16
 	github.com/juggleim/imserver-sdk-go v1.0.6 // indirect
-	github.com/juggleim/jugglechat-server v1.1.5
+	github.com/juggleim/jugglechat-server v1.1.7
 	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/livekit/protocol v1.39.3
