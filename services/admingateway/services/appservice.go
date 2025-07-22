@@ -83,7 +83,7 @@ func QryApps(limit int64, offset string) *Apps {
 				AppName:      dbApp.AppName,
 				CreatedTime:  dbApp.CreatedTime.UnixMilli(),
 				AppType:      dbApp.AppType,
-				MaxUserCount: 100,
+				MaxUserCount: 1000000,
 			}
 			storage := userStorage.NewUserStorage()
 			app.CurUserCount = storage.Count(dbApp.AppKey)
