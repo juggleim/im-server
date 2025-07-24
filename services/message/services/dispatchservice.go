@@ -76,7 +76,7 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 	sendTime := RegenateSendTime(appkey, receiverId, msg.MsgTime)
 	msg.MsgTime = sendTime
 	//handle conversation check, such as undisturb, unread index
-	HandleDownMsgByConver(ctx, receiverId, msg.TargetId, msg.ChannelType, msg)
+	HandleDownMsgByConver(ctx, receiverId, msg.TargetId, msg.SubChannel, msg.ChannelType, msg)
 	targetUserInfo := commonservices.GetTargetUserInfo(ctx, receiverId)
 	if targetUserInfo.UserType == pbobjs.UserType_Bot {
 		if msg.ChannelType == pbobjs.ChannelType_Private || (msg.ChannelType == pbobjs.ChannelType_Group && commonservices.IsDirectMentionedMe(targetUserInfo.UserId, msg)) {
@@ -134,6 +134,7 @@ func copyDownMsg(msg *pbobjs.DownMsg) *pbobjs.DownMsg {
 		GrpMemberInfo:     msg.GrpMemberInfo,
 		DestroyTime:       msg.DestroyTime,
 		LifeTimeAfterRead: msg.LifeTimeAfterRead,
+		SubChannel:        msg.SubChannel,
 	}
 }
 

@@ -99,12 +99,13 @@ func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg, userC
 		if userConvers == nil {
 			userConvers = getUserConvers(appkey, userId)
 		}
-		userConvers.AppendMention(msg.TargetId, msg.ChannelType, &models.MentionMsg{
+		userConvers.AppendMention(msg.TargetId, msg.SubChannel, msg.ChannelType, &models.MentionMsg{
 			SenderId:    msg.SenderId,
 			MsgId:       msg.MsgId,
 			MsgTime:     msg.MsgTime,
 			MsgIndex:    msg.UnreadIndex,
 			MentionType: msg.MentionInfo.MentionType,
+			SubChannel:  msg.SubChannel,
 		})
 		//save mentioned msg
 		storage := storages.NewMentionMsgStorage()
@@ -112,6 +113,7 @@ func HandleMentionedMsg(appkey string, userId string, msg *pbobjs.DownMsg, userC
 			UserId:      userId,
 			TargetId:    msg.TargetId,
 			ChannelType: msg.ChannelType,
+			SubChannel:  msg.SubChannel,
 			SenderId:    msg.SenderId,
 			MentionType: msg.MentionInfo.MentionType,
 			MsgId:       msg.MsgId,
@@ -141,7 +143,7 @@ func QryGlobalConvers(ctx context.Context, req *pbobjs.QryGlobalConversReq) *pbo
 		Convers: []*pbobjs.GlobalConver{},
 	}
 	storage := storages.NewGlobalConversationStorage()
-	dbConvers, err := storage.QryConversations(appkey, targetId, channelType, startTime, count, isPositiveOrder, req.ExcludeUserIds)
+	dbConvers, err := storage.QryConversations(appkey, targetId, req.SubChannel, channelType, startTime, count, isPositiveOrder, req.ExcludeUserIds)
 	if err == nil {
 		for _, dbConver := range dbConvers {
 			idStr, _ := tools.EncodeInt(dbConver.Id)
@@ -229,6 +231,7 @@ type ClearUnreadConver struct {
 	TargetId           string `json:"target_id"`
 	ChannelType        int32  `json:"channel_type"`
 	LatestReadMsgIndex int64  `json:"latest_read_index"`
+	SubChannel         string `json:"sub_channel"`
 }
 
 type MarkUnreadConvers struct {
@@ -250,6 +253,7 @@ type UndisturbConver struct {
 	TargetId      string `json:"target_id"`
 	ChannelType   int32  `json:"channel_type"`
 	UndisturbType int32  `json:"undisturb_type"`
+	SubChannel    string `json:"sub_channel"`
 }
 
 func GetGlobalConverId(senderId, targetId string, channelType pbobjs.ChannelType) string {

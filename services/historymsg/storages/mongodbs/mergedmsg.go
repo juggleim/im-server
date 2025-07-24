@@ -20,6 +20,7 @@ type MergedMsgDao struct {
 	FromId      string    `bson:"from_id"`
 	TargetId    string    `bson:"target_id"`
 	ChannelType int       `bson:"channel_type"`
+	SubChannel  string    `bson:"sub_channel"`
 	MsgId       string    `bson:"msg_id"`
 	MsgTime     int64     `bson:"msg_time"`
 	MsgBody     []byte    `bson:"msg_body"`
@@ -60,6 +61,7 @@ func (msg *MergedMsgDao) SaveMergedMsg(item models.MergedMsg) error {
 		FromId:      item.FromId,
 		TargetId:    item.TargetId,
 		ChannelType: int(item.ChannelType),
+		SubChannel:  item.SubChannel,
 		MsgId:       item.MsgId,
 		MsgTime:     item.MsgTime,
 		MsgBody:     item.MsgBody,
@@ -86,6 +88,7 @@ func (msg *MergedMsgDao) BatchSaveMergedMsgs(items []models.MergedMsg) error {
 			FromId:      item.FromId,
 			TargetId:    item.TargetId,
 			ChannelType: int(item.ChannelType),
+			SubChannel:  item.SubChannel,
 			MsgId:       item.MsgId,
 			MsgTime:     item.MsgTime,
 			MsgBody:     item.MsgBody,
@@ -133,6 +136,7 @@ func (msg *MergedMsgDao) QryMergedMsgs(appkey, parentMsgId string, startTime int
 				FromId:      item.FromId,
 				TargetId:    item.TargetId,
 				ChannelType: pbobjs.ChannelType(item.ChannelType),
+				SubChannel:  item.SubChannel,
 				MsgId:       item.MsgId,
 				MsgTime:     item.MsgTime,
 				MsgBody:     item.MsgBody,

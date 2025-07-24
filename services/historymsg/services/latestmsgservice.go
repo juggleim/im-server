@@ -34,12 +34,12 @@ func (item *LatestMsgItem) Update(msg *pbobjs.DownMsg) {
 	}
 }
 
-func getLatestMsgCacheKey(appkey, converId string, channelType pbobjs.ChannelType) string {
-	return fmt.Sprintf("%s_%s_%d", appkey, converId, channelType)
+func getLatestMsgCacheKey(appkey, converId, subChannel string, channelType pbobjs.ChannelType) string {
+	return fmt.Sprintf("%s_%s_%s_%d", appkey, converId, subChannel, channelType)
 }
-func GetLatestMsg(ctx context.Context, converId string, channelType pbobjs.ChannelType) *LatestMsgItem {
+func GetLatestMsg(ctx context.Context, converId, subChannel string, channelType pbobjs.ChannelType) *LatestMsgItem {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	key := getLatestMsgCacheKey(appkey, converId, channelType)
+	key := getLatestMsgCacheKey(appkey, converId, subChannel, channelType)
 	if val, exist := latestMsgCache.Get(key); exist {
 		return val.(*LatestMsgItem)
 	} else {
@@ -58,7 +58,7 @@ func GetLatestMsg(ctx context.Context, converId string, channelType pbobjs.Chann
 			}
 			if channelType == pbobjs.ChannelType_Private {
 				storage := storages.NewPrivateHisMsgStorage()
-				latestMsg, err := storage.QryLatestMsg(appkey, converId)
+				latestMsg, err := storage.QryLatestMsg(appkey, converId, subChannel)
 				if err == nil && latestMsg != nil {
 					item.LatestMsgId = latestMsg.MsgId
 					item.LatestMsgSeq = latestMsg.MsgSeqNo
@@ -66,7 +66,7 @@ func GetLatestMsg(ctx context.Context, converId string, channelType pbobjs.Chann
 				}
 			} else if channelType == pbobjs.ChannelType_Group {
 				storage := storages.NewGroupHisMsgStorage()
-				latestMsg, err := storage.QryLatestMsg(appkey, converId)
+				latestMsg, err := storage.QryLatestMsg(appkey, converId, subChannel)
 				if err == nil && latestMsg != nil {
 					item.LatestMsgId = latestMsg.MsgId
 					item.LatestMsgSeq = latestMsg.MsgSeqNo
@@ -103,8 +103,8 @@ func GetLatestMsg(ctx context.Context, converId string, channelType pbobjs.Chann
 	}
 }
 
-func IsLatestMsg(ctx context.Context, converId string, channelType pbobjs.ChannelType, msgId string, msgTime, msgSeq int64) bool {
-	latestMsg := GetLatestMsg(ctx, converId, channelType)
+func IsLatestMsg(ctx context.Context, converId, subChannel string, channelType pbobjs.ChannelType, msgId string, msgTime, msgSeq int64) bool {
+	latestMsg := GetLatestMsg(ctx, converId, subChannel, channelType)
 	if msgId == latestMsg.LatestMsgId || msgTime > latestMsg.LatestMsgTime {
 		return true
 	}

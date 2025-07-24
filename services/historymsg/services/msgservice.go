@@ -24,6 +24,7 @@ type MsgInfo struct {
 	Appkey      string
 	ChannelType pbobjs.ChannelType
 	ConverId    string
+	SubChannel  string
 	MsgId       string
 	MsgTime     int64
 	MsgSeq      int64
@@ -53,7 +54,7 @@ func (info *MsgInfo) AddReadMembers(members map[string]int64) (bool, int) {
 }
 
 func (info *MsgInfo) AddReadMember(memberId string, addedTime int64) (bool, int) {
-	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.MsgId, info.ChannelType)
+	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.SubChannel, info.MsgId, info.ChannelType)
 	lock := messageLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
@@ -66,7 +67,7 @@ func (info *MsgInfo) AddReadMember(memberId string, addedTime int64) (bool, int)
 }
 
 func (info *MsgInfo) GetReadMemberCount() int {
-	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.MsgId, info.ChannelType)
+	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.SubChannel, info.MsgId, info.ChannelType)
 	lock := messageLocks.GetLocks(key)
 	lock.RLock()
 	defer lock.RUnlock()
@@ -74,7 +75,7 @@ func (info *MsgInfo) GetReadMemberCount() int {
 }
 
 func (info *MsgInfo) SetMsgExt(ext *pbobjs.MsgExtItem) errs.IMErrorCode {
-	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.MsgId, info.ChannelType)
+	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.SubChannel, info.MsgId, info.ChannelType)
 	lock := messageLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
@@ -94,7 +95,7 @@ func (info *MsgInfo) SetMsgExt(ext *pbobjs.MsgExtItem) errs.IMErrorCode {
 }
 
 func (info *MsgInfo) DelMsgExt(extKey string) bool {
-	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.MsgId, info.ChannelType)
+	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.SubChannel, info.MsgId, info.ChannelType)
 	lock := messageLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
@@ -106,7 +107,7 @@ func (info *MsgInfo) DelMsgExt(extKey string) bool {
 }
 
 func (info *MsgInfo) ForeachMsgExt(f func(key string, ext *pbobjs.MsgExtItem)) {
-	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.MsgId, info.ChannelType)
+	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.SubChannel, info.MsgId, info.ChannelType)
 	lock := messageLocks.GetLocks(key)
 	lock.RLock()
 	defer lock.RUnlock()
@@ -116,7 +117,7 @@ func (info *MsgInfo) ForeachMsgExt(f func(key string, ext *pbobjs.MsgExtItem)) {
 }
 
 func (info *MsgInfo) AddMsgExset(ext *pbobjs.MsgExtItem) errs.IMErrorCode {
-	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.MsgId, info.ChannelType)
+	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.SubChannel, info.MsgId, info.ChannelType)
 	lock := messageLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
@@ -140,7 +141,7 @@ func (info *MsgInfo) AddMsgExset(ext *pbobjs.MsgExtItem) errs.IMErrorCode {
 }
 
 func (info *MsgInfo) DelMsgExset(extKey, extVal string) bool {
-	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.MsgId, info.ChannelType)
+	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.SubChannel, info.MsgId, info.ChannelType)
 	lock := messageLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
@@ -165,7 +166,7 @@ func (info *MsgInfo) DelMsgExset(extKey, extVal string) bool {
 }
 
 func (info *MsgInfo) ForeachMsgExset(f func(key string, exts []*pbobjs.MsgExtItem)) {
-	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.MsgId, info.ChannelType)
+	key := getMsgInfoCacheKey(info.Appkey, info.ConverId, info.SubChannel, info.MsgId, info.ChannelType)
 	lock := messageLocks.GetLocks(key)
 	lock.RLock()
 	defer lock.RUnlock()
@@ -174,12 +175,12 @@ func (info *MsgInfo) ForeachMsgExset(f func(key string, exts []*pbobjs.MsgExtIte
 	}
 }
 
-func getMsgInfoCacheKey(appkey, converId, msgId string, channelType pbobjs.ChannelType) string {
-	return fmt.Sprintf("%s_%s_%s_%d", appkey, msgId, converId, channelType)
+func getMsgInfoCacheKey(appkey, converId, subChannel, msgId string, channelType pbobjs.ChannelType) string {
+	return fmt.Sprintf("%s_%s_%s_%d_%s", appkey, msgId, converId, channelType, subChannel)
 }
 
-func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) *MsgInfo {
-	key := getMsgInfoCacheKey(appkey, converId, msgId, channelType)
+func GetMsgInfo(appkey, converId, subChannel, msgId string, channelType pbobjs.ChannelType) *MsgInfo {
+	key := getMsgInfoCacheKey(appkey, converId, subChannel, msgId, channelType)
 	if info, exist := messageCache.Get(key); exist {
 		return info.(*MsgInfo)
 	} else {
@@ -193,6 +194,7 @@ func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) 
 				Appkey:      appkey,
 				ChannelType: channelType,
 				ConverId:    converId,
+				SubChannel:  subChannel,
 				MsgId:       msgId,
 
 				ReadMembers:     make(map[string]int64),
@@ -204,7 +206,7 @@ func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) 
 			msgExset := []byte{}
 			if channelType == pbobjs.ChannelType_Group {
 				hisStorage := storages.NewGroupHisMsgStorage()
-				grpMsg, err := hisStorage.FindById(appkey, converId, msgId)
+				grpMsg, err := hisStorage.FindById(appkey, converId, subChannel, msgId)
 				if err == nil && grpMsg != nil {
 					msgExt = grpMsg.MsgExt
 					msgExset = grpMsg.MsgExset
@@ -217,7 +219,7 @@ func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) 
 
 					//readinfo
 					readInfoStorage := storages.NewReadInfoStorage()
-					infos, err := readInfoStorage.QryReadInfosByMsgId(appkey, converId, channelType, msgId, 0, GrpMsgReadInfoLimit)
+					infos, err := readInfoStorage.QryReadInfosByMsgId(appkey, converId, subChannel, channelType, msgId, 0, GrpMsgReadInfoLimit)
 					if err == nil {
 						members := make(map[string]int64)
 						for _, info := range infos {
@@ -228,7 +230,7 @@ func GetMsgInfo(appkey, converId, msgId string, channelType pbobjs.ChannelType) 
 				}
 			} else if channelType == pbobjs.ChannelType_Private {
 				hisStorage := storages.NewPrivateHisMsgStorage()
-				priMsg, err := hisStorage.FindById(appkey, converId, msgId)
+				priMsg, err := hisStorage.FindById(appkey, converId, subChannel, msgId)
 				if err == nil && priMsg != nil {
 					msgExt = priMsg.MsgExt
 					msgExset = priMsg.MsgExset

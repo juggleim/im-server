@@ -21,7 +21,7 @@ func (actor *PrivateMsgActor) OnReceive(ctx context.Context, input proto.Message
 		userId := bases.GetRequesterIdFromCtx(ctx)
 		exts := bases.GetExtsFromCtx(ctx)
 		if receiverId, exist := exts[commonservices.RpcExtKey_RealTargetId]; exist {
-			logs.WithContext(ctx).Infof("sender:%s\treceiver:%s\tflag:%d", userId, receiverId, upMsg.Flags)
+			logs.WithContext(ctx).Infof("sender:%s\treceiver:%s\tchannel:%s\tflag:%d", userId, receiverId, upMsg.SubChannel, upMsg.Flags)
 			code, msgId, sendTime, msgSeq, clientMsgId, modifiedMsg := services.SendPrivateMsg(ctx, userId, receiverId, upMsg)
 			userPubAck := bases.CreateUserPubAckWraper(ctx, code, msgId, sendTime, msgSeq, clientMsgId, modifiedMsg)
 			actor.Sender.Tell(userPubAck, actorsystem.NoSender)

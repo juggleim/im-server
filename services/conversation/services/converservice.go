@@ -39,6 +39,7 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 				UserId:      userId,
 				TargetId:    msg.TargetId,
 				ChannelType: msg.ChannelType,
+				SubChannel:  msg.SubChannel,
 				LatestMsgId: msg.MsgId,
 				// LatestMsg: msg,
 				SortTime:             sortTime,
@@ -49,7 +50,7 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 				HandleMentionedMsg(appkey, userId, msg, userConvers)
 			}
 			//save to db
-			userConvers.PersistConver(msg.TargetId, msg.ChannelType)
+			userConvers.PersistConver(msg.TargetId, msg.SubChannel, msg.ChannelType)
 		} else {
 			UpsertOfflineConversation(&ConversationCacheItem{
 				Appkey:      appkey,
@@ -68,11 +69,12 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 	}
 }
 
-func SaveNilConversationV2(ctx context.Context, appkey string, userId string, targetId string, channelType pbobjs.ChannelType) (errs.IMErrorCode, *pbobjs.Conversation) {
+func SaveNilConversationV2(ctx context.Context, appkey string, userId string, targetId, subChannel string, channelType pbobjs.ChannelType) (errs.IMErrorCode, *pbobjs.Conversation) {
 	sortTime := time.Now().UnixMilli()
 	resp := &pbobjs.Conversation{
 		UserId:      userId,
 		TargetId:    targetId,
+		SubChannel:  subChannel,
 		ChannelType: channelType,
 		SortTime:    sortTime,
 		SyncTime:    sortTime,
@@ -107,6 +109,8 @@ func SaveNilConversationV2(ctx context.Context, appkey string, userId string, ta
 		SortTime:    sortTime,
 		SyncTime:    sortTime,
 	})
+	//save to db
+	userConvers.PersistConver(targetId, subChannel, channelType)
 	//notify other device
 	addConver := &AddNilConver{
 		Conversation: &Conversation{
@@ -147,7 +151,7 @@ func SyncConversationsV2(ctx context.Context, appkey, userId string, startTime i
 func QryConverV2(ctx context.Context, userId string, req *pbobjs.QryConverReq) (errs.IMErrorCode, *pbobjs.Conversation) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userConvers := getUserConvers(appkey, userId)
-	conver := userConvers.QryConver(req.TargetId, req.ChannelType)
+	conver := userConvers.QryConver(req.TargetId, req.SubChannel, req.ChannelType)
 	if conver == nil {
 		return errs.IMErrorCode_SUCCESS, &pbobjs.Conversation{
 			TargetId:    req.TargetId,
@@ -197,7 +201,7 @@ func BatchQryConversV2(ctx context.Context, req *pbobjs.QryConverReq) (errs.IMEr
 	}
 	for _, uId := range req.UserIds {
 		userConvers := getUserConvers(appkey, uId)
-		conver := userConvers.QryConver(req.TargetId, req.ChannelType)
+		conver := userConvers.QryConver(req.TargetId, req.SubChannel, req.ChannelType)
 		if conver != nil {
 			ret.Conversations = append(ret.Conversations, &pbobjs.Conversation{
 				UserId:            conver.UserId,
@@ -276,6 +280,7 @@ func ClearUnreadV2(ctx context.Context, userId string, convers []*pbobjs.Convers
 				TargetId:           conver.TargetId,
 				ChannelType:        int32(conver.ChannelType),
 				LatestReadMsgIndex: msgIndex,
+				SubChannel:         conver.SubChannel,
 			})
 			if msgIndex > 0 {
 				readMsgId := conver.LatestReadMsgId
@@ -283,17 +288,17 @@ func ClearUnreadV2(ctx context.Context, userId string, convers []*pbobjs.Convers
 				if conver.LatestReadMsgTime <= 0 {
 					readMsgTime = time.Now().UnixMilli()
 				}
-				rowsAffected := userConvers.ClearUnread(conver.TargetId, conver.ChannelType, msgIndex, readMsgId, readMsgTime)
+				rowsAffected := userConvers.ClearUnread(conver.TargetId, conver.SubChannel, conver.ChannelType, msgIndex, readMsgId, readMsgTime)
 				if rowsAffected {
 					affected = true
-					userConvers.PersistConver(conver.TargetId, conver.ChannelType)
+					userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 				}
 			} else {
 				//TODO
-				rowsAffected := userConvers.DefaultClearUnread(conver.TargetId, conver.ChannelType)
+				rowsAffected := userConvers.DefaultClearUnread(conver.TargetId, conver.SubChannel, conver.ChannelType)
 				if rowsAffected {
 					affected = true
-					userConvers.PersistConver(conver.TargetId, conver.ChannelType)
+					userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 				}
 			}
 		}
@@ -327,9 +332,9 @@ func DelConversationV2(ctx context.Context, userId string, convers []*pbobjs.Con
 				TargetId:    conver.TargetId,
 				ChannelType: int32(conver.ChannelType),
 			})
-			affected := userConvers.DelConversation(conver.TargetId, conver.ChannelType)
+			affected := userConvers.DelConversation(conver.TargetId, conver.SubChannel, conver.ChannelType)
 			if affected {
-				userConvers.PersistConver(conver.TargetId, conver.ChannelType)
+				userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 			}
 		}
 		// bases.AsyncRpcCall(ctx, "del_conver_cache", userId, &pbobjs.ConversationsReq{
@@ -361,9 +366,9 @@ func MarkUnreadV2(ctx context.Context, userId string, req *pbobjs.ConversationsR
 				ChannelType: int32(conver.ChannelType),
 				UnreadTag:   int(conver.UnreadTag),
 			})
-			rowsAffected := userConvers.UpdateUnreadTag(conver.TargetId, conver.ChannelType, int(conver.UnreadTag))
+			rowsAffected := userConvers.UpdateUnreadTag(conver.TargetId, conver.SubChannel, conver.ChannelType, int(conver.UnreadTag))
 			if rowsAffected {
-				userConvers.PersistConver(conver.TargetId, conver.ChannelType)
+				userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 				affected = true
 			}
 		}
@@ -396,9 +401,9 @@ func SetTopConversV2(ctx context.Context, req *pbobjs.ConversationsReq) (errs.IM
 			if conver.IsTop > 0 {
 				t = currTime
 			}
-			affected := userConvers.UpdTopState(conver.TargetId, conver.ChannelType, int(conver.IsTop), t)
+			affected := userConvers.UpdTopState(conver.TargetId, conver.SubChannel, conver.ChannelType, int(conver.IsTop), t)
 			if affected {
-				userConvers.PersistConver(conver.TargetId, conver.ChannelType)
+				userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 			}
 			topConvers.Conversations = append(topConvers.Conversations, &Conversation{
 				TargetId:      conver.TargetId,
@@ -456,18 +461,20 @@ func UndisturbConversV2(ctx context.Context, req *pbobjs.UndisturbConversReq) er
 	userConvers := getUserConvers(appkey, userId)
 	needUnCacheConvers := []*pbobjs.Conversation{}
 	for _, item := range req.Items {
-		affected := userConvers.UpdateUndisturbType(item.TargetId, item.ChannelType, item.UndisturbType)
+		affected := userConvers.UpdateUndisturbType(item.TargetId, item.SubChannel, item.ChannelType, item.UndisturbType)
 		if affected {
-			userConvers.PersistConver(item.TargetId, item.ChannelType)
+			userConvers.PersistConver(item.TargetId, item.SubChannel, item.ChannelType)
 			needUnCacheConvers = append(needUnCacheConvers, &pbobjs.Conversation{
 				TargetId:    item.TargetId,
 				ChannelType: item.ChannelType,
+				SubChannel:  item.SubChannel,
 			})
 		}
 		convers.Conversations = append(convers.Conversations, &UndisturbConver{
 			TargetId:      item.TargetId,
 			ChannelType:   int32(item.ChannelType),
 			UndisturbType: item.UndisturbType,
+			SubChannel:    item.SubChannel,
 		})
 	}
 	if len(needUnCacheConvers) > 0 {
@@ -498,13 +505,15 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 		}
 		if conver.ChannelType == pbobjs.ChannelType_Private {
 			priConvers = append(priConvers, hisModels.ConverItem{
-				ConverId: commonservices.GetConversationId(userId, conver.TargetId, conver.ChannelType),
-				MsgId:    conver.LatestMsgId,
+				ConverId:   commonservices.GetConversationId(userId, conver.TargetId, conver.ChannelType),
+				SubChannel: conver.SubChannel,
+				MsgId:      conver.LatestMsgId,
 			})
 		} else if conver.ChannelType == pbobjs.ChannelType_Group {
 			grpConvers = append(grpConvers, hisModels.ConverItem{
-				ConverId: commonservices.GetConversationId(userId, conver.TargetId, conver.ChannelType),
-				MsgId:    conver.LatestMsgId,
+				ConverId:   commonservices.GetConversationId(userId, conver.TargetId, conver.ChannelType),
+				SubChannel: conver.SubChannel,
+				MsgId:      conver.LatestMsgId,
 			})
 		}
 	}
@@ -516,6 +525,7 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 			UserId:            conver.UserId,
 			TargetId:          conver.TargetId,
 			ChannelType:       conver.ChannelType,
+			SubChannel:        conver.SubChannel,
 			SortTime:          conver.SortTime,
 			SyncTime:          conver.SyncTime,
 			UnreadCount:       unreadCount,
@@ -561,10 +571,10 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 			// 	conversation.GroupInfo = commonservices.GetGroupInfoFromCache(ctx, conversation.TargetId)
 			// }
 			//mentions
-			mentionInfo := userConvers.GetMentionInfo(conver.TargetId, conver.ChannelType)
+			mentionInfo := userConvers.GetMentionInfo(conver.TargetId, conver.SubChannel, conver.ChannelType)
 			if mentionInfo == nil {
-				userConvers.AppendMention(conver.TargetId, conver.ChannelType, nil)
-				mentionInfo = userConvers.GetMentionInfo(conver.TargetId, conver.ChannelType)
+				userConvers.AppendMention(conver.TargetId, conver.SubChannel, conver.ChannelType, nil)
+				mentionInfo = userConvers.GetMentionInfo(conver.TargetId, conver.SubChannel, conver.ChannelType)
 			}
 			if mentionInfo != nil {
 				conversation.Mentions = &pbobjs.Mentions{

@@ -22,7 +22,7 @@ func SetMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	targetId := req.TargetId
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
-	msgInfo := GetMsgInfo(appkey, converId, req.MsgId, req.ChannelType)
+	msgInfo := GetMsgInfo(appkey, converId, req.SubChannel, req.MsgId, req.ChannelType)
 	optTime := time.Now().UnixMilli()
 	code := msgInfo.SetMsgExt(&pbobjs.MsgExtItem{
 		Key:       req.Ext.Key,
@@ -55,10 +55,10 @@ func SetMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	extItemsBs, _ := tools.PbMarshal(extItems)
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
-		storage.UpdateMsgExt(appkey, converId, req.MsgId, extItemsBs)
+		storage.UpdateMsgExt(appkey, converId, req.SubChannel, req.MsgId, extItemsBs)
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		storage := storages.NewGroupHisMsgStorage()
-		storage.UpdateMsgExt(appkey, converId, req.MsgId, extItemsBs)
+		storage.UpdateMsgExt(appkey, converId, req.SubChannel, req.MsgId, extItemsBs)
 	}
 	msgExt := &MsgExt{
 		MsgId: req.MsgId,
@@ -93,7 +93,7 @@ func DelMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
-	msgInfo := GetMsgInfo(appkey, converId, req.MsgId, req.ChannelType)
+	msgInfo := GetMsgInfo(appkey, converId, req.SubChannel, req.MsgId, req.ChannelType)
 	succ := msgInfo.DelMsgExt(req.Ext.Key)
 	if succ {
 		extItems := &pbobjs.MsgExtItems{
@@ -116,10 +116,10 @@ func DelMsgExt(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		extItemsBs, _ := tools.PbMarshal(extItems)
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			storage := storages.NewPrivateHisMsgStorage()
-			storage.UpdateMsgExt(appkey, converId, req.MsgId, extItemsBs)
+			storage.UpdateMsgExt(appkey, converId, req.SubChannel, req.MsgId, extItemsBs)
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
 			storage := storages.NewGroupHisMsgStorage()
-			storage.UpdateMsgExt(appkey, converId, req.MsgId, extItemsBs)
+			storage.UpdateMsgExt(appkey, converId, req.SubChannel, req.MsgId, extItemsBs)
 		}
 		msgExSet := &MsgExt{
 			MsgId: req.MsgId,
@@ -156,7 +156,7 @@ func QryMsgExts(ctx context.Context, req *pbobjs.QryMsgExtReq) (errs.IMErrorCode
 	msgMap := map[string][]byte{}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
-		msgs, err := storage.FindByIds(appkey, converId, req.MsgIds, 0)
+		msgs, err := storage.FindByIds(appkey, converId, req.SubChannel, req.MsgIds, 0)
 		if err == nil {
 			for _, msg := range msgs {
 				msgMap[msg.MsgId] = msg.MsgExt
@@ -164,7 +164,7 @@ func QryMsgExts(ctx context.Context, req *pbobjs.QryMsgExtReq) (errs.IMErrorCode
 		}
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		storage := storages.NewGroupHisMsgStorage()
-		msgs, err := storage.FindByIds(appkey, converId, req.MsgIds, 0)
+		msgs, err := storage.FindByIds(appkey, converId, req.SubChannel, req.MsgIds, 0)
 		if err == nil {
 			for _, msg := range msgs {
 				msgMap[msg.MsgId] = msg.MsgExt
@@ -196,7 +196,7 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
-	msgInfo := GetMsgInfo(appkey, converId, req.MsgId, req.ChannelType)
+	msgInfo := GetMsgInfo(appkey, converId, req.SubChannel, req.MsgId, req.ChannelType)
 	optTime := time.Now().UnixMilli()
 	code := msgInfo.AddMsgExset(&pbobjs.MsgExtItem{
 		Key:       req.Ext.Key,
@@ -236,10 +236,10 @@ func AddMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	extItemsBs, _ := tools.PbMarshal(extItems)
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
-		storage.UpdateMsgExset(appkey, converId, msgId, extItemsBs)
+		storage.UpdateMsgExset(appkey, converId, req.SubChannel, msgId, extItemsBs)
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		storage := storages.NewGroupHisMsgStorage()
-		storage.UpdateMsgExset(appkey, converId, msgId, extItemsBs)
+		storage.UpdateMsgExset(appkey, converId, req.SubChannel, msgId, extItemsBs)
 	}
 	msgExSet := &MsgExt{
 		MsgId: msgId,
@@ -282,7 +282,7 @@ func DelMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 
-	msgInfo := GetMsgInfo(appkey, converId, msgId, req.ChannelType)
+	msgInfo := GetMsgInfo(appkey, converId, req.SubChannel, msgId, req.ChannelType)
 	succ := msgInfo.DelMsgExset(req.Ext.Key, req.Ext.Value)
 	if succ {
 		extItems := &pbobjs.MsgExtItems{
@@ -312,10 +312,10 @@ func DelMsgExSet(ctx context.Context, req *pbobjs.MsgExt) errs.IMErrorCode {
 		extItemsBs, _ := tools.PbMarshal(extItems)
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			storage := storages.NewPrivateHisMsgStorage()
-			storage.UpdateMsgExset(appkey, converId, req.MsgId, extItemsBs)
+			storage.UpdateMsgExset(appkey, converId, req.SubChannel, req.MsgId, extItemsBs)
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
 			storage := storages.NewGroupHisMsgStorage()
-			storage.UpdateMsgExset(appkey, converId, req.MsgId, extItemsBs)
+			storage.UpdateMsgExset(appkey, converId, req.SubChannel, req.MsgId, extItemsBs)
 		}
 		msgExSet := &MsgExt{
 			MsgId: msgId,
@@ -360,7 +360,7 @@ func QryMsgExSets(ctx context.Context, req *pbobjs.QryMsgExtReq) (errs.IMErrorCo
 	msgMap := map[string][]byte{}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
-		msgs, err := storage.FindByIds(appkey, converId, req.MsgIds, 0)
+		msgs, err := storage.FindByIds(appkey, converId, req.SubChannel, req.MsgIds, 0)
 		if err == nil {
 			for _, msg := range msgs {
 				msgMap[msg.MsgId] = msg.MsgExset
@@ -368,7 +368,7 @@ func QryMsgExSets(ctx context.Context, req *pbobjs.QryMsgExtReq) (errs.IMErrorCo
 		}
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		storage := storages.NewGroupHisMsgStorage()
-		msgs, err := storage.FindByIds(appkey, converId, req.MsgIds, 0)
+		msgs, err := storage.FindByIds(appkey, converId, req.SubChannel, req.MsgIds, 0)
 		if err == nil {
 			for _, msg := range msgs {
 				msgMap[msg.MsgId] = msg.MsgExset

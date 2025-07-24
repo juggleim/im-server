@@ -27,6 +27,7 @@ func SavePrivateHisMsg(ctx context.Context, converId, senderId, receiverId strin
 	privateHisMsgStorage.SavePrivateHisMsg(models.PrivateHisMsg{
 		HisMsg: models.HisMsg{
 			ConverId:          converId,
+			SubChannel:        downMsg.SubChannel,
 			SenderId:          senderId,
 			ReceiverId:        receiverId,
 			ChannelType:       pbobjs.ChannelType_Private,
@@ -48,6 +49,7 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 	err := grpHisMsgStorage.SaveGroupHisMsg(models.GroupHisMsg{
 		HisMsg: models.HisMsg{
 			ConverId:          converId,
+			SubChannel:        downMsg.SubChannel,
 			SenderId:          bases.GetRequesterIdFromCtx(ctx),
 			ReceiverId:        bases.GetTargetIdFromCtx(ctx),
 			ChannelType:       pbobjs.ChannelType_Group,
@@ -123,15 +125,16 @@ func SaveBroadCastHisMsg(ctx context.Context, converId, senderId string, downMsg
 	})
 }
 
-func QryLatestHisMsg(ctx context.Context, appkey, converId string, channelType pbobjs.ChannelType) *LatestMsgItem {
-	latestMsgItem := GetLatestMsg(ctx, converId, channelType)
+func QryLatestHisMsg(ctx context.Context, appkey, converId, subChannel string, channelType pbobjs.ChannelType) *LatestMsgItem {
+	latestMsgItem := GetLatestMsg(ctx, converId, subChannel, channelType)
 	return latestMsgItem
 }
 
-func qryLatestReadMsgTime(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType) (bool, int64) {
+func qryLatestReadMsgTime(ctx context.Context, userId, targetId, subChannel string, channelType pbobjs.ChannelType) (bool, int64) {
 	code, resp, err := bases.SyncRpcCall(ctx, "qry_conver", userId, &pbobjs.QryConverReq{
 		TargetId:    targetId,
 		ChannelType: channelType,
+		SubChannel:  subChannel,
 		IsInner:     true,
 	}, func() proto.Message {
 		return &pbobjs.Conversation{}
@@ -157,7 +160,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 	converId := commonservices.GetConversationId(userId, targetId, channelType)
 	var count int32 = 1
 	var startTime int64 = 0
-	hasUnread, sTime := qryLatestReadMsgTime(ctx, userId, targetId, channelType)
+	hasUnread, sTime := qryLatestReadMsgTime(ctx, userId, targetId, req.SubChannel, channelType)
 	if hasUnread {
 		startTime = sTime
 	} else {
@@ -166,7 +169,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 
 	if channelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
-		msgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, true, 0, []string{}, []string{})
+		msgs, err := storage.QryHisMsgs(appkey, converId, req.SubChannel, startTime, count, true, 0, []string{}, []string{})
 		if err == nil {
 			for _, msg := range msgs {
 				downMsg := &pbobjs.DownMsg{}
@@ -216,7 +219,7 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 		}
 	} else if channelType == pbobjs.ChannelType_Group {
 		storage := storages.NewGroupHisMsgStorage()
-		dbMsgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, true, 0, []string{}, []string{})
+		dbMsgs, err := storage.QryHisMsgs(appkey, converId, req.SubChannel, startTime, count, true, 0, []string{}, []string{})
 		if err == nil {
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
@@ -247,16 +250,16 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 	return errs.IMErrorCode_SUCCESS, nil
 }
 
-func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs.ChannelType, startTime int64, count int32, isPositive bool, msgTypes []string) (errs.IMErrorCode, *pbobjs.DownMsgSet) {
+func QryHisMsgs(ctx context.Context, appkey, targetId, subChannel string, channelType pbobjs.ChannelType, startTime int64, count int32, isPositive bool, msgTypes []string) (errs.IMErrorCode, *pbobjs.DownMsgSet) {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	resp := &pbobjs.DownMsgSet{
 		Msgs: []*pbobjs.DownMsg{},
 	}
 	if channelType == pbobjs.ChannelType_Private {
-		cleanTime := GetCleanTime(appkey, userId, targetId, channelType)
+		cleanTime := GetCleanTime(appkey, userId, targetId, subChannel, channelType)
 		storage := storages.NewPrivateHisMsgStorage()
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
-		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
+		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
 		if err == nil {
 			referMsgIds := []string{}
 			haveReferMsgs := []*pbobjs.DownMsg{}
@@ -319,7 +322,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 			}
 			//retrieve referenced msg
 			if len(referMsgIds) > 0 {
-				retrievePrivateReferenceMsg(ctx, targetId, haveReferMsgs, referMsgIds)
+				retrievePrivateReferenceMsg(ctx, targetId, subChannel, haveReferMsgs, referMsgIds)
 			}
 			//add userinfo
 			targetUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, targetId)
@@ -328,7 +331,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 	} else if channelType == pbobjs.ChannelType_System {
 		storage := storages.NewSystemHisMsgStorage()
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
-		cleanTime := GetCleanTime(appkey, userId, targetId, channelType)
+		cleanTime := GetCleanTime(appkey, userId, targetId, subChannel, channelType)
 		dbMsgs, err := storage.QryHisMsgs(appkey, converId, startTime, count, isPositive, cleanTime, msgTypes)
 		if err == nil {
 			for _, dbMsg := range dbMsgs {
@@ -371,13 +374,13 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 				}
 			}
 		}
-		dbCleanTime := GetCleanTime(appkey, userId, targetId, channelType)
+		dbCleanTime := GetCleanTime(appkey, userId, targetId, subChannel, channelType)
 		if dbCleanTime > cleanTime {
 			cleanTime = dbCleanTime
 		}
 		storage := storages.NewGroupHisMsgStorage()
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
-		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
+		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
 		if err == nil {
 			msgMap := map[string]*pbobjs.DownMsg{}
 			msgIds := []string{}
@@ -445,7 +448,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 			}
 			//readed status of group msg
 			readStorage := storages.NewReadInfoStorage()
-			readMap, err := readStorage.CheckMsgsRead(appkey, targetId, userId, pbobjs.ChannelType_Group, msgIds)
+			readMap, err := readStorage.CheckMsgsRead(appkey, targetId, subChannel, userId, pbobjs.ChannelType_Group, msgIds)
 			if err == nil {
 				for msgId, readStatus := range readMap {
 					if msg, exist := msgMap[msgId]; exist {
@@ -455,7 +458,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 			}
 			//retrieve referenced msg
 			if len(referMsgIds) > 0 {
-				retrieveGrpReferenceMsg(ctx, targetId, haveReferMsgs, referMsgIds)
+				retrieveGrpReferenceMsg(ctx, targetId, subChannel, haveReferMsgs, referMsgIds)
 			}
 			//add groupinfo
 			groupInfo := commonservices.GetGroupInfoFromCache(ctx, targetId)
@@ -510,16 +513,16 @@ func QryHisMsgs(ctx context.Context, appkey, targetId string, channelType pbobjs
 	return errs.IMErrorCode_SUCCESS, resp
 }
 
-func retrievePrivateReferenceMsg(ctx context.Context, targetId string, haveReferMsgs []*pbobjs.DownMsg, referencedMsgIds []string) {
+func retrievePrivateReferenceMsg(ctx context.Context, targetId, subChannel string, haveReferMsgs []*pbobjs.DownMsg, referencedMsgIds []string) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	storage := storages.NewPrivateHisMsgStorage()
 	converId := commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_Private)
-	dbMsgs, err := storage.FindByIds(appkey, converId, referencedMsgIds, 0)
+	dbMsgs, err := storage.FindByIds(appkey, converId, subChannel, referencedMsgIds, 0)
 	if err == nil && len(dbMsgs) > 0 {
 		delMarkMap := map[string]bool{}
 		delStorage := storages.NewPrivateDelHisMsgStorage()
-		delMsgs, err := delStorage.QryDelHisMsgsByMsgIds(appkey, userId, targetId, referencedMsgIds)
+		delMsgs, err := delStorage.QryDelHisMsgsByMsgIds(appkey, userId, targetId, subChannel, referencedMsgIds)
 		if err == nil && len(delMsgs) > 0 {
 			for _, delMsg := range delMsgs {
 				delMarkMap[delMsg.MsgId] = true
@@ -564,16 +567,16 @@ func retrievePrivateReferenceMsg(ctx context.Context, targetId string, haveRefer
 	}
 }
 
-func retrieveGrpReferenceMsg(ctx context.Context, targetId string, haveReferMsgs []*pbobjs.DownMsg, referencedMsgIds []string) {
+func retrieveGrpReferenceMsg(ctx context.Context, targetId, subChannel string, haveReferMsgs []*pbobjs.DownMsg, referencedMsgIds []string) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	converId := commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_Group)
 	storage := storages.NewGroupHisMsgStorage()
-	dbMsgs, err := storage.FindByIds(appkey, converId, referencedMsgIds, 0)
+	dbMsgs, err := storage.FindByIds(appkey, converId, subChannel, referencedMsgIds, 0)
 	if err == nil && len(dbMsgs) > 0 {
 		delMarkMap := map[string]bool{}
 		delStorage := storages.NewGroupDelHisMsgStorage()
-		delMsgs, err := delStorage.QryDelHisMsgsByMsgIds(appkey, userId, targetId, referencedMsgIds)
+		delMsgs, err := delStorage.QryDelHisMsgsByMsgIds(appkey, userId, targetId, subChannel, referencedMsgIds)
 		if err == nil && len(delMsgs) > 0 {
 			for _, delMsg := range delMsgs {
 				delMarkMap[delMsg.MsgId] = true
@@ -655,14 +658,14 @@ func QryHisMsgByIds(ctx context.Context, req *pbobjs.QryHisMsgByIdsReq) *pbobjs.
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	targetId := req.TargetId
 	converId := commonservices.GetConversationId(userId, targetId, req.ChannelType)
-	cleanTime := GetCleanTime(appkey, userId, targetId, req.ChannelType)
+	cleanTime := GetCleanTime(appkey, userId, targetId, req.SubChannel, req.ChannelType)
 	resp := &pbobjs.DownMsgSet{
 		Msgs:       []*pbobjs.DownMsg{},
 		IsFinished: true,
 	}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		storage := storages.NewPrivateHisMsgStorage()
-		dbMsgs, err := storage.FindByIds(appkey, converId, req.MsgIds, cleanTime)
+		dbMsgs, err := storage.FindByIds(appkey, converId, req.SubChannel, req.MsgIds, cleanTime)
 		if err == nil {
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
@@ -691,7 +694,7 @@ func QryHisMsgByIds(ctx context.Context, req *pbobjs.QryHisMsgByIdsReq) *pbobjs.
 		}
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		storage := storages.NewGroupHisMsgStorage()
-		dbMsgs, err := storage.FindByIds(appkey, converId, req.MsgIds, cleanTime)
+		dbMsgs, err := storage.FindByIds(appkey, converId, req.SubChannel, req.MsgIds, cleanTime)
 		if err == nil {
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
@@ -714,18 +717,18 @@ func QryHisMsgByIds(ctx context.Context, req *pbobjs.QryHisMsgByIdsReq) *pbobjs.
 	return resp
 }
 
-func GetCleanTime(appkey, userId, targetId string, channelType pbobjs.ChannelType) int64 {
+func GetCleanTime(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType) int64 {
 	converId := commonservices.GetConversationId(userId, targetId, channelType)
 	var destroyTime, cleanTime int64 = 0, 0
 	//conver clean time
 	converCleanStorage := storages.NewHisMsgConverCleanTimeStorage()
-	destroy, err := converCleanStorage.FindOne(appkey, converId, channelType)
+	destroy, err := converCleanStorage.FindOne(appkey, converId, subChannel, channelType)
 	if err == nil && destroy != nil && destroy.CleanTime > 0 {
 		destroyTime = destroy.CleanTime
 	}
 	//user clean time
 	userCleanStorage := storages.NewHisMsgUserCleanTimeStorage()
-	clean, err := userCleanStorage.FindOne(appkey, userId, targetId, channelType)
+	clean, err := userCleanStorage.FindOne(appkey, userId, targetId, subChannel, channelType)
 	if err == nil && clean != nil && clean.CleanTime > 0 {
 		cleanTime = clean.CleanTime
 	}
@@ -760,11 +763,12 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 		MsgType:    cleanMsgType,
 		MsgContent: bs,
 		Flags:      flag,
+		SubChannel: req.SubChannel,
 	}
-	latestMsg := GetLatestMsg(ctx, commonservices.GetConversationId(userId, req.TargetId, req.ChannelType), channelType)
+	latestMsg := GetLatestMsg(ctx, commonservices.GetConversationId(userId, req.TargetId, req.ChannelType), req.SubChannel, channelType)
 	if req.CleanScope == 0 { //user clean time
 		storage := storages.NewHisMsgUserCleanTimeStorage()
-		dbClean, err := storage.FindOne(appkey, userId, targetId, channelType)
+		dbClean, err := storage.FindOne(appkey, userId, targetId, req.SubChannel, channelType)
 		if err == nil && dbClean.CleanTime >= cleanTime {
 			return errs.IMErrorCode_SUCCESS
 		}
@@ -796,7 +800,7 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 		converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 		if req.SenderId == "" {
 			storage := storages.NewHisMsgConverCleanTimeStorage()
-			dbDestroy, err := storage.FindOne(appkey, converId, req.ChannelType)
+			dbDestroy, err := storage.FindOne(appkey, converId, req.SubChannel, req.ChannelType)
 			if err == nil && dbDestroy != nil && dbDestroy.CleanTime >= cleanTime {
 				return errs.IMErrorCode_SUCCESS
 			}
@@ -812,10 +816,10 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 		} else {
 			if channelType == pbobjs.ChannelType_Private {
 				storage := storages.NewPrivateHisMsgStorage()
-				storage.DelSomeoneMsgsBaseTime(appkey, converId, cleanTime, req.SenderId)
+				storage.DelSomeoneMsgsBaseTime(appkey, converId, req.SubChannel, cleanTime, req.SenderId)
 			} else if channelType == pbobjs.ChannelType_Group {
 				storage := storages.NewGroupHisMsgStorage()
-				storage.DelSomeoneMsgsBaseTime(appkey, converId, cleanTime, req.SenderId)
+				storage.DelSomeoneMsgsBaseTime(appkey, converId, req.SubChannel, cleanTime, req.SenderId)
 			}
 		}
 		//notify other device to destroy msgs
@@ -940,7 +944,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 			// }
 			//delete mention msg
 			mentionStorage := converStorages.NewMentionMsgStorage()
-			mentionStorage.DelMentionMsgs(appkey, userId, req.TargetId, req.ChannelType, delMsgIds)
+			mentionStorage.DelMentionMsgs(appkey, userId, req.TargetId, req.SubChannel, req.ChannelType, delMsgIds)
 		}
 	} else if req.DelScope == 1 { //two-way
 		if req.ChannelType == pbobjs.ChannelType_Private {
@@ -953,7 +957,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 			}
 			//check permission
 			if !bases.GetIsFromApiFromCtx(ctx) {
-				delMsgs, err := pStorage.FindByIds(appkey, converId, delMsgIds, 0)
+				delMsgs, err := pStorage.FindByIds(appkey, converId, req.SubChannel, delMsgIds, 0)
 				if err == nil {
 					for _, delMsg := range delMsgs {
 						if delMsg.SenderId != userId {
@@ -964,7 +968,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					return errs.IMErrorCode_MSG_NO_Permission
 				}
 			}
-			pStorage.DelMsgs(appkey, converId, delMsgIds)
+			pStorage.DelMsgs(appkey, converId, req.SubChannel, delMsgIds)
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
 			gStorage := storages.NewGroupHisMsgStorage()
 			for _, msg := range req.Msgs {
@@ -975,7 +979,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 			}
 			//check permission
 			if !bases.GetIsFromApiFromCtx(ctx) {
-				delMsgs, err := gStorage.FindByIds(appkey, converId, delMsgIds, 0)
+				delMsgs, err := gStorage.FindByIds(appkey, converId, req.SubChannel, delMsgIds, 0)
 				if err == nil {
 					for _, delMsg := range delMsgs {
 						if delMsg.SenderId != userId {
@@ -986,7 +990,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					return errs.IMErrorCode_MSG_NO_Permission
 				}
 			}
-			gStorage.DelMsgs(appkey, converId, delMsgIds)
+			gStorage.DelMsgs(appkey, converId, req.SubChannel, delMsgIds)
 		}
 		//notify all people of conversation
 		if len(delMsgs.Msgs) > 0 {

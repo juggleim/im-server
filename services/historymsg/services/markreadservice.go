@@ -85,7 +85,7 @@ func markReadGroupMsgs(ctx context.Context, req *pbobjs.MarkReadReq) errs.IMErro
 
 		//update mention msg's read state
 		mentionStorage := mentionStorages.NewMentionMsgStorage()
-		mentionStorage.MarkRead(appkey, userId, req.TargetId, req.ChannelType, msgIds)
+		mentionStorage.MarkRead(appkey, userId, req.TargetId, req.SubChannel, req.ChannelType, msgIds)
 	}
 	return errs.IMErrorCode_SUCCESS
 }
@@ -113,8 +113,8 @@ func markReadPrivateMsgs(ctx context.Context, userId string, req *pbobjs.MarkRea
 			})
 		}
 		if len(msgIds) > 0 {
-			storage.MarkReadByMsgIds(appkey, converId, msgIds)
-			storage.UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, msgIds)
+			storage.MarkReadByMsgIds(appkey, converId, req.SubChannel, msgIds)
+			storage.UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, req.SubChannel, msgIds)
 		}
 	}
 	if len(req.IndexScopes) > 0 {
@@ -128,8 +128,8 @@ func markReadPrivateMsgs(ctx context.Context, userId string, req *pbobjs.MarkRea
 			if end > latestReadMsgIndex {
 				latestReadMsgIndex = end
 			}
-			storage.MarkReadByScope(appkey, converId, start, end)
-			storage.UpdateDestroyTimeAfterReadByScope(appkey, converId, start, end)
+			storage.MarkReadByScope(appkey, converId, req.SubChannel, start, end)
+			storage.UpdateDestroyTimeAfterReadByScope(appkey, converId, req.SubChannel, start, end)
 			markReadMsg.IndexScopes = append(markReadMsg.IndexScopes, &IndexScope{
 				StartIndex: start,
 				EndIndex:   end,

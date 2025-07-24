@@ -29,7 +29,7 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 	grpDelMsgs := []models.GroupDelHisMsg{}
 	allReadedMsgIds := []string{}
 	for _, msgId := range req.MsgIds {
-		readInfo := GetMsgInfo(appkey, req.GroupId, msgId, req.ChannelType)
+		readInfo := GetMsgInfo(appkey, req.GroupId, req.SubChannel, msgId, req.ChannelType)
 		if readInfo.SenderId == userId {
 			continue
 		}
@@ -46,7 +46,7 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 				CreatedTime: addedTime.UnixMilli(),
 			})
 			//update hismsg
-			grpHisStorage.UpdateReadCount(appkey, req.GroupId, msgId, readCount)
+			grpHisStorage.UpdateReadCount(appkey, req.GroupId, req.SubChannel, msgId, readCount)
 			//update msg destroy time after read
 			if readInfo.LifeTimeAfterRead > 0 {
 				grpDelMsgs = append(grpDelMsgs, models.GroupDelHisMsg{
@@ -84,7 +84,7 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 		grpDelMsgStorage.BatchCreate(grpDelMsgs)
 	}
 	if len(allReadedMsgIds) > 0 {
-		grpHisStorage.UpdateDestroyTimeAfterReadByMsgIds(appkey, req.GroupId, allReadedMsgIds)
+		grpHisStorage.UpdateDestroyTimeAfterReadByMsgIds(appkey, req.GroupId, req.SubChannel, allReadedMsgIds)
 	}
 }
 
@@ -112,7 +112,7 @@ func QryReadInfos(ctx context.Context, req *pbobjs.QryReadInfosReq) (errs.IMErro
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		storage := storages.NewReadInfoStorage()
 		for _, msgId := range req.MsgIds {
-			readCount := storage.CountReadInfosByMsgId(appkey, req.TargetId, req.ChannelType, msgId)
+			readCount := storage.CountReadInfosByMsgId(appkey, req.TargetId, req.SubChannel, req.ChannelType, msgId)
 			resp.Items = append(resp.Items, &pbobjs.ReadInfoItem{
 				MsgId:      msgId,
 				ReadCount:  readCount,
@@ -132,7 +132,7 @@ func QryReadDetail(ctx context.Context, req *pbobjs.QryReadDetailReq) (errs.IMEr
 
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		readInfoStorage := storages.NewReadInfoStorage()
-		infos, err := readInfoStorage.QryReadInfosByMsgId(appkey, req.TargetId, req.ChannelType, req.MsgId, 0, GrpMsgReadInfoLimit)
+		infos, err := readInfoStorage.QryReadInfosByMsgId(appkey, req.TargetId, req.SubChannel, req.ChannelType, req.MsgId, 0, GrpMsgReadInfoLimit)
 		readMemberMap := map[string]bool{}
 		if err == nil {
 			for _, info := range infos {
@@ -145,7 +145,7 @@ func QryReadDetail(ctx context.Context, req *pbobjs.QryReadDetailReq) (errs.IMEr
 			}
 		}
 		storage := storages.NewGroupHisMsgStorage()
-		msg, err := storage.FindById(appkey, req.TargetId, req.MsgId)
+		msg, err := storage.FindById(appkey, req.TargetId, req.SubChannel, req.MsgId)
 		if err == nil && msg != nil {
 			resp.MemberCount = int32(msg.MemberCount)
 			//get all members from grp snapshot

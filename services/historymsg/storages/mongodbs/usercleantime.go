@@ -18,6 +18,7 @@ type HisMsgUserCleanTimeDao struct {
 	UserId      string `bson:"user_id"`
 	TargetId    string `bson:"target_id"`
 	ChannelType int    `bson:"channel_type"`
+	SubChannel  string `bson:"sub_channel"`
 	CleanTime   int64  `bson:"clean_time"`
 	AppKey      string `bson:"app_key"`
 
@@ -49,6 +50,9 @@ func (msg *HisMsgUserCleanTimeDao) IndexCreator() func(colName string) {
 				{
 					Keys: bson.M{"channel_type": 1},
 				},
+				{
+					Keys: bson.M{"sub_channel": 1},
+				},
 			})
 		}
 	}
@@ -59,13 +63,14 @@ func (msg *HisMsgUserCleanTimeDao) UpsertCleanTime(item models.HisMsgUserCleanTi
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": item.AppKey, "user_id": item.UserId, "target_id": item.TargetId, "channel_type": item.ChannelType}
+	filter := bson.M{"app_key": item.AppKey, "user_id": item.UserId, "target_id": item.TargetId, "channel_type": item.ChannelType, "sub_channel": item.SubChannel}
 	update := bson.M{
 		"$set": bson.M{
 			"app_key":      item.AppKey,
 			"user_id":      item.UserId,
 			"target_id":    item.TargetId,
 			"channel_type": item.ChannelType,
+			"sub_channel":  item.SubChannel,
 			"clean_time":   item.CleanTime,
 		},
 	}
@@ -73,12 +78,12 @@ func (msg *HisMsgUserCleanTimeDao) UpsertCleanTime(item models.HisMsgUserCleanTi
 	return err
 }
 
-func (msg *HisMsgUserCleanTimeDao) FindOne(appkey, userId, targetId string, channelType pbobjs.ChannelType) (*models.HisMsgUserCleanTime, error) {
+func (msg *HisMsgUserCleanTimeDao) FindOne(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType) (*models.HisMsgUserCleanTime, error) {
 	collection := msg.getCollection()
 	if collection == nil {
 		return nil, errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "user_id": userId, "target_id": targetId, "channel_type": channelType}
+	filter := bson.M{"app_key": appkey, "user_id": userId, "target_id": targetId, "channel_type": channelType, "sub_channel": subChannel}
 	result := collection.FindOne(context.TODO(), filter)
 	var item HisMsgUserCleanTimeDao
 	err := result.Decode(&item)
@@ -89,6 +94,7 @@ func (msg *HisMsgUserCleanTimeDao) FindOne(appkey, userId, targetId string, chan
 		UserId:      item.UserId,
 		TargetId:    item.TargetId,
 		ChannelType: pbobjs.ChannelType(item.ChannelType),
+		SubChannel:  item.SubChannel,
 		CleanTime:   item.CleanTime,
 		AppKey:      item.AppKey,
 	}, nil

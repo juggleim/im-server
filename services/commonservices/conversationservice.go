@@ -15,6 +15,7 @@ func SaveConversation(ctx context.Context, userId string, msg *pbobjs.DownMsg) {
 			TargetId:    msg.TargetId,
 			ChannelType: msg.ChannelType,
 			Msg:         msg,
+			SubChannel:  msg.SubChannel,
 		})
 	}
 }

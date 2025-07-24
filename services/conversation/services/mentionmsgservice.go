@@ -25,9 +25,9 @@ func QryMentionedMsgs(ctx context.Context, userId string, req *pbobjs.QryMention
 		isPositiveOrder = true
 	}
 
-	cleanTime := hisService.GetCleanTime(appkey, userId, req.TargetId, req.ChannelType)
+	cleanTime := hisService.GetCleanTime(appkey, userId, req.TargetId, req.SubChannel, req.ChannelType)
 	mentionMsgStorage := storages.NewMentionMsgStorage()
-	dbMentionMsgs, err := mentionMsgStorage.QryMentionMsgs(appkey, userId, req.TargetId, req.ChannelType, startTime, int(req.Count), isPositiveOrder, req.LatestReadIndex, cleanTime)
+	dbMentionMsgs, err := mentionMsgStorage.QryMentionMsgs(appkey, userId, req.TargetId, req.SubChannel, req.ChannelType, startTime, int(req.Count), isPositiveOrder, req.LatestReadIndex, cleanTime)
 	// dbMentionMsgs, err := mentionMsgStorage.QryUnreadMentionMsgs(appkey, userId, req.TargetId, req.ChannelType, startTime, int(req.Count), isPositiveOrder, cleanTime)
 	if err == nil {
 		msgIds := []string{}

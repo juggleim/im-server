@@ -17,6 +17,7 @@ import (
 type HisMsgConverCleanTimeDao struct {
 	ConverId    string `bson:"conver_id"`
 	ChannelType int    `bson:"channel_type"`
+	SubChannel  string `bson:"sub_channel"`
 	CleanTime   int64  `bson:"clean_time"`
 	AppKey      string `bson:"app_key"`
 
@@ -45,6 +46,9 @@ func (msg *HisMsgConverCleanTimeDao) IndexCreator() func(colName string) {
 				{
 					Keys: bson.M{"channel_type": 1},
 				},
+				{
+					Keys: bson.M{"sub_channel": 1},
+				},
 			})
 		}
 	}
@@ -55,12 +59,13 @@ func (msg *HisMsgConverCleanTimeDao) UpsertDestroyTime(item models.HisMsgConverC
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": item.AppKey, "conver_id": item.ConverId, "channel_type": item.ChannelType}
+	filter := bson.M{"app_key": item.AppKey, "conver_id": item.ConverId, "channel_type": item.ChannelType, "sub_channel": item.SubChannel}
 	update := bson.M{
 		"$set": bson.M{
 			"app_key":      item.AppKey,
 			"conver_id":    item.ConverId,
 			"channel_type": item.ChannelType,
+			"sub_channel":  item.SubChannel,
 			"clean_time":   item.CleanTime,
 		},
 	}
@@ -68,12 +73,12 @@ func (msg *HisMsgConverCleanTimeDao) UpsertDestroyTime(item models.HisMsgConverC
 	return err
 }
 
-func (msg *HisMsgConverCleanTimeDao) FindOne(appkey, converId string, channelType pbobjs.ChannelType) (*models.HisMsgConverCleanTime, error) {
+func (msg *HisMsgConverCleanTimeDao) FindOne(appkey, converId, subChannel string, channelType pbobjs.ChannelType) (*models.HisMsgConverCleanTime, error) {
 	collection := msg.getCollection()
 	if collection == nil {
 		return nil, errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "channel_type": channelType}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "channel_type": channelType, "sub_channel": subChannel}
 	result := collection.FindOne(context.TODO(), filter)
 	var item HisMsgConverCleanTimeDao
 	err := result.Decode(&item)
@@ -83,6 +88,7 @@ func (msg *HisMsgConverCleanTimeDao) FindOne(appkey, converId string, channelTyp
 	return &models.HisMsgConverCleanTime{
 		ConverId:    item.ConverId,
 		ChannelType: pbobjs.ChannelType(item.ChannelType),
+		SubChannel:  item.SubChannel,
 		CleanTime:   item.CleanTime,
 		AppKey:      item.AppKey,
 	}, nil

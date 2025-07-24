@@ -25,6 +25,7 @@ type ConverPersistIndex struct {
 	UserId      string
 	TargetId    string
 	ChannelType pbobjs.ChannelType
+	SubChannel  string
 }
 
 func init() {
@@ -35,13 +36,14 @@ func init() {
 		persistIndex, ok := value.(*ConverPersistIndex)
 		if ok && persistIndex != nil {
 			userConvers := getUserConvers(persistIndex.Appkey, persistIndex.UserId)
-			item := userConvers.QryConver(persistIndex.TargetId, persistIndex.ChannelType)
+			item := userConvers.QryConver(persistIndex.TargetId, persistIndex.SubChannel, persistIndex.ChannelType)
 			if item != nil {
 				conversation := models.Conversation{
 					AppKey:      item.AppKey,
 					UserId:      item.UserId,
 					TargetId:    item.TargetId,
 					ChannelType: item.ChannelType,
+					SubChannel:  item.SubChannel,
 
 					SortTime: item.SortTime,
 					SyncTime: item.SyncTime,
@@ -91,7 +93,7 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	itemKey := getConverItemKey(conver.TargetId, conver.ChannelType)
+	itemKey := getConverItemKey(conver.TargetId, conver.SubChannel, conver.ChannelType)
 
 	if cacheConver, exist := uc.ConverItemMap[itemKey]; exist {
 		cacheConver.LatestMsgId = conver.LatestMsgId
@@ -113,6 +115,7 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 			UserId:               uc.UserId,
 			TargetId:             conver.TargetId,
 			ChannelType:          conver.ChannelType,
+			SubChannel:           conver.SubChannel,
 			LatestMsgId:          conver.LatestMsgId,
 			LatestUnreadMsgIndex: conver.LatestUnreadMsgIndex,
 			SortTime:             conver.SortTime,
@@ -128,12 +131,12 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 	}
 }
 
-func (uc *UserConversations) AppendMention(targetId string, channelType pbobjs.ChannelType, mentionMsg *models.MentionMsg) {
+func (uc *UserConversations) AppendMention(targetId, subChannel string, channelType pbobjs.ChannelType, mentionMsg *models.MentionMsg) {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if cacheConver, exist := uc.ConverItemMap[itemKey]; exist {
 		if cacheConver.MentionInfo != nil && mentionMsg == nil {
 			return
@@ -145,7 +148,7 @@ func (uc *UserConversations) AppendMention(targetId string, channelType pbobjs.C
 			}
 			//read from db
 			storage := storages.NewMentionMsgStorage()
-			mentionMsgs, err := storage.QryMentionSenderIdsBaseIndex(uc.Appkey, uc.UserId, targetId, channelType, cacheConver.LatestReadMsgIndex, 100)
+			mentionMsgs, err := storage.QryMentionSenderIdsBaseIndex(uc.Appkey, uc.UserId, targetId, subChannel, channelType, cacheConver.LatestReadMsgIndex, 100)
 			if err == nil {
 				mentionInfo.MentionMsgs = append(mentionInfo.MentionMsgs, mentionMsgs...)
 			}
@@ -180,13 +183,13 @@ func (uc *UserConversations) AppendMention(targetId string, channelType pbobjs.C
 	}
 }
 
-func (uc *UserConversations) GetMentionInfo(targetId string, channelType pbobjs.ChannelType) *models.ConverMentionInfo {
+func (uc *UserConversations) GetMentionInfo(targetId, subChannel string, channelType pbobjs.ChannelType) *models.ConverMentionInfo {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.RLock()
 	defer lock.RUnlock()
 
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if cacheConver, exist := uc.ConverItemMap[itemKey]; exist {
 		if cacheConver.MentionInfo != nil {
 			retMentionInfo := &models.ConverMentionInfo{
@@ -232,7 +235,7 @@ func (uc *UserConversations) innerClearMentionMsgs(item *models.Conversation, ms
 			go func() {
 				//clear readed mention msgs
 				storage := storages.NewMentionMsgStorage()
-				storage.CleanMentionMsgsBaseIndex(uc.Appkey, uc.UserId, item.TargetId, item.ChannelType, msgIndex)
+				storage.CleanMentionMsgsBaseIndex(uc.Appkey, uc.UserId, item.TargetId, item.SubChannel, item.ChannelType, msgIndex)
 			}()
 		}
 	}
@@ -261,12 +264,13 @@ func (uc *UserConversations) purge() {
 	}
 }
 
-func (uc *UserConversations) PersistConver(targetId string, channelType pbobjs.ChannelType) {
-	key := fmt.Sprintf("%s_%s_%s_%d", uc.Appkey, uc.UserId, targetId, channelType)
+func (uc *UserConversations) PersistConver(targetId, subChannel string, channelType pbobjs.ChannelType) {
+	key := fmt.Sprintf("%s_%s_%s_%s_%d", uc.Appkey, uc.UserId, targetId, subChannel, channelType)
 	persistCache.Add(key, &ConverPersistIndex{
 		Appkey:      uc.Appkey,
 		UserId:      uc.UserId,
 		TargetId:    targetId,
+		SubChannel:  subChannel,
 		ChannelType: channelType,
 	})
 }
@@ -287,6 +291,7 @@ func (uc *UserConversations) SyncConvers(startTime int64, count int32) []*models
 				UserId:      conver.UserId,
 				TargetId:    conver.TargetId,
 				ChannelType: conver.ChannelType,
+				SubChannel:  conver.SubChannel,
 				SortTime:    conver.SortTime,
 				SyncTime:    conver.SyncTime,
 
@@ -313,18 +318,19 @@ func (uc *UserConversations) SyncConvers(startTime int64, count int32) []*models
 	return resp
 }
 
-func (uc *UserConversations) QryConver(targetId string, channelType pbobjs.ChannelType) *models.Conversation {
+func (uc *UserConversations) QryConver(targetId, subChannel string, channelType pbobjs.ChannelType) *models.Conversation {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.RLock()
 	defer lock.RUnlock()
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if conver, exist := uc.ConverItemMap[itemKey]; exist {
 		ret := &models.Conversation{
 			AppKey:      conver.AppKey,
 			UserId:      conver.UserId,
 			TargetId:    targetId,
 			ChannelType: channelType,
+			SubChannel:  subChannel,
 			SortTime:    conver.SortTime,
 			SyncTime:    conver.SyncTime,
 
@@ -375,6 +381,7 @@ func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive
 				UserId:      conver.UserId,
 				TargetId:    conver.TargetId,
 				ChannelType: conver.ChannelType,
+				SubChannel:  conver.SubChannel,
 				SortTime:    conver.SortTime,
 				SyncTime:    conver.SyncTime,
 
@@ -431,6 +438,7 @@ func (uc *UserConversations) QryTopConvers(startTime int64, count int32, sortTyp
 				UserId:      conver.UserId,
 				TargetId:    conver.TargetId,
 				ChannelType: conver.ChannelType,
+				SubChannel:  conver.SubChannel,
 				SortTime:    conver.SortTime,
 				SyncTime:    conver.SyncTime,
 
@@ -491,13 +499,13 @@ func (uc *UserConversations) TotalUnreadCount() int64 {
 	return count
 }
 
-func (uc *UserConversations) ClearUnread(targetId string, channelType pbobjs.ChannelType, readMsgIndex int64, readMsgId string, readMsgTime int64) bool {
+func (uc *UserConversations) ClearUnread(targetId, subChannel string, channelType pbobjs.ChannelType, readMsgIndex int64, readMsgId string, readMsgTime int64) bool {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
 
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if item, exist := uc.ConverItemMap[itemKey]; exist {
 		if readMsgIndex > item.LatestReadMsgIndex && readMsgIndex <= item.LatestUnreadMsgIndex {
 			item.LatestReadMsgIndex = readMsgIndex
@@ -514,13 +522,13 @@ func (uc *UserConversations) ClearUnread(targetId string, channelType pbobjs.Cha
 	return false
 }
 
-func (uc *UserConversations) DefaultClearUnread(targetId string, channelType pbobjs.ChannelType) bool {
+func (uc *UserConversations) DefaultClearUnread(targetId, subChannel string, channelType pbobjs.ChannelType) bool {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
 
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if item, exist := uc.ConverItemMap[itemKey]; exist {
 		if item.LatestReadMsgIndex < item.LatestUnreadMsgIndex {
 			item.LatestReadMsgIndex = item.LatestUnreadMsgIndex
@@ -537,12 +545,12 @@ func (uc *UserConversations) DefaultClearUnread(targetId string, channelType pbo
 	return false
 }
 
-func (uc *UserConversations) DelConversation(targetId string, channelType pbobjs.ChannelType) bool {
+func (uc *UserConversations) DelConversation(targetId, subChannel string, channelType pbobjs.ChannelType) bool {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if item, exist := uc.ConverItemMap[itemKey]; exist {
 		if item.IsDeleted == 0 {
 			item.IsDeleted = 1
@@ -554,12 +562,12 @@ func (uc *UserConversations) DelConversation(targetId string, channelType pbobjs
 	return false
 }
 
-func (uc *UserConversations) UpdateUnreadTag(targetId string, channelType pbobjs.ChannelType, unreadTag int) bool {
+func (uc *UserConversations) UpdateUnreadTag(targetId, subChannel string, channelType pbobjs.ChannelType, unreadTag int) bool {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if item, exist := uc.ConverItemMap[itemKey]; exist {
 		if item.UnreadTag != unreadTag {
 			item.UnreadTag = unreadTag
@@ -569,12 +577,12 @@ func (uc *UserConversations) UpdateUnreadTag(targetId string, channelType pbobjs
 	return false
 }
 
-func (uc *UserConversations) UpdTopState(targetId string, channelType pbobjs.ChannelType, isTop int, topTime int64) bool {
+func (uc *UserConversations) UpdTopState(targetId, subChannel string, channelType pbobjs.ChannelType, isTop int, topTime int64) bool {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if item, exist := uc.ConverItemMap[itemKey]; exist {
 		if item.IsTop != isTop {
 			item.IsTop = isTop
@@ -592,12 +600,12 @@ func (uc *UserConversations) UpdTopState(targetId string, channelType pbobjs.Cha
 	return false
 }
 
-func (uc *UserConversations) UpdateUndisturbType(targetId string, channelType pbobjs.ChannelType, undisturbType int32) bool {
+func (uc *UserConversations) UpdateUndisturbType(targetId, subChannel string, channelType pbobjs.ChannelType, undisturbType int32) bool {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
-	itemKey := getConverItemKey(targetId, channelType)
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
 	if item, exist := uc.ConverItemMap[itemKey]; exist {
 		if item.UndisturbType != undisturbType {
 			item.UndisturbType = undisturbType
@@ -614,7 +622,7 @@ func (uc *UserConversations) TagAddConvers(tag string, convers []*pbobjs.SimpleC
 	defer lock.Unlock()
 	ret := false
 	for _, conver := range convers {
-		itemKey := getConverItemKey(conver.TargetId, conver.ChannelType)
+		itemKey := getConverItemKey(conver.TargetId, conver.SubChannel, conver.ChannelType)
 		if item, exist := uc.ConverItemMap[itemKey]; exist {
 			if item.ConverExts == nil {
 				item.ConverExts = &pbobjs.ConverExts{
@@ -637,7 +645,7 @@ func (uc *UserConversations) TagDelConvers(tag string, convers []*pbobjs.SimpleC
 	defer lock.Unlock()
 	ret := false
 	for _, conver := range convers {
-		itemKey := getConverItemKey(conver.TargetId, conver.ChannelType)
+		itemKey := getConverItemKey(conver.TargetId, conver.SubChannel, conver.ChannelType)
 		if item, exist := uc.ConverItemMap[itemKey]; exist && item.ConverExts != nil {
 			if _, exist := item.ConverExts.ConverTags[tag]; exist {
 				delete(item.ConverExts.ConverTags, tag)
@@ -652,8 +660,8 @@ func getUserConverCacheKey(appkey, userId string) string {
 	return strings.Join([]string{appkey, userId}, "_")
 }
 
-func getConverItemKey(targetId string, channelType pbobjs.ChannelType) string {
-	return fmt.Sprintf("%s_%d", targetId, channelType)
+func getConverItemKey(targetId, subChannel string, channelType pbobjs.ChannelType) string {
+	return fmt.Sprintf("%s_%s_%d", targetId, subChannel, channelType)
 }
 
 func getUserConvers(appkey, userId string) *UserConversations {
@@ -693,7 +701,7 @@ func getUserConvers(appkey, userId string) *UserConversations {
 						if dbConver.SyncTime < startTime {
 							startTime = dbConver.SyncTime
 						}
-						itemKey := getConverItemKey(dbConver.TargetId, dbConver.ChannelType)
+						itemKey := getConverItemKey(dbConver.TargetId, dbConver.SubChannel, dbConver.ChannelType)
 						userConvers.ConverItemMap[itemKey] = dbConver
 						// build index
 						userConvers.SyncTimeIndex.Add(float64(dbConver.SyncTime), itemKey)

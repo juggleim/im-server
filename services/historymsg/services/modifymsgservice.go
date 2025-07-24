@@ -43,11 +43,12 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 		MsgType:    defaultModifyMsgType,
 		MsgContent: contentBs,
 		Flags:      flag,
+		SubChannel: modifyReq.SubChannel,
 	}
 	if modifyReq.ChannelType == pbobjs.ChannelType_Private {
 		//update msg in history
 		storage := storages.NewPrivateHisMsgStorage()
-		dbMsg, err := storage.FindById(appkey, converId, modifyReq.MsgId)
+		dbMsg, err := storage.FindById(appkey, converId, modifyReq.SubChannel, modifyReq.MsgId)
 		if err == nil {
 			//check permission
 			if !bases.GetIsFromApiFromCtx(ctx) && dbMsg.SenderId != fromUserId {
@@ -62,7 +63,7 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 				newDownMsg.MsgContent = modifyReq.MsgContent
 				newDownMsg.Flags = msgdefines.SetModifiedMsg(newDownMsg.Flags)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
-				storage.UpdateMsgBody(appkey, converId, modifyReq.MsgId, newDownMsg.MsgType, newDownMsgBs)
+				storage.UpdateMsgBody(appkey, converId, modifyReq.SubChannel, modifyReq.MsgId, newDownMsg.MsgType, newDownMsgBs)
 			}
 		}
 		//send cmd msg
@@ -71,7 +72,7 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 	} else if modifyReq.ChannelType == pbobjs.ChannelType_Group {
 		//update history msg
 		storage := storages.NewGroupHisMsgStorage()
-		dbMsg, err := storage.FindById(appkey, converId, modifyReq.MsgId)
+		dbMsg, err := storage.FindById(appkey, converId, modifyReq.SubChannel, modifyReq.MsgId)
 		if err == nil {
 			//check permission
 			if !bases.GetIsFromApiFromCtx(ctx) && dbMsg.SenderId != fromUserId {
@@ -86,7 +87,7 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 				newDownMsg.MsgContent = modifyReq.MsgContent
 				newDownMsg.Flags = msgdefines.SetModifiedMsg(newDownMsg.Flags)
 				newDownMsgBs, _ := tools.PbMarshal(newDownMsg)
-				storage.UpdateMsgBody(appkey, converId, modifyReq.MsgId, newDownMsg.MsgType, newDownMsgBs)
+				storage.UpdateMsgBody(appkey, converId, modifyReq.SubChannel, modifyReq.MsgId, newDownMsg.MsgType, newDownMsgBs)
 			}
 		}
 		//send cmd msg

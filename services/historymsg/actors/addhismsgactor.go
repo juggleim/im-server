@@ -19,8 +19,12 @@ func (actor *AddHisMsgActor) OnReceive(ctx context.Context, input proto.Message)
 	if addHisMsg, ok := input.(*pbobjs.AddHisMsgReq); ok {
 		if addHisMsg != nil {
 			converId := commonservices.GetConversationId(addHisMsg.SenderId, addHisMsg.TargetId, addHisMsg.ChannelType)
-			logs.WithContext(ctx).Infof("channel_type:%s\tsender:%s\treceiver:%s", addHisMsg.ChannelType, addHisMsg.SenderId, addHisMsg.TargetId)
-			latestMsg := services.GetLatestMsg(ctx, converId, addHisMsg.ChannelType)
+			subChannel := ""
+			if addHisMsg.Msg != nil {
+				subChannel = addHisMsg.Msg.SubChannel
+			}
+			logs.WithContext(ctx).Infof("channel_type:%s\tsender:%s\treceiver:%s\tsub_channel:%s", addHisMsg.ChannelType, addHisMsg.SenderId, addHisMsg.TargetId, subChannel)
+			latestMsg := services.GetLatestMsg(ctx, converId, subChannel, addHisMsg.ChannelType)
 			latestMsg.Update(addHisMsg.Msg)
 			if addHisMsg.ChannelType == pbobjs.ChannelType_Private {
 				services.SavePrivateHisMsg(ctx, converId, addHisMsg.SenderId, addHisMsg.TargetId, addHisMsg.Msg)

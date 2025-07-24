@@ -15,6 +15,7 @@ type MergedMsgDao struct {
 	FromId      string `gorm:"from_id"`
 	TargetId    string `gorm:"target_id"`
 	ChannelType int    `gorm:"channel_type"`
+	SubChannel  string `gorm:"sub_channel"`
 	MsgId       string `gorm:"msg_id"`
 	MsgTime     int64  `gorm:"msg_time"`
 	MsgBody     []byte `gorm:"msg_body"`
@@ -30,6 +31,7 @@ func (msg MergedMsgDao) SaveMergedMsg(item models.MergedMsg) error {
 		FromId:      item.FromId,
 		TargetId:    item.TargetId,
 		ChannelType: int(item.ChannelType),
+		SubChannel:  item.SubChannel,
 		MsgId:       item.MsgId,
 		MsgTime:     item.MsgTime,
 		MsgBody:     item.MsgBody,
@@ -40,16 +42,16 @@ func (msg MergedMsgDao) SaveMergedMsg(item models.MergedMsg) error {
 }
 func (msg MergedMsgDao) BatchSaveMergedMsgs(items []models.MergedMsg) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("insert into %s (`parent_msg_id`,`from_id`,`target_id`,`channel_type`,`msg_id`,`msg_time`,`msg_body`,`app_key`)values ", msg.TableName())
+	sql := fmt.Sprintf("insert into %s (`parent_msg_id`,`from_id`,`target_id`,`channel_type`,`sub_channel`,`msg_id`,`msg_time`,`msg_body`,`app_key`)values ", msg.TableName())
 	buffer.WriteString(sql)
 	vals := []interface{}{}
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString("(?,?,?,?,?,?,?,?);")
+			buffer.WriteString("(?,?,?,?,?,?,?,?,?);")
 		} else {
-			buffer.WriteString("(?,?,?,?,?,?,?,?),")
+			buffer.WriteString("(?,?,?,?,?,?,?,?,?),")
 		}
-		vals = append(vals, item.ParentMsgId, item.FromId, item.TargetId, item.ChannelType, item.MsgId, item.MsgTime, item.MsgBody, item.AppKey)
+		vals = append(vals, item.ParentMsgId, item.FromId, item.TargetId, item.ChannelType, item.SubChannel, item.MsgId, item.MsgTime, item.MsgBody, item.AppKey)
 	}
 	err := dbcommons.GetDb().Exec(buffer.String(), vals...).Error
 	return err
@@ -75,6 +77,7 @@ func (msg MergedMsgDao) QryMergedMsgs(appkey, parentMsgId string, startTime int6
 			FromId:      dbMsg.FromId,
 			TargetId:    dbMsg.TargetId,
 			ChannelType: pbobjs.ChannelType(dbMsg.ChannelType),
+			SubChannel:  dbMsg.SubChannel,
 			MsgId:       dbMsg.MsgId,
 			MsgTime:     dbMsg.MsgTime,
 			MsgBody:     dbMsg.MsgBody,

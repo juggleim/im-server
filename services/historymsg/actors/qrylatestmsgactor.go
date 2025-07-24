@@ -17,10 +17,11 @@ type QryLatestMsgActor struct {
 func (actor *QryLatestMsgActor) OnReceive(ctx context.Context, input proto.Message) {
 	if qryMsgIndexReq, ok := input.(*pbobjs.QryLatestMsgReq); ok {
 		if qryMsgIndexReq != nil {
-			latest := services.QryLatestHisMsg(ctx, bases.GetAppKeyFromCtx(ctx), qryMsgIndexReq.ConverId, qryMsgIndexReq.ChannelType)
+			latest := services.QryLatestHisMsg(ctx, bases.GetAppKeyFromCtx(ctx), qryMsgIndexReq.ConverId, qryMsgIndexReq.SubChannel, qryMsgIndexReq.ChannelType)
 			ack := bases.CreateQueryAckWraper(ctx, 0, &pbobjs.QryLatestMsgResp{
 				ConverId:    qryMsgIndexReq.ConverId,
 				ChannelType: qryMsgIndexReq.ChannelType,
+				SubChannel:  qryMsgIndexReq.SubChannel,
 				MsgSeqNo:    latest.LatestMsgSeq,
 				MsgTime:     latest.LatestMsgTime,
 				MsgId:       latest.LatestMsgId,

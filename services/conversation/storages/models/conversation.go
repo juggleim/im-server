@@ -8,6 +8,7 @@ type Conversation struct {
 	AppKey      string
 	UserId      string
 	TargetId    string
+	SubChannel  string
 	ChannelType pbobjs.ChannelType
 
 	SortTime int64
@@ -42,7 +43,7 @@ type ConverMentionInfo struct {
 }
 
 type IConversationStorage interface {
-	FindOne(appkey, userId, targetId string, channelType pbobjs.ChannelType) (*Conversation, error)
+	FindOne(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType) (*Conversation, error)
 	UpsertConversation(conversation Conversation) error
 	Upsert(item Conversation) error
 	QryConvers(appkey, userId string, startTime int64, count int32) ([]*Conversation, error)

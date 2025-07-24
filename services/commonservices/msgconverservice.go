@@ -71,16 +71,16 @@ func (item *MsgConverItem) GenerateMsgId(converId string, channelType pbobjs.Cha
 	return msgId, msgTime, msgSeq
 }
 
-func GetMsgConverCache(ctx context.Context, converId string, channelType pbobjs.ChannelType) *MsgConverItem {
+func GetMsgConverCache(ctx context.Context, converId, subChannel string, channelType pbobjs.ChannelType) *MsgConverItem {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	cacheKey := getMsgConverCacheKey(appkey, converId, channelType)
+	cacheKey := getMsgConverCacheKey(appkey, converId, subChannel, channelType)
 	lock := msgConverLocks.GetLocks(cacheKey)
 	lock.Lock()
 	defer lock.Unlock()
 	if val, ok := msgConverCache.Get(cacheKey); ok {
 		return val.(*MsgConverItem)
 	} else {
-		msgTime, msgSeq := GetLatestMsgTimeSeq(ctx, appkey, converId, channelType)
+		msgTime, msgSeq := GetLatestMsgTimeSeq(ctx, appkey, converId, subChannel, channelType)
 		item := &MsgConverItem{
 			cacheKey:      cacheKey,
 			LatestMsgTime: msgTime,
@@ -91,17 +91,18 @@ func GetMsgConverCache(ctx context.Context, converId string, channelType pbobjs.
 	}
 }
 
-func getMsgConverCacheKey(appkey, converId string, channelType pbobjs.ChannelType) string {
-	return fmt.Sprintf("%s_%d_%s", appkey, channelType, converId)
+func getMsgConverCacheKey(appkey, converId, subChannel string, channelType pbobjs.ChannelType) string {
+	return fmt.Sprintf("%s_%d_%s_%s", appkey, channelType, converId, subChannel)
 }
 
-func GetLatestMsgTimeSeq(ctx context.Context, appkey, converId string, channelType pbobjs.ChannelType) (int64, int64) {
+func GetLatestMsgTimeSeq(ctx context.Context, appkey, converId, subChannel string, channelType pbobjs.ChannelType) (int64, int64) {
 	var msgSeq int64 = 0
 	var msgTime int64 = 0
 	//从会话查询最新的index
 	code, resp, err := bases.SyncRpcCall(ctx, "qry_latest_hismsg", converId, &pbobjs.QryLatestMsgReq{
 		ConverId:    converId,
 		ChannelType: channelType,
+		SubChannel:  subChannel,
 	}, func() proto.Message {
 		return &pbobjs.QryLatestMsgResp{}
 	})

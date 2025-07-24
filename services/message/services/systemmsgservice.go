@@ -18,7 +18,7 @@ func SendSystemMsg(ctx context.Context, senderId, receiverId string, upMsg *pbob
 	commonservices.ReportUpMsg(appkey, pbobjs.ChannelType_System, 1)
 	commonservices.ReportDispatchMsg(appkey, pbobjs.ChannelType_System, 1)
 
-	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_System)
+	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, upMsg.SubChannel, pbobjs.ChannelType_System)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_System, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)
 	if preMsgId != "" {

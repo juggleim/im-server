@@ -42,13 +42,14 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 		MsgType:    RecallCmdType,
 		MsgContent: contentBs,
 		Flags:      flag,
+		SubChannel: recallMsg.SubChannel,
 	}
 	if recallMsg.ChannelType == pbobjs.ChannelType_Private {
 		//replace history msg
 		storage := storages.NewPrivateHisMsgStorage()
 		//check permission
 		if !bases.GetIsFromApiFromCtx(ctx) {
-			dbMsg, err := storage.FindById(appkey, converId, recallMsg.MsgId)
+			dbMsg, err := storage.FindById(appkey, converId, recallMsg.SubChannel, recallMsg.MsgId)
 			if err != nil || dbMsg.SenderId != userId {
 				return errs.IMErrorCode_MSG_NO_Permission
 			}
@@ -64,10 +65,11 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 			Flags:       flag,
 			MsgId:       recallMsg.MsgId,
 			MsgTime:     recallMsg.MsgTime,
+			SubChannel:  recallMsg.SubChannel,
 		}
 
 		replaceMsgBs, _ := tools.PbMarshal(replaceMsg)
-		storage.UpdateMsgBody(appkey, converId, recallMsg.MsgId, RecallInfoType, replaceMsgBs)
+		storage.UpdateMsgBody(appkey, converId, recallMsg.SubChannel, recallMsg.MsgId, RecallInfoType, replaceMsgBs)
 		//send cmd msg
 		commonservices.AsyncPrivateMsg(ctx, userId, targetId, upMsg)
 		return errs.IMErrorCode_SUCCESS
@@ -76,7 +78,7 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 		storage := storages.NewGroupHisMsgStorage()
 		//check permission
 		if !bases.GetIsFromApiFromCtx(ctx) {
-			dbMsg, err := storage.FindById(appkey, converId, recallMsg.MsgId)
+			dbMsg, err := storage.FindById(appkey, converId, recallMsg.SubChannel, recallMsg.MsgId)
 			if err != nil || dbMsg.SenderId != userId {
 				return errs.IMErrorCode_MSG_NO_Permission
 			}
@@ -92,9 +94,10 @@ func RecallMsg(ctx context.Context, recallMsg *pbobjs.RecallMsgReq) errs.IMError
 			Flags:       flag,
 			MsgId:       recallMsg.MsgId,
 			MsgTime:     recallMsg.MsgTime,
+			SubChannel:  recallMsg.SubChannel,
 		}
 		replaceMsgBs, _ := tools.PbMarshal(replaceMsg)
-		storage.UpdateMsgBody(appkey, converId, recallMsg.MsgId, RecallInfoType, replaceMsgBs)
+		storage.UpdateMsgBody(appkey, converId, recallMsg.SubChannel, recallMsg.MsgId, RecallInfoType, replaceMsgBs)
 
 		//send cmd msg
 		commonservices.AsyncGroupMsg(ctx, userId, targetId, upMsg)

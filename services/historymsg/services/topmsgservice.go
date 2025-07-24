@@ -20,6 +20,7 @@ func SetTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 	err := storage.Upsert(models.TopMsg{
 		ConverId:    converId,
+		SubChannel:  req.SubChannel,
 		ChannelType: req.ChannelType,
 		MsgId:       req.MsgId,
 		UserId:      userId,
@@ -38,6 +39,7 @@ func SetTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
 		MsgType:    topMsgType,
 		MsgContent: contentBs,
 		Flags:      msgdefines.SetCmdMsg(0),
+		SubChannel: req.SubChannel,
 	}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)
@@ -52,7 +54,7 @@ func DelTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	storage := storages.NewTopMsgStorage()
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
-	err := storage.DelTopMsg(appkey, converId, req.ChannelType, req.MsgId)
+	err := storage.DelTopMsg(appkey, converId, req.SubChannel, req.ChannelType, req.MsgId)
 	if err != nil {
 		return errs.IMErrorCode_MSG_DEFAULT
 	}
@@ -65,6 +67,7 @@ func DelTopMsg(ctx context.Context, req *pbobjs.TopMsgReq) errs.IMErrorCode {
 		MsgType:    topMsgType,
 		MsgContent: contentBs,
 		Flags:      msgdefines.SetCmdMsg(0),
+		SubChannel: req.SubChannel,
 	}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, upMsg)
@@ -86,14 +89,14 @@ func GetTopMsg(ctx context.Context, req *pbobjs.GetTopMsgReq) (errs.IMErrorCode,
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 	storage := storages.NewTopMsgStorage()
-	msg, err := storage.FindTopMsg(appkey, converId, req.ChannelType)
+	msg, err := storage.FindTopMsg(appkey, converId, req.SubChannel, req.ChannelType)
 	if err != nil {
 		return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 	}
 	downMsg := &pbobjs.DownMsg{}
 	if req.ChannelType == pbobjs.ChannelType_Private {
 		hisStorage := storages.NewPrivateHisMsgStorage()
-		hisMsg, err := hisStorage.FindById(appkey, converId, msg.MsgId)
+		hisMsg, err := hisStorage.FindById(appkey, converId, req.SubChannel, msg.MsgId)
 		if err != nil || hisMsg == nil {
 			return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 		}
@@ -105,7 +108,7 @@ func GetTopMsg(ctx context.Context, req *pbobjs.GetTopMsgReq) (errs.IMErrorCode,
 		downMsg = msg
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		hisStorage := storages.NewGroupHisMsgStorage()
-		hisMsg, err := hisStorage.FindById(appkey, converId, msg.MsgId)
+		hisMsg, err := hisStorage.FindById(appkey, converId, req.SubChannel, msg.MsgId)
 		if err != nil || hisMsg == nil {
 			return errs.IMErrorCode_SUCCESS, &pbobjs.TopMsg{}
 		}

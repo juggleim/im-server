@@ -10,6 +10,7 @@ type FavoriteMsg struct {
 	UserId      string
 	SenderId    string
 	ReceiverId  string
+	SubChannel  string
 	ChannelType pbobjs.ChannelType
 	MsgId       string
 	MsgTime     int64

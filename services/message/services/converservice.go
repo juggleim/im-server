@@ -45,14 +45,14 @@ func (conver *UserConversationItem) GetUnreadIndex() int64 {
 	return conver.UnreadIndex
 }
 
-func UserConverCacheContains(appkey, userId, targetId string, channelType pbobjs.ChannelType) bool {
-	key := fmt.Sprintf("%s_%s_%s_%d", appkey, userId, targetId, channelType)
+func UserConverCacheContains(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType) bool {
+	key := fmt.Sprintf("%s_%s_%s_%d_%d", appkey, userId, targetId, subChannel, channelType)
 	return converCache.Contains(key)
 }
 
-func GetConversation(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType) *UserConversationItem {
+func GetConversation(ctx context.Context, userId, targetId, subChannel string, channelType pbobjs.ChannelType) *UserConversationItem {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	key := fmt.Sprintf("%s_%s_%s_%d", appkey, userId, targetId, channelType)
+	key := fmt.Sprintf("%s_%s_%s_%s_%d", appkey, userId, targetId, subChannel, channelType)
 	if converObj, exist := converCache.Get(key); exist {
 		converItem := converObj.(*UserConversationItem)
 		return converItem
@@ -65,7 +65,7 @@ func GetConversation(ctx context.Context, userId, targetId string, channelType p
 			undisturbItem := undisturbObj.(*UserConversationItem)
 			return undisturbItem
 		} else {
-			undisturbItem := QryConversation(ctx, userId, targetId, channelType)
+			undisturbItem := QryConversation(ctx, userId, targetId, subChannel, channelType)
 			undisturbItem.key = key
 			converCache.Add(key, undisturbItem)
 			return undisturbItem
@@ -73,17 +73,17 @@ func GetConversation(ctx context.Context, userId, targetId string, channelType p
 	}
 }
 
-func CacheUserConver(appkey, userId, targetId string, channelType pbobjs.ChannelType, conver *UserConversationItem) {
-	key := fmt.Sprintf("%s_%s_%s_%d", appkey, userId, targetId, channelType)
+func CacheUserConver(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, conver *UserConversationItem) {
+	key := fmt.Sprintf("%s_%s_%s_%s_%d", appkey, userId, targetId, subChannel, channelType)
 	l := userLocks.GetLocks(key)
 	l.Lock()
 	defer l.Unlock()
-	if !UserConverCacheContains(appkey, userId, targetId, channelType) {
+	if !UserConverCacheContains(appkey, userId, targetId, subChannel, channelType) {
 		converCache.Add(key, conver)
 	}
 }
 
-func BatchInitUserConvers(ctx context.Context, targetId string, channelType pbobjs.ChannelType, userIds []string) {
+func BatchInitUserConvers(ctx context.Context, targetId, subChannel string, channelType pbobjs.ChannelType, userIds []string) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	groups := bases.GroupTargets("qry_conver", userIds)
 	wg := sync.WaitGroup{}
@@ -104,8 +104,8 @@ func BatchInitUserConvers(ctx context.Context, targetId string, channelType pbob
 				convers, ok := resp.(*pbobjs.QryConversationsResp)
 				if ok && convers != nil {
 					for _, conver := range convers.Conversations {
-						key := fmt.Sprintf("%s_%s_%s_%d", appkey, conver.UserId, targetId, channelType)
-						CacheUserConver(appkey, conver.UserId, targetId, channelType, &UserConversationItem{
+						key := fmt.Sprintf("%s_%s_%s_%s_%d", appkey, conver.UserId, targetId, subChannel, channelType)
+						CacheUserConver(appkey, conver.UserId, targetId, subChannel, channelType, &UserConversationItem{
 							key:               key,
 							UndisturbType:     conver.UndisturbType,
 							UnreadIndex:       conver.LatestUnreadIndex,
@@ -120,16 +120,17 @@ func BatchInitUserConvers(ctx context.Context, targetId string, channelType pbob
 	wg.Wait()
 }
 
-func ClearConversation(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType) {
+func ClearConversation(ctx context.Context, userId, targetId, subChannel string, channelType pbobjs.ChannelType) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	key := fmt.Sprintf("%s_%s_%s_%d", appkey, userId, targetId, channelType)
+	key := fmt.Sprintf("%s_%s_%s_%s_%d", appkey, userId, targetId, subChannel, channelType)
 	converCache.Remove(key)
 }
 
-func QryConversation(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType) *UserConversationItem {
+func QryConversation(ctx context.Context, userId, targetId, subChannel string, channelType pbobjs.ChannelType) *UserConversationItem {
 	code, resp, err := bases.SyncRpcCall(ctx, "qry_conver", userId, &pbobjs.QryConverReq{
 		TargetId:    targetId,
 		ChannelType: channelType,
+		SubChannel:  subChannel,
 		IsInner:     true,
 	}, func() proto.Message {
 		return &pbobjs.Conversation{}
@@ -153,8 +154,8 @@ func QryConversation(ctx context.Context, userId, targetId string, channelType p
 
 // handle conversation check, such as undisturb, unread index
 // userId is the receiver
-func HandleDownMsgByConver(ctx context.Context, userId, targetId string, channelType pbobjs.ChannelType, downMsg *pbobjs.DownMsg) {
-	conver := GetConversation(ctx, userId, targetId, channelType)
+func HandleDownMsgByConver(ctx context.Context, userId, targetId, subChannel string, channelType pbobjs.ChannelType, downMsg *pbobjs.DownMsg) {
+	conver := GetConversation(ctx, userId, targetId, subChannel, channelType)
 	if conver.UndisturbType == UndisturbType_Normal {
 		downMsg.UndisturbType = UndisturbType_Normal
 		if !commonservices.IsMentionedMe(userId, downMsg) {

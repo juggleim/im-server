@@ -23,7 +23,7 @@ func (actor *QryHistoryMsgsActor) OnReceive(ctx context.Context, input proto.Mes
 		appkey := bases.GetAppKeyFromCtx(ctx)
 		startTime := qryHisMsgsReq.StartTime
 		isPositiveOrder := false
-		logs.WithContext(ctx).Infof("conver_id:%s\tchannel_type:%v\tstart_time:%d\tcount:%d\torder:%d", qryHisMsgsReq.TargetId, qryHisMsgsReq.ChannelType, qryHisMsgsReq.StartTime, qryHisMsgsReq.Count, qryHisMsgsReq.Order)
+		logs.WithContext(ctx).Infof("conver_id:%s\tchannel_type:%v\tsub_channel:%s\tstart_time:%d\tcount:%d\torder:%d", qryHisMsgsReq.TargetId, qryHisMsgsReq.ChannelType, qryHisMsgsReq.SubChannel, qryHisMsgsReq.StartTime, qryHisMsgsReq.Count, qryHisMsgsReq.Order)
 		if qryHisMsgsReq.Order == 0 { //0:倒序;1:正序;
 			if startTime <= 0 {
 				startTime = time.Now().UnixMilli()
@@ -31,7 +31,7 @@ func (actor *QryHistoryMsgsActor) OnReceive(ctx context.Context, input proto.Mes
 		} else {
 			isPositiveOrder = true
 		}
-		code, resp := services.QryHisMsgs(ctx, appkey, qryHisMsgsReq.TargetId, qryHisMsgsReq.ChannelType, startTime, qryHisMsgsReq.Count, isPositiveOrder, qryHisMsgsReq.MsgTypes)
+		code, resp := services.QryHisMsgs(ctx, appkey, qryHisMsgsReq.TargetId, qryHisMsgsReq.SubChannel, qryHisMsgsReq.ChannelType, startTime, qryHisMsgsReq.Count, isPositiveOrder, qryHisMsgsReq.MsgTypes)
 		qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 		msgCount := 0

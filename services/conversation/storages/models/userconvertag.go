@@ -22,6 +22,7 @@ type ConverTagRel struct {
 	Tag         string
 	TargetId    string
 	ChannelType pbobjs.ChannelType
+	SubChannel  string
 	CreatedTime int64
 	AppKey      string
 }
@@ -29,12 +30,13 @@ type ConverTagRel struct {
 type TargetConver struct {
 	TargetId    string
 	ChannelType pbobjs.ChannelType
+	SubChannel  string
 }
 
 type IConverTagRelStorage interface {
 	Create(item ConverTagRel) error
 	BatchCreate(items []ConverTagRel) error
-	Delete(appkey, userId, tag, targetId string, channelType pbobjs.ChannelType) error
+	Delete(appkey, userId, tag, targetId, subChannel string, channelType pbobjs.ChannelType) error
 	BatchDelete(appkey, userId, tag string, convers []TargetConver) error
 	DeleteByTag(appkey, userId, tag string) error
 }

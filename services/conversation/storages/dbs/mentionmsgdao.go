@@ -13,6 +13,7 @@ type MentionMsgDao struct {
 	UserId      string `gorm:"user_id"`
 	TargetId    string `gorm:"target_id"`
 	ChannelType int    `gorm:"channel_type"`
+	SubChannel  string `gorm:"sub_channel"`
 	SenderId    string `gorm:"sender_id"`
 	MentionType int    `gorm:"mention_type"`
 	MsgId       string `gorm:"msg_id"`
@@ -30,6 +31,7 @@ func (mention *MentionMsgDao) SaveMentionMsg(item models.MentionMsg) error {
 		UserId:      item.UserId,
 		TargetId:    item.TargetId,
 		ChannelType: int(item.ChannelType),
+		SubChannel:  item.SubChannel,
 		SenderId:    item.SenderId,
 		MentionType: int(item.MentionType),
 		MsgId:       item.MsgId,
@@ -42,15 +44,16 @@ func (mention *MentionMsgDao) SaveMentionMsg(item models.MentionMsg) error {
 	return err
 }
 
-func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64, cleanTime int64) ([]*models.MentionMsg, error) {
+func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64, cleanTime int64) ([]*models.MentionMsg, error) {
 	var items []MentionMsgDao
 
 	params := []interface{}{}
-	condition := "app_key=? and user_id=? and target_id=? and channel_type=?"
+	condition := "app_key=? and user_id=? and target_id=? and channel_type=? and sub_channel=?"
 	params = append(params, appkey)
 	params = append(params, userId)
 	params = append(params, targetId)
 	params = append(params, channelType)
+	params = append(params, subChannel)
 	if startIndex > 0 {
 		condition = condition + " and msg_index>?"
 		params = append(params, startIndex)
@@ -75,6 +78,7 @@ func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, ch
 			UserId:      item.UserId,
 			TargetId:    item.TargetId,
 			ChannelType: pbobjs.ChannelType(item.ChannelType),
+			SubChannel:  item.SubChannel,
 			SenderId:    item.SenderId,
 			MentionType: pbobjs.MentionType(item.MentionType),
 			MsgId:       item.MsgId,
@@ -92,14 +96,15 @@ func (mention *MentionMsgDao) QryMentionMsgs(appkey, userId, targetId string, ch
 	return mentionMsgs, nil
 }
 
-func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, cleanTime int64) ([]*models.MentionMsg, error) {
+func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, cleanTime int64) ([]*models.MentionMsg, error) {
 	var items []MentionMsgDao
 	params := []interface{}{}
-	condition := "app_key=? and user_id=? and target_id=? and channel_type=? and is_read=0"
+	condition := "app_key=? and user_id=? and target_id=? and channel_type=? and sub_channel=? and is_read=0"
 	params = append(params, appkey)
 	params = append(params, userId)
 	params = append(params, targetId)
 	params = append(params, channelType)
+	params = append(params, subChannel)
 	orderStr := "msg_time desc"
 	if isPositiveOrder {
 		condition = condition + " and msg_time>? and msg_time>?"
@@ -120,6 +125,7 @@ func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId stri
 			UserId:      item.UserId,
 			TargetId:    item.TargetId,
 			ChannelType: pbobjs.ChannelType(item.ChannelType),
+			SubChannel:  item.SubChannel,
 			SenderId:    item.SenderId,
 			MentionType: pbobjs.MentionType(item.MentionType),
 			MsgId:       item.MsgId,
@@ -137,9 +143,9 @@ func (mention *MentionMsgDao) QryUnreadMentionMsgs(appkey, userId, targetId stri
 	return mentionMsgs, nil
 }
 
-func (mention *MentionMsgDao) QryMentionSenderIdsBaseIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, startIndex int64, count int) ([]*models.MentionMsg, error) {
+func (mention *MentionMsgDao) QryMentionSenderIdsBaseIndex(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, startIndex int64, count int) ([]*models.MentionMsg, error) {
 	var items []MentionMsgDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_index>?", appkey, userId, targetId, int(channelType), startIndex).Select("sender_id,msg_id,msg_time,msg_index,mention_type").Order("msg_index desc").Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and sub_channel=? and msg_index>?", appkey, userId, targetId, int(channelType), subChannel, startIndex).Select("sender_id,msg_id,msg_time,msg_index,mention_type").Order("msg_index desc").Limit(count).Find(&items).Error
 	if err != nil {
 		return []*models.MentionMsg{}, err
 	}
@@ -151,6 +157,7 @@ func (mention *MentionMsgDao) QryMentionSenderIdsBaseIndex(appkey, userId, targe
 			MsgId:       item.MsgId,
 			MsgIndex:    item.MsgIndex,
 			MentionType: pbobjs.MentionType(item.MentionType),
+			SubChannel:  item.SubChannel,
 		})
 	}
 	sort.Slice(mentionMsgs, func(i, j int) bool {
@@ -172,16 +179,17 @@ func (mention *MentionMsgDao) BatchQryMentionSenderIdsBaseIndex(appkey, userId s
 	params = append(params, userId)
 	for i, conver := range convers {
 		if i == length-1 {
-			sqlBuilder.WriteString("(target_id=? and channel_type=? and msg_index>?)")
+			sqlBuilder.WriteString("(target_id=? and channel_type=? and sub_channel=? and msg_index>?)")
 		} else {
-			sqlBuilder.WriteString("(target_id=? and channel_type=? and msg_index>?) or ")
+			sqlBuilder.WriteString("(target_id=? and channel_type=? and sub_channel=? and msg_index>?) or ")
 		}
 		params = append(params, conver.TargetId)
 		params = append(params, conver.ChannelType)
+		params = append(params, conver.SubChannel)
 		params = append(params, conver.MsgIndex)
 	}
 	sqlBuilder.WriteString(")")
-	err := dbcommons.GetDb().Where(sqlBuilder.String(), params...).Select("target_id,channel_type,sender_id,msg_id,msg_time").Order("msg_index asc").Find(&items).Error
+	err := dbcommons.GetDb().Where(sqlBuilder.String(), params...).Select("target_id,channel_type,sub_channel,sender_id,msg_id,msg_time").Order("msg_index asc").Find(&items).Error
 	if err != nil {
 		return []*models.MentionMsg{}, err
 	}
@@ -190,6 +198,7 @@ func (mention *MentionMsgDao) BatchQryMentionSenderIdsBaseIndex(appkey, userId s
 		mentionMsgs = append(mentionMsgs, &models.MentionMsg{
 			TargetId:    item.TargetId,
 			ChannelType: pbobjs.ChannelType(item.ChannelType),
+			SubChannel:  item.SubChannel,
 			SenderId:    item.SenderId,
 			MsgTime:     item.MsgTime,
 			MsgId:       item.MsgId,
@@ -198,20 +207,20 @@ func (mention *MentionMsgDao) BatchQryMentionSenderIdsBaseIndex(appkey, userId s
 	return mentionMsgs, nil
 }
 
-func (mention *MentionMsgDao) MarkRead(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) error {
-	return dbcommons.GetDb().Model(&MentionMsgDao{}).Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_id in (?)", appkey, userId, targetId, channelType, msgIds).Update("is_read", 1).Error
+func (mention *MentionMsgDao) MarkRead(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgIds []string) error {
+	return dbcommons.GetDb().Model(&MentionMsgDao{}).Where("app_key=? and user_id=? and target_id=? and channel_type=? and sub_channel=? and msg_id in (?)", appkey, userId, targetId, channelType, subChannel, msgIds).Update("is_read", 1).Error
 }
 
-func (mention *MentionMsgDao) DelMentionMsgs(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIds []string) error {
-	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_id in (?)", appkey, userId, targetId, channelType, msgIds).Delete(&MentionMsgDao{}).Error
+func (mention *MentionMsgDao) DelMentionMsgs(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgIds []string) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and sub_channel=? and msg_id in (?)", appkey, userId, targetId, channelType, subChannel, msgIds).Delete(&MentionMsgDao{}).Error
 }
 
-func (mention *MentionMsgDao) DelMentionMsg(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgId string) error {
-	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_id=?", appkey, userId, targetId, channelType, msgId).Delete(&MentionMsgDao{}).Error
+func (mention *MentionMsgDao) DelMentionMsg(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgId string) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and sub_channel=? and msg_id=?", appkey, userId, targetId, channelType, subChannel, msgId).Delete(&MentionMsgDao{}).Error
 }
 
-func (mention *MentionMsgDao) CleanMentionMsgsBaseIndex(appkey, userId, targetId string, channelType pbobjs.ChannelType, msgIndex int64) error {
-	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and msg_index<=?", appkey, userId, targetId, channelType, msgIndex).Delete(&MentionMsgDao{}).Error
+func (mention *MentionMsgDao) CleanMentionMsgsBaseIndex(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgIndex int64) error {
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=? and sub_channel=? and msg_index<=?", appkey, userId, targetId, channelType, subChannel, msgIndex).Delete(&MentionMsgDao{}).Error
 }
 
 func (mention *MentionMsgDao) CleanMentionMsgsBaseUserId(appkey, userId string) error {

@@ -11,6 +11,7 @@ type GroupDelHisMsgDao struct {
 	ID            int64  `gorm:"primary_key"`
 	UserId        string `gorm:"user_id"`
 	TargetId      string `gorm:"target_id"`
+	SubChannel    string `gorm:"sub_channel"`
 	MsgId         string `gorm:"msg_id"`
 	MsgTime       int64  `gorm:"msg_time"`
 	MsgSeq        int64  `gorm:"msg_seq"`
@@ -26,6 +27,7 @@ func (msg GroupDelHisMsgDao) Create(item models.GroupDelHisMsg) error {
 	add := GroupDelHisMsgDao{
 		UserId:        item.UserId,
 		TargetId:      item.TargetId,
+		SubChannel:    item.SubChannel,
 		MsgId:         item.MsgId,
 		MsgTime:       item.MsgTime,
 		MsgSeq:        item.MsgSeq,
@@ -38,30 +40,31 @@ func (msg GroupDelHisMsgDao) Create(item models.GroupDelHisMsg) error {
 
 func (msg GroupDelHisMsgDao) BatchCreate(items []models.GroupDelHisMsg) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("insert into %s (`user_id`,`target_id`,`msg_id`,`msg_time`,`msg_seq`,`effective_time`,`app_key`)values", msg.TableName())
+	sql := fmt.Sprintf("insert into %s (`user_id`,`target_id`,`sub_channel`,`msg_id`,`msg_time`,`msg_seq`,`effective_time`,`app_key`)values", msg.TableName())
 	params := []interface{}{}
 
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString("(?,?,?,?,?,?,?);")
+			buffer.WriteString("(?,?,?,?,?,?,?,?);")
 		} else {
-			buffer.WriteString("(?,?,?,?,?,?,?),")
+			buffer.WriteString("(?,?,?,?,?,?,?,?),")
 		}
-		params = append(params, item.UserId, item.TargetId, item.MsgId, item.MsgTime, item.MsgSeq, item.EffectiveTime, item.AppKey)
+		params = append(params, item.UserId, item.TargetId, item.SubChannel, item.MsgId, item.MsgTime, item.MsgSeq, item.EffectiveTime, item.AppKey)
 	}
 
 	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
 	return err
 }
 
-func (msg GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, startTime int64, count int32, isPositive bool) ([]*models.GroupDelHisMsg, error) {
+func (msg GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId, subChannel string, startTime int64, count int32, isPositive bool) ([]*models.GroupDelHisMsg, error) {
 	var items []*GroupDelHisMsgDao
 	params := []interface{}{}
-	condition := "app_key=? and user_id=? and target_id=?"
+	condition := "app_key=? and user_id=? and target_id=? and sub_channel=?"
 	params = append(params, appkey)
 	params = append(params, userId)
 	params = append(params, targetId)
+	params = append(params, subChannel)
 	orderStr := "msg_time desc"
 	if isPositive {
 		condition = condition + " and msg_time>?"
@@ -78,6 +81,7 @@ func (msg GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, star
 		retItems = append(retItems, &models.GroupDelHisMsg{
 			UserId:        item.UserId,
 			TargetId:      item.TargetId,
+			SubChannel:    item.SubChannel,
 			MsgId:         item.MsgId,
 			MsgTime:       item.MsgTime,
 			MsgSeq:        item.MsgSeq,
@@ -88,13 +92,14 @@ func (msg GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, star
 	return retItems, err
 }
 
-func (msg GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*models.GroupDelHisMsg, error) {
+func (msg GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId, subChannel string, msgIds []string) ([]*models.GroupDelHisMsg, error) {
 	var items []*GroupDelHisMsgDao
 	params := []interface{}{}
-	condition := "app_key=? and user_id=? and target_id=? and msg_id in (?)"
+	condition := "app_key=? and user_id=? and target_id=? and sub_channel=? and msg_id in (?)"
 	params = append(params, appkey)
 	params = append(params, userId)
 	params = append(params, targetId)
+	params = append(params, subChannel)
 	params = append(params, msgIds)
 	err := dbcommons.GetDb().Where(condition, params...).Find(&items).Error
 	if err != nil {
@@ -105,6 +110,7 @@ func (msg GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId stri
 		retItems = append(retItems, &models.GroupDelHisMsg{
 			UserId:        item.UserId,
 			TargetId:      item.TargetId,
+			SubChannel:    item.SubChannel,
 			MsgId:         item.MsgId,
 			MsgTime:       item.MsgTime,
 			MsgSeq:        item.MsgSeq,
@@ -115,9 +121,9 @@ func (msg GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId stri
 	return retItems, err
 }
 
-func (msg GroupDelHisMsgDao) ExistDelHisMsg(appkey, userId, targetId string) bool {
+func (msg GroupDelHisMsgDao) ExistDelHisMsg(appkey, userId, targetId, subChannel string) bool {
 	var items []*GroupDelHisMsgDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=?", appkey, userId, targetId).Order("msg_time desc").Limit(1).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and sub_channel=?", appkey, userId, targetId, subChannel).Order("msg_time desc").Limit(1).Find(&items).Error
 	if err == nil && len(items) <= 0 {
 		return false
 	}

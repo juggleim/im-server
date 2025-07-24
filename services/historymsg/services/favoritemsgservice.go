@@ -24,7 +24,7 @@ func AddFavoriteMsgs(ctx context.Context, req *pbobjs.FavoriteMsgIds) errs.IMErr
 		//qry msg from history
 		if msg.ChannelType == pbobjs.ChannelType_Private {
 			hisStorage := storages.NewPrivateHisMsgStorage()
-			hisMsg, err := hisStorage.FindById(appkey, converId, msg.MsgId)
+			hisMsg, err := hisStorage.FindById(appkey, converId, msg.SubChannel, msg.MsgId)
 			if err != nil || hisMsg == nil {
 				return errs.IMErrorCode_MSG_DEFAULT
 			}
@@ -36,7 +36,7 @@ func AddFavoriteMsgs(ctx context.Context, req *pbobjs.FavoriteMsgIds) errs.IMErr
 			downMsg = msg
 		} else if msg.ChannelType == pbobjs.ChannelType_Group {
 			hisStorage := storages.NewGroupHisMsgStorage()
-			hisMsg, err := hisStorage.FindById(appkey, converId, msg.MsgId)
+			hisMsg, err := hisStorage.FindById(appkey, converId, msg.SubChannel, msg.MsgId)
 			if err != nil || hisMsg == nil {
 				return errs.IMErrorCode_MSG_DEFAULT
 			}
@@ -57,6 +57,7 @@ func AddFavoriteMsgs(ctx context.Context, req *pbobjs.FavoriteMsgIds) errs.IMErr
 			SenderId:    msg.SenderId,
 			ReceiverId:  msg.ReceiverId,
 			ChannelType: msg.ChannelType,
+			SubChannel:  msg.SubChannel,
 			MsgId:       msg.MsgId,
 			MsgTime:     downMsg.MsgTime,
 			MsgType:     downMsg.MsgType,

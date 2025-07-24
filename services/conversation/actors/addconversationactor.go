@@ -24,7 +24,7 @@ func (actor *AddConversationActor) OnReceive(ctx context.Context, input proto.Me
 		if conver.TargetId == "" || conver.ChannelType == pbobjs.ChannelType_Unknown {
 			logs.WithContext(ctx).Errorf("unknown conversation. user_id:%s\ttarget_id:%s", userId, targetId)
 		} else if conver.Msg == nil {
-			code, resp := services.SaveNilConversationV2(ctx, bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.TargetId, conver.ChannelType)
+			code, resp := services.SaveNilConversationV2(ctx, bases.GetAppKeyFromCtx(ctx), bases.GetTargetIdFromCtx(ctx), conver.TargetId, conver.SubChannel, conver.ChannelType)
 			qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 			actor.Sender.Tell(qryAck, actorsystem.NoSender)
 		} else {

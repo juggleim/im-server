@@ -14,6 +14,7 @@ type ConversationDao struct {
 	UserId      string `gorm:"user_id"`
 	TargetId    string `gorm:"target_id"`
 	ChannelType int    `gorm:"channel_type"`
+	SubChannel  string `gorm:"sub_channel"`
 
 	SortTime int64 `gorm:"sort_time"`
 	SyncTime int64 `gorm:"sync_time"`
@@ -39,9 +40,9 @@ func (conver *ConversationDao) TableName() string {
 	return "conversations"
 }
 
-func (conver *ConversationDao) FindOne(appkey, userId, targetId string, channelType pbobjs.ChannelType) (*models.Conversation, error) {
+func (conver *ConversationDao) FindOne(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType) (*models.Conversation, error) {
 	var item ConversationDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and channel_type=?", appkey, userId, targetId, channelType).Take(&item).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and target_id=? and sub_channel=? and channel_type=?", appkey, userId, targetId, subChannel, channelType).Take(&item).Error
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +51,7 @@ func (conver *ConversationDao) FindOne(appkey, userId, targetId string, channelT
 		TargetId:             item.TargetId,
 		SortTime:             item.SortTime,
 		ChannelType:          pbobjs.ChannelType(item.ChannelType),
+		SubChannel:           item.SubChannel,
 		AppKey:               item.AppKey,
 		LatestMsgId:          item.LatestMsgId,
 		LatestMsg:            item.LatestMsg,
@@ -69,19 +71,19 @@ func (conver *ConversationDao) UpsertConversation(item models.Conversation) erro
 	var err error
 	if item.SortTime > 0 {
 		if item.LatestUnreadMsgIndex > 0 {
-			err = dbcommons.GetDb().Exec("INSERT INTO conversations (app_key, user_id, target_id, channel_type, sort_time, latest_msg_id, latest_msg, latest_unread_msg_index, sync_time)VALUES(?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE sort_time=?, latest_msg_id=?, latest_msg=?, latest_unread_msg_index=?, is_deleted=0, sync_time=?",
-				item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.SortTime, item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex, item.SyncTime, item.SortTime, item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex, item.SyncTime).Error
+			err = dbcommons.GetDb().Exec("INSERT INTO conversations (app_key, user_id, target_id, channel_type, sub_channel, sort_time, latest_msg_id, latest_msg, latest_unread_msg_index, sync_time)VALUES(?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE sort_time=?, latest_msg_id=?, latest_msg=?, latest_unread_msg_index=?, is_deleted=0, sync_time=?",
+				item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.SubChannel, item.SortTime, item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex, item.SyncTime, item.SortTime, item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex, item.SyncTime).Error
 		} else {
-			err = dbcommons.GetDb().Exec("INSERT INTO conversations (app_key, user_id, target_id, channel_type, sort_time, latest_msg_id, latest_msg, sync_time)VALUES(?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE sort_time=?, latest_msg_id=?, latest_msg=?, is_deleted=0, sync_time=?",
-				item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.SortTime, item.LatestMsgId, item.LatestMsg, item.SyncTime, item.SortTime, item.LatestMsgId, item.LatestMsg, item.SyncTime).Error
+			err = dbcommons.GetDb().Exec("INSERT INTO conversations (app_key, user_id, target_id, channel_type, sub_channel, sort_time, latest_msg_id, latest_msg, sync_time)VALUES(?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE sort_time=?, latest_msg_id=?, latest_msg=?, is_deleted=0, sync_time=?",
+				item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.SubChannel, item.SortTime, item.LatestMsgId, item.LatestMsg, item.SyncTime, item.SortTime, item.LatestMsgId, item.LatestMsg, item.SyncTime).Error
 		}
 	} else {
 		if item.LatestUnreadMsgIndex > 0 {
-			err = dbcommons.GetDb().Exec("INSERT INTO conversations (app_key, user_id, target_id, channel_type, latest_msg_id, latest_msg, latest_unread_msg_index, sync_time)VALUES(?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE latest_msg_id=?, latest_msg=?, latest_unread_msg_index=?, is_deleted=0, sync_time=?",
-				item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex, item.SyncTime, item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex, item.SyncTime).Error
+			err = dbcommons.GetDb().Exec("INSERT INTO conversations (app_key, user_id, target_id, channel_type, sub_channel, latest_msg_id, latest_msg, latest_unread_msg_index, sync_time)VALUES(?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE latest_msg_id=?, latest_msg=?, latest_unread_msg_index=?, is_deleted=0, sync_time=?",
+				item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.SubChannel, item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex, item.SyncTime, item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex, item.SyncTime).Error
 		} else {
-			err = dbcommons.GetDb().Exec("INSERT INTO conversations (app_key, user_id, target_id, channel_type, latest_msg_id, latest_msg, sync_time)VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE latest_msg_id=?, latest_msg=?, is_deleted=0, sync_time=?",
-				item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.LatestMsgId, item.LatestMsg, item.SyncTime, item.LatestMsgId, item.LatestMsg, item.SyncTime).Error
+			err = dbcommons.GetDb().Exec("INSERT INTO conversations (app_key, user_id, target_id, channel_type, sub_channel, latest_msg_id, latest_msg, sync_time)VALUES(?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE latest_msg_id=?, latest_msg=?, is_deleted=0, sync_time=?",
+				item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.SubChannel, item.LatestMsgId, item.LatestMsg, item.SyncTime, item.LatestMsgId, item.LatestMsg, item.SyncTime).Error
 		}
 	}
 	return err
@@ -92,10 +94,10 @@ func (conver *ConversationDao) Upsert(item models.Conversation) error {
 	params := []interface{}{}
 	sqlBuilder.WriteString("INSERT INTO ")
 	sqlBuilder.WriteString(conver.TableName())
-	sqlBuilder.WriteString(" (app_key,user_id,target_id,channel_type,sort_time,sync_time,latest_msg_id,latest_msg,latest_unread_msg_index,latest_read_msg_index,latest_read_msg_id,latest_read_msg_time,is_top,top_updated_time,undisturb_type,unread_tag,is_deleted,conver_exts) ")
-	sqlBuilder.WriteString("VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE ")
+	sqlBuilder.WriteString(" (app_key,user_id,target_id,channel_type,sub_channel,sort_time,sync_time,latest_msg_id,latest_msg,latest_unread_msg_index,latest_read_msg_index,latest_read_msg_id,latest_read_msg_time,is_top,top_updated_time,undisturb_type,unread_tag,is_deleted,conver_exts) ")
+	sqlBuilder.WriteString("VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE ")
 	params = append(params,
-		item.AppKey, item.UserId, item.TargetId, item.ChannelType,
+		item.AppKey, item.UserId, item.TargetId, item.ChannelType, item.SubChannel,
 		item.SortTime, item.SyncTime,
 		item.LatestMsgId, item.LatestMsg, item.LatestUnreadMsgIndex,
 		item.LatestReadMsgIndex, item.LatestReadMsgId, item.LatestReadMsgTime,
@@ -124,6 +126,7 @@ func (conver *ConversationDao) QryConvers(appkey, userId string, startTime int64
 			TargetId:             item.TargetId,
 			SortTime:             item.SortTime,
 			ChannelType:          pbobjs.ChannelType(item.ChannelType),
+			SubChannel:           item.SubChannel,
 			LatestMsgId:          item.LatestMsgId,
 			LatestMsg:            item.LatestMsg,
 			LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,

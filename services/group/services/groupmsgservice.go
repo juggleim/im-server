@@ -68,7 +68,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 	}
 
-	msgConverCache := commonservices.GetMsgConverCache(ctx, groupId, pbobjs.ChannelType_Group)
+	msgConverCache := commonservices.GetMsgConverCache(ctx, groupId, upMsg.SubChannel, pbobjs.ChannelType_Group)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(groupId, pbobjs.ChannelType_Group, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)
 	if preMsgId != "" {
@@ -135,6 +135,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		GrpMemberInfo:     grpMemberInfo,
 		DestroyTime:       destroyTime,
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
+		SubChannel:        upMsg.SubChannel,
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 	msglogs.LogMsg(ctx, downMsg4Sendbox)
@@ -165,6 +166,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		GrpMemberInfo:     grpMemberInfo,
 		DestroyTime:       destroyTime,
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
+		SubChannel:        upMsg.SubChannel,
 	}
 
 	commonservices.SubGroupMsg(ctx, msgId, downMsg4Sendbox)

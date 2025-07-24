@@ -151,17 +151,19 @@ CREATE TABLE IF NOT EXISTS `cmdsendboxmsgs` (
 CREATE TABLE IF NOT EXISTS `convercleantimes` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
+  `sub_channel` varchar(32) DEFAULT '',
   `channel_type` tinyint DEFAULT '0' COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
   `clean_time` bigint DEFAULT '0' COMMENT '清除时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_destroy` (`app_key`,`conver_id`,`channel_type`)
+  UNIQUE KEY `uniq_destroy` (`app_key`,`conver_id`,`sub_channel`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话清理记录';
 
 CREATE TABLE IF NOT EXISTS `conversations` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
+  `sub_channel` varchar(32) DEFAULT '',
   `channel_type` tinyint DEFAULT '0' COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
   `latest_msg_id` varchar(20) DEFAULT NULL COMMENT '最新消息id',
   `latest_msg` mediumblob COMMENT '最新消息体',
@@ -179,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `conversations` (
   `conver_exts` mediumblob,
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_app_key_user_id_target_id` (`app_key`,`user_id`,`target_id`,`channel_type`),
+  UNIQUE KEY `uniq_app_key_user_id_target_id` (`app_key`,`user_id`,`target_id`,`sub_channel`,`channel_type`),
   KEY `idx_sync_time` (`app_key`,`user_id`,`sync_time`),
   KEY `idx_update_time` (`app_key`,`user_id`,`sort_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话';
@@ -202,11 +204,12 @@ CREATE TABLE IF NOT EXISTS `convertagrels` (
   `tag` VARCHAR(50) NULL COMMENT 'tag',
   `target_id` VARCHAR(32) NULL COMMENT '目标id',
   `channel_type` TINYINT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
+  `sub_channel` varchar(32) DEFAULT '',
   `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `app_key` VARCHAR(20) NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `uniq_tag_target` (`app_key`, `user_id`, `tag`, `target_id`, `channel_type`),
-  KEY `idx_target` (`app_key`, `user_id`, `target_id`, `channel_type`)
+  UNIQUE INDEX `uniq_tag_target` (`app_key`, `user_id`, `tag`, `target_id`, `channel_type`, `sub_channel`),
+  KEY `idx_target` (`app_key`, `user_id`, `target_id`, `channel_type`, `sub_channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话-分组绑定关系表';
 
 CREATE TABLE IF NOT EXISTS `msgstats` (
@@ -257,19 +260,21 @@ CREATE TABLE IF NOT EXISTS `g_delhismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '目标id',
+  `sub_channel` varchar(32) DEFAULT '',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
   `msg_time` bigint DEFAULT 0 COMMENT '消息时间',
   `msg_seq` int DEFAULT 0 COMMENT '消息seq',
   `effective_time` bigint DEFAULT 0,
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_msgid` (`app_key`,`user_id`,`target_id`,`msg_id`),
-  KEY `idx_target` (`app_key`,`user_id`,`target_id`,`msg_time`)
+  UNIQUE KEY `uniq_msgid` (`app_key`,`user_id`,`target_id`,`sub_channel`,`msg_id`),
+  KEY `idx_target` (`app_key`,`user_id`,`target_id`,`sub_channel`,`msg_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群聊-历史消息已删记录表';
 
 CREATE TABLE IF NOT EXISTS `g_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
+  `sub_channel` varchar(32) DEFAULT '',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
   `receiver_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
   `channel_type` tinyint DEFAULT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
@@ -289,8 +294,8 @@ CREATE TABLE IF NOT EXISTS `g_hismsgs` (
   `destroy_time` bigint DEFAULT 0,
   `life_time_after_read` bigint DEFAULT 0,
   PRIMARY KEY (`id`),
-  KEY `idx_appkey_converid` (`app_key`,`conver_id`,`msg_id`,`send_time`),
-  KEY `idx_conver_time` (`app_key`,`conver_id`,`send_time`)
+  KEY `idx_appkey_converid` (`app_key`,`conver_id`,`sub_channel`,`msg_id`,`send_time`),
+  KEY `idx_conver_time` (`app_key`,`conver_id`,`sub_channel`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群聊-历史消息表';
 
 CREATE TABLE IF NOT EXISTS `gc_hismsgs` (
@@ -325,10 +330,11 @@ CREATE TABLE IF NOT EXISTS `globalconvers` (
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者',
   `channel_type` tinyint DEFAULT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
+  `sub_channel` varchar(32) DEFAULT '',
   `updated_time` bigint DEFAULT NULL COMMENT '更新时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_conver` (`app_key`,`conver_id`,`channel_type`),
+  UNIQUE KEY `uniq_conver` (`app_key`,`conver_id`,`sub_channel`,`channel_type`),
   KEY `idx_time` (`app_key`,`channel_type`,`updated_time`),
   KEY `idx_targetid` (`app_key`,`channel_type`,`target_id`,`updated_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '全局会话表';
@@ -476,6 +482,7 @@ CREATE TABLE IF NOT EXISTS `mentionmsgs` (
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
   `channel_type` tinyint DEFAULT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
+  `sub_channel` varchar(32) DEFAULT '',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者id',
   `mention_type` tinyint DEFAULT NULL COMMENT '类型',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
@@ -484,9 +491,9 @@ CREATE TABLE IF NOT EXISTS `mentionmsgs` (
   `is_read` tinyint DEFAULT NULL COMMENT '是否已读',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  KEY `idx_uid_tid_type` (`app_key`,`user_id`,`target_id`,`channel_type`,`msg_index`,`msg_time`),
-  KEY `idx_read` (`app_key`,`user_id`,`target_id`,`channel_type`,`is_read`,`msg_time`),
-  KEY `idx_user_msgid` (`app_key`,`user_id`,`target_id`,`channel_type`,`msg_id`),
+  KEY `idx_uid_tid_type` (`app_key`,`user_id`,`target_id`,`channel_type`,`sub_channel`,`msg_index`,`msg_time`),
+  KEY `idx_read` (`app_key`,`user_id`,`target_id`,`channel_type`,`sub_channel`,`is_read`,`msg_time`),
+  KEY `idx_user_msgid` (`app_key`,`user_id`,`target_id`,`channel_type`,`sub_channel`,`msg_id`),
   KEY `idx_target_msgid` (`app_key`, `msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '@消息记录';
 
@@ -496,6 +503,7 @@ CREATE TABLE IF NOT EXISTS `mergedmsgs` (
   `from_id` varchar(32) DEFAULT NULL COMMENT '发送者',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者',
   `channel_type` tinyint DEFAULT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
+  `sub_channel` varchar(32) DEFAULT '',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
   `msg_time` bigint DEFAULT '0' COMMENT '消息时间',
   `msg_body` mediumblob COMMENT '消息体',
@@ -533,19 +541,21 @@ CREATE TABLE IF NOT EXISTS `p_delhismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者',
+  `sub_channel` varchar(32) DEFAULT '',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
   `msg_time` bigint DEFAULT 0 COMMENT '消息时间',
   `msg_seq` int DEFAULT 0 COMMENT '消息seq',
   `effective_time` bigint DEFAULT 0,
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_msgid` (`app_key`,`user_id`,`target_id`,`msg_id`),
-  KEY `idx_target` (`app_key`,`user_id`,`target_id`,`msg_time`)
+  UNIQUE KEY `uniq_msgid` (`app_key`,`user_id`,`target_id`,`sub_channel`,`msg_id`),
+  KEY `idx_target` (`app_key`,`user_id`,`target_id`,`sub_channel`,`msg_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '单聊-历史消息已删记录表';
 
 CREATE TABLE IF NOT EXISTS `p_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) DEFAULT NULL COMMENT '会话id',
+  `sub_channel` varchar(32) DEFAULT '',
   `sender_id` varchar(32) DEFAULT NULL COMMENT '发送者',
   `receiver_id` varchar(32) DEFAULT NULL COMMENT '接收者',
   `channel_type` tinyint DEFAULT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
@@ -564,8 +574,8 @@ CREATE TABLE IF NOT EXISTS `p_hismsgs` (
   `destroy_time` bigint DEFAULT 0,
   `life_time_after_read` bigint DEFAULT 0,
   PRIMARY KEY (`id`),
-  KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`msg_id`,`send_time`),
-  KEY `idx_conver_time` (`app_key`,`conver_id`,`send_time`)
+  KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`sub_channel`,`msg_id`,`send_time`),
+  KEY `idx_conver_time` (`app_key`,`conver_id`,`sub_channel`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '单聊-历史消息';
 
 CREATE TABLE IF NOT EXISTS `pushtokens` (
@@ -589,13 +599,14 @@ CREATE TABLE IF NOT EXISTS `readinfos` (
   `app_key` varchar(20) NOT NULL COMMENT '应用key',
   `msg_id` varchar(20) DEFAULT NULL COMMENT '消息id',
   `channel_type` tinyint DEFAULT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
+  `sub_channel` varchar(32) DEFAULT '',
   `group_id` varchar(32) DEFAULT NULL COMMENT '群id',
   `member_id` varchar(32) DEFAULT NULL COMMENT '群成员id',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_member` (`app_key`,`channel_type`,`group_id`,`msg_id`,`member_id`),
-  KEY `idx_memberid` (`app_key`,`channel_type`,`group_id`,`member_id`,`msg_id`),
-  KEY `idx_msgid` (`app_key`,`channel_type`,`group_id`,`msg_id`)
+  UNIQUE KEY `uniq_member` (`app_key`,`channel_type`,`group_id`,`msg_id`,`member_id`,`sub_channel`),
+  KEY `idx_memberid` (`app_key`,`channel_type`,`group_id`,`sub_channel`,`member_id`,`msg_id`),
+  KEY `idx_msgid` (`app_key`,`channel_type`,`group_id`,`sub_channel`,`msg_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群已读表';
 
 CREATE TABLE IF NOT EXISTS `s_hismsgs` (
@@ -657,11 +668,12 @@ CREATE TABLE IF NOT EXISTS `usercleantimes` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
   `target_id` varchar(32) DEFAULT NULL COMMENT '接收者id',
+  `sub_channel` varchar(32) DEFAULT '',
   `channel_type` tinyint DEFAULT NULL COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
   `clean_time` bigint DEFAULT NULL COMMENT '清理时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_app_key_user_id_target_id` (`app_key`,`user_id`,`target_id`,`channel_type`)
+  UNIQUE KEY `uniq_app_key_user_id_target_id` (`app_key`,`user_id`,`target_id`,`sub_channel`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `userexts` (
@@ -807,6 +819,7 @@ CREATE TABLE IF NOT EXISTS `favoritemsgs` (
   `user_id` VARCHAR(50) NULL,
   `sender_id` VARCHAR(50) NULL,
   `receiver_id` VARCHAR(50) NULL,
+  `sub_channel` VARCHAR(32) DEFAULT '',
   `channel_type` TINYINT NULL,
   `msg_id` VARCHAR(50) NULL,
   `msg_time` BIGINT DEFAULT '0',
@@ -822,13 +835,14 @@ CREATE TABLE IF NOT EXISTS `favoritemsgs` (
 CREATE TABLE IF NOT EXISTS `topmsgs` (
   `id` int NOT NULL AUTO_INCREMENT,
   `conver_id` varchar(100) DEFAULT '',
+  `sub_channel` VARCHAR(32) DEFAULT '',
   `channel_type` tinyint DEFAULT '0',
   `msg_id` varchar(20) DEFAULT NULL,
   `user_id` varchar(32) DEFAULT NULL,
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   `app_key` varchar(20) DEFAULT '',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`channel_type`)
+  UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`sub_channel`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20240716');

@@ -13,6 +13,7 @@ type FavoriteMsgDao struct {
 	SenderId    string    `gorm:"user_id"`
 	ReceiverId  string    `gorm:"receiver_id"`
 	ChannelType int32     `gorm:"channel_type"`
+	SubChannel  string    `gorm:"sub_channel"`
 	MsgId       string    `gorm:"msg_id"`
 	MsgTime     int64     `gorm:"msg_time"`
 	MsgType     string    `gorm:"msg_type"`
@@ -31,6 +32,7 @@ func (msg FavoriteMsgDao) Create(item models.FavoriteMsg) error {
 		SenderId:    item.SenderId,
 		ReceiverId:  item.ReceiverId,
 		ChannelType: int32(item.ChannelType),
+		SubChannel:  item.SubChannel,
 		MsgId:       item.MsgId,
 		MsgTime:     item.MsgTime,
 		MsgType:     item.MsgType,
@@ -53,6 +55,7 @@ func (msg FavoriteMsgDao) QueryFavoriteMsgs(appkey, userId string, startId, limi
 			UserId:      item.UserId,
 			SenderId:    item.SenderId,
 			ReceiverId:  item.ReceiverId,
+			SubChannel:  item.SubChannel,
 			ChannelType: pbobjs.ChannelType(item.ChannelType),
 			MsgId:       item.MsgId,
 			MsgTime:     item.MsgTime,

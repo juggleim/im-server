@@ -15,12 +15,13 @@ import (
 )
 
 type GroupDelHisMsgDao struct {
-	UserId   string `bson:"user_id"`
-	TargetId string `bson:"target_id"`
-	MsgId    string `bson:"msg_id"`
-	MsgTime  int64  `bson:"msg_time"`
-	MsgSeq   int64  `bson:"msg_seq"`
-	AppKey   string `bson:"app_key"`
+	UserId     string `bson:"user_id"`
+	TargetId   string `bson:"target_id"`
+	SubChannel string `bson:"sub_channel"`
+	MsgId      string `bson:"msg_id"`
+	MsgTime    int64  `bson:"msg_time"`
+	MsgSeq     int64  `bson:"msg_seq"`
+	AppKey     string `bson:"app_key"`
 
 	AddTime time.Time `bson:"add_time"`
 }
@@ -48,6 +49,9 @@ func (msg *GroupDelHisMsgDao) IndexCreator() func(colName string) {
 					Keys: bson.M{"target_id": 1},
 				},
 				{
+					Keys: bson.M{"sub_channel": 1},
+				},
+				{
 					Keys: bson.M{"msg_time": -1},
 				},
 			})
@@ -57,7 +61,7 @@ func (msg *GroupDelHisMsgDao) IndexCreator() func(colName string) {
 
 func (msg *GroupDelHisMsgDao) Create(item models.GroupDelHisMsg) error {
 	converId := commonservices.GetConversationId(item.UserId, item.TargetId, pbobjs.ChannelType_Group)
-	filter := bson.M{"app_key": item.AppKey, "conver_id": converId, "msg_id": item.MsgId}
+	filter := bson.M{"app_key": item.AppKey, "conver_id": converId, "sub_channel": item.SubChannel, "msg_id": item.MsgId}
 	update := bson.M{"$addToSet": bson.M{"del_user_ids": bson.M{"$each": []string{item.UserId}}}}
 
 	collection := msg.getCollection()
@@ -76,11 +80,12 @@ func (msg *GroupDelHisMsgDao) BatchCreate(items []models.GroupDelHisMsg) error {
 	appkey := items[0].AppKey
 	userId := items[0].UserId
 	converId := commonservices.GetConversationId(items[0].UserId, items[0].TargetId, pbobjs.ChannelType_Group)
+	subChannel := items[0].SubChannel
 
 	for _, item := range items {
 		msgIds = append(msgIds, item.MsgId)
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": bson.M{"$in": msgIds}}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": bson.M{"$in": msgIds}}
 	update := bson.M{
 		"$addToSet": bson.M{"del_user_ids": bson.M{"$each": []string{userId}}},
 	}
@@ -92,14 +97,14 @@ func (msg *GroupDelHisMsgDao) BatchCreate(items []models.GroupDelHisMsg) error {
 	return err
 }
 
-func (msg *GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, startTime int64, count int32, isPositive bool) ([]*models.GroupDelHisMsg, error) {
+func (msg *GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId, subChannel string, startTime int64, count int32, isPositive bool) ([]*models.GroupDelHisMsg, error) {
 	collection := msg.getCollection()
 	retItems := []*models.GroupDelHisMsg{}
 	if collection == nil {
 		return nil, errors.New("no mongo client")
 	}
 	converId := commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_Group)
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "del_user_ids": bson.M{"$in": []string{userId}}}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "del_user_ids": bson.M{"$in": []string{userId}}}
 	dbSort := -1
 	if isPositive {
 		dbSort = 1
@@ -138,6 +143,6 @@ func (msg *GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId string, sta
 	return retItems, nil
 }
 
-func (msg *GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*models.GroupDelHisMsg, error) {
+func (msg *GroupDelHisMsgDao) QryDelHisMsgsByMsgIds(appkey, userId, targetId, subChannel string, msgIds []string) ([]*models.GroupDelHisMsg, error) {
 	return nil, nil
 }

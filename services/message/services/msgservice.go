@@ -23,7 +23,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	converId := commonservices.GetConversationId(senderId, receiverId, pbobjs.ChannelType_Private)
 	//statistic
 	commonservices.ReportUpMsg(appkey, pbobjs.ChannelType_Private, 1)
-	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, pbobjs.ChannelType_Private)
+	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, upMsg.SubChannel, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)
 	if preMsgId != "" {
@@ -96,6 +96,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		SearchText:        upMsg.SearchText,
 		DestroyTime:       destroyTime,
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
+		SubChannel:        upMsg.SubChannel,
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 	msglogs.LogMsg(ctx, downMsg4Sendbox)
@@ -124,6 +125,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		SearchText:        upMsg.SearchText,
 		DestroyTime:       destroyTime,
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
+		SubChannel:        upMsg.SubChannel,
 	}
 
 	//check merged msg

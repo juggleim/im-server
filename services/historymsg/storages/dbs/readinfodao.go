@@ -14,6 +14,7 @@ type ReadInfoDao struct {
 	AppKey      string    `gorm:"app_key"`
 	MsgId       string    `gorm:"msg_id"`
 	ChannelType int       `gorm:"channel_type"`
+	SubChannel  string    `gorm:"sub_channel"`
 	GroupId     string    `gorm:"group_id"`
 	MemberId    string    `gorm:"member_id"`
 	CreatedTime time.Time `gorm:"created_time"`
@@ -35,6 +36,7 @@ func (info ReadInfoDao) Create(item models.ReadInfo) error {
 		MsgId:       item.MsgId,
 		ChannelType: int(item.ChannelType),
 		GroupId:     item.GroupId,
+		SubChannel:  item.SubChannel,
 		MemberId:    item.MemberId,
 		CreatedTime: addTime,
 	}
@@ -44,25 +46,25 @@ func (info ReadInfoDao) Create(item models.ReadInfo) error {
 
 func (info ReadInfoDao) BatchCreate(items []models.ReadInfo) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("insert into %s (`app_key`,`msg_id`,`channel_type`,`group_id`,`member_id`)values", info.TableName())
+	sql := fmt.Sprintf("insert into %s (`app_key`,`msg_id`,`channel_type`,`group_id`,`sub_channel`,`member_id`)values", info.TableName())
 	params := []interface{}{}
 
 	buffer.WriteString(sql)
 	for i, item := range items {
 		if i == len(items)-1 {
-			buffer.WriteString("(?,?,?,?,?);")
+			buffer.WriteString("(?,?,?,?,?,?);")
 		} else {
-			buffer.WriteString("(?,?,?,?,?),")
+			buffer.WriteString("(?,?,?,?,?,?),")
 		}
-		params = append(params, item.AppKey, item.MsgId, item.ChannelType, item.GroupId, item.MemberId)
+		params = append(params, item.AppKey, item.MsgId, item.ChannelType, item.GroupId, item.SubChannel, item.MemberId)
 	}
 	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
 	return err
 }
 
-func (info ReadInfoDao) QryReadInfosByMsgId(appkey, groupId string, channelType pbobjs.ChannelType, msgId string, startId, limit int64) ([]*models.ReadInfo, error) {
+func (info ReadInfoDao) QryReadInfosByMsgId(appkey, groupId, subChannel string, channelType pbobjs.ChannelType, msgId string, startId, limit int64) ([]*models.ReadInfo, error) {
 	var items []*ReadInfoDao
-	err := dbcommons.GetDb().Where("app_key=? and channel_type=? and group_id=? and msg_id=? and id>?", appkey, channelType, groupId, msgId, startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and channel_type=? and group_id=? and sub_channel=? and msg_id=? and id>?", appkey, channelType, groupId, subChannel, msgId, startId).Order("id asc").Limit(limit).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
@@ -72,6 +74,7 @@ func (info ReadInfoDao) QryReadInfosByMsgId(appkey, groupId string, channelType 
 			AppKey:      item.AppKey,
 			MsgId:       item.MsgId,
 			ChannelType: pbobjs.ChannelType(item.ChannelType),
+			SubChannel:  item.SubChannel,
 			GroupId:     item.GroupId,
 			MemberId:    item.MemberId,
 			CreatedTime: item.CreatedTime.UnixMilli(),
@@ -80,22 +83,22 @@ func (info ReadInfoDao) QryReadInfosByMsgId(appkey, groupId string, channelType 
 	return retItems, err
 }
 
-func (info ReadInfoDao) CountReadInfosByMsgId(appkey, groupId string, channelType pbobjs.ChannelType, msgId string) int32 {
+func (info ReadInfoDao) CountReadInfosByMsgId(appkey, groupId, subchannel string, channelType pbobjs.ChannelType, msgId string) int32 {
 	var count int32
-	err := dbcommons.GetDb().Model(&ReadInfoDao{}).Where("app_key=? and channel_type=? and group_id=? and msg_id=?", appkey, channelType, groupId, msgId).Count(&count).Error
+	err := dbcommons.GetDb().Model(&ReadInfoDao{}).Where("app_key=? and channel_type=? and group_id=? and sub_channel=? and msg_id=?", appkey, channelType, groupId, subchannel, msgId).Count(&count).Error
 	if err != nil {
 		return 0
 	}
 	return count
 }
 
-func (info ReadInfoDao) CheckMsgsRead(appkey, groupId, memberId string, channelType pbobjs.ChannelType, msgIds []string) (map[string]bool, error) {
+func (info ReadInfoDao) CheckMsgsRead(appkey, groupId, subChannel, memberId string, channelType pbobjs.ChannelType, msgIds []string) (map[string]bool, error) {
 	ret := map[string]bool{}
 	for _, msgId := range msgIds {
 		ret[msgId] = false
 	}
 	var items []*ReadInfoDao
-	err := dbcommons.GetDb().Where("app_key=? and channel_type=? and group_id=? and member_id=? and msg_id in (?)", appkey, channelType, groupId, memberId, msgIds).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and channel_type=? and group_id=? and sub_channel=? and member_id=? and msg_id in (?)", appkey, channelType, groupId, subChannel, memberId, msgIds).Find(&items).Error
 	if err != nil {
 		return ret, err
 	}

@@ -8,6 +8,7 @@ import (
 type TopMsg struct {
 	ID          int64
 	ConverId    string
+	SubChannel  string
 	ChannelType pbobjs.ChannelType
 	MsgId       string
 	UserId      string
@@ -17,6 +18,6 @@ type TopMsg struct {
 
 type ITopMsgStorage interface {
 	Upsert(item TopMsg) error
-	FindTopMsg(appkey, converId string, channelType pbobjs.ChannelType) (*TopMsg, error)
-	DelTopMsg(appkey, converId string, channelType pbobjs.ChannelType, msgId string) error
+	FindTopMsg(appkey, converId, subChannel string, channelType pbobjs.ChannelType) (*TopMsg, error)
+	DelTopMsg(appkey, converId, subChannel string, channelType pbobjs.ChannelType, msgId string) error
 }

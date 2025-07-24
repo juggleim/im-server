@@ -17,6 +17,7 @@ import (
 type PrivateHisMsgDao struct {
 	// ID          primitive.ObjectID `bson:"_id"`
 	ConverId    string    `bson:"conver_id"`
+	SubChannel  string    `bson:"sub_channel"`
 	SenderId    string    `bson:"sender_id"`
 	ReceiverId  string    `bson:"receiver_id"`
 	MsgType     string    `bson:"msg_type"`
@@ -56,6 +57,9 @@ func (msg *PrivateHisMsgDao) IndexCreator() func(colName string) {
 					Keys: bson.M{"conver_id": 1},
 				},
 				{
+					Keys: bson.M{"sub_channel": 1},
+				},
+				{
 					Keys: bson.M{"send_time": -1},
 				},
 				{
@@ -81,6 +85,7 @@ func (msg *PrivateHisMsgDao) IndexCreator() func(colName string) {
 func (msg *PrivateHisMsgDao) SavePrivateHisMsg(item models.PrivateHisMsg) error {
 	add := PrivateHisMsgDao{
 		ConverId:    item.ConverId,
+		SubChannel:  item.SubChannel,
 		SenderId:    item.SenderId,
 		ReceiverId:  item.ReceiverId,
 		ChannelType: int(item.ChannelType),
@@ -105,12 +110,12 @@ func (msg *PrivateHisMsgDao) SavePrivateHisMsg(item models.PrivateHisMsg) error 
 	return err
 }
 
-func (msg *PrivateHisMsgDao) FindById(appkey, converId, msgId string) (*models.PrivateHisMsg, error) {
+func (msg *PrivateHisMsgDao) FindById(appkey, converId, subChannel, msgId string) (*models.PrivateHisMsg, error) {
 	collection := msg.getCollection()
 	if collection == nil {
 		return nil, errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": msgId}
 	result := collection.FindOne(context.TODO(), filter)
 	var item PrivateHisMsgDao
 	err := result.Decode(&item)
@@ -120,12 +125,12 @@ func (msg *PrivateHisMsgDao) FindById(appkey, converId, msgId string) (*models.P
 	return dbMsg2PrivateMsg(&item), nil
 }
 
-func (msg *PrivateHisMsgDao) UpdateMsgBody(appkey, converId, msgId, msgType string, msgBody []byte) error {
+func (msg *PrivateHisMsgDao) UpdateMsgBody(appkey, converId, subChannel, msgId, msgType string, msgBody []byte) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": msgId}
 	update := bson.M{
 		"$set": bson.M{
 			"msg_type": msgType,
@@ -136,10 +141,10 @@ func (msg *PrivateHisMsgDao) UpdateMsgBody(appkey, converId, msgId, msgType stri
 	return err
 }
 
-func (msg *PrivateHisMsgDao) QryLatestMsgSeqNo(appkey, converId string) int64 {
+func (msg *PrivateHisMsgDao) QryLatestMsgSeqNo(appkey, converId, subChannel string) int64 {
 	collection := msg.getCollection()
 	if collection != nil {
-		filter := bson.M{"app_key": appkey, "conver_id": converId}
+		filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel}
 		result := collection.FindOne(context.TODO(), filter, options.FindOne().SetProjection(bson.M{"msg_seq_no": 1}), options.FindOne().SetSort(bson.D{{"send_time", -1}}))
 		var item GroupHisMsgDao
 		err := result.Decode(&item)
@@ -150,10 +155,10 @@ func (msg *PrivateHisMsgDao) QryLatestMsgSeqNo(appkey, converId string) int64 {
 	return 0
 }
 
-func (msg *PrivateHisMsgDao) QryLatestMsg(appkey, converId string) (*models.PrivateHisMsg, error) {
+func (msg *PrivateHisMsgDao) QryLatestMsg(appkey, converId, subChannel string) (*models.PrivateHisMsg, error) {
 	collection := msg.getCollection()
 	if collection != nil {
-		filter := bson.M{"app_key": appkey, "conver_id": converId}
+		filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel}
 		result := collection.FindOne(context.TODO(), filter, options.FindOne().SetSort(bson.D{{"send_time", -1}}))
 		var item PrivateHisMsgDao
 		err := result.Decode(&item)
@@ -166,13 +171,13 @@ func (msg *PrivateHisMsgDao) QryLatestMsg(appkey, converId string) (*models.Priv
 	return nil, errors.New("no mongo client")
 }
 
-func (msg *PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.PrivateHisMsg, error) {
+func (msg *PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.PrivateHisMsg, error) {
 	collection := msg.getCollection()
 	retItems := []*models.PrivateHisMsg{}
 	if collection == nil {
 		return nil, errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "del_user_ids": bson.M{"$nin": []string{userId}}}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "del_user_ids": bson.M{"$nin": []string{userId}}}
 	dbSort := -1
 	start := startTime
 	if isPositiveOrder {
@@ -220,13 +225,13 @@ func (msg *PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, userId, targ
 	return retItems, nil
 }
 
-func (msg *PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
+func (msg *PrivateHisMsgDao) QryHisMsgs(appkey, converId, subChannel string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.PrivateHisMsg, error) {
 	collection := msg.getCollection()
 	retItems := []*models.PrivateHisMsg{}
 	if collection == nil {
 		return nil, errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel}
 
 	dbSort := -1
 	start := startTime
@@ -286,12 +291,12 @@ func (msg *PrivateHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64
 	return retItems, nil
 }
 
-func (msg *PrivateHisMsgDao) MarkReadByMsgIds(appkey, converId string, msgIds []string) error {
+func (msg *PrivateHisMsgDao) MarkReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": bson.M{"$in": msgIds}}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": bson.M{"$in": msgIds}}
 	update := bson.M{
 		"$set": bson.M{
 			"is_read": 1,
@@ -301,16 +306,16 @@ func (msg *PrivateHisMsgDao) MarkReadByMsgIds(appkey, converId string, msgIds []
 	return err
 }
 
-func (msg *PrivateHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error {
+func (msg *PrivateHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error {
 	return nil
 }
 
-func (msg *PrivateHisMsgDao) MarkReadByScope(appkey, converId string, start, end int64) error {
+func (msg *PrivateHisMsgDao) MarkReadByScope(appkey, converId, subChannel string, start, end int64) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_index": bson.M{
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_index": bson.M{
 		"$gte": start,
 		"$lte": end,
 	}}
@@ -323,17 +328,17 @@ func (msg *PrivateHisMsgDao) MarkReadByScope(appkey, converId string, start, end
 	return err
 }
 
-func (msg *PrivateHisMsgDao) UpdateDestroyTimeAfterReadByScope(appkey, converId string, start, end int64) error {
+func (msg *PrivateHisMsgDao) UpdateDestroyTimeAfterReadByScope(appkey, converId, subChannel string, start, end int64) error {
 	return nil
 }
 
-func (msg *PrivateHisMsgDao) FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*models.PrivateHisMsg, error) {
+func (msg *PrivateHisMsgDao) FindByIds(appkey, converId, subChannel string, msgIds []string, cleanTime int64) ([]*models.PrivateHisMsg, error) {
 	collection := msg.getCollection()
 	retItems := []*models.PrivateHisMsg{}
 	if collection == nil {
 		return nil, errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId,
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel,
 		"send_time": bson.M{
 			"$gt": cleanTime,
 		},
@@ -373,7 +378,7 @@ func (msg *PrivateHisMsgDao) FindByConvers(appkey string, convers []models.Conve
 	}
 	or := []bson.M{}
 	for _, conver := range convers {
-		or = append(or, bson.M{"conver_id": conver.ConverId, "msg_id": conver.MsgId})
+		or = append(or, bson.M{"conver_id": conver.ConverId, "sub_channel": conver.SubChannel, "msg_id": conver.MsgId})
 	}
 	filter := bson.M{
 		"app_key": appkey,
@@ -398,12 +403,12 @@ func (msg *PrivateHisMsgDao) FindByConvers(appkey string, convers []models.Conve
 	return retItems, nil
 }
 
-func (msg *PrivateHisMsgDao) DelMsgs(appkey, converId string, msgIds []string) error {
+func (msg *PrivateHisMsgDao) DelMsgs(appkey, converId, subChannel string, msgIds []string) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": bson.M{"$in": msgIds}}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": bson.M{"$in": msgIds}}
 	_, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
 		return err
@@ -411,12 +416,12 @@ func (msg *PrivateHisMsgDao) DelMsgs(appkey, converId string, msgIds []string) e
 	return nil
 }
 
-func (msg *PrivateHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, isExt int) error {
+func (msg *PrivateHisMsgDao) UpdateMsgExtState(appkey, converId, subChannel, msgId string, isExt int) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": msgId}
 	update := bson.M{
 		"$set": bson.M{
 			"is_ext": isExt,
@@ -426,12 +431,12 @@ func (msg *PrivateHisMsgDao) UpdateMsgExtState(appkey, converId, msgId string, i
 	return err
 }
 
-func (msg *PrivateHisMsgDao) UpdateMsgExt(appkey, converId, msgId string, ext []byte) error {
+func (msg *PrivateHisMsgDao) UpdateMsgExt(appkey, converId, subChannel, msgId string, ext []byte) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": msgId}
 	update := bson.M{
 		"$set": bson.M{
 			"msg_ext": ext,
@@ -441,12 +446,12 @@ func (msg *PrivateHisMsgDao) UpdateMsgExt(appkey, converId, msgId string, ext []
 	return err
 }
 
-func (msg PrivateHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error {
+func (msg PrivateHisMsgDao) UpdateMsgExsetState(appkey, converId, subChannel, msgId string, isExset int) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": msgId}
 	update := bson.M{
 		"$set": bson.M{
 			"is_exset": isExset,
@@ -456,12 +461,12 @@ func (msg PrivateHisMsgDao) UpdateMsgExsetState(appkey, converId, msgId string, 
 	return err
 }
 
-func (msg PrivateHisMsgDao) UpdateMsgExset(appkey, converId, msgId string, ext []byte) error {
+func (msg PrivateHisMsgDao) UpdateMsgExset(appkey, converId, subChannel, msgId string, ext []byte) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "msg_id": msgId}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_id": msgId}
 	update := bson.M{
 		"$set": bson.M{
 			"msg_exset": ext,
@@ -472,12 +477,12 @@ func (msg PrivateHisMsgDao) UpdateMsgExset(appkey, converId, msgId string, ext [
 }
 
 // TODO need batch delete
-func (msg *PrivateHisMsgDao) DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error {
+func (msg *PrivateHisMsgDao) DelSomeoneMsgsBaseTime(appkey, converId, subChannel string, cleanTime int64, senderId string) error {
 	collection := msg.getCollection()
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "send_time": bson.M{"$lt": cleanTime}, "sender_id": senderId}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "send_time": bson.M{"$lt": cleanTime}, "sender_id": senderId}
 	_, err := collection.DeleteMany(context.TODO(), filter)
 	if err != nil {
 		return err
@@ -489,6 +494,7 @@ func dbMsg2PrivateMsg(dbMsg *PrivateHisMsgDao) *models.PrivateHisMsg {
 	return &models.PrivateHisMsg{
 		HisMsg: models.HisMsg{
 			ConverId:    dbMsg.ConverId,
+			SubChannel:  dbMsg.SubChannel,
 			SenderId:    dbMsg.SenderId,
 			ReceiverId:  dbMsg.ReceiverId,
 			ChannelType: pbobjs.ChannelType(dbMsg.ChannelType),

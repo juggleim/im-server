@@ -4,6 +4,7 @@ import "im-server/commons/pbdefines/pbobjs"
 
 type HisMsg struct {
 	ConverId          string
+	SubChannel        string
 	SenderId          string
 	ReceiverId        string
 	ChannelType       pbobjs.ChannelType
@@ -39,52 +40,53 @@ type SystemHisMsg struct {
 }
 
 type ConverItem struct {
-	ConverId string
-	MsgId    string
+	ConverId   string
+	MsgId      string
+	SubChannel string
 }
 
 type IGroupHisMsgStorage interface {
 	SaveGroupHisMsg(msg GroupHisMsg) error
 	//QryLatestMsgSeqNo(appkey, converId string) int64
-	QryLatestMsg(appkey, converId string) (*GroupHisMsg, error)
-	QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*GroupHisMsg, error)
-	QryHisMsgsExcludeDel(appkey, converId, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*GroupHisMsg, error)
-	UpdateMsgBody(appkey, converId, msgId, msgType string, msgBody []byte) error
-	FindById(appkey, converId, msgId string) (*GroupHisMsg, error)
-	FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*GroupHisMsg, error)
+	QryLatestMsg(appkey, converId, subChannel string) (*GroupHisMsg, error)
+	QryHisMsgs(appkey, converId, subChannel string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*GroupHisMsg, error)
+	QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*GroupHisMsg, error)
+	UpdateMsgBody(appkey, converId, subChannel, msgId, msgType string, msgBody []byte) error
+	FindById(appkey, converId, subChannel, msgId string) (*GroupHisMsg, error)
+	FindByIds(appkey, converId, subChannel string, msgIds []string, cleanTime int64) ([]*GroupHisMsg, error)
 	FindByConvers(appkey string, convers []ConverItem) ([]*GroupHisMsg, error)
-	DelMsgs(appkey, converId string, msgIds []string) error
-	UpdateMsgExtState(appkey, converId, msgId string, isExt int) error
-	UpdateMsgExt(appkey, converId, msgId string, ext []byte) error
-	UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error
-	UpdateMsgExset(appkey, converId, msgId string, ext []byte) error
-	DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error
-	UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error
+	DelMsgs(appkey, converId, subChannel string, msgIds []string) error
+	UpdateMsgExtState(appkey, converId, subChannel, msgId string, isExt int) error
+	UpdateMsgExt(appkey, converId, subChannel, msgId string, ext []byte) error
+	UpdateMsgExsetState(appkey, converId, subChannel, msgId string, isExset int) error
+	UpdateMsgExset(appkey, converId, subChannel, msgId string, ext []byte) error
+	DelSomeoneMsgsBaseTime(appkey, converId, subChannel string, cleanTime int64, senderId string) error
+	UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error
 
-	UpdateReadCount(appkey, converId, msgId string, readCount int) error
+	UpdateReadCount(appkey, converId, subChannel, msgId string, readCount int) error
 }
 
 type IPrivateHisMsgStorage interface {
 	SavePrivateHisMsg(msg PrivateHisMsg) error
 	//QryLatestMsg(appkey, converId string) *PrivateHisMsg
-	QryLatestMsg(appkey, converId string) (*PrivateHisMsg, error)
-	QryHisMsgs(appkey, converId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*PrivateHisMsg, error)
-	QryHisMsgsExcludeDel(appkey, converId, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*PrivateHisMsg, error)
-	UpdateMsgBody(appkey, converId, msgId, msgType string, msgBody []byte) error
-	FindById(appkey, converId, msgId string) (*PrivateHisMsg, error)
-	FindByIds(appkey, converId string, msgIds []string, cleanTime int64) ([]*PrivateHisMsg, error)
+	QryLatestMsg(appkey, converId, subChannel string) (*PrivateHisMsg, error)
+	QryHisMsgs(appkey, converId, subChannel string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*PrivateHisMsg, error)
+	QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*PrivateHisMsg, error)
+	UpdateMsgBody(appkey, converId, subChannel, msgId, msgType string, msgBody []byte) error
+	FindById(appkey, converId, subChannel, msgId string) (*PrivateHisMsg, error)
+	FindByIds(appkey, converId, subChannel string, msgIds []string, cleanTime int64) ([]*PrivateHisMsg, error)
 	FindByConvers(appkey string, convers []ConverItem) ([]*PrivateHisMsg, error)
-	DelMsgs(appkey, converId string, msgIds []string) error
-	UpdateMsgExtState(appkey, converId, msgId string, isExt int) error
-	UpdateMsgExt(appkey, converId, msgId string, ext []byte) error
-	UpdateMsgExsetState(appkey, converId, msgId string, isExset int) error
-	UpdateMsgExset(appkey, converId, msgId string, ext []byte) error
-	DelSomeoneMsgsBaseTime(appkey, converId string, cleanTime int64, senderId string) error
+	DelMsgs(appkey, converId, subChannel string, msgIds []string) error
+	UpdateMsgExtState(appkey, converId, subChannel, msgId string, isExt int) error
+	UpdateMsgExt(appkey, converId, subChannel, msgId string, ext []byte) error
+	UpdateMsgExsetState(appkey, converId, subChannel, msgId string, isExset int) error
+	UpdateMsgExset(appkey, converId, subChannel, msgId string, ext []byte) error
+	DelSomeoneMsgsBaseTime(appkey, converId, subChannel string, cleanTime int64, senderId string) error
 
-	MarkReadByMsgIds(appkey, converId string, msgIds []string) error
-	MarkReadByScope(appkey, converId string, start, end int64) error
-	UpdateDestroyTimeAfterReadByMsgIds(appkey, converId string, msgIds []string) error
-	UpdateDestroyTimeAfterReadByScope(appkey, converId string, start, end int64) error
+	MarkReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error
+	MarkReadByScope(appkey, converId, subChannel string, start, end int64) error
+	UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error
+	UpdateDestroyTimeAfterReadByScope(appkey, converId, subChannel string, start, end int64) error
 }
 
 type ISystemHisMsgStorage interface {
@@ -139,6 +141,7 @@ type MergedMsg struct {
 	FromId      string
 	TargetId    string
 	ChannelType pbobjs.ChannelType
+	SubChannel  string
 	MsgId       string
 	MsgTime     int64
 	MsgBody     []byte
@@ -153,6 +156,7 @@ type IMergedMsgStorage interface {
 
 type HisMsgConverCleanTime struct {
 	ConverId    string
+	SubChannel  string
 	ChannelType pbobjs.ChannelType
 	CleanTime   int64
 	AppKey      string
@@ -160,25 +164,27 @@ type HisMsgConverCleanTime struct {
 
 type IHisMsgConverCleanTimeStorage interface {
 	UpsertDestroyTime(item HisMsgConverCleanTime) error
-	FindOne(appkey, converId string, channelType pbobjs.ChannelType) (*HisMsgConverCleanTime, error)
+	FindOne(appkey, converId, subChannel string, channelType pbobjs.ChannelType) (*HisMsgConverCleanTime, error)
 }
 
 type HisMsgUserCleanTime struct {
 	UserId      string
 	TargetId    string
 	ChannelType pbobjs.ChannelType
+	SubChannel  string
 	CleanTime   int64
 	AppKey      string
 }
 
 type IHisMsgUserCleanTimeStorage interface {
 	UpsertCleanTime(item HisMsgUserCleanTime) error
-	FindOne(appkey, userId, targetId string, channelType pbobjs.ChannelType) (*HisMsgUserCleanTime, error)
+	FindOne(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType) (*HisMsgUserCleanTime, error)
 }
 
 type GroupDelHisMsg struct {
 	UserId        string
 	TargetId      string
+	SubChannel    string
 	MsgId         string
 	MsgTime       int64
 	MsgSeq        int64
@@ -189,13 +195,14 @@ type GroupDelHisMsg struct {
 type IGroupDelHisMsgStorage interface {
 	Create(item GroupDelHisMsg) error
 	BatchCreate(items []GroupDelHisMsg) error
-	QryDelHisMsgs(appkey, userId, targetId string, startTime int64, count int32, isPositive bool) ([]*GroupDelHisMsg, error)
-	QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*GroupDelHisMsg, error)
+	QryDelHisMsgs(appkey, userId, targetId, subChannel string, startTime int64, count int32, isPositive bool) ([]*GroupDelHisMsg, error)
+	QryDelHisMsgsByMsgIds(appkey, userId, targetId, subChannel string, msgIds []string) ([]*GroupDelHisMsg, error)
 }
 
 type PrivateDelHisMsg struct {
 	UserId        string
 	TargetId      string
+	SubChannel    string
 	MsgId         string
 	MsgTime       int64
 	MsgSeq        int64
@@ -206,14 +213,15 @@ type PrivateDelHisMsg struct {
 type IPrivateDelHisMsgStorage interface {
 	Create(item PrivateDelHisMsg) error
 	BatchCreate(items []PrivateDelHisMsg) error
-	QryDelHisMsgs(appkey, userId, targetId string, startTime int64, count int32, isPositive bool) ([]*PrivateDelHisMsg, error)
-	QryDelHisMsgsByMsgIds(appkey, userId, targetId string, msgIds []string) ([]*PrivateDelHisMsg, error)
+	QryDelHisMsgs(appkey, userId, targetId, subChannel string, startTime int64, count int32, isPositive bool) ([]*PrivateDelHisMsg, error)
+	QryDelHisMsgsByMsgIds(appkey, userId, targetId, subChannel string, msgIds []string) ([]*PrivateDelHisMsg, error)
 }
 
 type ReadInfo struct {
 	AppKey      string
 	MsgId       string
 	ChannelType pbobjs.ChannelType
+	SubChannel  string
 	GroupId     string
 	MemberId    string
 	CreatedTime int64
@@ -222,9 +230,9 @@ type ReadInfo struct {
 type IReadInfoStorage interface {
 	Create(item ReadInfo) error
 	BatchCreate(items []ReadInfo) error
-	QryReadInfosByMsgId(appkey, groupId string, channelType pbobjs.ChannelType, msgId string, startId, limit int64) ([]*ReadInfo, error)
-	CountReadInfosByMsgId(appkey, groupId string, channelType pbobjs.ChannelType, msgId string) int32
-	CheckMsgsRead(appkey, groupId, memberId string, channelType pbobjs.ChannelType, msgIds []string) (map[string]bool, error)
+	QryReadInfosByMsgId(appkey, groupId, subChannel string, channelType pbobjs.ChannelType, msgId string, startId, limit int64) ([]*ReadInfo, error)
+	CountReadInfosByMsgId(appkey, groupId, subChannel string, channelType pbobjs.ChannelType, msgId string) int32
+	CheckMsgsRead(appkey, groupId, subChannel, memberId string, channelType pbobjs.ChannelType, msgIds []string) (map[string]bool, error)
 }
 
 type MsgExt struct {

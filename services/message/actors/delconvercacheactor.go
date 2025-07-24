@@ -17,7 +17,7 @@ func (actor *DelConverCacheActor) OnReceive(ctx context.Context, input proto.Mes
 	if req, ok := input.(*pbobjs.ConversationsReq); ok {
 		userId := bases.GetRequesterIdFromCtx(ctx)
 		for _, conver := range req.Conversations {
-			services.ClearConversation(ctx, userId, conver.TargetId, conver.ChannelType)
+			services.ClearConversation(ctx, userId, conver.TargetId, conver.SubChannel, conver.ChannelType)
 		}
 	}
 }
