@@ -85,13 +85,18 @@ func (msg GroupHisMsgDao) QryLatestMsg(appkey, converId, subChannel string) (*mo
 	return nil, err
 }
 
+type GroupHisMsgDaoWithEffectiveTime struct {
+	GroupHisMsgDao
+	EffectiveTime int64 `gorm:"effective_time"`
+}
+
 func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.GroupHisMsg, error) {
 	curr := time.Now().UnixMilli()
-	var items []*GroupHisMsgDao
+	var items []*GroupHisMsgDaoWithEffectiveTime
 	params := []interface{}{}
 	hismsgTableName := msg.TableName()
 	delHismsgTableName := (&GroupDelHisMsgDao{}).TableName()
-	sql := fmt.Sprintf("select his.* from %s as his left join %s as delhis on his.app_key=delhis.app_key and delhis.user_id=? and delhis.target_id=his.conver_id and delhis.sub_channel=his.sub_channel and his.msg_id=delhis.msg_id and (delhis.effective_time=0 or delhis.effective_time<?) where his.app_key=? and his.conver_id=? and his.sub_channel=?", hismsgTableName, delHismsgTableName)
+	sql := fmt.Sprintf("select his.*,delhis.effective_time from %s as his left join %s as delhis on his.app_key=delhis.app_key and delhis.user_id=? and delhis.target_id=his.conver_id and delhis.sub_channel=his.sub_channel and his.msg_id=delhis.msg_id and (delhis.effective_time=0 or delhis.effective_time<?) where his.app_key=? and his.conver_id=? and his.sub_channel=?", hismsgTableName, delHismsgTableName)
 	params = append(params, userId)
 	params = append(params, curr)
 	params = append(params, appkey)
@@ -132,7 +137,10 @@ func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, use
 	}
 	retItems := []*models.GroupHisMsg{}
 	for _, dbMsg := range items {
-		retItems = append(retItems, dbMsg2GrpMsg(dbMsg))
+		if dbMsg.EffectiveTime > 0 {
+			dbMsg.DestroyTime = dbMsg.EffectiveTime
+		}
+		retItems = append(retItems, dbMsg2GrpMsg(&dbMsg.GroupHisMsgDao))
 	}
 	return retItems, err
 }
