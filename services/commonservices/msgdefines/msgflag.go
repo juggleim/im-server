@@ -13,6 +13,7 @@ package msgdefines
 	256: is ext msg
 	512: is reaction msg
 	1024: is stream msg
+	2048: is encrypted msg
 */
 
 func IsCmdMsg(flag int32) bool {
@@ -101,4 +102,12 @@ func IsStreamMsg(flag int32) bool {
 
 func SetStreamMsg(flag int32) int32 {
 	return flag | 0x400
+}
+
+func IsEncryptedMsg(flag int32) bool {
+	return (flag & 0x800) == 2048
+}
+
+func SetEncryptedMsg(flag int32) int32 {
+	return flag | 0x800
 }
