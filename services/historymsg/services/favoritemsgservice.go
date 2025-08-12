@@ -91,6 +91,7 @@ func DelFavoriteMsgs(ctx context.Context, req *pbobjs.FavoriteMsgIds) errs.IMErr
 }
 
 func QryFavoriteMsgs(ctx context.Context, req *pbobjs.QryFavoriteMsgsReq) (errs.IMErrorCode, *pbobjs.FavoriteMsgs) {
+	userId := bases.GetRequesterIdFromCtx(ctx)
 	var startId int64 = math.MaxInt64
 	if req.Offset != "" {
 		id, err := tools.DecodeInt(req.Offset)
@@ -114,11 +115,17 @@ func QryFavoriteMsgs(ctx context.Context, req *pbobjs.QryFavoriteMsgsReq) (errs.
 	for _, msg := range msgs {
 		ret.Offset, _ = tools.EncodeInt(msg.ID)
 		downMsg := &pbobjs.DownMsg{}
-		tools.PbUnMarshal(msg.MsgBody, downMsg)
-		ret.Items = append(ret.Items, &pbobjs.FavoriteMsg{
-			Msg:         downMsg,
-			CreatedTime: msg.CreatedTime.UnixMilli(),
-		})
+		err = tools.PbUnMarshal(msg.MsgBody, downMsg)
+		if err == nil {
+			if userId == msg.SenderId {
+				downMsg.IsSend = true
+				downMsg.TargetId = msg.ReceiverId
+			}
+			ret.Items = append(ret.Items, &pbobjs.FavoriteMsg{
+				Msg:         downMsg,
+				CreatedTime: msg.CreatedTime.UnixMilli(),
+			})
+		}
 	}
 	return errs.IMErrorCode_SUCCESS, ret
 }
