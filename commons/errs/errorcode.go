@@ -70,17 +70,19 @@ var (
 
 // msg errorcode
 var (
-	IMErrorCode_MSG_DEFAULT         IMErrorCode = 12000
-	IMErrorCode_MSG_ADDFAILED       IMErrorCode = 12001
-	IMErrorCode_MSG_DELFAILED       IMErrorCode = 12002
-	IMErrorCode_MSG_UPDFAILED       IMErrorCode = 12003
-	IMErrorCode_MSG_PARAM_ILLEGAL   IMErrorCode = 12004
-	IMErrorCode_MSG_BLOCK           IMErrorCode = 12005
-	IMErrorCode_MSG_MSGEXTDUPLICATE IMErrorCode = 12006
-	IMErrorCode_MSG_Hit_Sensitive   IMErrorCode = 12007
-	IMErrorCode_MSG_MSGEXTOVERLIMIT IMErrorCode = 12008
-	IMErrorCode_MSG_NOT_FRIEND      IMErrorCode = 12009
-	IMErrorCode_MSG_NO_Permission   IMErrorCode = 12010
+	IMErrorCode_MSG_DEFAULT           IMErrorCode = 12000
+	IMErrorCode_MSG_ADDFAILED         IMErrorCode = 12001
+	IMErrorCode_MSG_DELFAILED         IMErrorCode = 12002
+	IMErrorCode_MSG_UPDFAILED         IMErrorCode = 12003
+	IMErrorCode_MSG_PARAM_ILLEGAL     IMErrorCode = 12004
+	IMErrorCode_MSG_BLOCK             IMErrorCode = 12005
+	IMErrorCode_MSG_MSGEXTDUPLICATE   IMErrorCode = 12006
+	IMErrorCode_MSG_Hit_Sensitive     IMErrorCode = 12007
+	IMErrorCode_MSG_MSGEXTOVERLIMIT   IMErrorCode = 12008
+	IMErrorCode_MSG_NOT_FRIEND        IMErrorCode = 12009
+	IMErrorCode_MSG_NO_Permission     IMErrorCode = 12010
+	IMErrorCode_MSG_MSGNOTFOUND       IMErrorCode = 12011
+	IMErrorCode_MSG_FAVORITEDUPLICATE IMErrorCode = 12012
 )
 
 // conversation

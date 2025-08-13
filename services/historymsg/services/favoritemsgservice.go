@@ -26,29 +26,29 @@ func AddFavoriteMsgs(ctx context.Context, req *pbobjs.FavoriteMsgIds) errs.IMErr
 			hisStorage := storages.NewPrivateHisMsgStorage()
 			hisMsg, err := hisStorage.FindById(appkey, converId, msg.SubChannel, msg.MsgId)
 			if err != nil || hisMsg == nil {
-				return errs.IMErrorCode_MSG_DEFAULT
+				return errs.IMErrorCode_MSG_MSGNOTFOUND
 			}
 			msg := &pbobjs.DownMsg{}
 			err = tools.PbUnMarshal(hisMsg.MsgBody, msg)
 			if err != nil {
-				return errs.IMErrorCode_MSG_DEFAULT
+				return errs.IMErrorCode_MSG_MSGNOTFOUND
 			}
 			downMsg = msg
 		} else if msg.ChannelType == pbobjs.ChannelType_Group {
 			hisStorage := storages.NewGroupHisMsgStorage()
 			hisMsg, err := hisStorage.FindById(appkey, converId, msg.SubChannel, msg.MsgId)
 			if err != nil || hisMsg == nil {
-				return errs.IMErrorCode_MSG_DEFAULT
+				return errs.IMErrorCode_MSG_MSGNOTFOUND
 			}
 			msg := &pbobjs.DownMsg{}
 			err = tools.PbUnMarshal(hisMsg.MsgBody, msg)
 			if err != nil {
-				return errs.IMErrorCode_MSG_DEFAULT
+				return errs.IMErrorCode_MSG_MSGNOTFOUND
 			}
 			downMsg = msg
 		}
 		if downMsg == nil {
-			return errs.IMErrorCode_MSG_DEFAULT
+			return errs.IMErrorCode_MSG_MSGNOTFOUND
 		}
 		storage := storages.NewFavoriteMsgStorage()
 		msgBs, _ := tools.PbMarshal(downMsg)
@@ -67,7 +67,7 @@ func AddFavoriteMsgs(ctx context.Context, req *pbobjs.FavoriteMsgIds) errs.IMErr
 		})
 		if err != nil {
 			logs.WithContext(ctx).Errorf("save favorite msgs fail:%s", err.Error())
-			return errs.IMErrorCode_MSG_DEFAULT
+			return errs.IMErrorCode_MSG_FAVORITEDUPLICATE
 		}
 	}
 	return errs.IMErrorCode_SUCCESS
@@ -107,7 +107,7 @@ func QryFavoriteMsgs(ctx context.Context, req *pbobjs.QryFavoriteMsgsReq) (errs.
 	msgs, err := storage.QueryFavoriteMsgs(bases.GetAppKeyFromCtx(ctx), bases.GetRequesterIdFromCtx(ctx), startId, limit)
 	if err != nil {
 		logs.WithContext(ctx).Errorf("failed to query favorite msgs. err:%s", err.Error())
-		return errs.IMErrorCode_MSG_DEFAULT, nil
+		return errs.IMErrorCode_MSG_MSGNOTFOUND, nil
 	}
 	ret := &pbobjs.FavoriteMsgs{
 		Items: []*pbobjs.FavoriteMsg{},
