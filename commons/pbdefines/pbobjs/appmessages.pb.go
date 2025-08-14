@@ -1308,7 +1308,7 @@ type PushData struct {
 	RtcInviterId  string      `protobuf:"bytes,56,opt,name=rtcInviterId,proto3" json:"rtcInviterId,omitempty"`
 	RtcRoomType   int32       `protobuf:"varint,57,opt,name=rtcRoomType,proto3" json:"rtcRoomType,omitempty"`
 	RtcMediaType  int32       `protobuf:"varint,58,opt,name=rtcMediaType,proto3" json:"rtcMediaType,omitempty"`
-	IsMentionMe   bool        `protobuf:"varint,59,opt,name=isMentionMe,proto3" json:"isMentionMe,omitempty"`
+	IsMentioned   bool        `protobuf:"varint,59,opt,name=isMentioned,proto3" json:"isMentioned,omitempty"`
 	MentionType   MentionType `protobuf:"varint,60,opt,name=mentionType,proto3,enum=MentionType" json:"mentionType,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1449,9 +1449,9 @@ func (x *PushData) GetRtcMediaType() int32 {
 	return 0
 }
 
-func (x *PushData) GetIsMentionMe() bool {
+func (x *PushData) GetIsMentioned() bool {
 	if x != nil {
-		return x.IsMentionMe
+		return x.IsMentioned
 	}
 	return false
 }
@@ -10390,7 +10390,7 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\frtcInviterId\x188 \x01(\tR\frtcInviterId\x12 \n" +
 	"\vrtcRoomType\x189 \x01(\x05R\vrtcRoomType\x12\"\n" +
 	"\frtcMediaType\x18: \x01(\x05R\frtcMediaType\x12 \n" +
-	"\visMentionMe\x18; \x01(\bR\visMentionMe\x12.\n" +
+	"\visMentioned\x18; \x01(\bR\visMentioned\x12.\n" +
 	"\vmentionType\x18< \x01(\x0e2\f.MentionTypeR\vmentionType\"\xab\n" +
 	"\n" +
 	"\aDownMsg\x12\x1a\n" +

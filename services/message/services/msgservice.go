@@ -362,7 +362,7 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 		if pushData != nil {
 			if msg.MentionInfo != nil {
 				pushData.MentionType = msg.MentionInfo.MentionType
-				pushData.IsMentionMe = commonservices.IsMentionedMe(receiverId, msg)
+				pushData.IsMentioned = commonservices.IsMentionedMe(receiverId, msg)
 			}
 			//badge
 			userStatus := GetUserStatus(appkey, receiverId)

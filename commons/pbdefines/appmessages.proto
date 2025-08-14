@@ -109,7 +109,7 @@ message PushData{
   string rtcInviterId = 56;
   int32 rtcRoomType = 57;
   int32 rtcMediaType = 58;
-  bool isMentionMe = 59;
+  bool isMentioned = 59;
   MentionType mentionType = 60;
 }
 
