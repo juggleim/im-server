@@ -46,7 +46,7 @@ func (conver *UserConversationItem) GetUnreadIndex() int64 {
 }
 
 func UserConverCacheContains(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType) bool {
-	key := fmt.Sprintf("%s_%s_%s_%d_%d", appkey, userId, targetId, subChannel, channelType)
+	key := fmt.Sprintf("%s_%s_%s_%s_%d", appkey, userId, targetId, subChannel, channelType)
 	return converCache.Contains(key)
 }
 
