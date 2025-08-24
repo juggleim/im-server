@@ -8,7 +8,6 @@ import (
 	"im-server/commons/gmicro/utils"
 	"im-server/commons/logs"
 	"im-server/commons/tools"
-	apiRouters "im-server/services/apigateway/routers"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 	navRouters "im-server/services/navigator/routers"
@@ -43,16 +42,9 @@ func (server *ImWebsocketServer) SyncStart(port int) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, `{"status":"ok"}`)
 	})
-	RouteApi(mux)
 	RouteNav(mux)
 	RouteJuggleChat(mux)
 	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
-}
-
-func RouteApi(mux *http.ServeMux) {
-	ginEngine := gin.Default()
-	apiRouters.Route(ginEngine, "apigateway")
-	mux.Handle("/apigateway/", ginEngine)
 }
 
 func RouteNav(mux *http.ServeMux) {
