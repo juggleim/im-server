@@ -59,7 +59,7 @@ func (room *RtcRoomDao) FindById(appkey, roomId string) (*models.RtcRoom, error)
 }
 
 func (room *RtcRoomDao) UpdateAcceptedTime(appkey, roomId string, acceptedTime int64) error {
-	return dbcommons.GetDb().Model(room).Where("app_key=? and room_id=?").Update("accepted_time", acceptedTime).Error
+	return dbcommons.GetDb().Model(room).Where("app_key=? and room_id=?", appkey, roomId).Update("accepted_time", acceptedTime).Error
 }
 
 func (room *RtcRoomDao) Delete(appkey, roomId string) error {
