@@ -5,6 +5,7 @@ type SendMsgReq struct {
 	ReceiverId     string       `json:"receiver_id"`
 	TargetId       string       `json:"target_id"`
 	TargetIds      []string     `json:"target_ids"`
+	ToUserIds      []string     `json:"to_user_ids"`
 	MsgType        string       `json:"msg_type"`
 	MsgContent     string       `json:"msg_content"`
 	IsStorage      *bool        `json:"is_storage"`

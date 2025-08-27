@@ -161,6 +161,7 @@ func SendGroupMsg(ctx *gin.Context) {
 				MsgType:     sendMsgReq.MsgType,
 				MsgContent:  []byte(sendMsgReq.MsgContent),
 				Flags:       handleFlag(sendMsgReq),
+				ToUserIds:   sendMsgReq.ToUserIds,
 				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
 				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
 				PushData:    handlePushData(sendMsgReq.PushData),
