@@ -10,6 +10,13 @@ message RtcRoomReq{
     RtcChannel rtcChannel = 4;
     RtcMediaType rtcMediaType = 5;
     string ext = 6;
+    ConverIndex attachedConver = 7;
+}
+
+message ConverIndex {
+    string targetId = 1;
+    ChannelType channelType = 2;
+    string subChannel = 3;
 }
 
 message RtcRoom{
@@ -97,6 +104,7 @@ message RtcInviteReq{
     RtcChannel rtcChannel = 4;
     RtcMediaType rtcMediaType = 5;
     string ext = 6;
+    ConverIndex attachedConver = 7;
 }
 
 message RtcMemberRooms{
