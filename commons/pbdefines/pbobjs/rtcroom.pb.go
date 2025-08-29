@@ -459,66 +459,6 @@ func (x *RtcRoomReq) GetAttachedConver() *ConverIndex {
 	return nil
 }
 
-type ConverIndex struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TargetId      string                 `protobuf:"bytes,1,opt,name=targetId,proto3" json:"targetId,omitempty"`
-	ChannelType   ChannelType            `protobuf:"varint,2,opt,name=channelType,proto3,enum=ChannelType" json:"channelType,omitempty"`
-	SubChannel    string                 `protobuf:"bytes,3,opt,name=subChannel,proto3" json:"subChannel,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ConverIndex) Reset() {
-	*x = ConverIndex{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ConverIndex) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ConverIndex) ProtoMessage() {}
-
-func (x *ConverIndex) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ConverIndex.ProtoReflect.Descriptor instead.
-func (*ConverIndex) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ConverIndex) GetTargetId() string {
-	if x != nil {
-		return x.TargetId
-	}
-	return ""
-}
-
-func (x *ConverIndex) GetChannelType() ChannelType {
-	if x != nil {
-		return x.ChannelType
-	}
-	return ChannelType_Unknown
-}
-
-func (x *ConverIndex) GetSubChannel() string {
-	if x != nil {
-		return x.SubChannel
-	}
-	return ""
-}
-
 type RtcRoom struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoomType      RtcRoomType            `protobuf:"varint,1,opt,name=roomType,proto3,enum=RtcRoomType" json:"roomType,omitempty"`
@@ -527,6 +467,7 @@ type RtcRoom struct {
 	RtcChannel    RtcChannel             `protobuf:"varint,4,opt,name=rtcChannel,proto3,enum=RtcChannel" json:"rtcChannel,omitempty"`
 	RtcMediaType  RtcMediaType           `protobuf:"varint,5,opt,name=rtcMediaType,proto3,enum=RtcMediaType" json:"rtcMediaType,omitempty"`
 	Ext           string                 `protobuf:"bytes,6,opt,name=ext,proto3" json:"ext,omitempty"`
+	Auth          *RtcAuth               `protobuf:"bytes,7,opt,name=auth,proto3" json:"auth,omitempty"`
 	Members       []*RtcMember           `protobuf:"bytes,51,rep,name=members,proto3" json:"members,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -534,7 +475,7 @@ type RtcRoom struct {
 
 func (x *RtcRoom) Reset() {
 	*x = RtcRoom{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[2]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -546,7 +487,7 @@ func (x *RtcRoom) String() string {
 func (*RtcRoom) ProtoMessage() {}
 
 func (x *RtcRoom) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[2]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -559,7 +500,7 @@ func (x *RtcRoom) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcRoom.ProtoReflect.Descriptor instead.
 func (*RtcRoom) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{2}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *RtcRoom) GetRoomType() RtcRoomType {
@@ -604,6 +545,13 @@ func (x *RtcRoom) GetExt() string {
 	return ""
 }
 
+func (x *RtcRoom) GetAuth() *RtcAuth {
+	if x != nil {
+		return x.Auth
+	}
+	return nil
+}
+
 func (x *RtcRoom) GetMembers() []*RtcMember {
 	if x != nil {
 		return x.Members
@@ -625,7 +573,7 @@ type RtcMember struct {
 
 func (x *RtcMember) Reset() {
 	*x = RtcMember{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[3]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -637,7 +585,7 @@ func (x *RtcMember) String() string {
 func (*RtcMember) ProtoMessage() {}
 
 func (x *RtcMember) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[3]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -650,7 +598,7 @@ func (x *RtcMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcMember.ProtoReflect.Descriptor instead.
 func (*RtcMember) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{3}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *RtcMember) GetMember() *UserInfo {
@@ -708,7 +656,7 @@ type MemberState struct {
 
 func (x *MemberState) Reset() {
 	*x = MemberState{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[4]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -720,7 +668,7 @@ func (x *MemberState) String() string {
 func (*MemberState) ProtoMessage() {}
 
 func (x *MemberState) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[4]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -733,7 +681,7 @@ func (x *MemberState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MemberState.ProtoReflect.Descriptor instead.
 func (*MemberState) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{4}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *MemberState) GetRoomId() string {
@@ -781,7 +729,7 @@ type SyncMemberStateReq struct {
 
 func (x *SyncMemberStateReq) Reset() {
 	*x = SyncMemberStateReq{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[5]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -793,7 +741,7 @@ func (x *SyncMemberStateReq) String() string {
 func (*SyncMemberStateReq) ProtoMessage() {}
 
 func (x *SyncMemberStateReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[5]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -806,7 +754,7 @@ func (x *SyncMemberStateReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SyncMemberStateReq.ProtoReflect.Descriptor instead.
 func (*SyncMemberStateReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{5}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SyncMemberStateReq) GetIsDelete() bool {
@@ -836,7 +784,7 @@ type RtcRoomEvent struct {
 
 func (x *RtcRoomEvent) Reset() {
 	*x = RtcRoomEvent{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[6]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -848,7 +796,7 @@ func (x *RtcRoomEvent) String() string {
 func (*RtcRoomEvent) ProtoMessage() {}
 
 func (x *RtcRoomEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[6]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -861,7 +809,7 @@ func (x *RtcRoomEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcRoomEvent.ProtoReflect.Descriptor instead.
 func (*RtcRoomEvent) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{6}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RtcRoomEvent) GetRoomEventType() RtcRoomEventType {
@@ -914,7 +862,7 @@ type RtcInviteReq struct {
 
 func (x *RtcInviteReq) Reset() {
 	*x = RtcInviteReq{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[7]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -926,7 +874,7 @@ func (x *RtcInviteReq) String() string {
 func (*RtcInviteReq) ProtoMessage() {}
 
 func (x *RtcInviteReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[7]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -939,7 +887,7 @@ func (x *RtcInviteReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcInviteReq.ProtoReflect.Descriptor instead.
 func (*RtcInviteReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{7}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *RtcInviteReq) GetTargetIds() []string {
@@ -1000,7 +948,7 @@ type RtcMemberRooms struct {
 
 func (x *RtcMemberRooms) Reset() {
 	*x = RtcMemberRooms{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[8]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1012,7 +960,7 @@ func (x *RtcMemberRooms) String() string {
 func (*RtcMemberRooms) ProtoMessage() {}
 
 func (x *RtcMemberRooms) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[8]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1025,7 +973,7 @@ func (x *RtcMemberRooms) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcMemberRooms.ProtoReflect.Descriptor instead.
 func (*RtcMemberRooms) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{8}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *RtcMemberRooms) GetRooms() []*RtcMemberRoom {
@@ -1050,7 +998,7 @@ type RtcMemberRoom struct {
 
 func (x *RtcMemberRoom) Reset() {
 	*x = RtcMemberRoom{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[9]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1062,7 +1010,7 @@ func (x *RtcMemberRoom) String() string {
 func (*RtcMemberRoom) ProtoMessage() {}
 
 func (x *RtcMemberRoom) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[9]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1075,7 +1023,7 @@ func (x *RtcMemberRoom) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcMemberRoom.ProtoReflect.Descriptor instead.
 func (*RtcMemberRoom) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{9}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *RtcMemberRoom) GetRoomType() RtcRoomType {
@@ -1137,7 +1085,7 @@ type RtcAuth struct {
 
 func (x *RtcAuth) Reset() {
 	*x = RtcAuth{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[10]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1149,7 +1097,7 @@ func (x *RtcAuth) String() string {
 func (*RtcAuth) ProtoMessage() {}
 
 func (x *RtcAuth) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[10]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1162,7 +1110,7 @@ func (x *RtcAuth) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcAuth.ProtoReflect.Descriptor instead.
 func (*RtcAuth) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{10}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *RtcAuth) GetZegoAuth() *ZegoAuth {
@@ -1188,7 +1136,7 @@ type ZegoAuth struct {
 
 func (x *ZegoAuth) Reset() {
 	*x = ZegoAuth{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[11]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1200,7 +1148,7 @@ func (x *ZegoAuth) String() string {
 func (*ZegoAuth) ProtoMessage() {}
 
 func (x *ZegoAuth) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[11]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1213,7 +1161,7 @@ func (x *ZegoAuth) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ZegoAuth.ProtoReflect.Descriptor instead.
 func (*ZegoAuth) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{11}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ZegoAuth) GetToken() string {
@@ -1233,7 +1181,7 @@ type LivekitRtcAuth struct {
 
 func (x *LivekitRtcAuth) Reset() {
 	*x = LivekitRtcAuth{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[12]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1245,7 +1193,7 @@ func (x *LivekitRtcAuth) String() string {
 func (*LivekitRtcAuth) ProtoMessage() {}
 
 func (x *LivekitRtcAuth) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[12]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1258,7 +1206,7 @@ func (x *LivekitRtcAuth) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LivekitRtcAuth.ProtoReflect.Descriptor instead.
 func (*LivekitRtcAuth) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{12}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *LivekitRtcAuth) GetToken() string {
@@ -1288,7 +1236,7 @@ type RtcInviteEvent struct {
 
 func (x *RtcInviteEvent) Reset() {
 	*x = RtcInviteEvent{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[13]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1300,7 +1248,7 @@ func (x *RtcInviteEvent) String() string {
 func (*RtcInviteEvent) ProtoMessage() {}
 
 func (x *RtcInviteEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[13]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1313,7 +1261,7 @@ func (x *RtcInviteEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcInviteEvent.ProtoReflect.Descriptor instead.
 func (*RtcInviteEvent) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{13}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *RtcInviteEvent) GetInviteType() InviteType {
@@ -1360,7 +1308,7 @@ type RtcAnswer struct {
 
 func (x *RtcAnswer) Reset() {
 	*x = RtcAnswer{}
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[14]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1372,7 +1320,7 @@ func (x *RtcAnswer) String() string {
 func (*RtcAnswer) ProtoMessage() {}
 
 func (x *RtcAnswer) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[14]
+	mi := &file_commons_pbdefines_rtcroom_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1385,7 +1333,7 @@ func (x *RtcAnswer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcAnswer.ProtoReflect.Descriptor instead.
 func (*RtcAnswer) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{14}
+	return file_commons_pbdefines_rtcroom_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *RtcAnswer) GetRoomId() string {
@@ -1413,13 +1361,7 @@ const file_commons_pbdefines_rtcroom_proto_rawDesc = "" +
 	"rtcChannel\x121\n" +
 	"\frtcMediaType\x18\x05 \x01(\x0e2\r.RtcMediaTypeR\frtcMediaType\x12\x10\n" +
 	"\x03ext\x18\x06 \x01(\tR\x03ext\x124\n" +
-	"\x0eattachedConver\x18\a \x01(\v2\f.ConverIndexR\x0eattachedConver\"y\n" +
-	"\vConverIndex\x12\x1a\n" +
-	"\btargetId\x18\x01 \x01(\tR\btargetId\x12.\n" +
-	"\vchannelType\x18\x02 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12\x1e\n" +
-	"\n" +
-	"subChannel\x18\x03 \x01(\tR\n" +
-	"subChannel\"\x84\x02\n" +
+	"\x0eattachedConver\x18\a \x01(\v2\f.ConverIndexR\x0eattachedConver\"\xa2\x02\n" +
 	"\aRtcRoom\x12(\n" +
 	"\broomType\x18\x01 \x01(\x0e2\f.RtcRoomTypeR\broomType\x12\x16\n" +
 	"\x06roomId\x18\x02 \x01(\tR\x06roomId\x12\x1f\n" +
@@ -1428,7 +1370,8 @@ const file_commons_pbdefines_rtcroom_proto_rawDesc = "" +
 	"rtcChannel\x18\x04 \x01(\x0e2\v.RtcChannelR\n" +
 	"rtcChannel\x121\n" +
 	"\frtcMediaType\x18\x05 \x01(\x0e2\r.RtcMediaTypeR\frtcMediaType\x12\x10\n" +
-	"\x03ext\x18\x06 \x01(\tR\x03ext\x12$\n" +
+	"\x03ext\x18\x06 \x01(\tR\x03ext\x12\x1c\n" +
+	"\x04auth\x18\a \x01(\v2\b.RtcAuthR\x04auth\x12$\n" +
 	"\amembers\x183 \x03(\v2\n" +
 	".RtcMemberR\amembers\"\xd8\x01\n" +
 	"\tRtcMember\x12!\n" +
@@ -1547,7 +1490,7 @@ func file_commons_pbdefines_rtcroom_proto_rawDescGZIP() []byte {
 }
 
 var file_commons_pbdefines_rtcroom_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
-var file_commons_pbdefines_rtcroom_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_commons_pbdefines_rtcroom_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_commons_pbdefines_rtcroom_proto_goTypes = []any{
 	(RtcChannel)(0),            // 0: RtcChannel
 	(RtcRoomType)(0),           // 1: RtcRoomType
@@ -1557,61 +1500,60 @@ var file_commons_pbdefines_rtcroom_proto_goTypes = []any{
 	(RtcMediaType)(0),          // 5: RtcMediaType
 	(InviteType)(0),            // 6: InviteType
 	(*RtcRoomReq)(nil),         // 7: RtcRoomReq
-	(*ConverIndex)(nil),        // 8: ConverIndex
-	(*RtcRoom)(nil),            // 9: RtcRoom
-	(*RtcMember)(nil),          // 10: RtcMember
-	(*MemberState)(nil),        // 11: MemberState
-	(*SyncMemberStateReq)(nil), // 12: SyncMemberStateReq
-	(*RtcRoomEvent)(nil),       // 13: RtcRoomEvent
-	(*RtcInviteReq)(nil),       // 14: RtcInviteReq
-	(*RtcMemberRooms)(nil),     // 15: RtcMemberRooms
-	(*RtcMemberRoom)(nil),      // 16: RtcMemberRoom
-	(*RtcAuth)(nil),            // 17: RtcAuth
-	(*ZegoAuth)(nil),           // 18: ZegoAuth
-	(*LivekitRtcAuth)(nil),     // 19: LivekitRtcAuth
-	(*RtcInviteEvent)(nil),     // 20: RtcInviteEvent
-	(*RtcAnswer)(nil),          // 21: RtcAnswer
-	(ChannelType)(0),           // 22: ChannelType
-	(*UserInfo)(nil),           // 23: UserInfo
+	(*RtcRoom)(nil),            // 8: RtcRoom
+	(*RtcMember)(nil),          // 9: RtcMember
+	(*MemberState)(nil),        // 10: MemberState
+	(*SyncMemberStateReq)(nil), // 11: SyncMemberStateReq
+	(*RtcRoomEvent)(nil),       // 12: RtcRoomEvent
+	(*RtcInviteReq)(nil),       // 13: RtcInviteReq
+	(*RtcMemberRooms)(nil),     // 14: RtcMemberRooms
+	(*RtcMemberRoom)(nil),      // 15: RtcMemberRoom
+	(*RtcAuth)(nil),            // 16: RtcAuth
+	(*ZegoAuth)(nil),           // 17: ZegoAuth
+	(*LivekitRtcAuth)(nil),     // 18: LivekitRtcAuth
+	(*RtcInviteEvent)(nil),     // 19: RtcInviteEvent
+	(*RtcAnswer)(nil),          // 20: RtcAnswer
+	(*ConverIndex)(nil),        // 21: ConverIndex
+	(*UserInfo)(nil),           // 22: UserInfo
 }
 var file_commons_pbdefines_rtcroom_proto_depIdxs = []int32{
 	1,  // 0: RtcRoomReq.roomType:type_name -> RtcRoomType
-	10, // 1: RtcRoomReq.joinMember:type_name -> RtcMember
+	9,  // 1: RtcRoomReq.joinMember:type_name -> RtcMember
 	0,  // 2: RtcRoomReq.rtcChannel:type_name -> RtcChannel
 	5,  // 3: RtcRoomReq.rtcMediaType:type_name -> RtcMediaType
-	8,  // 4: RtcRoomReq.attachedConver:type_name -> ConverIndex
-	22, // 5: ConverIndex.channelType:type_name -> ChannelType
-	1,  // 6: RtcRoom.roomType:type_name -> RtcRoomType
-	23, // 7: RtcRoom.owner:type_name -> UserInfo
-	0,  // 8: RtcRoom.rtcChannel:type_name -> RtcChannel
-	5,  // 9: RtcRoom.rtcMediaType:type_name -> RtcMediaType
-	10, // 10: RtcRoom.members:type_name -> RtcMember
-	23, // 11: RtcMember.member:type_name -> UserInfo
+	21, // 4: RtcRoomReq.attachedConver:type_name -> ConverIndex
+	1,  // 5: RtcRoom.roomType:type_name -> RtcRoomType
+	22, // 6: RtcRoom.owner:type_name -> UserInfo
+	0,  // 7: RtcRoom.rtcChannel:type_name -> RtcChannel
+	5,  // 8: RtcRoom.rtcMediaType:type_name -> RtcMediaType
+	16, // 9: RtcRoom.auth:type_name -> RtcAuth
+	9,  // 10: RtcRoom.members:type_name -> RtcMember
+	22, // 11: RtcMember.member:type_name -> UserInfo
 	2,  // 12: RtcMember.rtcState:type_name -> RtcState
-	23, // 13: RtcMember.inviter:type_name -> UserInfo
+	22, // 13: RtcMember.inviter:type_name -> UserInfo
 	1,  // 14: MemberState.roomType:type_name -> RtcRoomType
 	2,  // 15: MemberState.rtcState:type_name -> RtcState
-	11, // 16: SyncMemberStateReq.member:type_name -> MemberState
+	10, // 16: SyncMemberStateReq.member:type_name -> MemberState
 	3,  // 17: RtcRoomEvent.roomEventType:type_name -> RtcRoomEventType
-	10, // 18: RtcRoomEvent.members:type_name -> RtcMember
-	9,  // 19: RtcRoomEvent.room:type_name -> RtcRoom
+	9,  // 18: RtcRoomEvent.members:type_name -> RtcMember
+	8,  // 19: RtcRoomEvent.room:type_name -> RtcRoom
 	4,  // 20: RtcRoomEvent.reason:type_name -> RtcRoomQuitReason
 	1,  // 21: RtcInviteReq.roomType:type_name -> RtcRoomType
 	0,  // 22: RtcInviteReq.rtcChannel:type_name -> RtcChannel
 	5,  // 23: RtcInviteReq.rtcMediaType:type_name -> RtcMediaType
-	8,  // 24: RtcInviteReq.attachedConver:type_name -> ConverIndex
-	16, // 25: RtcMemberRooms.rooms:type_name -> RtcMemberRoom
+	21, // 24: RtcInviteReq.attachedConver:type_name -> ConverIndex
+	15, // 25: RtcMemberRooms.rooms:type_name -> RtcMemberRoom
 	1,  // 26: RtcMemberRoom.roomType:type_name -> RtcRoomType
-	23, // 27: RtcMemberRoom.owner:type_name -> UserInfo
+	22, // 27: RtcMemberRoom.owner:type_name -> UserInfo
 	2,  // 28: RtcMemberRoom.rtcState:type_name -> RtcState
 	0,  // 29: RtcMemberRoom.rtcChannel:type_name -> RtcChannel
 	5,  // 30: RtcMemberRoom.rtcMediaType:type_name -> RtcMediaType
-	18, // 31: RtcAuth.zegoAuth:type_name -> ZegoAuth
-	19, // 32: RtcAuth.livekitRtcAuth:type_name -> LivekitRtcAuth
+	17, // 31: RtcAuth.zegoAuth:type_name -> ZegoAuth
+	18, // 32: RtcAuth.livekitRtcAuth:type_name -> LivekitRtcAuth
 	6,  // 33: RtcInviteEvent.inviteType:type_name -> InviteType
-	23, // 34: RtcInviteEvent.user:type_name -> UserInfo
-	9,  // 35: RtcInviteEvent.room:type_name -> RtcRoom
-	23, // 36: RtcInviteEvent.targetUsers:type_name -> UserInfo
+	22, // 34: RtcInviteEvent.user:type_name -> UserInfo
+	8,  // 35: RtcInviteEvent.room:type_name -> RtcRoom
+	22, // 36: RtcInviteEvent.targetUsers:type_name -> UserInfo
 	37, // [37:37] is the sub-list for method output_type
 	37, // [37:37] is the sub-list for method input_type
 	37, // [37:37] is the sub-list for extension type_name
@@ -1631,7 +1573,7 @@ func file_commons_pbdefines_rtcroom_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_commons_pbdefines_rtcroom_proto_rawDesc), len(file_commons_pbdefines_rtcroom_proto_rawDesc)),
 			NumEnums:      7,
-			NumMessages:   15,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

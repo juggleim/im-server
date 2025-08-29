@@ -11,12 +11,16 @@ type RtcRoom struct {
 	AcceptedTime int64
 	OwnerId      string
 	Ext          string
+	ConverId     *string
+	ChannelType  pbobjs.ChannelType
+	SubChannel   string
 	AppKey       string
 }
 
 type IRtcRoomStorage interface {
 	Create(item RtcRoom) error
 	FindById(appkey, roomId string) (*RtcRoom, error)
+	FindByConver(appkey, conveId string, channelType pbobjs.ChannelType, subChannel string) (*RtcRoom, error)
 	Delete(appkey, roomId string) error
 	UpdateAcceptedTime(appkey, roomId string, acceptedTime int64) error
 }

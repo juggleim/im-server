@@ -1,6 +1,9 @@
 package bases
 
-import "context"
+import (
+	"context"
+	"im-server/commons/tools"
+)
 
 type BaseActorOption interface {
 	HandleCtx(ctx context.Context) context.Context
@@ -65,6 +68,13 @@ type MarkFromApiOption struct{}
 
 func (opt *MarkFromApiOption) HandleCtx(ctx context.Context) context.Context {
 	retCtx := setCtxValue(ctx, CtxKey_IsFromApi, true)
+	return retCtx
+}
+
+type ReGenerateSessionOption struct{}
+
+func (opt *ReGenerateSessionOption) HandleCtx(ctx context.Context) context.Context {
+	retCtx := setCtxValue(ctx, CtxKey_Session, tools.GenerateUUIDShort11())
 	return retCtx
 }
 

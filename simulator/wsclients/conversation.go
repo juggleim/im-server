@@ -114,3 +114,15 @@ func (client *WsImClient) TagAddConvers(req *pbobjs.TagConvers) utils.ClientErro
 	code, _ := client.Query("tag_add_convers", client.UserId, data)
 	return code
 }
+
+func (client *WsImClient) QryConverConf(req *pbobjs.ConverIndex) (utils.ClientErrorCode, *pbobjs.ConverConf) {
+	data, _ := tools.PbMarshal(req)
+	code, qryAck := client.Query("qry_conver_conf", client.UserId, data)
+	if code == utils.ClientErrorCode_Success && qryAck.Code == 0 {
+		resp := &pbobjs.ConverConf{}
+		tools.PbUnMarshal(qryAck.Data, resp)
+		return utils.ClientErrorCode_Success, resp
+	} else {
+		return utils.ClientErrorCode(code), nil
+	}
+}

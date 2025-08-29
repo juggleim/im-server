@@ -212,6 +212,37 @@ CREATE TABLE IF NOT EXISTS `convertagrels` (
   KEY `idx_target` (`app_key`, `user_id`, `target_id`, `channel_type`, `sub_channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话-分组绑定关系表';
 
+CREATE TABLE IF NOT EXISTS `converconfs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `conver_id` varchar(100) DEFAULT '',
+  `conver_type` tinyint DEFAULT '0',
+  `sub_channel` varchar(32) DEFAULT '',
+  `item_key` varchar(100) DEFAULT '',
+  `item_value` varchar(2000) DEFAULT '',
+  `item_type` tinyint DEFAULT '0',
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_key` (`app_key`,`conver_id`,`conver_type`,`sub_channel`,`item_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE IF NOT EXISTS `userconverconfs`(
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT '',
+  `conver_id` varchar(100) DEFAULT '',
+  `conver_type` tinyint DEFAULT '0',
+  `sub_channel` varchar(32) DEFAULT '',
+  `item_key` varchar(100) DEFAULT '',
+  `item_value` varchar(2000) DEFAULT '',
+  `item_type` tinyint DEFAULT '0',
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_key` (`app_key`,`conver_id`,`conver_type`,`sub_channel`,`item_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS `msgstats` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `stat_type` TINYINT NULL DEFAULT 0 COMMENT '统计类型 1上行消息，2分发，3下行消息',
@@ -742,9 +773,13 @@ CREATE TABLE IF NOT EXISTS `rtcrooms` (
   `ext` varchar(2000) DEFAULT NULL COMMENT '扩展字段',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `accepted_time` bigint DEFAULT '0' COMMENT '1v1 接通时间',
+  `conver_id` VARCHAR(100) NULL,
+  `channel_type` TINYINT NULL DEFAULT 0,
+  `sub_channel` VARCHAR(32) NULL DEFAULT '',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`)
+  UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`),
+  UNIQUE KEY `uniq_conver` (`app_key`,`conver_id`,`channel_type`,`sub_channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'rtc-房间表';
 
 CREATE TABLE IF NOT EXISTS `rtcmembers` (

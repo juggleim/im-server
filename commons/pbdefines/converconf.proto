@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "commons/pbdefines/pbobjs";
+import "commons/pbdefines/appmessages.proto";
+import "commons/pbdefines/rtcroom.proto";
+
+message ConverConf{
+    ActivedRtcRoom activedRtcRoom = 1;
+}
+
+message ActivedRtcRoom{
+    RtcRoomType roomType = 1;
+    string roomId = 2;
+    UserInfo owner = 3;
+    RtcChannel rtcChannel = 4;
+    RtcMediaType rtcMediaType = 5;
+    string ext = 6;
+
+    repeated RtcMember members = 51;
+}

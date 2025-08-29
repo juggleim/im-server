@@ -13,12 +13,6 @@ message RtcRoomReq{
     ConverIndex attachedConver = 7;
 }
 
-message ConverIndex {
-    string targetId = 1;
-    ChannelType channelType = 2;
-    string subChannel = 3;
-}
-
 message RtcRoom{
     RtcRoomType roomType = 1;
     string roomId = 2;
@@ -26,6 +20,7 @@ message RtcRoom{
     RtcChannel rtcChannel = 4;
     RtcMediaType rtcMediaType = 5;
     string ext = 6;
+    RtcAuth auth = 7;
     
     repeated RtcMember members = 51;
 }

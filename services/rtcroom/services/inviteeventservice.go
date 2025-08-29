@@ -51,6 +51,12 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 		Ext:          req.Ext,
 		AppKey:       appkey,
 	}
+	if req.AttachedConver != nil && req.AttachedConver.TargetId != "" {
+		converId := commonservices.GetConversationId(userId, req.AttachedConver.TargetId, req.AttachedConver.ChannelType)
+		rtcRoom.ConverId = &converId
+		rtcRoom.ChannelType = req.AttachedConver.ChannelType
+		rtcRoom.SubChannel = req.AttachedConver.SubChannel
+	}
 	container, succ := createRtcRoomContainer2Cache(ctx, appkey, rtcRoom)
 	if succ {
 		// add to db
@@ -233,8 +239,51 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				TargetUsers: targetUsers,
 			})
 		})
+		//notify target conver
+		if req.AttachedConver != nil && req.AttachedConver.TargetId != "" && req.AttachedConver.ChannelType == pbobjs.ChannelType_Group {
+			syncMsg2Conver(ctx, container)
+		}
 	}
 	return errs.IMErrorCode_SUCCESS, auth
+}
+
+func syncMsg2Conver(ctx context.Context, container *RtcRoomContainer) {
+	if container.ConverId != nil && *container.ConverId != "" {
+		userId := bases.GetRequesterIdFromCtx(ctx)
+		activedCallMsg := &msgdefines.ActivedCallMsg{
+			RoomType:     int32(container.RoomType),
+			RoomId:       container.RoomId,
+			Owner:        &msgdefines.UserInfo{},
+			RtcChannel:   int32(container.RtcChannel),
+			RtcMediaType: int32(container.RtcMediaType),
+			Members:      []*msgdefines.UserInfo{},
+		}
+		if container.Owner != nil {
+			activedCallMsg.Owner.UserId = container.Owner.UserId
+			activedCallMsg.Owner.Nickname = container.Owner.Nickname
+			activedCallMsg.Owner.UserPortrait = container.Owner.UserPortrait
+		}
+		if container.MemberCount() > 0 {
+			container.ForeachMembers(func(member *models.RtcRoomMember) {
+				uInfo := commonservices.GetTargetDisplayUserInfo(ctx, member.MemberId)
+				activedCallMsg.Members = append(activedCallMsg.Members, &msgdefines.UserInfo{
+					UserId:       uInfo.UserId,
+					Nickname:     uInfo.Nickname,
+					UserPortrait: uInfo.UserPortrait,
+				})
+			})
+		} else {
+			activedCallMsg.Finished = true
+		}
+		flag := msgdefines.SetCmdMsg(0)
+		upMsg := &pbobjs.UpMsg{
+			MsgType:    msgdefines.CmdMsgType_ActivedCall,
+			MsgContent: tools.ToJsonBs(activedCallMsg),
+			Flags:      flag,
+			LifeTime:   10 * 60 * 1000,
+		}
+		commonservices.AsyncGroupMsg(ctx, userId, *container.ConverId, upMsg, &bases.ReGenerateSessionOption{})
+	}
 }
 
 func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
@@ -289,6 +338,9 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 			EventTime: acceptedTime,
 		})
 	})
+	if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
+		syncMsg2Conver(ctx, container)
+	}
 	//auth
 	code, auth := GenerateAuth(appkey, userId, roomId, container.RtcChannel)
 	return code, auth
@@ -380,6 +432,10 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 				EventTime: eventTime,
 			})
 		})
+		//send msg
+		if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
+			syncMsg2Conver(ctx, container)
+		}
 	}
 	return errs.IMErrorCode_SUCCESS
 }

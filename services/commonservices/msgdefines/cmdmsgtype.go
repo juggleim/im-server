@@ -22,6 +22,7 @@ var (
 	CmdMsgType_Recall           string = "jg:recall"
 	CmdMsgType_RecallInfo       string = "jg:recallinfo"
 	CmdMsgType_TopMsg           string = "jg:topmsg"
+	CmdMsgType_ActivedCall      string = "jg:activedcall"
 )
 
 var cmdMsgMap map[string]bool
@@ -49,9 +50,27 @@ func init() {
 	cmdMsgMap[CmdMsgType_Recall] = true
 	cmdMsgMap[CmdMsgType_RecallInfo] = true
 	cmdMsgMap[CmdMsgType_TopMsg] = true
+	cmdMsgMap[CmdMsgType_ActivedCall] = true
 }
 
 func IsCmdMsgType(msgType string) bool {
 	_, ok := cmdMsgMap[msgType]
 	return ok
+}
+
+//jg:activedcall
+type ActivedCallMsg struct {
+	Finished     bool        `json:"finished"`
+	RoomType     int32       `json:"room_type"`
+	RoomId       string      `json:"room_id"`
+	Owner        *UserInfo   `json:"owner"`
+	RtcChannel   int32       `json:"rtc_channel"`
+	RtcMediaType int32       `json:"rtc_media_type"`
+	Members      []*UserInfo `json:"members"`
+}
+
+type UserInfo struct {
+	UserId       string `json:"user_id"`
+	Nickname     string `json:"nickname"`
+	UserPortrait string `json:"user_portrait"`
 }

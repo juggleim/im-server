@@ -24,3 +24,7 @@ func NewUserConverTagStorage() models.IUserConverTagStorage {
 func NewConverTagRelStorage() models.IConverTagRelStorage {
 	return &dbs.ConverTagRelDao{}
 }
+
+func NewConverConfStorage() models.IConverConfStorage {
+	return &dbs.ConverConfDao{}
+}

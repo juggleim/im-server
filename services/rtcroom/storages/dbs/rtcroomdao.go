@@ -5,16 +5,23 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/rtcroom/storages/models"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type RtcRoomDao struct {
-	ID           int64     `gorm:"primary_key"`
-	RoomId       string    `gorm:"room_id"`
-	RoomType     int       `gorm:"room_type"`
-	RtcChannel   int       `gorm:"rtc_channel"`
-	RtcMediaType int       `gorm:"rtc_media_type"`
-	OwnerId      string    `gorm:"owner_id"`
-	Ext          string    `gorm:"ext"`
+	ID           int64  `gorm:"primary_key"`
+	RoomId       string `gorm:"room_id"`
+	RoomType     int    `gorm:"room_type"`
+	RtcChannel   int    `gorm:"rtc_channel"`
+	RtcMediaType int    `gorm:"rtc_media_type"`
+	OwnerId      string `gorm:"owner_id"`
+	Ext          string `gorm:"ext"`
+
+	ConverId    *string `gorm:"conver_id"`
+	ChannelType int32   `gorm:"channel_type"`
+	SubChannel  string  `gorm:"sub_channel"`
+
 	CreatedTime  time.Time `gorm:"created_time"`
 	AcceptedTime int64     `gorm:"accepted_time"`
 	AppKey       string    `gorm:"app_key"`
@@ -32,6 +39,9 @@ func (room *RtcRoomDao) Create(item models.RtcRoom) error {
 		RtcMediaType: int(item.RtcMediaType),
 		OwnerId:      item.OwnerId,
 		Ext:          item.Ext,
+		ConverId:     item.ConverId,
+		ChannelType:  int32(item.ChannelType),
+		SubChannel:   item.SubChannel,
 		CreatedTime:  time.Now(),
 		AcceptedTime: item.AcceptedTime,
 		AppKey:       item.AppKey,
@@ -52,6 +62,34 @@ func (room *RtcRoomDao) FindById(appkey, roomId string) (*models.RtcRoom, error)
 		RtcMediaType: pbobjs.RtcMediaType(item.RtcMediaType),
 		OwnerId:      item.OwnerId,
 		Ext:          item.Ext,
+		ConverId:     item.ConverId,
+		ChannelType:  pbobjs.ChannelType(item.ChannelType),
+		SubChannel:   item.SubChannel,
+		CreatedTime:  item.CreatedTime.UnixMilli(),
+		AcceptedTime: item.AcceptedTime,
+		AppKey:       item.AppKey,
+	}, nil
+}
+
+func (room *RtcRoomDao) FindByConver(appkey, converId string, channelType pbobjs.ChannelType, subChannel string) (*models.RtcRoom, error) {
+	var item RtcRoomDao
+	err := dbcommons.GetDb().Where("app_key=? and conver_id=? and channel_type=? and sub_channel=?", appkey, converId, int32(channelType), subChannel).Take(&item).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &models.RtcRoom{
+		RoomId:       item.RoomId,
+		RoomType:     pbobjs.RtcRoomType(item.RoomType),
+		RtcChannel:   pbobjs.RtcChannel(item.RtcChannel),
+		RtcMediaType: pbobjs.RtcMediaType(item.RtcMediaType),
+		OwnerId:      item.OwnerId,
+		Ext:          item.Ext,
+		ConverId:     item.ConverId,
+		ChannelType:  pbobjs.ChannelType(item.ChannelType),
+		SubChannel:   item.SubChannel,
 		CreatedTime:  item.CreatedTime.UnixMilli(),
 		AcceptedTime: item.AcceptedTime,
 		AppKey:       item.AppKey,

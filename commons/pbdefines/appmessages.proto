@@ -246,6 +246,13 @@ message SimpleConversation {
   int64 msgSeq = 4;
   string subChannel = 5;
 }
+
+message ConverIndex {
+  string targetId = 1;
+  ChannelType channelType = 2;
+  string subChannel = 3;
+}
+
 message AssistantMsgResp{
   string msgId = 1;
   int64 msgTime = 2;

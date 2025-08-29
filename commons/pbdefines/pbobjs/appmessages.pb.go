@@ -2516,6 +2516,66 @@ func (x *SimpleConversation) GetSubChannel() string {
 	return ""
 }
 
+type ConverIndex struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TargetId      string                 `protobuf:"bytes,1,opt,name=targetId,proto3" json:"targetId,omitempty"`
+	ChannelType   ChannelType            `protobuf:"varint,2,opt,name=channelType,proto3,enum=ChannelType" json:"channelType,omitempty"`
+	SubChannel    string                 `protobuf:"bytes,3,opt,name=subChannel,proto3" json:"subChannel,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConverIndex) Reset() {
+	*x = ConverIndex{}
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConverIndex) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConverIndex) ProtoMessage() {}
+
+func (x *ConverIndex) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConverIndex.ProtoReflect.Descriptor instead.
+func (*ConverIndex) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ConverIndex) GetTargetId() string {
+	if x != nil {
+		return x.TargetId
+	}
+	return ""
+}
+
+func (x *ConverIndex) GetChannelType() ChannelType {
+	if x != nil {
+		return x.ChannelType
+	}
+	return ChannelType_Unknown
+}
+
+func (x *ConverIndex) GetSubChannel() string {
+	if x != nil {
+		return x.SubChannel
+	}
+	return ""
+}
+
 type AssistantMsgResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MsgId         string                 `protobuf:"bytes,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
@@ -2528,7 +2588,7 @@ type AssistantMsgResp struct {
 
 func (x *AssistantMsgResp) Reset() {
 	*x = AssistantMsgResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[19]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2540,7 +2600,7 @@ func (x *AssistantMsgResp) String() string {
 func (*AssistantMsgResp) ProtoMessage() {}
 
 func (x *AssistantMsgResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[19]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2553,7 +2613,7 @@ func (x *AssistantMsgResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AssistantMsgResp.ProtoReflect.Descriptor instead.
 func (*AssistantMsgResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{19}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *AssistantMsgResp) GetMsgId() string {
@@ -2599,7 +2659,7 @@ type AddHisMsgReq struct {
 
 func (x *AddHisMsgReq) Reset() {
 	*x = AddHisMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[20]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2611,7 +2671,7 @@ func (x *AddHisMsgReq) String() string {
 func (*AddHisMsgReq) ProtoMessage() {}
 
 func (x *AddHisMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[20]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2624,7 +2684,7 @@ func (x *AddHisMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddHisMsgReq.ProtoReflect.Descriptor instead.
 func (*AddHisMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{20}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *AddHisMsgReq) GetSenderId() string {
@@ -2683,7 +2743,7 @@ type DelHisMsgsReq struct {
 
 func (x *DelHisMsgsReq) Reset() {
 	*x = DelHisMsgsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[21]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2695,7 +2755,7 @@ func (x *DelHisMsgsReq) String() string {
 func (*DelHisMsgsReq) ProtoMessage() {}
 
 func (x *DelHisMsgsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[21]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2708,7 +2768,7 @@ func (x *DelHisMsgsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DelHisMsgsReq.ProtoReflect.Descriptor instead.
 func (*DelHisMsgsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{21}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *DelHisMsgsReq) GetTargetId() string {
@@ -2757,7 +2817,7 @@ type QryLatestMsgReq struct {
 
 func (x *QryLatestMsgReq) Reset() {
 	*x = QryLatestMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[22]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2769,7 +2829,7 @@ func (x *QryLatestMsgReq) String() string {
 func (*QryLatestMsgReq) ProtoMessage() {}
 
 func (x *QryLatestMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[22]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2782,7 +2842,7 @@ func (x *QryLatestMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryLatestMsgReq.ProtoReflect.Descriptor instead.
 func (*QryLatestMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{22}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *QryLatestMsgReq) GetConverId() string {
@@ -2820,7 +2880,7 @@ type QryLatestMsgResp struct {
 
 func (x *QryLatestMsgResp) Reset() {
 	*x = QryLatestMsgResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[23]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2832,7 +2892,7 @@ func (x *QryLatestMsgResp) String() string {
 func (*QryLatestMsgResp) ProtoMessage() {}
 
 func (x *QryLatestMsgResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[23]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2845,7 +2905,7 @@ func (x *QryLatestMsgResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryLatestMsgResp.ProtoReflect.Descriptor instead.
 func (*QryLatestMsgResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{23}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *QryLatestMsgResp) GetConverId() string {
@@ -2905,7 +2965,7 @@ type QryHisMsgsReq struct {
 
 func (x *QryHisMsgsReq) Reset() {
 	*x = QryHisMsgsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[24]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2917,7 +2977,7 @@ func (x *QryHisMsgsReq) String() string {
 func (*QryHisMsgsReq) ProtoMessage() {}
 
 func (x *QryHisMsgsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[24]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2930,7 +2990,7 @@ func (x *QryHisMsgsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryHisMsgsReq.ProtoReflect.Descriptor instead.
 func (*QryHisMsgsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{24}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *QryHisMsgsReq) GetTargetId() string {
@@ -2993,7 +3053,7 @@ type QryFirstUnreadMsgReq struct {
 
 func (x *QryFirstUnreadMsgReq) Reset() {
 	*x = QryFirstUnreadMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[25]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3005,7 +3065,7 @@ func (x *QryFirstUnreadMsgReq) String() string {
 func (*QryFirstUnreadMsgReq) ProtoMessage() {}
 
 func (x *QryFirstUnreadMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[25]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3018,7 +3078,7 @@ func (x *QryFirstUnreadMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFirstUnreadMsgReq.ProtoReflect.Descriptor instead.
 func (*QryFirstUnreadMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{25}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *QryFirstUnreadMsgReq) GetTargetId() string {
@@ -3054,7 +3114,7 @@ type QryHisMsgByIdsReq struct {
 
 func (x *QryHisMsgByIdsReq) Reset() {
 	*x = QryHisMsgByIdsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[26]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3066,7 +3126,7 @@ func (x *QryHisMsgByIdsReq) String() string {
 func (*QryHisMsgByIdsReq) ProtoMessage() {}
 
 func (x *QryHisMsgByIdsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[26]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3079,7 +3139,7 @@ func (x *QryHisMsgByIdsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryHisMsgByIdsReq.ProtoReflect.Descriptor instead.
 func (*QryHisMsgByIdsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{26}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *QryHisMsgByIdsReq) GetTargetId() string {
@@ -3124,7 +3184,7 @@ type RecallMsgReq struct {
 
 func (x *RecallMsgReq) Reset() {
 	*x = RecallMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[27]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3136,7 +3196,7 @@ func (x *RecallMsgReq) String() string {
 func (*RecallMsgReq) ProtoMessage() {}
 
 func (x *RecallMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[27]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3149,7 +3209,7 @@ func (x *RecallMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecallMsgReq.ProtoReflect.Descriptor instead.
 func (*RecallMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{27}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *RecallMsgReq) GetTargetId() string {
@@ -3207,7 +3267,7 @@ type MarkReadReq struct {
 
 func (x *MarkReadReq) Reset() {
 	*x = MarkReadReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[28]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3219,7 +3279,7 @@ func (x *MarkReadReq) String() string {
 func (*MarkReadReq) ProtoMessage() {}
 
 func (x *MarkReadReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[28]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3232,7 +3292,7 @@ func (x *MarkReadReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarkReadReq.ProtoReflect.Descriptor instead.
 func (*MarkReadReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{28}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *MarkReadReq) GetTargetId() string {
@@ -3282,7 +3342,7 @@ type MarkGrpMsgReadReq struct {
 
 func (x *MarkGrpMsgReadReq) Reset() {
 	*x = MarkGrpMsgReadReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[29]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3294,7 +3354,7 @@ func (x *MarkGrpMsgReadReq) String() string {
 func (*MarkGrpMsgReadReq) ProtoMessage() {}
 
 func (x *MarkGrpMsgReadReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[29]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3307,7 +3367,7 @@ func (x *MarkGrpMsgReadReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarkGrpMsgReadReq.ProtoReflect.Descriptor instead.
 func (*MarkGrpMsgReadReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{29}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *MarkGrpMsgReadReq) GetGroupId() string {
@@ -3353,7 +3413,7 @@ type CleanHisMsgReq struct {
 
 func (x *CleanHisMsgReq) Reset() {
 	*x = CleanHisMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[30]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3365,7 +3425,7 @@ func (x *CleanHisMsgReq) String() string {
 func (*CleanHisMsgReq) ProtoMessage() {}
 
 func (x *CleanHisMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[30]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3378,7 +3438,7 @@ func (x *CleanHisMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CleanHisMsgReq.ProtoReflect.Descriptor instead.
 func (*CleanHisMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{30}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *CleanHisMsgReq) GetTargetId() string {
@@ -3441,7 +3501,7 @@ type SimpleMsg struct {
 
 func (x *SimpleMsg) Reset() {
 	*x = SimpleMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[31]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3453,7 +3513,7 @@ func (x *SimpleMsg) String() string {
 func (*SimpleMsg) ProtoMessage() {}
 
 func (x *SimpleMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[31]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3466,7 +3526,7 @@ func (x *SimpleMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SimpleMsg.ProtoReflect.Descriptor instead.
 func (*SimpleMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{31}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *SimpleMsg) GetMsgId() string {
@@ -3500,7 +3560,7 @@ type IndexScope struct {
 
 func (x *IndexScope) Reset() {
 	*x = IndexScope{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[32]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3512,7 +3572,7 @@ func (x *IndexScope) String() string {
 func (*IndexScope) ProtoMessage() {}
 
 func (x *IndexScope) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[32]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3525,7 +3585,7 @@ func (x *IndexScope) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IndexScope.ProtoReflect.Descriptor instead.
 func (*IndexScope) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{32}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *IndexScope) GetStartIndex() int64 {
@@ -3558,7 +3618,7 @@ type ModifyMsgReq struct {
 
 func (x *ModifyMsgReq) Reset() {
 	*x = ModifyMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[33]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3570,7 +3630,7 @@ func (x *ModifyMsgReq) String() string {
 func (*ModifyMsgReq) ProtoMessage() {}
 
 func (x *ModifyMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[33]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3583,7 +3643,7 @@ func (x *ModifyMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ModifyMsgReq.ProtoReflect.Descriptor instead.
 func (*ModifyMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{33}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ModifyMsgReq) GetTargetId() string {
@@ -3653,7 +3713,7 @@ type MergeMsgReq struct {
 
 func (x *MergeMsgReq) Reset() {
 	*x = MergeMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[34]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3665,7 +3725,7 @@ func (x *MergeMsgReq) String() string {
 func (*MergeMsgReq) ProtoMessage() {}
 
 func (x *MergeMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[34]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3678,7 +3738,7 @@ func (x *MergeMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MergeMsgReq.ProtoReflect.Descriptor instead.
 func (*MergeMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{34}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *MergeMsgReq) GetParentMsgId() string {
@@ -3713,7 +3773,7 @@ type QryMergedMsgsReq struct {
 
 func (x *QryMergedMsgsReq) Reset() {
 	*x = QryMergedMsgsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[35]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3725,7 +3785,7 @@ func (x *QryMergedMsgsReq) String() string {
 func (*QryMergedMsgsReq) ProtoMessage() {}
 
 func (x *QryMergedMsgsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[35]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3738,7 +3798,7 @@ func (x *QryMergedMsgsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryMergedMsgsReq.ProtoReflect.Descriptor instead.
 func (*QryMergedMsgsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{35}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *QryMergedMsgsReq) GetStartTime() int64 {
@@ -3775,7 +3835,7 @@ type MsgExt struct {
 
 func (x *MsgExt) Reset() {
 	*x = MsgExt{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[36]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3787,7 +3847,7 @@ func (x *MsgExt) String() string {
 func (*MsgExt) ProtoMessage() {}
 
 func (x *MsgExt) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[36]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3800,7 +3860,7 @@ func (x *MsgExt) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MsgExt.ProtoReflect.Descriptor instead.
 func (*MsgExt) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{36}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *MsgExt) GetTargetId() string {
@@ -3850,7 +3910,7 @@ type MsgExtItem struct {
 
 func (x *MsgExtItem) Reset() {
 	*x = MsgExtItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[37]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3862,7 +3922,7 @@ func (x *MsgExtItem) String() string {
 func (*MsgExtItem) ProtoMessage() {}
 
 func (x *MsgExtItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[37]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3875,7 +3935,7 @@ func (x *MsgExtItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MsgExtItem.ProtoReflect.Descriptor instead.
 func (*MsgExtItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{37}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *MsgExtItem) GetKey() string {
@@ -3918,7 +3978,7 @@ type QryMsgExtReq struct {
 
 func (x *QryMsgExtReq) Reset() {
 	*x = QryMsgExtReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[38]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3930,7 +3990,7 @@ func (x *QryMsgExtReq) String() string {
 func (*QryMsgExtReq) ProtoMessage() {}
 
 func (x *QryMsgExtReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[38]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3943,7 +4003,7 @@ func (x *QryMsgExtReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryMsgExtReq.ProtoReflect.Descriptor instead.
 func (*QryMsgExtReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{38}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *QryMsgExtReq) GetTargetId() string {
@@ -3983,7 +4043,7 @@ type MsgExtItemsList struct {
 
 func (x *MsgExtItemsList) Reset() {
 	*x = MsgExtItemsList{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[39]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3995,7 +4055,7 @@ func (x *MsgExtItemsList) String() string {
 func (*MsgExtItemsList) ProtoMessage() {}
 
 func (x *MsgExtItemsList) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[39]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4008,7 +4068,7 @@ func (x *MsgExtItemsList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MsgExtItemsList.ProtoReflect.Descriptor instead.
 func (*MsgExtItemsList) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{39}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *MsgExtItemsList) GetItems() []*MsgExtItems {
@@ -4028,7 +4088,7 @@ type MsgExtItems struct {
 
 func (x *MsgExtItems) Reset() {
 	*x = MsgExtItems{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[40]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4040,7 +4100,7 @@ func (x *MsgExtItems) String() string {
 func (*MsgExtItems) ProtoMessage() {}
 
 func (x *MsgExtItems) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[40]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4053,7 +4113,7 @@ func (x *MsgExtItems) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MsgExtItems.ProtoReflect.Descriptor instead.
 func (*MsgExtItems) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{40}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *MsgExtItems) GetMsgId() string {
@@ -4079,7 +4139,7 @@ type FavoriteMsgIds struct {
 
 func (x *FavoriteMsgIds) Reset() {
 	*x = FavoriteMsgIds{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[41]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4091,7 +4151,7 @@ func (x *FavoriteMsgIds) String() string {
 func (*FavoriteMsgIds) ProtoMessage() {}
 
 func (x *FavoriteMsgIds) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[41]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4104,7 +4164,7 @@ func (x *FavoriteMsgIds) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FavoriteMsgIds.ProtoReflect.Descriptor instead.
 func (*FavoriteMsgIds) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{41}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *FavoriteMsgIds) GetItems() []*FavoriteMsgIdItem {
@@ -4127,7 +4187,7 @@ type FavoriteMsgIdItem struct {
 
 func (x *FavoriteMsgIdItem) Reset() {
 	*x = FavoriteMsgIdItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[42]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4139,7 +4199,7 @@ func (x *FavoriteMsgIdItem) String() string {
 func (*FavoriteMsgIdItem) ProtoMessage() {}
 
 func (x *FavoriteMsgIdItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[42]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4152,7 +4212,7 @@ func (x *FavoriteMsgIdItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FavoriteMsgIdItem.ProtoReflect.Descriptor instead.
 func (*FavoriteMsgIdItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{42}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *FavoriteMsgIdItem) GetSenderId() string {
@@ -4200,7 +4260,7 @@ type QryFavoriteMsgsReq struct {
 
 func (x *QryFavoriteMsgsReq) Reset() {
 	*x = QryFavoriteMsgsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[43]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4212,7 +4272,7 @@ func (x *QryFavoriteMsgsReq) String() string {
 func (*QryFavoriteMsgsReq) ProtoMessage() {}
 
 func (x *QryFavoriteMsgsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[43]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4225,7 +4285,7 @@ func (x *QryFavoriteMsgsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFavoriteMsgsReq.ProtoReflect.Descriptor instead.
 func (*QryFavoriteMsgsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{43}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *QryFavoriteMsgsReq) GetLimit() int64 {
@@ -4252,7 +4312,7 @@ type FavoriteMsg struct {
 
 func (x *FavoriteMsg) Reset() {
 	*x = FavoriteMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[44]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4264,7 +4324,7 @@ func (x *FavoriteMsg) String() string {
 func (*FavoriteMsg) ProtoMessage() {}
 
 func (x *FavoriteMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[44]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4277,7 +4337,7 @@ func (x *FavoriteMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FavoriteMsg.ProtoReflect.Descriptor instead.
 func (*FavoriteMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{44}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *FavoriteMsg) GetMsg() *DownMsg {
@@ -4304,7 +4364,7 @@ type FavoriteMsgs struct {
 
 func (x *FavoriteMsgs) Reset() {
 	*x = FavoriteMsgs{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[45]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4316,7 +4376,7 @@ func (x *FavoriteMsgs) String() string {
 func (*FavoriteMsgs) ProtoMessage() {}
 
 func (x *FavoriteMsgs) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[45]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4329,7 +4389,7 @@ func (x *FavoriteMsgs) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FavoriteMsgs.ProtoReflect.Descriptor instead.
 func (*FavoriteMsgs) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{45}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *FavoriteMsgs) GetItems() []*FavoriteMsg {
@@ -4358,7 +4418,7 @@ type TopMsgReq struct {
 
 func (x *TopMsgReq) Reset() {
 	*x = TopMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[46]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4370,7 +4430,7 @@ func (x *TopMsgReq) String() string {
 func (*TopMsgReq) ProtoMessage() {}
 
 func (x *TopMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[46]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4383,7 +4443,7 @@ func (x *TopMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TopMsgReq.ProtoReflect.Descriptor instead.
 func (*TopMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{46}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *TopMsgReq) GetTargetId() string {
@@ -4425,7 +4485,7 @@ type GetTopMsgReq struct {
 
 func (x *GetTopMsgReq) Reset() {
 	*x = GetTopMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[47]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4437,7 +4497,7 @@ func (x *GetTopMsgReq) String() string {
 func (*GetTopMsgReq) ProtoMessage() {}
 
 func (x *GetTopMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[47]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4450,7 +4510,7 @@ func (x *GetTopMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTopMsgReq.ProtoReflect.Descriptor instead.
 func (*GetTopMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{47}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *GetTopMsgReq) GetTargetId() string {
@@ -4485,7 +4545,7 @@ type TopMsg struct {
 
 func (x *TopMsg) Reset() {
 	*x = TopMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[48]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4497,7 +4557,7 @@ func (x *TopMsg) String() string {
 func (*TopMsg) ProtoMessage() {}
 
 func (x *TopMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[48]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4510,7 +4570,7 @@ func (x *TopMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TopMsg.ProtoReflect.Descriptor instead.
 func (*TopMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{48}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *TopMsg) GetMsg() *DownMsg {
@@ -4550,7 +4610,7 @@ type QryGlobalConversReq struct {
 
 func (x *QryGlobalConversReq) Reset() {
 	*x = QryGlobalConversReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[49]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4562,7 +4622,7 @@ func (x *QryGlobalConversReq) String() string {
 func (*QryGlobalConversReq) ProtoMessage() {}
 
 func (x *QryGlobalConversReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[49]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4575,7 +4635,7 @@ func (x *QryGlobalConversReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGlobalConversReq.ProtoReflect.Descriptor instead.
 func (*QryGlobalConversReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{49}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *QryGlobalConversReq) GetStart() int64 {
@@ -4637,7 +4697,7 @@ type QryGlobalConversResp struct {
 
 func (x *QryGlobalConversResp) Reset() {
 	*x = QryGlobalConversResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[50]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4649,7 +4709,7 @@ func (x *QryGlobalConversResp) String() string {
 func (*QryGlobalConversResp) ProtoMessage() {}
 
 func (x *QryGlobalConversResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[50]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4662,7 +4722,7 @@ func (x *QryGlobalConversResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGlobalConversResp.ProtoReflect.Descriptor instead.
 func (*QryGlobalConversResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{50}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *QryGlobalConversResp) GetConvers() []*GlobalConver {
@@ -4693,7 +4753,7 @@ type GlobalConver struct {
 
 func (x *GlobalConver) Reset() {
 	*x = GlobalConver{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[51]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4705,7 +4765,7 @@ func (x *GlobalConver) String() string {
 func (*GlobalConver) ProtoMessage() {}
 
 func (x *GlobalConver) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[51]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4718,7 +4778,7 @@ func (x *GlobalConver) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GlobalConver.ProtoReflect.Descriptor instead.
 func (*GlobalConver) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{51}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *GlobalConver) GetId() string {
@@ -4778,7 +4838,7 @@ type QryConversationsReq struct {
 
 func (x *QryConversationsReq) Reset() {
 	*x = QryConversationsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[52]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4790,7 +4850,7 @@ func (x *QryConversationsReq) String() string {
 func (*QryConversationsReq) ProtoMessage() {}
 
 func (x *QryConversationsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[52]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4803,7 +4863,7 @@ func (x *QryConversationsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryConversationsReq.ProtoReflect.Descriptor instead.
 func (*QryConversationsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{52}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *QryConversationsReq) GetStartTime() int64 {
@@ -4858,7 +4918,7 @@ type QryConversationsResp struct {
 
 func (x *QryConversationsResp) Reset() {
 	*x = QryConversationsResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[53]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4870,7 +4930,7 @@ func (x *QryConversationsResp) String() string {
 func (*QryConversationsResp) ProtoMessage() {}
 
 func (x *QryConversationsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[53]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4883,7 +4943,7 @@ func (x *QryConversationsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryConversationsResp.ProtoReflect.Descriptor instead.
 func (*QryConversationsResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{53}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *QryConversationsResp) GetConversations() []*Conversation {
@@ -4929,7 +4989,7 @@ type Conversation struct {
 
 func (x *Conversation) Reset() {
 	*x = Conversation{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[54]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4941,7 +5001,7 @@ func (x *Conversation) String() string {
 func (*Conversation) ProtoMessage() {}
 
 func (x *Conversation) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[54]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4954,7 +5014,7 @@ func (x *Conversation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Conversation.ProtoReflect.Descriptor instead.
 func (*Conversation) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{54}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *Conversation) GetUserId() string {
@@ -5113,7 +5173,7 @@ type BatchAddConvers struct {
 
 func (x *BatchAddConvers) Reset() {
 	*x = BatchAddConvers{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[55]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5125,7 +5185,7 @@ func (x *BatchAddConvers) String() string {
 func (*BatchAddConvers) ProtoMessage() {}
 
 func (x *BatchAddConvers) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[55]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5138,7 +5198,7 @@ func (x *BatchAddConvers) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchAddConvers.ProtoReflect.Descriptor instead.
 func (*BatchAddConvers) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{55}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *BatchAddConvers) GetConvers() []*Conversation {
@@ -5158,7 +5218,7 @@ type UserMsgTimeItem struct {
 
 func (x *UserMsgTimeItem) Reset() {
 	*x = UserMsgTimeItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[56]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5170,7 +5230,7 @@ func (x *UserMsgTimeItem) String() string {
 func (*UserMsgTimeItem) ProtoMessage() {}
 
 func (x *UserMsgTimeItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[56]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5183,7 +5243,7 @@ func (x *UserMsgTimeItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserMsgTimeItem.ProtoReflect.Descriptor instead.
 func (*UserMsgTimeItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{56}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *UserMsgTimeItem) GetUserId() string {
@@ -5214,7 +5274,7 @@ type UpdLatestMsgReq struct {
 
 func (x *UpdLatestMsgReq) Reset() {
 	*x = UpdLatestMsgReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[57]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5226,7 +5286,7 @@ func (x *UpdLatestMsgReq) String() string {
 func (*UpdLatestMsgReq) ProtoMessage() {}
 
 func (x *UpdLatestMsgReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[57]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5239,7 +5299,7 @@ func (x *UpdLatestMsgReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdLatestMsgReq.ProtoReflect.Descriptor instead.
 func (*UpdLatestMsgReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{57}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *UpdLatestMsgReq) GetTargetId() string {
@@ -5296,7 +5356,7 @@ type Mentions struct {
 
 func (x *Mentions) Reset() {
 	*x = Mentions{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[58]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5308,7 +5368,7 @@ func (x *Mentions) String() string {
 func (*Mentions) ProtoMessage() {}
 
 func (x *Mentions) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[58]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5321,7 +5381,7 @@ func (x *Mentions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Mentions.ProtoReflect.Descriptor instead.
 func (*Mentions) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{58}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *Mentions) GetIsMentioned() bool {
@@ -5364,7 +5424,7 @@ type MentionMsg struct {
 
 func (x *MentionMsg) Reset() {
 	*x = MentionMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[59]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5376,7 +5436,7 @@ func (x *MentionMsg) String() string {
 func (*MentionMsg) ProtoMessage() {}
 
 func (x *MentionMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[59]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5389,7 +5449,7 @@ func (x *MentionMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MentionMsg.ProtoReflect.Descriptor instead.
 func (*MentionMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{59}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *MentionMsg) GetSenderId() string {
@@ -5435,7 +5495,7 @@ type QryMentionMsgsReq struct {
 
 func (x *QryMentionMsgsReq) Reset() {
 	*x = QryMentionMsgsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[60]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5447,7 +5507,7 @@ func (x *QryMentionMsgsReq) String() string {
 func (*QryMentionMsgsReq) ProtoMessage() {}
 
 func (x *QryMentionMsgsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[60]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5460,7 +5520,7 @@ func (x *QryMentionMsgsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryMentionMsgsReq.ProtoReflect.Descriptor instead.
 func (*QryMentionMsgsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{60}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *QryMentionMsgsReq) GetTargetId() string {
@@ -5522,7 +5582,7 @@ type QryMentionMsgsResp struct {
 
 func (x *QryMentionMsgsResp) Reset() {
 	*x = QryMentionMsgsResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[61]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5534,7 +5594,7 @@ func (x *QryMentionMsgsResp) String() string {
 func (*QryMentionMsgsResp) ProtoMessage() {}
 
 func (x *QryMentionMsgsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[61]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5547,7 +5607,7 @@ func (x *QryMentionMsgsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryMentionMsgsResp.ProtoReflect.Descriptor instead.
 func (*QryMentionMsgsResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{61}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *QryMentionMsgsResp) GetMentionMsgs() []*DownMsg {
@@ -5574,7 +5634,7 @@ type SyncConversationsReq struct {
 
 func (x *SyncConversationsReq) Reset() {
 	*x = SyncConversationsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[62]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5586,7 +5646,7 @@ func (x *SyncConversationsReq) String() string {
 func (*SyncConversationsReq) ProtoMessage() {}
 
 func (x *SyncConversationsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[62]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5599,7 +5659,7 @@ func (x *SyncConversationsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SyncConversationsReq.ProtoReflect.Descriptor instead.
 func (*SyncConversationsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{62}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *SyncConversationsReq) GetStartTime() int64 {
@@ -5626,7 +5686,7 @@ type QryTotalUnreadCountReq struct {
 
 func (x *QryTotalUnreadCountReq) Reset() {
 	*x = QryTotalUnreadCountReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[63]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5638,7 +5698,7 @@ func (x *QryTotalUnreadCountReq) String() string {
 func (*QryTotalUnreadCountReq) ProtoMessage() {}
 
 func (x *QryTotalUnreadCountReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[63]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5651,7 +5711,7 @@ func (x *QryTotalUnreadCountReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryTotalUnreadCountReq.ProtoReflect.Descriptor instead.
 func (*QryTotalUnreadCountReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{63}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *QryTotalUnreadCountReq) GetTime() int64 {
@@ -5680,7 +5740,7 @@ type ConverFilter struct {
 
 func (x *ConverFilter) Reset() {
 	*x = ConverFilter{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[64]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5692,7 +5752,7 @@ func (x *ConverFilter) String() string {
 func (*ConverFilter) ProtoMessage() {}
 
 func (x *ConverFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[64]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5705,7 +5765,7 @@ func (x *ConverFilter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConverFilter.ProtoReflect.Descriptor instead.
 func (*ConverFilter) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{64}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *ConverFilter) GetChannelTypes() []ChannelType {
@@ -5745,7 +5805,7 @@ type QryTotalUnreadCountResp struct {
 
 func (x *QryTotalUnreadCountResp) Reset() {
 	*x = QryTotalUnreadCountResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[65]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5757,7 +5817,7 @@ func (x *QryTotalUnreadCountResp) String() string {
 func (*QryTotalUnreadCountResp) ProtoMessage() {}
 
 func (x *QryTotalUnreadCountResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[65]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5770,7 +5830,7 @@ func (x *QryTotalUnreadCountResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryTotalUnreadCountResp.ProtoReflect.Descriptor instead.
 func (*QryTotalUnreadCountResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{65}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *QryTotalUnreadCountResp) GetTotalCount() int64 {
@@ -5789,7 +5849,7 @@ type ConversationsReq struct {
 
 func (x *ConversationsReq) Reset() {
 	*x = ConversationsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[66]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5801,7 +5861,7 @@ func (x *ConversationsReq) String() string {
 func (*ConversationsReq) ProtoMessage() {}
 
 func (x *ConversationsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[66]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5814,7 +5874,7 @@ func (x *ConversationsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConversationsReq.ProtoReflect.Descriptor instead.
 func (*ConversationsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{66}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *ConversationsReq) GetConversations() []*Conversation {
@@ -5834,7 +5894,7 @@ type ClearUnreadReq struct {
 
 func (x *ClearUnreadReq) Reset() {
 	*x = ClearUnreadReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[67]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5846,7 +5906,7 @@ func (x *ClearUnreadReq) String() string {
 func (*ClearUnreadReq) ProtoMessage() {}
 
 func (x *ClearUnreadReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[67]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5859,7 +5919,7 @@ func (x *ClearUnreadReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClearUnreadReq.ProtoReflect.Descriptor instead.
 func (*ClearUnreadReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{67}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *ClearUnreadReq) GetConversations() []*Conversation {
@@ -5886,7 +5946,7 @@ type UndisturbConversReq struct {
 
 func (x *UndisturbConversReq) Reset() {
 	*x = UndisturbConversReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[68]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5898,7 +5958,7 @@ func (x *UndisturbConversReq) String() string {
 func (*UndisturbConversReq) ProtoMessage() {}
 
 func (x *UndisturbConversReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[68]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5911,7 +5971,7 @@ func (x *UndisturbConversReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UndisturbConversReq.ProtoReflect.Descriptor instead.
 func (*UndisturbConversReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{68}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *UndisturbConversReq) GetItems() []*UndisturbConverItem {
@@ -5933,7 +5993,7 @@ type UndisturbConverItem struct {
 
 func (x *UndisturbConverItem) Reset() {
 	*x = UndisturbConverItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[69]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5945,7 +6005,7 @@ func (x *UndisturbConverItem) String() string {
 func (*UndisturbConverItem) ProtoMessage() {}
 
 func (x *UndisturbConverItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[69]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5958,7 +6018,7 @@ func (x *UndisturbConverItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UndisturbConverItem.ProtoReflect.Descriptor instead.
 func (*UndisturbConverItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{69}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *UndisturbConverItem) GetTargetId() string {
@@ -6000,7 +6060,7 @@ type QryTopConversReq struct {
 
 func (x *QryTopConversReq) Reset() {
 	*x = QryTopConversReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[70]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6012,7 +6072,7 @@ func (x *QryTopConversReq) String() string {
 func (*QryTopConversReq) ProtoMessage() {}
 
 func (x *QryTopConversReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[70]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6025,7 +6085,7 @@ func (x *QryTopConversReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryTopConversReq.ProtoReflect.Descriptor instead.
 func (*QryTopConversReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{70}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *QryTopConversReq) GetStartTime() int64 {
@@ -6058,7 +6118,7 @@ type TopConversResp struct {
 
 func (x *TopConversResp) Reset() {
 	*x = TopConversResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[71]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6070,7 +6130,7 @@ func (x *TopConversResp) String() string {
 func (*TopConversResp) ProtoMessage() {}
 
 func (x *TopConversResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[71]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6083,7 +6143,7 @@ func (x *TopConversResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TopConversResp.ProtoReflect.Descriptor instead.
 func (*TopConversResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{71}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *TopConversResp) GetOptTime() int64 {
@@ -6105,7 +6165,7 @@ type QryReadInfosReq struct {
 
 func (x *QryReadInfosReq) Reset() {
 	*x = QryReadInfosReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[72]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6117,7 +6177,7 @@ func (x *QryReadInfosReq) String() string {
 func (*QryReadInfosReq) ProtoMessage() {}
 
 func (x *QryReadInfosReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[72]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6130,7 +6190,7 @@ func (x *QryReadInfosReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryReadInfosReq.ProtoReflect.Descriptor instead.
 func (*QryReadInfosReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{72}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *QryReadInfosReq) GetTargetId() string {
@@ -6170,7 +6230,7 @@ type QryReadInfosResp struct {
 
 func (x *QryReadInfosResp) Reset() {
 	*x = QryReadInfosResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[73]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6182,7 +6242,7 @@ func (x *QryReadInfosResp) String() string {
 func (*QryReadInfosResp) ProtoMessage() {}
 
 func (x *QryReadInfosResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[73]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6195,7 +6255,7 @@ func (x *QryReadInfosResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryReadInfosResp.ProtoReflect.Descriptor instead.
 func (*QryReadInfosResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{73}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *QryReadInfosResp) GetItems() []*ReadInfoItem {
@@ -6216,7 +6276,7 @@ type ReadInfoItem struct {
 
 func (x *ReadInfoItem) Reset() {
 	*x = ReadInfoItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[74]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6228,7 +6288,7 @@ func (x *ReadInfoItem) String() string {
 func (*ReadInfoItem) ProtoMessage() {}
 
 func (x *ReadInfoItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[74]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6241,7 +6301,7 @@ func (x *ReadInfoItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReadInfoItem.ProtoReflect.Descriptor instead.
 func (*ReadInfoItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{74}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{75}
 }
 
 func (x *ReadInfoItem) GetMsgId() string {
@@ -6277,7 +6337,7 @@ type QryReadDetailReq struct {
 
 func (x *QryReadDetailReq) Reset() {
 	*x = QryReadDetailReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[75]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6289,7 +6349,7 @@ func (x *QryReadDetailReq) String() string {
 func (*QryReadDetailReq) ProtoMessage() {}
 
 func (x *QryReadDetailReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[75]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6302,7 +6362,7 @@ func (x *QryReadDetailReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryReadDetailReq.ProtoReflect.Descriptor instead.
 func (*QryReadDetailReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{75}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *QryReadDetailReq) GetTargetId() string {
@@ -6345,7 +6405,7 @@ type QryReadDetailResp struct {
 
 func (x *QryReadDetailResp) Reset() {
 	*x = QryReadDetailResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[76]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6357,7 +6417,7 @@ func (x *QryReadDetailResp) String() string {
 func (*QryReadDetailResp) ProtoMessage() {}
 
 func (x *QryReadDetailResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[76]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6370,7 +6430,7 @@ func (x *QryReadDetailResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryReadDetailResp.ProtoReflect.Descriptor instead.
 func (*QryReadDetailResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{76}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *QryReadDetailResp) GetReadCount() int32 {
@@ -6411,7 +6471,7 @@ type MemberReadDetailItem struct {
 
 func (x *MemberReadDetailItem) Reset() {
 	*x = MemberReadDetailItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[77]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6423,7 +6483,7 @@ func (x *MemberReadDetailItem) String() string {
 func (*MemberReadDetailItem) ProtoMessage() {}
 
 func (x *MemberReadDetailItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[77]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6436,7 +6496,7 @@ func (x *MemberReadDetailItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MemberReadDetailItem.ProtoReflect.Descriptor instead.
 func (*MemberReadDetailItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{77}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *MemberReadDetailItem) GetMember() *UserInfo {
@@ -6466,7 +6526,7 @@ type QryConverReq struct {
 
 func (x *QryConverReq) Reset() {
 	*x = QryConverReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[78]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6478,7 +6538,7 @@ func (x *QryConverReq) String() string {
 func (*QryConverReq) ProtoMessage() {}
 
 func (x *QryConverReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[78]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6491,7 +6551,7 @@ func (x *QryConverReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryConverReq.ProtoReflect.Descriptor instead.
 func (*QryConverReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{78}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{79}
 }
 
 func (x *QryConverReq) GetTargetId() string {
@@ -6540,7 +6600,7 @@ type TagConvers struct {
 
 func (x *TagConvers) Reset() {
 	*x = TagConvers{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[79]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6552,7 +6612,7 @@ func (x *TagConvers) String() string {
 func (*TagConvers) ProtoMessage() {}
 
 func (x *TagConvers) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[79]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6565,7 +6625,7 @@ func (x *TagConvers) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TagConvers.ProtoReflect.Descriptor instead.
 func (*TagConvers) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{79}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *TagConvers) GetTag() string {
@@ -6598,7 +6658,7 @@ type UserConverTags struct {
 
 func (x *UserConverTags) Reset() {
 	*x = UserConverTags{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[80]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6610,7 +6670,7 @@ func (x *UserConverTags) String() string {
 func (*UserConverTags) ProtoMessage() {}
 
 func (x *UserConverTags) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[80]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6623,7 +6683,7 @@ func (x *UserConverTags) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserConverTags.ProtoReflect.Descriptor instead.
 func (*UserConverTags) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{80}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{81}
 }
 
 func (x *UserConverTags) GetTags() []*ConverTag {
@@ -6644,7 +6704,7 @@ type ConverTag struct {
 
 func (x *ConverTag) Reset() {
 	*x = ConverTag{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[81]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6656,7 +6716,7 @@ func (x *ConverTag) String() string {
 func (*ConverTag) ProtoMessage() {}
 
 func (x *ConverTag) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[81]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6669,7 +6729,7 @@ func (x *ConverTag) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConverTag.ProtoReflect.Descriptor instead.
 func (*ConverTag) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{81}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{82}
 }
 
 func (x *ConverTag) GetTag() string {
@@ -6702,7 +6762,7 @@ type ConverExts struct {
 
 func (x *ConverExts) Reset() {
 	*x = ConverExts{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[82]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6714,7 +6774,7 @@ func (x *ConverExts) String() string {
 func (*ConverExts) ProtoMessage() {}
 
 func (x *ConverExts) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[82]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6727,7 +6787,7 @@ func (x *ConverExts) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConverExts.ProtoReflect.Descriptor instead.
 func (*ConverExts) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{82}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{83}
 }
 
 func (x *ConverExts) GetConverTags() map[string]bool {
@@ -6756,7 +6816,7 @@ type UserInfo struct {
 
 func (x *UserInfo) Reset() {
 	*x = UserInfo{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[83]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6768,7 +6828,7 @@ func (x *UserInfo) String() string {
 func (*UserInfo) ProtoMessage() {}
 
 func (x *UserInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[83]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6781,7 +6841,7 @@ func (x *UserInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserInfo.ProtoReflect.Descriptor instead.
 func (*UserInfo) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{83}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{84}
 }
 
 func (x *UserInfo) GetUserId() string {
@@ -6856,7 +6916,7 @@ type UserInfos struct {
 
 func (x *UserInfos) Reset() {
 	*x = UserInfos{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[84]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6868,7 +6928,7 @@ func (x *UserInfos) String() string {
 func (*UserInfos) ProtoMessage() {}
 
 func (x *UserInfos) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[84]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6881,7 +6941,7 @@ func (x *UserInfos) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserInfos.ProtoReflect.Descriptor instead.
 func (*UserInfos) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{84}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{85}
 }
 
 func (x *UserInfos) GetUserInfos() []*UserInfo {
@@ -6901,7 +6961,7 @@ type UserIdsReq struct {
 
 func (x *UserIdsReq) Reset() {
 	*x = UserIdsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[85]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6913,7 +6973,7 @@ func (x *UserIdsReq) String() string {
 func (*UserIdsReq) ProtoMessage() {}
 
 func (x *UserIdsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[85]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6926,7 +6986,7 @@ func (x *UserIdsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserIdsReq.ProtoReflect.Descriptor instead.
 func (*UserIdsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{85}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{86}
 }
 
 func (x *UserIdsReq) GetUserIds() []string {
@@ -6953,7 +7013,7 @@ type UserIdReq struct {
 
 func (x *UserIdReq) Reset() {
 	*x = UserIdReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[86]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6965,7 +7025,7 @@ func (x *UserIdReq) String() string {
 func (*UserIdReq) ProtoMessage() {}
 
 func (x *UserIdReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[86]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6978,7 +7038,7 @@ func (x *UserIdReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserIdReq.ProtoReflect.Descriptor instead.
 func (*UserIdReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{86}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{87}
 }
 
 func (x *UserIdReq) GetUserId() string {
@@ -7004,7 +7064,7 @@ type UserInfosResp struct {
 
 func (x *UserInfosResp) Reset() {
 	*x = UserInfosResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[87]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7016,7 +7076,7 @@ func (x *UserInfosResp) String() string {
 func (*UserInfosResp) ProtoMessage() {}
 
 func (x *UserInfosResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[87]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7029,7 +7089,7 @@ func (x *UserInfosResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserInfosResp.ProtoReflect.Descriptor instead.
 func (*UserInfosResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{87}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{88}
 }
 
 func (x *UserInfosResp) GetUserInfoMap() map[string]*UserInfo {
@@ -7053,7 +7113,7 @@ type UserRegResp struct {
 
 func (x *UserRegResp) Reset() {
 	*x = UserRegResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[88]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7065,7 +7125,7 @@ func (x *UserRegResp) String() string {
 func (*UserRegResp) ProtoMessage() {}
 
 func (x *UserRegResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[88]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7078,7 +7138,7 @@ func (x *UserRegResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserRegResp.ProtoReflect.Descriptor instead.
 func (*UserRegResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{88}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{89}
 }
 
 func (x *UserRegResp) GetUserId() string {
@@ -7132,7 +7192,7 @@ type UserOnlineStatusReq struct {
 
 func (x *UserOnlineStatusReq) Reset() {
 	*x = UserOnlineStatusReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[89]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[90]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7144,7 +7204,7 @@ func (x *UserOnlineStatusReq) String() string {
 func (*UserOnlineStatusReq) ProtoMessage() {}
 
 func (x *UserOnlineStatusReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[89]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[90]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7157,7 +7217,7 @@ func (x *UserOnlineStatusReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserOnlineStatusReq.ProtoReflect.Descriptor instead.
 func (*UserOnlineStatusReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{89}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{90}
 }
 
 func (x *UserOnlineStatusReq) GetUserIds() []string {
@@ -7176,7 +7236,7 @@ type UserOnlineStatusResp struct {
 
 func (x *UserOnlineStatusResp) Reset() {
 	*x = UserOnlineStatusResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[90]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7188,7 +7248,7 @@ func (x *UserOnlineStatusResp) String() string {
 func (*UserOnlineStatusResp) ProtoMessage() {}
 
 func (x *UserOnlineStatusResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[90]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7201,7 +7261,7 @@ func (x *UserOnlineStatusResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserOnlineStatusResp.ProtoReflect.Descriptor instead.
 func (*UserOnlineStatusResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{90}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{91}
 }
 
 func (x *UserOnlineStatusResp) GetItems() []*UserOnlineItem {
@@ -7221,7 +7281,7 @@ type UserOnlineItem struct {
 
 func (x *UserOnlineItem) Reset() {
 	*x = UserOnlineItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[91]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7233,7 +7293,7 @@ func (x *UserOnlineItem) String() string {
 func (*UserOnlineItem) ProtoMessage() {}
 
 func (x *UserOnlineItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[91]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7246,7 +7306,7 @@ func (x *UserOnlineItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserOnlineItem.ProtoReflect.Descriptor instead.
 func (*UserOnlineItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{91}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{92}
 }
 
 func (x *UserOnlineItem) GetUserId() string {
@@ -7273,7 +7333,7 @@ type BanUsersReq struct {
 
 func (x *BanUsersReq) Reset() {
 	*x = BanUsersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[92]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[93]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7285,7 +7345,7 @@ func (x *BanUsersReq) String() string {
 func (*BanUsersReq) ProtoMessage() {}
 
 func (x *BanUsersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[92]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[93]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7298,7 +7358,7 @@ func (x *BanUsersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BanUsersReq.ProtoReflect.Descriptor instead.
 func (*BanUsersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{92}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{93}
 }
 
 func (x *BanUsersReq) GetBanUsers() []*BanUser {
@@ -7329,7 +7389,7 @@ type BanUser struct {
 
 func (x *BanUser) Reset() {
 	*x = BanUser{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[93]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[94]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7341,7 +7401,7 @@ func (x *BanUser) String() string {
 func (*BanUser) ProtoMessage() {}
 
 func (x *BanUser) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[93]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[94]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7354,7 +7414,7 @@ func (x *BanUser) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BanUser.ProtoReflect.Descriptor instead.
 func (*BanUser) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{93}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{94}
 }
 
 func (x *BanUser) GetUserId() string {
@@ -7409,7 +7469,7 @@ type QryBanUsersReq struct {
 
 func (x *QryBanUsersReq) Reset() {
 	*x = QryBanUsersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[94]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[95]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7421,7 +7481,7 @@ func (x *QryBanUsersReq) String() string {
 func (*QryBanUsersReq) ProtoMessage() {}
 
 func (x *QryBanUsersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[94]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[95]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7434,7 +7494,7 @@ func (x *QryBanUsersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryBanUsersReq.ProtoReflect.Descriptor instead.
 func (*QryBanUsersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{94}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{95}
 }
 
 func (x *QryBanUsersReq) GetLimit() int64 {
@@ -7461,7 +7521,7 @@ type QryBanUsersResp struct {
 
 func (x *QryBanUsersResp) Reset() {
 	*x = QryBanUsersResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[95]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7473,7 +7533,7 @@ func (x *QryBanUsersResp) String() string {
 func (*QryBanUsersResp) ProtoMessage() {}
 
 func (x *QryBanUsersResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[95]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7486,7 +7546,7 @@ func (x *QryBanUsersResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryBanUsersResp.ProtoReflect.Descriptor instead.
 func (*QryBanUsersResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{95}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{96}
 }
 
 func (x *QryBanUsersResp) GetItems() []*BanUser {
@@ -7513,7 +7573,7 @@ type BlockUsersReq struct {
 
 func (x *BlockUsersReq) Reset() {
 	*x = BlockUsersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[96]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7525,7 +7585,7 @@ func (x *BlockUsersReq) String() string {
 func (*BlockUsersReq) ProtoMessage() {}
 
 func (x *BlockUsersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[96]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7538,7 +7598,7 @@ func (x *BlockUsersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BlockUsersReq.ProtoReflect.Descriptor instead.
 func (*BlockUsersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{96}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{97}
 }
 
 func (x *BlockUsersReq) GetUserIds() []string {
@@ -7566,7 +7626,7 @@ type QryBlockUsersReq struct {
 
 func (x *QryBlockUsersReq) Reset() {
 	*x = QryBlockUsersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[97]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[98]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7578,7 +7638,7 @@ func (x *QryBlockUsersReq) String() string {
 func (*QryBlockUsersReq) ProtoMessage() {}
 
 func (x *QryBlockUsersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[97]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[98]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7591,7 +7651,7 @@ func (x *QryBlockUsersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryBlockUsersReq.ProtoReflect.Descriptor instead.
 func (*QryBlockUsersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{97}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{98}
 }
 
 func (x *QryBlockUsersReq) GetUserId() string {
@@ -7625,7 +7685,7 @@ type BlockUser struct {
 
 func (x *BlockUser) Reset() {
 	*x = BlockUser{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[98]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[99]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7637,7 +7697,7 @@ func (x *BlockUser) String() string {
 func (*BlockUser) ProtoMessage() {}
 
 func (x *BlockUser) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[98]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[99]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7650,7 +7710,7 @@ func (x *BlockUser) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BlockUser.ProtoReflect.Descriptor instead.
 func (*BlockUser) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{98}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{99}
 }
 
 func (x *BlockUser) GetBlockUserId() string {
@@ -7677,7 +7737,7 @@ type QryBlockUsersResp struct {
 
 func (x *QryBlockUsersResp) Reset() {
 	*x = QryBlockUsersResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[99]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[100]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7689,7 +7749,7 @@ func (x *QryBlockUsersResp) String() string {
 func (*QryBlockUsersResp) ProtoMessage() {}
 
 func (x *QryBlockUsersResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[99]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[100]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7702,7 +7762,7 @@ func (x *QryBlockUsersResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryBlockUsersResp.ProtoReflect.Descriptor instead.
 func (*QryBlockUsersResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{99}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{100}
 }
 
 func (x *QryBlockUsersResp) GetItems() []*BlockUser {
@@ -7728,7 +7788,7 @@ type CheckBlockUserResp struct {
 
 func (x *CheckBlockUserResp) Reset() {
 	*x = CheckBlockUserResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[100]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[101]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7740,7 +7800,7 @@ func (x *CheckBlockUserResp) String() string {
 func (*CheckBlockUserResp) ProtoMessage() {}
 
 func (x *CheckBlockUserResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[100]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[101]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7753,7 +7813,7 @@ func (x *CheckBlockUserResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckBlockUserResp.ProtoReflect.Descriptor instead.
 func (*CheckBlockUserResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{100}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{101}
 }
 
 func (x *CheckBlockUserResp) GetIsBlock() bool {
@@ -7775,7 +7835,7 @@ type OnlineStatus struct {
 
 func (x *OnlineStatus) Reset() {
 	*x = OnlineStatus{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[101]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[102]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7787,7 +7847,7 @@ func (x *OnlineStatus) String() string {
 func (*OnlineStatus) ProtoMessage() {}
 
 func (x *OnlineStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[101]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[102]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7800,7 +7860,7 @@ func (x *OnlineStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OnlineStatus.ProtoReflect.Descriptor instead.
 func (*OnlineStatus) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{101}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{102}
 }
 
 func (x *OnlineStatus) GetType() OnlineType {
@@ -7844,7 +7904,7 @@ type KickUserReq struct {
 
 func (x *KickUserReq) Reset() {
 	*x = KickUserReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[102]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[103]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7856,7 +7916,7 @@ func (x *KickUserReq) String() string {
 func (*KickUserReq) ProtoMessage() {}
 
 func (x *KickUserReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[102]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[103]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7869,7 +7929,7 @@ func (x *KickUserReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use KickUserReq.ProtoReflect.Descriptor instead.
 func (*KickUserReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{102}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{103}
 }
 
 func (x *KickUserReq) GetUserId() string {
@@ -7918,7 +7978,7 @@ type UserUndisturb struct {
 
 func (x *UserUndisturb) Reset() {
 	*x = UserUndisturb{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[103]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[104]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7930,7 +7990,7 @@ func (x *UserUndisturb) String() string {
 func (*UserUndisturb) ProtoMessage() {}
 
 func (x *UserUndisturb) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[103]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[104]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7943,7 +8003,7 @@ func (x *UserUndisturb) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserUndisturb.ProtoReflect.Descriptor instead.
 func (*UserUndisturb) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{103}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{104}
 }
 
 func (x *UserUndisturb) GetSwitch() bool {
@@ -7977,7 +8037,7 @@ type UserUndisturbItem struct {
 
 func (x *UserUndisturbItem) Reset() {
 	*x = UserUndisturbItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[104]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[105]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7989,7 +8049,7 @@ func (x *UserUndisturbItem) String() string {
 func (*UserUndisturbItem) ProtoMessage() {}
 
 func (x *UserUndisturbItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[104]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[105]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8002,7 +8062,7 @@ func (x *UserUndisturbItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserUndisturbItem.ProtoReflect.Descriptor instead.
 func (*UserUndisturbItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{104}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{105}
 }
 
 func (x *UserUndisturbItem) GetStart() string {
@@ -8028,7 +8088,7 @@ type UserPushStatus struct {
 
 func (x *UserPushStatus) Reset() {
 	*x = UserPushStatus{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[105]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[106]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8040,7 +8100,7 @@ func (x *UserPushStatus) String() string {
 func (*UserPushStatus) ProtoMessage() {}
 
 func (x *UserPushStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[105]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[106]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8053,7 +8113,7 @@ func (x *UserPushStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserPushStatus.ProtoReflect.Descriptor instead.
 func (*UserPushStatus) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{105}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{106}
 }
 
 func (x *UserPushStatus) GetCanPush() bool {
@@ -8073,7 +8133,7 @@ type BatchMuteUsersReq struct {
 
 func (x *BatchMuteUsersReq) Reset() {
 	*x = BatchMuteUsersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[106]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[107]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8085,7 +8145,7 @@ func (x *BatchMuteUsersReq) String() string {
 func (*BatchMuteUsersReq) ProtoMessage() {}
 
 func (x *BatchMuteUsersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[106]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[107]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8098,7 +8158,7 @@ func (x *BatchMuteUsersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchMuteUsersReq.ProtoReflect.Descriptor instead.
 func (*BatchMuteUsersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{106}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{107}
 }
 
 func (x *BatchMuteUsersReq) GetUserIds() []string {
@@ -8125,7 +8185,7 @@ type FriendIdsReq struct {
 
 func (x *FriendIdsReq) Reset() {
 	*x = FriendIdsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[107]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[108]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8137,7 +8197,7 @@ func (x *FriendIdsReq) String() string {
 func (*FriendIdsReq) ProtoMessage() {}
 
 func (x *FriendIdsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[107]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[108]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8150,7 +8210,7 @@ func (x *FriendIdsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FriendIdsReq.ProtoReflect.Descriptor instead.
 func (*FriendIdsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{107}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{108}
 }
 
 func (x *FriendIdsReq) GetFriendIds() []string {
@@ -8169,7 +8229,7 @@ type FriendMembersReq struct {
 
 func (x *FriendMembersReq) Reset() {
 	*x = FriendMembersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[108]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[109]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8181,7 +8241,7 @@ func (x *FriendMembersReq) String() string {
 func (*FriendMembersReq) ProtoMessage() {}
 
 func (x *FriendMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[108]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[109]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8194,7 +8254,7 @@ func (x *FriendMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FriendMembersReq.ProtoReflect.Descriptor instead.
 func (*FriendMembersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{108}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{109}
 }
 
 func (x *FriendMembersReq) GetFriendMembers() []*FriendMember {
@@ -8215,7 +8275,7 @@ type QryFriendsReq struct {
 
 func (x *QryFriendsReq) Reset() {
 	*x = QryFriendsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[109]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[110]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8227,7 +8287,7 @@ func (x *QryFriendsReq) String() string {
 func (*QryFriendsReq) ProtoMessage() {}
 
 func (x *QryFriendsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[109]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[110]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8240,7 +8300,7 @@ func (x *QryFriendsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFriendsReq.ProtoReflect.Descriptor instead.
 func (*QryFriendsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{109}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{110}
 }
 
 func (x *QryFriendsReq) GetLimit() int64 {
@@ -8275,7 +8335,7 @@ type QryFriendsWithPageReq struct {
 
 func (x *QryFriendsWithPageReq) Reset() {
 	*x = QryFriendsWithPageReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[110]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[111]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8287,7 +8347,7 @@ func (x *QryFriendsWithPageReq) String() string {
 func (*QryFriendsWithPageReq) ProtoMessage() {}
 
 func (x *QryFriendsWithPageReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[110]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[111]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8300,7 +8360,7 @@ func (x *QryFriendsWithPageReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFriendsWithPageReq.ProtoReflect.Descriptor instead.
 func (*QryFriendsWithPageReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{110}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{111}
 }
 
 func (x *QryFriendsWithPageReq) GetPage() int64 {
@@ -8334,7 +8394,7 @@ type QryFriendsResp struct {
 
 func (x *QryFriendsResp) Reset() {
 	*x = QryFriendsResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[111]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[112]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8346,7 +8406,7 @@ func (x *QryFriendsResp) String() string {
 func (*QryFriendsResp) ProtoMessage() {}
 
 func (x *QryFriendsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[111]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[112]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8359,7 +8419,7 @@ func (x *QryFriendsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFriendsResp.ProtoReflect.Descriptor instead.
 func (*QryFriendsResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{111}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{112}
 }
 
 func (x *QryFriendsResp) GetItems() []*FriendMember {
@@ -8387,7 +8447,7 @@ type FriendMember struct {
 
 func (x *FriendMember) Reset() {
 	*x = FriendMember{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[112]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[113]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8399,7 +8459,7 @@ func (x *FriendMember) String() string {
 func (*FriendMember) ProtoMessage() {}
 
 func (x *FriendMember) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[112]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[113]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8412,7 +8472,7 @@ func (x *FriendMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FriendMember.ProtoReflect.Descriptor instead.
 func (*FriendMember) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{112}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{113}
 }
 
 func (x *FriendMember) GetFriendId() string {
@@ -8445,7 +8505,7 @@ type CheckFriendsReq struct {
 
 func (x *CheckFriendsReq) Reset() {
 	*x = CheckFriendsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[113]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[114]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8457,7 +8517,7 @@ func (x *CheckFriendsReq) String() string {
 func (*CheckFriendsReq) ProtoMessage() {}
 
 func (x *CheckFriendsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[113]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[114]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8470,7 +8530,7 @@ func (x *CheckFriendsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckFriendsReq.ProtoReflect.Descriptor instead.
 func (*CheckFriendsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{113}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{114}
 }
 
 func (x *CheckFriendsReq) GetFriendIds() []string {
@@ -8489,7 +8549,7 @@ type CheckFriendsResp struct {
 
 func (x *CheckFriendsResp) Reset() {
 	*x = CheckFriendsResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[114]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[115]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8501,7 +8561,7 @@ func (x *CheckFriendsResp) String() string {
 func (*CheckFriendsResp) ProtoMessage() {}
 
 func (x *CheckFriendsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[114]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[115]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8514,7 +8574,7 @@ func (x *CheckFriendsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckFriendsResp.ProtoReflect.Descriptor instead.
 func (*CheckFriendsResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{114}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{115}
 }
 
 func (x *CheckFriendsResp) GetCheckResults() map[string]bool {
@@ -8541,7 +8601,7 @@ type GroupInfo struct {
 
 func (x *GroupInfo) Reset() {
 	*x = GroupInfo{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[115]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[116]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8553,7 +8613,7 @@ func (x *GroupInfo) String() string {
 func (*GroupInfo) ProtoMessage() {}
 
 func (x *GroupInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[115]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[116]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8566,7 +8626,7 @@ func (x *GroupInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupInfo.ProtoReflect.Descriptor instead.
 func (*GroupInfo) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{115}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{116}
 }
 
 func (x *GroupInfo) GetGroupId() string {
@@ -8636,7 +8696,7 @@ type GrpMemberInfo struct {
 
 func (x *GrpMemberInfo) Reset() {
 	*x = GrpMemberInfo{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[116]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[117]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8648,7 +8708,7 @@ func (x *GrpMemberInfo) String() string {
 func (*GrpMemberInfo) ProtoMessage() {}
 
 func (x *GrpMemberInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[116]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[117]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8661,7 +8721,7 @@ func (x *GrpMemberInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GrpMemberInfo.ProtoReflect.Descriptor instead.
 func (*GrpMemberInfo) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{116}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{117}
 }
 
 func (x *GrpMemberInfo) GetGrpDisplayName() string {
@@ -8699,7 +8759,7 @@ type GroupMembersReq struct {
 
 func (x *GroupMembersReq) Reset() {
 	*x = GroupMembersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[117]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[118]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8711,7 +8771,7 @@ func (x *GroupMembersReq) String() string {
 func (*GroupMembersReq) ProtoMessage() {}
 
 func (x *GroupMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[117]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[118]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8724,7 +8784,7 @@ func (x *GroupMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMembersReq.ProtoReflect.Descriptor instead.
 func (*GroupMembersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{117}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{118}
 }
 
 func (x *GroupMembersReq) GetGroupId() string {
@@ -8779,7 +8839,7 @@ type GroupMuteReq struct {
 
 func (x *GroupMuteReq) Reset() {
 	*x = GroupMuteReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[118]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[119]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8791,7 +8851,7 @@ func (x *GroupMuteReq) String() string {
 func (*GroupMuteReq) ProtoMessage() {}
 
 func (x *GroupMuteReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[118]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[119]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8804,7 +8864,7 @@ func (x *GroupMuteReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMuteReq.ProtoReflect.Descriptor instead.
 func (*GroupMuteReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{118}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{119}
 }
 
 func (x *GroupMuteReq) GetGroupId() string {
@@ -8831,7 +8891,7 @@ type GroupInfoReq struct {
 
 func (x *GroupInfoReq) Reset() {
 	*x = GroupInfoReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[119]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[120]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8843,7 +8903,7 @@ func (x *GroupInfoReq) String() string {
 func (*GroupInfoReq) ProtoMessage() {}
 
 func (x *GroupInfoReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[119]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[120]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8856,7 +8916,7 @@ func (x *GroupInfoReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupInfoReq.ProtoReflect.Descriptor instead.
 func (*GroupInfoReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{119}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{120}
 }
 
 func (x *GroupInfoReq) GetGroupId() string {
@@ -8882,7 +8942,7 @@ type GroupIdsReq struct {
 
 func (x *GroupIdsReq) Reset() {
 	*x = GroupIdsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[120]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[121]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8894,7 +8954,7 @@ func (x *GroupIdsReq) String() string {
 func (*GroupIdsReq) ProtoMessage() {}
 
 func (x *GroupIdsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[120]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[121]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8907,7 +8967,7 @@ func (x *GroupIdsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupIdsReq.ProtoReflect.Descriptor instead.
 func (*GroupIdsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{120}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{121}
 }
 
 func (x *GroupIdsReq) GetGroupIds() []string {
@@ -8926,7 +8986,7 @@ type GroupInfosResp struct {
 
 func (x *GroupInfosResp) Reset() {
 	*x = GroupInfosResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[121]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[122]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8938,7 +8998,7 @@ func (x *GroupInfosResp) String() string {
 func (*GroupInfosResp) ProtoMessage() {}
 
 func (x *GroupInfosResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[121]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[122]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8951,7 +9011,7 @@ func (x *GroupInfosResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupInfosResp.ProtoReflect.Descriptor instead.
 func (*GroupInfosResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{121}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{122}
 }
 
 func (x *GroupInfosResp) GetGroupInfoMap() map[string]*GroupInfo {
@@ -8973,7 +9033,7 @@ type GroupMemberMuteReq struct {
 
 func (x *GroupMemberMuteReq) Reset() {
 	*x = GroupMemberMuteReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[122]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[123]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8985,7 +9045,7 @@ func (x *GroupMemberMuteReq) String() string {
 func (*GroupMemberMuteReq) ProtoMessage() {}
 
 func (x *GroupMemberMuteReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[122]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[123]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8998,7 +9058,7 @@ func (x *GroupMemberMuteReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMemberMuteReq.ProtoReflect.Descriptor instead.
 func (*GroupMemberMuteReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{122}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{123}
 }
 
 func (x *GroupMemberMuteReq) GetGroupId() string {
@@ -9040,7 +9100,7 @@ type GroupMemberAllowReq struct {
 
 func (x *GroupMemberAllowReq) Reset() {
 	*x = GroupMemberAllowReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[123]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[124]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9052,7 +9112,7 @@ func (x *GroupMemberAllowReq) String() string {
 func (*GroupMemberAllowReq) ProtoMessage() {}
 
 func (x *GroupMemberAllowReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[123]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[124]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9065,7 +9125,7 @@ func (x *GroupMemberAllowReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMemberAllowReq.ProtoReflect.Descriptor instead.
 func (*GroupMemberAllowReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{123}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{124}
 }
 
 func (x *GroupMemberAllowReq) GetGroupId() string {
@@ -9099,7 +9159,7 @@ type GroupMembersResp struct {
 
 func (x *GroupMembersResp) Reset() {
 	*x = GroupMembersResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[124]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[125]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9111,7 +9171,7 @@ func (x *GroupMembersResp) String() string {
 func (*GroupMembersResp) ProtoMessage() {}
 
 func (x *GroupMembersResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[124]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[125]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9124,7 +9184,7 @@ func (x *GroupMembersResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMembersResp.ProtoReflect.Descriptor instead.
 func (*GroupMembersResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{124}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{125}
 }
 
 func (x *GroupMembersResp) GetItems() []*GroupMember {
@@ -9155,7 +9215,7 @@ type GroupMember struct {
 
 func (x *GroupMember) Reset() {
 	*x = GroupMember{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[125]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[126]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9167,7 +9227,7 @@ func (x *GroupMember) String() string {
 func (*GroupMember) ProtoMessage() {}
 
 func (x *GroupMember) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[125]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[126]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9180,7 +9240,7 @@ func (x *GroupMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMember.ProtoReflect.Descriptor instead.
 func (*GroupMember) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{125}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{126}
 }
 
 func (x *GroupMember) GetMemberId() string {
@@ -9236,7 +9296,7 @@ type QryGroupMembersReq struct {
 
 func (x *QryGroupMembersReq) Reset() {
 	*x = QryGroupMembersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[126]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[127]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9248,7 +9308,7 @@ func (x *QryGroupMembersReq) String() string {
 func (*QryGroupMembersReq) ProtoMessage() {}
 
 func (x *QryGroupMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[126]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[127]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9261,7 +9321,7 @@ func (x *QryGroupMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGroupMembersReq.ProtoReflect.Descriptor instead.
 func (*QryGroupMembersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{126}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{127}
 }
 
 func (x *QryGroupMembersReq) GetGroupId() string {
@@ -9295,7 +9355,7 @@ type CheckGroupMembersReq struct {
 
 func (x *CheckGroupMembersReq) Reset() {
 	*x = CheckGroupMembersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[127]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[128]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9307,7 +9367,7 @@ func (x *CheckGroupMembersReq) String() string {
 func (*CheckGroupMembersReq) ProtoMessage() {}
 
 func (x *CheckGroupMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[127]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[128]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9320,7 +9380,7 @@ func (x *CheckGroupMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckGroupMembersReq.ProtoReflect.Descriptor instead.
 func (*CheckGroupMembersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{127}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{128}
 }
 
 func (x *CheckGroupMembersReq) GetGroupId() string {
@@ -9346,7 +9406,7 @@ type CheckGroupMembersResp struct {
 
 func (x *CheckGroupMembersResp) Reset() {
 	*x = CheckGroupMembersResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[128]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[129]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9358,7 +9418,7 @@ func (x *CheckGroupMembersResp) String() string {
 func (*CheckGroupMembersResp) ProtoMessage() {}
 
 func (x *CheckGroupMembersResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[128]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[129]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9371,7 +9431,7 @@ func (x *CheckGroupMembersResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckGroupMembersResp.ProtoReflect.Descriptor instead.
 func (*CheckGroupMembersResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{128}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{129}
 }
 
 func (x *CheckGroupMembersResp) GetMemberIdMap() map[string]int64 {
@@ -9391,7 +9451,7 @@ type QryGrpSnapshotReq struct {
 
 func (x *QryGrpSnapshotReq) Reset() {
 	*x = QryGrpSnapshotReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[129]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[130]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9403,7 +9463,7 @@ func (x *QryGrpSnapshotReq) String() string {
 func (*QryGrpSnapshotReq) ProtoMessage() {}
 
 func (x *QryGrpSnapshotReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[129]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[130]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9416,7 +9476,7 @@ func (x *QryGrpSnapshotReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGrpSnapshotReq.ProtoReflect.Descriptor instead.
 func (*QryGrpSnapshotReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{129}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{130}
 }
 
 func (x *QryGrpSnapshotReq) GetGroupId() string {
@@ -9443,7 +9503,7 @@ type GroupSnapshot struct {
 
 func (x *GroupSnapshot) Reset() {
 	*x = GroupSnapshot{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[130]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[131]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9455,7 +9515,7 @@ func (x *GroupSnapshot) String() string {
 func (*GroupSnapshot) ProtoMessage() {}
 
 func (x *GroupSnapshot) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[130]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[131]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9468,7 +9528,7 @@ func (x *GroupSnapshot) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupSnapshot.ProtoReflect.Descriptor instead.
 func (*GroupSnapshot) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{130}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{131}
 }
 
 func (x *GroupSnapshot) GetGroupId() string {
@@ -9494,7 +9554,7 @@ type QryGrpMemberSettingsReq struct {
 
 func (x *QryGrpMemberSettingsReq) Reset() {
 	*x = QryGrpMemberSettingsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[131]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[132]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9506,7 +9566,7 @@ func (x *QryGrpMemberSettingsReq) String() string {
 func (*QryGrpMemberSettingsReq) ProtoMessage() {}
 
 func (x *QryGrpMemberSettingsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[131]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[132]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9519,7 +9579,7 @@ func (x *QryGrpMemberSettingsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGrpMemberSettingsReq.ProtoReflect.Descriptor instead.
 func (*QryGrpMemberSettingsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{131}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{132}
 }
 
 func (x *QryGrpMemberSettingsReq) GetMemberId() string {
@@ -9544,7 +9604,7 @@ type QryGrpMemberSettingsResp struct {
 
 func (x *QryGrpMemberSettingsResp) Reset() {
 	*x = QryGrpMemberSettingsResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[132]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[133]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9556,7 +9616,7 @@ func (x *QryGrpMemberSettingsResp) String() string {
 func (*QryGrpMemberSettingsResp) ProtoMessage() {}
 
 func (x *QryGrpMemberSettingsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[132]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[133]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9569,7 +9629,7 @@ func (x *QryGrpMemberSettingsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGrpMemberSettingsResp.ProtoReflect.Descriptor instead.
 func (*QryGrpMemberSettingsResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{132}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{133}
 }
 
 func (x *QryGrpMemberSettingsResp) GetGroupId() string {
@@ -9632,7 +9692,7 @@ type QryFileCredReq struct {
 
 func (x *QryFileCredReq) Reset() {
 	*x = QryFileCredReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[133]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9644,7 +9704,7 @@ func (x *QryFileCredReq) String() string {
 func (*QryFileCredReq) ProtoMessage() {}
 
 func (x *QryFileCredReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[133]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9657,7 +9717,7 @@ func (x *QryFileCredReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFileCredReq.ProtoReflect.Descriptor instead.
 func (*QryFileCredReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{133}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{134}
 }
 
 func (x *QryFileCredReq) GetFileType() FileType {
@@ -9688,7 +9748,7 @@ type QryFileCredResp struct {
 
 func (x *QryFileCredResp) Reset() {
 	*x = QryFileCredResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9700,7 +9760,7 @@ func (x *QryFileCredResp) String() string {
 func (*QryFileCredResp) ProtoMessage() {}
 
 func (x *QryFileCredResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9713,7 +9773,7 @@ func (x *QryFileCredResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFileCredResp.ProtoReflect.Descriptor instead.
 func (*QryFileCredResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{134}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{135}
 }
 
 func (x *QryFileCredResp) GetOssType() OssType {
@@ -9774,7 +9834,7 @@ type QiNiuCredResp struct {
 
 func (x *QiNiuCredResp) Reset() {
 	*x = QiNiuCredResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9786,7 +9846,7 @@ func (x *QiNiuCredResp) String() string {
 func (*QiNiuCredResp) ProtoMessage() {}
 
 func (x *QiNiuCredResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9799,7 +9859,7 @@ func (x *QiNiuCredResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QiNiuCredResp.ProtoReflect.Descriptor instead.
 func (*QiNiuCredResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{135}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{136}
 }
 
 func (x *QiNiuCredResp) GetDomain() string {
@@ -9831,7 +9891,7 @@ type PreSignResp struct {
 
 func (x *PreSignResp) Reset() {
 	*x = PreSignResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9843,7 +9903,7 @@ func (x *PreSignResp) String() string {
 func (*PreSignResp) ProtoMessage() {}
 
 func (x *PreSignResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9856,7 +9916,7 @@ func (x *PreSignResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PreSignResp.ProtoReflect.Descriptor instead.
 func (*PreSignResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{136}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{137}
 }
 
 func (x *PreSignResp) GetUrl() string {
@@ -9919,7 +9979,7 @@ type UploadLogStatusReq struct {
 
 func (x *UploadLogStatusReq) Reset() {
 	*x = UploadLogStatusReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9931,7 +9991,7 @@ func (x *UploadLogStatusReq) String() string {
 func (*UploadLogStatusReq) ProtoMessage() {}
 
 func (x *UploadLogStatusReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9944,7 +10004,7 @@ func (x *UploadLogStatusReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadLogStatusReq.ProtoReflect.Descriptor instead.
 func (*UploadLogStatusReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{137}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{138}
 }
 
 func (x *UploadLogStatusReq) GetMsgId() string {
@@ -9978,7 +10038,7 @@ type SubMsgs struct {
 
 func (x *SubMsgs) Reset() {
 	*x = SubMsgs{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9990,7 +10050,7 @@ func (x *SubMsgs) String() string {
 func (*SubMsgs) ProtoMessage() {}
 
 func (x *SubMsgs) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10003,7 +10063,7 @@ func (x *SubMsgs) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubMsgs.ProtoReflect.Descriptor instead.
 func (*SubMsgs) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{138}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{139}
 }
 
 func (x *SubMsgs) GetSubMsgs() []*SubMsg {
@@ -10023,7 +10083,7 @@ type SubMsg struct {
 
 func (x *SubMsg) Reset() {
 	*x = SubMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10035,7 +10095,7 @@ func (x *SubMsg) String() string {
 func (*SubMsg) ProtoMessage() {}
 
 func (x *SubMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10048,7 +10108,7 @@ func (x *SubMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubMsg.ProtoReflect.Descriptor instead.
 func (*SubMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{139}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{140}
 }
 
 func (x *SubMsg) GetMsg() *DownMsg {
@@ -10082,7 +10142,7 @@ type OnlineOfflineMsg struct {
 
 func (x *OnlineOfflineMsg) Reset() {
 	*x = OnlineOfflineMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10094,7 +10154,7 @@ func (x *OnlineOfflineMsg) String() string {
 func (*OnlineOfflineMsg) ProtoMessage() {}
 
 func (x *OnlineOfflineMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10107,7 +10167,7 @@ func (x *OnlineOfflineMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OnlineOfflineMsg.ProtoReflect.Descriptor instead.
 func (*OnlineOfflineMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{140}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{141}
 }
 
 func (x *OnlineOfflineMsg) GetType() OnlineType {
@@ -10184,7 +10244,7 @@ type TransReq struct {
 
 func (x *TransReq) Reset() {
 	*x = TransReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10196,7 +10256,7 @@ func (x *TransReq) String() string {
 func (*TransReq) ProtoMessage() {}
 
 func (x *TransReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10209,7 +10269,7 @@ func (x *TransReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransReq.ProtoReflect.Descriptor instead.
 func (*TransReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{141}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{142}
 }
 
 func (x *TransReq) GetItems() []*TransItem {
@@ -10243,7 +10303,7 @@ type TransItem struct {
 
 func (x *TransItem) Reset() {
 	*x = TransItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10255,7 +10315,7 @@ func (x *TransItem) String() string {
 func (*TransItem) ProtoMessage() {}
 
 func (x *TransItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10268,7 +10328,7 @@ func (x *TransItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransItem.ProtoReflect.Descriptor instead.
 func (*TransItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{142}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{143}
 }
 
 func (x *TransItem) GetKey() string {
@@ -10504,6 +10564,12 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\x06msgSeq\x18\x04 \x01(\x03R\x06msgSeq\x12\x1e\n" +
 	"\n" +
 	"subChannel\x18\x05 \x01(\tR\n" +
+	"subChannel\"y\n" +
+	"\vConverIndex\x12\x1a\n" +
+	"\btargetId\x18\x01 \x01(\tR\btargetId\x12.\n" +
+	"\vchannelType\x18\x02 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12\x1e\n" +
+	"\n" +
+	"subChannel\x18\x03 \x01(\tR\n" +
 	"subChannel\"\x89\x01\n" +
 	"\x10AssistantMsgResp\x12\x14\n" +
 	"\x05msgId\x18\x01 \x01(\tR\x05msgId\x12\x18\n" +
@@ -11250,7 +11316,7 @@ func file_commons_pbdefines_appmessages_proto_rawDescGZIP() []byte {
 }
 
 var file_commons_pbdefines_appmessages_proto_enumTypes = make([]protoimpl.EnumInfo, 13)
-var file_commons_pbdefines_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 153)
+var file_commons_pbdefines_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 154)
 var file_commons_pbdefines_appmessages_proto_goTypes = []any{
 	(RpcMsgType)(0),                  // 0: RpcMsgType
 	(MentionType)(0),                 // 1: MentionType
@@ -11284,154 +11350,155 @@ var file_commons_pbdefines_appmessages_proto_goTypes = []any{
 	(*PushSwitch)(nil),               // 29: PushSwitch
 	(*AddGrpAssistantReq)(nil),       // 30: AddGrpAssistantReq
 	(*SimpleConversation)(nil),       // 31: SimpleConversation
-	(*AssistantMsgResp)(nil),         // 32: AssistantMsgResp
-	(*AddHisMsgReq)(nil),             // 33: AddHisMsgReq
-	(*DelHisMsgsReq)(nil),            // 34: DelHisMsgsReq
-	(*QryLatestMsgReq)(nil),          // 35: QryLatestMsgReq
-	(*QryLatestMsgResp)(nil),         // 36: QryLatestMsgResp
-	(*QryHisMsgsReq)(nil),            // 37: QryHisMsgsReq
-	(*QryFirstUnreadMsgReq)(nil),     // 38: QryFirstUnreadMsgReq
-	(*QryHisMsgByIdsReq)(nil),        // 39: QryHisMsgByIdsReq
-	(*RecallMsgReq)(nil),             // 40: RecallMsgReq
-	(*MarkReadReq)(nil),              // 41: MarkReadReq
-	(*MarkGrpMsgReadReq)(nil),        // 42: MarkGrpMsgReadReq
-	(*CleanHisMsgReq)(nil),           // 43: CleanHisMsgReq
-	(*SimpleMsg)(nil),                // 44: SimpleMsg
-	(*IndexScope)(nil),               // 45: IndexScope
-	(*ModifyMsgReq)(nil),             // 46: ModifyMsgReq
-	(*MergeMsgReq)(nil),              // 47: MergeMsgReq
-	(*QryMergedMsgsReq)(nil),         // 48: QryMergedMsgsReq
-	(*MsgExt)(nil),                   // 49: MsgExt
-	(*MsgExtItem)(nil),               // 50: MsgExtItem
-	(*QryMsgExtReq)(nil),             // 51: QryMsgExtReq
-	(*MsgExtItemsList)(nil),          // 52: MsgExtItemsList
-	(*MsgExtItems)(nil),              // 53: MsgExtItems
-	(*FavoriteMsgIds)(nil),           // 54: FavoriteMsgIds
-	(*FavoriteMsgIdItem)(nil),        // 55: FavoriteMsgIdItem
-	(*QryFavoriteMsgsReq)(nil),       // 56: QryFavoriteMsgsReq
-	(*FavoriteMsg)(nil),              // 57: FavoriteMsg
-	(*FavoriteMsgs)(nil),             // 58: FavoriteMsgs
-	(*TopMsgReq)(nil),                // 59: TopMsgReq
-	(*GetTopMsgReq)(nil),             // 60: GetTopMsgReq
-	(*TopMsg)(nil),                   // 61: TopMsg
-	(*QryGlobalConversReq)(nil),      // 62: QryGlobalConversReq
-	(*QryGlobalConversResp)(nil),     // 63: QryGlobalConversResp
-	(*GlobalConver)(nil),             // 64: GlobalConver
-	(*QryConversationsReq)(nil),      // 65: QryConversationsReq
-	(*QryConversationsResp)(nil),     // 66: QryConversationsResp
-	(*Conversation)(nil),             // 67: Conversation
-	(*BatchAddConvers)(nil),          // 68: BatchAddConvers
-	(*UserMsgTimeItem)(nil),          // 69: UserMsgTimeItem
-	(*UpdLatestMsgReq)(nil),          // 70: UpdLatestMsgReq
-	(*Mentions)(nil),                 // 71: Mentions
-	(*MentionMsg)(nil),               // 72: MentionMsg
-	(*QryMentionMsgsReq)(nil),        // 73: QryMentionMsgsReq
-	(*QryMentionMsgsResp)(nil),       // 74: QryMentionMsgsResp
-	(*SyncConversationsReq)(nil),     // 75: SyncConversationsReq
-	(*QryTotalUnreadCountReq)(nil),   // 76: QryTotalUnreadCountReq
-	(*ConverFilter)(nil),             // 77: ConverFilter
-	(*QryTotalUnreadCountResp)(nil),  // 78: QryTotalUnreadCountResp
-	(*ConversationsReq)(nil),         // 79: ConversationsReq
-	(*ClearUnreadReq)(nil),           // 80: ClearUnreadReq
-	(*UndisturbConversReq)(nil),      // 81: UndisturbConversReq
-	(*UndisturbConverItem)(nil),      // 82: UndisturbConverItem
-	(*QryTopConversReq)(nil),         // 83: QryTopConversReq
-	(*TopConversResp)(nil),           // 84: TopConversResp
-	(*QryReadInfosReq)(nil),          // 85: QryReadInfosReq
-	(*QryReadInfosResp)(nil),         // 86: QryReadInfosResp
-	(*ReadInfoItem)(nil),             // 87: ReadInfoItem
-	(*QryReadDetailReq)(nil),         // 88: QryReadDetailReq
-	(*QryReadDetailResp)(nil),        // 89: QryReadDetailResp
-	(*MemberReadDetailItem)(nil),     // 90: MemberReadDetailItem
-	(*QryConverReq)(nil),             // 91: QryConverReq
-	(*TagConvers)(nil),               // 92: TagConvers
-	(*UserConverTags)(nil),           // 93: UserConverTags
-	(*ConverTag)(nil),                // 94: ConverTag
-	(*ConverExts)(nil),               // 95: ConverExts
-	(*UserInfo)(nil),                 // 96: UserInfo
-	(*UserInfos)(nil),                // 97: UserInfos
-	(*UserIdsReq)(nil),               // 98: UserIdsReq
-	(*UserIdReq)(nil),                // 99: UserIdReq
-	(*UserInfosResp)(nil),            // 100: UserInfosResp
-	(*UserRegResp)(nil),              // 101: UserRegResp
-	(*UserOnlineStatusReq)(nil),      // 102: UserOnlineStatusReq
-	(*UserOnlineStatusResp)(nil),     // 103: UserOnlineStatusResp
-	(*UserOnlineItem)(nil),           // 104: UserOnlineItem
-	(*BanUsersReq)(nil),              // 105: BanUsersReq
-	(*BanUser)(nil),                  // 106: BanUser
-	(*QryBanUsersReq)(nil),           // 107: QryBanUsersReq
-	(*QryBanUsersResp)(nil),          // 108: QryBanUsersResp
-	(*BlockUsersReq)(nil),            // 109: BlockUsersReq
-	(*QryBlockUsersReq)(nil),         // 110: QryBlockUsersReq
-	(*BlockUser)(nil),                // 111: BlockUser
-	(*QryBlockUsersResp)(nil),        // 112: QryBlockUsersResp
-	(*CheckBlockUserResp)(nil),       // 113: CheckBlockUserResp
-	(*OnlineStatus)(nil),             // 114: OnlineStatus
-	(*KickUserReq)(nil),              // 115: KickUserReq
-	(*UserUndisturb)(nil),            // 116: UserUndisturb
-	(*UserUndisturbItem)(nil),        // 117: UserUndisturbItem
-	(*UserPushStatus)(nil),           // 118: UserPushStatus
-	(*BatchMuteUsersReq)(nil),        // 119: BatchMuteUsersReq
-	(*FriendIdsReq)(nil),             // 120: FriendIdsReq
-	(*FriendMembersReq)(nil),         // 121: FriendMembersReq
-	(*QryFriendsReq)(nil),            // 122: QryFriendsReq
-	(*QryFriendsWithPageReq)(nil),    // 123: QryFriendsWithPageReq
-	(*QryFriendsResp)(nil),           // 124: QryFriendsResp
-	(*FriendMember)(nil),             // 125: FriendMember
-	(*CheckFriendsReq)(nil),          // 126: CheckFriendsReq
-	(*CheckFriendsResp)(nil),         // 127: CheckFriendsResp
-	(*GroupInfo)(nil),                // 128: GroupInfo
-	(*GrpMemberInfo)(nil),            // 129: GrpMemberInfo
-	(*GroupMembersReq)(nil),          // 130: GroupMembersReq
-	(*GroupMuteReq)(nil),             // 131: GroupMuteReq
-	(*GroupInfoReq)(nil),             // 132: GroupInfoReq
-	(*GroupIdsReq)(nil),              // 133: GroupIdsReq
-	(*GroupInfosResp)(nil),           // 134: GroupInfosResp
-	(*GroupMemberMuteReq)(nil),       // 135: GroupMemberMuteReq
-	(*GroupMemberAllowReq)(nil),      // 136: GroupMemberAllowReq
-	(*GroupMembersResp)(nil),         // 137: GroupMembersResp
-	(*GroupMember)(nil),              // 138: GroupMember
-	(*QryGroupMembersReq)(nil),       // 139: QryGroupMembersReq
-	(*CheckGroupMembersReq)(nil),     // 140: CheckGroupMembersReq
-	(*CheckGroupMembersResp)(nil),    // 141: CheckGroupMembersResp
-	(*QryGrpSnapshotReq)(nil),        // 142: QryGrpSnapshotReq
-	(*GroupSnapshot)(nil),            // 143: GroupSnapshot
-	(*QryGrpMemberSettingsReq)(nil),  // 144: QryGrpMemberSettingsReq
-	(*QryGrpMemberSettingsResp)(nil), // 145: QryGrpMemberSettingsResp
-	(*QryFileCredReq)(nil),           // 146: QryFileCredReq
-	(*QryFileCredResp)(nil),          // 147: QryFileCredResp
-	(*QiNiuCredResp)(nil),            // 148: QiNiuCredResp
-	(*PreSignResp)(nil),              // 149: PreSignResp
-	(*UploadLogStatusReq)(nil),       // 150: UploadLogStatusReq
-	(*SubMsgs)(nil),                  // 151: SubMsgs
-	(*SubMsg)(nil),                   // 152: SubMsg
-	(*OnlineOfflineMsg)(nil),         // 153: OnlineOfflineMsg
-	(*TransReq)(nil),                 // 154: TransReq
-	(*TransItem)(nil),                // 155: TransItem
-	nil,                              // 156: RpcMessageWraper.ExtParamsEntry
-	nil,                              // 157: DownMsg.TransMsgMapEntry
-	nil,                              // 158: ConverExts.ConverTagsEntry
-	nil,                              // 159: UserInfosResp.UserInfoMapEntry
-	nil,                              // 160: CheckFriendsResp.CheckResultsEntry
-	nil,                              // 161: GroupInfosResp.GroupInfoMapEntry
-	nil,                              // 162: CheckGroupMembersResp.MemberIdMapEntry
-	nil,                              // 163: QryGrpMemberSettingsResp.GroupSettingsEntry
-	nil,                              // 164: QryGrpMemberSettingsResp.MemberSettingsEntry
-	nil,                              // 165: QryGrpMemberSettingsResp.MemberExtsEntry
+	(*ConverIndex)(nil),              // 32: ConverIndex
+	(*AssistantMsgResp)(nil),         // 33: AssistantMsgResp
+	(*AddHisMsgReq)(nil),             // 34: AddHisMsgReq
+	(*DelHisMsgsReq)(nil),            // 35: DelHisMsgsReq
+	(*QryLatestMsgReq)(nil),          // 36: QryLatestMsgReq
+	(*QryLatestMsgResp)(nil),         // 37: QryLatestMsgResp
+	(*QryHisMsgsReq)(nil),            // 38: QryHisMsgsReq
+	(*QryFirstUnreadMsgReq)(nil),     // 39: QryFirstUnreadMsgReq
+	(*QryHisMsgByIdsReq)(nil),        // 40: QryHisMsgByIdsReq
+	(*RecallMsgReq)(nil),             // 41: RecallMsgReq
+	(*MarkReadReq)(nil),              // 42: MarkReadReq
+	(*MarkGrpMsgReadReq)(nil),        // 43: MarkGrpMsgReadReq
+	(*CleanHisMsgReq)(nil),           // 44: CleanHisMsgReq
+	(*SimpleMsg)(nil),                // 45: SimpleMsg
+	(*IndexScope)(nil),               // 46: IndexScope
+	(*ModifyMsgReq)(nil),             // 47: ModifyMsgReq
+	(*MergeMsgReq)(nil),              // 48: MergeMsgReq
+	(*QryMergedMsgsReq)(nil),         // 49: QryMergedMsgsReq
+	(*MsgExt)(nil),                   // 50: MsgExt
+	(*MsgExtItem)(nil),               // 51: MsgExtItem
+	(*QryMsgExtReq)(nil),             // 52: QryMsgExtReq
+	(*MsgExtItemsList)(nil),          // 53: MsgExtItemsList
+	(*MsgExtItems)(nil),              // 54: MsgExtItems
+	(*FavoriteMsgIds)(nil),           // 55: FavoriteMsgIds
+	(*FavoriteMsgIdItem)(nil),        // 56: FavoriteMsgIdItem
+	(*QryFavoriteMsgsReq)(nil),       // 57: QryFavoriteMsgsReq
+	(*FavoriteMsg)(nil),              // 58: FavoriteMsg
+	(*FavoriteMsgs)(nil),             // 59: FavoriteMsgs
+	(*TopMsgReq)(nil),                // 60: TopMsgReq
+	(*GetTopMsgReq)(nil),             // 61: GetTopMsgReq
+	(*TopMsg)(nil),                   // 62: TopMsg
+	(*QryGlobalConversReq)(nil),      // 63: QryGlobalConversReq
+	(*QryGlobalConversResp)(nil),     // 64: QryGlobalConversResp
+	(*GlobalConver)(nil),             // 65: GlobalConver
+	(*QryConversationsReq)(nil),      // 66: QryConversationsReq
+	(*QryConversationsResp)(nil),     // 67: QryConversationsResp
+	(*Conversation)(nil),             // 68: Conversation
+	(*BatchAddConvers)(nil),          // 69: BatchAddConvers
+	(*UserMsgTimeItem)(nil),          // 70: UserMsgTimeItem
+	(*UpdLatestMsgReq)(nil),          // 71: UpdLatestMsgReq
+	(*Mentions)(nil),                 // 72: Mentions
+	(*MentionMsg)(nil),               // 73: MentionMsg
+	(*QryMentionMsgsReq)(nil),        // 74: QryMentionMsgsReq
+	(*QryMentionMsgsResp)(nil),       // 75: QryMentionMsgsResp
+	(*SyncConversationsReq)(nil),     // 76: SyncConversationsReq
+	(*QryTotalUnreadCountReq)(nil),   // 77: QryTotalUnreadCountReq
+	(*ConverFilter)(nil),             // 78: ConverFilter
+	(*QryTotalUnreadCountResp)(nil),  // 79: QryTotalUnreadCountResp
+	(*ConversationsReq)(nil),         // 80: ConversationsReq
+	(*ClearUnreadReq)(nil),           // 81: ClearUnreadReq
+	(*UndisturbConversReq)(nil),      // 82: UndisturbConversReq
+	(*UndisturbConverItem)(nil),      // 83: UndisturbConverItem
+	(*QryTopConversReq)(nil),         // 84: QryTopConversReq
+	(*TopConversResp)(nil),           // 85: TopConversResp
+	(*QryReadInfosReq)(nil),          // 86: QryReadInfosReq
+	(*QryReadInfosResp)(nil),         // 87: QryReadInfosResp
+	(*ReadInfoItem)(nil),             // 88: ReadInfoItem
+	(*QryReadDetailReq)(nil),         // 89: QryReadDetailReq
+	(*QryReadDetailResp)(nil),        // 90: QryReadDetailResp
+	(*MemberReadDetailItem)(nil),     // 91: MemberReadDetailItem
+	(*QryConverReq)(nil),             // 92: QryConverReq
+	(*TagConvers)(nil),               // 93: TagConvers
+	(*UserConverTags)(nil),           // 94: UserConverTags
+	(*ConverTag)(nil),                // 95: ConverTag
+	(*ConverExts)(nil),               // 96: ConverExts
+	(*UserInfo)(nil),                 // 97: UserInfo
+	(*UserInfos)(nil),                // 98: UserInfos
+	(*UserIdsReq)(nil),               // 99: UserIdsReq
+	(*UserIdReq)(nil),                // 100: UserIdReq
+	(*UserInfosResp)(nil),            // 101: UserInfosResp
+	(*UserRegResp)(nil),              // 102: UserRegResp
+	(*UserOnlineStatusReq)(nil),      // 103: UserOnlineStatusReq
+	(*UserOnlineStatusResp)(nil),     // 104: UserOnlineStatusResp
+	(*UserOnlineItem)(nil),           // 105: UserOnlineItem
+	(*BanUsersReq)(nil),              // 106: BanUsersReq
+	(*BanUser)(nil),                  // 107: BanUser
+	(*QryBanUsersReq)(nil),           // 108: QryBanUsersReq
+	(*QryBanUsersResp)(nil),          // 109: QryBanUsersResp
+	(*BlockUsersReq)(nil),            // 110: BlockUsersReq
+	(*QryBlockUsersReq)(nil),         // 111: QryBlockUsersReq
+	(*BlockUser)(nil),                // 112: BlockUser
+	(*QryBlockUsersResp)(nil),        // 113: QryBlockUsersResp
+	(*CheckBlockUserResp)(nil),       // 114: CheckBlockUserResp
+	(*OnlineStatus)(nil),             // 115: OnlineStatus
+	(*KickUserReq)(nil),              // 116: KickUserReq
+	(*UserUndisturb)(nil),            // 117: UserUndisturb
+	(*UserUndisturbItem)(nil),        // 118: UserUndisturbItem
+	(*UserPushStatus)(nil),           // 119: UserPushStatus
+	(*BatchMuteUsersReq)(nil),        // 120: BatchMuteUsersReq
+	(*FriendIdsReq)(nil),             // 121: FriendIdsReq
+	(*FriendMembersReq)(nil),         // 122: FriendMembersReq
+	(*QryFriendsReq)(nil),            // 123: QryFriendsReq
+	(*QryFriendsWithPageReq)(nil),    // 124: QryFriendsWithPageReq
+	(*QryFriendsResp)(nil),           // 125: QryFriendsResp
+	(*FriendMember)(nil),             // 126: FriendMember
+	(*CheckFriendsReq)(nil),          // 127: CheckFriendsReq
+	(*CheckFriendsResp)(nil),         // 128: CheckFriendsResp
+	(*GroupInfo)(nil),                // 129: GroupInfo
+	(*GrpMemberInfo)(nil),            // 130: GrpMemberInfo
+	(*GroupMembersReq)(nil),          // 131: GroupMembersReq
+	(*GroupMuteReq)(nil),             // 132: GroupMuteReq
+	(*GroupInfoReq)(nil),             // 133: GroupInfoReq
+	(*GroupIdsReq)(nil),              // 134: GroupIdsReq
+	(*GroupInfosResp)(nil),           // 135: GroupInfosResp
+	(*GroupMemberMuteReq)(nil),       // 136: GroupMemberMuteReq
+	(*GroupMemberAllowReq)(nil),      // 137: GroupMemberAllowReq
+	(*GroupMembersResp)(nil),         // 138: GroupMembersResp
+	(*GroupMember)(nil),              // 139: GroupMember
+	(*QryGroupMembersReq)(nil),       // 140: QryGroupMembersReq
+	(*CheckGroupMembersReq)(nil),     // 141: CheckGroupMembersReq
+	(*CheckGroupMembersResp)(nil),    // 142: CheckGroupMembersResp
+	(*QryGrpSnapshotReq)(nil),        // 143: QryGrpSnapshotReq
+	(*GroupSnapshot)(nil),            // 144: GroupSnapshot
+	(*QryGrpMemberSettingsReq)(nil),  // 145: QryGrpMemberSettingsReq
+	(*QryGrpMemberSettingsResp)(nil), // 146: QryGrpMemberSettingsResp
+	(*QryFileCredReq)(nil),           // 147: QryFileCredReq
+	(*QryFileCredResp)(nil),          // 148: QryFileCredResp
+	(*QiNiuCredResp)(nil),            // 149: QiNiuCredResp
+	(*PreSignResp)(nil),              // 150: PreSignResp
+	(*UploadLogStatusReq)(nil),       // 151: UploadLogStatusReq
+	(*SubMsgs)(nil),                  // 152: SubMsgs
+	(*SubMsg)(nil),                   // 153: SubMsg
+	(*OnlineOfflineMsg)(nil),         // 154: OnlineOfflineMsg
+	(*TransReq)(nil),                 // 155: TransReq
+	(*TransItem)(nil),                // 156: TransItem
+	nil,                              // 157: RpcMessageWraper.ExtParamsEntry
+	nil,                              // 158: DownMsg.TransMsgMapEntry
+	nil,                              // 159: ConverExts.ConverTagsEntry
+	nil,                              // 160: UserInfosResp.UserInfoMapEntry
+	nil,                              // 161: CheckFriendsResp.CheckResultsEntry
+	nil,                              // 162: GroupInfosResp.GroupInfoMapEntry
+	nil,                              // 163: CheckGroupMembersResp.MemberIdMapEntry
+	nil,                              // 164: QryGrpMemberSettingsResp.GroupSettingsEntry
+	nil,                              // 165: QryGrpMemberSettingsResp.MemberSettingsEntry
+	nil,                              // 166: QryGrpMemberSettingsResp.MemberExtsEntry
 }
 var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	0,   // 0: RpcMessageWraper.rpcMsgType:type_name -> RpcMsgType
-	156, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
+	157, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
 	19,  // 2: RpcMessageWraper.modifiedMsg:type_name -> DownMsg
-	96,  // 3: RpcMessageWraper.senderInfo:type_name -> UserInfo
+	97,  // 3: RpcMessageWraper.senderInfo:type_name -> UserInfo
 	18,  // 4: UpMsg.pushData:type_name -> PushData
 	17,  // 5: UpMsg.mentionInfo:type_name -> MentionInfo
 	19,  // 6: UpMsg.referMsg:type_name -> DownMsg
 	16,  // 7: UpMsg.mergedMsgs:type_name -> MergedMsgs
 	4,   // 8: MergedMsgs.channelType:type_name -> ChannelType
-	44,  // 9: MergedMsgs.msgs:type_name -> SimpleMsg
+	45,  // 9: MergedMsgs.msgs:type_name -> SimpleMsg
 	1,   // 10: MentionInfo.mentionType:type_name -> MentionType
-	96,  // 11: MentionInfo.targetUsers:type_name -> UserInfo
+	97,  // 11: MentionInfo.targetUsers:type_name -> UserInfo
 	2,   // 12: PushData.pushLevel:type_name -> PushLevel
 	4,   // 13: PushData.channelType:type_name -> ChannelType
 	1,   // 14: PushData.mentionType:type_name -> MentionType
@@ -11439,15 +11506,15 @@ var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	18,  // 16: DownMsg.pushData:type_name -> PushData
 	17,  // 17: DownMsg.mentionInfo:type_name -> MentionInfo
 	19,  // 18: DownMsg.referMsg:type_name -> DownMsg
-	96,  // 19: DownMsg.targetUserInfo:type_name -> UserInfo
-	128, // 20: DownMsg.groupInfo:type_name -> GroupInfo
+	97,  // 19: DownMsg.targetUserInfo:type_name -> UserInfo
+	129, // 20: DownMsg.groupInfo:type_name -> GroupInfo
 	16,  // 21: DownMsg.mergedMsgs:type_name -> MergedMsgs
 	23,  // 22: DownMsg.streamMsgParts:type_name -> StreamMsgItem
-	50,  // 23: DownMsg.msgExSet:type_name -> MsgExtItem
-	50,  // 24: DownMsg.msgExts:type_name -> MsgExtItem
-	94,  // 25: DownMsg.converTags:type_name -> ConverTag
-	157, // 26: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
-	129, // 27: DownMsg.grpMemberInfo:type_name -> GrpMemberInfo
+	51,  // 23: DownMsg.msgExSet:type_name -> MsgExtItem
+	51,  // 24: DownMsg.msgExts:type_name -> MsgExtItem
+	95,  // 25: DownMsg.converTags:type_name -> ConverTag
+	158, // 26: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
+	130, // 27: DownMsg.grpMemberInfo:type_name -> GrpMemberInfo
 	15,  // 28: PriMsgPostReq.upMsg:type_name -> UpMsg
 	19,  // 29: PriMsgPostReq.modifiedMsg:type_name -> DownMsg
 	18,  // 30: TransMsgContent.pushData:type_name -> PushData
@@ -11456,129 +11523,130 @@ var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	23,  // 33: StreamDownMsg.msgItems:type_name -> StreamMsgItem
 	5,   // 34: Notify.type:type_name -> NotifyType
 	19,  // 35: DownMsgSet.msgs:type_name -> DownMsg
-	96,  // 36: DownMsgSet.targetUserInfo:type_name -> UserInfo
-	128, // 37: DownMsgSet.groupInfo:type_name -> GroupInfo
+	97,  // 36: DownMsgSet.targetUserInfo:type_name -> UserInfo
+	129, // 37: DownMsgSet.groupInfo:type_name -> GroupInfo
 	31,  // 38: AddGrpAssistantReq.targets:type_name -> SimpleConversation
 	4,   // 39: SimpleConversation.channelType:type_name -> ChannelType
-	31,  // 40: AssistantMsgResp.convers:type_name -> SimpleConversation
-	4,   // 41: AddHisMsgReq.channelType:type_name -> ChannelType
-	19,  // 42: AddHisMsgReq.msg:type_name -> DownMsg
-	4,   // 43: DelHisMsgsReq.channelType:type_name -> ChannelType
-	44,  // 44: DelHisMsgsReq.msgs:type_name -> SimpleMsg
-	4,   // 45: QryLatestMsgReq.channelType:type_name -> ChannelType
-	4,   // 46: QryLatestMsgResp.ChannelType:type_name -> ChannelType
-	4,   // 47: QryHisMsgsReq.channelType:type_name -> ChannelType
-	4,   // 48: QryFirstUnreadMsgReq.channelType:type_name -> ChannelType
-	4,   // 49: QryHisMsgByIdsReq.channelType:type_name -> ChannelType
-	4,   // 50: RecallMsgReq.channelType:type_name -> ChannelType
-	28,  // 51: RecallMsgReq.exts:type_name -> KvItem
-	4,   // 52: MarkReadReq.channelType:type_name -> ChannelType
-	44,  // 53: MarkReadReq.msgs:type_name -> SimpleMsg
-	45,  // 54: MarkReadReq.indexScopes:type_name -> IndexScope
-	4,   // 55: MarkGrpMsgReadReq.channelType:type_name -> ChannelType
-	4,   // 56: CleanHisMsgReq.channelType:type_name -> ChannelType
-	4,   // 57: ModifyMsgReq.channelType:type_name -> ChannelType
-	16,  // 58: MergeMsgReq.mergedMsgs:type_name -> MergedMsgs
-	4,   // 59: MsgExt.channelType:type_name -> ChannelType
-	50,  // 60: MsgExt.ext:type_name -> MsgExtItem
-	96,  // 61: MsgExtItem.userInfo:type_name -> UserInfo
-	4,   // 62: QryMsgExtReq.channelType:type_name -> ChannelType
-	53,  // 63: MsgExtItemsList.items:type_name -> MsgExtItems
-	50,  // 64: MsgExtItems.exts:type_name -> MsgExtItem
-	55,  // 65: FavoriteMsgIds.items:type_name -> FavoriteMsgIdItem
-	4,   // 66: FavoriteMsgIdItem.ChannelType:type_name -> ChannelType
-	19,  // 67: FavoriteMsg.msg:type_name -> DownMsg
-	57,  // 68: FavoriteMsgs.items:type_name -> FavoriteMsg
-	4,   // 69: TopMsgReq.channelType:type_name -> ChannelType
-	4,   // 70: GetTopMsgReq.channelType:type_name -> ChannelType
-	19,  // 71: TopMsg.msg:type_name -> DownMsg
-	96,  // 72: TopMsg.operator:type_name -> UserInfo
-	4,   // 73: QryGlobalConversReq.channelType:type_name -> ChannelType
-	64,  // 74: QryGlobalConversResp.convers:type_name -> GlobalConver
-	4,   // 75: GlobalConver.channelType:type_name -> ChannelType
-	4,   // 76: QryConversationsReq.channelType:type_name -> ChannelType
-	67,  // 77: QryConversationsResp.conversations:type_name -> Conversation
-	4,   // 78: Conversation.channelType:type_name -> ChannelType
-	19,  // 79: Conversation.msg:type_name -> DownMsg
-	71,  // 80: Conversation.mentions:type_name -> Mentions
-	96,  // 81: Conversation.targetUserInfo:type_name -> UserInfo
-	128, // 82: Conversation.groupInfo:type_name -> GroupInfo
-	94,  // 83: Conversation.converTags:type_name -> ConverTag
-	67,  // 84: BatchAddConvers.convers:type_name -> Conversation
-	4,   // 85: UpdLatestMsgReq.channelType:type_name -> ChannelType
-	6,   // 86: UpdLatestMsgReq.action:type_name -> UpdLatestMsgAction
-	19,  // 87: UpdLatestMsgReq.msg:type_name -> DownMsg
-	96,  // 88: Mentions.senders:type_name -> UserInfo
-	72,  // 89: Mentions.mentionMsgs:type_name -> MentionMsg
-	1,   // 90: MentionMsg.mentionType:type_name -> MentionType
-	4,   // 91: QryMentionMsgsReq.channelType:type_name -> ChannelType
-	19,  // 92: QryMentionMsgsResp.mentionMsgs:type_name -> DownMsg
-	77,  // 93: QryTotalUnreadCountReq.filter:type_name -> ConverFilter
-	4,   // 94: ConverFilter.channelTypes:type_name -> ChannelType
-	31,  // 95: ConverFilter.excludeConvers:type_name -> SimpleConversation
-	31,  // 96: ConverFilter.includeConvers:type_name -> SimpleConversation
-	67,  // 97: ConversationsReq.conversations:type_name -> Conversation
-	67,  // 98: ClearUnreadReq.conversations:type_name -> Conversation
-	82,  // 99: UndisturbConversReq.items:type_name -> UndisturbConverItem
-	4,   // 100: UndisturbConverItem.channelType:type_name -> ChannelType
-	7,   // 101: QryTopConversReq.sortType:type_name -> TopConverSortType
-	4,   // 102: QryReadInfosReq.channelType:type_name -> ChannelType
-	87,  // 103: QryReadInfosResp.items:type_name -> ReadInfoItem
-	4,   // 104: QryReadDetailReq.channelType:type_name -> ChannelType
-	90,  // 105: QryReadDetailResp.readMembers:type_name -> MemberReadDetailItem
-	90,  // 106: QryReadDetailResp.unreadMembers:type_name -> MemberReadDetailItem
-	96,  // 107: MemberReadDetailItem.member:type_name -> UserInfo
-	4,   // 108: QryConverReq.channelType:type_name -> ChannelType
-	31,  // 109: TagConvers.convers:type_name -> SimpleConversation
-	94,  // 110: UserConverTags.tags:type_name -> ConverTag
-	8,   // 111: ConverTag.tagType:type_name -> ConverTagType
-	158, // 112: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
-	28,  // 113: UserInfo.extFields:type_name -> KvItem
-	28,  // 114: UserInfo.settings:type_name -> KvItem
-	28,  // 115: UserInfo.statuses:type_name -> KvItem
-	9,   // 116: UserInfo.userType:type_name -> UserType
-	96,  // 117: UserInfos.userInfos:type_name -> UserInfo
-	159, // 118: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
-	28,  // 119: UserRegResp.extFields:type_name -> KvItem
-	104, // 120: UserOnlineStatusResp.items:type_name -> UserOnlineItem
-	106, // 121: BanUsersReq.banUsers:type_name -> BanUser
-	106, // 122: QryBanUsersResp.items:type_name -> BanUser
-	111, // 123: QryBlockUsersResp.items:type_name -> BlockUser
-	10,  // 124: OnlineStatus.type:type_name -> OnlineType
-	117, // 125: UserUndisturb.rules:type_name -> UserUndisturbItem
-	125, // 126: FriendMembersReq.friendMembers:type_name -> FriendMember
-	125, // 127: QryFriendsResp.items:type_name -> FriendMember
-	160, // 128: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
-	28,  // 129: GroupInfo.extFields:type_name -> KvItem
-	28,  // 130: GroupInfo.settings:type_name -> KvItem
-	28,  // 131: GrpMemberInfo.extFields:type_name -> KvItem
-	28,  // 132: GroupMembersReq.extFields:type_name -> KvItem
-	28,  // 133: GroupMembersReq.settings:type_name -> KvItem
-	161, // 134: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
-	138, // 135: GroupMembersResp.items:type_name -> GroupMember
-	28,  // 136: GroupMember.extFields:type_name -> KvItem
-	28,  // 137: GroupMember.settings:type_name -> KvItem
-	9,   // 138: GroupMember.memberType:type_name -> UserType
-	162, // 139: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
-	163, // 140: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
-	164, // 141: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
-	165, // 142: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
-	11,  // 143: QryFileCredReq.file_type:type_name -> FileType
-	12,  // 144: QryFileCredResp.oss_type:type_name -> OssType
-	148, // 145: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
-	149, // 146: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
-	152, // 147: SubMsgs.subMsgs:type_name -> SubMsg
-	19,  // 148: SubMsg.msg:type_name -> DownMsg
-	10,  // 149: OnlineOfflineMsg.type:type_name -> OnlineType
-	155, // 150: TransReq.items:type_name -> TransItem
-	21,  // 151: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
-	96,  // 152: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
-	128, // 153: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
-	154, // [154:154] is the sub-list for method output_type
-	154, // [154:154] is the sub-list for method input_type
-	154, // [154:154] is the sub-list for extension type_name
-	154, // [154:154] is the sub-list for extension extendee
-	0,   // [0:154] is the sub-list for field type_name
+	4,   // 40: ConverIndex.channelType:type_name -> ChannelType
+	31,  // 41: AssistantMsgResp.convers:type_name -> SimpleConversation
+	4,   // 42: AddHisMsgReq.channelType:type_name -> ChannelType
+	19,  // 43: AddHisMsgReq.msg:type_name -> DownMsg
+	4,   // 44: DelHisMsgsReq.channelType:type_name -> ChannelType
+	45,  // 45: DelHisMsgsReq.msgs:type_name -> SimpleMsg
+	4,   // 46: QryLatestMsgReq.channelType:type_name -> ChannelType
+	4,   // 47: QryLatestMsgResp.ChannelType:type_name -> ChannelType
+	4,   // 48: QryHisMsgsReq.channelType:type_name -> ChannelType
+	4,   // 49: QryFirstUnreadMsgReq.channelType:type_name -> ChannelType
+	4,   // 50: QryHisMsgByIdsReq.channelType:type_name -> ChannelType
+	4,   // 51: RecallMsgReq.channelType:type_name -> ChannelType
+	28,  // 52: RecallMsgReq.exts:type_name -> KvItem
+	4,   // 53: MarkReadReq.channelType:type_name -> ChannelType
+	45,  // 54: MarkReadReq.msgs:type_name -> SimpleMsg
+	46,  // 55: MarkReadReq.indexScopes:type_name -> IndexScope
+	4,   // 56: MarkGrpMsgReadReq.channelType:type_name -> ChannelType
+	4,   // 57: CleanHisMsgReq.channelType:type_name -> ChannelType
+	4,   // 58: ModifyMsgReq.channelType:type_name -> ChannelType
+	16,  // 59: MergeMsgReq.mergedMsgs:type_name -> MergedMsgs
+	4,   // 60: MsgExt.channelType:type_name -> ChannelType
+	51,  // 61: MsgExt.ext:type_name -> MsgExtItem
+	97,  // 62: MsgExtItem.userInfo:type_name -> UserInfo
+	4,   // 63: QryMsgExtReq.channelType:type_name -> ChannelType
+	54,  // 64: MsgExtItemsList.items:type_name -> MsgExtItems
+	51,  // 65: MsgExtItems.exts:type_name -> MsgExtItem
+	56,  // 66: FavoriteMsgIds.items:type_name -> FavoriteMsgIdItem
+	4,   // 67: FavoriteMsgIdItem.ChannelType:type_name -> ChannelType
+	19,  // 68: FavoriteMsg.msg:type_name -> DownMsg
+	58,  // 69: FavoriteMsgs.items:type_name -> FavoriteMsg
+	4,   // 70: TopMsgReq.channelType:type_name -> ChannelType
+	4,   // 71: GetTopMsgReq.channelType:type_name -> ChannelType
+	19,  // 72: TopMsg.msg:type_name -> DownMsg
+	97,  // 73: TopMsg.operator:type_name -> UserInfo
+	4,   // 74: QryGlobalConversReq.channelType:type_name -> ChannelType
+	65,  // 75: QryGlobalConversResp.convers:type_name -> GlobalConver
+	4,   // 76: GlobalConver.channelType:type_name -> ChannelType
+	4,   // 77: QryConversationsReq.channelType:type_name -> ChannelType
+	68,  // 78: QryConversationsResp.conversations:type_name -> Conversation
+	4,   // 79: Conversation.channelType:type_name -> ChannelType
+	19,  // 80: Conversation.msg:type_name -> DownMsg
+	72,  // 81: Conversation.mentions:type_name -> Mentions
+	97,  // 82: Conversation.targetUserInfo:type_name -> UserInfo
+	129, // 83: Conversation.groupInfo:type_name -> GroupInfo
+	95,  // 84: Conversation.converTags:type_name -> ConverTag
+	68,  // 85: BatchAddConvers.convers:type_name -> Conversation
+	4,   // 86: UpdLatestMsgReq.channelType:type_name -> ChannelType
+	6,   // 87: UpdLatestMsgReq.action:type_name -> UpdLatestMsgAction
+	19,  // 88: UpdLatestMsgReq.msg:type_name -> DownMsg
+	97,  // 89: Mentions.senders:type_name -> UserInfo
+	73,  // 90: Mentions.mentionMsgs:type_name -> MentionMsg
+	1,   // 91: MentionMsg.mentionType:type_name -> MentionType
+	4,   // 92: QryMentionMsgsReq.channelType:type_name -> ChannelType
+	19,  // 93: QryMentionMsgsResp.mentionMsgs:type_name -> DownMsg
+	78,  // 94: QryTotalUnreadCountReq.filter:type_name -> ConverFilter
+	4,   // 95: ConverFilter.channelTypes:type_name -> ChannelType
+	31,  // 96: ConverFilter.excludeConvers:type_name -> SimpleConversation
+	31,  // 97: ConverFilter.includeConvers:type_name -> SimpleConversation
+	68,  // 98: ConversationsReq.conversations:type_name -> Conversation
+	68,  // 99: ClearUnreadReq.conversations:type_name -> Conversation
+	83,  // 100: UndisturbConversReq.items:type_name -> UndisturbConverItem
+	4,   // 101: UndisturbConverItem.channelType:type_name -> ChannelType
+	7,   // 102: QryTopConversReq.sortType:type_name -> TopConverSortType
+	4,   // 103: QryReadInfosReq.channelType:type_name -> ChannelType
+	88,  // 104: QryReadInfosResp.items:type_name -> ReadInfoItem
+	4,   // 105: QryReadDetailReq.channelType:type_name -> ChannelType
+	91,  // 106: QryReadDetailResp.readMembers:type_name -> MemberReadDetailItem
+	91,  // 107: QryReadDetailResp.unreadMembers:type_name -> MemberReadDetailItem
+	97,  // 108: MemberReadDetailItem.member:type_name -> UserInfo
+	4,   // 109: QryConverReq.channelType:type_name -> ChannelType
+	31,  // 110: TagConvers.convers:type_name -> SimpleConversation
+	95,  // 111: UserConverTags.tags:type_name -> ConverTag
+	8,   // 112: ConverTag.tagType:type_name -> ConverTagType
+	159, // 113: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
+	28,  // 114: UserInfo.extFields:type_name -> KvItem
+	28,  // 115: UserInfo.settings:type_name -> KvItem
+	28,  // 116: UserInfo.statuses:type_name -> KvItem
+	9,   // 117: UserInfo.userType:type_name -> UserType
+	97,  // 118: UserInfos.userInfos:type_name -> UserInfo
+	160, // 119: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
+	28,  // 120: UserRegResp.extFields:type_name -> KvItem
+	105, // 121: UserOnlineStatusResp.items:type_name -> UserOnlineItem
+	107, // 122: BanUsersReq.banUsers:type_name -> BanUser
+	107, // 123: QryBanUsersResp.items:type_name -> BanUser
+	112, // 124: QryBlockUsersResp.items:type_name -> BlockUser
+	10,  // 125: OnlineStatus.type:type_name -> OnlineType
+	118, // 126: UserUndisturb.rules:type_name -> UserUndisturbItem
+	126, // 127: FriendMembersReq.friendMembers:type_name -> FriendMember
+	126, // 128: QryFriendsResp.items:type_name -> FriendMember
+	161, // 129: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
+	28,  // 130: GroupInfo.extFields:type_name -> KvItem
+	28,  // 131: GroupInfo.settings:type_name -> KvItem
+	28,  // 132: GrpMemberInfo.extFields:type_name -> KvItem
+	28,  // 133: GroupMembersReq.extFields:type_name -> KvItem
+	28,  // 134: GroupMembersReq.settings:type_name -> KvItem
+	162, // 135: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
+	139, // 136: GroupMembersResp.items:type_name -> GroupMember
+	28,  // 137: GroupMember.extFields:type_name -> KvItem
+	28,  // 138: GroupMember.settings:type_name -> KvItem
+	9,   // 139: GroupMember.memberType:type_name -> UserType
+	163, // 140: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
+	164, // 141: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
+	165, // 142: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
+	166, // 143: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
+	11,  // 144: QryFileCredReq.file_type:type_name -> FileType
+	12,  // 145: QryFileCredResp.oss_type:type_name -> OssType
+	149, // 146: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
+	150, // 147: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
+	153, // 148: SubMsgs.subMsgs:type_name -> SubMsg
+	19,  // 149: SubMsg.msg:type_name -> DownMsg
+	10,  // 150: OnlineOfflineMsg.type:type_name -> OnlineType
+	156, // 151: TransReq.items:type_name -> TransItem
+	21,  // 152: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
+	97,  // 153: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
+	129, // 154: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
+	155, // [155:155] is the sub-list for method output_type
+	155, // [155:155] is the sub-list for method input_type
+	155, // [155:155] is the sub-list for extension type_name
+	155, // [155:155] is the sub-list for extension extendee
+	0,   // [0:155] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_appmessages_proto_init() }
@@ -11586,7 +11654,7 @@ func file_commons_pbdefines_appmessages_proto_init() {
 	if File_commons_pbdefines_appmessages_proto != nil {
 		return
 	}
-	file_commons_pbdefines_appmessages_proto_msgTypes[134].OneofWrappers = []any{
+	file_commons_pbdefines_appmessages_proto_msgTypes[135].OneofWrappers = []any{
 		(*QryFileCredResp_QiniuCred)(nil),
 		(*QryFileCredResp_PreSignResp)(nil),
 	}
@@ -11596,7 +11664,7 @@ func file_commons_pbdefines_appmessages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_commons_pbdefines_appmessages_proto_rawDesc), len(file_commons_pbdefines_appmessages_proto_rawDesc)),
 			NumEnums:      13,
-			NumMessages:   153,
+			NumMessages:   154,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

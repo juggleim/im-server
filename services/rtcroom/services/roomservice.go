@@ -56,6 +56,9 @@ type RtcRoomContainer struct {
 	AcceptedTime int64
 	Status       RtcRoomStatus // 0:normal; 1: destroy; 2: not exist;
 	Ext          string
+	ConverId     *string
+	ChannelType  pbobjs.ChannelType
+	SubChannel   string
 
 	Members map[string]*models.RtcRoomMember
 }
@@ -302,6 +305,9 @@ func createRtcRoomContainer2Cache(ctx context.Context, appkey string, room *mode
 		CreatedTime:  time.Now().UnixMilli(),
 		Owner:        commonservices.GetTargetDisplayUserInfo(ctx, room.OwnerId),
 		Ext:          room.Ext,
+		ConverId:     room.ConverId,
+		ChannelType:  room.ChannelType,
+		SubChannel:   room.SubChannel,
 		Status:       RtcRoomStatus_Normal,
 		Members:      make(map[string]*models.RtcRoomMember),
 	}
@@ -471,7 +477,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 		RoomId:         roomId,
 		MemberId:       userId,
 		DeviceId:       deviceId,
-		RtcState:       req.JoinMember.RtcState,
+		RtcState:       pbobjs.RtcState_RtcConnecting,
 		AppKey:         appkey,
 		LatestPingTime: time.Now().UnixMilli(),
 	}
@@ -486,7 +492,34 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 	if err != nil {
 		logs.WithContext(ctx).Errorf("failed to join rtc room. err:%v", err)
 	}
-	return errs.IMErrorCode_SUCCESS, generatePbRtcRoom(ctx, container)
+	room := generatePbRtcRoom(ctx, container)
+	code, auth := GenerateAuth(appkey, userId, roomId, container.RtcChannel)
+	if code != errs.IMErrorCode_SUCCESS {
+		return code, nil
+	}
+	room.Auth = auth
+	curr := time.Now().UnixMilli()
+	container.ForeachMembers(func(member *models.RtcRoomMember) {
+		SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
+			RoomEventType: pbobjs.RtcRoomEventType_RtcJoin,
+			Members: []*pbobjs.RtcMember{
+				{
+					Member: &pbobjs.UserInfo{
+						UserId: userId,
+					},
+				},
+			},
+			Room: &pbobjs.RtcRoom{
+				RoomType: container.RoomType,
+				RoomId:   container.RoomId,
+			},
+			EventTime: curr,
+		})
+	})
+	if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
+		syncMsg2Conver(ctx, container)
+	}
+	return errs.IMErrorCode_SUCCESS, room
 }
 
 func QuitRtcRoom(ctx context.Context) errs.IMErrorCode {
