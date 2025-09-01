@@ -361,9 +361,6 @@ func RtcAccept(ctx context.Context) (errs.IMErrorCode, *pbobjs.RtcAuth) {
 			EventTime: acceptedTime,
 		})
 	})
-	if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
-		syncMsg2Conver(ctx, container)
-	}
 	//auth
 	code, auth := GenerateAuth(appkey, userId, roomId, container.RtcChannel)
 	return code, auth
