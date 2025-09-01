@@ -153,6 +153,9 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 			ItemType:  int(commonservices.AttItemType_Setting),
 		})
 	}
+	if len(members) <= 0 {
+		return errs.IMErrorCode_SUCCESS
+	}
 	err := memberDao.BatchCreate(members)
 	if err == nil {
 		existMemberIds := []string{}
