@@ -507,9 +507,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 			RoomEventType: pbobjs.RtcRoomEventType_RtcJoin,
 			Members: []*pbobjs.RtcMember{
 				{
-					Member: &pbobjs.UserInfo{
-						UserId: userId,
-					},
+					Member: commonservices.GetTargetDisplayUserInfo(ctx, userId),
 				},
 			},
 			Room: &pbobjs.RtcRoom{

@@ -432,7 +432,12 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 		rtcroomCache.Remove(getRoomKey(appkey, roomId))
 	} else if container.RoomType == pbobjs.RtcRoomType_OneMore {
 		//quit
-		container.QuitRoom(userId)
+		code, _ := container.QuitRoom(userId)
+		if code == errs.IMErrorCode_SUCCESS {
+			//delete from db
+			storage := storages.NewRtcRoomMemberStorage()
+			storage.Delete(appkey, roomId, userId)
+		}
 		MemberSyncState(ctx, userId, &pbobjs.SyncMemberStateReq{
 			IsDelete: true,
 			Member: &pbobjs.MemberState{
@@ -458,6 +463,14 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 		//send msg
 		if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
 			syncMsg2Conver(ctx, container)
+		}
+		if container.MemberCount() <= 0 {
+			//destroy room
+			roomStorage := storages.NewRtcRoomStorage()
+			roomStorage.Delete(appkey, roomId)
+			storage := storages.NewRtcRoomMemberStorage()
+			storage.DeleteByRoomId(appkey, roomId)
+			rtcroomCache.Remove(getRoomKey(appkey, roomId))
 		}
 	}
 	return errs.IMErrorCode_SUCCESS
