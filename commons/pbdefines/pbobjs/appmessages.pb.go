@@ -572,6 +572,55 @@ func (OnlineType) EnumDescriptor() ([]byte, []int) {
 	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{10}
 }
 
+type RtcConverBindAction int32
+
+const (
+	RtcConverBindAction_RtcBind   RtcConverBindAction = 0
+	RtcConverBindAction_RtcUnBind RtcConverBindAction = 1
+	RtcConverBindAction_RtcPing   RtcConverBindAction = 2
+)
+
+// Enum value maps for RtcConverBindAction.
+var (
+	RtcConverBindAction_name = map[int32]string{
+		0: "RtcBind",
+		1: "RtcUnBind",
+		2: "RtcPing",
+	}
+	RtcConverBindAction_value = map[string]int32{
+		"RtcBind":   0,
+		"RtcUnBind": 1,
+		"RtcPing":   2,
+	}
+)
+
+func (x RtcConverBindAction) Enum() *RtcConverBindAction {
+	p := new(RtcConverBindAction)
+	*p = x
+	return p
+}
+
+func (x RtcConverBindAction) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RtcConverBindAction) Descriptor() protoreflect.EnumDescriptor {
+	return file_commons_pbdefines_appmessages_proto_enumTypes[11].Descriptor()
+}
+
+func (RtcConverBindAction) Type() protoreflect.EnumType {
+	return &file_commons_pbdefines_appmessages_proto_enumTypes[11]
+}
+
+func (x RtcConverBindAction) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RtcConverBindAction.Descriptor instead.
+func (RtcConverBindAction) EnumDescriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{11}
+}
+
 type FileType int32
 
 const (
@@ -614,11 +663,11 @@ func (x FileType) String() string {
 }
 
 func (FileType) Descriptor() protoreflect.EnumDescriptor {
-	return file_commons_pbdefines_appmessages_proto_enumTypes[11].Descriptor()
+	return file_commons_pbdefines_appmessages_proto_enumTypes[12].Descriptor()
 }
 
 func (FileType) Type() protoreflect.EnumType {
-	return &file_commons_pbdefines_appmessages_proto_enumTypes[11]
+	return &file_commons_pbdefines_appmessages_proto_enumTypes[12]
 }
 
 func (x FileType) Number() protoreflect.EnumNumber {
@@ -627,7 +676,7 @@ func (x FileType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FileType.Descriptor instead.
 func (FileType) EnumDescriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{11}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{12}
 }
 
 type OssType int32
@@ -669,11 +718,11 @@ func (x OssType) String() string {
 }
 
 func (OssType) Descriptor() protoreflect.EnumDescriptor {
-	return file_commons_pbdefines_appmessages_proto_enumTypes[12].Descriptor()
+	return file_commons_pbdefines_appmessages_proto_enumTypes[13].Descriptor()
 }
 
 func (OssType) Type() protoreflect.EnumType {
-	return &file_commons_pbdefines_appmessages_proto_enumTypes[12]
+	return &file_commons_pbdefines_appmessages_proto_enumTypes[13]
 }
 
 func (x OssType) Number() protoreflect.EnumNumber {
@@ -682,7 +731,7 @@ func (x OssType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use OssType.Descriptor instead.
 func (OssType) EnumDescriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{12}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{13}
 }
 
 type Nil struct {
@@ -9681,6 +9730,82 @@ func (x *QryGrpMemberSettingsResp) GetMemberExts() map[string]string {
 	return nil
 }
 
+type RtcConverBindReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Action        RtcConverBindAction    `protobuf:"varint,1,opt,name=action,proto3,enum=RtcConverBindAction" json:"action,omitempty"`
+	ConverId      string                 `protobuf:"bytes,2,opt,name=converId,proto3" json:"converId,omitempty"`
+	ChannelType   ChannelType            `protobuf:"varint,3,opt,name=channelType,proto3,enum=ChannelType" json:"channelType,omitempty"`
+	SubChannel    string                 `protobuf:"bytes,4,opt,name=subChannel,proto3" json:"subChannel,omitempty"`
+	RtcRoomId     string                 `protobuf:"bytes,5,opt,name=rtcRoomId,proto3" json:"rtcRoomId,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RtcConverBindReq) Reset() {
+	*x = RtcConverBindReq{}
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RtcConverBindReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RtcConverBindReq) ProtoMessage() {}
+
+func (x *RtcConverBindReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RtcConverBindReq.ProtoReflect.Descriptor instead.
+func (*RtcConverBindReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{134}
+}
+
+func (x *RtcConverBindReq) GetAction() RtcConverBindAction {
+	if x != nil {
+		return x.Action
+	}
+	return RtcConverBindAction_RtcBind
+}
+
+func (x *RtcConverBindReq) GetConverId() string {
+	if x != nil {
+		return x.ConverId
+	}
+	return ""
+}
+
+func (x *RtcConverBindReq) GetChannelType() ChannelType {
+	if x != nil {
+		return x.ChannelType
+	}
+	return ChannelType_Unknown
+}
+
+func (x *RtcConverBindReq) GetSubChannel() string {
+	if x != nil {
+		return x.SubChannel
+	}
+	return ""
+}
+
+func (x *RtcConverBindReq) GetRtcRoomId() string {
+	if x != nil {
+		return x.RtcRoomId
+	}
+	return ""
+}
+
 // file
 type QryFileCredReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -9692,7 +9817,7 @@ type QryFileCredReq struct {
 
 func (x *QryFileCredReq) Reset() {
 	*x = QryFileCredReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9704,7 +9829,7 @@ func (x *QryFileCredReq) String() string {
 func (*QryFileCredReq) ProtoMessage() {}
 
 func (x *QryFileCredReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9717,7 +9842,7 @@ func (x *QryFileCredReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFileCredReq.ProtoReflect.Descriptor instead.
 func (*QryFileCredReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{134}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{135}
 }
 
 func (x *QryFileCredReq) GetFileType() FileType {
@@ -9748,7 +9873,7 @@ type QryFileCredResp struct {
 
 func (x *QryFileCredResp) Reset() {
 	*x = QryFileCredResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9760,7 +9885,7 @@ func (x *QryFileCredResp) String() string {
 func (*QryFileCredResp) ProtoMessage() {}
 
 func (x *QryFileCredResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9773,7 +9898,7 @@ func (x *QryFileCredResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFileCredResp.ProtoReflect.Descriptor instead.
 func (*QryFileCredResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{135}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{136}
 }
 
 func (x *QryFileCredResp) GetOssType() OssType {
@@ -9834,7 +9959,7 @@ type QiNiuCredResp struct {
 
 func (x *QiNiuCredResp) Reset() {
 	*x = QiNiuCredResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9846,7 +9971,7 @@ func (x *QiNiuCredResp) String() string {
 func (*QiNiuCredResp) ProtoMessage() {}
 
 func (x *QiNiuCredResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9859,7 +9984,7 @@ func (x *QiNiuCredResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QiNiuCredResp.ProtoReflect.Descriptor instead.
 func (*QiNiuCredResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{136}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{137}
 }
 
 func (x *QiNiuCredResp) GetDomain() string {
@@ -9891,7 +10016,7 @@ type PreSignResp struct {
 
 func (x *PreSignResp) Reset() {
 	*x = PreSignResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9903,7 +10028,7 @@ func (x *PreSignResp) String() string {
 func (*PreSignResp) ProtoMessage() {}
 
 func (x *PreSignResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9916,7 +10041,7 @@ func (x *PreSignResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PreSignResp.ProtoReflect.Descriptor instead.
 func (*PreSignResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{137}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{138}
 }
 
 func (x *PreSignResp) GetUrl() string {
@@ -9979,7 +10104,7 @@ type UploadLogStatusReq struct {
 
 func (x *UploadLogStatusReq) Reset() {
 	*x = UploadLogStatusReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9991,7 +10116,7 @@ func (x *UploadLogStatusReq) String() string {
 func (*UploadLogStatusReq) ProtoMessage() {}
 
 func (x *UploadLogStatusReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10004,7 +10129,7 @@ func (x *UploadLogStatusReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadLogStatusReq.ProtoReflect.Descriptor instead.
 func (*UploadLogStatusReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{138}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{139}
 }
 
 func (x *UploadLogStatusReq) GetMsgId() string {
@@ -10038,7 +10163,7 @@ type SubMsgs struct {
 
 func (x *SubMsgs) Reset() {
 	*x = SubMsgs{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10050,7 +10175,7 @@ func (x *SubMsgs) String() string {
 func (*SubMsgs) ProtoMessage() {}
 
 func (x *SubMsgs) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10063,7 +10188,7 @@ func (x *SubMsgs) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubMsgs.ProtoReflect.Descriptor instead.
 func (*SubMsgs) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{139}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{140}
 }
 
 func (x *SubMsgs) GetSubMsgs() []*SubMsg {
@@ -10083,7 +10208,7 @@ type SubMsg struct {
 
 func (x *SubMsg) Reset() {
 	*x = SubMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10095,7 +10220,7 @@ func (x *SubMsg) String() string {
 func (*SubMsg) ProtoMessage() {}
 
 func (x *SubMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10108,7 +10233,7 @@ func (x *SubMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubMsg.ProtoReflect.Descriptor instead.
 func (*SubMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{140}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{141}
 }
 
 func (x *SubMsg) GetMsg() *DownMsg {
@@ -10142,7 +10267,7 @@ type OnlineOfflineMsg struct {
 
 func (x *OnlineOfflineMsg) Reset() {
 	*x = OnlineOfflineMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10154,7 +10279,7 @@ func (x *OnlineOfflineMsg) String() string {
 func (*OnlineOfflineMsg) ProtoMessage() {}
 
 func (x *OnlineOfflineMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10167,7 +10292,7 @@ func (x *OnlineOfflineMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OnlineOfflineMsg.ProtoReflect.Descriptor instead.
 func (*OnlineOfflineMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{141}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{142}
 }
 
 func (x *OnlineOfflineMsg) GetType() OnlineType {
@@ -10244,7 +10369,7 @@ type TransReq struct {
 
 func (x *TransReq) Reset() {
 	*x = TransReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10256,7 +10381,7 @@ func (x *TransReq) String() string {
 func (*TransReq) ProtoMessage() {}
 
 func (x *TransReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10269,7 +10394,7 @@ func (x *TransReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransReq.ProtoReflect.Descriptor instead.
 func (*TransReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{142}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{143}
 }
 
 func (x *TransReq) GetItems() []*TransItem {
@@ -10303,7 +10428,7 @@ type TransItem struct {
 
 func (x *TransItem) Reset() {
 	*x = TransItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[144]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10315,7 +10440,7 @@ func (x *TransItem) String() string {
 func (*TransItem) ProtoMessage() {}
 
 func (x *TransItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[144]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10328,7 +10453,7 @@ func (x *TransItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransItem.ProtoReflect.Descriptor instead.
 func (*TransItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{143}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{144}
 }
 
 func (x *TransItem) GetKey() string {
@@ -11178,7 +11303,15 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a=\n" +
 	"\x0fMemberExtsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"J\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xca\x01\n" +
+	"\x10RtcConverBindReq\x12,\n" +
+	"\x06action\x18\x01 \x01(\x0e2\x14.RtcConverBindActionR\x06action\x12\x1a\n" +
+	"\bconverId\x18\x02 \x01(\tR\bconverId\x12.\n" +
+	"\vchannelType\x18\x03 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12\x1e\n" +
+	"\n" +
+	"subChannel\x18\x04 \x01(\tR\n" +
+	"subChannel\x12\x1c\n" +
+	"\trtcRoomId\x18\x05 \x01(\tR\trtcRoomId\"J\n" +
 	"\x0eQryFileCredReq\x12&\n" +
 	"\tfile_type\x18\x01 \x01(\x0e2\t.FileTypeR\bfileType\x12\x10\n" +
 	"\x03ext\x18\x02 \x01(\tR\x03ext\"\xa4\x01\n" +
@@ -11287,7 +11420,11 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"OnlineType\x12\v\n" +
 	"\aOffline\x10\x00\x12\n" +
 	"\n" +
-	"\x06Online\x10\x01*S\n" +
+	"\x06Online\x10\x01*>\n" +
+	"\x13RtcConverBindAction\x12\v\n" +
+	"\aRtcBind\x10\x00\x12\r\n" +
+	"\tRtcUnBind\x10\x01\x12\v\n" +
+	"\aRtcPing\x10\x02*S\n" +
 	"\bFileType\x12\x13\n" +
 	"\x0fDefaultFileType\x10\x00\x12\t\n" +
 	"\x05Image\x10\x01\x12\t\n" +
@@ -11315,8 +11452,8 @@ func file_commons_pbdefines_appmessages_proto_rawDescGZIP() []byte {
 	return file_commons_pbdefines_appmessages_proto_rawDescData
 }
 
-var file_commons_pbdefines_appmessages_proto_enumTypes = make([]protoimpl.EnumInfo, 13)
-var file_commons_pbdefines_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 154)
+var file_commons_pbdefines_appmessages_proto_enumTypes = make([]protoimpl.EnumInfo, 14)
+var file_commons_pbdefines_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 155)
 var file_commons_pbdefines_appmessages_proto_goTypes = []any{
 	(RpcMsgType)(0),                  // 0: RpcMsgType
 	(MentionType)(0),                 // 1: MentionType
@@ -11329,324 +11466,328 @@ var file_commons_pbdefines_appmessages_proto_goTypes = []any{
 	(ConverTagType)(0),               // 8: ConverTagType
 	(UserType)(0),                    // 9: UserType
 	(OnlineType)(0),                  // 10: OnlineType
-	(FileType)(0),                    // 11: FileType
-	(OssType)(0),                     // 12: OssType
-	(*Nil)(nil),                      // 13: Nil
-	(*RpcMessageWraper)(nil),         // 14: RpcMessageWraper
-	(*UpMsg)(nil),                    // 15: UpMsg
-	(*MergedMsgs)(nil),               // 16: MergedMsgs
-	(*MentionInfo)(nil),              // 17: MentionInfo
-	(*PushData)(nil),                 // 18: PushData
-	(*DownMsg)(nil),                  // 19: DownMsg
-	(*PriMsgPostReq)(nil),            // 20: PriMsgPostReq
-	(*TransMsgContent)(nil),          // 21: TransMsgContent
-	(*MsgAck)(nil),                   // 22: MsgAck
-	(*StreamMsgItem)(nil),            // 23: StreamMsgItem
-	(*StreamDownMsg)(nil),            // 24: StreamDownMsg
-	(*Notify)(nil),                   // 25: Notify
-	(*SyncMsgReq)(nil),               // 26: SyncMsgReq
-	(*DownMsgSet)(nil),               // 27: DownMsgSet
-	(*KvItem)(nil),                   // 28: KvItem
-	(*PushSwitch)(nil),               // 29: PushSwitch
-	(*AddGrpAssistantReq)(nil),       // 30: AddGrpAssistantReq
-	(*SimpleConversation)(nil),       // 31: SimpleConversation
-	(*ConverIndex)(nil),              // 32: ConverIndex
-	(*AssistantMsgResp)(nil),         // 33: AssistantMsgResp
-	(*AddHisMsgReq)(nil),             // 34: AddHisMsgReq
-	(*DelHisMsgsReq)(nil),            // 35: DelHisMsgsReq
-	(*QryLatestMsgReq)(nil),          // 36: QryLatestMsgReq
-	(*QryLatestMsgResp)(nil),         // 37: QryLatestMsgResp
-	(*QryHisMsgsReq)(nil),            // 38: QryHisMsgsReq
-	(*QryFirstUnreadMsgReq)(nil),     // 39: QryFirstUnreadMsgReq
-	(*QryHisMsgByIdsReq)(nil),        // 40: QryHisMsgByIdsReq
-	(*RecallMsgReq)(nil),             // 41: RecallMsgReq
-	(*MarkReadReq)(nil),              // 42: MarkReadReq
-	(*MarkGrpMsgReadReq)(nil),        // 43: MarkGrpMsgReadReq
-	(*CleanHisMsgReq)(nil),           // 44: CleanHisMsgReq
-	(*SimpleMsg)(nil),                // 45: SimpleMsg
-	(*IndexScope)(nil),               // 46: IndexScope
-	(*ModifyMsgReq)(nil),             // 47: ModifyMsgReq
-	(*MergeMsgReq)(nil),              // 48: MergeMsgReq
-	(*QryMergedMsgsReq)(nil),         // 49: QryMergedMsgsReq
-	(*MsgExt)(nil),                   // 50: MsgExt
-	(*MsgExtItem)(nil),               // 51: MsgExtItem
-	(*QryMsgExtReq)(nil),             // 52: QryMsgExtReq
-	(*MsgExtItemsList)(nil),          // 53: MsgExtItemsList
-	(*MsgExtItems)(nil),              // 54: MsgExtItems
-	(*FavoriteMsgIds)(nil),           // 55: FavoriteMsgIds
-	(*FavoriteMsgIdItem)(nil),        // 56: FavoriteMsgIdItem
-	(*QryFavoriteMsgsReq)(nil),       // 57: QryFavoriteMsgsReq
-	(*FavoriteMsg)(nil),              // 58: FavoriteMsg
-	(*FavoriteMsgs)(nil),             // 59: FavoriteMsgs
-	(*TopMsgReq)(nil),                // 60: TopMsgReq
-	(*GetTopMsgReq)(nil),             // 61: GetTopMsgReq
-	(*TopMsg)(nil),                   // 62: TopMsg
-	(*QryGlobalConversReq)(nil),      // 63: QryGlobalConversReq
-	(*QryGlobalConversResp)(nil),     // 64: QryGlobalConversResp
-	(*GlobalConver)(nil),             // 65: GlobalConver
-	(*QryConversationsReq)(nil),      // 66: QryConversationsReq
-	(*QryConversationsResp)(nil),     // 67: QryConversationsResp
-	(*Conversation)(nil),             // 68: Conversation
-	(*BatchAddConvers)(nil),          // 69: BatchAddConvers
-	(*UserMsgTimeItem)(nil),          // 70: UserMsgTimeItem
-	(*UpdLatestMsgReq)(nil),          // 71: UpdLatestMsgReq
-	(*Mentions)(nil),                 // 72: Mentions
-	(*MentionMsg)(nil),               // 73: MentionMsg
-	(*QryMentionMsgsReq)(nil),        // 74: QryMentionMsgsReq
-	(*QryMentionMsgsResp)(nil),       // 75: QryMentionMsgsResp
-	(*SyncConversationsReq)(nil),     // 76: SyncConversationsReq
-	(*QryTotalUnreadCountReq)(nil),   // 77: QryTotalUnreadCountReq
-	(*ConverFilter)(nil),             // 78: ConverFilter
-	(*QryTotalUnreadCountResp)(nil),  // 79: QryTotalUnreadCountResp
-	(*ConversationsReq)(nil),         // 80: ConversationsReq
-	(*ClearUnreadReq)(nil),           // 81: ClearUnreadReq
-	(*UndisturbConversReq)(nil),      // 82: UndisturbConversReq
-	(*UndisturbConverItem)(nil),      // 83: UndisturbConverItem
-	(*QryTopConversReq)(nil),         // 84: QryTopConversReq
-	(*TopConversResp)(nil),           // 85: TopConversResp
-	(*QryReadInfosReq)(nil),          // 86: QryReadInfosReq
-	(*QryReadInfosResp)(nil),         // 87: QryReadInfosResp
-	(*ReadInfoItem)(nil),             // 88: ReadInfoItem
-	(*QryReadDetailReq)(nil),         // 89: QryReadDetailReq
-	(*QryReadDetailResp)(nil),        // 90: QryReadDetailResp
-	(*MemberReadDetailItem)(nil),     // 91: MemberReadDetailItem
-	(*QryConverReq)(nil),             // 92: QryConverReq
-	(*TagConvers)(nil),               // 93: TagConvers
-	(*UserConverTags)(nil),           // 94: UserConverTags
-	(*ConverTag)(nil),                // 95: ConverTag
-	(*ConverExts)(nil),               // 96: ConverExts
-	(*UserInfo)(nil),                 // 97: UserInfo
-	(*UserInfos)(nil),                // 98: UserInfos
-	(*UserIdsReq)(nil),               // 99: UserIdsReq
-	(*UserIdReq)(nil),                // 100: UserIdReq
-	(*UserInfosResp)(nil),            // 101: UserInfosResp
-	(*UserRegResp)(nil),              // 102: UserRegResp
-	(*UserOnlineStatusReq)(nil),      // 103: UserOnlineStatusReq
-	(*UserOnlineStatusResp)(nil),     // 104: UserOnlineStatusResp
-	(*UserOnlineItem)(nil),           // 105: UserOnlineItem
-	(*BanUsersReq)(nil),              // 106: BanUsersReq
-	(*BanUser)(nil),                  // 107: BanUser
-	(*QryBanUsersReq)(nil),           // 108: QryBanUsersReq
-	(*QryBanUsersResp)(nil),          // 109: QryBanUsersResp
-	(*BlockUsersReq)(nil),            // 110: BlockUsersReq
-	(*QryBlockUsersReq)(nil),         // 111: QryBlockUsersReq
-	(*BlockUser)(nil),                // 112: BlockUser
-	(*QryBlockUsersResp)(nil),        // 113: QryBlockUsersResp
-	(*CheckBlockUserResp)(nil),       // 114: CheckBlockUserResp
-	(*OnlineStatus)(nil),             // 115: OnlineStatus
-	(*KickUserReq)(nil),              // 116: KickUserReq
-	(*UserUndisturb)(nil),            // 117: UserUndisturb
-	(*UserUndisturbItem)(nil),        // 118: UserUndisturbItem
-	(*UserPushStatus)(nil),           // 119: UserPushStatus
-	(*BatchMuteUsersReq)(nil),        // 120: BatchMuteUsersReq
-	(*FriendIdsReq)(nil),             // 121: FriendIdsReq
-	(*FriendMembersReq)(nil),         // 122: FriendMembersReq
-	(*QryFriendsReq)(nil),            // 123: QryFriendsReq
-	(*QryFriendsWithPageReq)(nil),    // 124: QryFriendsWithPageReq
-	(*QryFriendsResp)(nil),           // 125: QryFriendsResp
-	(*FriendMember)(nil),             // 126: FriendMember
-	(*CheckFriendsReq)(nil),          // 127: CheckFriendsReq
-	(*CheckFriendsResp)(nil),         // 128: CheckFriendsResp
-	(*GroupInfo)(nil),                // 129: GroupInfo
-	(*GrpMemberInfo)(nil),            // 130: GrpMemberInfo
-	(*GroupMembersReq)(nil),          // 131: GroupMembersReq
-	(*GroupMuteReq)(nil),             // 132: GroupMuteReq
-	(*GroupInfoReq)(nil),             // 133: GroupInfoReq
-	(*GroupIdsReq)(nil),              // 134: GroupIdsReq
-	(*GroupInfosResp)(nil),           // 135: GroupInfosResp
-	(*GroupMemberMuteReq)(nil),       // 136: GroupMemberMuteReq
-	(*GroupMemberAllowReq)(nil),      // 137: GroupMemberAllowReq
-	(*GroupMembersResp)(nil),         // 138: GroupMembersResp
-	(*GroupMember)(nil),              // 139: GroupMember
-	(*QryGroupMembersReq)(nil),       // 140: QryGroupMembersReq
-	(*CheckGroupMembersReq)(nil),     // 141: CheckGroupMembersReq
-	(*CheckGroupMembersResp)(nil),    // 142: CheckGroupMembersResp
-	(*QryGrpSnapshotReq)(nil),        // 143: QryGrpSnapshotReq
-	(*GroupSnapshot)(nil),            // 144: GroupSnapshot
-	(*QryGrpMemberSettingsReq)(nil),  // 145: QryGrpMemberSettingsReq
-	(*QryGrpMemberSettingsResp)(nil), // 146: QryGrpMemberSettingsResp
-	(*QryFileCredReq)(nil),           // 147: QryFileCredReq
-	(*QryFileCredResp)(nil),          // 148: QryFileCredResp
-	(*QiNiuCredResp)(nil),            // 149: QiNiuCredResp
-	(*PreSignResp)(nil),              // 150: PreSignResp
-	(*UploadLogStatusReq)(nil),       // 151: UploadLogStatusReq
-	(*SubMsgs)(nil),                  // 152: SubMsgs
-	(*SubMsg)(nil),                   // 153: SubMsg
-	(*OnlineOfflineMsg)(nil),         // 154: OnlineOfflineMsg
-	(*TransReq)(nil),                 // 155: TransReq
-	(*TransItem)(nil),                // 156: TransItem
-	nil,                              // 157: RpcMessageWraper.ExtParamsEntry
-	nil,                              // 158: DownMsg.TransMsgMapEntry
-	nil,                              // 159: ConverExts.ConverTagsEntry
-	nil,                              // 160: UserInfosResp.UserInfoMapEntry
-	nil,                              // 161: CheckFriendsResp.CheckResultsEntry
-	nil,                              // 162: GroupInfosResp.GroupInfoMapEntry
-	nil,                              // 163: CheckGroupMembersResp.MemberIdMapEntry
-	nil,                              // 164: QryGrpMemberSettingsResp.GroupSettingsEntry
-	nil,                              // 165: QryGrpMemberSettingsResp.MemberSettingsEntry
-	nil,                              // 166: QryGrpMemberSettingsResp.MemberExtsEntry
+	(RtcConverBindAction)(0),         // 11: RtcConverBindAction
+	(FileType)(0),                    // 12: FileType
+	(OssType)(0),                     // 13: OssType
+	(*Nil)(nil),                      // 14: Nil
+	(*RpcMessageWraper)(nil),         // 15: RpcMessageWraper
+	(*UpMsg)(nil),                    // 16: UpMsg
+	(*MergedMsgs)(nil),               // 17: MergedMsgs
+	(*MentionInfo)(nil),              // 18: MentionInfo
+	(*PushData)(nil),                 // 19: PushData
+	(*DownMsg)(nil),                  // 20: DownMsg
+	(*PriMsgPostReq)(nil),            // 21: PriMsgPostReq
+	(*TransMsgContent)(nil),          // 22: TransMsgContent
+	(*MsgAck)(nil),                   // 23: MsgAck
+	(*StreamMsgItem)(nil),            // 24: StreamMsgItem
+	(*StreamDownMsg)(nil),            // 25: StreamDownMsg
+	(*Notify)(nil),                   // 26: Notify
+	(*SyncMsgReq)(nil),               // 27: SyncMsgReq
+	(*DownMsgSet)(nil),               // 28: DownMsgSet
+	(*KvItem)(nil),                   // 29: KvItem
+	(*PushSwitch)(nil),               // 30: PushSwitch
+	(*AddGrpAssistantReq)(nil),       // 31: AddGrpAssistantReq
+	(*SimpleConversation)(nil),       // 32: SimpleConversation
+	(*ConverIndex)(nil),              // 33: ConverIndex
+	(*AssistantMsgResp)(nil),         // 34: AssistantMsgResp
+	(*AddHisMsgReq)(nil),             // 35: AddHisMsgReq
+	(*DelHisMsgsReq)(nil),            // 36: DelHisMsgsReq
+	(*QryLatestMsgReq)(nil),          // 37: QryLatestMsgReq
+	(*QryLatestMsgResp)(nil),         // 38: QryLatestMsgResp
+	(*QryHisMsgsReq)(nil),            // 39: QryHisMsgsReq
+	(*QryFirstUnreadMsgReq)(nil),     // 40: QryFirstUnreadMsgReq
+	(*QryHisMsgByIdsReq)(nil),        // 41: QryHisMsgByIdsReq
+	(*RecallMsgReq)(nil),             // 42: RecallMsgReq
+	(*MarkReadReq)(nil),              // 43: MarkReadReq
+	(*MarkGrpMsgReadReq)(nil),        // 44: MarkGrpMsgReadReq
+	(*CleanHisMsgReq)(nil),           // 45: CleanHisMsgReq
+	(*SimpleMsg)(nil),                // 46: SimpleMsg
+	(*IndexScope)(nil),               // 47: IndexScope
+	(*ModifyMsgReq)(nil),             // 48: ModifyMsgReq
+	(*MergeMsgReq)(nil),              // 49: MergeMsgReq
+	(*QryMergedMsgsReq)(nil),         // 50: QryMergedMsgsReq
+	(*MsgExt)(nil),                   // 51: MsgExt
+	(*MsgExtItem)(nil),               // 52: MsgExtItem
+	(*QryMsgExtReq)(nil),             // 53: QryMsgExtReq
+	(*MsgExtItemsList)(nil),          // 54: MsgExtItemsList
+	(*MsgExtItems)(nil),              // 55: MsgExtItems
+	(*FavoriteMsgIds)(nil),           // 56: FavoriteMsgIds
+	(*FavoriteMsgIdItem)(nil),        // 57: FavoriteMsgIdItem
+	(*QryFavoriteMsgsReq)(nil),       // 58: QryFavoriteMsgsReq
+	(*FavoriteMsg)(nil),              // 59: FavoriteMsg
+	(*FavoriteMsgs)(nil),             // 60: FavoriteMsgs
+	(*TopMsgReq)(nil),                // 61: TopMsgReq
+	(*GetTopMsgReq)(nil),             // 62: GetTopMsgReq
+	(*TopMsg)(nil),                   // 63: TopMsg
+	(*QryGlobalConversReq)(nil),      // 64: QryGlobalConversReq
+	(*QryGlobalConversResp)(nil),     // 65: QryGlobalConversResp
+	(*GlobalConver)(nil),             // 66: GlobalConver
+	(*QryConversationsReq)(nil),      // 67: QryConversationsReq
+	(*QryConversationsResp)(nil),     // 68: QryConversationsResp
+	(*Conversation)(nil),             // 69: Conversation
+	(*BatchAddConvers)(nil),          // 70: BatchAddConvers
+	(*UserMsgTimeItem)(nil),          // 71: UserMsgTimeItem
+	(*UpdLatestMsgReq)(nil),          // 72: UpdLatestMsgReq
+	(*Mentions)(nil),                 // 73: Mentions
+	(*MentionMsg)(nil),               // 74: MentionMsg
+	(*QryMentionMsgsReq)(nil),        // 75: QryMentionMsgsReq
+	(*QryMentionMsgsResp)(nil),       // 76: QryMentionMsgsResp
+	(*SyncConversationsReq)(nil),     // 77: SyncConversationsReq
+	(*QryTotalUnreadCountReq)(nil),   // 78: QryTotalUnreadCountReq
+	(*ConverFilter)(nil),             // 79: ConverFilter
+	(*QryTotalUnreadCountResp)(nil),  // 80: QryTotalUnreadCountResp
+	(*ConversationsReq)(nil),         // 81: ConversationsReq
+	(*ClearUnreadReq)(nil),           // 82: ClearUnreadReq
+	(*UndisturbConversReq)(nil),      // 83: UndisturbConversReq
+	(*UndisturbConverItem)(nil),      // 84: UndisturbConverItem
+	(*QryTopConversReq)(nil),         // 85: QryTopConversReq
+	(*TopConversResp)(nil),           // 86: TopConversResp
+	(*QryReadInfosReq)(nil),          // 87: QryReadInfosReq
+	(*QryReadInfosResp)(nil),         // 88: QryReadInfosResp
+	(*ReadInfoItem)(nil),             // 89: ReadInfoItem
+	(*QryReadDetailReq)(nil),         // 90: QryReadDetailReq
+	(*QryReadDetailResp)(nil),        // 91: QryReadDetailResp
+	(*MemberReadDetailItem)(nil),     // 92: MemberReadDetailItem
+	(*QryConverReq)(nil),             // 93: QryConverReq
+	(*TagConvers)(nil),               // 94: TagConvers
+	(*UserConverTags)(nil),           // 95: UserConverTags
+	(*ConverTag)(nil),                // 96: ConverTag
+	(*ConverExts)(nil),               // 97: ConverExts
+	(*UserInfo)(nil),                 // 98: UserInfo
+	(*UserInfos)(nil),                // 99: UserInfos
+	(*UserIdsReq)(nil),               // 100: UserIdsReq
+	(*UserIdReq)(nil),                // 101: UserIdReq
+	(*UserInfosResp)(nil),            // 102: UserInfosResp
+	(*UserRegResp)(nil),              // 103: UserRegResp
+	(*UserOnlineStatusReq)(nil),      // 104: UserOnlineStatusReq
+	(*UserOnlineStatusResp)(nil),     // 105: UserOnlineStatusResp
+	(*UserOnlineItem)(nil),           // 106: UserOnlineItem
+	(*BanUsersReq)(nil),              // 107: BanUsersReq
+	(*BanUser)(nil),                  // 108: BanUser
+	(*QryBanUsersReq)(nil),           // 109: QryBanUsersReq
+	(*QryBanUsersResp)(nil),          // 110: QryBanUsersResp
+	(*BlockUsersReq)(nil),            // 111: BlockUsersReq
+	(*QryBlockUsersReq)(nil),         // 112: QryBlockUsersReq
+	(*BlockUser)(nil),                // 113: BlockUser
+	(*QryBlockUsersResp)(nil),        // 114: QryBlockUsersResp
+	(*CheckBlockUserResp)(nil),       // 115: CheckBlockUserResp
+	(*OnlineStatus)(nil),             // 116: OnlineStatus
+	(*KickUserReq)(nil),              // 117: KickUserReq
+	(*UserUndisturb)(nil),            // 118: UserUndisturb
+	(*UserUndisturbItem)(nil),        // 119: UserUndisturbItem
+	(*UserPushStatus)(nil),           // 120: UserPushStatus
+	(*BatchMuteUsersReq)(nil),        // 121: BatchMuteUsersReq
+	(*FriendIdsReq)(nil),             // 122: FriendIdsReq
+	(*FriendMembersReq)(nil),         // 123: FriendMembersReq
+	(*QryFriendsReq)(nil),            // 124: QryFriendsReq
+	(*QryFriendsWithPageReq)(nil),    // 125: QryFriendsWithPageReq
+	(*QryFriendsResp)(nil),           // 126: QryFriendsResp
+	(*FriendMember)(nil),             // 127: FriendMember
+	(*CheckFriendsReq)(nil),          // 128: CheckFriendsReq
+	(*CheckFriendsResp)(nil),         // 129: CheckFriendsResp
+	(*GroupInfo)(nil),                // 130: GroupInfo
+	(*GrpMemberInfo)(nil),            // 131: GrpMemberInfo
+	(*GroupMembersReq)(nil),          // 132: GroupMembersReq
+	(*GroupMuteReq)(nil),             // 133: GroupMuteReq
+	(*GroupInfoReq)(nil),             // 134: GroupInfoReq
+	(*GroupIdsReq)(nil),              // 135: GroupIdsReq
+	(*GroupInfosResp)(nil),           // 136: GroupInfosResp
+	(*GroupMemberMuteReq)(nil),       // 137: GroupMemberMuteReq
+	(*GroupMemberAllowReq)(nil),      // 138: GroupMemberAllowReq
+	(*GroupMembersResp)(nil),         // 139: GroupMembersResp
+	(*GroupMember)(nil),              // 140: GroupMember
+	(*QryGroupMembersReq)(nil),       // 141: QryGroupMembersReq
+	(*CheckGroupMembersReq)(nil),     // 142: CheckGroupMembersReq
+	(*CheckGroupMembersResp)(nil),    // 143: CheckGroupMembersResp
+	(*QryGrpSnapshotReq)(nil),        // 144: QryGrpSnapshotReq
+	(*GroupSnapshot)(nil),            // 145: GroupSnapshot
+	(*QryGrpMemberSettingsReq)(nil),  // 146: QryGrpMemberSettingsReq
+	(*QryGrpMemberSettingsResp)(nil), // 147: QryGrpMemberSettingsResp
+	(*RtcConverBindReq)(nil),         // 148: RtcConverBindReq
+	(*QryFileCredReq)(nil),           // 149: QryFileCredReq
+	(*QryFileCredResp)(nil),          // 150: QryFileCredResp
+	(*QiNiuCredResp)(nil),            // 151: QiNiuCredResp
+	(*PreSignResp)(nil),              // 152: PreSignResp
+	(*UploadLogStatusReq)(nil),       // 153: UploadLogStatusReq
+	(*SubMsgs)(nil),                  // 154: SubMsgs
+	(*SubMsg)(nil),                   // 155: SubMsg
+	(*OnlineOfflineMsg)(nil),         // 156: OnlineOfflineMsg
+	(*TransReq)(nil),                 // 157: TransReq
+	(*TransItem)(nil),                // 158: TransItem
+	nil,                              // 159: RpcMessageWraper.ExtParamsEntry
+	nil,                              // 160: DownMsg.TransMsgMapEntry
+	nil,                              // 161: ConverExts.ConverTagsEntry
+	nil,                              // 162: UserInfosResp.UserInfoMapEntry
+	nil,                              // 163: CheckFriendsResp.CheckResultsEntry
+	nil,                              // 164: GroupInfosResp.GroupInfoMapEntry
+	nil,                              // 165: CheckGroupMembersResp.MemberIdMapEntry
+	nil,                              // 166: QryGrpMemberSettingsResp.GroupSettingsEntry
+	nil,                              // 167: QryGrpMemberSettingsResp.MemberSettingsEntry
+	nil,                              // 168: QryGrpMemberSettingsResp.MemberExtsEntry
 }
 var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	0,   // 0: RpcMessageWraper.rpcMsgType:type_name -> RpcMsgType
-	157, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
-	19,  // 2: RpcMessageWraper.modifiedMsg:type_name -> DownMsg
-	97,  // 3: RpcMessageWraper.senderInfo:type_name -> UserInfo
-	18,  // 4: UpMsg.pushData:type_name -> PushData
-	17,  // 5: UpMsg.mentionInfo:type_name -> MentionInfo
-	19,  // 6: UpMsg.referMsg:type_name -> DownMsg
-	16,  // 7: UpMsg.mergedMsgs:type_name -> MergedMsgs
+	159, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
+	20,  // 2: RpcMessageWraper.modifiedMsg:type_name -> DownMsg
+	98,  // 3: RpcMessageWraper.senderInfo:type_name -> UserInfo
+	19,  // 4: UpMsg.pushData:type_name -> PushData
+	18,  // 5: UpMsg.mentionInfo:type_name -> MentionInfo
+	20,  // 6: UpMsg.referMsg:type_name -> DownMsg
+	17,  // 7: UpMsg.mergedMsgs:type_name -> MergedMsgs
 	4,   // 8: MergedMsgs.channelType:type_name -> ChannelType
-	45,  // 9: MergedMsgs.msgs:type_name -> SimpleMsg
+	46,  // 9: MergedMsgs.msgs:type_name -> SimpleMsg
 	1,   // 10: MentionInfo.mentionType:type_name -> MentionType
-	97,  // 11: MentionInfo.targetUsers:type_name -> UserInfo
+	98,  // 11: MentionInfo.targetUsers:type_name -> UserInfo
 	2,   // 12: PushData.pushLevel:type_name -> PushLevel
 	4,   // 13: PushData.channelType:type_name -> ChannelType
 	1,   // 14: PushData.mentionType:type_name -> MentionType
 	4,   // 15: DownMsg.channelType:type_name -> ChannelType
-	18,  // 16: DownMsg.pushData:type_name -> PushData
-	17,  // 17: DownMsg.mentionInfo:type_name -> MentionInfo
-	19,  // 18: DownMsg.referMsg:type_name -> DownMsg
-	97,  // 19: DownMsg.targetUserInfo:type_name -> UserInfo
-	129, // 20: DownMsg.groupInfo:type_name -> GroupInfo
-	16,  // 21: DownMsg.mergedMsgs:type_name -> MergedMsgs
-	23,  // 22: DownMsg.streamMsgParts:type_name -> StreamMsgItem
-	51,  // 23: DownMsg.msgExSet:type_name -> MsgExtItem
-	51,  // 24: DownMsg.msgExts:type_name -> MsgExtItem
-	95,  // 25: DownMsg.converTags:type_name -> ConverTag
-	158, // 26: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
-	130, // 27: DownMsg.grpMemberInfo:type_name -> GrpMemberInfo
-	15,  // 28: PriMsgPostReq.upMsg:type_name -> UpMsg
-	19,  // 29: PriMsgPostReq.modifiedMsg:type_name -> DownMsg
-	18,  // 30: TransMsgContent.pushData:type_name -> PushData
+	19,  // 16: DownMsg.pushData:type_name -> PushData
+	18,  // 17: DownMsg.mentionInfo:type_name -> MentionInfo
+	20,  // 18: DownMsg.referMsg:type_name -> DownMsg
+	98,  // 19: DownMsg.targetUserInfo:type_name -> UserInfo
+	130, // 20: DownMsg.groupInfo:type_name -> GroupInfo
+	17,  // 21: DownMsg.mergedMsgs:type_name -> MergedMsgs
+	24,  // 22: DownMsg.streamMsgParts:type_name -> StreamMsgItem
+	52,  // 23: DownMsg.msgExSet:type_name -> MsgExtItem
+	52,  // 24: DownMsg.msgExts:type_name -> MsgExtItem
+	96,  // 25: DownMsg.converTags:type_name -> ConverTag
+	160, // 26: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
+	131, // 27: DownMsg.grpMemberInfo:type_name -> GrpMemberInfo
+	16,  // 28: PriMsgPostReq.upMsg:type_name -> UpMsg
+	20,  // 29: PriMsgPostReq.modifiedMsg:type_name -> DownMsg
+	19,  // 30: TransMsgContent.pushData:type_name -> PushData
 	3,   // 31: StreamMsgItem.event:type_name -> StreamEvent
 	4,   // 32: StreamDownMsg.channelType:type_name -> ChannelType
-	23,  // 33: StreamDownMsg.msgItems:type_name -> StreamMsgItem
+	24,  // 33: StreamDownMsg.msgItems:type_name -> StreamMsgItem
 	5,   // 34: Notify.type:type_name -> NotifyType
-	19,  // 35: DownMsgSet.msgs:type_name -> DownMsg
-	97,  // 36: DownMsgSet.targetUserInfo:type_name -> UserInfo
-	129, // 37: DownMsgSet.groupInfo:type_name -> GroupInfo
-	31,  // 38: AddGrpAssistantReq.targets:type_name -> SimpleConversation
+	20,  // 35: DownMsgSet.msgs:type_name -> DownMsg
+	98,  // 36: DownMsgSet.targetUserInfo:type_name -> UserInfo
+	130, // 37: DownMsgSet.groupInfo:type_name -> GroupInfo
+	32,  // 38: AddGrpAssistantReq.targets:type_name -> SimpleConversation
 	4,   // 39: SimpleConversation.channelType:type_name -> ChannelType
 	4,   // 40: ConverIndex.channelType:type_name -> ChannelType
-	31,  // 41: AssistantMsgResp.convers:type_name -> SimpleConversation
+	32,  // 41: AssistantMsgResp.convers:type_name -> SimpleConversation
 	4,   // 42: AddHisMsgReq.channelType:type_name -> ChannelType
-	19,  // 43: AddHisMsgReq.msg:type_name -> DownMsg
+	20,  // 43: AddHisMsgReq.msg:type_name -> DownMsg
 	4,   // 44: DelHisMsgsReq.channelType:type_name -> ChannelType
-	45,  // 45: DelHisMsgsReq.msgs:type_name -> SimpleMsg
+	46,  // 45: DelHisMsgsReq.msgs:type_name -> SimpleMsg
 	4,   // 46: QryLatestMsgReq.channelType:type_name -> ChannelType
 	4,   // 47: QryLatestMsgResp.ChannelType:type_name -> ChannelType
 	4,   // 48: QryHisMsgsReq.channelType:type_name -> ChannelType
 	4,   // 49: QryFirstUnreadMsgReq.channelType:type_name -> ChannelType
 	4,   // 50: QryHisMsgByIdsReq.channelType:type_name -> ChannelType
 	4,   // 51: RecallMsgReq.channelType:type_name -> ChannelType
-	28,  // 52: RecallMsgReq.exts:type_name -> KvItem
+	29,  // 52: RecallMsgReq.exts:type_name -> KvItem
 	4,   // 53: MarkReadReq.channelType:type_name -> ChannelType
-	45,  // 54: MarkReadReq.msgs:type_name -> SimpleMsg
-	46,  // 55: MarkReadReq.indexScopes:type_name -> IndexScope
+	46,  // 54: MarkReadReq.msgs:type_name -> SimpleMsg
+	47,  // 55: MarkReadReq.indexScopes:type_name -> IndexScope
 	4,   // 56: MarkGrpMsgReadReq.channelType:type_name -> ChannelType
 	4,   // 57: CleanHisMsgReq.channelType:type_name -> ChannelType
 	4,   // 58: ModifyMsgReq.channelType:type_name -> ChannelType
-	16,  // 59: MergeMsgReq.mergedMsgs:type_name -> MergedMsgs
+	17,  // 59: MergeMsgReq.mergedMsgs:type_name -> MergedMsgs
 	4,   // 60: MsgExt.channelType:type_name -> ChannelType
-	51,  // 61: MsgExt.ext:type_name -> MsgExtItem
-	97,  // 62: MsgExtItem.userInfo:type_name -> UserInfo
+	52,  // 61: MsgExt.ext:type_name -> MsgExtItem
+	98,  // 62: MsgExtItem.userInfo:type_name -> UserInfo
 	4,   // 63: QryMsgExtReq.channelType:type_name -> ChannelType
-	54,  // 64: MsgExtItemsList.items:type_name -> MsgExtItems
-	51,  // 65: MsgExtItems.exts:type_name -> MsgExtItem
-	56,  // 66: FavoriteMsgIds.items:type_name -> FavoriteMsgIdItem
+	55,  // 64: MsgExtItemsList.items:type_name -> MsgExtItems
+	52,  // 65: MsgExtItems.exts:type_name -> MsgExtItem
+	57,  // 66: FavoriteMsgIds.items:type_name -> FavoriteMsgIdItem
 	4,   // 67: FavoriteMsgIdItem.ChannelType:type_name -> ChannelType
-	19,  // 68: FavoriteMsg.msg:type_name -> DownMsg
-	58,  // 69: FavoriteMsgs.items:type_name -> FavoriteMsg
+	20,  // 68: FavoriteMsg.msg:type_name -> DownMsg
+	59,  // 69: FavoriteMsgs.items:type_name -> FavoriteMsg
 	4,   // 70: TopMsgReq.channelType:type_name -> ChannelType
 	4,   // 71: GetTopMsgReq.channelType:type_name -> ChannelType
-	19,  // 72: TopMsg.msg:type_name -> DownMsg
-	97,  // 73: TopMsg.operator:type_name -> UserInfo
+	20,  // 72: TopMsg.msg:type_name -> DownMsg
+	98,  // 73: TopMsg.operator:type_name -> UserInfo
 	4,   // 74: QryGlobalConversReq.channelType:type_name -> ChannelType
-	65,  // 75: QryGlobalConversResp.convers:type_name -> GlobalConver
+	66,  // 75: QryGlobalConversResp.convers:type_name -> GlobalConver
 	4,   // 76: GlobalConver.channelType:type_name -> ChannelType
 	4,   // 77: QryConversationsReq.channelType:type_name -> ChannelType
-	68,  // 78: QryConversationsResp.conversations:type_name -> Conversation
+	69,  // 78: QryConversationsResp.conversations:type_name -> Conversation
 	4,   // 79: Conversation.channelType:type_name -> ChannelType
-	19,  // 80: Conversation.msg:type_name -> DownMsg
-	72,  // 81: Conversation.mentions:type_name -> Mentions
-	97,  // 82: Conversation.targetUserInfo:type_name -> UserInfo
-	129, // 83: Conversation.groupInfo:type_name -> GroupInfo
-	95,  // 84: Conversation.converTags:type_name -> ConverTag
-	68,  // 85: BatchAddConvers.convers:type_name -> Conversation
+	20,  // 80: Conversation.msg:type_name -> DownMsg
+	73,  // 81: Conversation.mentions:type_name -> Mentions
+	98,  // 82: Conversation.targetUserInfo:type_name -> UserInfo
+	130, // 83: Conversation.groupInfo:type_name -> GroupInfo
+	96,  // 84: Conversation.converTags:type_name -> ConverTag
+	69,  // 85: BatchAddConvers.convers:type_name -> Conversation
 	4,   // 86: UpdLatestMsgReq.channelType:type_name -> ChannelType
 	6,   // 87: UpdLatestMsgReq.action:type_name -> UpdLatestMsgAction
-	19,  // 88: UpdLatestMsgReq.msg:type_name -> DownMsg
-	97,  // 89: Mentions.senders:type_name -> UserInfo
-	73,  // 90: Mentions.mentionMsgs:type_name -> MentionMsg
+	20,  // 88: UpdLatestMsgReq.msg:type_name -> DownMsg
+	98,  // 89: Mentions.senders:type_name -> UserInfo
+	74,  // 90: Mentions.mentionMsgs:type_name -> MentionMsg
 	1,   // 91: MentionMsg.mentionType:type_name -> MentionType
 	4,   // 92: QryMentionMsgsReq.channelType:type_name -> ChannelType
-	19,  // 93: QryMentionMsgsResp.mentionMsgs:type_name -> DownMsg
-	78,  // 94: QryTotalUnreadCountReq.filter:type_name -> ConverFilter
+	20,  // 93: QryMentionMsgsResp.mentionMsgs:type_name -> DownMsg
+	79,  // 94: QryTotalUnreadCountReq.filter:type_name -> ConverFilter
 	4,   // 95: ConverFilter.channelTypes:type_name -> ChannelType
-	31,  // 96: ConverFilter.excludeConvers:type_name -> SimpleConversation
-	31,  // 97: ConverFilter.includeConvers:type_name -> SimpleConversation
-	68,  // 98: ConversationsReq.conversations:type_name -> Conversation
-	68,  // 99: ClearUnreadReq.conversations:type_name -> Conversation
-	83,  // 100: UndisturbConversReq.items:type_name -> UndisturbConverItem
+	32,  // 96: ConverFilter.excludeConvers:type_name -> SimpleConversation
+	32,  // 97: ConverFilter.includeConvers:type_name -> SimpleConversation
+	69,  // 98: ConversationsReq.conversations:type_name -> Conversation
+	69,  // 99: ClearUnreadReq.conversations:type_name -> Conversation
+	84,  // 100: UndisturbConversReq.items:type_name -> UndisturbConverItem
 	4,   // 101: UndisturbConverItem.channelType:type_name -> ChannelType
 	7,   // 102: QryTopConversReq.sortType:type_name -> TopConverSortType
 	4,   // 103: QryReadInfosReq.channelType:type_name -> ChannelType
-	88,  // 104: QryReadInfosResp.items:type_name -> ReadInfoItem
+	89,  // 104: QryReadInfosResp.items:type_name -> ReadInfoItem
 	4,   // 105: QryReadDetailReq.channelType:type_name -> ChannelType
-	91,  // 106: QryReadDetailResp.readMembers:type_name -> MemberReadDetailItem
-	91,  // 107: QryReadDetailResp.unreadMembers:type_name -> MemberReadDetailItem
-	97,  // 108: MemberReadDetailItem.member:type_name -> UserInfo
+	92,  // 106: QryReadDetailResp.readMembers:type_name -> MemberReadDetailItem
+	92,  // 107: QryReadDetailResp.unreadMembers:type_name -> MemberReadDetailItem
+	98,  // 108: MemberReadDetailItem.member:type_name -> UserInfo
 	4,   // 109: QryConverReq.channelType:type_name -> ChannelType
-	31,  // 110: TagConvers.convers:type_name -> SimpleConversation
-	95,  // 111: UserConverTags.tags:type_name -> ConverTag
+	32,  // 110: TagConvers.convers:type_name -> SimpleConversation
+	96,  // 111: UserConverTags.tags:type_name -> ConverTag
 	8,   // 112: ConverTag.tagType:type_name -> ConverTagType
-	159, // 113: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
-	28,  // 114: UserInfo.extFields:type_name -> KvItem
-	28,  // 115: UserInfo.settings:type_name -> KvItem
-	28,  // 116: UserInfo.statuses:type_name -> KvItem
+	161, // 113: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
+	29,  // 114: UserInfo.extFields:type_name -> KvItem
+	29,  // 115: UserInfo.settings:type_name -> KvItem
+	29,  // 116: UserInfo.statuses:type_name -> KvItem
 	9,   // 117: UserInfo.userType:type_name -> UserType
-	97,  // 118: UserInfos.userInfos:type_name -> UserInfo
-	160, // 119: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
-	28,  // 120: UserRegResp.extFields:type_name -> KvItem
-	105, // 121: UserOnlineStatusResp.items:type_name -> UserOnlineItem
-	107, // 122: BanUsersReq.banUsers:type_name -> BanUser
-	107, // 123: QryBanUsersResp.items:type_name -> BanUser
-	112, // 124: QryBlockUsersResp.items:type_name -> BlockUser
+	98,  // 118: UserInfos.userInfos:type_name -> UserInfo
+	162, // 119: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
+	29,  // 120: UserRegResp.extFields:type_name -> KvItem
+	106, // 121: UserOnlineStatusResp.items:type_name -> UserOnlineItem
+	108, // 122: BanUsersReq.banUsers:type_name -> BanUser
+	108, // 123: QryBanUsersResp.items:type_name -> BanUser
+	113, // 124: QryBlockUsersResp.items:type_name -> BlockUser
 	10,  // 125: OnlineStatus.type:type_name -> OnlineType
-	118, // 126: UserUndisturb.rules:type_name -> UserUndisturbItem
-	126, // 127: FriendMembersReq.friendMembers:type_name -> FriendMember
-	126, // 128: QryFriendsResp.items:type_name -> FriendMember
-	161, // 129: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
-	28,  // 130: GroupInfo.extFields:type_name -> KvItem
-	28,  // 131: GroupInfo.settings:type_name -> KvItem
-	28,  // 132: GrpMemberInfo.extFields:type_name -> KvItem
-	28,  // 133: GroupMembersReq.extFields:type_name -> KvItem
-	28,  // 134: GroupMembersReq.settings:type_name -> KvItem
-	162, // 135: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
-	139, // 136: GroupMembersResp.items:type_name -> GroupMember
-	28,  // 137: GroupMember.extFields:type_name -> KvItem
-	28,  // 138: GroupMember.settings:type_name -> KvItem
+	119, // 126: UserUndisturb.rules:type_name -> UserUndisturbItem
+	127, // 127: FriendMembersReq.friendMembers:type_name -> FriendMember
+	127, // 128: QryFriendsResp.items:type_name -> FriendMember
+	163, // 129: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
+	29,  // 130: GroupInfo.extFields:type_name -> KvItem
+	29,  // 131: GroupInfo.settings:type_name -> KvItem
+	29,  // 132: GrpMemberInfo.extFields:type_name -> KvItem
+	29,  // 133: GroupMembersReq.extFields:type_name -> KvItem
+	29,  // 134: GroupMembersReq.settings:type_name -> KvItem
+	164, // 135: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
+	140, // 136: GroupMembersResp.items:type_name -> GroupMember
+	29,  // 137: GroupMember.extFields:type_name -> KvItem
+	29,  // 138: GroupMember.settings:type_name -> KvItem
 	9,   // 139: GroupMember.memberType:type_name -> UserType
-	163, // 140: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
-	164, // 141: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
-	165, // 142: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
-	166, // 143: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
-	11,  // 144: QryFileCredReq.file_type:type_name -> FileType
-	12,  // 145: QryFileCredResp.oss_type:type_name -> OssType
-	149, // 146: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
-	150, // 147: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
-	153, // 148: SubMsgs.subMsgs:type_name -> SubMsg
-	19,  // 149: SubMsg.msg:type_name -> DownMsg
-	10,  // 150: OnlineOfflineMsg.type:type_name -> OnlineType
-	156, // 151: TransReq.items:type_name -> TransItem
-	21,  // 152: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
-	97,  // 153: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
-	129, // 154: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
-	155, // [155:155] is the sub-list for method output_type
-	155, // [155:155] is the sub-list for method input_type
-	155, // [155:155] is the sub-list for extension type_name
-	155, // [155:155] is the sub-list for extension extendee
-	0,   // [0:155] is the sub-list for field type_name
+	165, // 140: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
+	166, // 141: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
+	167, // 142: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
+	168, // 143: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
+	11,  // 144: RtcConverBindReq.action:type_name -> RtcConverBindAction
+	4,   // 145: RtcConverBindReq.channelType:type_name -> ChannelType
+	12,  // 146: QryFileCredReq.file_type:type_name -> FileType
+	13,  // 147: QryFileCredResp.oss_type:type_name -> OssType
+	151, // 148: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
+	152, // 149: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
+	155, // 150: SubMsgs.subMsgs:type_name -> SubMsg
+	20,  // 151: SubMsg.msg:type_name -> DownMsg
+	10,  // 152: OnlineOfflineMsg.type:type_name -> OnlineType
+	158, // 153: TransReq.items:type_name -> TransItem
+	22,  // 154: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
+	98,  // 155: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
+	130, // 156: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
+	157, // [157:157] is the sub-list for method output_type
+	157, // [157:157] is the sub-list for method input_type
+	157, // [157:157] is the sub-list for extension type_name
+	157, // [157:157] is the sub-list for extension extendee
+	0,   // [0:157] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_appmessages_proto_init() }
@@ -11654,7 +11795,7 @@ func file_commons_pbdefines_appmessages_proto_init() {
 	if File_commons_pbdefines_appmessages_proto != nil {
 		return
 	}
-	file_commons_pbdefines_appmessages_proto_msgTypes[135].OneofWrappers = []any{
+	file_commons_pbdefines_appmessages_proto_msgTypes[136].OneofWrappers = []any{
 		(*QryFileCredResp_QiniuCred)(nil),
 		(*QryFileCredResp_PreSignResp)(nil),
 	}
@@ -11663,8 +11804,8 @@ func file_commons_pbdefines_appmessages_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_commons_pbdefines_appmessages_proto_rawDesc), len(file_commons_pbdefines_appmessages_proto_rawDesc)),
-			NumEnums:      13,
-			NumMessages:   154,
+			NumEnums:      14,
+			NumMessages:   155,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

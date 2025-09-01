@@ -740,9 +740,13 @@ CREATE TABLE IF NOT EXISTS `rtcrooms` (
   `ext` varchar(2000) DEFAULT NULL COMMENT '扩展字段',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `accepted_time` bigint DEFAULT '0' COMMENT '1v1 接通时间',
+  `conver_id` VARCHAR(100) NULL,
+  `channel_type` TINYINT NULL DEFAULT 0,
+  `sub_channel` VARCHAR(32) NULL DEFAULT '',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`)
+  UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`),
+  UNIQUE KEY `uniq_conver` (`app_key`,`conver_id`,`channel_type`,`sub_channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'rtc-房间表';
 
 CREATE TABLE IF NOT EXISTS `rtcmembers` (

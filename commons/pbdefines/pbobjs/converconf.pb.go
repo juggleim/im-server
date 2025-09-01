@@ -157,6 +157,74 @@ func (x *ActivedRtcRoom) GetMembers() []*RtcMember {
 	return nil
 }
 
+type ConverConfReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ConverId      string                 `protobuf:"bytes,1,opt,name=converId,proto3" json:"converId,omitempty"`
+	ChannelType   ChannelType            `protobuf:"varint,2,opt,name=channelType,proto3,enum=ChannelType" json:"channelType,omitempty"`
+	SubChannel    string                 `protobuf:"bytes,3,opt,name=subChannel,proto3" json:"subChannel,omitempty"`
+	ConverConf    *ConverConf            `protobuf:"bytes,4,opt,name=converConf,proto3" json:"converConf,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConverConfReq) Reset() {
+	*x = ConverConfReq{}
+	mi := &file_commons_pbdefines_converconf_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConverConfReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConverConfReq) ProtoMessage() {}
+
+func (x *ConverConfReq) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_converconf_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConverConfReq.ProtoReflect.Descriptor instead.
+func (*ConverConfReq) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_converconf_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ConverConfReq) GetConverId() string {
+	if x != nil {
+		return x.ConverId
+	}
+	return ""
+}
+
+func (x *ConverConfReq) GetChannelType() ChannelType {
+	if x != nil {
+		return x.ChannelType
+	}
+	return ChannelType_Unknown
+}
+
+func (x *ConverConfReq) GetSubChannel() string {
+	if x != nil {
+		return x.SubChannel
+	}
+	return ""
+}
+
+func (x *ConverConfReq) GetConverConf() *ConverConf {
+	if x != nil {
+		return x.ConverConf
+	}
+	return nil
+}
+
 var File_commons_pbdefines_converconf_proto protoreflect.FileDescriptor
 
 const file_commons_pbdefines_converconf_proto_rawDesc = "" +
@@ -175,7 +243,16 @@ const file_commons_pbdefines_converconf_proto_rawDesc = "" +
 	"\frtcMediaType\x18\x05 \x01(\x0e2\r.RtcMediaTypeR\frtcMediaType\x12\x10\n" +
 	"\x03ext\x18\x06 \x01(\tR\x03ext\x12$\n" +
 	"\amembers\x183 \x03(\v2\n" +
-	".RtcMemberR\amembersB\x1aZ\x18commons/pbdefines/pbobjsb\x06proto3"
+	".RtcMemberR\amembers\"\xa8\x01\n" +
+	"\rConverConfReq\x12\x1a\n" +
+	"\bconverId\x18\x01 \x01(\tR\bconverId\x12.\n" +
+	"\vchannelType\x18\x02 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12\x1e\n" +
+	"\n" +
+	"subChannel\x18\x03 \x01(\tR\n" +
+	"subChannel\x12+\n" +
+	"\n" +
+	"converConf\x18\x04 \x01(\v2\v.ConverConfR\n" +
+	"converConfB\x1aZ\x18commons/pbdefines/pbobjsb\x06proto3"
 
 var (
 	file_commons_pbdefines_converconf_proto_rawDescOnce sync.Once
@@ -189,28 +266,32 @@ func file_commons_pbdefines_converconf_proto_rawDescGZIP() []byte {
 	return file_commons_pbdefines_converconf_proto_rawDescData
 }
 
-var file_commons_pbdefines_converconf_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_commons_pbdefines_converconf_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_commons_pbdefines_converconf_proto_goTypes = []any{
 	(*ConverConf)(nil),     // 0: ConverConf
 	(*ActivedRtcRoom)(nil), // 1: ActivedRtcRoom
-	(RtcRoomType)(0),       // 2: RtcRoomType
-	(*UserInfo)(nil),       // 3: UserInfo
-	(RtcChannel)(0),        // 4: RtcChannel
-	(RtcMediaType)(0),      // 5: RtcMediaType
-	(*RtcMember)(nil),      // 6: RtcMember
+	(*ConverConfReq)(nil),  // 2: ConverConfReq
+	(RtcRoomType)(0),       // 3: RtcRoomType
+	(*UserInfo)(nil),       // 4: UserInfo
+	(RtcChannel)(0),        // 5: RtcChannel
+	(RtcMediaType)(0),      // 6: RtcMediaType
+	(*RtcMember)(nil),      // 7: RtcMember
+	(ChannelType)(0),       // 8: ChannelType
 }
 var file_commons_pbdefines_converconf_proto_depIdxs = []int32{
 	1, // 0: ConverConf.activedRtcRoom:type_name -> ActivedRtcRoom
-	2, // 1: ActivedRtcRoom.roomType:type_name -> RtcRoomType
-	3, // 2: ActivedRtcRoom.owner:type_name -> UserInfo
-	4, // 3: ActivedRtcRoom.rtcChannel:type_name -> RtcChannel
-	5, // 4: ActivedRtcRoom.rtcMediaType:type_name -> RtcMediaType
-	6, // 5: ActivedRtcRoom.members:type_name -> RtcMember
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	3, // 1: ActivedRtcRoom.roomType:type_name -> RtcRoomType
+	4, // 2: ActivedRtcRoom.owner:type_name -> UserInfo
+	5, // 3: ActivedRtcRoom.rtcChannel:type_name -> RtcChannel
+	6, // 4: ActivedRtcRoom.rtcMediaType:type_name -> RtcMediaType
+	7, // 5: ActivedRtcRoom.members:type_name -> RtcMember
+	8, // 6: ConverConfReq.channelType:type_name -> ChannelType
+	0, // 7: ConverConfReq.converConf:type_name -> ConverConf
+	8, // [8:8] is the sub-list for method output_type
+	8, // [8:8] is the sub-list for method input_type
+	8, // [8:8] is the sub-list for extension type_name
+	8, // [8:8] is the sub-list for extension extendee
+	0, // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_converconf_proto_init() }
@@ -226,7 +307,7 @@ func file_commons_pbdefines_converconf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_commons_pbdefines_converconf_proto_rawDesc), len(file_commons_pbdefines_converconf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

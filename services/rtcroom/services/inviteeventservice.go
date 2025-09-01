@@ -59,11 +59,26 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 	}
 	container, succ := createRtcRoomContainer2Cache(ctx, appkey, rtcRoom)
 	if succ {
+		if rtcRoom.ConverId != nil && *rtcRoom.ConverId != "" {
+			code, _, err := bases.SyncRpcCall(ctx, "rtc_bind_conver", *rtcRoom.ConverId, &pbobjs.RtcConverBindReq{
+				Action:      pbobjs.RtcConverBindAction_RtcBind,
+				ConverId:    *rtcRoom.ConverId,
+				ChannelType: rtcRoom.ChannelType,
+				SubChannel:  rtcRoom.SubChannel,
+				RtcRoomId:   roomId,
+			}, nil)
+			if err == nil && code != errs.IMErrorCode_SUCCESS {
+				rtcroomCache.Remove(getRoomKey(appkey, roomId))
+				return errs.IMErrorCode_RTCROOM_BINDCONVERFAIL, nil
+			}
+		}
 		// add to db
 		storage := storages.NewRtcRoomStorage()
 		err := storage.Create(*rtcRoom)
 		if err != nil {
 			logs.WithContext(ctx).Errorf("create rtc room failed:%v", err)
+			rtcroomCache.Remove(getRoomKey(appkey, roomId))
+			return errs.IMErrorCode_RTCROOM_ROOMHASEXIST, nil
 		}
 	}
 	eventTime := time.Now().UnixMilli()
@@ -248,7 +263,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 }
 
 func syncMsg2Conver(ctx context.Context, container *RtcRoomContainer) {
-	if container.ConverId != nil && *container.ConverId != "" {
+	if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
 		userId := bases.GetRequesterIdFromCtx(ctx)
 		activedCallMsg := &msgdefines.ActivedCallMsg{
 			RoomType:     int32(container.RoomType),
@@ -274,6 +289,14 @@ func syncMsg2Conver(ctx context.Context, container *RtcRoomContainer) {
 			})
 		} else {
 			activedCallMsg.Finished = true
+			//un bind conver
+			bases.AsyncRpcCall(ctx, "rtc_bind_conver", *container.ConverId, &pbobjs.RtcConverBindReq{
+				Action:      pbobjs.RtcConverBindAction_RtcUnBind,
+				ConverId:    *container.ConverId,
+				ChannelType: container.ChannelType,
+				SubChannel:  container.SubChannel,
+				RtcRoomId:   container.RoomId,
+			})
 		}
 		flag := msgdefines.SetCmdMsg(0)
 		upMsg := &pbobjs.UpMsg{

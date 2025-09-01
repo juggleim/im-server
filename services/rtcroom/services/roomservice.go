@@ -417,6 +417,9 @@ func DestroyRtcRoom(ctx context.Context) errs.IMErrorCode {
 	if !exist {
 		return errs.IMErrorCode_RTCROOM_ROOMNOTEXIST
 	}
+	if container.ConverId != nil && *container.ConverId != "" {
+		syncMsg2Conver(ctx, container)
+	}
 	storage := storages.NewRtcRoomStorage()
 	err := storage.Delete(appkey, roomId)
 	if err == nil {
@@ -643,6 +646,7 @@ func innerQuitRtcRoom(ctx context.Context, appkey, roomId, userId string, quitRe
 					})
 				}
 			} else {
+				syncMsg2Conver(ctx, container)
 				//desctroy room
 				storage.DeleteByRoomId(appkey, roomId)
 				roomStorage := storages.NewRtcRoomStorage()

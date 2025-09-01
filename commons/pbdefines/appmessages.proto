@@ -985,6 +985,20 @@ message QryGrpMemberSettingsResp{
   map<string,string> memberExts = 7;
 }
 
+enum RtcConverBindAction{
+  RtcBind = 0;
+  RtcUnBind = 1;
+  RtcPing = 2;
+}
+
+message RtcConverBindReq{
+  RtcConverBindAction action = 1;
+  string converId = 2;
+  ChannelType channelType = 3;
+  string subChannel = 4;
+  string rtcRoomId = 5;
+}
+
 // file
 message QryFileCredReq{
   FileType file_type = 1;

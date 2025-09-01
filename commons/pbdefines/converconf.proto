@@ -18,3 +18,10 @@ message ActivedRtcRoom{
 
     repeated RtcMember members = 51;
 }
+
+message ConverConfReq {
+    string converId = 1;
+    ChannelType channelType = 2;
+    string subChannel = 3;
+    ConverConf converConf = 4;
+}

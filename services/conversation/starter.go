@@ -76,6 +76,9 @@ func (manager *ConversationManager) RegisterActors(register gmicro.IActorRegiste
 	register.RegisterActor("del_user_conver_tags", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.DelUserConverTagsActor{}, serviceName)
 	})
+	register.RegisterActor("rtc_bind_conver", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.RtcConverBindActor{}, serviceName)
+	})
 	register.RegisterActor("qry_conver_conf", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryUserConverConfActor{}, serviceName)
 	})

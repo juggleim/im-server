@@ -29,15 +29,3 @@ func (actor *QryUserConverConfActor) OnReceive(ctx context.Context, input proto.
 func (actor *QryUserConverConfActor) CreateInputObj() proto.Message {
 	return &pbobjs.ConverIndex{}
 }
-
-type QryGlobalConverConfActor struct {
-	bases.BaseActor
-}
-
-func (actor *QryGlobalConverConfActor) OnReceive(ctx context.Context, input proto.Message) {
-
-}
-
-func (actor *QryGlobalConverConfActor) CreateInputObj() proto.Message {
-	return &pbobjs.ConverIndex{}
-}

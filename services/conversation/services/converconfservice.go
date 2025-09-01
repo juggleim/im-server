@@ -9,8 +9,6 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
-	"im-server/services/conversation/storages"
-	"im-server/services/conversation/storages/models"
 	rtcStorage "im-server/services/rtcroom/storages"
 	"time"
 
@@ -24,15 +22,16 @@ type ConverConfItem struct {
 	SubChannel  string
 
 	//rtc room
-	RtcRoomId         string
-	LatestRtcPingTime int64
+	RtcRoomId                 string
+	ActivedRtcRoom            *pbobjs.ActivedRtcRoom
+	LatestActivedRtcRoomCheck int64
 }
 
 var converConfCache *caches.LruCache
 var converConfLocks *tools.SegmentatedLocks
 
 func init() {
-	converConfCache = caches.NewLruCacheWithReadTimeout("converconf_cache", 100000, nil, 10*time.Minute)
+	converConfCache = caches.NewLruCacheWithAddReadTimeout("converconf_cache", 100000, nil, 5*time.Minute, 5*time.Minute)
 	converConfLocks = tools.NewSegmentatedLocks(256)
 }
 
@@ -57,15 +56,11 @@ func GetConverConf(appkey, converId string, channelType pbobjs.ChannelType, subC
 				ChannelType: channelType,
 				SubChannel:  subChannel,
 			}
-			storage := storages.NewConverConfStorage()
-			confs, err := storage.QryConverConfs(appkey, converId, subChannel, int32(channelType))
-			if err == nil && len(confs) > 0 {
-				for itemKey, conf := range confs {
-					if itemKey == string(models.ConverConfItemKey_RtcRoomId) {
-						item.RtcRoomId = conf.ItemValue
-						item.LatestRtcPingTime = conf.UpdatedTime
-					}
-				}
+			//rtc conver
+			storage := rtcStorage.NewRtcRoomStorage()
+			rtcRoom, err := storage.FindByConver(appkey, converId, channelType, subChannel)
+			if err == nil && rtcRoom != nil {
+				item.RtcRoomId = rtcRoom.RoomId
 			}
 			converConfCache.Add(key, item)
 			return item
@@ -73,16 +68,12 @@ func GetConverConf(appkey, converId string, channelType pbobjs.ChannelType, subC
 	}
 }
 
-func (conf *ConverConfItem) SetRtcRoomId(rtcRoomId string, t int64) bool {
+func (conf *ConverConfItem) SetRtcRoomId(rtcRoomId string) bool {
 	l := converConfLocks.GetLocks(getConverConfCacheKey(conf.AppKey, conf.ConverId, conf.ChannelType, conf.SubChannel))
 	l.Lock()
 	defer l.Unlock()
 	if conf.RtcRoomId == "" || conf.RtcRoomId == rtcRoomId {
 		conf.RtcRoomId = rtcRoomId
-		if t <= 0 {
-			t = time.Now().UnixMilli()
-		}
-		conf.LatestRtcPingTime = t
 		return true
 	}
 	return false
@@ -93,7 +84,65 @@ func (conf *ConverConfItem) ClearRtcRoomId() {
 	l.Lock()
 	defer l.Unlock()
 	conf.RtcRoomId = ""
-	conf.LatestRtcPingTime = 0
+	conf.ActivedRtcRoom = nil
+	conf.LatestActivedRtcRoomCheck = 0
+}
+
+func (conf *ConverConfItem) GetActivedRtcRoom(ctx context.Context) *pbobjs.ActivedRtcRoom {
+	if conf.RtcRoomId == "" {
+		conf.ActivedRtcRoom = nil
+		conf.LatestActivedRtcRoomCheck = 0
+	}
+	if (conf.ActivedRtcRoom == nil && conf.RtcRoomId != "") || time.Now().UnixMilli()-conf.LatestActivedRtcRoomCheck > 10*1000 {
+		l := converConfLocks.GetLocks(getConverConfCacheKey(conf.AppKey, conf.ConverId, conf.ChannelType, conf.SubChannel))
+		l.Lock()
+		defer l.Unlock()
+		if conf.RtcRoomId != "" {
+			code, resp, err := bases.SyncRpcCall(ctx, "rtc_qry", conf.RtcRoomId, &pbobjs.Nil{}, func() proto.Message {
+				return &pbobjs.RtcRoom{}
+			})
+			if err == nil {
+				if code == errs.IMErrorCode_SUCCESS {
+					if resp != nil {
+						rtcRoom := resp.(*pbobjs.RtcRoom)
+						conf.ActivedRtcRoom = &pbobjs.ActivedRtcRoom{
+							RoomType:     rtcRoom.RoomType,
+							RoomId:       rtcRoom.RoomId,
+							Owner:        rtcRoom.Owner,
+							RtcChannel:   rtcRoom.RtcChannel,
+							RtcMediaType: rtcRoom.RtcMediaType,
+							Ext:          rtcRoom.Ext,
+							Members:      rtcRoom.Members,
+						}
+						conf.LatestActivedRtcRoomCheck = time.Now().UnixMilli()
+					}
+				} else {
+					conf.RtcRoomId = ""
+					conf.LatestActivedRtcRoomCheck = 0
+				}
+			}
+		} else {
+			conf.ActivedRtcRoom = nil
+			conf.LatestActivedRtcRoomCheck = 0
+		}
+	}
+	return conf.ActivedRtcRoom
+}
+
+func RtcConverBind(ctx context.Context, req *pbobjs.RtcConverBindReq) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	converConf := GetConverConf(appkey, req.ConverId, req.ChannelType, req.SubChannel)
+	if converConf != nil {
+		if req.Action == pbobjs.RtcConverBindAction_RtcBind {
+			succ := converConf.SetRtcRoomId(req.RtcRoomId)
+			if !succ {
+				return errs.IMErrorCode_RTCROOM_BINDCONVERFAIL
+			}
+		} else if req.Action == pbobjs.RtcConverBindAction_RtcUnBind {
+			converConf.ClearRtcRoomId()
+		}
+	}
+	return errs.IMErrorCode_SUCCESS
 }
 
 func QryConverConf(ctx context.Context, req *pbobjs.ConverIndex) (errs.IMErrorCode, *pbobjs.ConverConf) {
@@ -101,24 +150,9 @@ func QryConverConf(ctx context.Context, req *pbobjs.ConverIndex) (errs.IMErrorCo
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
-	storage := rtcStorage.NewRtcRoomStorage()
-	room, err := storage.FindByConver(appkey, converId, req.ChannelType, req.SubChannel)
-	if err == nil && room != nil {
-		code, resp, err := bases.SyncRpcCall(ctx, "rtc_qry", room.RoomId, &pbobjs.Nil{}, func() proto.Message {
-			return &pbobjs.RtcRoom{}
-		})
-		if err == nil && code == errs.IMErrorCode_SUCCESS && resp != nil {
-			rtcRoom := resp.(*pbobjs.RtcRoom)
-			ret.ActivedRtcRoom = &pbobjs.ActivedRtcRoom{
-				RoomType:     rtcRoom.RoomType,
-				RoomId:       rtcRoom.RoomId,
-				Owner:        rtcRoom.Owner,
-				RtcChannel:   rtcRoom.RtcChannel,
-				RtcMediaType: rtcRoom.RtcMediaType,
-				Ext:          rtcRoom.Ext,
-				Members:      rtcRoom.Members,
-			}
-		}
+	converConf := GetConverConf(appkey, converId, req.ChannelType, req.SubChannel)
+	if converConf != nil {
+		ret.ActivedRtcRoom = converConf.GetActivedRtcRoom(ctx)
 	}
 	return errs.IMErrorCode_SUCCESS, ret
 }
