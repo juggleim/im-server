@@ -9,7 +9,6 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
-	rtcStorage "im-server/services/rtcroom/storages"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -55,12 +54,6 @@ func GetConverConf(appkey, converId string, channelType pbobjs.ChannelType, subC
 				ConverId:    converId,
 				ChannelType: channelType,
 				SubChannel:  subChannel,
-			}
-			//rtc conver
-			storage := rtcStorage.NewRtcRoomStorage()
-			rtcRoom, err := storage.FindByConver(appkey, converId, channelType, subChannel)
-			if err == nil && rtcRoom != nil {
-				item.RtcRoomId = rtcRoom.RoomId
 			}
 			converConfCache.Add(key, item)
 			return item

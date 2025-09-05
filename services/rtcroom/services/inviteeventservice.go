@@ -444,8 +444,12 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 				DeviceId: deviceId,
 			},
 		})
+		needDestroy := true
 		//notify other members
 		container.ForeachMembers(func(member *models.RtcRoomMember) {
+			if member.RtcState != pbobjs.RtcState_RtcIncoming {
+				needDestroy = false
+			}
 			SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
 				InviteType: pbobjs.InviteType_RtcHangup,
 				User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
@@ -457,17 +461,18 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 				EventTime: eventTime,
 			})
 		})
-		//send msg
-		if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
-			syncMsg2Conver(ctx, container)
-		}
-		if container.MemberCount() <= 0 {
+		if container.MemberCount() <= 0 || needDestroy {
+			container.CleanMembers()
 			//destroy room
 			roomStorage := storages.NewRtcRoomStorage()
 			roomStorage.Delete(appkey, roomId)
 			storage := storages.NewRtcRoomMemberStorage()
 			storage.DeleteByRoomId(appkey, roomId)
 			rtcroomCache.Remove(getRoomKey(appkey, roomId))
+		}
+		//send msg
+		if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
+			syncMsg2Conver(ctx, container)
 		}
 	}
 	return errs.IMErrorCode_SUCCESS

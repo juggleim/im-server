@@ -174,6 +174,14 @@ func (container *RtcRoomContainer) MemberCount() int {
 	return len(container.Members)
 }
 
+func (container *RtcRoomContainer) CleanMembers() {
+	key := getRoomKey(container.Appkey, container.RoomId)
+	lock := rtcroomLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	container.Members = map[string]*models.RtcRoomMember{}
+}
+
 func (container *RtcRoomContainer) MemberExist(memberId string) bool {
 	key := getRoomKey(container.Appkey, container.RoomId)
 	lock := rtcroomLocks.GetLocks(key)
