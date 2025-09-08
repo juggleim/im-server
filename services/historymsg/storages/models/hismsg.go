@@ -27,6 +27,7 @@ type GroupHisMsg struct {
 	HisMsg
 	MemberCount int
 	ReadCount   int
+	IsPortion   int
 }
 
 type PrivateHisMsg struct {
@@ -64,6 +65,23 @@ type IGroupHisMsgStorage interface {
 	UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error
 
 	UpdateReadCount(appkey, converId, subChannel, msgId string, readCount int) error
+}
+
+type GroupPortionRel struct {
+	ConverId    string
+	ChannelType pbobjs.ChannelType
+	SubChannel  string
+	UserId      string
+	MsgId       string
+	MsgTime     int64
+	AppKey      string
+}
+
+type IGroupPortionRelStorage interface {
+	Upsert(item GroupPortionRel) error
+	BatchUpsert(items []GroupPortionRel) error
+	Delete(item GroupPortionRel) error
+	QryPortionMsgs(appkey, userId, converId, subChannel string, startTime int64, count int32, isPositive bool, cleanTime int64) ([]*GroupHisMsg, error)
 }
 
 type IPrivateHisMsgStorage interface {

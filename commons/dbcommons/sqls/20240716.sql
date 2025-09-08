@@ -746,7 +746,7 @@ CREATE TABLE IF NOT EXISTS `rtcrooms` (
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_roomid` (`app_key`,`room_id`),
-  UNIQUE KEY `uniq_conver` (`app_key`,`conver_id`,`channel_type`,`sub_channel`)
+  KEY `idx_conver` (`app_key`,`conver_id`,`channel_type`,`sub_channel`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'rtc-房间表';
 
 CREATE TABLE IF NOT EXISTS `rtcmembers` (

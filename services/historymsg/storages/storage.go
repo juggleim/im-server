@@ -29,6 +29,10 @@ func NewGroupHisMsgStorage() models.IGroupHisMsgStorage {
 	}
 }
 
+func NewGroupPortionMsgStorage() models.IGroupPortionRelStorage {
+	return &dbs.GroupPortionRelDao{}
+}
+
 func NewSystemHisMsgStorage() models.ISystemHisMsgStorage {
 	switch configures.Config.MsgStoreEngine {
 	case configures.MsgStoreEngine_MySQL:

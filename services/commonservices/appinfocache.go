@@ -56,6 +56,7 @@ type AppInfo struct {
 	OpenGrpSnapshot          bool `default:"false"`
 	BigGrpThreshold          int  `default:"1000"`
 	ClosePushGrpThreshold    int  `default:"0"`
+	HideGrpPortionMsgs       bool `default:"false"`
 
 	EventSubConfig  string `default:""`
 	EventSubSwitch  string `default:""`

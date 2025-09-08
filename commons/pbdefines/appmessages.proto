@@ -154,6 +154,7 @@ message DownMsg{
   int64 lifeTimeAfterRead = 32;
   bool isDelete = 33;
   string subChannel = 34;
+  repeated string toUserIds = 35;
 }
 
 message PriMsgPostReq{

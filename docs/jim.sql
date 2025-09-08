@@ -293,10 +293,25 @@ CREATE TABLE IF NOT EXISTS `g_hismsgs` (
   `msg_exset` mediumblob,
   `destroy_time` bigint DEFAULT 0,
   `life_time_after_read` bigint DEFAULT 0,
+  `is_portion` tinyint DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `idx_appkey_converid` (`app_key`,`conver_id`,`sub_channel`,`msg_id`,`send_time`),
   KEY `idx_conver_time` (`app_key`,`conver_id`,`sub_channel`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群聊-历史消息表';
+
+CREATE TABLE `g_portionrels` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `conver_id` VARCHAR(100) NULL,
+  `sub_channel` VARCHAR(32) NULL DEFAULT '',
+  `channel_type` TINYINT NULL DEFAULT 0,
+  `user_id` VARCHAR(32) NULL,
+  `msg_id` VARCHAR(32) NULL,
+  `msg_time` BIGINT NULL DEFAULT 0,
+  `app_key` VARCHAR(20) NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_msgid` (`app_key`, `conver_id`, `sub_channel`, `user_id`, `msg_id`),
+  INDEX `idx_msg_time` (`app_key`, `conver_id`, `sub_channel`, `user_id`, `msg_time`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `gc_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',

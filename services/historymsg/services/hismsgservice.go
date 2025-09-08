@@ -14,6 +14,7 @@ import (
 	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 	"im-server/services/historymsg/storages/models"
+	"sort"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -43,9 +44,47 @@ func SavePrivateHisMsg(ctx context.Context, converId, senderId, receiverId strin
 	})
 }
 func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownMsg, groupMemberCount int) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
 	grpHisMsgStorage := storages.NewGroupHisMsgStorage()
 	msgBs, _ := tools.PbMarshal(downMsg)
 
+	isPortion := 0
+	if len(downMsg.ToUserIds) > 0 {
+		isPortion = 1
+		//add portion msgs
+		portionStorage := storages.NewGroupPortionMsgStorage()
+		rels := []models.GroupPortionRel{}
+		containsSender := false
+		for _, toUserId := range downMsg.ToUserIds {
+			if toUserId == downMsg.SenderId {
+				containsSender = true
+			}
+			rels = append(rels, models.GroupPortionRel{
+				ConverId:    converId,
+				ChannelType: downMsg.ChannelType,
+				SubChannel:  downMsg.SubChannel,
+				UserId:      toUserId,
+				MsgId:       downMsg.MsgId,
+				MsgTime:     downMsg.MsgTime,
+				AppKey:      appkey,
+			})
+		}
+		if !containsSender {
+			rels = append(rels, models.GroupPortionRel{
+				ConverId:    converId,
+				ChannelType: downMsg.ChannelType,
+				SubChannel:  downMsg.SubChannel,
+				UserId:      downMsg.SenderId,
+				MsgId:       downMsg.MsgId,
+				MsgTime:     downMsg.MsgTime,
+				AppKey:      appkey,
+			})
+		}
+		err := portionStorage.BatchUpsert(rels)
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
+	}
 	err := grpHisMsgStorage.SaveGroupHisMsg(models.GroupHisMsg{
 		HisMsg: models.HisMsg{
 			ConverId:          converId,
@@ -60,9 +99,10 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 			MsgBody:           msgBs,
 			DestroyTime:       downMsg.DestroyTime,
 			LifeTimeAfterRead: downMsg.LifeTimeAfterRead,
-			AppKey:            bases.GetAppKeyFromCtx(ctx),
+			AppKey:            appkey,
 		},
 		MemberCount: groupMemberCount,
+		IsPortion:   isPortion,
 	})
 	if err != nil {
 		logs.WithContext(ctx).Errorf("msg_id:%s\terr:%v", downMsg.MsgId, err)
@@ -378,92 +418,89 @@ func QryHisMsgs(ctx context.Context, appkey, targetId, subChannel string, channe
 		if dbCleanTime > cleanTime {
 			cleanTime = dbCleanTime
 		}
-		storage := storages.NewGroupHisMsgStorage()
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
-		dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
-		if err == nil {
-			msgMap := map[string]*pbobjs.DownMsg{}
-			msgIds := []string{}
-			referMsgIds := []string{}
-			haveReferMsgs := []*pbobjs.DownMsg{}
-			for _, dbMsg := range dbMsgs {
-				downMsg := &pbobjs.DownMsg{}
-				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
-				if err == nil {
-					msgMap[dbMsg.MsgId] = downMsg
-					msgIds = append(msgIds, dbMsg.MsgId)
-
-					if downMsg.ClientUid == "" {
-						downMsg.ClientUid = tools.GenerateUUIDShort22()
-					}
-					if downMsg.MsgSeqNo <= 0 {
-						downMsg.MsgSeqNo = dbMsg.MsgSeqNo
-					}
-					if downMsg.MsgTime <= 0 {
-						downMsg.MsgTime = dbMsg.SendTime
-					}
-					if downMsg.MsgId == "" {
-						downMsg.MsgId = dbMsg.MsgId
-					}
-					downMsg.GroupInfo = nil
-					if userId == dbMsg.SenderId {
-						downMsg.IsSend = true
-					}
-					downMsg.MemberCount = int32(dbMsg.MemberCount)
-					downMsg.ReadCount = int32(dbMsg.ReadCount)
-					downMsg.IsDelete = dbMsg.IsDelete == 1
-					//msg ext
-					if len(dbMsg.MsgExt) > 0 {
-						extItems := &pbobjs.MsgExtItems{
-							MsgId: dbMsg.MsgId,
-						}
-						err = tools.PbUnMarshal(dbMsg.MsgExt, extItems)
-						if err == nil {
-							downMsg.MsgExts = extItems.Exts
-						}
-					}
-					//msg exset
-					if len(dbMsg.MsgExset) > 0 {
-						extItems := &pbobjs.MsgExtItems{
-							MsgId: dbMsg.MsgId,
-						}
-						err = tools.PbUnMarshal(dbMsg.MsgExset, extItems)
-						if err == nil {
-							downMsg.MsgExSet = extItems.Exts
-							fillUserInfos(ctx, []*pbobjs.MsgExtItems{
-								{
-									MsgId: downMsg.MsgId,
-									Exts:  downMsg.MsgExSet,
-								},
-							})
-						}
-					}
-					//reference msg
-					if downMsg.ReferMsg != nil && downMsg.ReferMsg.MsgId != "" {
-						referMsgIds = append(referMsgIds, downMsg.ReferMsg.MsgId)
-						haveReferMsgs = append(haveReferMsgs, downMsg)
-					}
-					resp.Msgs = append(resp.Msgs, downMsg)
-				}
-			}
-			//readed status of group msg
-			readStorage := storages.NewReadInfoStorage()
-			readMap, err := readStorage.CheckMsgsRead(appkey, targetId, subChannel, userId, pbobjs.ChannelType_Group, msgIds)
+		dbMsgs := qryGrpHisMsgs(ctx, converId, subChannel, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
+		msgMap := map[string]*pbobjs.DownMsg{}
+		msgIds := []string{}
+		referMsgIds := []string{}
+		haveReferMsgs := []*pbobjs.DownMsg{}
+		for _, dbMsg := range dbMsgs {
+			downMsg := &pbobjs.DownMsg{}
+			err := tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
 			if err == nil {
-				for msgId, readStatus := range readMap {
-					if msg, exist := msgMap[msgId]; exist {
-						msg.IsRead = readStatus
+				msgMap[dbMsg.MsgId] = downMsg
+				msgIds = append(msgIds, dbMsg.MsgId)
+
+				if downMsg.ClientUid == "" {
+					downMsg.ClientUid = tools.GenerateUUIDShort22()
+				}
+				if downMsg.MsgSeqNo <= 0 {
+					downMsg.MsgSeqNo = dbMsg.MsgSeqNo
+				}
+				if downMsg.MsgTime <= 0 {
+					downMsg.MsgTime = dbMsg.SendTime
+				}
+				if downMsg.MsgId == "" {
+					downMsg.MsgId = dbMsg.MsgId
+				}
+				downMsg.GroupInfo = nil
+				if userId == dbMsg.SenderId {
+					downMsg.IsSend = true
+				}
+				downMsg.MemberCount = int32(dbMsg.MemberCount)
+				downMsg.ReadCount = int32(dbMsg.ReadCount)
+				downMsg.IsDelete = dbMsg.IsDelete == 1
+				//msg ext
+				if len(dbMsg.MsgExt) > 0 {
+					extItems := &pbobjs.MsgExtItems{
+						MsgId: dbMsg.MsgId,
+					}
+					err = tools.PbUnMarshal(dbMsg.MsgExt, extItems)
+					if err == nil {
+						downMsg.MsgExts = extItems.Exts
 					}
 				}
+				//msg exset
+				if len(dbMsg.MsgExset) > 0 {
+					extItems := &pbobjs.MsgExtItems{
+						MsgId: dbMsg.MsgId,
+					}
+					err = tools.PbUnMarshal(dbMsg.MsgExset, extItems)
+					if err == nil {
+						downMsg.MsgExSet = extItems.Exts
+						fillUserInfos(ctx, []*pbobjs.MsgExtItems{
+							{
+								MsgId: downMsg.MsgId,
+								Exts:  downMsg.MsgExSet,
+							},
+						})
+					}
+				}
+				//reference msg
+				if downMsg.ReferMsg != nil && downMsg.ReferMsg.MsgId != "" {
+					referMsgIds = append(referMsgIds, downMsg.ReferMsg.MsgId)
+					haveReferMsgs = append(haveReferMsgs, downMsg)
+				}
+				resp.Msgs = append(resp.Msgs, downMsg)
 			}
-			//retrieve referenced msg
-			if len(referMsgIds) > 0 {
-				retrieveGrpReferenceMsg(ctx, targetId, subChannel, haveReferMsgs, referMsgIds)
-			}
-			//add groupinfo
-			groupInfo := commonservices.GetGroupInfoFromCache(ctx, targetId)
-			resp.GroupInfo = groupInfo
 		}
+		//readed status of group msg
+		readStorage := storages.NewReadInfoStorage()
+		readMap, err := readStorage.CheckMsgsRead(appkey, targetId, subChannel, userId, pbobjs.ChannelType_Group, msgIds)
+		if err == nil {
+			for msgId, readStatus := range readMap {
+				if msg, exist := msgMap[msgId]; exist {
+					msg.IsRead = readStatus
+				}
+			}
+		}
+		//retrieve referenced msg
+		if len(referMsgIds) > 0 {
+			retrieveGrpReferenceMsg(ctx, targetId, subChannel, haveReferMsgs, referMsgIds)
+		}
+		//add groupinfo
+		groupInfo := commonservices.GetGroupInfoFromCache(ctx, targetId)
+		resp.GroupInfo = groupInfo
 	} else if channelType == pbobjs.ChannelType_GroupCast {
 		storage := storages.NewGrpCastHisMsgStorage()
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
@@ -511,6 +548,41 @@ func QryHisMsgs(ctx context.Context, appkey, targetId, subChannel string, channe
 		}
 	}
 	return errs.IMErrorCode_SUCCESS, resp
+}
+
+func qryGrpHisMsgs(ctx context.Context, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositive bool, cleanTime int64, msgTypes []string) []*models.GroupHisMsg {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	ret := []*models.GroupHisMsg{}
+	storage := storages.NewGroupHisMsgStorage()
+	dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
+	if err == nil {
+		ret = append(ret, dbMsgs...)
+		appInfo, exist := commonservices.GetAppInfo(appkey)
+		if exist && appInfo != nil && appInfo.HideGrpPortionMsgs {
+			storage := storages.NewGroupPortionMsgStorage()
+			msgs, err := storage.QryPortionMsgs(appkey, userId, converId, subChannel, startTime, count, isPositive, cleanTime)
+			if err == nil && len(msgs) > 0 {
+				ret = append(ret, msgs...)
+				sort.Slice(ret, func(i, j int) bool {
+					return ret[i].SendTime < ret[j].SendTime
+				})
+				if len(ret) > int(count) {
+					if isPositive {
+						ret = ret[:count]
+					} else {
+						ret = ret[len(ret)-int(count):]
+					}
+				}
+			} else {
+				if err != nil {
+					logs.WithContext(ctx).Error(err.Error())
+				}
+			}
+		}
+	} else {
+		logs.WithContext(ctx).Error(err.Error())
+	}
+	return ret
 }
 
 func retrievePrivateReferenceMsg(ctx context.Context, targetId, subChannel string, haveReferMsgs []*pbobjs.DownMsg, referencedMsgIds []string) {

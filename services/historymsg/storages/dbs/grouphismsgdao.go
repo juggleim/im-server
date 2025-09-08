@@ -35,6 +35,7 @@ type GroupHisMsgDao struct {
 	IsDelete          int   `gorm:"is_delete"`
 	DestroyTime       int64 `gorm:"destroy_time"`
 	LifeTimeAfterRead int64 `gorm:"life_time_after_read"`
+	IsPortion         int   `gorm:"is_portion"`
 }
 
 func (msg GroupHisMsgDao) TableName() string {
@@ -62,6 +63,7 @@ func (msg GroupHisMsgDao) SaveGroupHisMsg(item models.GroupHisMsg) error {
 		IsDelete:          item.IsDelete,
 		DestroyTime:       item.DestroyTime,
 		LifeTimeAfterRead: item.LifeTimeAfterRead,
+		IsPortion:         item.IsPortion,
 	}
 	err := dbcommons.GetDb().Create(&gMsg).Error
 	return err
@@ -127,7 +129,7 @@ func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, use
 		sql = sql + " and his.msg_type in (?)"
 		params = append(params, msgTypes)
 	}
-	sql = sql + " and his.is_delete=0 and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
+	sql = sql + " and his.is_delete=0 and his.is_portion=0 and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
 	params = append(params, curr)
 	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if !isPositiveOrder {
@@ -312,5 +314,6 @@ func dbMsg2GrpMsg(dbMsg *GroupHisMsgDao) *models.GroupHisMsg {
 		},
 		MemberCount: dbMsg.MemberCount,
 		ReadCount:   dbMsg.ReadCount,
+		IsPortion:   dbMsg.IsPortion,
 	}
 }
