@@ -6,6 +6,7 @@ import (
 	"im-server/services/commonservices"
 	"time"
 
+	agoraTokenBuilder "github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src/rtctokenbuilder2"
 	"github.com/livekit/protocol/auth"
 	"github.com/zegoim/zego_server_assistant/token/go/src/token04"
 )
@@ -31,6 +32,27 @@ func GenerateAuth(appkey, userId, roomId string, rtcChannel pbobjs.RtcChannel) (
 		return errs.IMErrorCode_SUCCESS, &pbobjs.RtcAuth{
 			ZegoAuth: &pbobjs.ZegoAuth{
 				Token: token,
+			},
+		}
+	} else if rtcChannel == pbobjs.RtcChannel_Agora {
+		if appInfo.AgoraConfigObj == nil {
+			return errs.IMErrorCode_RTCROOM_RTCAUTHFAILED, nil
+		}
+		appId := appInfo.AgoraConfigObj.AppId
+		appCertificate := appInfo.AgoraConfigObj.AppCertificate
+		tokenExpirationInSeconds := uint32(3600)
+		privilegeExpirationInSeconds := uint32(3600)
+		// joinChannelPrivilegeExpireInSeconds := uint32(3600)
+		// pubAudioPrivilegeExpireInSeconds := uint32(3600)
+		// pubVideoPrivilegeExpireInSeconds := uint32(3600)
+		// pubDataStreamPrivilegeExpireInSeconds := uint32(3600)
+		result, err := agoraTokenBuilder.BuildTokenWithUserAccount(appId, appCertificate, roomId, userId, agoraTokenBuilder.RolePublisher, tokenExpirationInSeconds, privilegeExpirationInSeconds)
+		if err != nil {
+			return errs.IMErrorCode_RTCROOM_RTCAUTHFAILED, nil
+		}
+		return errs.IMErrorCode_SUCCESS, &pbobjs.RtcAuth{
+			AgoraAuth: &pbobjs.AgoraAuth{
+				Token: result,
 			},
 		}
 	} else if rtcChannel == pbobjs.RtcChannel_LivekitRtc {

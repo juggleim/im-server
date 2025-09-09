@@ -31,6 +31,7 @@ type AppInfo struct {
 	SecurityDomainsObj *SecurityDomains   `default:"-"`
 	ZegoConfigObj      *ZegoConfigObj     `default:"-"`
 	LivekitConfigObj   *LivekitConfigObj  `default:"-"`
+	AgoraConfigObj     *AgoraConfigObj    `default:"-"`
 
 	TokenEffectiveMinute  int    `default:"0"`
 	OfflineMsgSaveTime    int    `default:"1440"`
@@ -63,6 +64,7 @@ type AppInfo struct {
 	SecurityDomains string `default:""`
 	ZegoConfig      string `default:""`
 	LivekitConfig   string `default:""`
+	AgoraConfig     string `default:""`
 	TransEngineConf string `default:""`
 	SmsEngineConf   string `default:""`
 
@@ -143,6 +145,13 @@ func init() {
 				err := json.Unmarshal([]byte(appInfo.LivekitConfig), livekitConfig)
 				if err == nil {
 					appInfo.LivekitConfigObj = livekitConfig
+				}
+			}
+			if appInfo.AgoraConfigObj == nil && appInfo.AgoraConfig != "" {
+				agoraConfig := &AgoraConfigObj{}
+				err := json.Unmarshal([]byte(appInfo.AgoraConfig), agoraConfig)
+				if err == nil {
+					appInfo.AgoraConfigObj = agoraConfig
 				}
 			}
 			return appInfo
@@ -250,4 +259,9 @@ type LivekitConfigObj struct {
 	AppKey     string `json:"app_key"`
 	AppSecret  string `json:"app_secret"`
 	ServiceUrl string `json:"service_url"`
+}
+
+type AgoraConfigObj struct {
+	AppId          string `json:"app_id"`
+	AppCertificate string `json:"app_certificate"`
 }

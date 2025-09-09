@@ -197,6 +197,7 @@ require (
 )
 
 require (
+	github.com/AgoraIO/Tools/DynamicKey/AgoraDynamicKey/go/src v0.0.0-20250825033728-374cd21f5220
 	github.com/baidubce/bce-sdk-go v0.9.231
 	github.com/boombuler/barcode v1.0.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20230728082804-614d0af6619b
