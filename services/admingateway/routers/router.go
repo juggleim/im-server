@@ -2,7 +2,7 @@ package routers
 
 import (
 	"im-server/services/admingateway/apis"
-	"im-server/services/admingateway/services"
+	"im-server/services/admingateway/ctxs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +21,8 @@ func Route(eng *gin.Engine, prefix string) *gin.RouterGroup {
 	group.POST("/accounts/add", apis.AddAccount)
 	group.POST("/accounts/delete", apis.DeleteAccounts)
 	group.POST("/accounts/disable", apis.DisableAccounts)
+	group.POST("/accounts/bindapps", apis.BindApps)
+	group.POST("/accounts/unbindapps", apis.UnBindApps)
 	group.GET("/accounts/list", apis.QryAccounts)
 
 	group.POST("/apps/create", apis.CreateApp)
@@ -94,7 +96,7 @@ func CorsHandler() gin.HandlerFunc {
 func InjectCtx() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		appKey := ctx.Request.Header.Get("appkey")
-		ctx.Set(services.CtxKey_AppKey, appKey)
+		ctx.Set(string(ctxs.CtxKey_AppKey), appKey)
 		ctx.Next()
 	}
 }

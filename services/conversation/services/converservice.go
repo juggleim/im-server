@@ -29,6 +29,18 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 			if msgdefines.IsNoAffectSenderConver(msg.Flags) {
 				sortTime = 0
 			}
+			appinfo, exist := commonservices.GetAppInfo(appkey)
+			if exist && appinfo != nil && appinfo.RecordGlobalConvers {
+				converId := commonservices.GetConversationId(msg.SenderId, msg.TargetId, msg.ChannelType)
+				SaveGlobalConversationByCache(&GlobalConversationCacheItem{
+					Appkey:      appkey,
+					ConverId:    converId,
+					SenderId:    msg.SenderId,
+					TargetId:    msg.TargetId,
+					ChannelType: msg.ChannelType,
+					MsgTime:     msg.MsgTime,
+				})
+			}
 		} else {
 			unreadIndex = msg.UnreadIndex
 		}

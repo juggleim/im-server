@@ -7,12 +7,21 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '修改时间',
   `state` tinyint DEFAULT '0' COMMENT '状态',
-  `role_id` int DEFAULT '0' COMMENT '角色id',
+  `role_type` tinyint DEFAULT 0 COMMENT '角色类型',
   `parent_account` varchar(45) DEFAULT NULL COMMENT '父账号',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_account` (`account`),
   KEY `idx_parent` (`parent_account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '管理端-账号';
+
+CREATE TABLE IF NOT EXISTS `accountapprels` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `app_key` varchar(20) DEFAULT '',
+  `account_id` int DEFAULT '0',
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_app` (`account_id`,`app_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `androidpushconfs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -864,5 +873,5 @@ CREATE TABLE IF NOT EXISTS `topmsgs` (
   UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`sub_channel`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20240716');
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20250918');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

@@ -26,39 +26,37 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 	pushToken := GetPushToken(appkey, userId)
 	if pushToken.PushToken != "" || pushToken.VoipPushToken != "" {
 		if pushToken.Platform == pbobjs.Platform_iOS {
-			if pushToken.PushToken != "" {
-				iosPushConf := GetIosPushConf(ctx, appkey, pushToken.PackageName)
-				if iosPushConf != nil && (iosPushConf.ApnsClient != nil || iosPushConf.ApnsVoipClient != nil) {
-					notification := &apns2.Notification{}
-					notification.DeviceToken = pushToken.PushToken
-					notification.Topic = pushToken.PackageName
-					notification.Payload = iosPushPayload(req)
-					var client *apns2.Client
-					if req.IsVoip && iosPushConf.ApnsVoipClient != nil {
-						client = iosPushConf.ApnsVoipClient
-						notification.Topic = notification.Topic + ".voip"
-						notification.DeviceToken = pushToken.VoipPushToken
-						notification.PushType = apns2.PushTypeVOIP
+			iosPushConf := GetIosPushConf(ctx, appkey, pushToken.PackageName)
+			if iosPushConf != nil {
+				notification := &apns2.Notification{}
+				notification.DeviceToken = pushToken.PushToken
+				notification.Topic = pushToken.PackageName
+				notification.Payload = iosPushPayload(req)
+				var client *apns2.Client
+				if req.IsVoip && iosPushConf.ApnsVoipClient != nil && pushToken.VoipPushToken != "" {
+					client = iosPushConf.ApnsVoipClient
+					notification.Topic = notification.Topic + ".voip"
+					notification.DeviceToken = pushToken.VoipPushToken
+					notification.PushType = apns2.PushTypeVOIP
+				} else {
+					client = iosPushConf.ApnsClient
+				}
+				if client != nil {
+					resp, err := client.Push(notification)
+					if err != nil {
+						logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 					} else {
-						client = iosPushConf.ApnsClient
-					}
-					if client != nil {
-						resp, err := client.Push(notification)
-						if err != nil {
-							logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						if resp.StatusCode == 200 {
+							logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
 						} else {
-							if resp.StatusCode == 200 {
-								logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
-							} else {
-								logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
-							}
+							logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
 						}
-					} else {
-						logs.WithContext(ctx).Infof("[IOS_ERR]user_id:%s\tnot init apns client")
 					}
 				} else {
-					logs.WithContext(ctx).Infof("[IOS_CONF_NIL]app_key=%s\tpackage:%s", appkey, pushToken.PackageName)
+					logs.WithContext(ctx).Infof("[IOS_ERR]user_id:%s\tnot init apns client")
 				}
+			} else {
+				logs.WithContext(ctx).Infof("[IOS_CONF_NIL]app_key=%s\tpackage:%s", appkey, pushToken.PackageName)
 			}
 		} else if pushToken.Platform == pbobjs.Platform_Android {
 			androidPushConf := GetAndroidPushConf(ctx, appkey, pushToken.PackageName)

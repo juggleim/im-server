@@ -1,9 +1,13 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"im-server/commons/tools"
-	"im-server/services/commonservices/dbs"
+	"im-server/services/admingateway/ctxs"
+	"im-server/services/admingateway/dbs"
+	commonDbs "im-server/services/commonservices/dbs"
+	"im-server/services/commonservices/logs"
 	userStorage "im-server/services/usermanager/storages"
 	"math"
 	"time"
@@ -22,7 +26,7 @@ func init() {
 }
 
 func CreateApp(appInfo AppInfo) (AdminErrorCode, *AppInfo) {
-	dao := dbs.AppInfoDao{}
+	dao := commonDbs.AppInfoDao{}
 	if appInfo.AppKey == "" {
 		appInfo.AppKey = tools.RandStr(16)
 	}
@@ -38,7 +42,7 @@ func CreateApp(appInfo AppInfo) (AdminErrorCode, *AppInfo) {
 	if len(appInfo.AppSecret) != 16 {
 		appInfo.AppSecret = tools.RandStr(16)
 	}
-	newApp := dbs.AppInfoDao{
+	newApp := commonDbs.AppInfoDao{
 		AppName:      appInfo.AppName,
 		AppKey:       appInfo.AppKey,
 		AppSecret:    appInfo.AppSecret,
@@ -59,49 +63,92 @@ func CreateApp(appInfo AppInfo) (AdminErrorCode, *AppInfo) {
 	}
 }
 
-func QryApps(limit int64, offset string) *Apps {
+func QryApps(ctx context.Context, account string, limit int64, offset string) (AdminErrorCode, *Apps) {
+	curAccount, exist := GetAccountInfo(ctxs.GetAccountFromCtx(ctx))
+	if !exist || curAccount == nil {
+		return AdminErrorCode_AccountNotExist, nil
+	}
 	apps := &Apps{
 		Items:   []*SimpleApp{},
 		HasMore: false,
 		Offset:  "",
 	}
-	dao := dbs.AppInfoDao{}
-	offsetInt, err := tools.DecodeInt(offset)
-	if err != nil {
-		offsetInt = math.MaxInt64
-	}
-	dbApps, err := dao.QryApps(limit+1, offsetInt)
-	if err == nil {
-		if len(dbApps) > int(limit) {
-			dbApps = dbApps[:len(dbApps)-1]
-			apps.HasMore = true
+	if curAccount.RoleType == RoleType_SuperAdmin && account == "" {
+		dao := commonDbs.AppInfoDao{}
+		offsetInt, err := tools.DecodeInt(offset)
+		if err != nil {
+			offsetInt = math.MaxInt64
 		}
-		var id int64 = math.MaxInt64
-		for _, dbApp := range dbApps {
-			app := &SimpleApp{
-				AppKey:       dbApp.AppKey,
-				AppName:      dbApp.AppName,
-				CreatedTime:  dbApp.CreatedTime.UnixMilli(),
-				AppType:      dbApp.AppType,
-				MaxUserCount: 1000000,
+		dbApps, err := dao.QryApps(limit+1, offsetInt)
+		if err == nil {
+			if len(dbApps) > int(limit) {
+				dbApps = dbApps[:len(dbApps)-1]
+				apps.HasMore = true
 			}
-			storage := userStorage.NewUserStorage()
-			app.CurUserCount = storage.Count(dbApp.AppKey)
-			apps.Items = append(apps.Items, app)
-			if dbApp.ID < id {
-				id = dbApp.ID
+			var id int64 = math.MaxInt64
+			for _, dbApp := range dbApps {
+				app := &SimpleApp{
+					AppKey:       dbApp.AppKey,
+					AppName:      dbApp.AppName,
+					CreatedTime:  dbApp.CreatedTime.UnixMilli(),
+					AppType:      dbApp.AppType,
+					MaxUserCount: 100,
+				}
+				storage := userStorage.NewUserStorage()
+				app.CurUserCount = storage.Count(dbApp.AppKey)
+				if id > 0 {
+					offset, _ := tools.EncodeInt(id)
+					apps.Offset = offset
+				}
 			}
+		} else {
+			logs.NewLogEntity().Error(err.Error())
 		}
-		if id > 0 {
-			offset, _ := tools.EncodeInt(id)
-			apps.Offset = offset
+	} else {
+		acc := curAccount.Account
+		if curAccount.RoleType == RoleType_SuperAdmin && account != "" {
+			acc = account
+		}
+		dao := dbs.AccountAppRelDao{}
+		offsetInt, err := tools.DecodeInt(offset)
+		if err != nil {
+			offsetInt = math.MaxInt64
+		}
+		dbApps, err := dao.QryApps(acc, limit+1, offsetInt)
+		if err == nil {
+			if len(dbApps) > int(limit) {
+				dbApps = dbApps[:len(dbApps)-1]
+				apps.HasMore = true
+			}
+			var id int64 = math.MaxInt64
+			for _, dbApp := range dbApps {
+				app := &SimpleApp{
+					AppKey:       dbApp.AppKey,
+					AppName:      dbApp.AppName,
+					CreatedTime:  dbApp.CreatedTime.UnixMilli(),
+					AppType:      dbApp.AppType,
+					MaxUserCount: 100,
+				}
+				storage := userStorage.NewUserStorage()
+				app.CurUserCount = storage.Count(dbApp.AppKey)
+				apps.Items = append(apps.Items, app)
+				if dbApp.ID < id {
+					id = dbApp.ID
+				}
+			}
+			if id > 0 {
+				offset, _ := tools.EncodeInt(id)
+				apps.Offset = offset
+			}
+		} else {
+			logs.NewLogEntity().Error(err.Error())
 		}
 	}
-	return apps
+	return AdminErrorCode_Success, apps
 }
 
 func QryApp(appkey string) *AppInfo {
-	dao := dbs.AppInfoDao{}
+	dao := commonDbs.AppInfoDao{}
 	dbApp := dao.FindByAppkey(appkey)
 	if dbApp == nil {
 		return nil
@@ -120,7 +167,7 @@ func QryApp(appkey string) *AppInfo {
 	storage := userStorage.NewUserStorage()
 	appInfo.CurUserCount = storage.Count(dbApp.AppKey)
 	//appext
-	extDao := dbs.AppExtDao{}
+	extDao := commonDbs.AppExtDao{}
 	dbExts := extDao.FindListByAppkey(appkey)
 	for _, dbExt := range dbExts {
 		appInfo.ConfigFields[dbExt.AppItemKey] = dbExt.AppItemValue
@@ -136,7 +183,7 @@ func UpdateAppConfigs(appkey string, configFields map[string]interface{}) AdminE
 	// 		return AdminErrorCode_NotSupportField
 	// 	}
 	// }
-	dao := dbs.AppExtDao{}
+	dao := commonDbs.AppExtDao{}
 	for fieldKey, fieldValue := range configFields {
 		dao.CreateOrUpdate(appkey, fieldKey, fmt.Sprintf("%s", fieldValue))
 	}
@@ -148,7 +195,7 @@ func QryAppConfigs(appkey string, keys []string) (AdminErrorCode, *AppConfigs) {
 		AppKey:  appkey,
 		Configs: map[string]interface{}{},
 	}
-	dao := dbs.AppExtDao{}
+	dao := commonDbs.AppExtDao{}
 	extList, err := dao.FindByItemKeys(appkey, keys)
 	extMap := map[string]string{}
 	if err == nil {

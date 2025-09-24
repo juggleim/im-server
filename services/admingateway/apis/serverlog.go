@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/admingateway/ctxs"
 	"im-server/services/admingateway/services"
 	"im-server/services/commonservices"
 	logService "im-server/services/logmanager/services"
@@ -97,10 +98,11 @@ func qryServerLogs(ctx *gin.Context, logType string) {
 		services.FailHttpResp(ctx, services.AdminErrorCode_ParamError)
 		return
 	}
-	services.SetCtxString(ctx, services.CtxKey_AppKey, appkey)
+	rpcCtx := ctxs.ToCtx(ctx)
+	rpcCtx = ctxs.SetAppKeyToCtx(rpcCtx, appkey)
 	logs := []string{}
 	for _, targetId := range targetIds {
-		logs = qryLogsByRpc(services.ToRpcCtx(ctx, ""), targetId, &pbobjs.QryServerLogsReq{
+		logs = qryLogsByRpc(rpcCtx, targetId, &pbobjs.QryServerLogsReq{
 			LogType: logType,
 			UserId:  userId,
 			Session: session,

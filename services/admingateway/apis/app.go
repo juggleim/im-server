@@ -2,6 +2,7 @@ package apis
 
 import (
 	"im-server/commons/tools"
+	"im-server/services/admingateway/ctxs"
 	"im-server/services/admingateway/services"
 	"net/http"
 
@@ -47,7 +48,11 @@ func QryApps(ctx *gin.Context) {
 			limit = intVal
 		}
 	}
-	apps := services.QryApps(limit, offsetStr)
+	account := ctx.Query("account")
+	code, apps := services.QryApps(ctxs.ToCtx(ctx), account, limit, offsetStr)
+	if code != services.AdminErrorCode_Success {
+		services.FailHttpResp(ctx, code)
+	}
 	services.SuccessHttpResp(ctx, apps)
 }
 

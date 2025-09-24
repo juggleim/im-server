@@ -3,6 +3,8 @@ package dbs
 import (
 	"im-server/commons/dbcommons"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type AccountDao struct {
@@ -12,7 +14,7 @@ type AccountDao struct {
 	CreatedTime   time.Time `gorm:"created_time"`
 	UpdatedTime   time.Time `gorm:"updated_time"`
 	State         int       `gorm:"state"` //0:normal; 1:forbidden
-	RoleId        int       `gorm:"role_id"`
+	RoleType      int       `gorm:"role_type"`
 	ParentAccount string    `gorm:"parent_account"`
 }
 
@@ -38,6 +40,9 @@ func (admin AccountDao) FindByAccount(account string) (*AccountDao, error) {
 	var item AccountDao
 	err := dbcommons.GetDb().Where("account=?", account).Take(&item).Error
 	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &item, nil

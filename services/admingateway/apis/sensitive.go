@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/admingateway/ctxs"
 	"im-server/services/admingateway/services"
 	"io"
 
@@ -32,8 +33,9 @@ func SensitiveWords(ctx *gin.Context) {
 		}
 	}
 	appkey := ctx.Query("app_key")
-	services.SetCtxString(ctx, services.CtxKey_AppKey, appkey)
-	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_sensitive_words", tools.RandStr(8), &pbobjs.QrySensitiveWordsReq{
+	rpcCtx := ctxs.ToCtx(ctx)
+	rpcCtx = ctxs.SetAppKeyToCtx(rpcCtx, appkey)
+	code, resp, err := bases.SyncRpcCall(rpcCtx, "qry_sensitive_words", tools.RandStr(8), &pbobjs.QrySensitiveWordsReq{
 		Page: int32(page),
 		Size: int32(size),
 	}, func() proto.Message {
@@ -115,7 +117,7 @@ func ImportSensitiveWords(ctx *gin.Context) {
 		Words: allWords,
 	}
 
-	bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "add_sensitive_words", appKey, rpcReq, nil)
+	bases.SyncRpcCall(ctxs.ToCtx(ctx), "add_sensitive_words", appKey, rpcReq, nil)
 
 	services.SuccessHttpResp(ctx, nil)
 }
@@ -136,8 +138,9 @@ func AddSensitiveWord(ctx *gin.Context) {
 		},
 	}
 	appKey := req.AppKey
-	services.SetCtxString(ctx, services.CtxKey_AppKey, appKey)
-	bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "add_sensitive_words", appKey, rpcReq, nil)
+	rpcCtx := ctxs.ToCtx(ctx)
+	rpcCtx = ctxs.SetAppKeyToCtx(rpcCtx, appKey)
+	bases.SyncRpcCall(rpcCtx, "add_sensitive_words", appKey, rpcReq, nil)
 
 	services.SuccessHttpResp(ctx, nil)
 }
@@ -152,8 +155,9 @@ func DeleteSensitiveWord(ctx *gin.Context) {
 	rpcReq := &pbobjs.DelSensitiveWordsReq{
 		Words: []string{req.Word},
 	}
-	services.SetCtxString(ctx, services.CtxKey_AppKey, appKey)
-	bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "del_sensitive_words", appKey, rpcReq, nil)
+	rpcCtx := ctxs.ToCtx(ctx)
+	rpcCtx = ctxs.SetAppKeyToCtx(rpcCtx, appKey)
+	bases.SyncRpcCall(rpcCtx, "del_sensitive_words", appKey, rpcReq, nil)
 
 	services.SuccessHttpResp(ctx, nil)
 }

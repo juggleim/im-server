@@ -3,6 +3,7 @@ package apis
 import (
 	"fmt"
 	"im-server/commons/tools"
+	"im-server/services/admingateway/ctxs"
 	"im-server/services/admingateway/services"
 	"net/http"
 	"strings"
@@ -20,7 +21,7 @@ const (
 func Validate(ctx *gin.Context) {
 	session := fmt.Sprintf("admin_%s", tools.GenerateUUIDShort11())
 	ctx.Header(Header_RequestId, session)
-	ctx.Set(services.CtxKey_Session, session)
+	ctx.Set(string(ctxs.CtxKey_Session), session)
 
 	urlPath := ctx.Request.URL.Path
 	if strings.HasSuffix(urlPath, "/login") || strings.HasSuffix(urlPath, "/apps/create") {
@@ -46,11 +47,11 @@ func Validate(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
-	ctx.Set(services.CtxKey_Account, account)
+	ctx.Set(string(ctxs.CtxKey_Account), account)
 }
 
 func GetLoginedAccount(ctx *gin.Context) string {
-	if account, ok := ctx.Value(services.CtxKey_Account).(string); ok {
+	if account, ok := ctx.Value(ctxs.CtxKey_Account).(string); ok {
 		return account
 	}
 	return ""
@@ -59,7 +60,8 @@ func GetLoginedAccount(ctx *gin.Context) string {
 var jwtkey = []byte("jug9le1m")
 
 type Claims struct {
-	Account string
+	Account  string
+	RoleType int
 	jwt.RegisteredClaims
 }
 

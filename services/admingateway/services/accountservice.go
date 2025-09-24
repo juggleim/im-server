@@ -1,10 +1,75 @@
 package services
 
 import (
+	"context"
 	"im-server/commons/tools"
+	"im-server/services/admingateway/ctxs"
 	"im-server/services/admingateway/dbs"
 	"time"
+
+	"github.com/juggleim/commons/caches"
 )
+
+type RoleType int
+type AccountState int
+
+const (
+	RoleType_SuperAdmin  RoleType = 0
+	RoleType_NormalAdmin RoleType = 1
+
+	AccountState_Normal AccountState = 0
+)
+
+type AccountInfo struct {
+	Account  string
+	RoleType RoleType
+	State    AccountState
+}
+
+var accountInfoCache *caches.LruCache
+var accountLocks *tools.SegmentatedLocks
+
+func init() {
+	accountLocks = tools.NewSegmentatedLocks(16)
+	accountInfoCache = caches.NewLruCacheWithAddReadTimeout("account_cache", 100, nil, 10*time.Minute, 10*time.Minute)
+}
+
+var notExistAccount = &AccountInfo{}
+
+func GetAccountInfo(account string) (*AccountInfo, bool) {
+	if val, exist := accountInfoCache.Get(account); exist {
+		info := val.(*AccountInfo)
+		if info == notExistAccount {
+			return nil, false
+		}
+		return info, true
+	} else {
+		l := accountLocks.GetLocks(account)
+		l.Lock()
+		defer l.Unlock()
+		if val, exist := accountInfoCache.Get(account); exist {
+			info := val.(*AccountInfo)
+			if info == notExistAccount {
+				return nil, false
+			}
+			return info, true
+		} else {
+			dao := dbs.AccountDao{}
+			acc, err := dao.FindByAccount(account)
+			if err != nil || acc == nil {
+				accountInfoCache.Add(account, notExistAccount)
+				return nil, false
+			}
+			info := &AccountInfo{
+				Account:  account,
+				State:    AccountState(acc.State),
+				RoleType: RoleType(acc.RoleType),
+			}
+			accountInfoCache.Add(account, info)
+			return info, true
+		}
+	}
+}
 
 func CheckLogin(account, password string) (AdminErrorCode, *Account) {
 	dao := dbs.AccountDao{}
@@ -31,7 +96,7 @@ func CheckLogin(account, password string) (AdminErrorCode, *Account) {
 			Account:       admin.Account,
 			State:         admin.State,
 			ParentAccount: admin.ParentAccount,
-			RoleId:        admin.RoleId,
+			RoleType:      admin.RoleType,
 			CreatedTime:   admin.CreatedTime.UnixMilli(),
 			UpdatedTime:   admin.UpdatedTime.UnixMilli(),
 		}
@@ -65,7 +130,15 @@ func UpdPassword(account, password, newPassword string) AdminErrorCode {
 	return AdminErrorCode_Success
 }
 
-func AddAccount(parentAccount, account, password string, roleId int) AdminErrorCode {
+func AddAccount(ctx context.Context, account, password string, roleType int) AdminErrorCode {
+	parentAccount := ctxs.GetAccountFromCtx(ctx)
+	curAccount, exist := GetAccountInfo(parentAccount)
+	if !exist || curAccount == nil {
+		return AdminErrorCode_AccountNotExist
+	}
+	if curAccount.RoleType != RoleType_SuperAdmin {
+		return AdminErrorCode_NotPermission
+	}
 	dao := dbs.AccountDao{}
 	password = tools.SHA1(password)
 	err := dao.Create(dbs.AccountDao{
@@ -74,7 +147,7 @@ func AddAccount(parentAccount, account, password string, roleId int) AdminErrorC
 		ParentAccount: parentAccount,
 		UpdatedTime:   time.Now(),
 		CreatedTime:   time.Now(),
-		RoleId:        roleId,
+		RoleType:      roleType,
 	})
 	if err != nil {
 		return AdminErrorCode_AccountExisted
@@ -82,18 +155,72 @@ func AddAccount(parentAccount, account, password string, roleId int) AdminErrorC
 	return AdminErrorCode_Success
 }
 
-func DisableAccounts(accounts []string, isDisable int) AdminErrorCode {
+func DisableAccounts(ctx context.Context, accounts []string, isDisable int) AdminErrorCode {
+	curAccount, exist := GetAccountInfo(ctxs.GetAccountFromCtx(ctx))
+	if !exist || curAccount == nil {
+		return AdminErrorCode_AccountNotExist
+	}
+	if curAccount.RoleType != RoleType_SuperAdmin {
+		return AdminErrorCode_NotPermission
+	}
 	dao := dbs.AccountDao{}
 	dao.UpdateState(accounts, isDisable)
 	return AdminErrorCode_Success
 }
-func DeleteAccounts(accounts []string) AdminErrorCode {
+
+func DeleteAccounts(ctx context.Context, accounts []string) AdminErrorCode {
+	curAccount, exist := GetAccountInfo(ctxs.GetAccountFromCtx(ctx))
+	if !exist || curAccount == nil {
+		return AdminErrorCode_AccountNotExist
+	}
+	if curAccount.RoleType != RoleType_SuperAdmin {
+		return AdminErrorCode_NotPermission
+	}
 	dao := dbs.AccountDao{}
 	dao.DeleteAccounts(accounts)
 	return AdminErrorCode_Success
 }
 
-func QryAccounts(limit int64, offset string) *Accounts {
+func BindApps(ctx context.Context, account string, appkeys []string) AdminErrorCode {
+	curAccount, exist := GetAccountInfo(ctxs.GetAccountFromCtx(ctx))
+	if !exist || curAccount == nil {
+		return AdminErrorCode_AccountNotExist
+	}
+	if curAccount.RoleType != RoleType_SuperAdmin {
+		return AdminErrorCode_NotPermission
+	}
+	dao := dbs.AccountAppRelDao{}
+	for _, appkey := range appkeys {
+		dao.Create(dbs.AccountAppRelDao{
+			AppKey:  appkey,
+			Account: account,
+		})
+	}
+	return AdminErrorCode_Success
+}
+
+func UnBindApps(ctx context.Context, account string, appkeys []string) AdminErrorCode {
+	curAccount, exist := GetAccountInfo(ctxs.GetAccountFromCtx(ctx))
+	if !exist || curAccount == nil {
+		return AdminErrorCode_AccountNotExist
+	}
+	if curAccount.RoleType != RoleType_SuperAdmin {
+		return AdminErrorCode_NotPermission
+	}
+	dao := dbs.AccountAppRelDao{}
+	dao.BatchDelete(account, appkeys)
+	return AdminErrorCode_Success
+}
+
+func QryAccounts(ctx context.Context, limit int64, offset string) (AdminErrorCode, *Accounts) {
+	curAccount, exist := GetAccountInfo(ctxs.GetAccountFromCtx(ctx))
+	if !exist || curAccount == nil {
+		return AdminErrorCode_AccountNotExist, nil
+	}
+	if curAccount.RoleType != RoleType_SuperAdmin {
+		return AdminErrorCode_NotPermission, nil
+	}
+
 	accounts := &Accounts{
 		Items:   []*Account{},
 		HasMore: false,
@@ -118,7 +245,7 @@ func QryAccounts(limit int64, offset string) *Accounts {
 				CreatedTime:   dbAccount.CreatedTime.UnixMilli(),
 				UpdatedTime:   dbAccount.UpdatedTime.UnixMilli(),
 				ParentAccount: dbAccount.ParentAccount,
-				RoleId:        dbAccount.RoleId,
+				RoleType:      dbAccount.RoleType,
 			})
 			if dbAccount.ID > id {
 				id = dbAccount.ID
@@ -129,5 +256,5 @@ func QryAccounts(limit int64, offset string) *Accounts {
 			accounts.Offset = offset
 		}
 	}
-	return accounts
+	return AdminErrorCode_Success, accounts
 }

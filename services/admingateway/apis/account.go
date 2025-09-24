@@ -5,6 +5,8 @@ import (
 	"im-server/services/admingateway/services"
 	"net/http"
 
+	"im-server/services/admingateway/ctxs"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,7 +33,8 @@ func Login(ctx *gin.Context) {
 			Account:       req.Account,
 			Authorization: authStr,
 			Env:           "private", //public
-			RoleId:        account.RoleId,
+			// RoleId:        account.RoleId,
+			RoleType: account.RoleType,
 		})
 	} else {
 		ctx.JSON(http.StatusOK, &services.ApiErrorMsg{
@@ -45,14 +48,16 @@ type AccountReq struct {
 	Account     string `json:"account"`
 	Password    string `json:"password"`
 	NewPassword string `json:"new_password"`
-	RoleId      int    `json:"role_id"`
+	// RoleId      int    `json:"role_id"`
+	RoleType int `json:"role_type"`
 }
 
 type LoginResp struct {
 	Account       string `json:"account"`
 	Authorization string `json:"authorization"`
 	Env           string `json:"env"`
-	RoleId        int    `json:"role_id"`
+	// RoleId        int    `json:"role_id"`
+	RoleType int `json:"role_type"`
 }
 
 func AddAccount(ctx *gin.Context) {
@@ -64,7 +69,7 @@ func AddAccount(ctx *gin.Context) {
 		})
 		return
 	}
-	code := services.AddAccount(GetLoginedAccount(ctx), req.Account, req.Password, req.RoleId)
+	code := services.AddAccount(ctxs.ToCtx(ctx), req.Account, req.Password, req.RoleType)
 	ctx.JSON(http.StatusOK, &services.ApiErrorMsg{
 		Code: code,
 	})
@@ -94,10 +99,43 @@ func DisableAccounts(ctx *gin.Context) {
 		})
 		return
 	}
-	code := services.DisableAccounts(req.Accounts, req.IsDisable)
+	code := services.DisableAccounts(ctxs.ToCtx(ctx), req.Accounts, req.IsDisable)
 	ctx.JSON(http.StatusOK, &services.ApiErrorMsg{
 		Code: code,
 	})
+}
+
+type BindAppsReq struct {
+	Account string   `json:"account"`
+	AppKeys []string `json:"app_keys"`
+}
+
+func BindApps(ctx *gin.Context) {
+	var req BindAppsReq
+	if err := ctx.ShouldBindJSON(&req); err != nil || req.Account == "" || len(req.AppKeys) <= 0 {
+		services.FailHttpResp(ctx, services.AdminErrorCode_ParamError)
+		return
+	}
+	code := services.BindApps(ctxs.ToCtx(ctx), req.Account, req.AppKeys)
+	if code != services.AdminErrorCode_Success {
+		services.FailHttpResp(ctx, code)
+		return
+	}
+	services.SuccessHttpResp(ctx, nil)
+}
+
+func UnBindApps(ctx *gin.Context) {
+	var req BindAppsReq
+	if err := ctx.ShouldBindJSON(&req); err != nil || req.Account == "" || len(req.AppKeys) <= 0 {
+		services.FailHttpResp(ctx, services.AdminErrorCode_ParamError)
+		return
+	}
+	code := services.UnBindApps(ctxs.ToCtx(ctx), req.Account, req.AppKeys)
+	if code != services.AdminErrorCode_Success {
+		services.FailHttpResp(ctx, code)
+		return
+	}
+	services.SuccessHttpResp(ctx, nil)
 }
 
 func DeleteAccounts(ctx *gin.Context) {
@@ -109,7 +147,7 @@ func DeleteAccounts(ctx *gin.Context) {
 		})
 		return
 	}
-	code := services.DeleteAccounts(req.Accounts)
+	code := services.DeleteAccounts(ctxs.ToCtx(ctx), req.Accounts)
 	ctx.JSON(http.StatusOK, &services.ApiErrorMsg{
 		Code: code,
 	})
@@ -130,6 +168,12 @@ func QryAccounts(ctx *gin.Context) {
 			limit = intVal
 		}
 	}
-	accounts := services.QryAccounts(limit, offsetStr)
+	code, accounts := services.QryAccounts(ctxs.ToCtx(ctx), limit, offsetStr)
+	if code != services.AdminErrorCode_Success {
+		ctx.JSON(http.StatusOK, &services.ApiErrorMsg{
+			Code: code,
+		})
+		return
+	}
 	services.SuccessHttpResp(ctx, accounts)
 }
