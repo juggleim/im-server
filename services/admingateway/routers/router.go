@@ -32,6 +32,13 @@ func Route(eng *gin.Engine, prefix string) *gin.RouterGroup {
 	group.POST("/apps/configs/get", apis.QryAppConfigs)
 	group.POST("/apps/eventsubconfig/set", apis.SetEventSubConfig)
 	group.GET("/apps/eventsubconfig/get", apis.GetEventSubConfig)
+	//rtc
+	group.POST("/apps/zegoconf/set", apis.SetZegoConf)
+	group.GET("/apps/zegoconf/get", apis.GetZegoConf)
+	group.POST("/apps/agoraconf/set", apis.SetAgoraConf)
+	group.GET("/apps/agoraconf/get", apis.GetAgoraConf)
+	group.POST("/apps/livekitconf/set", apis.SetLivekitConf)
+	group.GET("/apps/livekitconf/get", apis.GetLivekitConf)
 	//translate
 	group.POST("/apps/translate/set", apis.SetTranslateConf)
 	group.GET("/apps/translate/get", apis.GetTranslateConf)
