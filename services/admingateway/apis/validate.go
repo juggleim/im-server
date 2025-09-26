@@ -86,7 +86,16 @@ func GetLoginedAccount(ctx *gin.Context) string {
 	return ""
 }
 
-var jwtkey = []byte("jug9le1m")
+var defaultJwtkey = []byte("jug9le1m")
+
+func getJwtKey() []byte {
+	adminSecret := configures.Config.AdminSecret
+	if adminSecret != "" {
+		return []byte(adminSecret)
+	} else {
+		return defaultJwtkey
+	}
+}
 
 type Claims struct {
 	Account  string
@@ -110,7 +119,7 @@ func generateAuthorization(account string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtkey)
+	tokenString, err := token.SignedString(getJwtKey())
 	if err != nil {
 		return "", err
 	}
@@ -132,7 +141,7 @@ func validateAuthorization(authorization string) (string, error) {
 func parseToken(tokenString string) (*jwt.Token, *Claims, error) {
 	Claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, Claims, func(token *jwt.Token) (i interface{}, err error) {
-		return jwtkey, nil
+		return getJwtKey(), nil
 	})
 	return token, Claims, err
 }
