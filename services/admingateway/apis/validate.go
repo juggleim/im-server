@@ -2,6 +2,7 @@ package apis
 
 import (
 	"fmt"
+	"im-server/commons/configures"
 	"im-server/commons/tools"
 	"im-server/services/admingateway/ctxs"
 	"im-server/services/admingateway/services"
@@ -16,6 +17,9 @@ import (
 const (
 	Header_RequestId     string = "request-id"
 	Header_Authorization string = "Authorization"
+	Header_Timestamp     string = "timestamp"
+	Header_Nonce         string = "timestamp"
+	Header_Signature     string = "signature"
 )
 
 func Validate(ctx *gin.Context) {
@@ -27,27 +31,52 @@ func Validate(ctx *gin.Context) {
 	if strings.HasSuffix(urlPath, "/login") || strings.HasSuffix(urlPath, "/apps/create") {
 		return
 	}
-	authStr := ctx.Request.Header.Get(Header_Authorization)
-	account, err := validateAuthorization(authStr)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, &services.ApiErrorMsg{
-			Code: services.AdminErrorCode_AuthFail,
-			Msg:  "auth failed",
-		})
-		ctx.Abort()
-		return
+
+	signature := ctx.Request.Header.Get(Header_Signature)
+	if signature != "" && configures.Config.AdminSecret != "" {
+		secret := configures.Config.AdminSecret
+		nonce := ctx.Request.Header.Get(Header_Nonce)
+		tsStr := ctx.Request.Header.Get(Header_Timestamp)
+		if nonce == "" || tsStr == "" {
+			ctx.JSON(http.StatusBadRequest, &services.ApiErrorMsg{
+				Code: services.AdminErrorCode_ParamError,
+			})
+			ctx.Abort()
+			return
+		}
+		str := fmt.Sprintf("%s%s%s", secret, nonce, tsStr)
+		sig := tools.SHA1(str)
+		if sig != signature {
+			ctx.JSON(http.StatusUnauthorized, &services.ApiErrorMsg{
+				Code: services.AdminErrorCode_AuthFail,
+				Msg:  "auth failed",
+			})
+			ctx.Abort()
+			return
+		}
+	} else {
+		authStr := ctx.Request.Header.Get(Header_Authorization)
+		account, err := validateAuthorization(authStr)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, &services.ApiErrorMsg{
+				Code: services.AdminErrorCode_AuthFail,
+				Msg:  "auth failed",
+			})
+			ctx.Abort()
+			return
+		}
+		//check account
+		code := services.CheckAccountState(account)
+		if code != services.AdminErrorCode_Success {
+			ctx.JSON(http.StatusUnauthorized, &services.ApiErrorMsg{
+				Code: code,
+				Msg:  "auth failed",
+			})
+			ctx.Abort()
+			return
+		}
+		ctx.Set(string(ctxs.CtxKey_Account), account)
 	}
-	//check account
-	code := services.CheckAccountState(account)
-	if code != services.AdminErrorCode_Success {
-		ctx.JSON(http.StatusUnauthorized, &services.ApiErrorMsg{
-			Code: code,
-			Msg:  "auth failed",
-		})
-		ctx.Abort()
-		return
-	}
-	ctx.Set(string(ctxs.CtxKey_Account), account)
 }
 
 func GetLoginedAccount(ctx *gin.Context) string {

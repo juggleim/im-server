@@ -69,6 +69,7 @@ type ImConfig struct {
 	AdminGateway struct {
 		HttpPort int `yaml:"httpPort"`
 	} `yaml:"adminGateway"`
+	AdminSecret string `yaml:"adminSecret"`
 }
 
 var Config ImConfig
