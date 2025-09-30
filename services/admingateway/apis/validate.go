@@ -98,8 +98,7 @@ func getJwtKey() []byte {
 }
 
 type Claims struct {
-	Account  string
-	RoleType int
+	Account string
 	jwt.RegisteredClaims
 }
 

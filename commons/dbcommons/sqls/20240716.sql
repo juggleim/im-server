@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '修改时间',
   `state` tinyint DEFAULT '0' COMMENT '状态',
-  `role_id` int DEFAULT '0' COMMENT '角色id',
+  `role_id` int DEFAULT '0' COMMENT '角色类型',
   `parent_account` varchar(45) DEFAULT NULL COMMENT '父账号',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_account` (`account`),
