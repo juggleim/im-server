@@ -96,6 +96,7 @@ func QryApps(ctx context.Context, account string, limit int64, offset string) (A
 				}
 				storage := userStorage.NewUserStorage()
 				app.CurUserCount = storage.Count(dbApp.AppKey)
+				apps.Items = append(apps.Items, app)
 				if id > 0 {
 					offset, _ := tools.EncodeInt(id)
 					apps.Offset = offset
