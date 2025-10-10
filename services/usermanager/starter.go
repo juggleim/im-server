@@ -62,6 +62,12 @@ func (manager *UserManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("qry_pri_global_mute", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryPriGlobalMuteActor{}, serviceName)
 	})
+	register.RegisterActor("grp_global_mute", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.GrpGlobalMuteActor{}, serviceName)
+	})
+	register.RegisterActor("qry_grp_global_mute", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryGrpGlobalMuteActor{}, serviceName)
+	})
 }
 
 func (manager *UserManager) Startup(args map[string]interface{}) {

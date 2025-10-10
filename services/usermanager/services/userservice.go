@@ -85,6 +85,17 @@ func (u *UserInfo) SetPriGlobalMute(isDelete bool, endTime int64) {
 	}
 }
 
+func (u *UserInfo) SetGrpGlobalMute(isDelete bool, endTime int64) {
+	lock := userLocks.GetLocks(u.AppKey, u.UserId)
+	lock.Lock()
+	defer lock.Unlock()
+	if isDelete {
+		delete(u.SettingFields, string(commonservices.AttItemKey_GrpGlobalMute))
+	} else {
+		u.SettingFields[string(commonservices.AttItemKey_GrpGlobalMute)] = tools.Int642String(endTime)
+	}
+}
+
 var notExistUser *UserInfo
 
 func init() {

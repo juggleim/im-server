@@ -34,6 +34,7 @@ const (
 	AttItemKey_Language      AttItemKey = "language"
 	AttItemKey_Undisturb     AttItemKey = "undisturb"
 	AttItemKey_PriGlobalMute AttItemKey = "pri_global_mute"
+	AttItemKey_GrpGlobalMute AttItemKey = "grp_global_mute"
 
 	//setting keys of bots
 	AttItemKey_Bot_Type    AttItemKey = "bot_type"

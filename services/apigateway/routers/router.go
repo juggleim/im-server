@@ -45,6 +45,9 @@ func Route(eng *gin.Engine, prefix string) {
 	group.POST("/private/globalmutemembers/add", apis.AddPrivateGlobalMuteMembers)
 	group.POST("/private/globalmutemembers/del", apis.DelPrivateGlobalMuteMembers)
 	group.GET("/private/globalmutemembers/query", apis.QryPrivateGlobalMuteMembers)
+	group.POST("/group/globalmutemembers/add", apis.AddGroupGlobalMuteMembers)
+	group.POST("/group/globalmutemembers/del", apis.DelGroupGlobalMuteMembers)
+	group.GET("/group/globalmutemembers/query", apis.QryGroupGlobalMuteMembers)
 
 	group.POST("/groups/add", apis.GroupAddMembers)
 	group.GET("/groups/info", apis.QryGroupInfo)
