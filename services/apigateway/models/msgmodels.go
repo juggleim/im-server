@@ -1,21 +1,23 @@
 package models
 
 type SendMsgReq struct {
-	SenderId       string       `json:"sender_id"`
-	ReceiverId     string       `json:"receiver_id"`
-	TargetId       string       `json:"target_id"`
-	TargetIds      []string     `json:"target_ids"`
-	ToUserIds      []string     `json:"to_user_ids"`
-	MsgType        string       `json:"msg_type"`
-	MsgContent     string       `json:"msg_content"`
-	IsStorage      *bool        `json:"is_storage"`
-	IsCount        *bool        `json:"is_count"`
-	IsNotifySender *bool        `json:"is_notify_sender"`
-	IsState        *bool        `json:"is_state"`
-	IsCmd          *bool        `json:"is_cmd"`
-	MentionInfo    *MentionInfo `json:"mention_info"`
-	ReferMsg       *ReferMsg    `json:"refer_msg"`
-	PushData       *PushData    `json:"push_data"`
+	SenderId          string       `json:"sender_id"`
+	ReceiverId        string       `json:"receiver_id"`
+	TargetId          string       `json:"target_id"`
+	TargetIds         []string     `json:"target_ids"`
+	ToUserIds         []string     `json:"to_user_ids"`
+	MsgType           string       `json:"msg_type"`
+	MsgContent        string       `json:"msg_content"`
+	IsStorage         *bool        `json:"is_storage"`
+	IsCount           *bool        `json:"is_count"`
+	IsNotifySender    *bool        `json:"is_notify_sender"`
+	IsState           *bool        `json:"is_state"`
+	IsCmd             *bool        `json:"is_cmd"`
+	MentionInfo       *MentionInfo `json:"mention_info"`
+	ReferMsg          *ReferMsg    `json:"refer_msg"`
+	PushData          *PushData    `json:"push_data"`
+	LifeTime          int64        `json:"life_time"`
+	LifeTimeAfterRead int64        `json:"life_time_after_read"`
 
 	MsgId *string `json:"msg_id,omitempty"`
 }

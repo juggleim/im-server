@@ -61,12 +61,14 @@ func SendPrivateMsg(ctx *gin.Context) {
 				MsgId: msgId,
 			})
 			commonservices.AsyncPrivateMsgOverUpstream(services.ToRpcCtx(ctx, sendMsgReq.SenderId), sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
-				MsgType:     sendMsgReq.MsgType,
-				MsgContent:  []byte(sendMsgReq.MsgContent),
-				Flags:       handleFlag(sendMsgReq),
-				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
-				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
-				PushData:    handlePushData(sendMsgReq.PushData),
+				MsgType:           sendMsgReq.MsgType,
+				MsgContent:        []byte(sendMsgReq.MsgContent),
+				Flags:             handleFlag(sendMsgReq),
+				MentionInfo:       handleMentionInfo(sendMsgReq.MentionInfo),
+				ReferMsg:          handleReferMsg(sendMsgReq.ReferMsg),
+				PushData:          handlePushData(sendMsgReq.PushData),
+				LifeTime:          sendMsgReq.LifeTime,
+				LifeTimeAfterRead: sendMsgReq.LifeTimeAfterRead,
 			}, opts...)
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -158,13 +160,15 @@ func SendGroupMsg(ctx *gin.Context) {
 				MsgId: msgId,
 			})
 			commonservices.AsyncGroupMsgOverUpstream(services.ToRpcCtx(ctx, sendMsgReq.SenderId), sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
-				MsgType:     sendMsgReq.MsgType,
-				MsgContent:  []byte(sendMsgReq.MsgContent),
-				Flags:       handleFlag(sendMsgReq),
-				ToUserIds:   sendMsgReq.ToUserIds,
-				MentionInfo: handleMentionInfo(sendMsgReq.MentionInfo),
-				ReferMsg:    handleReferMsg(sendMsgReq.ReferMsg),
-				PushData:    handlePushData(sendMsgReq.PushData),
+				MsgType:           sendMsgReq.MsgType,
+				MsgContent:        []byte(sendMsgReq.MsgContent),
+				Flags:             handleFlag(sendMsgReq),
+				ToUserIds:         sendMsgReq.ToUserIds,
+				MentionInfo:       handleMentionInfo(sendMsgReq.MentionInfo),
+				ReferMsg:          handleReferMsg(sendMsgReq.ReferMsg),
+				PushData:          handlePushData(sendMsgReq.PushData),
+				LifeTime:          sendMsgReq.LifeTime,
+				LifeTimeAfterRead: sendMsgReq.LifeTimeAfterRead,
 			}, opts...)
 			time.Sleep(10 * time.Millisecond)
 		}
