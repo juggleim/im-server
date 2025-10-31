@@ -60,9 +60,17 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 	result := strings.ToLower(resp.Result)
 	customCode := resp.CustomCode
 	if result == "pass" {
+		if msg != nil {
+			if resp.LifeTime > 0 {
+				msg.LifeTime = resp.LifeTime
+			}
+		}
 		return InterceptorResult_Pass, 0
 	} else if result == "replace" {
 		if msg != nil {
+			if resp.LifeTime > 0 {
+				msg.LifeTime = resp.LifeTime
+			}
 			if resp.MsgType == "" && resp.MsgContent == "" {
 				return InterceptorResult_Pass, customCode
 			}
@@ -91,6 +99,7 @@ type CustomInterceptorResp struct {
 	MsgType    string `json:"msg_type"`
 	MsgContent string `json:"msg_content"`
 	CustomCode int64  `json:"custom_code"`
+	LifeTime   int64  `json:"life_time"`
 }
 
 type MsgEvent struct {
