@@ -155,6 +155,7 @@ message DownMsg{
   bool isDelete = 33;
   string subChannel = 34;
   repeated string toUserIds = 35;
+  int64 readTime = 36;
 }
 
 message PriMsgPostReq{

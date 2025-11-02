@@ -325,6 +325,9 @@ func QryHisMsgs(ctx context.Context, appkey, targetId, subChannel string, channe
 						downMsg.TargetId = targetId
 					}
 					downMsg.IsRead = dbMsg.IsRead > 0
+					if downMsg.IsRead {
+						downMsg.ReadTime = dbMsg.ReadTime
+					}
 					downMsg.IsDelete = dbMsg.IsDelete == 1
 					//msg ext
 					if len(dbMsg.MsgExt) > 0 {

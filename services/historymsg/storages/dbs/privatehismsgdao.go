@@ -25,6 +25,7 @@ type PrivateHisMsgDao struct {
 	MsgSeqNo          int64  `gorm:"msg_seq_no"`
 	MsgBody           []byte `gorm:"msg_body"`
 	IsRead            int    `gorm:"is_read"`
+	ReadTime          int64  `gorm:"read_time"`
 	AppKey            string `gorm:"app_key"`
 	IsDelete          int    `gorm:"is_delete"`
 	IsExt             int    `gorm:"is_ext"`
@@ -207,7 +208,10 @@ func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId, subChannel string, star
 }
 
 func (msg PrivateHisMsgDao) MarkReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error {
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_id in (?)", appkey, converId, subChannel, msgIds).Update("is_read", 1).Error
+	upd := map[string]interface{}{}
+	upd["is_read"] = 1
+	upd["read_time"] = time.Now().UnixMilli()
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_id in (?)", appkey, converId, subChannel, msgIds).Update(upd).Error
 }
 
 func (msg PrivateHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error {
@@ -215,7 +219,10 @@ func (msg PrivateHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId,
 }
 
 func (msg PrivateHisMsgDao) MarkReadByScope(appkey, converId, subChannel string, start, end int64) error {
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_index>=? and msg_index<=?", appkey, converId, subChannel, start, end).Update("is_read", 1).Error
+	upd := map[string]interface{}{}
+	upd["is_read"] = 1
+	upd["read_time"] = time.Now().UnixMilli()
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_index>=? and msg_index<=?", appkey, converId, subChannel, start, end).Update(upd).Error
 }
 
 func (msg PrivateHisMsgDao) UpdateDestroyTimeAfterReadByScope(appkey, converId, subChannel string, start, end int64) error {
@@ -310,6 +317,7 @@ func dbMsg2PrivateMsg(dbMsg *PrivateHisMsgDao) *models.PrivateHisMsg {
 			DestroyTime:       dbMsg.DestroyTime,
 			LifeTimeAfterRead: dbMsg.LifeTimeAfterRead,
 		},
-		IsRead: dbMsg.IsRead,
+		IsRead:   dbMsg.IsRead,
+		ReadTime: dbMsg.ReadTime,
 	}
 }

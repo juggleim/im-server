@@ -32,7 +32,8 @@ type GroupHisMsg struct {
 
 type PrivateHisMsg struct {
 	HisMsg
-	IsRead int
+	IsRead   int
+	ReadTime int64
 }
 
 type SystemHisMsg struct {

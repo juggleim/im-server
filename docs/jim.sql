@@ -590,6 +590,7 @@ CREATE TABLE IF NOT EXISTS `p_hismsgs` (
   `msg_body` mediumblob COMMENT '消息体',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   `is_read` tinyint DEFAULT '0' COMMENT '是否已读 0未读，1已读',
+  `read_time` bigint DEFAULT 0 COMMENT '消息已读时间', 
   `is_delete` tinyint DEFAULT '0' COMMENT '是否删除 0未删除，1已删除',
   `is_ext` tinyint DEFAULT '0',
   `is_exset` tinyint DEFAULT '0',
@@ -873,5 +874,5 @@ CREATE TABLE IF NOT EXISTS `topmsgs` (
   UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`sub_channel`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20250918');
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20251102');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
