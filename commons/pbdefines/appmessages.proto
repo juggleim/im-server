@@ -647,6 +647,7 @@ message ReadInfoItem{
   string msgId = 1;
   int32 readCount = 2;
   int32 totalCount = 3;
+  int64 readTime = 4;
 }
 
 message QryReadDetailReq{

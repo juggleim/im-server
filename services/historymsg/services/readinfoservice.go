@@ -104,11 +104,22 @@ func DispatchGroupMsgMarkRead(ctx context.Context, groupId, memberId string, cha
 
 func QryReadInfos(ctx context.Context, req *pbobjs.QryReadInfosReq) (errs.IMErrorCode, *pbobjs.QryReadInfosResp) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 	resp := &pbobjs.QryReadInfosResp{
 		Items: []*pbobjs.ReadInfoItem{},
 	}
 	if req.ChannelType == pbobjs.ChannelType_Private {
-
+		storage := storages.NewPrivateHisMsgStorage()
+		msgs, err := storage.FindReadTimeByIds(appkey, converId, req.SubChannel, req.MsgIds)
+		if err == nil && len(msgs) > 0 {
+			for _, msg := range msgs {
+				resp.Items = append(resp.Items, &pbobjs.ReadInfoItem{
+					MsgId:    msg.MsgId,
+					ReadTime: msg.ReadTime,
+				})
+			}
+		}
 	} else if req.ChannelType == pbobjs.ChannelType_Group {
 		storage := storages.NewReadInfoStorage()
 		for _, msgId := range req.MsgIds {

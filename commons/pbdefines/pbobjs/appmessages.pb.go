@@ -6335,6 +6335,7 @@ type ReadInfoItem struct {
 	MsgId         string                 `protobuf:"bytes,1,opt,name=msgId,proto3" json:"msgId,omitempty"`
 	ReadCount     int32                  `protobuf:"varint,2,opt,name=readCount,proto3" json:"readCount,omitempty"`
 	TotalCount    int32                  `protobuf:"varint,3,opt,name=totalCount,proto3" json:"totalCount,omitempty"`
+	ReadTime      int64                  `protobuf:"varint,4,opt,name=readTime,proto3" json:"readTime,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6386,6 +6387,13 @@ func (x *ReadInfoItem) GetReadCount() int32 {
 func (x *ReadInfoItem) GetTotalCount() int32 {
 	if x != nil {
 		return x.TotalCount
+	}
+	return 0
+}
+
+func (x *ReadInfoItem) GetReadTime() int64 {
+	if x != nil {
+		return x.ReadTime
 	}
 	return 0
 }
@@ -11053,13 +11061,14 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"subChannel\x18\x04 \x01(\tR\n" +
 	"subChannel\"7\n" +
 	"\x10QryReadInfosResp\x12#\n" +
-	"\x05items\x18\x01 \x03(\v2\r.ReadInfoItemR\x05items\"b\n" +
+	"\x05items\x18\x01 \x03(\v2\r.ReadInfoItemR\x05items\"~\n" +
 	"\fReadInfoItem\x12\x14\n" +
 	"\x05msgId\x18\x01 \x01(\tR\x05msgId\x12\x1c\n" +
 	"\treadCount\x18\x02 \x01(\x05R\treadCount\x12\x1e\n" +
 	"\n" +
 	"totalCount\x18\x03 \x01(\x05R\n" +
-	"totalCount\"\x94\x01\n" +
+	"totalCount\x12\x1a\n" +
+	"\breadTime\x18\x04 \x01(\x03R\breadTime\"\x94\x01\n" +
 	"\x10QryReadDetailReq\x12\x1a\n" +
 	"\btargetId\x18\x01 \x01(\tR\btargetId\x12.\n" +
 	"\vchannelType\x18\x02 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12\x14\n" +

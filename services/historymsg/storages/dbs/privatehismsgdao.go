@@ -241,6 +241,18 @@ func (msg PrivateHisMsgDao) FindByIds(appkey, converId, subChannel string, msgId
 	return retItems, err
 }
 
+func (msg PrivateHisMsgDao) FindReadTimeByIds(appkey, converId, subChannel string, msgIds []string) ([]*models.PrivateHisMsg, error) {
+	var items []*PrivateHisMsgDao
+	err := dbcommons.GetDb().Select("id,msg_id,is_read,read_time").Where("app_key=? and conver_id=? and sub_channel=? and msg_id in (?)", appkey, converId, subChannel, msgIds).Find(&items).Error
+
+	retItems := []*models.PrivateHisMsg{}
+	for _, dbMsg := range items {
+		retItems = append(retItems, dbMsg2PrivateMsg(dbMsg))
+	}
+
+	return retItems, err
+}
+
 func (msg PrivateHisMsgDao) FindByConvers(appkey string, convers []models.ConverItem) ([]*models.PrivateHisMsg, error) {
 	length := len(convers)
 	if length <= 0 {

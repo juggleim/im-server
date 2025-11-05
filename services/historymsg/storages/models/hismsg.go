@@ -94,6 +94,7 @@ type IPrivateHisMsgStorage interface {
 	UpdateMsgBody(appkey, converId, subChannel, msgId, msgType string, msgBody []byte) error
 	FindById(appkey, converId, subChannel, msgId string) (*PrivateHisMsg, error)
 	FindByIds(appkey, converId, subChannel string, msgIds []string, cleanTime int64) ([]*PrivateHisMsg, error)
+	FindReadTimeByIds(appkey, converId, subChannel string, msgIds []string) ([]*PrivateHisMsg, error)
 	FindByConvers(appkey string, convers []ConverItem) ([]*PrivateHisMsg, error)
 	DelMsgs(appkey, converId, subChannel string, msgIds []string) error
 	UpdateMsgExtState(appkey, converId, subChannel, msgId string, isExt int) error

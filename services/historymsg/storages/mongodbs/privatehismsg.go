@@ -27,6 +27,7 @@ type PrivateHisMsgDao struct {
 	MsgSeqNo    int64     `bson:"msg_seq_no"`
 	MsgBody     []byte    `bson:"msg_body"`
 	IsRead      int       `bson:"is_read"`
+	ReadTime    int64     `bson:"read_time"`
 	AppKey      string    `bson:"app_key"`
 	IsDelete    int       `bson:"is_delete"`
 	IsExt       int       `bson:"is_ext"`
@@ -366,6 +367,37 @@ func (msg *PrivateHisMsgDao) FindByIds(appkey, converId, subChannel string, msgI
 	return retItems, nil
 }
 
+func (msg *PrivateHisMsgDao) FindReadTimeByIds(appkey, converId, subChannel string, msgIds []string) ([]*models.PrivateHisMsg, error) {
+	collection := msg.getCollection()
+	retItems := []*models.PrivateHisMsg{}
+	if collection == nil {
+		return nil, errors.New("no mongo client")
+	}
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel,
+		"msg_id": bson.M{
+			"$in": msgIds,
+		},
+	}
+
+	cur, err := collection.Find(context.TODO(), filter)
+	defer func() {
+		if cur != nil {
+			cur.Close(context.TODO())
+		}
+	}()
+	if err != nil {
+		return nil, err
+	}
+	for cur.Next(context.TODO()) {
+		var item PrivateHisMsgDao
+		err = cur.Decode(&item)
+		if err == nil {
+			retItems = append(retItems, dbMsg2PrivateMsg(&item))
+		}
+	}
+	return retItems, nil
+}
+
 func (msg *PrivateHisMsgDao) FindByConvers(appkey string, convers []models.ConverItem) ([]*models.PrivateHisMsg, error) {
 	retItems := []*models.PrivateHisMsg{}
 	length := len(convers)
@@ -510,6 +542,7 @@ func dbMsg2PrivateMsg(dbMsg *PrivateHisMsgDao) *models.PrivateHisMsg {
 			MsgExset:    dbMsg.MsgExset,
 			IsDelete:    dbMsg.IsDelete,
 		},
-		IsRead: dbMsg.IsRead,
+		IsRead:   dbMsg.IsRead,
+		ReadTime: dbMsg.ReadTime,
 	}
 }
