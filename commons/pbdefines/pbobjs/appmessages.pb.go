@@ -4897,6 +4897,7 @@ type QryConversationsReq struct {
 	TargetId      string      `protobuf:"bytes,5,opt,name=targetId,proto3" json:"targetId,omitempty"`
 	ChannelType   ChannelType `protobuf:"varint,6,opt,name=channelType,proto3,enum=ChannelType" json:"channelType,omitempty"`
 	Tag           string      `protobuf:"bytes,7,opt,name=tag,proto3" json:"tag,omitempty"`
+	OnlyConver    bool        `protobuf:"varint,51,opt,name=onlyConver,proto3" json:"onlyConver,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4971,6 +4972,13 @@ func (x *QryConversationsReq) GetTag() string {
 		return x.Tag
 	}
 	return ""
+}
+
+func (x *QryConversationsReq) GetOnlyConver() bool {
+	if x != nil {
+		return x.OnlyConver
+	}
+	return false
 }
 
 type QryConversationsResp struct {
@@ -10938,14 +10946,17 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\bsenderId\x18\x03 \x01(\tR\bsenderId\x12\x1a\n" +
 	"\btargetId\x18\x04 \x01(\tR\btargetId\x12.\n" +
 	"\vchannelType\x18\x05 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12 \n" +
-	"\vupdatedTime\x18\x06 \x01(\x03R\vupdatedTime\"\xbd\x01\n" +
+	"\vupdatedTime\x18\x06 \x01(\x03R\vupdatedTime\"\xdd\x01\n" +
 	"\x13QryConversationsReq\x12\x1c\n" +
 	"\tstartTime\x18\x01 \x01(\x03R\tstartTime\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x14\n" +
 	"\x05order\x18\x03 \x01(\x05R\x05order\x12\x1a\n" +
 	"\btargetId\x18\x05 \x01(\tR\btargetId\x12.\n" +
 	"\vchannelType\x18\x06 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12\x10\n" +
-	"\x03tag\x18\a \x01(\tR\x03tag\"k\n" +
+	"\x03tag\x18\a \x01(\tR\x03tag\x12\x1e\n" +
+	"\n" +
+	"onlyConver\x183 \x01(\bR\n" +
+	"onlyConver\"k\n" +
 	"\x14QryConversationsResp\x123\n" +
 	"\rconversations\x18\x01 \x03(\v2\r.ConversationR\rconversations\x12\x1e\n" +
 	"\n" +

@@ -74,6 +74,7 @@ func Route(eng *gin.Engine, prefix string) {
 	group.POST("/convers/add", apis.AddConversation)
 	group.POST("/convers/clearunread", apis.ClearConverUnread)
 	group.POST("/convers/top", apis.TopConversations)
+	group.GET("/convers/query", apis.QryConvers)
 
 	group.GET("/globalconvers/query", apis.QryGlobalConvers)
 

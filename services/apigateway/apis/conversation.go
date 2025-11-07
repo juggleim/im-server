@@ -131,6 +131,71 @@ func TopConversations(ctx *gin.Context) {
 	tools.SuccessHttpResp(ctx, nil)
 }
 
+func QryConvers(ctx *gin.Context) {
+	userId := ctx.Query("user_id")
+	if userId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	start := ctx.Query("start")
+	var startTime int64 = 0
+	if start != "" {
+		intVal, err := tools.String2Int64(start)
+		if err == nil {
+			startTime = intVal
+		}
+	}
+
+	limitStr := ctx.Query("count")
+	var limit int64 = 100
+	if limitStr != "" {
+		intVal, err := tools.String2Int64(limitStr)
+		if err == nil && intVal > 0 && intVal <= 100 {
+			limit = intVal
+		}
+	}
+	orderStr := ctx.Query("order")
+	var order int32 = 0
+	if orderStr != "" {
+		intVal, err := tools.String2Int64(orderStr)
+		if err == nil && intVal > 0 {
+			order = 1
+		}
+	}
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, userId), "qry_convers", userId, &pbobjs.QryConversationsReq{
+		StartTime:  startTime,
+		Count:      int32(limit),
+		Order:      order,
+		OnlyConver: true,
+	}, func() proto.Message {
+		return &pbobjs.QryGlobalConversResp{}
+	})
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+		return
+	}
+	conversResp := resp.(*pbobjs.QryConversationsResp)
+	ret := models.Conversations{
+		Items:      []*models.Conversation{},
+		IsFinished: conversResp.IsFinished,
+	}
+	for _, conver := range conversResp.Conversations {
+		item := &models.Conversation{
+			UserId:      conver.UserId,
+			TargetId:    conver.TargetId,
+			ChannelType: int(conver.ChannelType),
+			SubChannel:  conver.SubChannel,
+			Time:        conver.SortTime,
+		}
+		ret.Items = append(ret.Items, item)
+	}
+	tools.SuccessHttpResp(ctx, ret)
+}
+
 func QryGlobalConvers(ctx *gin.Context) {
 	start := ctx.Query("start")
 	var startTime int64 = 0

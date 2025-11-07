@@ -494,6 +494,8 @@ message QryConversationsReq{
   string targetId = 5;
   ChannelType channelType = 6;
   string tag = 7;
+
+  bool onlyConver = 51;
 }
 message QryConversationsResp{
   repeated Conversation conversations = 1;
