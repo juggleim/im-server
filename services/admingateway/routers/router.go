@@ -85,15 +85,18 @@ func Route(eng *gin.Engine, prefix string) *gin.RouterGroup {
 
 func CorsHandler() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		method := context.Request.Method
-		context.Writer.Header().Add("Access-Control-Allow-Origin", "*")
-		context.Writer.Header().Add("Access-Control-Allow-Headers", "*")
-		context.Writer.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH, PUT")
-		context.Writer.Header().Add("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
-		context.Writer.Header().Add("Access-Control-Allow-Credentials", "true")
+		jchatProxy := context.Request.Header.Get("jchat-proxy")
+		if jchatProxy != "1" {
+			method := context.Request.Method
+			context.Writer.Header().Add("Access-Control-Allow-Origin", "*")
+			context.Writer.Header().Add("Access-Control-Allow-Headers", "*")
+			context.Writer.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH, PUT")
+			context.Writer.Header().Add("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
+			context.Writer.Header().Add("Access-Control-Allow-Credentials", "true")
 
-		if method == "OPTIONS" {
-			context.AbortWithStatus(http.StatusNoContent)
+			if method == "OPTIONS" {
+				context.AbortWithStatus(http.StatusNoContent)
+			}
 		}
 		context.Next()
 	}
