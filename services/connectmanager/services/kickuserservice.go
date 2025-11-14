@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func KickUser(ctx context.Context, req *pbobjs.KickUserReq) {
+func KickUser(ctx context.Context, req *pbobjs.KickUserReq, code errs.IMErrorCode) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	ctxs := []imcontext.WsHandleContext{}
 	ctxMap := GetConnectCtxByUser(appkey, req.UserId)
@@ -51,14 +51,14 @@ func KickUser(ctx context.Context, req *pbobjs.KickUserReq) {
 	for _, ctx := range ctxs {
 		tmpCtx := ctx
 		msgAck := codec.NewDisconnectMessage(&codec.DisconnectMsgBody{
-			Code:      int32(errs.IMErrorCode_CONNECT_KICKED_OFF),
+			Code:      int32(code),
 			Timestamp: time.Now().UnixMilli(),
 			Ext:       req.Ext,
 		})
 		tmpCtx.Write(msgAck)
 		logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(tmpCtx), imcontext.Action_Disconnect, msgAck.MsgBody.Code)
 		go func() {
-			Offline(tmpCtx, errs.IMErrorCode_CONNECT_KICKED_OFF)
+			Offline(tmpCtx, code)
 			time.Sleep(time.Millisecond * 50)
 			tmpCtx.Close(errors.New("kick off"))
 		}()

@@ -137,7 +137,7 @@ func BanUsers(ctx context.Context, banUsers []*pbobjs.BanUser) {
 				}
 			}
 			if kicReq.UserId != "" {
-				KickUser(ctx, kicReq)
+				KickUser(ctx, kicReq, errs.IMErrorCode_CONNECT_USER_BLOCK)
 			}
 		}
 	}

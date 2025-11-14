@@ -19,7 +19,7 @@ type KickUserActor struct {
 func (actor *KickUserActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.KickUserReq); ok {
 		logs.WithContext(ctx).Infof("\tuser_id:%s\tplatform:%v", req.UserId, req.Platforms)
-		services.KickUser(ctx, req)
+		services.KickUser(ctx, req, errs.IMErrorCode_CONNECT_KICKED_OFF)
 	} else {
 		logs.WithContext(ctx).Errorf("ban_users, input is illigal.")
 	}
