@@ -19,6 +19,7 @@ type AndroidNotification struct {
 	Inbox      map[string]interface{} `json:"inbox,omitempty"`
 	BigPicPath string                 `json:"big_pic_path,omitempty"`
 	Extras     map[string]interface{} `json:"extras,omitempty"`
+	Intent     map[string]interface{} `json:"intent,omitempty"`
 }
 
 type IosNotification struct {

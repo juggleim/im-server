@@ -124,7 +124,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					}
 				case pbobjs.PushChannel_JPush:
 					if androidPushConf.JpushClient != nil {
-						androidPushConf.JpushClient.Push(&jpush.Payload{
+						_, err := androidPushConf.JpushClient.Push(&jpush.Payload{
 							Platform: jpush.NewPlatform().All(),
 							Audience: jpush.NewAudience().SetRegistrationId(pushToken.PushToken),
 							Notification: &jpush.Notification{
@@ -133,9 +133,19 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 									Alert:  req.PushText,
 									Title:  req.Title,
 									Extras: transfer2Exts(req),
+									Intent: map[string]interface{}{
+										"url": "intent:#Intent;action=com.j.im.intent.MESSAGE_CLICK;end",
+									},
 								},
 							},
 						})
+						if err != nil {
+							logs.WithContext(ctx).Infof("[JPush_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						} else {
+							logs.WithContext(ctx).Infof("[JPush_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+						}
+					} else {
+						logs.WithContext(ctx).Infof("[JPush_FAIL]have no init jpush client")
 					}
 				case pbobjs.PushChannel_FCM:
 					if androidPushConf.FcmPushClient != nil {
