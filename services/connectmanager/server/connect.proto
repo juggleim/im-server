@@ -36,6 +36,14 @@ message ConnectAckMsgBody{
     string session = 3;
     int64 timestamp = 4;
     string ext = 5;
+    ConnectConf conf = 6;
+}
+
+message ConnectConf{
+    int32 heartbeatInterval = 1;
+    int32 heartbeatTimeout = 2;
+    int32 signalTimeout = 3;
+    int32 signalFailCount = 4;
 }
 
 message DisconnectMsgBody{

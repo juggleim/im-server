@@ -7544,6 +7544,7 @@ type QryBanUsersReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Limit         int64                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
 	Offset        string                 `protobuf:"bytes,2,opt,name=offset,proto3" json:"offset,omitempty"`
+	UserIds       []string               `protobuf:"bytes,3,rep,name=userIds,proto3" json:"userIds,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7590,6 +7591,13 @@ func (x *QryBanUsersReq) GetOffset() string {
 		return x.Offset
 	}
 	return ""
+}
+
+func (x *QryBanUsersReq) GetUserIds() []string {
+	if x != nil {
+		return x.UserIds
+	}
+	return nil
 }
 
 type QryBanUsersResp struct {
@@ -11172,10 +11180,11 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\n" +
 	"scopeValue\x18\x05 \x01(\tR\n" +
 	"scopeValue\x12\x10\n" +
-	"\x03ext\x18\x06 \x01(\tR\x03ext\">\n" +
+	"\x03ext\x18\x06 \x01(\tR\x03ext\"X\n" +
 	"\x0eQryBanUsersReq\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x03R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x02 \x01(\tR\x06offset\"I\n" +
+	"\x06offset\x18\x02 \x01(\tR\x06offset\x12\x18\n" +
+	"\auserIds\x18\x03 \x03(\tR\auserIds\"I\n" +
 	"\x0fQryBanUsersResp\x12\x1e\n" +
 	"\x05items\x18\x01 \x03(\v2\b.BanUserR\x05items\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\tR\x06offset\"?\n" +

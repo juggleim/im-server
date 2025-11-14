@@ -44,6 +44,15 @@ func (user BanUserDao) FindById(appkey, userId string) ([]*BanUserDao, error) {
 	return items, nil
 }
 
+func (user BanUserDao) FindByUserIds(appkey string, userIds []string) ([]*BanUserDao, error) {
+	var items []*BanUserDao
+	err := dbcommons.GetDb().Where("app_key=? and user_id in (?)", appkey, userIds).Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 func (user BanUserDao) DelBanUser(appkey, userId, scopeKey string) error {
 	if scopeKey == "" {
 		return dbcommons.GetDb().Where("app_key=? and user_id=?", appkey, userId).Delete(&BanUserDao{}).Error

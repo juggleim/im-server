@@ -780,6 +780,7 @@ message BanUser {
 message QryBanUsersReq{
   int64 limit = 1;
   string offset = 2;
+  repeated string userIds = 3;
 }
 
 message QryBanUsersResp{

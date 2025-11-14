@@ -327,6 +327,7 @@ func UserUnBan(ctx *gin.Context) {
 }
 
 func QryBanUsers(ctx *gin.Context) {
+	userIds := ctx.QueryArray("user_id")
 	limitStr := ctx.Query("limit")
 	var limit int64 = 50
 	if limitStr != "" {
@@ -338,8 +339,9 @@ func QryBanUsers(ctx *gin.Context) {
 	offsetStr := ctx.Query("offset")
 
 	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_ban_users", fmt.Sprintf("%s%d", services.GetCtxString(ctx, services.CtxKey_AppKey), tools.RandInt(100000)), &pbobjs.QryBanUsersReq{
-		Limit:  limit,
-		Offset: offsetStr,
+		Limit:   limit,
+		Offset:  offsetStr,
+		UserIds: userIds,
 	}, func() proto.Message {
 		return &pbobjs.QryBanUsersResp{}
 	})

@@ -7,6 +7,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices/logs"
 	"im-server/services/connectmanager/dbs"
 	"strings"
 	"time"
@@ -152,18 +153,23 @@ func UnBanUsers(ctx context.Context, banUsers []*pbobjs.BanUser) {
 	}
 }
 
-func QryBanUsers(ctx context.Context, limit int64, startIdStr string) (errs.IMErrorCode, []*pbobjs.BanUser, string) {
+func QryBanUsers(ctx context.Context, limit int64, startIdStr string, userIds []string) (errs.IMErrorCode, []*pbobjs.BanUser, string) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	dao := dbs.BanUserDao{}
-
-	startId, err := tools.DecodeInt(startIdStr)
-	if err != nil {
-		startId = 0
-	}
 	banUsers := []*pbobjs.BanUser{}
 	offset := ""
-	dbBanUsers, err := dao.QryBanUsers(appkey, limit, startId)
-	if err == nil {
+	dao := dbs.BanUserDao{}
+	var dbBanUsers []*dbs.BanUserDao
+	var dbErr error
+	if len(userIds) > 0 {
+		dbBanUsers, dbErr = dao.FindByUserIds(appkey, userIds)
+	} else {
+		startId, err := tools.DecodeInt(startIdStr)
+		if err != nil {
+			startId = 0
+		}
+		dbBanUsers, dbErr = dao.QryBanUsers(appkey, limit, startId)
+	}
+	if dbErr == nil {
 		for _, dbBanUser := range dbBanUsers {
 			user := &pbobjs.BanUser{
 				UserId:      dbBanUser.UserId,
@@ -176,11 +182,10 @@ func QryBanUsers(ctx context.Context, limit int64, startIdStr string) (errs.IMEr
 			user.EndTime = dbBanUser.EndTime
 			banUsers = append(banUsers, user)
 
-			offset, err = tools.EncodeInt(dbBanUser.ID)
-			if err != nil {
-				offset = ""
-			}
+			offset, _ = tools.EncodeInt(dbBanUser.ID)
 		}
+	} else {
+		logs.NewLogEntity().Error(dbErr.Error())
 	}
 	return errs.IMErrorCode_SUCCESS, banUsers, offset
 }

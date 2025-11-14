@@ -10,6 +10,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
+	"im-server/services/connectmanager/server/imhttpmsghandlers"
 	navRouters "im-server/services/navigator/routers"
 	"net/http"
 	"strings"
@@ -34,6 +35,7 @@ type ImWebsocketServer struct {
 func (server *ImWebsocketServer) SyncStart(port int) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/im", server.ImWsServer)
+	mux.HandleFunc("/im/publish", imhttpmsghandlers.ImHttpPubHandler)
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")

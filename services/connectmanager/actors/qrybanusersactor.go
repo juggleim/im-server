@@ -22,14 +22,14 @@ func (actor *QryBanUsersActor) OnReceive(ctx context.Context, input proto.Messag
 	}
 	code := errs.IMErrorCode_SUCCESS
 	if banReq, ok := input.(*pbobjs.QryBanUsersReq); ok {
-		logs.WithContext(ctx).WithField("method", "qry_ban_users").Infof("limit:%d\toffset:%s", banReq.Limit, banReq.Offset)
-		code, ret.Items, ret.Offset = services.QryBanUsers(ctx, banReq.Limit, banReq.Offset)
+		logs.WithContext(ctx).Infof("limit:%d\toffset:%s\tuser_ids:%v", banReq.Limit, banReq.Offset, banReq.UserIds)
+		code, ret.Items, ret.Offset = services.QryBanUsers(ctx, banReq.Limit, banReq.Offset, banReq.UserIds)
 	} else {
 		logs.WithContext(ctx).Errorf("qry_ban_users, input is illigal.")
 	}
 	ack := bases.CreateQueryAckWraper(ctx, code, ret)
 	actor.Sender.Tell(ack, actorsystem.NoSender)
-	logs.WithContext(ctx).WithField("method", "qry_ban_users").Infof("result_len:%d\toffset:%s", len(ret.Items), ret.Offset)
+	logs.WithContext(ctx).Infof("result_len:%d\toffset:%s", len(ret.Items), ret.Offset)
 }
 
 func (actor *QryBanUsersActor) CreateInputObj() proto.Message {
