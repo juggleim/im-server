@@ -97,6 +97,9 @@ func BanUsers(ctx context.Context, banUsers []*pbobjs.BanUser) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	dao := dbs.BanUserDao{}
 	for _, user := range banUsers {
+		if user.ScopeKey == "" {
+			user.ScopeKey = string(dbs.UserBanScopeDefault)
+		}
 		dao.Upsert(dbs.BanUserDao{
 			UserId:      user.UserId,
 			ScopeKey:    user.ScopeKey,
