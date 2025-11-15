@@ -206,8 +206,8 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/jinzhu/gorm v1.9.16
-	github.com/juggleim/imserver-sdk-go v1.0.9 // indirect
-	github.com/juggleim/jugglechat-server v1.1.9
+	github.com/juggleim/imserver-sdk-go v1.0.10 // indirect
+	github.com/juggleim/jugglechat-server v1.1.12
 	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/livekit/protocol v1.39.3

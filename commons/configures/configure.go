@@ -72,6 +72,14 @@ type ImConfig struct {
 	AdminSecret string `yaml:"adminSecret"`
 }
 
+func (conf ImConfig) GetApiPort() int {
+	apiPort := conf.ApiGateway.HttpPort
+	if apiPort <= 0 {
+		apiPort = conf.ConnectManager.WsPort
+	}
+	return apiPort
+}
+
 var Config ImConfig
 
 func InitConfigures() error {

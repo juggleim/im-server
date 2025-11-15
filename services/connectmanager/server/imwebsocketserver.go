@@ -3,27 +3,18 @@ package server
 import (
 	"errors"
 	"fmt"
-	"im-server/commons/configures"
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
-	"im-server/commons/logs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 	"im-server/services/connectmanager/server/imhttpmsghandlers"
-	navRouters "im-server/services/navigator/routers"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
-	jimConfigures "github.com/juggleim/commons/configures"
-	jimDb "github.com/juggleim/commons/dbcommons"
-	jimLog "github.com/juggleim/jugglechat-server/log"
-	jimRouters "github.com/juggleim/jugglechat-server/routers"
-	jimDbMigrations "github.com/juggleim/jugglechat-server/storages/dbs/dbmigrations"
-
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"golang.org/x/time/rate"
 )
@@ -32,8 +23,8 @@ type ImWebsocketServer struct {
 	MessageListener ImListener
 }
 
-func (server *ImWebsocketServer) SyncStart(port int) {
-	mux := http.NewServeMux()
+func (server *ImWebsocketServer) AsyncStart(port int) {
+	var mux *http.ServeMux = commonservices.GetDefaultHttpServeMux()
 	mux.HandleFunc("/im", server.ImWsServer)
 	mux.HandleFunc("/im/publish", imhttpmsghandlers.ImHttpPubHandler)
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -44,36 +35,7 @@ func (server *ImWebsocketServer) SyncStart(port int) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, `{"status":"ok"}`)
 	})
-	RouteNav(mux)
-	RouteJuggleChat(mux)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
-}
-
-func RouteNav(mux *http.ServeMux) {
-	ginEngine := gin.Default()
-	navRouters.Route(ginEngine, "navigator")
-	mux.Handle("/navigator/", ginEngine)
-}
-
-func RouteJuggleChat(mux *http.ServeMux) {
-	if err := jimConfigures.InitConfigures(); err != nil {
-		fmt.Println("Init Jim Configures failed", err)
-		return
-	}
-	imApiPort := configures.Config.ApiGateway.HttpPort
-	if imApiPort <= 0 {
-		imApiPort = configures.Config.ConnectManager.WsPort
-	}
-	jimConfigures.Config.ImApiDomain = fmt.Sprintf("http://127.0.0.1:%d", imApiPort)
-	jimLog.SetLogger(logs.GetInfoLogger(), logs.GetErrorLogger())
-	if err := jimDb.InitMysql(); err != nil {
-		fmt.Println("Init Jim Mysql failed")
-		return
-	}
-	jimDbMigrations.Upgrade()
-	ginEngine := gin.Default()
-	jimRouters.Route(ginEngine, "jim")
-	mux.Handle("/jim/", ginEngine)
+	go http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 }
 
 var upgrader = websocket.Upgrader{

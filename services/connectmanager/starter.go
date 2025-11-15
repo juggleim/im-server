@@ -39,7 +39,7 @@ func (ser *ConnectManager) Startup(args map[string]interface{}) {
 	ser.wsServer = &server.ImWebsocketServer{
 		MessageListener: &server.ImListenerImpl{},
 	}
-	go ser.wsServer.SyncStart(wsPort)
+	ser.wsServer.AsyncStart(wsPort)
 	fmt.Println("Start", serviceName, "with port:", wsPort)
 }
 

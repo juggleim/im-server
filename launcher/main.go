@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"im-server/services/botmsg"
 	"im-server/services/broadcast"
+	"im-server/services/commonservices"
 	"im-server/services/logmanager"
 	"im-server/services/rtcroom"
 	sensitivemanager "im-server/services/sensitivemanager"
@@ -38,6 +39,14 @@ import (
 	hisMsgMongo "im-server/services/historymsg/storages/mongodbs"
 	msgMongo "im-server/services/message/storages/mongodbs"
 	pushMongo "im-server/services/pushmanager/storages/mongodbs"
+
+	navRouters "im-server/services/navigator/routers"
+
+	"github.com/gin-gonic/gin"
+	jimConfigures "github.com/juggleim/jugglechat-server/commons/configures"
+	jimDb "github.com/juggleim/jugglechat-server/commons/dbcommons"
+	jimLog "github.com/juggleim/jugglechat-server/log"
+	jimRouters "github.com/juggleim/jugglechat-server/routers"
 )
 
 func main() {
@@ -97,6 +106,8 @@ func main() {
 		return
 	}
 
+	commonservices.InitDefaultHttpServer()
+
 	imstarters.Loaded(&admingateway.AdminGateway{})
 	imstarters.Loaded(&apigateway.ApiGateway{})
 	imstarters.Loaded(&connectmanager.ConnectManager{})
@@ -129,4 +140,30 @@ func main() {
 	}()
 
 	<-closeChan
+}
+
+func RouteNav(mux *http.ServeMux) {
+	ginEngine := gin.Default()
+	navRouters.Route(ginEngine, "navigator")
+	mux.Handle("/navigator/", ginEngine)
+}
+
+func RouteJuggleChat(mux *http.ServeMux) {
+	if err := jimConfigures.InitConfigures(); err != nil {
+		fmt.Println("Init Jim Configures failed", err)
+		return
+	}
+	jimConfigures.Config.ImApiDomain = fmt.Sprintf("http://127.0.0.1:%d", configures.Config.GetApiPort())
+
+	jimLog.SetLogger(logs.GetInfoLogger(), logs.GetErrorLogger())
+	if err := jimDb.InitMysql(); err != nil {
+		fmt.Println("Init Jim Mysql failed")
+		return
+	}
+	jimDb.Upgrade()
+
+	ginEngine := gin.Default()
+	jimRouters.Route(ginEngine, "jim")
+
+	mux.Handle("/jim/", ginEngine)
 }
