@@ -43,7 +43,7 @@ func SetRtcConf(appkey string, req *RtcConf) AdminErrorCode {
 func GetRtcConf(appkey string) (AdminErrorCode, *RtcConf) {
 	ret := &RtcConf{}
 	dao := dbs.AppExtDao{}
-	exts, err := dao.FindByItemKeys(appkey, []string{"zego_config,agora_config,livekit_config"})
+	exts, err := dao.FindByItemKeys(appkey, []string{"zego_config", "agora_config", "livekit_config"})
 	if err == nil {
 		for _, ext := range exts {
 			if ext.AppItemKey == "zego_config" {
