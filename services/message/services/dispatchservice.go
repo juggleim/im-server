@@ -36,7 +36,7 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 		if downMsg.MemberCount > int32(threadhold) {
 			preheat(ctx, appkey, memberIds)
 			for _, receiverId := range memberIds {
-				newDownMsg := copyDownMsg(downMsg)
+				newDownMsg := copyDownMsg(downMsg, receiverId)
 				receId := receiverId
 				userStatus := GetUserStatus(appkey, receId)
 				closeOffline := (!userStatus.IsOnline())
@@ -46,7 +46,7 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 			}
 		} else {
 			for _, receiverId := range memberIds {
-				newDownMsg := copyDownMsg(downMsg)
+				newDownMsg := copyDownMsg(downMsg, receiverId)
 				receId := receiverId
 				MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
 					doDispatch(ctx, receId, newDownMsg, false)
@@ -105,7 +105,15 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 	}
 }
 
-func copyDownMsg(msg *pbobjs.DownMsg) *pbobjs.DownMsg {
+func copyDownMsg(msg *pbobjs.DownMsg, receiverId string) *pbobjs.DownMsg {
+	referMsg := msg.ReferMsg
+	if referMsg != nil {
+		if referMsg.SenderId == receiverId {
+			referMsg.IsSend = true
+		} else {
+			referMsg.IsSend = false
+		}
+	}
 	return &pbobjs.DownMsg{
 		TargetId:          msg.TargetId,
 		ChannelType:       msg.ChannelType,
@@ -122,7 +130,7 @@ func copyDownMsg(msg *pbobjs.DownMsg) *pbobjs.DownMsg {
 		PushData:          msg.PushData,
 		MentionInfo:       msg.MentionInfo,
 		IsRead:            msg.IsRead,
-		ReferMsg:          msg.ReferMsg,
+		ReferMsg:          referMsg,
 		TargetUserInfo:    msg.TargetUserInfo,
 		GroupInfo:         msg.GroupInfo,
 		MergedMsgs:        msg.MergedMsgs,
