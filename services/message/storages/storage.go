@@ -61,7 +61,3 @@ func NewBrdInboxMsgStorage() models.IBroadcastMsgStorage {
 		return &dbs.BrdInboxMsgDao{}
 	}
 }
-
-func NewFriendRelStorage() models.IFriendRelStorage {
-	return &dbs.FriendRelDao{}
-}

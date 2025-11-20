@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"im-server/commons/dbcommons"
-	"im-server/services/message/storages/models"
+	"im-server/services/friendmanager/storages/models"
 )
 
 type FriendRelDao struct {

@@ -5,6 +5,7 @@ import (
 	"im-server/services/botmsg"
 	"im-server/services/broadcast"
 	"im-server/services/commonservices"
+	"im-server/services/friendmanager"
 	"im-server/services/logmanager"
 	"im-server/services/rtcroom"
 	sensitivemanager "im-server/services/sensitivemanager"
@@ -112,6 +113,7 @@ func main() {
 	imstarters.Loaded(&apigateway.ApiGateway{})
 	imstarters.Loaded(&connectmanager.ConnectManager{})
 	imstarters.Loaded(&message.MessageManager{})
+	imstarters.Loaded(&friendmanager.FriendManager{})
 	imstarters.Loaded(&conversation.ConversationManager{})
 	imstarters.Loaded(&usermanager.UserManager{})
 	imstarters.Loaded(&historymsg.HistoryMsgManager{})

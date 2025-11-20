@@ -6,7 +6,7 @@ import (
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices/logs"
-	"im-server/services/message/services"
+	"im-server/services/friendmanager/services"
 
 	"google.golang.org/protobuf/proto"
 )
