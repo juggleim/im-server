@@ -205,21 +205,6 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 				return errs.IMErrorCode_RTCROOM_NOTMEMBER, nil
 			}
 		}
-		rtcRoom := &pbobjs.RtcRoom{
-			RoomType:     container.RoomType,
-			RoomId:       container.RoomId,
-			Owner:        container.Owner,
-			RtcChannel:   container.RtcChannel,
-			RtcMediaType: container.RtcMediaType,
-			Ext:          container.Ext,
-			Members:      []*pbobjs.RtcMember{},
-		}
-		container.ForeachMembers(func(member *models.RtcRoomMember) {
-			rtcRoom.Members = append(rtcRoom.Members, &pbobjs.RtcMember{
-				Member:   commonservices.GetTargetDisplayUserInfo(ctx, member.MemberId),
-				RtcState: member.RtcState,
-			})
-		})
 		// add target members
 		for _, targetId := range req.TargetIds {
 			targetMember := &models.RtcRoomMember{
@@ -244,8 +229,41 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 					RtcState: pbobjs.RtcState_RtcIncoming,
 				},
 			})
+			//trigger push
+			msg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "user_push", &pbobjs.DownMsg{
+				TargetId:       userId,
+				ChannelType:    pbobjs.ChannelType_Private,
+				SenderId:       userId,
+				MsgType:        msgdefines.InnerMsgType_VoiceCall,
+				TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, userId),
+				PushData: &pbobjs.PushData{
+					IsVoip: true,
+
+					RtcRoomId:    roomId,
+					RtcInviterId: userId,
+					RtcRoomType:  int32(req.RoomType),
+					RtcMediaType: int32(req.RtcMediaType),
+				},
+			})
+			bases.UnicastRouteWithNoSender(msg)
 		}
+		rtcRoom := &pbobjs.RtcRoom{
+			RoomType:     container.RoomType,
+			RoomId:       container.RoomId,
+			Owner:        container.Owner,
+			RtcChannel:   container.RtcChannel,
+			RtcMediaType: container.RtcMediaType,
+			Ext:          container.Ext,
+			Members:      []*pbobjs.RtcMember{},
+		}
+		container.ForeachMembers(func(member *models.RtcRoomMember) {
+			rtcRoom.Members = append(rtcRoom.Members, &pbobjs.RtcMember{
+				Member:   commonservices.GetTargetDisplayUserInfo(ctx, member.MemberId),
+				RtcState: member.RtcState,
+			})
+		})
 		targetUsers := commonservices.GetTargetDisplayUserInfos(ctx, req.TargetIds)
+		//send invite event
 		container.ForeachMembers(func(member *models.RtcRoomMember) {
 			SendInviteEvent(ctx, member.MemberId, &pbobjs.RtcInviteEvent{
 				InviteType:  pbobjs.InviteType_RtcInvite,

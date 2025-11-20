@@ -1045,6 +1045,7 @@ message PreSignResp {
   string credential = 5;
   string date = 6;
   string signature = 7;
+  string downloadUrl = 8;
 }
 
 message UploadLogStatusReq{

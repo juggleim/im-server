@@ -22,12 +22,14 @@ type OssConfig struct {
 	Endpoint  string `json:"endpoint"`
 	Bucket    string `json:"bucket"`
 	Region    string `json:"region"`
+	Domain    string `json:"domain"`
 }
 
 type OssStorage struct {
 	accessKeyId, accessKeySecret string
 	endpoint, bucket             string
 	region                       string
+	domain                       string
 }
 
 func NewOss(conf OssConfig) *OssStorage {
@@ -37,6 +39,7 @@ func NewOss(conf OssConfig) *OssStorage {
 		endpoint:        conf.Endpoint,
 		bucket:          conf.Bucket,
 		region:          conf.Region,
+		domain:          conf.Domain,
 	}
 }
 
@@ -64,7 +67,7 @@ func (o *OssStorage) buildBucket() (bucket *oss.Bucket, err error) {
 	return
 }
 
-func (o *OssStorage) getURL(fileType string, dir string) (signedURL string, err error) {
+func (o *OssStorage) getURL(fileType string, dir string) (signedURL, objectKey, downUrl string, err error) {
 	bucket, err := o.buildBucket()
 	if err != nil {
 		err = fmt.Errorf("bucket err:%v", err)
@@ -75,25 +78,25 @@ func (o *OssStorage) getURL(fileType string, dir string) (signedURL string, err 
 	//}
 	objectName := tools.GenerateUUIDShort22() + "." + fileType
 	objectName = filepath.Join(dir, objectName)
+	objectKey = objectName
+	if o.domain != "" {
+		downUrl = o.domain + "/" + objectKey
+	}
 
 	signedURL, err = bucket.SignURL(objectName, oss.HTTPPut, expireTime)
 	if err != nil {
 		err = fmt.Errorf("sign url err:%v", err)
 		return
 	}
-	return signedURL, nil
+	return
 }
 
-func (o *OssStorage) PreSignedURL(fileType string, dir string) (url string, err error) {
+func (o *OssStorage) PreSignedURL(fileType string, dir string) (url, objectKey, downUrl string, err error) {
 	return o.getURL(fileType, dir)
 }
 
 func (o *OssStorage) PostSign(fileType string, dir string) *pbobjs.PreSignResp {
-	objectName := tools.GenerateUUIDShort22() + "." + fileType
-	objectName = filepath.Join(dir, objectName)
-	ret := &pbobjs.PreSignResp{
-		ObjKey: objectName,
-	}
+	ret := &pbobjs.PreSignResp{}
 	utcTime := time.Now().UTC()
 	date := utcTime.Format("20060102")
 	//policy
