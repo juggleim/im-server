@@ -23,6 +23,44 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	converId := commonservices.GetConversationId(senderId, receiverId, pbobjs.ChannelType_Private)
 	//statistic
 	commonservices.ReportUpMsg(appkey, pbobjs.ChannelType_Private, 1)
+	//check msg interceptor
+	var modifiedMsg *pbobjs.DownMsg = nil
+	result, interceptorCode := commonservices.CheckMsgInterceptor(ctx, senderId, receiverId, pbobjs.ChannelType_Private, upMsg)
+	if result == interceptors.InterceptorResult_Reject {
+		sendTime := time.Now().UnixMilli()
+		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), converId)
+		if interceptorCode == 0 {
+			return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, nil
+		} else {
+			return errs.IMErrorCode(interceptorCode), msgId, sendTime, 0, upMsg.ClientUid, nil
+		}
+	} else if result == interceptors.InterceptorResult_Replace {
+		modifiedMsg = &pbobjs.DownMsg{
+			MsgType:    upMsg.MsgType,
+			MsgContent: upMsg.MsgContent,
+		}
+	} else if result == interceptors.InterceptorResult_Silent {
+		sendTime := time.Now().UnixMilli()
+		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), converId)
+		return errs.IMErrorCode_SUCCESS, msgId, sendTime, 0, upMsg.ClientUid, nil
+	}
+	//check block user
+	blockUser := GetBlockUserItem(appkey, receiverId, senderId)
+	if blockUser.IsBlock {
+		sendTime := time.Now().UnixMilli()
+		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
+		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid, nil
+	}
+	//check friend status
+	appinfo, exist := commonservices.GetAppInfo(appkey)
+	if exist && appinfo != nil && appinfo.MsgFriendCheck {
+		friendStatus := GetFriendStatus(appkey, receiverId, senderId)
+		if !friendStatus.IsFriend {
+			sendTime := time.Now().UnixMilli()
+			msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), converId)
+			return errs.IMErrorCode_MSG_NOT_FRIEND, msgId, sendTime, 0, upMsg.ClientUid, nil
+		}
+	}
 	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, upMsg.SubChannel, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)
@@ -39,38 +77,6 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		}
 	} else {
 		upMsg.ClientUid = tools.GenerateUUIDShort22()
-	}
-	//check msg interceptor
-	var modifiedMsg *pbobjs.DownMsg = nil
-	result, interceptorCode := commonservices.CheckMsgInterceptor(ctx, senderId, receiverId, pbobjs.ChannelType_Private, upMsg)
-	if result == interceptors.InterceptorResult_Reject {
-		if interceptorCode == 0 {
-			return errs.IMErrorCode_MSG_Hit_Sensitive, msgId, sendTime, 0, upMsg.ClientUid, nil
-		} else {
-			return errs.IMErrorCode(interceptorCode), msgId, sendTime, 0, upMsg.ClientUid, nil
-		}
-	} else if result == interceptors.InterceptorResult_Replace {
-		modifiedMsg = &pbobjs.DownMsg{
-			MsgType:    upMsg.MsgType,
-			MsgContent: upMsg.MsgContent,
-		}
-	} else if result == interceptors.InterceptorResult_Silent {
-		return errs.IMErrorCode_SUCCESS, msgId, sendTime, 0, upMsg.ClientUid, nil
-	}
-	//check block user
-	blockUser := GetBlockUserItem(appkey, receiverId, senderId)
-	if blockUser.IsBlock {
-		sendTime := time.Now().UnixMilli()
-		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
-		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid, nil
-	}
-	//check friend status
-	appinfo, exist := commonservices.GetAppInfo(appkey)
-	if exist && appinfo != nil && appinfo.MsgFriendCheck {
-		friendStatus := GetFriendStatus(appkey, receiverId, senderId)
-		if !friendStatus.IsFriend {
-			return errs.IMErrorCode_MSG_NOT_FRIEND, msgId, sendTime, 0, upMsg.ClientUid, nil
-		}
 	}
 	var destroyTime int64 = 0
 	if upMsg.LifeTime > 0 {
