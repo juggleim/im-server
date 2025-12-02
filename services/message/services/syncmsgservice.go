@@ -21,12 +21,26 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 
 	appinfo, exist := commonservices.GetAppInfo(appKey)
 	restrictTime := time.Now().Add(-time.Minute * 1440).UnixMilli()
+	cmdRestrictTime := time.Now().Add(-time.Minute * 10080).UnixMilli()
 	if exist && appinfo != nil {
 		connectedTime := bases.GetConnectedTimeFromCtx(ctx)
-		if appinfo.CloseOfflineMsg && connectedTime > 0 {
-			restrictTime = connectedTime - 5*1000
+		if appinfo.OfflineMsgSaveTime <= 0 {
+			if connectedTime > 0 {
+				restrictTime = connectedTime - 5*1000
+			} else {
+				restrictTime = time.Now().UnixMilli()
+			}
 		} else {
 			restrictTime = time.Now().Add(-time.Minute * time.Duration(appinfo.OfflineMsgSaveTime)).UnixMilli()
+		}
+		if appinfo.OfflineCmdMsgSaveTime <= 0 {
+			if connectedTime > 0 {
+				cmdRestrictTime = connectedTime - 5*1000
+			} else {
+				cmdRestrictTime = time.Now().UnixMilli()
+			}
+		} else {
+			cmdRestrictTime = time.Now().Add(-time.Minute * time.Duration(appinfo.OfflineCmdMsgSaveTime)).UnixMilli()
 		}
 	}
 	syncTime := syncMsg.SyncTime
@@ -36,6 +50,14 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 	}
 	if sendboxSyncTime < restrictTime {
 		sendboxSyncTime = restrictTime
+	}
+	cmdSyncTime := syncMsg.SyncTime
+	cmdSendboxSyncTime := syncMsg.SendBoxSyncTime
+	if cmdSyncTime < cmdRestrictTime {
+		cmdSyncTime = cmdRestrictTime
+	}
+	if cmdSendboxSyncTime < cmdRestrictTime {
+		cmdSendboxSyncTime = cmdRestrictTime
 	}
 
 	//记录用户在离线状态
@@ -53,8 +75,8 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 		Msgs: []*pbobjs.DownMsg{},
 	}
 	//拉取收件箱
-	if userStatus.LatestMsgTime == nil || *userStatus.LatestMsgTime > syncTime {
-		inboxMsgs := SyncInboxMessages(appKey, userId, syncTime, syncMsg.SyncTime, msgSyncBatchCount)
+	if userStatus.LatestMsgTime == nil || *userStatus.LatestMsgTime > syncTime || *userStatus.LatestMsgTime > cmdSyncTime {
+		inboxMsgs := SyncInboxMessages(appKey, userId, syncTime, cmdSyncTime, msgSyncBatchCount)
 		for _, msg := range inboxMsgs {
 			downMsg := &pbobjs.DownMsg{}
 			err := tools.PbUnMarshal(msg.MsgBody, downMsg)
@@ -66,7 +88,7 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 
 	//拉取发件箱
 	if syncMsg.ContainsSendBox {
-		sendboxMsgs := SyncSendboxMessages(appKey, userId, sendboxSyncTime, syncMsg.SendBoxSyncTime, msgSyncBatchCount)
+		sendboxMsgs := SyncSendboxMessages(appKey, userId, sendboxSyncTime, cmdSendboxSyncTime, msgSyncBatchCount)
 		for _, msg := range sendboxMsgs {
 			downMsg := &pbobjs.DownMsg{}
 			err := tools.PbUnMarshal(msg.MsgBody, downMsg)
