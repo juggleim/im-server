@@ -14,16 +14,24 @@ import (
 
 func AddFriends(ctx *gin.Context) {
 	var req models.FriendIds
-	if err := ctx.BindJSON(&req); err != nil || req.UserId == "" || len(req.Friends) <= 0 {
+	if err := ctx.BindJSON(&req); err != nil || req.UserId == "" || (len(req.Friends) <= 0 && len(req.FriendIds) <= 0) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
 	members := []*pbobjs.FriendMember{}
-	for _, friend := range req.Friends {
-		members = append(members, &pbobjs.FriendMember{
-			FriendId:    friend.FriendId,
-			DisplayName: friend.DisplayName,
-		})
+	if len(req.Friends) > 0 {
+		for _, friend := range req.Friends {
+			members = append(members, &pbobjs.FriendMember{
+				FriendId:    friend.FriendId,
+				DisplayName: friend.DisplayName,
+			})
+		}
+	} else if len(req.FriendIds) > 0 {
+		for _, friendId := range req.FriendIds {
+			members = append(members, &pbobjs.FriendMember{
+				FriendId: friendId,
+			})
+		}
 	}
 	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, req.UserId), "add_friends", req.UserId, &pbobjs.FriendMembersReq{
 		FriendMembers: members,
