@@ -8,7 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices/logs"
 	"im-server/services/sensitivemanager/dbs"
-	"im-server/services/sensitivemanager/services"
+	"im-server/services/sensitivemanager/sensitive"
 
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/proto"
@@ -35,7 +35,7 @@ func (actor *AddWordsActor) OnReceive(ctx context.Context, input proto.Message) 
 			logs.WithContext(ctx).Errorf("add words error:%v", err)
 			return
 		}
-		filter := services.GetAppFilter(bases.GetAppKeyFromCtx(ctx))
+		filter := sensitive.GetAppSensitiveFilter(bases.GetAppKeyFromCtx(ctx))
 		filter.AddWord(req.Words...)
 		targetId := bases.GetTargetIdFromCtx(ctx)
 		logs.WithContext(ctx).Infof("target_id:%s\treq:%v", targetId, req)

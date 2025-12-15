@@ -8,7 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices/logs"
 	"im-server/services/sensitivemanager/dbs"
-	"im-server/services/sensitivemanager/services"
+	"im-server/services/sensitivemanager/sensitive"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -29,7 +29,7 @@ func (actor *DelWordsActor) OnReceive(ctx context.Context, input proto.Message) 
 			logs.WithContext(ctx).WithField("method", method).Errorf("add words error:%v", err)
 			return
 		}
-		filter := services.GetAppFilter(appkey)
+		filter := sensitive.GetAppSensitiveFilter(appkey)
 		filter.DelWord(req.Words...)
 		targetId := bases.GetTargetIdFromCtx(ctx)
 		logs.WithContext(ctx).Infof("target_id:%s\treq:%v", targetId, req)

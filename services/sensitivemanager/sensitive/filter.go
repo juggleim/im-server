@@ -18,7 +18,7 @@ type Filter struct {
 }
 
 // New 返回一个敏感词过滤器
-func New() *Filter {
+func NewFilter() *Filter {
 	return &Filter{
 		trie:  trie.NewTrie(),
 		noise: regexp.MustCompile(`[|\s&%$@*！!#^~_—｜'";.。，,?<>《》：:]+`),

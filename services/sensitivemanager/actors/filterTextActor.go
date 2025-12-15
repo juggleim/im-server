@@ -7,7 +7,7 @@ import (
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices/logs"
-	"im-server/services/sensitivemanager/services"
+	"im-server/services/sensitivemanager/sensitive"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -20,7 +20,7 @@ func (actor *FilterTextActor) OnReceive(ctx context.Context, input proto.Message
 	method := bases.GetMethodFromCtx(ctx)
 	if req, ok := input.(*pbobjs.SensitiveFilterReq); ok {
 		appkey := bases.GetAppKeyFromCtx(ctx)
-		filter := services.GetAppFilter(appkey)
+		filter := sensitive.GetAppSensitiveFilter(appkey)
 		isDeny, replacedText := filter.ReplaceSensitiveWords(req.Text)
 		targetId := bases.GetTargetIdFromCtx(ctx)
 		logs.WithContext(ctx).Infof("target_id:%s\treq:%v", targetId, req)
