@@ -29,17 +29,22 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 		memberIds := bases.GetTargetIdsFromCtx(ctx)
 		bases.SetTargetIds2Ctx(ctx, []string{})
 		threadhold := 1000
+		forceCloseOfflineMsg := false
 		appinfo, exist := commonservices.GetAppInfo(appkey)
 		if exist && appinfo != nil {
 			threadhold = appinfo.BigGrpThreshold
+			forceCloseOfflineMsg = appinfo.ForceCloseOfflineMsg
 		}
 		if downMsg.MemberCount > int32(threadhold) {
 			preheat(ctx, appkey, memberIds)
 			for _, receiverId := range memberIds {
 				newDownMsg := copyDownMsg(downMsg, receiverId)
 				receId := receiverId
-				userStatus := GetUserStatus(appkey, receId)
-				closeOffline := (!userStatus.IsOnline())
+				closeOffline := forceCloseOfflineMsg
+				if !closeOffline {
+					userStatus := GetUserStatus(appkey, receId)
+					closeOffline = (!userStatus.IsOnline())
+				}
 				MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
 					doDispatch(ctx, receId, newDownMsg, closeOffline)
 				})
