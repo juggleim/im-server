@@ -28,6 +28,7 @@ func SaveHistoryMsg(ctx context.Context, senderId, targetId string, channelType 
 			RequesterId:  bases.GetRequesterIdFromCtx(ctx),
 			ReqIndex:     bases.GetSeqIndexFromCtx(ctx),
 			Qos:          bases.GetQosFromCtx(ctx),
+			NoSendbox:    bases.GetNoSendboxFromCtx(ctx),
 			AppDataBytes: data,
 			TargetId:     GetConversationId(senderId, targetId, channelType),
 		})

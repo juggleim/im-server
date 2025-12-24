@@ -42,6 +42,21 @@ func SavePrivateHisMsg(ctx context.Context, converId, senderId, receiverId strin
 			AppKey:            appkey,
 		},
 	})
+	noSender := bases.GetNoSendboxFromCtx(ctx)
+	if noSender {
+		pDelStorage := storages.NewPrivateDelHisMsgStorage()
+		pDelStorage.BatchCreate([]models.PrivateDelHisMsg{
+			{
+				UserId:     senderId,
+				TargetId:   receiverId,
+				SubChannel: downMsg.SubChannel,
+				MsgId:      downMsg.MsgId,
+				MsgTime:    downMsg.MsgTime,
+				MsgSeq:     downMsg.MsgSeqNo,
+				AppKey:     appkey,
+			},
+		})
+	}
 }
 func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownMsg, groupMemberCount int) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
@@ -106,6 +121,24 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 	})
 	if err != nil {
 		logs.WithContext(ctx).Errorf("msg_id:%s\terr:%v", downMsg.MsgId, err)
+	}
+	noSender := bases.GetNoSendboxFromCtx(ctx)
+	if noSender {
+		gDelStorage := storages.NewGroupDelHisMsgStorage()
+		err := gDelStorage.BatchCreate([]models.GroupDelHisMsg{
+			{
+				UserId:     downMsg.SenderId,
+				TargetId:   converId,
+				SubChannel: downMsg.SubChannel,
+				MsgId:      downMsg.MsgId,
+				MsgTime:    downMsg.MsgTime,
+				MsgSeq:     downMsg.MsgSeqNo,
+				AppKey:     appkey,
+			},
+		})
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
 	}
 }
 
