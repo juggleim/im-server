@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/convercache"
 	"im-server/services/commonservices/msgdefines"
 	"time"
 )
@@ -14,7 +15,7 @@ func BroadcastMsg(ctx context.Context, msg *pbobjs.UpMsg) (errs.IMErrorCode, str
 	senderId := bases.GetRequesterIdFromCtx(ctx)
 
 	converId := commonservices.GetConversationId(senderId, senderId, pbobjs.ChannelType_BroadCast)
-	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, "", pbobjs.ChannelType_BroadCast)
+	msgConverCache := convercache.GetMsgConverCache(ctx, converId, "", pbobjs.ChannelType_BroadCast)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_BroadCast, time.Now().UnixMilli(), msg.Flags)
 
 	downMsg := &pbobjs.DownMsg{

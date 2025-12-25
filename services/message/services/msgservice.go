@@ -10,6 +10,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/convercache"
 	"im-server/services/commonservices/interceptors"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
@@ -61,7 +62,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 			return errs.IMErrorCode_MSG_NOT_FRIEND, msgId, sendTime, 0, upMsg.ClientUid, nil
 		}
 	}
-	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, upMsg.SubChannel, pbobjs.ChannelType_Private)
+	msgConverCache := convercache.GetMsgConverCache(ctx, converId, upMsg.SubChannel, pbobjs.ChannelType_Private)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_Private, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)
 	if preMsgId != "" {

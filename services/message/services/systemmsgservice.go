@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/convercache"
 	"im-server/services/commonservices/msgdefines"
 	"im-server/services/logmanager/msglogs"
 	"time"
@@ -18,7 +19,7 @@ func SendSystemMsg(ctx context.Context, senderId, receiverId string, upMsg *pbob
 	commonservices.ReportUpMsg(appkey, pbobjs.ChannelType_System, 1)
 	commonservices.ReportDispatchMsg(appkey, pbobjs.ChannelType_System, 1)
 
-	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, upMsg.SubChannel, pbobjs.ChannelType_System)
+	msgConverCache := convercache.GetMsgConverCache(ctx, converId, upMsg.SubChannel, pbobjs.ChannelType_System)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_System, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)
 	if preMsgId != "" {

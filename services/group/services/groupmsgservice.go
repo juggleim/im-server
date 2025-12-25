@@ -7,6 +7,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/convercache"
 	"im-server/services/commonservices/interceptors"
 	"im-server/services/commonservices/msgdefines"
 	"im-server/services/logmanager/msglogs"
@@ -68,7 +69,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 	}
 
-	msgConverCache := commonservices.GetMsgConverCache(ctx, groupId, upMsg.SubChannel, pbobjs.ChannelType_Group)
+	msgConverCache := convercache.GetMsgConverCache(ctx, groupId, upMsg.SubChannel, pbobjs.ChannelType_Group)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(groupId, pbobjs.ChannelType_Group, time.Now().UnixMilli(), upMsg.Flags)
 	preMsgId := bases.GetMsgIdFromCtx(ctx)
 	if preMsgId != "" {

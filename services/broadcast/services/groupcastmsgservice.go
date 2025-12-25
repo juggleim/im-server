@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/convercache"
 	"im-server/services/commonservices/msgdefines"
 	"time"
 )
@@ -19,7 +20,7 @@ func SendGroupCastMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCod
 	commonservices.ReportUpMsg(appkey, pbobjs.ChannelType_GroupCast, 1)
 
 	converId := commonservices.GetConversationId(userId, grpCastId, pbobjs.ChannelType_GroupCast)
-	msgConverCache := commonservices.GetMsgConverCache(ctx, converId, "", pbobjs.ChannelType_GroupCast)
+	msgConverCache := convercache.GetMsgConverCache(ctx, converId, "", pbobjs.ChannelType_GroupCast)
 	msgId, sendTime, msgSeq := msgConverCache.GenerateMsgId(converId, pbobjs.ChannelType_GroupCast, time.Now().UnixMilli(), upMsg.Flags)
 
 	downMsg4Sendbox := &pbobjs.DownMsg{

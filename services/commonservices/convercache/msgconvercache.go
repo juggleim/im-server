@@ -1,17 +1,16 @@
-package commonservices
+package convercache
 
 import (
 	"context"
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
-	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
+	"im-server/services/historymsg/storages"
 	"time"
-
-	"google.golang.org/protobuf/proto"
 )
 
 var msgConverCache *caches.LruCache
@@ -99,19 +98,72 @@ func GetLatestMsgTimeSeq(ctx context.Context, appkey, converId, subChannel strin
 	var msgSeq int64 = 0
 	var msgTime int64 = 0
 	//从会话查询最新的index
-	code, resp, err := bases.SyncRpcCall(ctx, "qry_latest_hismsg", converId, &pbobjs.QryLatestMsgReq{
-		ConverId:    converId,
-		ChannelType: channelType,
-		SubChannel:  subChannel,
-	}, func() proto.Message {
-		return &pbobjs.QryLatestMsgResp{}
-	})
-	if code == errs.IMErrorCode_SUCCESS && err == nil {
-		if resp, ok := resp.(*pbobjs.QryLatestMsgResp); ok {
-			msgSeq = resp.MsgSeqNo
-			msgTime = resp.MsgTime
+	switch channelType {
+	case pbobjs.ChannelType_Private:
+		storage := storages.NewPrivateHisMsgStorage()
+		latestMsg, err := storage.QryLatestMsg(appkey, converId, subChannel)
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
+		if latestMsg != nil {
+			msgSeq = latestMsg.MsgSeqNo
+			msgTime = latestMsg.SendTime
+		}
+	case pbobjs.ChannelType_Group:
+		storage := storages.NewGroupHisMsgStorage()
+		latestMsg, err := storage.QryLatestMsg(appkey, converId, subChannel)
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
+		if latestMsg != nil {
+			msgSeq = latestMsg.MsgSeqNo
+			msgTime = latestMsg.SendTime
+		}
+	case pbobjs.ChannelType_System:
+		storage := storages.NewSystemHisMsgStorage()
+		latestMsg, err := storage.QryLatestMsg(appkey, converId)
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
+		if latestMsg != nil {
+			msgSeq = latestMsg.MsgSeqNo
+			msgTime = latestMsg.SendTime
+		}
+	case pbobjs.ChannelType_GroupCast:
+		storage := storages.NewGrpCastHisMsgStorage()
+		latestMsg, err := storage.QryLatestMsg(appkey, converId)
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
+		if latestMsg != nil {
+			msgSeq = latestMsg.MsgSeqNo
+			msgTime = latestMsg.SendTime
+		}
+	case pbobjs.ChannelType_BroadCast:
+		storage := storages.NewBrdCastHisMsgStorage()
+		latestMsg, err := storage.QryLatestMsg(appkey, converId)
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
+		if latestMsg != nil {
+			msgSeq = latestMsg.MsgSeqNo
+			msgTime = latestMsg.SendTime
 		}
 	}
-
+	/*
+		code, resp, err := bases.SyncRpcCall(ctx, "qry_latest_hismsg", converId, &pbobjs.QryLatestMsgReq{
+			ConverId:    converId,
+			ChannelType: channelType,
+			SubChannel:  subChannel,
+		}, func() proto.Message {
+			return &pbobjs.QryLatestMsgResp{}
+		})
+		if code == errs.IMErrorCode_SUCCESS && err == nil {
+			if resp, ok := resp.(*pbobjs.QryLatestMsgResp); ok {
+				msgSeq = resp.MsgSeqNo
+				msgTime = resp.MsgTime
+			}
+		}
+	*/
 	return msgTime, msgSeq
 }
