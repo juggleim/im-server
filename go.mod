@@ -14,7 +14,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.93
 	github.com/qiniu/go-sdk/v7 v7.25.4
 	github.com/rfyiamcool/go-timewheel v1.1.0
-	github.com/samber/lo v1.39.0
+	github.com/samber/lo v1.52.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/syndtr/goleveldb v0.0.0-20181127023241-353a9fca669c
 	github.com/tidwall/gjson v1.17.1
@@ -206,8 +206,8 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/jinzhu/gorm v1.9.16
-	github.com/juggleim/imserver-sdk-go v1.0.10 // indirect
-	github.com/juggleim/jugglechat-server v1.1.12
+	github.com/juggleim/imserver-sdk-go v1.0.11 // indirect
+	github.com/juggleim/jugglechat-server v1.1.15
 	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/livekit/protocol v1.39.3
