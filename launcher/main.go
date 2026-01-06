@@ -108,6 +108,7 @@ func main() {
 	}
 
 	commonservices.InitDefaultHttpServer()
+	RouteJuggleChat(commonservices.GetDefaultHttpServeMux())
 
 	imstarters.Loaded(&admingateway.AdminGateway{})
 	imstarters.Loaded(&apigateway.ApiGateway{})
