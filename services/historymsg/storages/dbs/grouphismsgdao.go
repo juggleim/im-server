@@ -185,7 +185,7 @@ func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId, subChannel string, startT
 		condition = condition + " and msg_type in (?)"
 		params = append(params, msgTypes)
 	}
-	condition = condition + " and is_delete=0 and (destroy_time=0 or destroy_time>?)"
+	condition = condition + " and is_delete=0 and is_portion=0 and (destroy_time=0 or destroy_time>?)"
 	params = append(params, curr)
 
 	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
