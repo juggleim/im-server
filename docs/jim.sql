@@ -305,7 +305,8 @@ CREATE TABLE IF NOT EXISTS `g_hismsgs` (
   `is_portion` tinyint DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `idx_appkey_converid` (`app_key`,`conver_id`,`sub_channel`,`msg_id`,`send_time`),
-  KEY `idx_conver_time` (`app_key`,`conver_id`,`sub_channel`,`send_time`)
+  KEY `idx_conver_time` (`app_key`,`conver_id`,`sub_channel`,`send_time`),
+  KEY `idx_sender_time` (`app_key`,`conver_id`,`sub_channel`,`sender_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群聊-历史消息表';
 
 CREATE TABLE `g_portionrels` (
@@ -600,7 +601,8 @@ CREATE TABLE IF NOT EXISTS `p_hismsgs` (
   `life_time_after_read` bigint DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `idx_app_key_conver_id` (`app_key`,`conver_id`,`sub_channel`,`msg_id`,`send_time`),
-  KEY `idx_conver_time` (`app_key`,`conver_id`,`sub_channel`,`send_time`)
+  KEY `idx_conver_time` (`app_key`,`conver_id`,`sub_channel`,`send_time`),
+  KEY `idx_sender_time` (`app_key`,`conver_id`,`sub_channel`,`sender_id`,`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '单聊-历史消息';
 
 CREATE TABLE IF NOT EXISTS `pushtokens` (
