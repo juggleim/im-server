@@ -187,3 +187,18 @@ func CreateDirs(path string) error {
 	}
 	return nil
 }
+
+func FilterDuplicated(arr []string) []string {
+	if len(arr) > 0 {
+		tmp := map[string]bool{}
+		ret := []string{}
+		for _, item := range arr {
+			if _, exist := tmp[item]; !exist {
+				tmp[item] = true
+				ret = append(ret, item)
+			}
+		}
+		return ret
+	}
+	return arr
+}

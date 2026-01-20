@@ -103,6 +103,7 @@ func AddGroupMembers(ctx context.Context, groupId, groupName, groupPortrait stri
 	} else {
 		needAddMemberIds = append(needAddMemberIds, memberIds...)
 	}
+	needAddMemberIds = tools.FilterDuplicated(needAddMemberIds)
 	//check group member count limit
 	appInfo, exist := commonservices.GetAppInfo(appKey)
 	if exist && appInfo != nil {
