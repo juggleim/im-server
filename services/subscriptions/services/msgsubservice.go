@@ -136,6 +136,7 @@ func createEvent(msg proto.Message) *SubEvent {
 				Sender:      msg.Msg.SenderId,
 				Receiver:    msg.Msg.TargetId,
 				ConverType:  int(msg.Msg.ChannelType),
+				ChannelType: int(msg.Msg.ChannelType),
 				MsgType:     msg.Msg.MsgType,
 				MsgContent:  string(msg.Msg.MsgContent),
 				MsgId:       msg.Msg.MsgId,
