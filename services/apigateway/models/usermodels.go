@@ -12,6 +12,7 @@ type UserInfo struct {
 	UserPortrait string            `json:"user_portrait"`
 	ExtFields    map[string]string `json:"ext_fields"`
 	UpdatedTime  int64             `json:"updated_time"`
+	IsAdmin      bool              `json:"is_admin"`
 }
 
 type KickUserReq struct {

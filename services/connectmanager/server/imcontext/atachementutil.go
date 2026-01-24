@@ -3,6 +3,7 @@ package imcontext
 import (
 	"context"
 	"im-server/commons/bases"
+	"im-server/commons/pbdefines/pbobjs"
 	"sync"
 
 	"golang.org/x/time/rate"
@@ -41,6 +42,17 @@ func GetContextAttrString(ctx WsHandleContext, key string) string {
 
 func GetUserId(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_UserID)
+}
+
+func GetUserType(ctx WsHandleContext) pbobjs.UserType {
+	ret := GetContextAttr(ctx, StateKey_UserType)
+	if ret != nil {
+		val, ok := ret.(pbobjs.UserType)
+		if ok {
+			return val
+		}
+	}
+	return pbobjs.UserType_User
 }
 
 func GetConnSession(ctx WsHandleContext) string {

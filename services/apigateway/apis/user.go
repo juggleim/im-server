@@ -22,11 +22,16 @@ func Register(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
+	userType := pbobjs.UserType_User
+	if userInfo.IsAdmin {
+		userType = pbobjs.UserType_Admin
+	}
 	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "reg_user", userInfo.UserId, &pbobjs.UserInfo{
 		UserId:       userInfo.UserId,
 		Nickname:     userInfo.Nickname,
 		UserPortrait: userInfo.UserPortrait,
 		ExtFields:    commonservices.Map2KvItems(userInfo.ExtFields),
+		UserType:     userType,
 	}, func() proto.Message {
 		return &pbobjs.UserRegResp{}
 	})

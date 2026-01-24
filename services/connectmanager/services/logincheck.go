@@ -65,6 +65,7 @@ func CheckLogin(ctx imcontext.WsHandleContext, msg *codec.ConnectMsgBody) (int32
 	}
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_UserID, token.UserId)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_DeviceID, msg.DeviceId)
+	imcontext.SetContextAttr(ctx, imcontext.StateKey_UserType, token.UserType)
 
 	//check ban user
 	banUser, exist := GetBanUserFromCache(appkey, token.UserId)

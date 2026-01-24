@@ -40,6 +40,7 @@ const (
 	StateKey_Referer              string = "state.referer"
 	// StateKey_Extra                string = "state.extra"
 	StateKey_InstanceId string = "state.instance_id"
+	StateKey_UserType   string = "state.user_type"
 )
 
 type CloseReason int

@@ -227,7 +227,11 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 		})
 		return
 	}
-
+	isFromApi := false
+	userType := imcontext.GetUserType(ctx)
+	if userType == pbobjs.UserType_Admin {
+		isFromApi = true
+	}
 	isSucc := bases.UnicastRoute(&pbobjs.RpcMessageWraper{
 		RpcMsgType:   pbobjs.RpcMsgType_UserPub,
 		AppKey:       imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey),
@@ -244,6 +248,7 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 		ExtParams: map[string]string{
 			commonservices.RpcExtKey_RealMethod: msg.Topic,
 		},
+		IsFromApi: isFromApi,
 	}, "connect")
 
 	if !isSucc {

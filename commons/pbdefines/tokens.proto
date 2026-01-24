@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 option go_package = "commons/pbdefines/pbobjs";
+import "commons/pbdefines/appmessages.proto";
 
 message TokenWrap{
     string appKey = 1;
@@ -11,4 +12,5 @@ message TokenValue {
     string userId = 1;
     string deviceId = 2;
     int64 tokenTime = 3;
+    UserType userType = 4;
 }

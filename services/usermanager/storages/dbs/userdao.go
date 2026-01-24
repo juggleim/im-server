@@ -130,7 +130,7 @@ func (user UserDao) Create(item models.User) error {
 }
 
 func (user UserDao) Upsert(item models.User) error {
-	return dbcommons.GetDb().Exec(fmt.Sprintf("INSERT INTO %s (user_id,user_type,nickname,user_portrait,app_key)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE nickname=?,user_portrait=?", user.TableName()), item.UserId, item.UserType, item.Nickname, item.UserPortrait, item.AppKey, item.Nickname, item.UserPortrait).Error
+	return dbcommons.GetDb().Exec(fmt.Sprintf("INSERT INTO %s (user_id,user_type,nickname,user_portrait,app_key)VALUES(?,?,?,?,?) ON DUPLICATE KEY UPDATE nickname=?,user_portrait=?,user_type=?", user.TableName()), item.UserId, item.UserType, item.Nickname, item.UserPortrait, item.AppKey, item.Nickname, item.UserPortrait, item.UserType).Error
 }
 
 func (user UserDao) Update(appkey, userId, nickname, userPortrait string) error {

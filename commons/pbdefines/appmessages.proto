@@ -723,6 +723,7 @@ message UserInfo{
 enum UserType{
   User = 0;
   Bot = 1;
+  Admin = 2;
 }
 
 message UserInfos{

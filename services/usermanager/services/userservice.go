@@ -110,7 +110,7 @@ func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFiel
 	userInfo, exist := GetUserInfo(appkey, userId)
 	storage := userStorage.NewUserStorage()
 	if exist && userInfo != nil {
-		if nickname != userInfo.Nickname || userPortrait != userInfo.UserPortrait {
+		if nickname != userInfo.Nickname || userPortrait != userInfo.UserPortrait || userType != pbobjs.UserType(userInfo.UserType) {
 			err := storage.Upsert(models.User{
 				UserId:       userId,
 				UserType:     userType,

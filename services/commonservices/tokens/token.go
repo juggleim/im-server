@@ -13,6 +13,7 @@ type ImToken struct {
 	UserId    string
 	DeviceId  string
 	TokenTime int64
+	UserType  pbobjs.UserType
 }
 
 func (t ImToken) ToTokenString(secureKey []byte) (string, error) {
@@ -20,6 +21,7 @@ func (t ImToken) ToTokenString(secureKey []byte) (string, error) {
 		UserId:    t.UserId,
 		DeviceId:  t.DeviceId,
 		TokenTime: t.TokenTime,
+		UserType:  t.UserType,
 	}
 	tokenBs, err := tools.PbMarshal(tokenValue)
 	if err == nil {
@@ -79,6 +81,7 @@ func ParseToken(tokenWrap *pbobjs.TokenWrap, secureKey []byte) (ImToken, error) 
 		token.UserId = tokenValue.UserId
 		token.DeviceId = tokenValue.DeviceId
 		token.TokenTime = tokenValue.TokenTime
+		token.UserType = tokenValue.UserType
 	}
 	return token, err
 }

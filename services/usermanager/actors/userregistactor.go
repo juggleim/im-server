@@ -29,12 +29,13 @@ func (actor *UserRegistActor) OnReceive(ctx context.Context, input proto.Message
 			UserId:    req.UserId,
 			DeviceId:  "",
 			TokenTime: time.Now().UnixMilli(),
+			UserType:  req.UserType,
 		}
 		appInfo, exist := commonservices.GetAppInfo(token.AppKey)
 		if exist && appInfo != nil {
 			tokenStr, _ := token.ToTokenString([]byte(appInfo.AppSecureKey))
 			if !req.NoCover || !services.CheckUserExist(ctx, req.UserId) {
-				services.AddUser(ctx, req.UserId, req.Nickname, req.UserPortrait, req.ExtFields, req.Settings, pbobjs.UserType_User)
+				services.AddUser(ctx, req.UserId, req.Nickname, req.UserPortrait, req.ExtFields, req.Settings, req.UserType)
 			}
 			queryAck := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_SUCCESS, &pbobjs.UserRegResp{
 				UserId: req.UserId,
