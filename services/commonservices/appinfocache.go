@@ -46,6 +46,7 @@ type AppInfo struct {
 	OpenSensitive         bool   `default:"false"`
 	RecordMsgLogs         bool   `default:"false"`
 	MsgFriendCheck        bool   `default:"false"`
+	OpenRemark            bool   `default:"false"`
 
 	//group
 	IsHideMsgBeforeJoinGroup bool `default:"false"`

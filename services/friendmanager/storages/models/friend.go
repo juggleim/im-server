@@ -7,6 +7,8 @@ type FriendRel struct {
 	FriendId    string
 	DisplayName string
 	OrderTag    string
+	CreatedTime int64
+	UpdatedTime int64
 }
 
 type IFriendRelStorage interface {

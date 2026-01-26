@@ -555,10 +555,15 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 			if msg, exist := priMsgs[conver.LatestMsgId]; exist {
 				downMsg = msg
 				conversation.TargetUserInfo = msg.TargetUserInfo
+				conversation.FriendInfo = msg.FriendInfo
 				if userId == downMsg.SenderId {
 					downMsg.IsSend = true
 					downMsg.TargetId = conver.TargetId
-					conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, downMsg.TargetId)
+					// conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, downMsg.TargetId)
+					downMsg.TargetUserInfo = downMsg.ReceiverInfo
+					downMsg.FriendInfo = downMsg.SenderFriendInfo
+					conversation.TargetUserInfo = downMsg.ReceiverInfo
+					conversation.FriendInfo = downMsg.SenderFriendInfo
 				}
 			}
 			if conversation.TargetUserInfo == nil {

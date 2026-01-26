@@ -774,41 +774,42 @@ func (*Nil) Descriptor() ([]byte, []int) {
 }
 
 type RpcMessageWraper struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RpcMsgType    RpcMsgType             `protobuf:"varint,1,opt,name=rpcMsgType,proto3,enum=RpcMsgType" json:"rpcMsgType,omitempty"`
-	AppKey        string                 `protobuf:"bytes,2,opt,name=appKey,proto3" json:"appKey,omitempty"`
-	Session       string                 `protobuf:"bytes,3,opt,name=session,proto3" json:"session,omitempty"`
-	Method        string                 `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
-	TargetId      string                 `protobuf:"bytes,5,opt,name=targetId,proto3" json:"targetId,omitempty"`
-	SourceMethod  string                 `protobuf:"bytes,6,opt,name=sourceMethod,proto3" json:"sourceMethod,omitempty"`
-	RequesterId   string                 `protobuf:"bytes,7,opt,name=requesterId,proto3" json:"requesterId,omitempty"`
-	Qos           int32                  `protobuf:"varint,8,opt,name=qos,proto3" json:"qos,omitempty"`
-	ReqIndex      int32                  `protobuf:"varint,9,opt,name=reqIndex,proto3" json:"reqIndex,omitempty"`
-	PublishType   int32                  `protobuf:"varint,10,opt,name=publishType,proto3" json:"publishType,omitempty"`
-	IsFromApi     bool                   `protobuf:"varint,11,opt,name=isFromApi,proto3" json:"isFromApi,omitempty"`
-	ExtParams     map[string]string      `protobuf:"bytes,12,rep,name=extParams,proto3" json:"extParams,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	TerminalNum   int32                  `protobuf:"varint,13,opt,name=terminalNum,proto3" json:"terminalNum,omitempty"`
-	NoSendbox     bool                   `protobuf:"varint,14,opt,name=noSendbox,proto3" json:"noSendbox,omitempty"`
-	OnlySendbox   bool                   `protobuf:"varint,15,opt,name=onlySendbox,proto3" json:"onlySendbox,omitempty"`
-	DeviceId      string                 `protobuf:"bytes,16,opt,name=deviceId,proto3" json:"deviceId,omitempty"`
-	InstanceId    string                 `protobuf:"bytes,17,opt,name=instanceId,proto3" json:"instanceId,omitempty"`
-	Platform      string                 `protobuf:"bytes,18,opt,name=platform,proto3" json:"platform,omitempty"`
-	IsFromApp     bool                   `protobuf:"varint,19,opt,name=isFromApp,proto3" json:"isFromApp,omitempty"`
-	ConnectedTime int64                  `protobuf:"varint,20,opt,name=connectedTime,proto3" json:"connectedTime,omitempty"`
-	ResultCode    int32                  `protobuf:"varint,21,opt,name=resultCode,proto3" json:"resultCode,omitempty"`
-	MsgSendTime   int64                  `protobuf:"varint,22,opt,name=msgSendTime,proto3" json:"msgSendTime,omitempty"`
-	MsgId         string                 `protobuf:"bytes,23,opt,name=msgId,proto3" json:"msgId,omitempty"`
-	MsgSeqNo      int64                  `protobuf:"varint,24,opt,name=msgSeqNo,proto3" json:"msgSeqNo,omitempty"`
-	MemberCount   int32                  `protobuf:"varint,25,opt,name=memberCount,proto3" json:"memberCount,omitempty"`
-	ClientMsgId   string                 `protobuf:"bytes,26,opt,name=clientMsgId,proto3" json:"clientMsgId,omitempty"`
-	ModifiedMsg   *DownMsg               `protobuf:"bytes,27,opt,name=modifiedMsg,proto3" json:"modifiedMsg,omitempty"`
-	GroupId       string                 `protobuf:"bytes,31,opt,name=groupId,proto3" json:"groupId,omitempty"`
-	TargetIds     []string               `protobuf:"bytes,32,rep,name=targetIds,proto3" json:"targetIds,omitempty"`
-	DelMsgId      string                 `protobuf:"bytes,33,opt,name=delMsgId,proto3" json:"delMsgId,omitempty"`
-	AppDataBytes  []byte                 `protobuf:"bytes,50,opt,name=appDataBytes,proto3" json:"appDataBytes,omitempty"`
-	SenderInfo    *UserInfo              `protobuf:"bytes,51,opt,name=senderInfo,proto3" json:"senderInfo,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	RpcMsgType       RpcMsgType             `protobuf:"varint,1,opt,name=rpcMsgType,proto3,enum=RpcMsgType" json:"rpcMsgType,omitempty"`
+	AppKey           string                 `protobuf:"bytes,2,opt,name=appKey,proto3" json:"appKey,omitempty"`
+	Session          string                 `protobuf:"bytes,3,opt,name=session,proto3" json:"session,omitempty"`
+	Method           string                 `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
+	TargetId         string                 `protobuf:"bytes,5,opt,name=targetId,proto3" json:"targetId,omitempty"`
+	SourceMethod     string                 `protobuf:"bytes,6,opt,name=sourceMethod,proto3" json:"sourceMethod,omitempty"`
+	RequesterId      string                 `protobuf:"bytes,7,opt,name=requesterId,proto3" json:"requesterId,omitempty"`
+	Qos              int32                  `protobuf:"varint,8,opt,name=qos,proto3" json:"qos,omitempty"`
+	ReqIndex         int32                  `protobuf:"varint,9,opt,name=reqIndex,proto3" json:"reqIndex,omitempty"`
+	PublishType      int32                  `protobuf:"varint,10,opt,name=publishType,proto3" json:"publishType,omitempty"`
+	IsFromApi        bool                   `protobuf:"varint,11,opt,name=isFromApi,proto3" json:"isFromApi,omitempty"`
+	ExtParams        map[string]string      `protobuf:"bytes,12,rep,name=extParams,proto3" json:"extParams,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	TerminalNum      int32                  `protobuf:"varint,13,opt,name=terminalNum,proto3" json:"terminalNum,omitempty"`
+	NoSendbox        bool                   `protobuf:"varint,14,opt,name=noSendbox,proto3" json:"noSendbox,omitempty"`
+	OnlySendbox      bool                   `protobuf:"varint,15,opt,name=onlySendbox,proto3" json:"onlySendbox,omitempty"`
+	DeviceId         string                 `protobuf:"bytes,16,opt,name=deviceId,proto3" json:"deviceId,omitempty"`
+	InstanceId       string                 `protobuf:"bytes,17,opt,name=instanceId,proto3" json:"instanceId,omitempty"`
+	Platform         string                 `protobuf:"bytes,18,opt,name=platform,proto3" json:"platform,omitempty"`
+	IsFromApp        bool                   `protobuf:"varint,19,opt,name=isFromApp,proto3" json:"isFromApp,omitempty"`
+	ConnectedTime    int64                  `protobuf:"varint,20,opt,name=connectedTime,proto3" json:"connectedTime,omitempty"`
+	ResultCode       int32                  `protobuf:"varint,21,opt,name=resultCode,proto3" json:"resultCode,omitempty"`
+	MsgSendTime      int64                  `protobuf:"varint,22,opt,name=msgSendTime,proto3" json:"msgSendTime,omitempty"`
+	MsgId            string                 `protobuf:"bytes,23,opt,name=msgId,proto3" json:"msgId,omitempty"`
+	MsgSeqNo         int64                  `protobuf:"varint,24,opt,name=msgSeqNo,proto3" json:"msgSeqNo,omitempty"`
+	MemberCount      int32                  `protobuf:"varint,25,opt,name=memberCount,proto3" json:"memberCount,omitempty"`
+	ClientMsgId      string                 `protobuf:"bytes,26,opt,name=clientMsgId,proto3" json:"clientMsgId,omitempty"`
+	ModifiedMsg      *DownMsg               `protobuf:"bytes,27,opt,name=modifiedMsg,proto3" json:"modifiedMsg,omitempty"`
+	GroupId          string                 `protobuf:"bytes,31,opt,name=groupId,proto3" json:"groupId,omitempty"`
+	TargetIds        []string               `protobuf:"bytes,32,rep,name=targetIds,proto3" json:"targetIds,omitempty"`
+	DelMsgId         string                 `protobuf:"bytes,33,opt,name=delMsgId,proto3" json:"delMsgId,omitempty"`
+	AppDataBytes     []byte                 `protobuf:"bytes,50,opt,name=appDataBytes,proto3" json:"appDataBytes,omitempty"`
+	SenderInfo       *UserInfo              `protobuf:"bytes,51,opt,name=senderInfo,proto3" json:"senderInfo,omitempty"`
+	SenderFriendInfo *FriendInfo            `protobuf:"bytes,52,opt,name=senderFriendInfo,proto3" json:"senderFriendInfo,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *RpcMessageWraper) Reset() {
@@ -1061,6 +1062,13 @@ func (x *RpcMessageWraper) GetAppDataBytes() []byte {
 func (x *RpcMessageWraper) GetSenderInfo() *UserInfo {
 	if x != nil {
 		return x.SenderInfo
+	}
+	return nil
+}
+
+func (x *RpcMessageWraper) GetSenderFriendInfo() *FriendInfo {
+	if x != nil {
+		return x.SenderFriendInfo
 	}
 	return nil
 }
@@ -1553,6 +1561,9 @@ type DownMsg struct {
 	SubChannel        string                      `protobuf:"bytes,34,opt,name=subChannel,proto3" json:"subChannel,omitempty"`
 	ToUserIds         []string                    `protobuf:"bytes,35,rep,name=toUserIds,proto3" json:"toUserIds,omitempty"`
 	ReadTime          int64                       `protobuf:"varint,36,opt,name=readTime,proto3" json:"readTime,omitempty"`
+	FriendInfo        *FriendInfo                 `protobuf:"bytes,37,opt,name=friendInfo,proto3" json:"friendInfo,omitempty"`
+	ReceiverInfo      *UserInfo                   `protobuf:"bytes,101,opt,name=receiverInfo,proto3" json:"receiverInfo,omitempty"`
+	SenderFriendInfo  *FriendInfo                 `protobuf:"bytes,102,opt,name=senderFriendInfo,proto3" json:"senderFriendInfo,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -1837,6 +1848,27 @@ func (x *DownMsg) GetReadTime() int64 {
 		return x.ReadTime
 	}
 	return 0
+}
+
+func (x *DownMsg) GetFriendInfo() *FriendInfo {
+	if x != nil {
+		return x.FriendInfo
+	}
+	return nil
+}
+
+func (x *DownMsg) GetReceiverInfo() *UserInfo {
+	if x != nil {
+		return x.ReceiverInfo
+	}
+	return nil
+}
+
+func (x *DownMsg) GetSenderFriendInfo() *FriendInfo {
+	if x != nil {
+		return x.SenderFriendInfo
+	}
+	return nil
 }
 
 type PriMsgPostReq struct {
@@ -5059,6 +5091,7 @@ type Conversation struct {
 	LatestReadMsgTime int64                  `protobuf:"varint,19,opt,name=latestReadMsgTime,proto3" json:"latestReadMsgTime,omitempty"`
 	ConverTags        []*ConverTag           `protobuf:"bytes,20,rep,name=converTags,proto3" json:"converTags,omitempty"`
 	SubChannel        string                 `protobuf:"bytes,21,opt,name=subChannel,proto3" json:"subChannel,omitempty"`
+	FriendInfo        *FriendInfo            `protobuf:"bytes,22,opt,name=friendInfo,proto3" json:"friendInfo,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -5238,6 +5271,13 @@ func (x *Conversation) GetSubChannel() string {
 		return x.SubChannel
 	}
 	return ""
+}
+
+func (x *Conversation) GetFriendInfo() *FriendInfo {
+	if x != nil {
+		return x.FriendInfo
+	}
+	return nil
 }
 
 type BatchAddConvers struct {
@@ -8676,6 +8716,66 @@ func (x *CheckFriendsResp) GetCheckResults() map[string]bool {
 	return nil
 }
 
+type FriendInfo struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	IsFriend          bool                   `protobuf:"varint,1,opt,name=isFriend,proto3" json:"isFriend,omitempty"`
+	FriendDisplayName string                 `protobuf:"bytes,2,opt,name=friendDisplayName,proto3" json:"friendDisplayName,omitempty"`
+	UpdatedTime       int64                  `protobuf:"varint,3,opt,name=updatedTime,proto3" json:"updatedTime,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *FriendInfo) Reset() {
+	*x = FriendInfo{}
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[116]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FriendInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FriendInfo) ProtoMessage() {}
+
+func (x *FriendInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[116]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FriendInfo.ProtoReflect.Descriptor instead.
+func (*FriendInfo) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{116}
+}
+
+func (x *FriendInfo) GetIsFriend() bool {
+	if x != nil {
+		return x.IsFriend
+	}
+	return false
+}
+
+func (x *FriendInfo) GetFriendDisplayName() string {
+	if x != nil {
+		return x.FriendDisplayName
+	}
+	return ""
+}
+
+func (x *FriendInfo) GetUpdatedTime() int64 {
+	if x != nil {
+		return x.UpdatedTime
+	}
+	return 0
+}
+
 // group
 type GroupInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -8693,7 +8793,7 @@ type GroupInfo struct {
 
 func (x *GroupInfo) Reset() {
 	*x = GroupInfo{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[116]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[117]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8705,7 +8805,7 @@ func (x *GroupInfo) String() string {
 func (*GroupInfo) ProtoMessage() {}
 
 func (x *GroupInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[116]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[117]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8718,7 +8818,7 @@ func (x *GroupInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupInfo.ProtoReflect.Descriptor instead.
 func (*GroupInfo) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{116}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{117}
 }
 
 func (x *GroupInfo) GetGroupId() string {
@@ -8788,7 +8888,7 @@ type GrpMemberInfo struct {
 
 func (x *GrpMemberInfo) Reset() {
 	*x = GrpMemberInfo{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[117]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[118]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8800,7 +8900,7 @@ func (x *GrpMemberInfo) String() string {
 func (*GrpMemberInfo) ProtoMessage() {}
 
 func (x *GrpMemberInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[117]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[118]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8813,7 +8913,7 @@ func (x *GrpMemberInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GrpMemberInfo.ProtoReflect.Descriptor instead.
 func (*GrpMemberInfo) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{117}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{118}
 }
 
 func (x *GrpMemberInfo) GetGrpDisplayName() string {
@@ -8851,7 +8951,7 @@ type GroupMembersReq struct {
 
 func (x *GroupMembersReq) Reset() {
 	*x = GroupMembersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[118]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[119]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8863,7 +8963,7 @@ func (x *GroupMembersReq) String() string {
 func (*GroupMembersReq) ProtoMessage() {}
 
 func (x *GroupMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[118]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[119]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8876,7 +8976,7 @@ func (x *GroupMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMembersReq.ProtoReflect.Descriptor instead.
 func (*GroupMembersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{118}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{119}
 }
 
 func (x *GroupMembersReq) GetGroupId() string {
@@ -8931,7 +9031,7 @@ type GroupMuteReq struct {
 
 func (x *GroupMuteReq) Reset() {
 	*x = GroupMuteReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[119]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[120]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8943,7 +9043,7 @@ func (x *GroupMuteReq) String() string {
 func (*GroupMuteReq) ProtoMessage() {}
 
 func (x *GroupMuteReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[119]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[120]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8956,7 +9056,7 @@ func (x *GroupMuteReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMuteReq.ProtoReflect.Descriptor instead.
 func (*GroupMuteReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{119}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{120}
 }
 
 func (x *GroupMuteReq) GetGroupId() string {
@@ -8983,7 +9083,7 @@ type GroupInfoReq struct {
 
 func (x *GroupInfoReq) Reset() {
 	*x = GroupInfoReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[120]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[121]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8995,7 +9095,7 @@ func (x *GroupInfoReq) String() string {
 func (*GroupInfoReq) ProtoMessage() {}
 
 func (x *GroupInfoReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[120]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[121]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9008,7 +9108,7 @@ func (x *GroupInfoReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupInfoReq.ProtoReflect.Descriptor instead.
 func (*GroupInfoReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{120}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{121}
 }
 
 func (x *GroupInfoReq) GetGroupId() string {
@@ -9034,7 +9134,7 @@ type GroupIdsReq struct {
 
 func (x *GroupIdsReq) Reset() {
 	*x = GroupIdsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[121]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[122]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9046,7 +9146,7 @@ func (x *GroupIdsReq) String() string {
 func (*GroupIdsReq) ProtoMessage() {}
 
 func (x *GroupIdsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[121]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[122]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9059,7 +9159,7 @@ func (x *GroupIdsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupIdsReq.ProtoReflect.Descriptor instead.
 func (*GroupIdsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{121}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{122}
 }
 
 func (x *GroupIdsReq) GetGroupIds() []string {
@@ -9078,7 +9178,7 @@ type GroupInfosResp struct {
 
 func (x *GroupInfosResp) Reset() {
 	*x = GroupInfosResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[122]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[123]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9090,7 +9190,7 @@ func (x *GroupInfosResp) String() string {
 func (*GroupInfosResp) ProtoMessage() {}
 
 func (x *GroupInfosResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[122]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[123]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9103,7 +9203,7 @@ func (x *GroupInfosResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupInfosResp.ProtoReflect.Descriptor instead.
 func (*GroupInfosResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{122}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{123}
 }
 
 func (x *GroupInfosResp) GetGroupInfoMap() map[string]*GroupInfo {
@@ -9125,7 +9225,7 @@ type GroupMemberMuteReq struct {
 
 func (x *GroupMemberMuteReq) Reset() {
 	*x = GroupMemberMuteReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[123]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[124]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9137,7 +9237,7 @@ func (x *GroupMemberMuteReq) String() string {
 func (*GroupMemberMuteReq) ProtoMessage() {}
 
 func (x *GroupMemberMuteReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[123]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[124]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9150,7 +9250,7 @@ func (x *GroupMemberMuteReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMemberMuteReq.ProtoReflect.Descriptor instead.
 func (*GroupMemberMuteReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{123}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{124}
 }
 
 func (x *GroupMemberMuteReq) GetGroupId() string {
@@ -9192,7 +9292,7 @@ type GroupMemberAllowReq struct {
 
 func (x *GroupMemberAllowReq) Reset() {
 	*x = GroupMemberAllowReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[124]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[125]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9204,7 +9304,7 @@ func (x *GroupMemberAllowReq) String() string {
 func (*GroupMemberAllowReq) ProtoMessage() {}
 
 func (x *GroupMemberAllowReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[124]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[125]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9217,7 +9317,7 @@ func (x *GroupMemberAllowReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMemberAllowReq.ProtoReflect.Descriptor instead.
 func (*GroupMemberAllowReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{124}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{125}
 }
 
 func (x *GroupMemberAllowReq) GetGroupId() string {
@@ -9251,7 +9351,7 @@ type GroupMembersResp struct {
 
 func (x *GroupMembersResp) Reset() {
 	*x = GroupMembersResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[125]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[126]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9263,7 +9363,7 @@ func (x *GroupMembersResp) String() string {
 func (*GroupMembersResp) ProtoMessage() {}
 
 func (x *GroupMembersResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[125]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[126]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9276,7 +9376,7 @@ func (x *GroupMembersResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMembersResp.ProtoReflect.Descriptor instead.
 func (*GroupMembersResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{125}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{126}
 }
 
 func (x *GroupMembersResp) GetItems() []*GroupMember {
@@ -9307,7 +9407,7 @@ type GroupMember struct {
 
 func (x *GroupMember) Reset() {
 	*x = GroupMember{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[126]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[127]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9319,7 +9419,7 @@ func (x *GroupMember) String() string {
 func (*GroupMember) ProtoMessage() {}
 
 func (x *GroupMember) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[126]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[127]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9332,7 +9432,7 @@ func (x *GroupMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupMember.ProtoReflect.Descriptor instead.
 func (*GroupMember) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{126}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{127}
 }
 
 func (x *GroupMember) GetMemberId() string {
@@ -9388,7 +9488,7 @@ type QryGroupMembersReq struct {
 
 func (x *QryGroupMembersReq) Reset() {
 	*x = QryGroupMembersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[127]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[128]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9400,7 +9500,7 @@ func (x *QryGroupMembersReq) String() string {
 func (*QryGroupMembersReq) ProtoMessage() {}
 
 func (x *QryGroupMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[127]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[128]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9413,7 +9513,7 @@ func (x *QryGroupMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGroupMembersReq.ProtoReflect.Descriptor instead.
 func (*QryGroupMembersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{127}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{128}
 }
 
 func (x *QryGroupMembersReq) GetGroupId() string {
@@ -9447,7 +9547,7 @@ type CheckGroupMembersReq struct {
 
 func (x *CheckGroupMembersReq) Reset() {
 	*x = CheckGroupMembersReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[128]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[129]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9459,7 +9559,7 @@ func (x *CheckGroupMembersReq) String() string {
 func (*CheckGroupMembersReq) ProtoMessage() {}
 
 func (x *CheckGroupMembersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[128]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[129]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9472,7 +9572,7 @@ func (x *CheckGroupMembersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckGroupMembersReq.ProtoReflect.Descriptor instead.
 func (*CheckGroupMembersReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{128}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{129}
 }
 
 func (x *CheckGroupMembersReq) GetGroupId() string {
@@ -9498,7 +9598,7 @@ type CheckGroupMembersResp struct {
 
 func (x *CheckGroupMembersResp) Reset() {
 	*x = CheckGroupMembersResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[129]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[130]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9510,7 +9610,7 @@ func (x *CheckGroupMembersResp) String() string {
 func (*CheckGroupMembersResp) ProtoMessage() {}
 
 func (x *CheckGroupMembersResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[129]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[130]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9523,7 +9623,7 @@ func (x *CheckGroupMembersResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckGroupMembersResp.ProtoReflect.Descriptor instead.
 func (*CheckGroupMembersResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{129}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{130}
 }
 
 func (x *CheckGroupMembersResp) GetMemberIdMap() map[string]int64 {
@@ -9543,7 +9643,7 @@ type QryGrpSnapshotReq struct {
 
 func (x *QryGrpSnapshotReq) Reset() {
 	*x = QryGrpSnapshotReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[130]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[131]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9555,7 +9655,7 @@ func (x *QryGrpSnapshotReq) String() string {
 func (*QryGrpSnapshotReq) ProtoMessage() {}
 
 func (x *QryGrpSnapshotReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[130]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[131]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9568,7 +9668,7 @@ func (x *QryGrpSnapshotReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGrpSnapshotReq.ProtoReflect.Descriptor instead.
 func (*QryGrpSnapshotReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{130}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{131}
 }
 
 func (x *QryGrpSnapshotReq) GetGroupId() string {
@@ -9595,7 +9695,7 @@ type GroupSnapshot struct {
 
 func (x *GroupSnapshot) Reset() {
 	*x = GroupSnapshot{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[131]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[132]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9607,7 +9707,7 @@ func (x *GroupSnapshot) String() string {
 func (*GroupSnapshot) ProtoMessage() {}
 
 func (x *GroupSnapshot) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[131]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[132]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9620,7 +9720,7 @@ func (x *GroupSnapshot) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GroupSnapshot.ProtoReflect.Descriptor instead.
 func (*GroupSnapshot) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{131}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{132}
 }
 
 func (x *GroupSnapshot) GetGroupId() string {
@@ -9646,7 +9746,7 @@ type QryGrpMemberSettingsReq struct {
 
 func (x *QryGrpMemberSettingsReq) Reset() {
 	*x = QryGrpMemberSettingsReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[132]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[133]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9658,7 +9758,7 @@ func (x *QryGrpMemberSettingsReq) String() string {
 func (*QryGrpMemberSettingsReq) ProtoMessage() {}
 
 func (x *QryGrpMemberSettingsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[132]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[133]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9671,7 +9771,7 @@ func (x *QryGrpMemberSettingsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGrpMemberSettingsReq.ProtoReflect.Descriptor instead.
 func (*QryGrpMemberSettingsReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{132}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{133}
 }
 
 func (x *QryGrpMemberSettingsReq) GetMemberId() string {
@@ -9696,7 +9796,7 @@ type QryGrpMemberSettingsResp struct {
 
 func (x *QryGrpMemberSettingsResp) Reset() {
 	*x = QryGrpMemberSettingsResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[133]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9708,7 +9808,7 @@ func (x *QryGrpMemberSettingsResp) String() string {
 func (*QryGrpMemberSettingsResp) ProtoMessage() {}
 
 func (x *QryGrpMemberSettingsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[133]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9721,7 +9821,7 @@ func (x *QryGrpMemberSettingsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryGrpMemberSettingsResp.ProtoReflect.Descriptor instead.
 func (*QryGrpMemberSettingsResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{133}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{134}
 }
 
 func (x *QryGrpMemberSettingsResp) GetGroupId() string {
@@ -9786,7 +9886,7 @@ type RtcConverBindReq struct {
 
 func (x *RtcConverBindReq) Reset() {
 	*x = RtcConverBindReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9798,7 +9898,7 @@ func (x *RtcConverBindReq) String() string {
 func (*RtcConverBindReq) ProtoMessage() {}
 
 func (x *RtcConverBindReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[134]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9811,7 +9911,7 @@ func (x *RtcConverBindReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RtcConverBindReq.ProtoReflect.Descriptor instead.
 func (*RtcConverBindReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{134}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{135}
 }
 
 func (x *RtcConverBindReq) GetAction() RtcConverBindAction {
@@ -9860,7 +9960,7 @@ type QryFileCredReq struct {
 
 func (x *QryFileCredReq) Reset() {
 	*x = QryFileCredReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9872,7 +9972,7 @@ func (x *QryFileCredReq) String() string {
 func (*QryFileCredReq) ProtoMessage() {}
 
 func (x *QryFileCredReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[135]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9885,7 +9985,7 @@ func (x *QryFileCredReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFileCredReq.ProtoReflect.Descriptor instead.
 func (*QryFileCredReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{135}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{136}
 }
 
 func (x *QryFileCredReq) GetFileType() FileType {
@@ -9916,7 +10016,7 @@ type QryFileCredResp struct {
 
 func (x *QryFileCredResp) Reset() {
 	*x = QryFileCredResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9928,7 +10028,7 @@ func (x *QryFileCredResp) String() string {
 func (*QryFileCredResp) ProtoMessage() {}
 
 func (x *QryFileCredResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[136]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9941,7 +10041,7 @@ func (x *QryFileCredResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QryFileCredResp.ProtoReflect.Descriptor instead.
 func (*QryFileCredResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{136}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{137}
 }
 
 func (x *QryFileCredResp) GetOssType() OssType {
@@ -10002,7 +10102,7 @@ type QiNiuCredResp struct {
 
 func (x *QiNiuCredResp) Reset() {
 	*x = QiNiuCredResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10014,7 +10114,7 @@ func (x *QiNiuCredResp) String() string {
 func (*QiNiuCredResp) ProtoMessage() {}
 
 func (x *QiNiuCredResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[137]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10027,7 +10127,7 @@ func (x *QiNiuCredResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QiNiuCredResp.ProtoReflect.Descriptor instead.
 func (*QiNiuCredResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{137}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{138}
 }
 
 func (x *QiNiuCredResp) GetDomain() string {
@@ -10060,7 +10160,7 @@ type PreSignResp struct {
 
 func (x *PreSignResp) Reset() {
 	*x = PreSignResp{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10072,7 +10172,7 @@ func (x *PreSignResp) String() string {
 func (*PreSignResp) ProtoMessage() {}
 
 func (x *PreSignResp) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[138]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10085,7 +10185,7 @@ func (x *PreSignResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PreSignResp.ProtoReflect.Descriptor instead.
 func (*PreSignResp) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{138}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{139}
 }
 
 func (x *PreSignResp) GetUrl() string {
@@ -10155,7 +10255,7 @@ type UploadLogStatusReq struct {
 
 func (x *UploadLogStatusReq) Reset() {
 	*x = UploadLogStatusReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10167,7 +10267,7 @@ func (x *UploadLogStatusReq) String() string {
 func (*UploadLogStatusReq) ProtoMessage() {}
 
 func (x *UploadLogStatusReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[139]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10180,7 +10280,7 @@ func (x *UploadLogStatusReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadLogStatusReq.ProtoReflect.Descriptor instead.
 func (*UploadLogStatusReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{139}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{140}
 }
 
 func (x *UploadLogStatusReq) GetMsgId() string {
@@ -10214,7 +10314,7 @@ type SubMsgs struct {
 
 func (x *SubMsgs) Reset() {
 	*x = SubMsgs{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10226,7 +10326,7 @@ func (x *SubMsgs) String() string {
 func (*SubMsgs) ProtoMessage() {}
 
 func (x *SubMsgs) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[140]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10239,7 +10339,7 @@ func (x *SubMsgs) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubMsgs.ProtoReflect.Descriptor instead.
 func (*SubMsgs) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{140}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{141}
 }
 
 func (x *SubMsgs) GetSubMsgs() []*SubMsg {
@@ -10259,7 +10359,7 @@ type SubMsg struct {
 
 func (x *SubMsg) Reset() {
 	*x = SubMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10271,7 +10371,7 @@ func (x *SubMsg) String() string {
 func (*SubMsg) ProtoMessage() {}
 
 func (x *SubMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[141]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10284,7 +10384,7 @@ func (x *SubMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubMsg.ProtoReflect.Descriptor instead.
 func (*SubMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{141}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{142}
 }
 
 func (x *SubMsg) GetMsg() *DownMsg {
@@ -10318,7 +10418,7 @@ type OnlineOfflineMsg struct {
 
 func (x *OnlineOfflineMsg) Reset() {
 	*x = OnlineOfflineMsg{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10330,7 +10430,7 @@ func (x *OnlineOfflineMsg) String() string {
 func (*OnlineOfflineMsg) ProtoMessage() {}
 
 func (x *OnlineOfflineMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[142]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10343,7 +10443,7 @@ func (x *OnlineOfflineMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OnlineOfflineMsg.ProtoReflect.Descriptor instead.
 func (*OnlineOfflineMsg) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{142}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{143}
 }
 
 func (x *OnlineOfflineMsg) GetType() OnlineType {
@@ -10420,7 +10520,7 @@ type TransReq struct {
 
 func (x *TransReq) Reset() {
 	*x = TransReq{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[144]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10432,7 +10532,7 @@ func (x *TransReq) String() string {
 func (*TransReq) ProtoMessage() {}
 
 func (x *TransReq) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[143]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[144]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10445,7 +10545,7 @@ func (x *TransReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransReq.ProtoReflect.Descriptor instead.
 func (*TransReq) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{143}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{144}
 }
 
 func (x *TransReq) GetItems() []*TransItem {
@@ -10479,7 +10579,7 @@ type TransItem struct {
 
 func (x *TransItem) Reset() {
 	*x = TransItem{}
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[144]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[145]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10491,7 +10591,7 @@ func (x *TransItem) String() string {
 func (*TransItem) ProtoMessage() {}
 
 func (x *TransItem) ProtoReflect() protoreflect.Message {
-	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[144]
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[145]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10504,7 +10604,7 @@ func (x *TransItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransItem.ProtoReflect.Descriptor instead.
 func (*TransItem) Descriptor() ([]byte, []int) {
-	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{144}
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{145}
 }
 
 func (x *TransItem) GetKey() string {
@@ -10526,7 +10626,7 @@ var File_commons_pbdefines_appmessages_proto protoreflect.FileDescriptor
 const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\n" +
 	"#commons/pbdefines/appmessages.proto\"\x05\n" +
-	"\x03Nil\"\xdc\b\n" +
+	"\x03Nil\"\x95\t\n" +
 	"\x10RpcMessageWraper\x12+\n" +
 	"\n" +
 	"rpcMsgType\x18\x01 \x01(\x0e2\v.RpcMsgTypeR\n" +
@@ -10568,7 +10668,8 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\fappDataBytes\x182 \x01(\fR\fappDataBytes\x12)\n" +
 	"\n" +
 	"senderInfo\x183 \x01(\v2\t.UserInfoR\n" +
-	"senderInfo\x1a<\n" +
+	"senderInfo\x127\n" +
+	"\x10senderFriendInfo\x184 \x01(\v2\v.FriendInfoR\x10senderFriendInfo\x1a<\n" +
 	"\x0eExtParamsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe1\x03\n" +
@@ -10627,8 +10728,7 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\vrtcRoomType\x189 \x01(\x05R\vrtcRoomType\x12\"\n" +
 	"\frtcMediaType\x18: \x01(\x05R\frtcMediaType\x12 \n" +
 	"\visMentioned\x18; \x01(\bR\visMentioned\x12.\n" +
-	"\vmentionType\x18< \x01(\x0e2\f.MentionTypeR\vmentionType\"\xe5\n" +
-	"\n" +
+	"\vmentionType\x18< \x01(\x0e2\f.MentionTypeR\vmentionType\"\xfa\v\n" +
 	"\aDownMsg\x12\x1a\n" +
 	"\btargetId\x18\x01 \x01(\tR\btargetId\x12.\n" +
 	"\vchannelType\x18\x02 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12\x18\n" +
@@ -10678,7 +10778,12 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"subChannel\x18\" \x01(\tR\n" +
 	"subChannel\x12\x1c\n" +
 	"\ttoUserIds\x18# \x03(\tR\ttoUserIds\x12\x1a\n" +
-	"\breadTime\x18$ \x01(\x03R\breadTime\x1aP\n" +
+	"\breadTime\x18$ \x01(\x03R\breadTime\x12+\n" +
+	"\n" +
+	"friendInfo\x18% \x01(\v2\v.FriendInfoR\n" +
+	"friendInfo\x12-\n" +
+	"\freceiverInfo\x18e \x01(\v2\t.UserInfoR\freceiverInfo\x127\n" +
+	"\x10senderFriendInfo\x18f \x01(\v2\v.FriendInfoR\x10senderFriendInfo\x1aP\n" +
 	"\x10TransMsgMapEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12&\n" +
 	"\x05value\x18\x02 \x01(\v2\x10.TransMsgContentR\x05value:\x028\x01\"\xa3\x01\n" +
@@ -10980,7 +11085,7 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\rconversations\x18\x01 \x03(\v2\r.ConversationR\rconversations\x12\x1e\n" +
 	"\n" +
 	"isFinished\x18\x02 \x01(\bR\n" +
-	"isFinished\"\x86\x06\n" +
+	"isFinished\"\xb3\x06\n" +
 	"\fConversation\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
 	"\btargetId\x18\x02 \x01(\tR\btargetId\x12.\n" +
@@ -11009,7 +11114,10 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"converTags\x12\x1e\n" +
 	"\n" +
 	"subChannel\x18\x15 \x01(\tR\n" +
-	"subChannel\":\n" +
+	"subChannel\x12+\n" +
+	"\n" +
+	"friendInfo\x18\x16 \x01(\v2\v.FriendInfoR\n" +
+	"friendInfo\":\n" +
 	"\x0fBatchAddConvers\x12'\n" +
 	"\aconvers\x18\x01 \x03(\v2\r.ConversationR\aconvers\"C\n" +
 	"\x0fUserMsgTimeItem\x12\x16\n" +
@@ -11263,7 +11371,12 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\fcheckResults\x18\x01 \x03(\v2#.CheckFriendsResp.CheckResultsEntryR\fcheckResults\x1a?\n" +
 	"\x11CheckResultsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\bR\x05value:\x028\x01\"\x91\x02\n" +
+	"\x05value\x18\x02 \x01(\bR\x05value:\x028\x01\"x\n" +
+	"\n" +
+	"FriendInfo\x12\x1a\n" +
+	"\bisFriend\x18\x01 \x01(\bR\bisFriend\x12,\n" +
+	"\x11friendDisplayName\x18\x02 \x01(\tR\x11friendDisplayName\x12 \n" +
+	"\vupdatedTime\x18\x03 \x01(\x03R\vupdatedTime\"\x91\x02\n" +
 	"\tGroupInfo\x12\x18\n" +
 	"\agroupId\x18\x01 \x01(\tR\agroupId\x12\x1c\n" +
 	"\tgroupName\x18\x02 \x01(\tR\tgroupName\x12$\n" +
@@ -11513,7 +11626,7 @@ func file_commons_pbdefines_appmessages_proto_rawDescGZIP() []byte {
 }
 
 var file_commons_pbdefines_appmessages_proto_enumTypes = make([]protoimpl.EnumInfo, 14)
-var file_commons_pbdefines_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 155)
+var file_commons_pbdefines_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 156)
 var file_commons_pbdefines_appmessages_proto_goTypes = []any{
 	(RpcMsgType)(0),                  // 0: RpcMsgType
 	(MentionType)(0),                 // 1: MentionType
@@ -11645,209 +11758,215 @@ var file_commons_pbdefines_appmessages_proto_goTypes = []any{
 	(*FriendMember)(nil),             // 127: FriendMember
 	(*CheckFriendsReq)(nil),          // 128: CheckFriendsReq
 	(*CheckFriendsResp)(nil),         // 129: CheckFriendsResp
-	(*GroupInfo)(nil),                // 130: GroupInfo
-	(*GrpMemberInfo)(nil),            // 131: GrpMemberInfo
-	(*GroupMembersReq)(nil),          // 132: GroupMembersReq
-	(*GroupMuteReq)(nil),             // 133: GroupMuteReq
-	(*GroupInfoReq)(nil),             // 134: GroupInfoReq
-	(*GroupIdsReq)(nil),              // 135: GroupIdsReq
-	(*GroupInfosResp)(nil),           // 136: GroupInfosResp
-	(*GroupMemberMuteReq)(nil),       // 137: GroupMemberMuteReq
-	(*GroupMemberAllowReq)(nil),      // 138: GroupMemberAllowReq
-	(*GroupMembersResp)(nil),         // 139: GroupMembersResp
-	(*GroupMember)(nil),              // 140: GroupMember
-	(*QryGroupMembersReq)(nil),       // 141: QryGroupMembersReq
-	(*CheckGroupMembersReq)(nil),     // 142: CheckGroupMembersReq
-	(*CheckGroupMembersResp)(nil),    // 143: CheckGroupMembersResp
-	(*QryGrpSnapshotReq)(nil),        // 144: QryGrpSnapshotReq
-	(*GroupSnapshot)(nil),            // 145: GroupSnapshot
-	(*QryGrpMemberSettingsReq)(nil),  // 146: QryGrpMemberSettingsReq
-	(*QryGrpMemberSettingsResp)(nil), // 147: QryGrpMemberSettingsResp
-	(*RtcConverBindReq)(nil),         // 148: RtcConverBindReq
-	(*QryFileCredReq)(nil),           // 149: QryFileCredReq
-	(*QryFileCredResp)(nil),          // 150: QryFileCredResp
-	(*QiNiuCredResp)(nil),            // 151: QiNiuCredResp
-	(*PreSignResp)(nil),              // 152: PreSignResp
-	(*UploadLogStatusReq)(nil),       // 153: UploadLogStatusReq
-	(*SubMsgs)(nil),                  // 154: SubMsgs
-	(*SubMsg)(nil),                   // 155: SubMsg
-	(*OnlineOfflineMsg)(nil),         // 156: OnlineOfflineMsg
-	(*TransReq)(nil),                 // 157: TransReq
-	(*TransItem)(nil),                // 158: TransItem
-	nil,                              // 159: RpcMessageWraper.ExtParamsEntry
-	nil,                              // 160: DownMsg.TransMsgMapEntry
-	nil,                              // 161: ConverExts.ConverTagsEntry
-	nil,                              // 162: UserInfosResp.UserInfoMapEntry
-	nil,                              // 163: CheckFriendsResp.CheckResultsEntry
-	nil,                              // 164: GroupInfosResp.GroupInfoMapEntry
-	nil,                              // 165: CheckGroupMembersResp.MemberIdMapEntry
-	nil,                              // 166: QryGrpMemberSettingsResp.GroupSettingsEntry
-	nil,                              // 167: QryGrpMemberSettingsResp.MemberSettingsEntry
-	nil,                              // 168: QryGrpMemberSettingsResp.MemberExtsEntry
+	(*FriendInfo)(nil),               // 130: FriendInfo
+	(*GroupInfo)(nil),                // 131: GroupInfo
+	(*GrpMemberInfo)(nil),            // 132: GrpMemberInfo
+	(*GroupMembersReq)(nil),          // 133: GroupMembersReq
+	(*GroupMuteReq)(nil),             // 134: GroupMuteReq
+	(*GroupInfoReq)(nil),             // 135: GroupInfoReq
+	(*GroupIdsReq)(nil),              // 136: GroupIdsReq
+	(*GroupInfosResp)(nil),           // 137: GroupInfosResp
+	(*GroupMemberMuteReq)(nil),       // 138: GroupMemberMuteReq
+	(*GroupMemberAllowReq)(nil),      // 139: GroupMemberAllowReq
+	(*GroupMembersResp)(nil),         // 140: GroupMembersResp
+	(*GroupMember)(nil),              // 141: GroupMember
+	(*QryGroupMembersReq)(nil),       // 142: QryGroupMembersReq
+	(*CheckGroupMembersReq)(nil),     // 143: CheckGroupMembersReq
+	(*CheckGroupMembersResp)(nil),    // 144: CheckGroupMembersResp
+	(*QryGrpSnapshotReq)(nil),        // 145: QryGrpSnapshotReq
+	(*GroupSnapshot)(nil),            // 146: GroupSnapshot
+	(*QryGrpMemberSettingsReq)(nil),  // 147: QryGrpMemberSettingsReq
+	(*QryGrpMemberSettingsResp)(nil), // 148: QryGrpMemberSettingsResp
+	(*RtcConverBindReq)(nil),         // 149: RtcConverBindReq
+	(*QryFileCredReq)(nil),           // 150: QryFileCredReq
+	(*QryFileCredResp)(nil),          // 151: QryFileCredResp
+	(*QiNiuCredResp)(nil),            // 152: QiNiuCredResp
+	(*PreSignResp)(nil),              // 153: PreSignResp
+	(*UploadLogStatusReq)(nil),       // 154: UploadLogStatusReq
+	(*SubMsgs)(nil),                  // 155: SubMsgs
+	(*SubMsg)(nil),                   // 156: SubMsg
+	(*OnlineOfflineMsg)(nil),         // 157: OnlineOfflineMsg
+	(*TransReq)(nil),                 // 158: TransReq
+	(*TransItem)(nil),                // 159: TransItem
+	nil,                              // 160: RpcMessageWraper.ExtParamsEntry
+	nil,                              // 161: DownMsg.TransMsgMapEntry
+	nil,                              // 162: ConverExts.ConverTagsEntry
+	nil,                              // 163: UserInfosResp.UserInfoMapEntry
+	nil,                              // 164: CheckFriendsResp.CheckResultsEntry
+	nil,                              // 165: GroupInfosResp.GroupInfoMapEntry
+	nil,                              // 166: CheckGroupMembersResp.MemberIdMapEntry
+	nil,                              // 167: QryGrpMemberSettingsResp.GroupSettingsEntry
+	nil,                              // 168: QryGrpMemberSettingsResp.MemberSettingsEntry
+	nil,                              // 169: QryGrpMemberSettingsResp.MemberExtsEntry
 }
 var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	0,   // 0: RpcMessageWraper.rpcMsgType:type_name -> RpcMsgType
-	159, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
+	160, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
 	20,  // 2: RpcMessageWraper.modifiedMsg:type_name -> DownMsg
 	98,  // 3: RpcMessageWraper.senderInfo:type_name -> UserInfo
-	19,  // 4: UpMsg.pushData:type_name -> PushData
-	18,  // 5: UpMsg.mentionInfo:type_name -> MentionInfo
-	20,  // 6: UpMsg.referMsg:type_name -> DownMsg
-	17,  // 7: UpMsg.mergedMsgs:type_name -> MergedMsgs
-	4,   // 8: MergedMsgs.channelType:type_name -> ChannelType
-	46,  // 9: MergedMsgs.msgs:type_name -> SimpleMsg
-	1,   // 10: MentionInfo.mentionType:type_name -> MentionType
-	98,  // 11: MentionInfo.targetUsers:type_name -> UserInfo
-	2,   // 12: PushData.pushLevel:type_name -> PushLevel
-	4,   // 13: PushData.channelType:type_name -> ChannelType
-	1,   // 14: PushData.mentionType:type_name -> MentionType
-	4,   // 15: DownMsg.channelType:type_name -> ChannelType
-	19,  // 16: DownMsg.pushData:type_name -> PushData
-	18,  // 17: DownMsg.mentionInfo:type_name -> MentionInfo
-	20,  // 18: DownMsg.referMsg:type_name -> DownMsg
-	98,  // 19: DownMsg.targetUserInfo:type_name -> UserInfo
-	130, // 20: DownMsg.groupInfo:type_name -> GroupInfo
-	17,  // 21: DownMsg.mergedMsgs:type_name -> MergedMsgs
-	24,  // 22: DownMsg.streamMsgParts:type_name -> StreamMsgItem
-	52,  // 23: DownMsg.msgExSet:type_name -> MsgExtItem
-	52,  // 24: DownMsg.msgExts:type_name -> MsgExtItem
-	96,  // 25: DownMsg.converTags:type_name -> ConverTag
-	160, // 26: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
-	131, // 27: DownMsg.grpMemberInfo:type_name -> GrpMemberInfo
-	16,  // 28: PriMsgPostReq.upMsg:type_name -> UpMsg
-	20,  // 29: PriMsgPostReq.modifiedMsg:type_name -> DownMsg
-	19,  // 30: TransMsgContent.pushData:type_name -> PushData
-	3,   // 31: StreamMsgItem.event:type_name -> StreamEvent
-	4,   // 32: StreamDownMsg.channelType:type_name -> ChannelType
-	24,  // 33: StreamDownMsg.msgItems:type_name -> StreamMsgItem
-	5,   // 34: Notify.type:type_name -> NotifyType
-	20,  // 35: DownMsgSet.msgs:type_name -> DownMsg
-	98,  // 36: DownMsgSet.targetUserInfo:type_name -> UserInfo
-	130, // 37: DownMsgSet.groupInfo:type_name -> GroupInfo
-	32,  // 38: AddGrpAssistantReq.targets:type_name -> SimpleConversation
-	4,   // 39: SimpleConversation.channelType:type_name -> ChannelType
-	4,   // 40: ConverIndex.channelType:type_name -> ChannelType
-	32,  // 41: AssistantMsgResp.convers:type_name -> SimpleConversation
-	4,   // 42: AddHisMsgReq.channelType:type_name -> ChannelType
-	20,  // 43: AddHisMsgReq.msg:type_name -> DownMsg
-	4,   // 44: DelHisMsgsReq.channelType:type_name -> ChannelType
-	46,  // 45: DelHisMsgsReq.msgs:type_name -> SimpleMsg
-	4,   // 46: QryLatestMsgReq.channelType:type_name -> ChannelType
-	4,   // 47: QryLatestMsgResp.ChannelType:type_name -> ChannelType
-	4,   // 48: QryHisMsgsReq.channelType:type_name -> ChannelType
-	4,   // 49: QryFirstUnreadMsgReq.channelType:type_name -> ChannelType
-	4,   // 50: QryHisMsgByIdsReq.channelType:type_name -> ChannelType
-	4,   // 51: RecallMsgReq.channelType:type_name -> ChannelType
-	29,  // 52: RecallMsgReq.exts:type_name -> KvItem
-	4,   // 53: MarkReadReq.channelType:type_name -> ChannelType
-	46,  // 54: MarkReadReq.msgs:type_name -> SimpleMsg
-	47,  // 55: MarkReadReq.indexScopes:type_name -> IndexScope
-	4,   // 56: MarkGrpMsgReadReq.channelType:type_name -> ChannelType
-	4,   // 57: CleanHisMsgReq.channelType:type_name -> ChannelType
-	4,   // 58: ModifyMsgReq.channelType:type_name -> ChannelType
-	17,  // 59: MergeMsgReq.mergedMsgs:type_name -> MergedMsgs
-	4,   // 60: MsgExt.channelType:type_name -> ChannelType
-	52,  // 61: MsgExt.ext:type_name -> MsgExtItem
-	98,  // 62: MsgExtItem.userInfo:type_name -> UserInfo
-	4,   // 63: QryMsgExtReq.channelType:type_name -> ChannelType
-	55,  // 64: MsgExtItemsList.items:type_name -> MsgExtItems
-	52,  // 65: MsgExtItems.exts:type_name -> MsgExtItem
-	57,  // 66: FavoriteMsgIds.items:type_name -> FavoriteMsgIdItem
-	4,   // 67: FavoriteMsgIdItem.ChannelType:type_name -> ChannelType
-	20,  // 68: FavoriteMsg.msg:type_name -> DownMsg
-	59,  // 69: FavoriteMsgs.items:type_name -> FavoriteMsg
-	4,   // 70: TopMsgReq.channelType:type_name -> ChannelType
-	4,   // 71: GetTopMsgReq.channelType:type_name -> ChannelType
-	20,  // 72: TopMsg.msg:type_name -> DownMsg
-	98,  // 73: TopMsg.operator:type_name -> UserInfo
-	4,   // 74: QryGlobalConversReq.channelType:type_name -> ChannelType
-	66,  // 75: QryGlobalConversResp.convers:type_name -> GlobalConver
-	4,   // 76: GlobalConver.channelType:type_name -> ChannelType
-	4,   // 77: QryConversationsReq.channelType:type_name -> ChannelType
-	69,  // 78: QryConversationsResp.conversations:type_name -> Conversation
-	4,   // 79: Conversation.channelType:type_name -> ChannelType
-	20,  // 80: Conversation.msg:type_name -> DownMsg
-	73,  // 81: Conversation.mentions:type_name -> Mentions
-	98,  // 82: Conversation.targetUserInfo:type_name -> UserInfo
-	130, // 83: Conversation.groupInfo:type_name -> GroupInfo
-	96,  // 84: Conversation.converTags:type_name -> ConverTag
-	69,  // 85: BatchAddConvers.convers:type_name -> Conversation
-	4,   // 86: UpdLatestMsgReq.channelType:type_name -> ChannelType
-	6,   // 87: UpdLatestMsgReq.action:type_name -> UpdLatestMsgAction
-	20,  // 88: UpdLatestMsgReq.msg:type_name -> DownMsg
-	98,  // 89: Mentions.senders:type_name -> UserInfo
-	74,  // 90: Mentions.mentionMsgs:type_name -> MentionMsg
-	1,   // 91: MentionMsg.mentionType:type_name -> MentionType
-	4,   // 92: QryMentionMsgsReq.channelType:type_name -> ChannelType
-	20,  // 93: QryMentionMsgsResp.mentionMsgs:type_name -> DownMsg
-	79,  // 94: QryTotalUnreadCountReq.filter:type_name -> ConverFilter
-	4,   // 95: ConverFilter.channelTypes:type_name -> ChannelType
-	32,  // 96: ConverFilter.excludeConvers:type_name -> SimpleConversation
-	32,  // 97: ConverFilter.includeConvers:type_name -> SimpleConversation
-	69,  // 98: ConversationsReq.conversations:type_name -> Conversation
-	69,  // 99: ClearUnreadReq.conversations:type_name -> Conversation
-	84,  // 100: UndisturbConversReq.items:type_name -> UndisturbConverItem
-	4,   // 101: UndisturbConverItem.channelType:type_name -> ChannelType
-	7,   // 102: QryTopConversReq.sortType:type_name -> TopConverSortType
-	4,   // 103: QryReadInfosReq.channelType:type_name -> ChannelType
-	89,  // 104: QryReadInfosResp.items:type_name -> ReadInfoItem
-	4,   // 105: QryReadDetailReq.channelType:type_name -> ChannelType
-	92,  // 106: QryReadDetailResp.readMembers:type_name -> MemberReadDetailItem
-	92,  // 107: QryReadDetailResp.unreadMembers:type_name -> MemberReadDetailItem
-	98,  // 108: MemberReadDetailItem.member:type_name -> UserInfo
-	4,   // 109: QryConverReq.channelType:type_name -> ChannelType
-	32,  // 110: TagConvers.convers:type_name -> SimpleConversation
-	96,  // 111: UserConverTags.tags:type_name -> ConverTag
-	8,   // 112: ConverTag.tagType:type_name -> ConverTagType
-	161, // 113: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
-	29,  // 114: UserInfo.extFields:type_name -> KvItem
-	29,  // 115: UserInfo.settings:type_name -> KvItem
-	29,  // 116: UserInfo.statuses:type_name -> KvItem
-	9,   // 117: UserInfo.userType:type_name -> UserType
-	98,  // 118: UserInfos.userInfos:type_name -> UserInfo
-	162, // 119: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
-	29,  // 120: UserRegResp.extFields:type_name -> KvItem
-	106, // 121: UserOnlineStatusResp.items:type_name -> UserOnlineItem
-	108, // 122: BanUsersReq.banUsers:type_name -> BanUser
-	108, // 123: QryBanUsersResp.items:type_name -> BanUser
-	113, // 124: QryBlockUsersResp.items:type_name -> BlockUser
-	10,  // 125: OnlineStatus.type:type_name -> OnlineType
-	119, // 126: UserUndisturb.rules:type_name -> UserUndisturbItem
-	127, // 127: FriendMembersReq.friendMembers:type_name -> FriendMember
-	127, // 128: QryFriendsResp.items:type_name -> FriendMember
-	163, // 129: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
-	29,  // 130: GroupInfo.extFields:type_name -> KvItem
-	29,  // 131: GroupInfo.settings:type_name -> KvItem
-	29,  // 132: GrpMemberInfo.extFields:type_name -> KvItem
-	29,  // 133: GroupMembersReq.extFields:type_name -> KvItem
-	29,  // 134: GroupMembersReq.settings:type_name -> KvItem
-	164, // 135: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
-	140, // 136: GroupMembersResp.items:type_name -> GroupMember
-	29,  // 137: GroupMember.extFields:type_name -> KvItem
-	29,  // 138: GroupMember.settings:type_name -> KvItem
-	9,   // 139: GroupMember.memberType:type_name -> UserType
-	165, // 140: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
-	166, // 141: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
-	167, // 142: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
-	168, // 143: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
-	11,  // 144: RtcConverBindReq.action:type_name -> RtcConverBindAction
-	4,   // 145: RtcConverBindReq.channelType:type_name -> ChannelType
-	12,  // 146: QryFileCredReq.file_type:type_name -> FileType
-	13,  // 147: QryFileCredResp.oss_type:type_name -> OssType
-	151, // 148: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
-	152, // 149: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
-	155, // 150: SubMsgs.subMsgs:type_name -> SubMsg
-	20,  // 151: SubMsg.msg:type_name -> DownMsg
-	10,  // 152: OnlineOfflineMsg.type:type_name -> OnlineType
-	158, // 153: TransReq.items:type_name -> TransItem
-	22,  // 154: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
-	98,  // 155: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
-	130, // 156: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
-	157, // [157:157] is the sub-list for method output_type
-	157, // [157:157] is the sub-list for method input_type
-	157, // [157:157] is the sub-list for extension type_name
-	157, // [157:157] is the sub-list for extension extendee
-	0,   // [0:157] is the sub-list for field type_name
+	130, // 4: RpcMessageWraper.senderFriendInfo:type_name -> FriendInfo
+	19,  // 5: UpMsg.pushData:type_name -> PushData
+	18,  // 6: UpMsg.mentionInfo:type_name -> MentionInfo
+	20,  // 7: UpMsg.referMsg:type_name -> DownMsg
+	17,  // 8: UpMsg.mergedMsgs:type_name -> MergedMsgs
+	4,   // 9: MergedMsgs.channelType:type_name -> ChannelType
+	46,  // 10: MergedMsgs.msgs:type_name -> SimpleMsg
+	1,   // 11: MentionInfo.mentionType:type_name -> MentionType
+	98,  // 12: MentionInfo.targetUsers:type_name -> UserInfo
+	2,   // 13: PushData.pushLevel:type_name -> PushLevel
+	4,   // 14: PushData.channelType:type_name -> ChannelType
+	1,   // 15: PushData.mentionType:type_name -> MentionType
+	4,   // 16: DownMsg.channelType:type_name -> ChannelType
+	19,  // 17: DownMsg.pushData:type_name -> PushData
+	18,  // 18: DownMsg.mentionInfo:type_name -> MentionInfo
+	20,  // 19: DownMsg.referMsg:type_name -> DownMsg
+	98,  // 20: DownMsg.targetUserInfo:type_name -> UserInfo
+	131, // 21: DownMsg.groupInfo:type_name -> GroupInfo
+	17,  // 22: DownMsg.mergedMsgs:type_name -> MergedMsgs
+	24,  // 23: DownMsg.streamMsgParts:type_name -> StreamMsgItem
+	52,  // 24: DownMsg.msgExSet:type_name -> MsgExtItem
+	52,  // 25: DownMsg.msgExts:type_name -> MsgExtItem
+	96,  // 26: DownMsg.converTags:type_name -> ConverTag
+	161, // 27: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
+	132, // 28: DownMsg.grpMemberInfo:type_name -> GrpMemberInfo
+	130, // 29: DownMsg.friendInfo:type_name -> FriendInfo
+	98,  // 30: DownMsg.receiverInfo:type_name -> UserInfo
+	130, // 31: DownMsg.senderFriendInfo:type_name -> FriendInfo
+	16,  // 32: PriMsgPostReq.upMsg:type_name -> UpMsg
+	20,  // 33: PriMsgPostReq.modifiedMsg:type_name -> DownMsg
+	19,  // 34: TransMsgContent.pushData:type_name -> PushData
+	3,   // 35: StreamMsgItem.event:type_name -> StreamEvent
+	4,   // 36: StreamDownMsg.channelType:type_name -> ChannelType
+	24,  // 37: StreamDownMsg.msgItems:type_name -> StreamMsgItem
+	5,   // 38: Notify.type:type_name -> NotifyType
+	20,  // 39: DownMsgSet.msgs:type_name -> DownMsg
+	98,  // 40: DownMsgSet.targetUserInfo:type_name -> UserInfo
+	131, // 41: DownMsgSet.groupInfo:type_name -> GroupInfo
+	32,  // 42: AddGrpAssistantReq.targets:type_name -> SimpleConversation
+	4,   // 43: SimpleConversation.channelType:type_name -> ChannelType
+	4,   // 44: ConverIndex.channelType:type_name -> ChannelType
+	32,  // 45: AssistantMsgResp.convers:type_name -> SimpleConversation
+	4,   // 46: AddHisMsgReq.channelType:type_name -> ChannelType
+	20,  // 47: AddHisMsgReq.msg:type_name -> DownMsg
+	4,   // 48: DelHisMsgsReq.channelType:type_name -> ChannelType
+	46,  // 49: DelHisMsgsReq.msgs:type_name -> SimpleMsg
+	4,   // 50: QryLatestMsgReq.channelType:type_name -> ChannelType
+	4,   // 51: QryLatestMsgResp.ChannelType:type_name -> ChannelType
+	4,   // 52: QryHisMsgsReq.channelType:type_name -> ChannelType
+	4,   // 53: QryFirstUnreadMsgReq.channelType:type_name -> ChannelType
+	4,   // 54: QryHisMsgByIdsReq.channelType:type_name -> ChannelType
+	4,   // 55: RecallMsgReq.channelType:type_name -> ChannelType
+	29,  // 56: RecallMsgReq.exts:type_name -> KvItem
+	4,   // 57: MarkReadReq.channelType:type_name -> ChannelType
+	46,  // 58: MarkReadReq.msgs:type_name -> SimpleMsg
+	47,  // 59: MarkReadReq.indexScopes:type_name -> IndexScope
+	4,   // 60: MarkGrpMsgReadReq.channelType:type_name -> ChannelType
+	4,   // 61: CleanHisMsgReq.channelType:type_name -> ChannelType
+	4,   // 62: ModifyMsgReq.channelType:type_name -> ChannelType
+	17,  // 63: MergeMsgReq.mergedMsgs:type_name -> MergedMsgs
+	4,   // 64: MsgExt.channelType:type_name -> ChannelType
+	52,  // 65: MsgExt.ext:type_name -> MsgExtItem
+	98,  // 66: MsgExtItem.userInfo:type_name -> UserInfo
+	4,   // 67: QryMsgExtReq.channelType:type_name -> ChannelType
+	55,  // 68: MsgExtItemsList.items:type_name -> MsgExtItems
+	52,  // 69: MsgExtItems.exts:type_name -> MsgExtItem
+	57,  // 70: FavoriteMsgIds.items:type_name -> FavoriteMsgIdItem
+	4,   // 71: FavoriteMsgIdItem.ChannelType:type_name -> ChannelType
+	20,  // 72: FavoriteMsg.msg:type_name -> DownMsg
+	59,  // 73: FavoriteMsgs.items:type_name -> FavoriteMsg
+	4,   // 74: TopMsgReq.channelType:type_name -> ChannelType
+	4,   // 75: GetTopMsgReq.channelType:type_name -> ChannelType
+	20,  // 76: TopMsg.msg:type_name -> DownMsg
+	98,  // 77: TopMsg.operator:type_name -> UserInfo
+	4,   // 78: QryGlobalConversReq.channelType:type_name -> ChannelType
+	66,  // 79: QryGlobalConversResp.convers:type_name -> GlobalConver
+	4,   // 80: GlobalConver.channelType:type_name -> ChannelType
+	4,   // 81: QryConversationsReq.channelType:type_name -> ChannelType
+	69,  // 82: QryConversationsResp.conversations:type_name -> Conversation
+	4,   // 83: Conversation.channelType:type_name -> ChannelType
+	20,  // 84: Conversation.msg:type_name -> DownMsg
+	73,  // 85: Conversation.mentions:type_name -> Mentions
+	98,  // 86: Conversation.targetUserInfo:type_name -> UserInfo
+	131, // 87: Conversation.groupInfo:type_name -> GroupInfo
+	96,  // 88: Conversation.converTags:type_name -> ConverTag
+	130, // 89: Conversation.friendInfo:type_name -> FriendInfo
+	69,  // 90: BatchAddConvers.convers:type_name -> Conversation
+	4,   // 91: UpdLatestMsgReq.channelType:type_name -> ChannelType
+	6,   // 92: UpdLatestMsgReq.action:type_name -> UpdLatestMsgAction
+	20,  // 93: UpdLatestMsgReq.msg:type_name -> DownMsg
+	98,  // 94: Mentions.senders:type_name -> UserInfo
+	74,  // 95: Mentions.mentionMsgs:type_name -> MentionMsg
+	1,   // 96: MentionMsg.mentionType:type_name -> MentionType
+	4,   // 97: QryMentionMsgsReq.channelType:type_name -> ChannelType
+	20,  // 98: QryMentionMsgsResp.mentionMsgs:type_name -> DownMsg
+	79,  // 99: QryTotalUnreadCountReq.filter:type_name -> ConverFilter
+	4,   // 100: ConverFilter.channelTypes:type_name -> ChannelType
+	32,  // 101: ConverFilter.excludeConvers:type_name -> SimpleConversation
+	32,  // 102: ConverFilter.includeConvers:type_name -> SimpleConversation
+	69,  // 103: ConversationsReq.conversations:type_name -> Conversation
+	69,  // 104: ClearUnreadReq.conversations:type_name -> Conversation
+	84,  // 105: UndisturbConversReq.items:type_name -> UndisturbConverItem
+	4,   // 106: UndisturbConverItem.channelType:type_name -> ChannelType
+	7,   // 107: QryTopConversReq.sortType:type_name -> TopConverSortType
+	4,   // 108: QryReadInfosReq.channelType:type_name -> ChannelType
+	89,  // 109: QryReadInfosResp.items:type_name -> ReadInfoItem
+	4,   // 110: QryReadDetailReq.channelType:type_name -> ChannelType
+	92,  // 111: QryReadDetailResp.readMembers:type_name -> MemberReadDetailItem
+	92,  // 112: QryReadDetailResp.unreadMembers:type_name -> MemberReadDetailItem
+	98,  // 113: MemberReadDetailItem.member:type_name -> UserInfo
+	4,   // 114: QryConverReq.channelType:type_name -> ChannelType
+	32,  // 115: TagConvers.convers:type_name -> SimpleConversation
+	96,  // 116: UserConverTags.tags:type_name -> ConverTag
+	8,   // 117: ConverTag.tagType:type_name -> ConverTagType
+	162, // 118: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
+	29,  // 119: UserInfo.extFields:type_name -> KvItem
+	29,  // 120: UserInfo.settings:type_name -> KvItem
+	29,  // 121: UserInfo.statuses:type_name -> KvItem
+	9,   // 122: UserInfo.userType:type_name -> UserType
+	98,  // 123: UserInfos.userInfos:type_name -> UserInfo
+	163, // 124: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
+	29,  // 125: UserRegResp.extFields:type_name -> KvItem
+	106, // 126: UserOnlineStatusResp.items:type_name -> UserOnlineItem
+	108, // 127: BanUsersReq.banUsers:type_name -> BanUser
+	108, // 128: QryBanUsersResp.items:type_name -> BanUser
+	113, // 129: QryBlockUsersResp.items:type_name -> BlockUser
+	10,  // 130: OnlineStatus.type:type_name -> OnlineType
+	119, // 131: UserUndisturb.rules:type_name -> UserUndisturbItem
+	127, // 132: FriendMembersReq.friendMembers:type_name -> FriendMember
+	127, // 133: QryFriendsResp.items:type_name -> FriendMember
+	164, // 134: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
+	29,  // 135: GroupInfo.extFields:type_name -> KvItem
+	29,  // 136: GroupInfo.settings:type_name -> KvItem
+	29,  // 137: GrpMemberInfo.extFields:type_name -> KvItem
+	29,  // 138: GroupMembersReq.extFields:type_name -> KvItem
+	29,  // 139: GroupMembersReq.settings:type_name -> KvItem
+	165, // 140: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
+	141, // 141: GroupMembersResp.items:type_name -> GroupMember
+	29,  // 142: GroupMember.extFields:type_name -> KvItem
+	29,  // 143: GroupMember.settings:type_name -> KvItem
+	9,   // 144: GroupMember.memberType:type_name -> UserType
+	166, // 145: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
+	167, // 146: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
+	168, // 147: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
+	169, // 148: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
+	11,  // 149: RtcConverBindReq.action:type_name -> RtcConverBindAction
+	4,   // 150: RtcConverBindReq.channelType:type_name -> ChannelType
+	12,  // 151: QryFileCredReq.file_type:type_name -> FileType
+	13,  // 152: QryFileCredResp.oss_type:type_name -> OssType
+	152, // 153: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
+	153, // 154: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
+	156, // 155: SubMsgs.subMsgs:type_name -> SubMsg
+	20,  // 156: SubMsg.msg:type_name -> DownMsg
+	10,  // 157: OnlineOfflineMsg.type:type_name -> OnlineType
+	159, // 158: TransReq.items:type_name -> TransItem
+	22,  // 159: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
+	98,  // 160: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
+	131, // 161: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
+	162, // [162:162] is the sub-list for method output_type
+	162, // [162:162] is the sub-list for method input_type
+	162, // [162:162] is the sub-list for extension type_name
+	162, // [162:162] is the sub-list for extension extendee
+	0,   // [0:162] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_appmessages_proto_init() }
@@ -11855,7 +11974,7 @@ func file_commons_pbdefines_appmessages_proto_init() {
 	if File_commons_pbdefines_appmessages_proto != nil {
 		return
 	}
-	file_commons_pbdefines_appmessages_proto_msgTypes[136].OneofWrappers = []any{
+	file_commons_pbdefines_appmessages_proto_msgTypes[137].OneofWrappers = []any{
 		(*QryFileCredResp_QiniuCred)(nil),
 		(*QryFileCredResp_PreSignResp)(nil),
 	}
@@ -11865,7 +11984,7 @@ func file_commons_pbdefines_appmessages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_commons_pbdefines_appmessages_proto_rawDesc), len(file_commons_pbdefines_appmessages_proto_rawDesc)),
 			NumEnums:      14,
-			NumMessages:   155,
+			NumMessages:   156,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

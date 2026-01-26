@@ -11,6 +11,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/convercache"
+	"im-server/services/commonservices/friendcache"
 	"im-server/services/commonservices/interceptors"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
@@ -55,11 +56,20 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 	//check friend status
 	appinfo, exist := commonservices.GetAppInfo(appkey)
 	if exist && appinfo != nil && appinfo.MsgFriendCheck {
-		friendStatus := GetFriendStatus(appkey, receiverId, senderId)
+		friendStatus := friendcache.GetFriendStatus(appkey, receiverId, senderId)
 		if !friendStatus.IsFriend {
 			sendTime := time.Now().UnixMilli()
 			msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), converId)
 			return errs.IMErrorCode_MSG_NOT_FRIEND, msgId, sendTime, 0, upMsg.ClientUid, nil
+		}
+	}
+	var friendInfo *pbobjs.FriendInfo
+	if appinfo, exist := commonservices.GetAppInfo(appkey); exist && appinfo != nil && appinfo.OpenRemark {
+		friendStatus := friendcache.GetFriendStatus(appkey, receiverId, senderId)
+		friendInfo = &pbobjs.FriendInfo{
+			FriendDisplayName: friendStatus.FriendDisplayName,
+			IsFriend:          friendStatus.IsFriend,
+			UpdatedTime:       friendStatus.UpdatedTime,
 		}
 	}
 	msgConverCache := convercache.GetMsgConverCache(ctx, converId, upMsg.SubChannel, pbobjs.ChannelType_Private)
@@ -98,6 +108,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		MentionInfo:       upMsg.MentionInfo,
 		ReferMsg:          commonservices.FillReferMsg(ctx, upMsg),
 		TargetUserInfo:    commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
+		FriendInfo:        bases.GetSenderFriendInfoFromCtx(ctx),
 		MergedMsgs:        upMsg.MergedMsgs,
 		PushData:          upMsg.PushData,
 		SearchText:        upMsg.SearchText,
@@ -127,12 +138,16 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		MentionInfo:       upMsg.MentionInfo,
 		ReferMsg:          commonservices.FillReferMsg(ctx, upMsg),
 		TargetUserInfo:    commonservices.GetSenderUserInfo(ctx),
+		FriendInfo:        friendInfo,
 		MergedMsgs:        upMsg.MergedMsgs,
 		PushData:          upMsg.PushData,
 		SearchText:        upMsg.SearchText,
 		DestroyTime:       destroyTime,
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
 		SubChannel:        upMsg.SubChannel,
+
+		ReceiverInfo:     commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
+		SenderFriendInfo: bases.GetSenderFriendInfoFromCtx(ctx),
 	}
 
 	//check merged msg

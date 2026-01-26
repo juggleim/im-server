@@ -8,6 +8,7 @@ import (
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/friendcache"
 	"im-server/services/commonservices/logs"
 	"im-server/services/usermanager/services"
 
@@ -58,6 +59,19 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 			}
 		}
 
+		//friend info
+		senderFriendInfo := &pbobjs.FriendInfo{}
+		if realMethod == "p_msg" {
+			if appinfo, exist := commonservices.GetAppInfo(appkey); exist && appinfo != nil && appinfo.OpenRemark {
+				friStatus := friendcache.GetFriendStatus(appkey, userId, targetId)
+				if friStatus != nil && friStatus.IsFriend {
+					senderFriendInfo.IsFriend = true
+					senderFriendInfo.FriendDisplayName = friStatus.FriendDisplayName
+					senderFriendInfo.UpdatedTime = friStatus.UpdatedTime
+				}
+			}
+		}
+
 		exts := map[string]string{}
 		if realMethod == "p_msg" || realMethod == "imp_pri_msg" {
 			exts[commonservices.RpcExtKey_RealTargetId] = targetId
@@ -67,24 +81,25 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 			targetId = commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_System)
 		}
 		isSucc := bases.UnicastRouteWithSenderActor(&pbobjs.RpcMessageWraper{
-			RpcMsgType:   pbobjs.RpcMsgType_UserPub,
-			AppKey:       appkey,
-			Session:      rpcMsg.Session,
-			DeviceId:     rpcMsg.DeviceId,
-			InstanceId:   rpcMsg.InstanceId,
-			Platform:     rpcMsg.Platform,
-			Method:       realMethod,
-			RequesterId:  userId,
-			ReqIndex:     rpcMsg.ReqIndex,
-			Qos:          rpcMsg.Qos,
-			AppDataBytes: rpcMsg.AppDataBytes,
-			TargetId:     targetId,
-			SenderInfo:   userInfo,
-			ExtParams:    exts,
-			IsFromApi:    rpcMsg.IsFromApi,
-			NoSendbox:    rpcMsg.NoSendbox,
-			OnlySendbox:  rpcMsg.OnlySendbox,
-			MsgId:        rpcMsg.MsgId,
+			RpcMsgType:       pbobjs.RpcMsgType_UserPub,
+			AppKey:           appkey,
+			Session:          rpcMsg.Session,
+			DeviceId:         rpcMsg.DeviceId,
+			InstanceId:       rpcMsg.InstanceId,
+			Platform:         rpcMsg.Platform,
+			Method:           realMethod,
+			RequesterId:      userId,
+			ReqIndex:         rpcMsg.ReqIndex,
+			Qos:              rpcMsg.Qos,
+			AppDataBytes:     rpcMsg.AppDataBytes,
+			TargetId:         targetId,
+			SenderInfo:       userInfo,
+			SenderFriendInfo: senderFriendInfo,
+			ExtParams:        exts,
+			IsFromApi:        rpcMsg.IsFromApi,
+			NoSendbox:        rpcMsg.NoSendbox,
+			OnlySendbox:      rpcMsg.OnlySendbox,
+			MsgId:            rpcMsg.MsgId,
 		}, actor.Sender)
 		if !isSucc {
 			userPubAck := &pbobjs.RpcMessageWraper{

@@ -49,6 +49,7 @@ message RpcMessageWraper{
 
   bytes appDataBytes = 50;
   UserInfo senderInfo = 51;
+  FriendInfo senderFriendInfo = 52;
 }
 
 //上行消息
@@ -156,6 +157,10 @@ message DownMsg{
   string subChannel = 34;
   repeated string toUserIds = 35;
   int64 readTime = 36;
+  FriendInfo friendInfo = 37;
+
+  UserInfo receiverInfo = 101;
+  FriendInfo senderFriendInfo = 102;
 }
 
 message PriMsgPostReq{
@@ -523,6 +528,7 @@ message Conversation{
   int64 latestReadMsgTime = 19;
   repeated ConverTag converTags = 20;
   string subChannel = 21;
+  FriendInfo friendInfo = 22;
 }
 
 message BatchAddConvers{
@@ -884,6 +890,12 @@ message CheckFriendsReq{
 
 message CheckFriendsResp{
   map<string,bool> checkResults = 1;
+}
+
+message FriendInfo{
+  bool isFriend = 1;
+  string friendDisplayName = 2;
+  int64 updatedTime = 3;
 }
 
 //group

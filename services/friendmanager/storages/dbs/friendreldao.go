@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"im-server/commons/dbcommons"
 	"im-server/services/friendmanager/storages/models"
+	"time"
 )
 
 type FriendRelDao struct {
-	ID          int64  `gorm:"primary_key"`
-	UserId      string `gorm:"user_id"`
-	FriendId    string `gorm:"friend_id"`
-	OrderTag    string `gorm:"order_tag"`
-	DisplayName string `gorm:"display_name"`
-	AppKey      string `gorm:"app_key"`
+	ID          int64     `gorm:"primary_key"`
+	UserId      string    `gorm:"user_id"`
+	FriendId    string    `gorm:"friend_id"`
+	OrderTag    string    `gorm:"order_tag"`
+	DisplayName string    `gorm:"display_name"`
+	CreatedTime time.Time `gorm:"created_time"`
+	UpdatedTime time.Time `gorm:"updated_time"`
+	AppKey      string    `gorm:"app_key"`
 }
 
 func (rel FriendRelDao) TableName() string {
@@ -71,6 +74,8 @@ func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit in
 			FriendId:    rel.FriendId,
 			DisplayName: rel.DisplayName,
 			OrderTag:    rel.OrderTag,
+			CreatedTime: rel.CreatedTime.UnixMilli(),
+			UpdatedTime: rel.UpdatedTime.UnixMilli(),
 		})
 	}
 	return ret, nil
@@ -98,6 +103,8 @@ func (rel FriendRelDao) QueryFriendRelsWithPage(appkey, userId string, orderTag 
 			FriendId:    rel.FriendId,
 			DisplayName: rel.DisplayName,
 			OrderTag:    rel.OrderTag,
+			CreatedTime: rel.CreatedTime.UnixMilli(),
+			UpdatedTime: rel.UpdatedTime.UnixMilli(),
 		})
 	}
 	return ret, nil
@@ -120,6 +127,8 @@ func (rel FriendRelDao) GetFriendRel(appkey, userId, friendId string) (*models.F
 		FriendId:    item.FriendId,
 		DisplayName: item.DisplayName,
 		OrderTag:    item.OrderTag,
+		CreatedTime: rel.CreatedTime.UnixMilli(),
+		UpdatedTime: rel.UpdatedTime.UnixMilli(),
 	}, nil
 }
 
@@ -138,6 +147,8 @@ func (rel FriendRelDao) QueryFriendRelsByFriendIds(appkey, userId string, friend
 			FriendId:    rel.FriendId,
 			DisplayName: rel.DisplayName,
 			OrderTag:    rel.OrderTag,
+			CreatedTime: rel.CreatedTime.UnixMilli(),
+			UpdatedTime: rel.UpdatedTime.UnixMilli(),
 		})
 	}
 	return ret, nil

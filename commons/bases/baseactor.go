@@ -41,32 +41,33 @@ type BaseActor struct {
 type CtxKey string
 
 const (
-	CtxKey_Tags          CtxKey = "CtxKey_Tags"
-	CtxKey_RpcType       CtxKey = "CtxKey_RpcType"
-	CtxKey_SeqIndex      CtxKey = "CtxKey_SeqIndex"
-	CtxKey_AppKey        CtxKey = "CtxKey_AppKey"
-	CtxKey_Qos           CtxKey = "CtxKey_Qos"
-	CtxKey_Session       CtxKey = "CtxKey_Session"
-	CtxKey_ConnectedTime CtxKey = "CtxKey_ConnectedTime"
-	CtxKey_DeviceId      CtxKey = "CtxKey_DeviceId"
-	CtxKey_InstanceId    CtxKey = "CtxKey_InstanceId"
-	CtxKey_Platform      CtxKey = "CtxKey_Platform"
-	CtxKey_Method        CtxKey = "CtxKey_Method"
-	CtxKey_SourceMethod  CtxKey = "CtxKey_SourceMethod"
-	CtxKey_RequesterId   CtxKey = "CtxKey_RequesterId"
-	CtxKey_TargetId      CtxKey = "CtxKey_TargetId"
-	CtxKey_PublishType   CtxKey = "CtxKey_PublishType"
-	CtxKey_IsFromApi     CtxKey = "CtxKey_IsFromApi"
-	CtxKey_IsFromApp     CtxKey = "CtxKey_IsFromApp"
-	CtxKey_TerminalCount CtxKey = "CtxKey_TerminalCount"
-	CtxKey_GroupId       CtxKey = "CtxKey_GroupId"
-	CtxKey_TargetIds     CtxKey = "CtxKey_TargetIds"
-	CtxKey_SenderInfo    CtxKey = "CtxKey_SenderInfo"
-	CtxKey_NoSendbox     CtxKey = "CtxKey_NoSendbox"
-	CtxKey_OnlySendbox   CtxKey = "CtxKey_OnlySendbox"
-	CtxKey_Exts          CtxKey = "CtxKey_Exts"
-	CtxKey_MsgId         CtxKey = "CtxKey_MsgId"
-	CtxKey_DelMsgId      CtxKey = "CtxKey_DelMsgId"
+	CtxKey_Tags             CtxKey = "CtxKey_Tags"
+	CtxKey_RpcType          CtxKey = "CtxKey_RpcType"
+	CtxKey_SeqIndex         CtxKey = "CtxKey_SeqIndex"
+	CtxKey_AppKey           CtxKey = "CtxKey_AppKey"
+	CtxKey_Qos              CtxKey = "CtxKey_Qos"
+	CtxKey_Session          CtxKey = "CtxKey_Session"
+	CtxKey_ConnectedTime    CtxKey = "CtxKey_ConnectedTime"
+	CtxKey_DeviceId         CtxKey = "CtxKey_DeviceId"
+	CtxKey_InstanceId       CtxKey = "CtxKey_InstanceId"
+	CtxKey_Platform         CtxKey = "CtxKey_Platform"
+	CtxKey_Method           CtxKey = "CtxKey_Method"
+	CtxKey_SourceMethod     CtxKey = "CtxKey_SourceMethod"
+	CtxKey_RequesterId      CtxKey = "CtxKey_RequesterId"
+	CtxKey_TargetId         CtxKey = "CtxKey_TargetId"
+	CtxKey_PublishType      CtxKey = "CtxKey_PublishType"
+	CtxKey_IsFromApi        CtxKey = "CtxKey_IsFromApi"
+	CtxKey_IsFromApp        CtxKey = "CtxKey_IsFromApp"
+	CtxKey_TerminalCount    CtxKey = "CtxKey_TerminalCount"
+	CtxKey_GroupId          CtxKey = "CtxKey_GroupId"
+	CtxKey_TargetIds        CtxKey = "CtxKey_TargetIds"
+	CtxKey_SenderInfo       CtxKey = "CtxKey_SenderInfo"
+	CtxKey_SenderFriendInfo CtxKey = "CtxKey_SenderFriendInfo"
+	CtxKey_NoSendbox        CtxKey = "CtxKey_NoSendbox"
+	CtxKey_OnlySendbox      CtxKey = "CtxKey_OnlySendbox"
+	CtxKey_Exts             CtxKey = "CtxKey_Exts"
+	CtxKey_MsgId            CtxKey = "CtxKey_MsgId"
+	CtxKey_DelMsgId         CtxKey = "CtxKey_DelMsgId"
 
 	CtxKey_StartTime CtxKey = "CtxKey_StartTime"
 )
@@ -114,6 +115,7 @@ func (actor *baseProcessActor) OnReceive(ctx context.Context, input proto.Messag
 			ctx = setCtxValue(ctx, CtxKey_StartTime, startTime.UnixMilli())
 
 			ctx = setCtxValue(ctx, CtxKey_SenderInfo, ssRequest.SenderInfo)
+			ctx = setCtxValue(ctx, CtxKey_SenderFriendInfo, ssRequest.SenderFriendInfo)
 			if preProcess != nil {
 				isContinue := preProcess(ctx, actor.GetSender())
 				if !isContinue {
@@ -348,6 +350,13 @@ func SetTargetIds2Ctx(ctx context.Context, ids []string) context.Context {
 func GetSenderInfoFromCtx(ctx context.Context) *pbobjs.UserInfo {
 	if senderInfo, ok := ctx.Value(CtxKey_SenderInfo).(*pbobjs.UserInfo); ok {
 		return senderInfo
+	}
+	return nil
+}
+
+func GetSenderFriendInfoFromCtx(ctx context.Context) *pbobjs.FriendInfo {
+	if friendInfo, ok := ctx.Value(CtxKey_SenderFriendInfo).(*pbobjs.FriendInfo); ok {
+		return friendInfo
 	}
 	return nil
 }
