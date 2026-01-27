@@ -65,6 +65,9 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("sync_friend_rels", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SyncFriendRelsActor{}, serviceName)
 	})
+	register.RegisterActor("qry_friend_infos", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryFriendInfoActor{}, serviceName)
+	})
 }
 
 func (manager *MessageManager) Startup(args map[string]interface{}) {
