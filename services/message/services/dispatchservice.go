@@ -137,6 +137,7 @@ func copyDownMsg(msg *pbobjs.DownMsg, receiverId string) *pbobjs.DownMsg {
 		IsRead:            msg.IsRead,
 		ReferMsg:          referMsg,
 		TargetUserInfo:    msg.TargetUserInfo,
+		SenderInfo:        msg.SenderInfo,
 		GroupInfo:         msg.GroupInfo,
 		MergedMsgs:        msg.MergedMsgs,
 		UndisturbType:     msg.UndisturbType,

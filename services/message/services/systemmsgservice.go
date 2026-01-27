@@ -41,6 +41,7 @@ func SendSystemMsg(ctx context.Context, senderId, receiverId string, upMsg *pbob
 		MentionInfo:    upMsg.MentionInfo,
 		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
 		TargetUserInfo: commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
+		SenderInfo:     bases.GetSenderInfoFromCtx(ctx),
 	}
 	msglogs.LogMsg(ctx, downMsg4Sendbox)
 	//send to sender's other device
@@ -65,6 +66,7 @@ func SendSystemMsg(ctx context.Context, senderId, receiverId string, upMsg *pbob
 		MentionInfo:    upMsg.MentionInfo,
 		ReferMsg:       commonservices.FillReferMsg(ctx, upMsg),
 		TargetUserInfo: commonservices.GetSenderUserInfo(ctx),
+		SenderInfo:     commonservices.GetSenderUserInfo(ctx),
 	}
 	//save history msg
 	if msgdefines.IsStoreMsg(upMsg.Flags) {

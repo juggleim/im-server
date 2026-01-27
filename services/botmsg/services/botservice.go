@@ -193,6 +193,7 @@ func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
 						Flags:          streamFlag,
 						ClientUid:      tools.GenerateUUIDShort22(),
 						TargetUserInfo: botUserInfo,
+						SenderInfo:     botUserInfo,
 						MsgTime:        curr,
 						MsgId:          tools.GenerateMsgId(curr, int32(msg.ChannelType), msg.TargetId),
 						StreamMsgParts: []*pbobjs.StreamMsgItem{},

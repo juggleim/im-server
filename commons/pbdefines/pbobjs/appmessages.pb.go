@@ -1562,6 +1562,7 @@ type DownMsg struct {
 	ToUserIds         []string                    `protobuf:"bytes,35,rep,name=toUserIds,proto3" json:"toUserIds,omitempty"`
 	ReadTime          int64                       `protobuf:"varint,36,opt,name=readTime,proto3" json:"readTime,omitempty"`
 	FriendInfo        *FriendInfo                 `protobuf:"bytes,37,opt,name=friendInfo,proto3" json:"friendInfo,omitempty"`
+	SenderInfo        *UserInfo                   `protobuf:"bytes,38,opt,name=senderInfo,proto3" json:"senderInfo,omitempty"`
 	ReceiverInfo      *UserInfo                   `protobuf:"bytes,101,opt,name=receiverInfo,proto3" json:"receiverInfo,omitempty"`
 	SenderFriendInfo  *FriendInfo                 `protobuf:"bytes,102,opt,name=senderFriendInfo,proto3" json:"senderFriendInfo,omitempty"`
 	unknownFields     protoimpl.UnknownFields
@@ -1853,6 +1854,13 @@ func (x *DownMsg) GetReadTime() int64 {
 func (x *DownMsg) GetFriendInfo() *FriendInfo {
 	if x != nil {
 		return x.FriendInfo
+	}
+	return nil
+}
+
+func (x *DownMsg) GetSenderInfo() *UserInfo {
+	if x != nil {
+		return x.SenderInfo
 	}
 	return nil
 }
@@ -10780,7 +10788,7 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\vrtcRoomType\x189 \x01(\x05R\vrtcRoomType\x12\"\n" +
 	"\frtcMediaType\x18: \x01(\x05R\frtcMediaType\x12 \n" +
 	"\visMentioned\x18; \x01(\bR\visMentioned\x12.\n" +
-	"\vmentionType\x18< \x01(\x0e2\f.MentionTypeR\vmentionType\"\xfa\v\n" +
+	"\vmentionType\x18< \x01(\x0e2\f.MentionTypeR\vmentionType\"\xa5\f\n" +
 	"\aDownMsg\x12\x1a\n" +
 	"\btargetId\x18\x01 \x01(\tR\btargetId\x12.\n" +
 	"\vchannelType\x18\x02 \x01(\x0e2\f.ChannelTypeR\vchannelType\x12\x18\n" +
@@ -10833,7 +10841,10 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\breadTime\x18$ \x01(\x03R\breadTime\x12+\n" +
 	"\n" +
 	"friendInfo\x18% \x01(\v2\v.FriendInfoR\n" +
-	"friendInfo\x12-\n" +
+	"friendInfo\x12)\n" +
+	"\n" +
+	"senderInfo\x18& \x01(\v2\t.UserInfoR\n" +
+	"senderInfo\x12-\n" +
 	"\freceiverInfo\x18e \x01(\v2\t.UserInfoR\freceiverInfo\x127\n" +
 	"\x10senderFriendInfo\x18f \x01(\v2\v.FriendInfoR\x10senderFriendInfo\x1aP\n" +
 	"\x10TransMsgMapEntry\x12\x10\n" +
@@ -11886,144 +11897,145 @@ var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	162, // 27: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
 	133, // 28: DownMsg.grpMemberInfo:type_name -> GrpMemberInfo
 	130, // 29: DownMsg.friendInfo:type_name -> FriendInfo
-	98,  // 30: DownMsg.receiverInfo:type_name -> UserInfo
-	130, // 31: DownMsg.senderFriendInfo:type_name -> FriendInfo
-	16,  // 32: PriMsgPostReq.upMsg:type_name -> UpMsg
-	20,  // 33: PriMsgPostReq.modifiedMsg:type_name -> DownMsg
-	19,  // 34: TransMsgContent.pushData:type_name -> PushData
-	3,   // 35: StreamMsgItem.event:type_name -> StreamEvent
-	4,   // 36: StreamDownMsg.channelType:type_name -> ChannelType
-	24,  // 37: StreamDownMsg.msgItems:type_name -> StreamMsgItem
-	5,   // 38: Notify.type:type_name -> NotifyType
-	20,  // 39: DownMsgSet.msgs:type_name -> DownMsg
-	98,  // 40: DownMsgSet.targetUserInfo:type_name -> UserInfo
-	132, // 41: DownMsgSet.groupInfo:type_name -> GroupInfo
-	32,  // 42: AddGrpAssistantReq.targets:type_name -> SimpleConversation
-	4,   // 43: SimpleConversation.channelType:type_name -> ChannelType
-	4,   // 44: ConverIndex.channelType:type_name -> ChannelType
-	32,  // 45: AssistantMsgResp.convers:type_name -> SimpleConversation
-	4,   // 46: AddHisMsgReq.channelType:type_name -> ChannelType
-	20,  // 47: AddHisMsgReq.msg:type_name -> DownMsg
-	4,   // 48: DelHisMsgsReq.channelType:type_name -> ChannelType
-	46,  // 49: DelHisMsgsReq.msgs:type_name -> SimpleMsg
-	4,   // 50: QryLatestMsgReq.channelType:type_name -> ChannelType
-	4,   // 51: QryLatestMsgResp.ChannelType:type_name -> ChannelType
-	4,   // 52: QryHisMsgsReq.channelType:type_name -> ChannelType
-	4,   // 53: QryFirstUnreadMsgReq.channelType:type_name -> ChannelType
-	4,   // 54: QryHisMsgByIdsReq.channelType:type_name -> ChannelType
-	4,   // 55: RecallMsgReq.channelType:type_name -> ChannelType
-	29,  // 56: RecallMsgReq.exts:type_name -> KvItem
-	4,   // 57: MarkReadReq.channelType:type_name -> ChannelType
-	46,  // 58: MarkReadReq.msgs:type_name -> SimpleMsg
-	47,  // 59: MarkReadReq.indexScopes:type_name -> IndexScope
-	4,   // 60: MarkGrpMsgReadReq.channelType:type_name -> ChannelType
-	4,   // 61: CleanHisMsgReq.channelType:type_name -> ChannelType
-	4,   // 62: ModifyMsgReq.channelType:type_name -> ChannelType
-	17,  // 63: MergeMsgReq.mergedMsgs:type_name -> MergedMsgs
-	4,   // 64: MsgExt.channelType:type_name -> ChannelType
-	52,  // 65: MsgExt.ext:type_name -> MsgExtItem
-	98,  // 66: MsgExtItem.userInfo:type_name -> UserInfo
-	4,   // 67: QryMsgExtReq.channelType:type_name -> ChannelType
-	55,  // 68: MsgExtItemsList.items:type_name -> MsgExtItems
-	52,  // 69: MsgExtItems.exts:type_name -> MsgExtItem
-	57,  // 70: FavoriteMsgIds.items:type_name -> FavoriteMsgIdItem
-	4,   // 71: FavoriteMsgIdItem.ChannelType:type_name -> ChannelType
-	20,  // 72: FavoriteMsg.msg:type_name -> DownMsg
-	59,  // 73: FavoriteMsgs.items:type_name -> FavoriteMsg
-	4,   // 74: TopMsgReq.channelType:type_name -> ChannelType
-	4,   // 75: GetTopMsgReq.channelType:type_name -> ChannelType
-	20,  // 76: TopMsg.msg:type_name -> DownMsg
-	98,  // 77: TopMsg.operator:type_name -> UserInfo
-	4,   // 78: QryGlobalConversReq.channelType:type_name -> ChannelType
-	66,  // 79: QryGlobalConversResp.convers:type_name -> GlobalConver
-	4,   // 80: GlobalConver.channelType:type_name -> ChannelType
-	4,   // 81: QryConversationsReq.channelType:type_name -> ChannelType
-	69,  // 82: QryConversationsResp.conversations:type_name -> Conversation
-	4,   // 83: Conversation.channelType:type_name -> ChannelType
-	20,  // 84: Conversation.msg:type_name -> DownMsg
-	73,  // 85: Conversation.mentions:type_name -> Mentions
-	98,  // 86: Conversation.targetUserInfo:type_name -> UserInfo
-	132, // 87: Conversation.groupInfo:type_name -> GroupInfo
-	96,  // 88: Conversation.converTags:type_name -> ConverTag
-	130, // 89: Conversation.friendInfo:type_name -> FriendInfo
-	69,  // 90: BatchAddConvers.convers:type_name -> Conversation
-	4,   // 91: UpdLatestMsgReq.channelType:type_name -> ChannelType
-	6,   // 92: UpdLatestMsgReq.action:type_name -> UpdLatestMsgAction
-	20,  // 93: UpdLatestMsgReq.msg:type_name -> DownMsg
-	98,  // 94: Mentions.senders:type_name -> UserInfo
-	74,  // 95: Mentions.mentionMsgs:type_name -> MentionMsg
-	1,   // 96: MentionMsg.mentionType:type_name -> MentionType
-	4,   // 97: QryMentionMsgsReq.channelType:type_name -> ChannelType
-	20,  // 98: QryMentionMsgsResp.mentionMsgs:type_name -> DownMsg
-	79,  // 99: QryTotalUnreadCountReq.filter:type_name -> ConverFilter
-	4,   // 100: ConverFilter.channelTypes:type_name -> ChannelType
-	32,  // 101: ConverFilter.excludeConvers:type_name -> SimpleConversation
-	32,  // 102: ConverFilter.includeConvers:type_name -> SimpleConversation
-	69,  // 103: ConversationsReq.conversations:type_name -> Conversation
-	69,  // 104: ClearUnreadReq.conversations:type_name -> Conversation
-	84,  // 105: UndisturbConversReq.items:type_name -> UndisturbConverItem
-	4,   // 106: UndisturbConverItem.channelType:type_name -> ChannelType
-	7,   // 107: QryTopConversReq.sortType:type_name -> TopConverSortType
-	4,   // 108: QryReadInfosReq.channelType:type_name -> ChannelType
-	89,  // 109: QryReadInfosResp.items:type_name -> ReadInfoItem
-	4,   // 110: QryReadDetailReq.channelType:type_name -> ChannelType
-	92,  // 111: QryReadDetailResp.readMembers:type_name -> MemberReadDetailItem
-	92,  // 112: QryReadDetailResp.unreadMembers:type_name -> MemberReadDetailItem
-	98,  // 113: MemberReadDetailItem.member:type_name -> UserInfo
-	4,   // 114: QryConverReq.channelType:type_name -> ChannelType
-	32,  // 115: TagConvers.convers:type_name -> SimpleConversation
-	96,  // 116: UserConverTags.tags:type_name -> ConverTag
-	8,   // 117: ConverTag.tagType:type_name -> ConverTagType
-	163, // 118: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
-	29,  // 119: UserInfo.extFields:type_name -> KvItem
-	29,  // 120: UserInfo.settings:type_name -> KvItem
-	29,  // 121: UserInfo.statuses:type_name -> KvItem
-	9,   // 122: UserInfo.userType:type_name -> UserType
-	98,  // 123: UserInfos.userInfos:type_name -> UserInfo
-	164, // 124: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
-	29,  // 125: UserRegResp.extFields:type_name -> KvItem
-	106, // 126: UserOnlineStatusResp.items:type_name -> UserOnlineItem
-	108, // 127: BanUsersReq.banUsers:type_name -> BanUser
-	108, // 128: QryBanUsersResp.items:type_name -> BanUser
-	113, // 129: QryBlockUsersResp.items:type_name -> BlockUser
-	10,  // 130: OnlineStatus.type:type_name -> OnlineType
-	119, // 131: UserUndisturb.rules:type_name -> UserUndisturbItem
-	127, // 132: FriendMembersReq.friendMembers:type_name -> FriendMember
-	127, // 133: QryFriendsResp.items:type_name -> FriendMember
-	165, // 134: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
-	130, // 135: FriendInfos.items:type_name -> FriendInfo
-	29,  // 136: GroupInfo.extFields:type_name -> KvItem
-	29,  // 137: GroupInfo.settings:type_name -> KvItem
-	29,  // 138: GrpMemberInfo.extFields:type_name -> KvItem
-	29,  // 139: GroupMembersReq.extFields:type_name -> KvItem
-	29,  // 140: GroupMembersReq.settings:type_name -> KvItem
-	166, // 141: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
-	142, // 142: GroupMembersResp.items:type_name -> GroupMember
-	29,  // 143: GroupMember.extFields:type_name -> KvItem
-	29,  // 144: GroupMember.settings:type_name -> KvItem
-	9,   // 145: GroupMember.memberType:type_name -> UserType
-	167, // 146: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
-	168, // 147: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
-	169, // 148: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
-	170, // 149: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
-	11,  // 150: RtcConverBindReq.action:type_name -> RtcConverBindAction
-	4,   // 151: RtcConverBindReq.channelType:type_name -> ChannelType
-	12,  // 152: QryFileCredReq.file_type:type_name -> FileType
-	13,  // 153: QryFileCredResp.oss_type:type_name -> OssType
-	153, // 154: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
-	154, // 155: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
-	157, // 156: SubMsgs.subMsgs:type_name -> SubMsg
-	20,  // 157: SubMsg.msg:type_name -> DownMsg
-	10,  // 158: OnlineOfflineMsg.type:type_name -> OnlineType
-	160, // 159: TransReq.items:type_name -> TransItem
-	22,  // 160: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
-	98,  // 161: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
-	132, // 162: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
-	163, // [163:163] is the sub-list for method output_type
-	163, // [163:163] is the sub-list for method input_type
-	163, // [163:163] is the sub-list for extension type_name
-	163, // [163:163] is the sub-list for extension extendee
-	0,   // [0:163] is the sub-list for field type_name
+	98,  // 30: DownMsg.senderInfo:type_name -> UserInfo
+	98,  // 31: DownMsg.receiverInfo:type_name -> UserInfo
+	130, // 32: DownMsg.senderFriendInfo:type_name -> FriendInfo
+	16,  // 33: PriMsgPostReq.upMsg:type_name -> UpMsg
+	20,  // 34: PriMsgPostReq.modifiedMsg:type_name -> DownMsg
+	19,  // 35: TransMsgContent.pushData:type_name -> PushData
+	3,   // 36: StreamMsgItem.event:type_name -> StreamEvent
+	4,   // 37: StreamDownMsg.channelType:type_name -> ChannelType
+	24,  // 38: StreamDownMsg.msgItems:type_name -> StreamMsgItem
+	5,   // 39: Notify.type:type_name -> NotifyType
+	20,  // 40: DownMsgSet.msgs:type_name -> DownMsg
+	98,  // 41: DownMsgSet.targetUserInfo:type_name -> UserInfo
+	132, // 42: DownMsgSet.groupInfo:type_name -> GroupInfo
+	32,  // 43: AddGrpAssistantReq.targets:type_name -> SimpleConversation
+	4,   // 44: SimpleConversation.channelType:type_name -> ChannelType
+	4,   // 45: ConverIndex.channelType:type_name -> ChannelType
+	32,  // 46: AssistantMsgResp.convers:type_name -> SimpleConversation
+	4,   // 47: AddHisMsgReq.channelType:type_name -> ChannelType
+	20,  // 48: AddHisMsgReq.msg:type_name -> DownMsg
+	4,   // 49: DelHisMsgsReq.channelType:type_name -> ChannelType
+	46,  // 50: DelHisMsgsReq.msgs:type_name -> SimpleMsg
+	4,   // 51: QryLatestMsgReq.channelType:type_name -> ChannelType
+	4,   // 52: QryLatestMsgResp.ChannelType:type_name -> ChannelType
+	4,   // 53: QryHisMsgsReq.channelType:type_name -> ChannelType
+	4,   // 54: QryFirstUnreadMsgReq.channelType:type_name -> ChannelType
+	4,   // 55: QryHisMsgByIdsReq.channelType:type_name -> ChannelType
+	4,   // 56: RecallMsgReq.channelType:type_name -> ChannelType
+	29,  // 57: RecallMsgReq.exts:type_name -> KvItem
+	4,   // 58: MarkReadReq.channelType:type_name -> ChannelType
+	46,  // 59: MarkReadReq.msgs:type_name -> SimpleMsg
+	47,  // 60: MarkReadReq.indexScopes:type_name -> IndexScope
+	4,   // 61: MarkGrpMsgReadReq.channelType:type_name -> ChannelType
+	4,   // 62: CleanHisMsgReq.channelType:type_name -> ChannelType
+	4,   // 63: ModifyMsgReq.channelType:type_name -> ChannelType
+	17,  // 64: MergeMsgReq.mergedMsgs:type_name -> MergedMsgs
+	4,   // 65: MsgExt.channelType:type_name -> ChannelType
+	52,  // 66: MsgExt.ext:type_name -> MsgExtItem
+	98,  // 67: MsgExtItem.userInfo:type_name -> UserInfo
+	4,   // 68: QryMsgExtReq.channelType:type_name -> ChannelType
+	55,  // 69: MsgExtItemsList.items:type_name -> MsgExtItems
+	52,  // 70: MsgExtItems.exts:type_name -> MsgExtItem
+	57,  // 71: FavoriteMsgIds.items:type_name -> FavoriteMsgIdItem
+	4,   // 72: FavoriteMsgIdItem.ChannelType:type_name -> ChannelType
+	20,  // 73: FavoriteMsg.msg:type_name -> DownMsg
+	59,  // 74: FavoriteMsgs.items:type_name -> FavoriteMsg
+	4,   // 75: TopMsgReq.channelType:type_name -> ChannelType
+	4,   // 76: GetTopMsgReq.channelType:type_name -> ChannelType
+	20,  // 77: TopMsg.msg:type_name -> DownMsg
+	98,  // 78: TopMsg.operator:type_name -> UserInfo
+	4,   // 79: QryGlobalConversReq.channelType:type_name -> ChannelType
+	66,  // 80: QryGlobalConversResp.convers:type_name -> GlobalConver
+	4,   // 81: GlobalConver.channelType:type_name -> ChannelType
+	4,   // 82: QryConversationsReq.channelType:type_name -> ChannelType
+	69,  // 83: QryConversationsResp.conversations:type_name -> Conversation
+	4,   // 84: Conversation.channelType:type_name -> ChannelType
+	20,  // 85: Conversation.msg:type_name -> DownMsg
+	73,  // 86: Conversation.mentions:type_name -> Mentions
+	98,  // 87: Conversation.targetUserInfo:type_name -> UserInfo
+	132, // 88: Conversation.groupInfo:type_name -> GroupInfo
+	96,  // 89: Conversation.converTags:type_name -> ConverTag
+	130, // 90: Conversation.friendInfo:type_name -> FriendInfo
+	69,  // 91: BatchAddConvers.convers:type_name -> Conversation
+	4,   // 92: UpdLatestMsgReq.channelType:type_name -> ChannelType
+	6,   // 93: UpdLatestMsgReq.action:type_name -> UpdLatestMsgAction
+	20,  // 94: UpdLatestMsgReq.msg:type_name -> DownMsg
+	98,  // 95: Mentions.senders:type_name -> UserInfo
+	74,  // 96: Mentions.mentionMsgs:type_name -> MentionMsg
+	1,   // 97: MentionMsg.mentionType:type_name -> MentionType
+	4,   // 98: QryMentionMsgsReq.channelType:type_name -> ChannelType
+	20,  // 99: QryMentionMsgsResp.mentionMsgs:type_name -> DownMsg
+	79,  // 100: QryTotalUnreadCountReq.filter:type_name -> ConverFilter
+	4,   // 101: ConverFilter.channelTypes:type_name -> ChannelType
+	32,  // 102: ConverFilter.excludeConvers:type_name -> SimpleConversation
+	32,  // 103: ConverFilter.includeConvers:type_name -> SimpleConversation
+	69,  // 104: ConversationsReq.conversations:type_name -> Conversation
+	69,  // 105: ClearUnreadReq.conversations:type_name -> Conversation
+	84,  // 106: UndisturbConversReq.items:type_name -> UndisturbConverItem
+	4,   // 107: UndisturbConverItem.channelType:type_name -> ChannelType
+	7,   // 108: QryTopConversReq.sortType:type_name -> TopConverSortType
+	4,   // 109: QryReadInfosReq.channelType:type_name -> ChannelType
+	89,  // 110: QryReadInfosResp.items:type_name -> ReadInfoItem
+	4,   // 111: QryReadDetailReq.channelType:type_name -> ChannelType
+	92,  // 112: QryReadDetailResp.readMembers:type_name -> MemberReadDetailItem
+	92,  // 113: QryReadDetailResp.unreadMembers:type_name -> MemberReadDetailItem
+	98,  // 114: MemberReadDetailItem.member:type_name -> UserInfo
+	4,   // 115: QryConverReq.channelType:type_name -> ChannelType
+	32,  // 116: TagConvers.convers:type_name -> SimpleConversation
+	96,  // 117: UserConverTags.tags:type_name -> ConverTag
+	8,   // 118: ConverTag.tagType:type_name -> ConverTagType
+	163, // 119: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
+	29,  // 120: UserInfo.extFields:type_name -> KvItem
+	29,  // 121: UserInfo.settings:type_name -> KvItem
+	29,  // 122: UserInfo.statuses:type_name -> KvItem
+	9,   // 123: UserInfo.userType:type_name -> UserType
+	98,  // 124: UserInfos.userInfos:type_name -> UserInfo
+	164, // 125: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
+	29,  // 126: UserRegResp.extFields:type_name -> KvItem
+	106, // 127: UserOnlineStatusResp.items:type_name -> UserOnlineItem
+	108, // 128: BanUsersReq.banUsers:type_name -> BanUser
+	108, // 129: QryBanUsersResp.items:type_name -> BanUser
+	113, // 130: QryBlockUsersResp.items:type_name -> BlockUser
+	10,  // 131: OnlineStatus.type:type_name -> OnlineType
+	119, // 132: UserUndisturb.rules:type_name -> UserUndisturbItem
+	127, // 133: FriendMembersReq.friendMembers:type_name -> FriendMember
+	127, // 134: QryFriendsResp.items:type_name -> FriendMember
+	165, // 135: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
+	130, // 136: FriendInfos.items:type_name -> FriendInfo
+	29,  // 137: GroupInfo.extFields:type_name -> KvItem
+	29,  // 138: GroupInfo.settings:type_name -> KvItem
+	29,  // 139: GrpMemberInfo.extFields:type_name -> KvItem
+	29,  // 140: GroupMembersReq.extFields:type_name -> KvItem
+	29,  // 141: GroupMembersReq.settings:type_name -> KvItem
+	166, // 142: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
+	142, // 143: GroupMembersResp.items:type_name -> GroupMember
+	29,  // 144: GroupMember.extFields:type_name -> KvItem
+	29,  // 145: GroupMember.settings:type_name -> KvItem
+	9,   // 146: GroupMember.memberType:type_name -> UserType
+	167, // 147: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
+	168, // 148: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
+	169, // 149: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
+	170, // 150: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
+	11,  // 151: RtcConverBindReq.action:type_name -> RtcConverBindAction
+	4,   // 152: RtcConverBindReq.channelType:type_name -> ChannelType
+	12,  // 153: QryFileCredReq.file_type:type_name -> FileType
+	13,  // 154: QryFileCredResp.oss_type:type_name -> OssType
+	153, // 155: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
+	154, // 156: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
+	157, // 157: SubMsgs.subMsgs:type_name -> SubMsg
+	20,  // 158: SubMsg.msg:type_name -> DownMsg
+	10,  // 159: OnlineOfflineMsg.type:type_name -> OnlineType
+	160, // 160: TransReq.items:type_name -> TransItem
+	22,  // 161: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
+	98,  // 162: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
+	132, // 163: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
+	164, // [164:164] is the sub-list for method output_type
+	164, // [164:164] is the sub-list for method input_type
+	164, // [164:164] is the sub-list for extension type_name
+	164, // [164:164] is the sub-list for extension extendee
+	0,   // [0:164] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_appmessages_proto_init() }

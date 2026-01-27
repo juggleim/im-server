@@ -19,7 +19,9 @@ var (
 func FillReferMsg(ctx context.Context, upMsg *pbobjs.UpMsg) *pbobjs.DownMsg {
 	if upMsg.ReferMsg != nil {
 		if upMsg.ReferMsg.SenderId != "" {
-			upMsg.ReferMsg.TargetUserInfo = GetTargetDisplayUserInfo(ctx, upMsg.ReferMsg.SenderId)
+			senderInfo := GetTargetDisplayUserInfo(ctx, upMsg.ReferMsg.SenderId)
+			upMsg.ReferMsg.TargetUserInfo = senderInfo
+			upMsg.ReferMsg.SenderInfo = senderInfo
 			userId := bases.GetRequesterIdFromCtx(ctx)
 			if upMsg.ReferMsg.SenderId == userId {
 				upMsg.ReferMsg.IsSend = true

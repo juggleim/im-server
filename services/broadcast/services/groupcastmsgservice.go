@@ -36,6 +36,7 @@ func SendGroupCastMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCod
 		ClientUid:      upMsg.ClientUid,
 		IsSend:         true,
 		TargetUserInfo: bases.GetSenderInfoFromCtx(ctx),
+		SenderInfo:     bases.GetSenderInfoFromCtx(ctx),
 	}
 	if !msgdefines.IsStateMsg(upMsg.Flags) {
 		//save msg to sendbox for sender
