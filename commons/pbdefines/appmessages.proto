@@ -183,6 +183,14 @@ message MsgAck{
   int64 msgTime = 2;
 }
 
+message StreamMsg{
+  string streamMsgId = 1;
+  bytes partialContent = 2;
+  int64 seq = 3;
+  bool isFinished = 4;
+  string targetId = 5;
+}
+
 message StreamMsgItem{
   StreamEvent event = 1;
   int64 subSeq = 2;

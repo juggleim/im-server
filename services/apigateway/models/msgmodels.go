@@ -135,22 +135,11 @@ type SimpleMsg struct {
 	MsgReadIndex int64  `json:"msg_read_index"`
 }
 
-type AppendStreamMsgReq struct {
-	SenderId string           `json:"sender_id"`
-	TargetId string           `json:"target_id"`
-	MsgId    string           `json:"msg_id"`
-	Items    []*StreamMsgItem `json:"items"`
-	MsgType  string           `json:"msg_type"`
-}
-
-type StreamMsgItem struct {
-	Event          string `json:"event"`
-	SubSeq         int64  `json:"sub_seq"`
+type StreamMsg struct {
+	MsgId          string `json:"msg_id"`
+	FromId         string `json:"from_id"`
+	TargetId       string `json:"target_id"`
 	PartialContent string `json:"partial_content"`
-}
-
-type CompleteStreamMsgReq struct {
-	SenderId string `json:"sender_id"`
-	TargetId string `json:"target_id"`
-	MsgId    string `json:"msg_id"`
+	Seq            int    `json:"seq"`
+	IsFinished     bool   `json:"is_finished"`
 }

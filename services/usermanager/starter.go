@@ -17,9 +17,6 @@ func (manager *UserManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterStandaloneActor("upstream", func() actorsystem.IUntypedActor {
 		return &actors.UpstreamActor{}
 	}, 6144)
-	register.RegisterActor("send_stream", func() actorsystem.IUntypedActor {
-		return bases.BaseProcessActor(&actors.SendStreamActor{}, serviceName)
-	})
 	register.RegisterActor("reg_user", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.UserRegistActor{}, serviceName)
 	})

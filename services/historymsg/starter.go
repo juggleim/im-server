@@ -97,6 +97,9 @@ func (manager *HistoryMsgManager) RegisterActors(register gmicro.IActorRegister)
 	register.RegisterActor("get_top_msg", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.GetTopMsgActor{}, serviceName)
 	})
+	register.RegisterActor("send_stream_msg", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.SendStreamActor{}, serviceName)
+	})
 }
 
 func (manager *HistoryMsgManager) Startup(args map[string]interface{}) {

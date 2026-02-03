@@ -34,7 +34,7 @@ type AppInfo struct {
 	AgoraConfigObj     *AgoraConfigObj    `default:"-"`
 
 	TokenEffectiveMinute  int    `default:"0"`
-	OfflineMsgSaveTime    int    `default:"1440"`
+	OfflineMsgSaveTime    int    `default:"10"`
 	OfflineCmdMsgSaveTime int    `default:"10080"`
 	ForceCloseOfflineMsg  bool   `default:"false"`
 	IsSubApiMsg           bool   `default:"false"`
