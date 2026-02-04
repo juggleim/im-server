@@ -265,3 +265,63 @@ func QryGlobalConvers(ctx *gin.Context) {
 
 	tools.SuccessHttpResp(ctx, ret)
 }
+
+func TagConvers(ctx *gin.Context) {
+	var tagConvers models.TagConversReq
+	if err := ctx.BindJSON(&tagConvers); err != nil || len(tagConvers.Convers) <= 0 || tagConvers.UserId == "" || tagConvers.Tag == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	convers := []*pbobjs.SimpleConversation{}
+	for _, conver := range tagConvers.Convers {
+		convers = append(convers, &pbobjs.SimpleConversation{
+			TargetId:    conver.TargetId,
+			ChannelType: pbobjs.ChannelType(conver.ChannelType),
+			SubChannel:  conver.SubChannel,
+		})
+	}
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, tagConvers.UserId), "tag_add_convers", tagConvers.UserId, &pbobjs.TagConvers{
+		Tag:     tagConvers.Tag,
+		TagName: tagConvers.TagName,
+		Convers: convers,
+	}, nil)
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_RESP_FAIL)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, code)
+		return
+	}
+	tools.SuccessHttpResp(ctx, nil)
+}
+
+func UnTagConvers(ctx *gin.Context) {
+	var tagConvers models.TagConversReq
+	if err := ctx.BindJSON(&tagConvers); err != nil || len(tagConvers.Convers) <= 0 || tagConvers.UserId == "" || tagConvers.Tag == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	convers := []*pbobjs.SimpleConversation{}
+	for _, conver := range tagConvers.Convers {
+		convers = append(convers, &pbobjs.SimpleConversation{
+			TargetId:    conver.TargetId,
+			ChannelType: pbobjs.ChannelType(conver.ChannelType),
+			SubChannel:  conver.SubChannel,
+		})
+	}
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, tagConvers.UserId), "tag_del_convers", tagConvers.UserId, &pbobjs.TagConvers{
+		Tag:     tagConvers.Tag,
+		TagName: tagConvers.TagName,
+		Convers: convers,
+	}, nil)
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_RESP_FAIL)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, code)
+		return
+	}
+	tools.SuccessHttpResp(ctx, nil)
+}

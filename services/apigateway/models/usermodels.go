@@ -30,9 +30,11 @@ type UserIds struct {
 type UserOnlineStatusReq struct {
 	UserIds []string `json:"user_ids"`
 }
+
 type UserOnlineStatusResp struct {
 	Items []*UserOnlineStatusItem `json:"items"`
 }
+
 type UserOnlineStatusItem struct {
 	UserId   string `json:"user_id"`
 	IsOnline bool   `json:"is_online"`
@@ -104,16 +106,4 @@ type UndisturbConverItem struct {
 type UserSettings struct {
 	UserId   string                 `json:"user_id"`
 	Settings map[string]interface{} `json:"settings"`
-}
-
-// top convers
-type TopConversReq struct {
-	UserId string              `json:"user_id"`
-	Items  []*TopConverReqItem `json:"items"`
-}
-
-type TopConverReqItem struct {
-	TargetId    string `json:"target_id"`
-	ChannelType int    `json:"channel_type"`
-	IsTop       bool   `json:"is_top"`
 }
