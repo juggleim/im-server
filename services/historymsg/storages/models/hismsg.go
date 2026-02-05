@@ -51,7 +51,7 @@ type IGroupHisMsgStorage interface {
 	SaveGroupHisMsg(msg GroupHisMsg) error
 	//QryLatestMsgSeqNo(appkey, converId string) int64
 	QryLatestMsg(appkey, converId, subChannel string) (*GroupHisMsg, error)
-	QryHisMsgs(appkey, converId, subChannel string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*GroupHisMsg, error)
+	QryHisMsgs(appkey, converId, subChannel, userId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*GroupHisMsg, error)
 	QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*GroupHisMsg, error)
 	UpdateMsgBody(appkey, converId, subChannel, msgId, msgType string, msgBody []byte) error
 	FindById(appkey, converId, subChannel, msgId string) (*GroupHisMsg, error)

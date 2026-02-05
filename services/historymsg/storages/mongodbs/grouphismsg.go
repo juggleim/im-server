@@ -197,7 +197,7 @@ func (msg *GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, us
 	return retItems, nil
 }
 
-func (msg *GroupHisMsgDao) QryHisMsgs(appkey, converId, subChannel string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.GroupHisMsg, error) {
+func (msg *GroupHisMsgDao) QryHisMsgs(appkey, converId, subChannel, userId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.GroupHisMsg, error) {
 	collection := msg.getCollection()
 	retItems := []*models.GroupHisMsg{}
 	if collection == nil {

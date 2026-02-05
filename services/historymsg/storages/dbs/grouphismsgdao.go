@@ -147,49 +147,48 @@ func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, use
 	return retItems, err
 }
 
-func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId, subChannel string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.GroupHisMsg, error) {
+func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId, subChannel, userId string, startTime int64, count int32, isPositive bool, cleanTime int64, msgTypes []string, excludeMsgIds []string) ([]*models.GroupHisMsg, error) {
 	curr := time.Now().UnixMilli()
 	var items []*GroupHisMsgDao
 	params := []interface{}{}
-	condition := "app_key=? and conver_id=? and sub_channel=?"
-	params = append(params, appkey)
-	params = append(params, converId)
-	params = append(params, subChannel)
-
-	orderStr := "send_time desc"
+	hismsgTableName := msg.TableName()
+	portionTableName := (&GroupPortionRelDao{}).TableName()
+	sql := fmt.Sprintf("select his.* from %s as his left join %s as rel on his.app_key=rel.app_key and his.conver_id=rel.conver_id and his.sub_channel=rel.sub_channel and rel.user_id=? and his.msg_id=rel.msg_id where his.app_key=? and his.conver_id=? and his.sub_channel=?", hismsgTableName, portionTableName)
+	params = append(params, userId, appkey, converId, subChannel)
+	orderStr := "his.send_time desc"
 	start := startTime
-	if isPositiveOrder {
-		orderStr = "send_time asc"
+	if isPositive {
+		orderStr = "his.send_time asc"
 		if start < cleanTime {
 			start = cleanTime
 		}
-		condition = condition + " and send_time>?"
+		sql = sql + " and his.send_time>?"
 		params = append(params, start)
 	} else {
 		if start <= 0 {
 			start = curr
 		}
-		condition = condition + " and send_time<?"
+		sql = sql + " and his.send_time<?"
 		params = append(params, start)
 		if cleanTime > 0 {
-			condition = condition + " and send_time>?"
+			sql = sql + " and his.send_time>?"
 			params = append(params, cleanTime)
 		}
 	}
 
 	if len(excludeMsgIds) > 0 {
-		condition = condition + " and msg_id not in (?)"
+		sql = sql + " and his.msg_id not in (?)"
 		params = append(params, excludeMsgIds)
 	}
 	if len(msgTypes) > 0 {
-		condition = condition + " and msg_type in (?)"
+		sql = sql + " and his.msg_type in (?)"
 		params = append(params, msgTypes)
 	}
-	condition = condition + " and is_delete=0 and is_portion=0 and (destroy_time=0 or destroy_time>?)"
+	sql = sql + " and his.is_delete=0 and (his.is_portion=0 or rel.msg_id is not null) and (his.destroy_time=0 or his.destroy_time>?)"
 	params = append(params, curr)
 
-	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
-	if !isPositiveOrder {
+	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(count).Table(msg.TableName()).Find(&items).Error
+	if !isPositive {
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].SendTime < items[j].SendTime
 		})
