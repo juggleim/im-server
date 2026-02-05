@@ -294,6 +294,17 @@ func QryFirstUnreadMsg(ctx context.Context, req *pbobjs.QryFirstUnreadMsgReq) (e
 		storage := storages.NewGroupHisMsgStorage()
 		dbMsgs, err := storage.QryHisMsgs(appkey, converId, req.SubChannel, startTime, count, true, 0, []string{}, []string{})
 		if err == nil {
+			appInfo, exist := commonservices.GetAppInfo(appkey)
+			if exist && appInfo != nil && !appInfo.HideGrpPortionMsgs {
+				storage := storages.NewGroupPortionMsgStorage()
+				msgs, err := storage.QryPortionMsgs(appkey, userId, converId, req.SubChannel, startTime, count, true, 0)
+				if err == nil && len(msgs) > 0 {
+					dbMsgs = append(dbMsgs, msgs...)
+					sort.Slice(dbMsgs, func(i, j int) bool {
+						return dbMsgs[i].SendTime < dbMsgs[j].SendTime
+					})
+				}
+			}
 			for _, dbMsg := range dbMsgs {
 				downMsg := &pbobjs.DownMsg{}
 				err = tools.PbUnMarshal(dbMsg.MsgBody, downMsg)
@@ -594,7 +605,7 @@ func qryGrpHisMsgs(ctx context.Context, converId, subChannel, userId, targetId s
 	if err == nil {
 		ret = append(ret, dbMsgs...)
 		appInfo, exist := commonservices.GetAppInfo(appkey)
-		if exist && appInfo != nil && appInfo.HideGrpPortionMsgs {
+		if exist && appInfo != nil && !appInfo.HideGrpPortionMsgs {
 			storage := storages.NewGroupPortionMsgStorage()
 			msgs, err := storage.QryPortionMsgs(appkey, userId, converId, subChannel, startTime, count, isPositive, cleanTime)
 			if err == nil && len(msgs) > 0 {
