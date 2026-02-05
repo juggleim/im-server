@@ -14,7 +14,6 @@ import (
 	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 	"im-server/services/historymsg/storages/models"
-	"sort"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -455,7 +454,7 @@ func QryHisMsgs(ctx context.Context, appkey, targetId, subChannel string, channe
 			cleanTime = dbCleanTime
 		}
 		converId := commonservices.GetConversationId(userId, targetId, channelType)
-		dbMsgs := qryGrpHisMsgs(ctx, converId, subChannel, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
+		dbMsgs := qryGrpHisMsgs(ctx, converId, subChannel, userId, startTime, count, isPositive, cleanTime, msgTypes)
 		msgMap := map[string]*pbobjs.DownMsg{}
 		msgIds := []string{}
 		referMsgIds := []string{}
@@ -586,39 +585,14 @@ func QryHisMsgs(ctx context.Context, appkey, targetId, subChannel string, channe
 	return errs.IMErrorCode_SUCCESS, resp
 }
 
-func qryGrpHisMsgs(ctx context.Context, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositive bool, cleanTime int64, msgTypes []string) []*models.GroupHisMsg {
+func qryGrpHisMsgs(ctx context.Context, converId, subChannel, userId string, startTime int64, count int32, isPositive bool, cleanTime int64, msgTypes []string) []*models.GroupHisMsg {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	ret := []*models.GroupHisMsg{}
 	storage := storages.NewGroupHisMsgStorage()
-	dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId, startTime, count, isPositive, cleanTime, msgTypes)
-	if err == nil {
-		ret = append(ret, dbMsgs...)
-		appInfo, exist := commonservices.GetAppInfo(appkey)
-		if exist && appInfo != nil && !appInfo.HideGrpPortionMsgs {
-			storage := storages.NewGroupPortionMsgStorage()
-			msgs, err := storage.QryPortionMsgs(appkey, userId, converId, subChannel, startTime, count, isPositive, cleanTime)
-			if err == nil && len(msgs) > 0 {
-				ret = append(ret, msgs...)
-				sort.Slice(ret, func(i, j int) bool {
-					return ret[i].SendTime < ret[j].SendTime
-				})
-				if len(ret) > int(count) {
-					if isPositive {
-						ret = ret[:count]
-					} else {
-						ret = ret[len(ret)-int(count):]
-					}
-				}
-			} else {
-				if err != nil {
-					logs.WithContext(ctx).Error(err.Error())
-				}
-			}
-		}
-	} else {
+	dbMsgs, err := storage.QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, startTime, count, isPositive, cleanTime, msgTypes)
+	if err != nil {
 		logs.WithContext(ctx).Error(err.Error())
 	}
-	return ret
+	return dbMsgs
 }
 
 func retrievePrivateReferenceMsg(ctx context.Context, targetId, subChannel string, haveReferMsgs []*pbobjs.DownMsg, referencedMsgIds []string) {

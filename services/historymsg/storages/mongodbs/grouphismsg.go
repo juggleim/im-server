@@ -142,7 +142,7 @@ func (msg *GroupHisMsgDao) QryLatestMsg(appkey, converId, subChannel string) (*m
 	return nil, errors.New("no mongo client")
 }
 
-func (msg *GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.GroupHisMsg, error) {
+func (msg *GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, userId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.GroupHisMsg, error) {
 	collection := msg.getCollection()
 	retItems := []*models.GroupHisMsg{}
 	if collection == nil {

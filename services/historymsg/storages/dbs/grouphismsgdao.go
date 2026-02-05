@@ -92,15 +92,18 @@ type GroupHisMsgDaoWithEffectiveTime struct {
 	EffectiveTime int64 `gorm:"effective_time"`
 }
 
-func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, userId, targetId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.GroupHisMsg, error) {
+func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, userId string, startTime int64, count int32, isPositiveOrder bool, cleanTime int64, msgTypes []string) ([]*models.GroupHisMsg, error) {
 	curr := time.Now().UnixMilli()
 	var items []*GroupHisMsgDaoWithEffectiveTime
 	params := []interface{}{}
 	hismsgTableName := msg.TableName()
 	delHismsgTableName := (&GroupDelHisMsgDao{}).TableName()
-	sql := fmt.Sprintf("select his.*,delhis.effective_time from %s as his left join %s as delhis on his.app_key=delhis.app_key and delhis.user_id=? and delhis.target_id=his.conver_id and delhis.sub_channel=his.sub_channel and his.msg_id=delhis.msg_id and (delhis.effective_time=0 or delhis.effective_time<?) where his.app_key=? and his.conver_id=? and his.sub_channel=?", hismsgTableName, delHismsgTableName)
+	portionTableName := (&GroupPortionRelDao{}).TableName()
+	//sql := fmt.Sprintf("select his.*,delhis.effective_time from %s as his left join %s as delhis on his.app_key=delhis.app_key and delhis.user_id=? and delhis.target_id=his.conver_id and delhis.sub_channel=his.sub_channel and his.msg_id=delhis.msg_id and (delhis.effective_time=0 or delhis.effective_time<?) where his.app_key=? and his.conver_id=? and his.sub_channel=?", hismsgTableName, delHismsgTableName)
+	sql := fmt.Sprintf("select his.*,delhis.effective_time from %s as his left join %s as delhis on his.app_key=delhis.app_key and delhis.user_id=? and delhis.target_id=his.conver_id and delhis.sub_channel=his.sub_channel and his.msg_id=delhis.msg_id and (delhis.effective_time=0 or delhis.effective_time<?) left join %s as rel on his.app_key=rel.app_key and his.conver_id=rel.conver_id and his.sub_channel=rel.sub_channel and his.msg_id=rel.msg_id and rel.user_id=? where his.app_key=? and his.conver_id=? and his.sub_channel=?", hismsgTableName, delHismsgTableName, portionTableName)
 	params = append(params, userId)
 	params = append(params, curr)
+	params = append(params, userId)
 	params = append(params, appkey)
 	params = append(params, converId)
 	params = append(params, subChannel)
@@ -129,7 +132,8 @@ func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, use
 		sql = sql + " and his.msg_type in (?)"
 		params = append(params, msgTypes)
 	}
-	sql = sql + " and his.is_delete=0 and his.is_portion=0 and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
+	// sql = sql + " and his.is_delete=0 and his.is_portion=0 and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
+	sql = sql + " and his.is_delete=0 and (his.is_portion=0 or rel.msg_id is not null) and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
 	params = append(params, curr)
 	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(count).Find(&items).Error
 	if !isPositiveOrder {
