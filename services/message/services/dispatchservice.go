@@ -15,7 +15,7 @@ import (
 var MsgSinglePools *tools.SinglePools
 
 func init() {
-	MsgSinglePools = tools.NewSinglePools(8192)
+	MsgSinglePools = tools.NewSinglePools(8192, true)
 }
 
 func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {

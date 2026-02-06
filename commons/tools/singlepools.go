@@ -5,18 +5,21 @@ import (
 )
 
 type SinglePools struct {
-	pools []*SinglePool
-	lock  *sync.RWMutex
+	pools     []*SinglePool
+	lock      *sync.RWMutex
+	isBlocked bool
 }
 type SinglePool struct {
 	taskChan  chan func()
 	isActived bool
+	isBlocked bool
 }
 
-func NewSinglePools(count int) *SinglePools {
+func NewSinglePools(count int, isBlocked bool) *SinglePools {
 	return &SinglePools{
-		pools: make([]*SinglePool, count),
-		lock:  &sync.RWMutex{},
+		pools:     make([]*SinglePool, count),
+		lock:      &sync.RWMutex{},
+		isBlocked: isBlocked,
 	}
 }
 
@@ -32,6 +35,7 @@ func (pools *SinglePools) GetPool(key string) *SinglePool {
 			pool = &SinglePool{
 				taskChan:  make(chan func(), 100),
 				isActived: true,
+				isBlocked: pools.isBlocked,
 			}
 			pools.pools[index] = pool
 			pool.Start()
@@ -52,8 +56,17 @@ func (pool *SinglePool) Start() {
 
 func (pool *SinglePool) Submit(task func()) bool {
 	if pool.isActived {
-		pool.taskChan <- task
-		return true
+		if pool.isBlocked {
+			pool.taskChan <- task
+			return true
+		} else {
+			select {
+			case pool.taskChan <- task:
+				return true
+			default:
+				return false
+			}
+		}
 	}
 	return false
 }
