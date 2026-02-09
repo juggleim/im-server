@@ -370,17 +370,21 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, exist := commonservices.GetAppInfo(appkey)
 	if exist && appInfo != nil && appInfo.IsOpenPush {
+		pushLevel := pbobjs.PushLevel_DefaultPuhsLevel
+		if msg.PushData != nil {
+			pushLevel = msg.PushData.PushLevel
+		}
 		//check close push threshold
-		if msg.ChannelType == pbobjs.ChannelType_Group && appInfo.ClosePushGrpThreshold > 0 && msg.MemberCount > int32(appInfo.ClosePushGrpThreshold) {
-			if msg.PushData == nil || msg.PushData.PushLevel == pbobjs.PushLevel_DefaultPuhsLevel {
-				return
-			}
+		if pushLevel == pbobjs.PushLevel_DefaultPuhsLevel &&
+			msg.ChannelType == pbobjs.ChannelType_Group &&
+			appInfo.ClosePushGrpThreshold > 0 &&
+			msg.MemberCount > int32(appInfo.ClosePushGrpThreshold) {
+			return
 		}
 		//undisturb
-		if msgdefines.IsUndisturbMsg(msg.Flags) {
-			if msg.PushData == nil || msg.PushData.PushLevel < pbobjs.PushLevel_IgnoreUndisturb {
-				return
-			}
+		if msgdefines.IsUndisturbMsg(msg.Flags) &&
+			pushLevel != pbobjs.PushLevel_IgnoreUndisturb {
+			return
 		}
 		pushData := GetPushData(ctx, msg, getTargetUserLanguage(ctx, receiverId))
 		if pushData != nil {
