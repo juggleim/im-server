@@ -14,8 +14,7 @@ func GroupMsg1000() {
 	for i := 1; i <= 100; i++ {
 		senderId := fmt.Sprintf("userid%d", i)
 		client := connectMap[senderId]
-		flag := msgdefines.SetStoreMsg(0)
-		flag = msgdefines.SetCountMsg(flag)
+		flag := msgdefines.SetStateMsg(0)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
 			MsgType:    msgdefines.InnerMsgType_Text,
@@ -38,8 +37,7 @@ func GroupMsg2000() {
 	for i := 1; i <= 100; i++ {
 		senderId := fmt.Sprintf("userid%d", i)
 		client := connectMap[senderId]
-		flag := msgdefines.SetStoreMsg(0)
-		flag = msgdefines.SetCountMsg(flag)
+		flag := msgdefines.SetStateMsg(0)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
 			MsgType:    msgdefines.InnerMsgType_Text,
@@ -62,8 +60,7 @@ func GroupMsg3000() {
 	for i := 1; i <= 100; i++ {
 		senderId := fmt.Sprintf("userid%d", i)
 		client := connectMap[senderId]
-		flag := msgdefines.SetStoreMsg(0)
-		flag = msgdefines.SetCountMsg(flag)
+		flag := msgdefines.SetStateMsg(0)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
 			MsgType:    msgdefines.InnerMsgType_Text,
@@ -85,8 +82,7 @@ func GroupMsg5000() {
 	for i := 1; i <= 10; i++ {
 		senderId := fmt.Sprintf("userid%d", i)
 		client := connectMap[senderId]
-		flag := msgdefines.SetStoreMsg(0)
-		flag = msgdefines.SetCountMsg(flag)
+		flag := msgdefines.SetStateMsg(0)
 		start := time.Now()
 		code, resp := client.SendGroupMsg(groupId, &pbobjs.UpMsg{
 			MsgType:    msgdefines.InnerMsgType_Text,
