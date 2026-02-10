@@ -106,6 +106,17 @@ func LoadInterceptors(appkey string) *MsgInterceptors {
 						},
 					})
 				}
+			} else if dbInterceptor.InterceptType == dbs.InterceptorType_Yidun {
+				ydConf := interceptors.YidunInterceptorConf{}
+				err := tools.JsonUnMarshal([]byte(dbInterceptor.Conf), &ydConf)
+				if err == nil && ydConf.BusinessId != "" && ydConf.SecretId != "" && ydConf.SecretKey != "" {
+					ret.Interceptors = append(ret.Interceptors, &interceptors.MsgInterceptor{
+						Interceptor: &interceptors.YidunInterceptor{
+							Conf:       &ydConf,
+							Conditions: LoadIcConditions(appkey, dbInterceptor.ID),
+						},
+					})
+				}
 			}
 		}
 	}

@@ -8,6 +8,7 @@ import (
 var (
 	InterceptorType_Custom int = 0
 	InterceptorType_Baidu  int = 1
+	InterceptorType_Yidun  int = 2
 )
 
 type InterceptorDao struct {

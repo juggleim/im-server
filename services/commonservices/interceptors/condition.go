@@ -62,7 +62,7 @@ func (condition *Condition) Match(senderId, receiverId string, channelType pbobj
 	}
 	//msg content
 	if condition.MsgContentChecker != nil {
-		isMatch := condition.ReceiverIdChecker.Match(string(msgContent))
+		isMatch := condition.MsgContentChecker.Match(string(msgContent))
 		ret = ret && isMatch
 	} else {
 		ret = ret && true
