@@ -182,20 +182,22 @@ func DelGroupMembers(ctx context.Context, groupId string, memberIds []string) {
 			isAffected = true
 		}
 	}
-	//update for db
-	memberDao := dbs.GroupMemberDao{}
-	err := memberDao.BatchDelete(appkey, groupId, memberIds)
-	if err == nil && isAffected {
-		existMemberIds := []string{}
-		memberMap := memberContainer.GetMemberMap()
-		for memberId := range memberMap {
-			existMemberIds = append(existMemberIds, memberId)
+	go func() {
+		//update for db
+		memberDao := dbs.GroupMemberDao{}
+		err := memberDao.BatchDelete(appkey, groupId, memberIds)
+		if err == nil && isAffected {
+			existMemberIds := []string{}
+			memberMap := memberContainer.GetMemberMap()
+			for memberId := range memberMap {
+				existMemberIds = append(existMemberIds, memberId)
+			}
+			GenerateGroupSnapshot(appkey, groupId, existMemberIds)
+			//delete ext from db
+			memberExtDao := dbs.GroupMemberExtDao{}
+			memberExtDao.BatchDelete(appkey, groupId, memberIds)
 		}
-		GenerateGroupSnapshot(appkey, groupId, existMemberIds)
-		//delete ext from db
-		memberExtDao := dbs.GroupMemberExtDao{}
-		memberExtDao.BatchDelete(appkey, groupId, memberIds)
-	}
+	}()
 }
 
 func clearMembersFromCache(ctx context.Context, appkey, groupId string) {

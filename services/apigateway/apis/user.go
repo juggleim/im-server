@@ -61,20 +61,12 @@ func UpdateUser(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "upd_user_info", req.UserId, &pbobjs.UserInfo{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "upd_user_info", req.UserId, &pbobjs.UserInfo{
 		UserId:       req.UserId,
 		Nickname:     req.Nickname,
 		UserPortrait: req.UserPortrait,
 		ExtFields:    commonservices.Map2KvItems(req.ExtFields),
 	}, nil)
-	if err != nil {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
-		return
-	}
-	if code > 0 {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
-		return
-	}
 	tools.SuccessHttpResp(ctx, nil)
 }
 
