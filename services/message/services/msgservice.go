@@ -46,21 +46,23 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), converId)
 		return errs.IMErrorCode_SUCCESS, msgId, sendTime, 0, upMsg.ClientUid, nil
 	}
-	//check block user
-	blockUser := GetBlockUserItem(appkey, receiverId, senderId)
-	if blockUser.IsBlock {
-		sendTime := time.Now().UnixMilli()
-		msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
-		return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid, nil
-	}
-	//check friend status
-	appinfo, exist := commonservices.GetAppInfo(appkey)
-	if exist && appinfo != nil && appinfo.MsgFriendCheck {
-		friendStatus := friendcache.GetFriendStatus(appkey, receiverId, senderId)
-		if !friendStatus.IsFriend {
+	if senderId != receiverId {
+		//check block user
+		blockUser := GetBlockUserItem(appkey, receiverId, senderId)
+		if blockUser.IsBlock {
 			sendTime := time.Now().UnixMilli()
-			msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), converId)
-			return errs.IMErrorCode_MSG_NOT_FRIEND, msgId, sendTime, 0, upMsg.ClientUid, nil
+			msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), receiverId)
+			return errs.IMErrorCode_MSG_BLOCK, msgId, sendTime, 0, upMsg.ClientUid, nil
+		}
+		//check friend status
+		appinfo, exist := commonservices.GetAppInfo(appkey)
+		if exist && appinfo != nil && appinfo.MsgFriendCheck {
+			friendStatus := friendcache.GetFriendStatus(appkey, receiverId, senderId)
+			if !friendStatus.IsFriend {
+				sendTime := time.Now().UnixMilli()
+				msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Private), converId)
+				return errs.IMErrorCode_MSG_NOT_FRIEND, msgId, sendTime, 0, upMsg.ClientUid, nil
+			}
 		}
 	}
 	var friendInfo *pbobjs.FriendInfo
