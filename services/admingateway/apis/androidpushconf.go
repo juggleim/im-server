@@ -46,17 +46,23 @@ func SetAndroidPushConf(ctx *gin.Context) {
 		return
 	}
 	pushConf := ""
+	pushChannel := req.PushChannel
 	var conf any
 	if strings.EqualFold(req.PushChannel, string(commonservices.PushChannel_Huawei)) {
 		conf = tools.MapToStruct[commonservices.HuaweiPushConf](req.Extra)
+		pushChannel = string(commonservices.PushChannel_Huawei)
 	} else if strings.EqualFold(req.PushChannel, string(commonservices.PushChannel_Xiaomi)) {
 		conf = tools.MapToStruct[commonservices.XiaomiPushConf](req.Extra)
+		pushChannel = string(commonservices.PushChannel_Xiaomi)
 	} else if strings.EqualFold(req.PushChannel, string(commonservices.PushChannel_OPPO)) {
 		conf = tools.MapToStruct[commonservices.OppoPushConf](req.Extra)
+		pushChannel = string(commonservices.PushChannel_OPPO)
 	} else if strings.EqualFold(req.PushChannel, string(commonservices.PushChannel_VIVO)) {
 		conf = tools.MapToStruct[commonservices.VivoPushConf](req.Extra)
+		pushChannel = string(commonservices.PushChannel_VIVO)
 	} else if strings.EqualFold(req.PushChannel, string(commonservices.PushChannel_Jpush)) {
 		conf = tools.MapToStruct[commonservices.JPushConf](req.Extra)
+		pushChannel = string(commonservices.PushChannel_Jpush)
 	}
 	pushConf = tools.ToJson(conf)
 
@@ -64,7 +70,7 @@ func SetAndroidPushConf(ctx *gin.Context) {
 	dao := dbs.AndroidPushConfDao{}
 	dao.Upsert(dbs.AndroidPushConfDao{
 		AppKey:      req.AppKey,
-		PushChannel: req.PushChannel,
+		PushChannel: pushChannel,
 		Package:     req.Package,
 		PushConf:    pushConf,
 	})
