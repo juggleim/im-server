@@ -66,7 +66,7 @@ func UpdateUser(ctx *gin.Context) {
 		Nickname:     req.Nickname,
 		UserPortrait: req.UserPortrait,
 		ExtFields:    commonservices.Map2KvItems(req.ExtFields),
-	}, nil)
+	})
 	tools.SuccessHttpResp(ctx, nil)
 }
 
