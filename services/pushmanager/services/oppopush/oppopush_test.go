@@ -12,7 +12,7 @@ var regId = "OPPO_CN_7a2dd1e9f74d0c93d1e51ae44c5f5243"
 var channelId = "message"
 
 func TestSend(t *testing.T) {
-	client := oppopush.NewOppoPushClient(appKey, masterSecret)
+	client := oppopush.NewOppoPushClient(appKey, masterSecret, "")
 
 	sendReq := &oppopush.SendReq{
 		Notification: &oppopush.Notification{

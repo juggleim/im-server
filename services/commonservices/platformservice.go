@@ -39,6 +39,7 @@ func (conf *HuaweiPushConf) Valid() bool {
 
 type XiaomiPushConf struct {
 	AppSecret string `json:"app_secret"`
+	ChannelId string `json:"channel_id"`
 }
 
 func (conf *XiaomiPushConf) Valid() bool {
@@ -48,6 +49,7 @@ func (conf *XiaomiPushConf) Valid() bool {
 type OppoPushConf struct {
 	AppKey       string `json:"app_key"`
 	MasterSecret string `json:"master_secret"`
+	ChannelId    string `json:"channel_id"`
 }
 
 func (conf *OppoPushConf) Valid() bool {

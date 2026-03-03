@@ -11,12 +11,14 @@ type XiaomiPushClient struct {
 	httpClient *http.Client
 	host       string
 	appSecret  string
+	ChannelId  string
 }
 
-func NewXiaomiPushClient(appSecret string) *XiaomiPushClient {
+func NewXiaomiPushClient(appSecret, channelId string) *XiaomiPushClient {
 	return &XiaomiPushClient{
 		host:      Host,
 		appSecret: appSecret,
+		ChannelId: channelId,
 	}
 }
 

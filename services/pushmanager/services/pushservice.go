@@ -99,7 +99,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 							Description:           req.PushText,
 							RegistrationId:        pushToken.PushToken,
 							Extra: &xiaomipush.Extra{
-								ChannelId: "119572", // TODO
+								ChannelId: androidPushConf.XiaomiPushClient.ChannelId,
 							},
 						})
 						if err != nil {
@@ -114,9 +114,9 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					if androidPushConf.OppoPushClient != nil {
 						_, err := androidPushConf.OppoPushClient.SendWithContext(ctx, &oppopush.SendReq{
 							Notification: &oppopush.Notification{
-								Title:   req.Title,
-								Content: req.PushText,
-								//ChannelID: channelId,
+								Title:     req.Title,
+								Content:   req.PushText,
+								ChannelID: androidPushConf.OppoPushClient.ChannelId,
 							},
 							TargetType:  2,
 							TargetValue: pushToken.PushToken,

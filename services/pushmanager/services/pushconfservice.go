@@ -199,7 +199,7 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 				var pushConf = &commonservices.XiaomiPushConf{}
 				err = json.Unmarshal([]byte(dbPushConf.PushConf), pushConf)
 				if err == nil && pushConf.Valid() {
-					androidPushConf.XiaomiPushClient = xiaomipush.NewXiaomiPushClient(pushConf.AppSecret)
+					androidPushConf.XiaomiPushClient = xiaomipush.NewXiaomiPushClient(pushConf.AppSecret, pushConf.ChannelId)
 				} else {
 					logs.WithContext(ctx).Errorf("xiaomi push conf is illegal %v", err)
 				}
@@ -207,7 +207,7 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 				var pushConf = &commonservices.OppoPushConf{}
 				err = json.Unmarshal([]byte(dbPushConf.PushConf), pushConf)
 				if err == nil && pushConf.Valid() {
-					androidPushConf.OppoPushClient = oppopush.NewOppoPushClient(pushConf.AppKey, pushConf.MasterSecret)
+					androidPushConf.OppoPushClient = oppopush.NewOppoPushClient(pushConf.AppKey, pushConf.MasterSecret, pushConf.ChannelId)
 				} else {
 					logs.WithContext(ctx).Errorf("oppo push conf is illegal %v", err)
 				}

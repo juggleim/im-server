@@ -21,13 +21,15 @@ type OppoPushClient struct {
 	masterSecret      string
 	authToken         string
 	authTokenExpireAt int64
+	ChannelId         string
 }
 
-func NewOppoPushClient(appKey, masterSecret string) *OppoPushClient {
+func NewOppoPushClient(appKey, masterSecret, channelId string) *OppoPushClient {
 	return &OppoPushClient{
 		host:         Host,
 		appKey:       appKey,
 		masterSecret: masterSecret,
+		ChannelId:    channelId,
 	}
 }
 
