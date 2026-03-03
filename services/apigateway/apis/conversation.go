@@ -168,7 +168,7 @@ func QryConvers(ctx *gin.Context) {
 		Order:      order,
 		OnlyConver: true,
 	}, func() proto.Message {
-		return &pbobjs.QryGlobalConversResp{}
+		return &pbobjs.QryConversationsResp{}
 	})
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
