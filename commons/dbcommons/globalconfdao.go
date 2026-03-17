@@ -1,9 +1,10 @@
 package dbcommons
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type GlobalConfKey string
@@ -35,7 +36,7 @@ func (conf GlobalConfDao) Create(item GlobalConfDao) error {
 func (conf GlobalConfDao) FindByKey(key string) (*GlobalConfDao, error) {
 	var item GlobalConfDao
 	err := GetDb().Where("conf_key=?", key).Take(&item).Error
-	if err == gorm.ErrRecordNotFound {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 	return &item, nil

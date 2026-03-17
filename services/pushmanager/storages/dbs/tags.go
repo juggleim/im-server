@@ -2,7 +2,7 @@ package dbs
 
 import (
 	"context"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"im-server/services/pushmanager/storages/models"
 	"time"
 )

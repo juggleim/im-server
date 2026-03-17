@@ -88,6 +88,7 @@ require (
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
+	github.com/jinzhu/gorm v1.9.16 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jxskiss/base62 v1.1.0 // indirect
@@ -203,10 +204,9 @@ require (
 	github.com/boombuler/barcode v1.0.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20230728082804-614d0af6619b
 	github.com/gin-gonic/gin v1.10.1
-	github.com/go-sql-driver/mysql v1.9.3
+	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru v1.0.2
-	github.com/jinzhu/gorm v1.9.16
 	github.com/juggleim/imserver-sdk-go v1.0.12 // indirect
 	github.com/juggleim/jugglechat-server v1.1.16
 	github.com/kataras/i18n v0.0.8
@@ -222,5 +222,6 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/time v0.12.0
 	gopkg.in/yaml.v3 v3.0.1
+	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.30.0
 )

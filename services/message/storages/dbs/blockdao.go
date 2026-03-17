@@ -41,6 +41,6 @@ func (block BlockDao) Find(appkey, userId, blockUserId string) (*BlockDao, error
 
 func (block BlockDao) QryBlockUsers(appkey, userId string, limit, startId int64) ([]*BlockDao, error) {
 	var items []*BlockDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and id>?", appkey, userId, startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and id>?", appkey, userId, startId).Order("id asc").Limit(int(limit)).Find(&items).Error
 	return items, err
 }

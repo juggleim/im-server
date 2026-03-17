@@ -3,7 +3,7 @@ package dbs
 import (
 	"im-server/commons/dbcommons"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type FileConfDao struct {

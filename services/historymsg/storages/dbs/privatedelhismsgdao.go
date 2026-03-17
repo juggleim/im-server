@@ -72,7 +72,7 @@ func (msg PrivateDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId, subChanne
 		condition = condition + " and msg_time<?"
 	}
 	params = append(params, startTime)
-	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(int(count)).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}

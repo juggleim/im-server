@@ -64,7 +64,7 @@ func (info ReadInfoDao) BatchCreate(items []models.ReadInfo) error {
 
 func (info ReadInfoDao) QryReadInfosByMsgId(appkey, groupId, subChannel string, channelType pbobjs.ChannelType, msgId string, startId, limit int64) ([]*models.ReadInfo, error) {
 	var items []*ReadInfoDao
-	err := dbcommons.GetDb().Where("app_key=? and channel_type=? and group_id=? and sub_channel=? and msg_id=? and id>?", appkey, channelType, groupId, subChannel, msgId, startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and channel_type=? and group_id=? and sub_channel=? and msg_id=? and id>?", appkey, channelType, groupId, subChannel, msgId, startId).Order("id asc").Limit(int(limit)).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
@@ -84,12 +84,12 @@ func (info ReadInfoDao) QryReadInfosByMsgId(appkey, groupId, subChannel string, 
 }
 
 func (info ReadInfoDao) CountReadInfosByMsgId(appkey, groupId, subchannel string, channelType pbobjs.ChannelType, msgId string) int32 {
-	var count int32
+	var count int64
 	err := dbcommons.GetDb().Model(&ReadInfoDao{}).Where("app_key=? and channel_type=? and group_id=? and sub_channel=? and msg_id=?", appkey, channelType, groupId, subchannel, msgId).Count(&count).Error
 	if err != nil {
 		return 0
 	}
-	return count
+	return int32(count)
 }
 
 func (info ReadInfoDao) CheckMsgsRead(appkey, groupId, subChannel, memberId string, channelType pbobjs.ChannelType, msgIds []string) (map[string]bool, error) {

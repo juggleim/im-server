@@ -46,7 +46,7 @@ func (word SensitiveWordDao) DeleteWords(appkey string, words ...string) error {
 
 func (word SensitiveWordDao) QrySensitiveWords(appkey string, limit, startId int64) ([]*SensitiveWordDao, error) {
 	var items []*SensitiveWordDao
-	err := dbcommons.GetDb().Where("app_key=? and id>?", appkey, startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and id>?", appkey, startId).Order("id asc").Limit(int(limit)).Find(&items).Error
 	return items, err
 }
 
@@ -59,24 +59,25 @@ func (word SensitiveWordDao) QrySensitiveWordsWithPage(appkey string, page, size
 	if wordType != 0 {
 		db = db.Where("word_type=?", wordType)
 	}
-	err = db.Count(&total).Error
+	var totalCount int64
+	err = db.Count(&totalCount).Error
 	if err != nil {
 		return nil, 0, err
 	}
 
-	err = db.Order("id asc").Offset((page - 1) * size).Limit(size).Find(&items).Error
+	err = db.Order("id asc").Offset(int((page - 1) * size)).Limit(int(size)).Find(&items).Error
 	if err != nil {
 		return nil, 0, nil
 	}
 
-	return items, total, err
+	return items, int(totalCount), err
 }
 
 func (word SensitiveWordDao) Total(appkey string) int {
-	var count int
+	var count int64
 	err := dbcommons.GetDb().Table(word.TableName()).Where("app_key=?", appkey).Count(&count).Error
 	if err != nil {
 		count = 0
 	}
-	return count
+	return int(count)
 }

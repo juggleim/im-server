@@ -63,7 +63,7 @@ func (conver *GlobalConverDao) QryConversations(appkey, targetId, subChannel str
 		condition = condition + " and updated_time<?"
 		params = append(params, startTime)
 	}
-	err := dbcommons.GetDb().Debug().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Debug().Where(condition, params...).Order(orderStr).Limit(int(count)).Find(&items).Error
 	if err != nil {
 		return []*models.GlobalConver{}, err
 	}

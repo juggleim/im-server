@@ -23,6 +23,6 @@ func (conf MsgTransConfDao) Upsert(item MsgTransConfDao) error {
 
 func (conf MsgTransConfDao) QueryConfs(appkey string, startId, limit int64) ([]*MsgTransConfDao, error) {
 	var list []*MsgTransConfDao
-	err := dbcommons.GetDb().Where("app_key=? and id>?", appkey, startId).Order("id asc").Limit(limit).Find(&list).Error
+	err := dbcommons.GetDb().Where("app_key=? and id>?", appkey, startId).Order("id asc").Limit(int(limit)).Find(&list).Error
 	return list, err
 }

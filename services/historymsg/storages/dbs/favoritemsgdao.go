@@ -44,7 +44,7 @@ func (msg FavoriteMsgDao) Create(item models.FavoriteMsg) error {
 
 func (msg FavoriteMsgDao) QueryFavoriteMsgs(appkey, userId string, startId, limit int64) ([]*models.FavoriteMsg, error) {
 	var items []*FavoriteMsgDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and id<?", appkey, userId, startId).Order("id desc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and id<?", appkey, userId, startId).Order("id desc").Limit(int(limit)).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}

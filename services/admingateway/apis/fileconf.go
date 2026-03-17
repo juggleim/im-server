@@ -2,15 +2,17 @@ package apis
 
 import (
 	"encoding/json"
-	"im-server/commons/tools"
-	"im-server/services/admingateway/services"
-	"im-server/services/fileplugin/dbs"
-	"im-server/services/fileplugin/fileengine"
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
+
+	"im-server/commons/tools"
+	"im-server/services/admingateway/services"
+	"im-server/services/fileplugin/dbs"
+	"im-server/services/fileplugin/fileengine"
 )
 
 type FileConf struct {
@@ -27,7 +29,7 @@ func GetFileConf(c *gin.Context) {
 	dao := dbs.FileConfDao{}
 	fileConf, err := dao.FindFileConf(appkey, channel)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			services.SuccessHttpResp(c, nil)
 			return
 		}

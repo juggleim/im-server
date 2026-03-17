@@ -61,7 +61,7 @@ func (rel FriendRelDao) QueryFriendRels(appkey, userId string, startId, limit in
 			params = append(params, startId)
 		}
 	}
-	err := dbcommons.GetDb().Where(condition, params...).Order(orderBy).Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where(condition, params...).Order(orderBy).Limit(int(limit)).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (rel FriendRelDao) QueryFriendRelsWithPage(appkey, userId string, orderTag 
 		condition = condition + " and order_tag>=?"
 		params = append(params, orderTag)
 	}
-	err := dbcommons.GetDb().Where(condition, params...).Order("order_tag asc").Offset((page - 1) * size).Limit(size).Find(&items).Error
+	err := dbcommons.GetDb().Where(condition, params...).Order("order_tag asc").Offset(int((page - 1) * size)).Limit(int(size)).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}

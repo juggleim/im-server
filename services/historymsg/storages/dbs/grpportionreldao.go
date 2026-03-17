@@ -76,7 +76,7 @@ func (rel GroupPortionRelDao) QryPortionMsgs(appkey, userId, converId, subChanne
 			params = append(params, cleanTime)
 		}
 	}
-	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(int(count)).Find(&items).Error
 	if !isPositive {
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].SendTime < items[j].SendTime

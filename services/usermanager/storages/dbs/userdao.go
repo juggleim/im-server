@@ -146,17 +146,17 @@ func (user UserDao) Update(appkey, userId, nickname, userPortrait string) error 
 	} else {
 		return fmt.Errorf("do nothing")
 	}
-	err := dbcommons.GetDb().Model(&UserDao{}).Where("app_key=? and user_id=?", appkey, userId).Update(upd).Error
+	err := dbcommons.GetDb().Model(&UserDao{}).Where("app_key=? and user_id=?", appkey, userId).Updates(upd).Error
 	return err
 }
 
 func (user UserDao) Count(appkey string) int {
-	var count int
+	var count int64
 	err := dbcommons.GetDb().Model(&UserDao{}).Where("app_key=?", appkey).Count(&count).Error
 	if err != nil {
 		return 0
 	}
-	return count
+	return int(count)
 }
 
 func (user UserDao) CountByTime(appkey string, start, end int64) int64 {

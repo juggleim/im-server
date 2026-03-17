@@ -58,13 +58,13 @@ func (member GroupMemberDao) BatchCreate(items []GroupMemberDao) error {
 
 func (member GroupMemberDao) QueryMembers(appkey, groupId string, startId, limit int64) ([]*GroupMemberDao, error) {
 	var items []*GroupMemberDao
-	err := dbcommons.GetDb().Where("app_key=? and group_id=? and id>?", appkey, groupId, startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and group_id=? and id>?", appkey, groupId, startId).Order("id asc").Limit(int(limit)).Find(&items).Error
 	return items, err
 }
 
 func (member GroupMemberDao) QueryGroupsByMemberId(appkey, memberId string, startId, limit int64) ([]*GroupMemberDao, error) {
 	var items []*GroupMemberDao
-	err := dbcommons.GetDb().Where("app_key=? and member_id=? and id>?", appkey, memberId, startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and member_id=? and id>?", appkey, memberId, startId).Order("id asc").Limit(int(limit)).Find(&items).Error
 	return items, err
 }
 
@@ -84,7 +84,7 @@ func (member GroupMemberDao) UpdateMute(appkey, groupId string, isMute int, memb
 	} else {
 		upd["mute_end_at"] = muteEndAt
 	}
-	return dbcommons.GetDb().Model(&GroupMemberDao{}).Where("app_key=? and group_id=? and member_id in (?)", appkey, groupId, memberIds).Update(upd).Error
+	return dbcommons.GetDb().Model(&GroupMemberDao{}).Where("app_key=? and group_id=? and member_id in (?)", appkey, groupId, memberIds).Updates(upd).Error
 }
 
 func (member GroupMemberDao) UpdateAllow(appkey, groupId string, isAllow int, memberIds []string) error {

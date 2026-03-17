@@ -1,10 +1,12 @@
 package dbs
 
 import (
-	"im-server/commons/dbcommons"
+	"errors"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"im-server/commons/dbcommons"
+
+	"gorm.io/gorm"
 )
 
 type AccountDao struct {
@@ -40,7 +42,7 @@ func (admin AccountDao) FindByAccount(account string) (*AccountDao, error) {
 	var item AccountDao
 	err := dbcommons.GetDb().Where("account=?", account).Take(&item).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -58,7 +60,7 @@ func (admin AccountDao) UpdatePassword(account, password string) error {
 
 func (admin AccountDao) QryAccounts(limit int64, offset int64) ([]*AccountDao, error) {
 	var list []*AccountDao
-	err := dbcommons.GetDb().Where("id > ?", offset).Order("id asc").Limit(limit).Find(&list).Error
+	err := dbcommons.GetDb().Where("id > ?", offset).Order("id asc").Limit(int(limit)).Find(&list).Error
 	return list, err
 }
 

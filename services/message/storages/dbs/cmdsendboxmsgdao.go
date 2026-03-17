@@ -74,7 +74,7 @@ func (msg *CmdSendboxMsgDao) DelMsgsBaseTime(appkey string, start int64) error {
 
 func (msg *CmdSendboxMsgDao) QryBaseTime(limit, offset int64) ([]*CmdSendboxMsgDao, error) {
 	var items []*CmdSendboxMsgDao
-	err := dbcommons.GetDb().Order("id asc").Limit(limit).Offset(offset).Find(&items).Error
+	err := dbcommons.GetDb().Order("id asc").Limit(int(limit)).Offset(int(offset)).Find(&items).Error
 	return items, err
 }
 

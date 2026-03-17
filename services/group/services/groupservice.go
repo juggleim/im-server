@@ -2,6 +2,13 @@ package services
 
 import (
 	"context"
+	"errors"
+	"strconv"
+	"strings"
+	"time"
+
+	"gorm.io/gorm"
+
 	"im-server/commons/bases"
 	"im-server/commons/caches"
 	"im-server/commons/errs"
@@ -9,11 +16,6 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/group/dbs"
-	"strconv"
-	"strings"
-	"time"
-
-	"github.com/jinzhu/gorm"
 )
 
 var groupInfoCache *caches.LruCache
@@ -126,7 +128,7 @@ func getGroupInfoFromDb(appkey, groupId string) *GroupInfo {
 	dao := dbs.GroupDao{}
 	dbGroup, err := dao.FindById(appkey, groupId)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return &notExistGroup
 		}
 		return nil

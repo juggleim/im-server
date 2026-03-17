@@ -70,9 +70,9 @@ func (msg GrpCastHisMsgDao) QryHisMsgs(appkey, converId string, startTime int64,
 	var err error
 	if len(msgTypes) > 0 {
 		condition = condition + " and msg_type in (?)"
-		err = dbcommons.GetDb().Where("app_key=? and conver_id=? and "+condition, appkey, converId, startTime, cleanTime, msgTypes).Order(orderStr).Limit(count).Find(&items).Error
+		err = dbcommons.GetDb().Where("app_key=? and conver_id=? and "+condition, appkey, converId, startTime, cleanTime, msgTypes).Order(orderStr).Limit(int(count)).Find(&items).Error
 	} else {
-		err = dbcommons.GetDb().Where("app_key=? and conver_id=? and "+condition, appkey, converId, startTime, cleanTime).Order(orderStr).Limit(count).Find(&items).Error
+		err = dbcommons.GetDb().Where("app_key=? and conver_id=? and "+condition, appkey, converId, startTime, cleanTime).Order(orderStr).Limit(int(count)).Find(&items).Error
 	}
 	if !isPositiveOrder {
 		sort.Slice(items, func(i, j int) bool {

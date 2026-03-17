@@ -76,7 +76,7 @@ func (log *ClientLogDao) QryLogs(appkey, userId string, start, end, startId, lim
 	condition = condition + " and id>?"
 	params = append(params, startId)
 
-	err := dbcommons.GetDb().Where(condition, params...).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where(condition, params...).Order("id asc").Limit(int(limit)).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
@@ -87,12 +87,12 @@ func (log *ClientLogDao) Update(appkey, msgId string, data []byte, state ClientL
 	upd := map[string]interface{}{}
 	upd["log"] = data
 	upd["state"] = state
-	return dbcommons.GetDb().Model(&ClientLogDao{}).Where("app_key=? and msg_id=?", appkey, msgId).Update(upd).Error
+	return dbcommons.GetDb().Model(&ClientLogDao{}).Where("app_key=? and msg_id=?", appkey, msgId).Updates(upd).Error
 }
 
 func (log *ClientLogDao) UpdateLogUrl(appkey, msgId string, logUrl string, state ClientLogState) error {
 	upd := map[string]interface{}{}
 	upd["log_url"] = logUrl
 	upd["state"] = state
-	return dbcommons.GetDb().Model(&ClientLogDao{}).Where("app_key=? and msg_id=? and state!=?", appkey, msgId, ClientLogState_Uploaded).Update(upd).Error
+	return dbcommons.GetDb().Model(&ClientLogDao{}).Where("app_key=? and msg_id=? and state!=?", appkey, msgId, ClientLogState_Uploaded).Updates(upd).Error
 }

@@ -79,7 +79,7 @@ func (msg PrivateHisMsgDao) UpdateMsgBody(appkey, conver_id, subChannel, msgId, 
 	upd := map[string]interface{}{}
 	upd["msg_body"] = msgBody
 	upd["msg_type"] = msgType
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_id=?", appkey, conver_id, subChannel, msgId).Update(upd).Error
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_id=?", appkey, conver_id, subChannel, msgId).Updates(upd).Error
 }
 
 func (msg PrivateHisMsgDao) QryLatestMsgSeqNo(appkey, converId, subChannel string) int64 {
@@ -140,7 +140,7 @@ func (msg PrivateHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, u
 	sql = sql + " and his.is_delete=0 and delhis.msg_id is null"
 	sql = sql + " and his.is_delete=0 and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
 	params = append(params, curr)
-	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(int(count)).Find(&items).Error
 	if !isPositiveOrder {
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].SendTime < items[j].SendTime
@@ -194,7 +194,7 @@ func (msg PrivateHisMsgDao) QryHisMsgs(appkey, converId, subChannel string, star
 	condition = condition + " and is_delete=0 and (destroy_time=0 or destroy_time>?)"
 	params = append(params, curr)
 
-	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where(condition, params...).Order(orderStr).Limit(int(count)).Find(&items).Error
 	if !isPositiveOrder {
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].SendTime < items[j].SendTime
@@ -211,7 +211,7 @@ func (msg PrivateHisMsgDao) MarkReadByMsgIds(appkey, converId, subChannel string
 	upd := map[string]interface{}{}
 	upd["is_read"] = 1
 	upd["read_time"] = time.Now().UnixMilli()
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_id in (?)", appkey, converId, subChannel, msgIds).Update(upd).Error
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_id in (?)", appkey, converId, subChannel, msgIds).Updates(upd).Error
 }
 
 func (msg PrivateHisMsgDao) UpdateDestroyTimeAfterReadByMsgIds(appkey, converId, subChannel string, msgIds []string) error {
@@ -222,7 +222,7 @@ func (msg PrivateHisMsgDao) MarkReadByScope(appkey, converId, subChannel string,
 	upd := map[string]interface{}{}
 	upd["is_read"] = 1
 	upd["read_time"] = time.Now().UnixMilli()
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_index>=? and msg_index<=?", appkey, converId, subChannel, start, end).Update(upd).Error
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_index>=? and msg_index<=?", appkey, converId, subChannel, start, end).Updates(upd).Error
 }
 
 func (msg PrivateHisMsgDao) UpdateDestroyTimeAfterReadByScope(appkey, converId, subChannel string, start, end int64) error {

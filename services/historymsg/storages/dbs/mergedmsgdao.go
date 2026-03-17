@@ -64,7 +64,7 @@ func (msg MergedMsgDao) QryMergedMsgs(appkey, parentMsgId string, startTime int6
 		condition = "msg_time>?"
 		orderStr = "msg_time asc"
 	}
-	err := dbcommons.GetDb().Where("app_key=? and parent_msg_id=? and "+condition, appkey, parentMsgId, startTime).Order(orderStr).Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and parent_msg_id=? and "+condition, appkey, parentMsgId, startTime).Order(orderStr).Limit(int(count)).Find(&items).Error
 	if !isPositiveOrder {
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].MsgTime < items[j].MsgTime

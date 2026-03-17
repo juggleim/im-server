@@ -5,7 +5,7 @@ import (
 	"im-server/commons/dbcommons"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type GroupDao struct {
@@ -55,7 +55,7 @@ func (group GroupDao) Delete(appkey, groupId string) error {
 func (group GroupDao) UpdateGroupMuteStatus(appkey, groupId string, isMute int32) error {
 	upd := map[string]interface{}{}
 	upd["is_mute"] = isMute
-	return dbcommons.GetDb().Model(&GroupDao{}).Where("app_key=? and group_id=?", appkey, groupId).Update(upd).Error
+	return dbcommons.GetDb().Model(&GroupDao{}).Where("app_key=? and group_id=?", appkey, groupId).Updates(upd).Error
 }
 
 func (group GroupDao) UpdateGrpName(appkey, groupId, groupName, groupPortrait string) error {
@@ -71,6 +71,6 @@ func (group GroupDao) UpdateGrpName(appkey, groupId, groupName, groupPortrait st
 	} else {
 		return nil
 	}
-	err := dbcommons.GetDb().Model(&GroupDao{}).Where("app_key=? and group_id=?", appkey, groupId).Update(upd).Error
+	err := dbcommons.GetDb().Model(&GroupDao{}).Where("app_key=? and group_id=?", appkey, groupId).Updates(upd).Error
 	return err
 }

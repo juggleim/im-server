@@ -64,13 +64,13 @@ func (member *RtcRoomMemberDao) UpdateState(appkey, roomId, memberId string, sta
 		upd["device_id"] = deviceId
 	}
 	upd["latest_ping_time"] = time.Now().UnixMilli()
-	return dbcommons.GetDb().Model(member).Where("app_key=? and room_id=? and member_id=?", appkey, roomId, memberId).Update(upd).Error
+	return dbcommons.GetDb().Model(member).Where("app_key=? and room_id=? and member_id=?", appkey, roomId, memberId).Updates(upd).Error
 }
 
 func (member *RtcRoomMemberDao) RefreshPingTime(appkey, roomId, memberId string) error {
 	upd := map[string]interface{}{}
 	upd["latest_ping_time"] = time.Now().UnixMilli()
-	return dbcommons.GetDb().Model(member).Where("app_key=? and room_id=? and member_id=?", appkey, roomId, memberId).Update(upd).Error
+	return dbcommons.GetDb().Model(member).Where("app_key=? and room_id=? and member_id=?", appkey, roomId, memberId).Updates(upd).Error
 }
 
 func (member *RtcRoomMemberDao) Delete(appkey, roomId, memberId string) error {
@@ -87,7 +87,7 @@ func (member *RtcRoomMemberDao) DelteByRoomIdBaseTime(appkey, roomId string, bas
 
 func (member *RtcRoomMemberDao) QueryMembers(appkey, roomId string, startId, limit int64) ([]*models.RtcRoomMember, error) {
 	var items []*RtcRoomMemberDao
-	err := dbcommons.GetDb().Where("app_key=? and room_id=? and id>?", appkey, roomId, startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and room_id=? and id>?", appkey, roomId, startId).Order("id asc").Limit(int(limit)).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ type RtcRoomMemberDaoExt struct {
 func (member *RtcRoomMemberDao) QueryRoomsByMember(appkey, memberId string, limit int64) ([]*models.RtcRoomMember, error) {
 	var items []*RtcRoomMemberDaoExt
 	sql := "select rtcmembers.id,rtcmembers.room_id,rtcrooms.room_type,rtcrooms.owner_id,member_id,device_id,rtc_state,inviter_id,latest_ping_time,call_time,connect_time,hangup_time,rtcmembers.app_key from rtcmembers right join rtcrooms on (rtcmembers.app_key=rtcrooms.app_key and rtcmembers.room_id=rtcrooms.room_id) where rtcmembers.app_key=? and member_id=?"
-	err := dbcommons.GetDb().Raw(sql, appkey, memberId).Order("rtcmembers.id desc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Raw(sql, appkey, memberId).Order("rtcmembers.id desc").Limit(int(limit)).Find(&items).Error
 	if err != nil {
 		return nil, err
 	}

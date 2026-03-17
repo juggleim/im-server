@@ -1,12 +1,14 @@
 package dbs
 
 import (
+	"errors"
+	"time"
+
 	"im-server/commons/dbcommons"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/rtcroom/storages/models"
-	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type RtcRoomDao struct {
@@ -75,7 +77,7 @@ func (room *RtcRoomDao) FindByConver(appkey, converId string, channelType pbobjs
 	var item RtcRoomDao
 	err := dbcommons.GetDb().Where("app_key=? and conver_id=? and channel_type=? and sub_channel=?", appkey, converId, int32(channelType), subChannel).Take(&item).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err

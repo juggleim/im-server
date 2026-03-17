@@ -2,11 +2,14 @@ package dbs
 
 import (
 	"context"
-	"github.com/jinzhu/gorm"
-	"im-server/services/pushmanager/storages/models"
 	"log"
 	"testing"
 	"time"
+
+	"im-server/services/pushmanager/storages/models"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func TestUserTagsDao_GetUserWithTags(t *testing.T) {
@@ -37,21 +40,19 @@ func TestUserTagsDao_GetUserWithTags(t *testing.T) {
 }
 
 func initMysql(sqlDsn string) (db *gorm.DB, err error) {
-	db, err = gorm.Open("mysql", sqlDsn)
+	db, err = gorm.Open(mysql.Open(sqlDsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatalf("models.Setup err: %v", err)
 		return
 	}
 
-	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		return "" + defaultTableName
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
 	}
-
-	db.SingularTable(true)
-	db.LogMode(true)
-	db.DB().SetMaxIdleConns(20)
-	db.DB().SetMaxOpenConns(500)
-	db.DB().SetConnMaxLifetime(time.Second * 9) // mysql连接默认10s断开
+	sqlDB.SetMaxIdleConns(20)
+	sqlDB.SetMaxOpenConns(500)
+	sqlDB.SetConnMaxLifetime(time.Second * 9) // mysql连接默认10s断开
 	return
 }

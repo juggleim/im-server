@@ -84,7 +84,7 @@ func (ext UserExtDao) QryExtFieldsByItemKeys(appkey, userId string, itemKeys []s
 
 func (ext UserExtDao) QryExtsBaseItemKey(appkey, itemKey string, startId, limit int64) ([]*models.UserExt, error) {
 	var items []*UserExtDao
-	err := dbcommons.GetDb().Where("app_key=? and item_key=? and id>?", appkey, itemKey, startId).Order("id asc").Limit(limit).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and item_key=? and id>?", appkey, itemKey, startId).Order("id asc").Limit(int(limit)).Find(&items).Error
 	ret := []*models.UserExt{}
 	for _, item := range items {
 		ret = append(ret, &models.UserExt{

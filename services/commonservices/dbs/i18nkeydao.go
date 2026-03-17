@@ -28,6 +28,6 @@ func (i18n I18nKeyDao) Delete(appkey, lang, key string) error {
 
 func (i18n I18nKeyDao) Query(appkey string, startId, limit int64) ([]*I18nKeyDao, error) {
 	var list []*I18nKeyDao
-	err := dbcommons.GetDb().Where("app_key=? and id>?", appkey, startId).Order("id asc").Limit(limit).Find(&list).Error
+	err := dbcommons.GetDb().Where("app_key=? and id>?", appkey, startId).Order("id asc").Limit(int(limit)).Find(&list).Error
 	return list, err
 }

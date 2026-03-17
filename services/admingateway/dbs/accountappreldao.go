@@ -43,6 +43,6 @@ func (rel AccountAppRelDao) FindByAppkey(account string, appkey string) *commonD
 func (rel AccountAppRelDao) QryApps(account string, limit int64, offset int64) ([]*commonDbs.AppInfoDao, error) {
 	var list []*commonDbs.AppInfoDao
 	sql := fmt.Sprintf("select app.* from %s as rel left join %s as app on rel.app_key=app.app_key where rel.account=? and app.id<?", rel.TableName(), commonDbs.AppInfoDao{}.TableName())
-	err := dbcommons.GetDb().Raw(sql, account, offset).Order("app.id desc").Limit(limit).Find(&list).Error
+	err := dbcommons.GetDb().Raw(sql, account, offset).Order("app.id desc").Limit(int(limit)).Find(&list).Error
 	return list, err
 }

@@ -20,7 +20,7 @@ func (sub SubRelationDao) Create(item SubRelationDao) error {
 
 func (sub SubRelationDao) QrySubscribers(appkey, userId string, startId int64, count int32) ([]*SubRelationDao, error) {
 	var items []*SubRelationDao
-	err := dbcommons.GetDb().Where("app_key=? and user_id=? and id>?", appkey, userId, startId).Order("id asc").Limit(count).Find(&items).Error
+	err := dbcommons.GetDb().Where("app_key=? and user_id=? and id>?", appkey, userId, startId).Order("id asc").Limit(int(count)).Find(&items).Error
 	return items, err
 }
 

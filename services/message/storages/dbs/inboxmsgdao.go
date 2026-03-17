@@ -69,7 +69,7 @@ func (msg *InboxMsgDao) DelMsgsBaseTime(appkey string, start int64) error {
 
 func (msg *InboxMsgDao) QryBaseTime(limit, offset int64) ([]*InboxMsgDao, error) {
 	var items []*InboxMsgDao
-	err := dbcommons.GetDb().Order("id asc").Limit(limit).Offset(offset).Find(&items).Error
+	err := dbcommons.GetDb().Order("id asc").Limit(int(limit)).Offset(int(offset)).Find(&items).Error
 	return items, err
 }
 
