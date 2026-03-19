@@ -1,0 +1,37 @@
+# === Build stage ===
+# BUILDPLATFORM = CI machine's native arch, no QEMU needed for Go compilation
+# TARGETARCH = amd64 | arm64, auto-set by `docker buildx --platform`
+FROM --platform=$BUILDPLATFORM registry.cn-hangzhou.aliyuncs.com/juggleim/golang:1.23-alpine AS builder
+
+ARG TARGETOS=linux
+ARG TARGETARCH
+
+ENV GOPROXY=https://goproxy.cn,direct
+
+WORKDIR /src
+
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    go build -trimpath -ldflags="-s -w" -o /out/imserver ./launcher/main.go
+
+# === Runtime stage ===
+FROM registry.cn-hangzhou.aliyuncs.com/juggleim/alpine:3.23
+
+WORKDIR /opt
+
+RUN mkdir /opt/conf \
+    && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    && apk update && apk add --no-cache tzdata bash
+
+COPY --from=builder /out/imserver /opt/imserver
+COPY --from=builder /src/launcher/scripts/ /opt/
+
+RUN chmod +x /opt/run.sh /opt/imserver
+
+ENTRYPOINT ["/opt/run.sh"]
