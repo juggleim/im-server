@@ -129,3 +129,28 @@ func (msg GroupDelHisMsgDao) ExistDelHisMsg(appkey, userId, targetId, subChannel
 	}
 	return true
 }
+
+func (msg GroupDelHisMsgDao) DelMsgsByIds(ids []int64) error {
+	return dbcommons.GetDb().Model(&msg).Where("id in (?)", ids).Delete(&msg).Error
+}
+
+func (msg GroupDelHisMsgDao) DelMsgsBaseTime(appkey string, expiredTime int64) error {
+	for {
+		var ids []int64
+		err := dbcommons.GetDb().Model(&GroupDelHisMsgDao{}).Where("app_key=? and msg_time<?", appkey, expiredTime).
+			Limit(1000).Pluck("id", &ids).Error
+		if err != nil {
+			return err
+		}
+		if len(ids) == 0 {
+			break
+		}
+		if err = msg.DelMsgsByIds(ids); err != nil {
+			return err
+		}
+		if len(ids) < 1000 {
+			break
+		}
+	}
+	return nil
+}

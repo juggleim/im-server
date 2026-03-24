@@ -293,6 +293,31 @@ func (msg GroupHisMsgDao) DelSomeoneMsgsBaseTime(appkey, converId, subChannel st
 	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and sender_id=? and send_time<?", appkey, converId, subChannel, senderId, cleanTime).Update("is_delete", 1).Error
 }
 
+func (msg GroupHisMsgDao) DelMsgsByIds(ids []int64) error {
+	return dbcommons.GetDb().Model(&msg).Where("id in (?)", ids).Delete(&msg).Error
+}
+
+func (msg GroupHisMsgDao) DelMsgsBaseTime(appkey string, expiredTime int64) error {
+	for {
+		var ids []int64
+		err := dbcommons.GetDb().Model(&GroupHisMsgDao{}).Where("app_key=? and send_time<?", appkey, expiredTime).
+			Limit(1000).Pluck("id", &ids).Error
+		if err != nil {
+			return err
+		}
+		if len(ids) == 0 {
+			break
+		}
+		if err = msg.DelMsgsByIds(ids); err != nil {
+			return err
+		}
+		if len(ids) < 1000 {
+			break
+		}
+	}
+	return nil
+}
+
 func dbMsg2GrpMsg(dbMsg *GroupHisMsgDao) *models.GroupHisMsg {
 	return &models.GroupHisMsg{
 		HisMsg: models.HisMsg{

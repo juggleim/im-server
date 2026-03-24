@@ -25,6 +25,7 @@ import (
 	"im-server/commons/kvdbcommons"
 	"im-server/commons/logs"
 	"im-server/commons/mongocommons"
+	"im-server/commons/tasks"
 	"im-server/commons/tools"
 	"im-server/services/admingateway"
 	"im-server/services/apigateway"
@@ -88,6 +89,9 @@ func main() {
 		}
 	}
 
+	//start task executor
+	tasks.StartTaskExecute()
+
 	//init cluster
 	exts := map[string]string{}
 	exts[bases.NodeTag_Nav] = tools.ToJson(bases.HttpNodeExt{
@@ -139,6 +143,7 @@ func main() {
 		<-sigChan
 		imstarters.Shutdown(true)
 		signal.Stop(sigChan)
+		tasks.StopTaskExecute()
 		close(closeChan)
 	}()
 

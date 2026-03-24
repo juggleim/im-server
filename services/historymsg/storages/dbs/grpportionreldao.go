@@ -88,3 +88,28 @@ func (rel GroupPortionRelDao) QryPortionMsgs(appkey, userId, converId, subChanne
 	}
 	return retItems, err
 }
+
+func (rel GroupPortionRelDao) DelRelsByIds(ids []int64) error {
+	return dbcommons.GetDb().Model(&GroupPortionRelDao{}).Where("id in (?)", ids).Delete(&GroupPortionRelDao{}).Error
+}
+
+func (rel GroupPortionRelDao) DelRelsBaseTime(appkey string, expiredTime int64) error {
+	for {
+		var ids []int64
+		err := dbcommons.GetDb().Model(&GroupPortionRelDao{}).Where("app_key=? and msg_time<?", appkey, expiredTime).
+			Limit(1000).Pluck("id", &ids).Error
+		if err != nil {
+			return err
+		}
+		if len(ids) == 0 {
+			break
+		}
+		if err = rel.DelRelsByIds(ids); err != nil {
+			return err
+		}
+		if len(ids) < 1000 {
+			break
+		}
+	}
+	return nil
+}

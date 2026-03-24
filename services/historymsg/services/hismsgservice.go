@@ -56,6 +56,8 @@ func SavePrivateHisMsg(ctx context.Context, converId, senderId, receiverId strin
 			},
 		})
 	}
+	//purge private history msg
+	PurgePrivateHisMsg(appkey, downMsg.MsgTime)
 }
 func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownMsg, groupMemberCount int) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
@@ -139,6 +141,8 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 			logs.WithContext(ctx).Error(err.Error())
 		}
 	}
+	//purge group history msg
+	PurgeGroupHisMsg(appkey, downMsg.MsgTime)
 }
 
 func SaveSystemHisMsg(ctx context.Context, converId, senderId, receiverId string, downMsg *pbobjs.DownMsg) {
