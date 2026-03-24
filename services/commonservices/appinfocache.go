@@ -47,7 +47,7 @@ type AppInfo struct {
 	RecordMsgLogs         bool   `default:"false"`
 	MsgFriendCheck        bool   `default:"false"`
 	OpenRemark            bool   `default:"false"`
-	HistoryMsgSaveDay     int    `default:"180"`
+	HisMsgSaveDay         int    `default:"180"`
 
 	//group
 	IsHideMsgBeforeJoinGroup bool `default:"false"`

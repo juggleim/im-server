@@ -13,8 +13,8 @@ func PurgePrivateHisMsg(appkey string, msgTime int64) {
 	taskKey := "purge_private_msg"
 	if canPurgeMsg(taskKey) {
 		appinfo, exist := commonservices.GetAppInfo(appkey)
-		if exist && appinfo != nil && appinfo.HistoryMsgSaveDay > 0 {
-			expiredTime := msgTime - int64(appinfo.HistoryMsgSaveDay)*24*60*60*1000
+		if exist && appinfo != nil && appinfo.HisMsgSaveDay > 0 {
+			expiredTime := msgTime - int64(appinfo.HisMsgSaveDay)*24*60*60*1000
 			tasks.TaskExecute(taskKey, 60*1000, func() {
 				//clean private msg
 				priDao := dbs.PrivateHisMsgDao{}
@@ -37,8 +37,8 @@ func PurgeGroupHisMsg(appkey string, msgTime int64) {
 	taskKey := "purge_group_msg"
 	if canPurgeMsg(taskKey) {
 		appinfo, exist := commonservices.GetAppInfo(appkey)
-		if exist && appinfo != nil && appinfo.HistoryMsgSaveDay > 0 {
-			expiredTime := msgTime - int64(appinfo.HistoryMsgSaveDay)*24*60*60*1000
+		if exist && appinfo != nil && appinfo.HisMsgSaveDay > 0 {
+			expiredTime := msgTime - int64(appinfo.HisMsgSaveDay)*24*60*60*1000
 			tasks.TaskExecute(taskKey, 60*1000, func() {
 				//clean group msg
 				grpDao := dbs.GroupHisMsgDao{}
