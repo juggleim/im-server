@@ -87,7 +87,7 @@ type UserConversations struct {
 	TopIndexBaseSortTime *zset.Float64Set
 }
 
-func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
+func (uc *UserConversations) UpsertCovner(conver models.Conversation) *models.Conversation {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
@@ -95,6 +95,7 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 
 	itemKey := getConverItemKey(conver.TargetId, conver.SubChannel, conver.ChannelType)
 
+	var result *models.Conversation
 	if cacheConver, exist := uc.ConverItemMap[itemKey]; exist {
 		cacheConver.LatestMsgId = conver.LatestMsgId
 		if conver.LatestUnreadMsgIndex > cacheConver.LatestUnreadMsgIndex {
@@ -109,6 +110,7 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 			uc.SyncTimeIndex.Add(float64(conver.SyncTime), itemKey)
 		}
 		cacheConver.IsDeleted = 0
+		result = cacheConver
 	} else {
 		item := &models.Conversation{
 			AppKey:               uc.Appkey,
@@ -128,7 +130,10 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) {
 		if evictCount > 100 {
 			go uc.purge()
 		}
+		result = item
 	}
+	snapshot := *result
+	return &snapshot
 }
 
 func (uc *UserConversations) AppendMention(targetId, subChannel string, channelType pbobjs.ChannelType, mentionMsg *models.MentionMsg) {
@@ -264,14 +269,44 @@ func (uc *UserConversations) purge() {
 	}
 }
 
-func (uc *UserConversations) PersistConver(targetId, subChannel string, channelType pbobjs.ChannelType) {
-	key := fmt.Sprintf("%s_%s_%s_%s_%d", uc.Appkey, uc.UserId, targetId, subChannel, channelType)
-	persistCache.Add(key, &ConverPersistIndex{
-		Appkey:      uc.Appkey,
-		UserId:      uc.UserId,
-		TargetId:    targetId,
-		SubChannel:  subChannel,
-		ChannelType: channelType,
+// func (uc *UserConversations) PersistConver(targetId, subChannel string, channelType pbobjs.ChannelType) {
+// 	key := fmt.Sprintf("%s_%s_%s_%s_%d", uc.Appkey, uc.UserId, targetId, subChannel, channelType)
+// 	persistCache.Add(key, &ConverPersistIndex{
+// 		Appkey:      uc.Appkey,
+// 		UserId:      uc.UserId,
+// 		TargetId:    targetId,
+// 		SubChannel:  subChannel,
+// 		ChannelType: channelType,
+// 	})
+// }
+
+func (uc *UserConversations) PersistConverV2(item *models.Conversation) {
+	key := fmt.Sprintf("%s_%s_%s_%s_%d", uc.Appkey, uc.UserId, item.TargetId, item.SubChannel, item.ChannelType)
+	persistCache.Add(key, &models.Conversation{
+		AppKey:      item.AppKey,
+		UserId:      item.UserId,
+		TargetId:    item.TargetId,
+		ChannelType: item.ChannelType,
+		SubChannel:  item.SubChannel,
+
+		SortTime: item.SortTime,
+		SyncTime: item.SyncTime,
+
+		LatestMsgId: item.LatestMsgId,
+		// LatestMsg:            item.LatestMsg,
+		LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
+
+		LatestReadMsgIndex: item.LatestReadMsgIndex,
+		LatestReadMsgId:    item.LatestReadMsgId,
+		LatestReadMsgTime:  item.LatestReadMsgTime,
+
+		IsTop:          item.IsTop,
+		TopUpdatedTime: item.TopUpdatedTime,
+		UndisturbType:  item.UndisturbType,
+
+		UnreadTag:  item.UnreadTag,
+		ConverExts: item.ConverExts,
+		IsDeleted:  item.IsDeleted,
 	})
 }
 
