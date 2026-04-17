@@ -19,6 +19,7 @@ func (actor *PushSwitchActor) OnReceive(ctx context.Context, input proto.Message
 		userId := bases.GetTargetIdFromCtx(ctx)
 		userStatus := services.GetUserStatus(appkey, userId)
 		userStatus.SetPushSwitch(req.Switch)
+		userStatus.SetBadge(0)
 	}
 }
 
