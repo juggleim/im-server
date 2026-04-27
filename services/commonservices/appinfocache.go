@@ -48,6 +48,8 @@ type AppInfo struct {
 	MsgFriendCheck        bool   `default:"false"`
 	OpenRemark            bool   `default:"false"`
 	HisMsgSaveDay         int    `default:"180"`
+	GlobalPrivateMute     bool   `default:"false"`
+	GlobalGroupMute       bool   `default:"false"`
 
 	//group
 	IsHideMsgBeforeJoinGroup bool `default:"false"`

@@ -7,6 +7,7 @@ msgStoreEngine: mysql
 log:
   logPath: ./logs
   logName: jim-info
+  logExpireHours: 24
 
 kvdb:
   isOpen: true

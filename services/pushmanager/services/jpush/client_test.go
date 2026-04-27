@@ -8,7 +8,7 @@ var (
 )
 
 func TestJPushClient(t *testing.T) {
-	client := NewJpushClient(appKey, masterSecret)
+	client := NewJpushClient(appKey, masterSecret, nil)
 	msgId, err := client.Push(&Payload{
 		Platform: NewPlatform().All(),
 		Audience: NewAudience().SetRegistrationId("1104a89793a130a90cf"),

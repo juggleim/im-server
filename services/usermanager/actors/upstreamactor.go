@@ -36,8 +36,35 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 			userInfo.UserType = pbobjs.UserType(user.UserType)
 			userInfo.UpdatedTime = user.UpdatedTime
 			userInfo.ExtFields = commonservices.Map2KvItems(user.ExtFields)
+			isPriMute := false
+			isGrpMute := false
+			if appinfo, exist := commonservices.GetAppInfo(appkey); exist && appinfo != nil {
+				isPriMute = appinfo.GlobalPrivateMute
+				isGrpMute = appinfo.GlobalGroupMute
+			}
 			//check private global mute
-			if realMethod == "p_msg" && user.CheckPrivateGlobalMute() {
+			if realMethod == "p_msg" && (isPriMute || user.CheckPrivateGlobalMute()) {
+				userPubAck := &pbobjs.RpcMessageWraper{
+					RpcMsgType:   pbobjs.RpcMsgType_UserPubAck,
+					ResultCode:   int32(errs.IMErrorCode_MSG_BLOCK),
+					MsgId:        "",
+					MsgSendTime:  0,
+					MsgSeqNo:     0,
+					ReqIndex:     rpcMsg.ReqIndex,
+					AppKey:       appkey,
+					Qos:          rpcMsg.Qos,
+					Session:      rpcMsg.Session,
+					Method:       rpcMsg.Method,
+					SourceMethod: rpcMsg.SourceMethod,
+					RequesterId:  rpcMsg.RequesterId,
+					TargetId:     rpcMsg.TargetId,
+					PublishType:  rpcMsg.PublishType,
+				}
+				actor.Sender.Tell(userPubAck, actorsystem.NoSender)
+				return
+			}
+			//check group global mute
+			if realMethod == "g_msg" && (isGrpMute || user.CheckGroupGlobalMute()) {
 				userPubAck := &pbobjs.RpcMessageWraper{
 					RpcMsgType:   pbobjs.RpcMsgType_UserPubAck,
 					ResultCode:   int32(errs.IMErrorCode_MSG_BLOCK),

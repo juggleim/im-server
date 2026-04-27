@@ -74,6 +74,21 @@ func (u *UserInfo) CheckPrivateGlobalMute() bool {
 	return false
 }
 
+func (u *UserInfo) CheckGroupGlobalMute() bool {
+	if val, exist := u.SettingFields[string(commonservices.AttItemKey_GrpGlobalMute)]; exist {
+		intVal, err := tools.String2Int64(val)
+		if err == nil {
+			if intVal == 0 || intVal > time.Now().UnixMilli() {
+				return true
+			} else {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
 func (u *UserInfo) SetPriGlobalMute(isDelete bool, endTime int64) {
 	lock := userLocks.GetLocks(u.AppKey, u.UserId)
 	lock.Lock()

@@ -5,6 +5,7 @@ import (
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/pushmanager/services/hwpush"
 	"im-server/services/pushmanager/services/jpush"
@@ -152,7 +153,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					}
 				case pbobjs.PushChannel_JPush:
 					if androidPushConf.JpushClient != nil {
-						_, err := androidPushConf.JpushClient.Push(&jpush.Payload{
+						jPushPayload := &jpush.Payload{
 							Platform: jpush.NewPlatform().All(),
 							Audience: jpush.NewAudience().SetRegistrationId(pushToken.PushToken),
 							Notification: &jpush.Notification{
@@ -166,7 +167,9 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 									},
 								},
 							},
-						})
+							Options: handleJPushOptions(androidPushConf.JpushClient.Options),
+						}
+						_, err := androidPushConf.JpushClient.Push(jPushPayload)
 						if err != nil {
 							logs.WithContext(ctx).Infof("[JPush_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 						} else {
@@ -248,4 +251,24 @@ func iosPushPayload(req *pbobjs.PushData) interface{} {
 		iosPayload.Badge(int(req.Badge))
 	}
 	return iosPayload
+}
+
+func handleJPushOptions(jpushOptions *commonservices.JPushOptions) *jpush.Options {
+	if jpushOptions != nil {
+		options := &jpush.Options{
+			Classification: jpushOptions.Classification,
+		}
+		if jpushOptions.ThirdPartyChannel != nil {
+			options.ThirdPartyChannel = &jpush.ThirdPartyChannel{
+				Huawei: jpushOptions.ThirdPartyChannel.Huawei,
+				Xiaomi: jpushOptions.ThirdPartyChannel.Xiaomi,
+				Honor:  jpushOptions.ThirdPartyChannel.Honor,
+				Oppo:   jpushOptions.ThirdPartyChannel.Oppo,
+				Vivo:   jpushOptions.ThirdPartyChannel.Vivo,
+				Meizu:  jpushOptions.ThirdPartyChannel.Meizu,
+			}
+		}
+		return options
+	}
+	return nil
 }

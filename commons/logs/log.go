@@ -35,10 +35,14 @@ func GetErrorLogger() *logrus.Logger {
 
 func initInfoLogger() {
 	infoLogger = logrus.New()
+	logExpireHours := configures.Config.Log.LogExpireHours
+	if logExpireHours <= 0 {
+		logExpireHours = 24
+	}
 	writer, err := rotatelogs.New(
 		fmt.Sprintf(`%s/%s.%%Y%%m%%d%%H.log`, configures.Config.Log.LogPath, configures.Config.Log.LogName),
 		rotatelogs.WithLinkName(fmt.Sprintf(`%s/%s.log`, configures.Config.Log.LogPath, configures.Config.Log.LogName)),
-		rotatelogs.WithMaxAge(24*time.Hour),
+		rotatelogs.WithMaxAge(time.Duration(logExpireHours)*time.Hour),
 		rotatelogs.WithRotationTime(time.Hour),
 		// rotatelogs.WithRotationSize(512*1024*1024),
 	)

@@ -26,8 +26,9 @@ type ImConfig struct {
 	MsgStoreEngine string `yaml:"msgStoreEngine"`
 
 	Log struct {
-		LogPath string `yaml:"logPath"`
-		LogName string `yaml:"logName"`
+		LogPath        string `yaml:"logPath"`
+		LogName        string `yaml:"logName"`
+		LogExpireHours int    `yaml:"logExpireHours"`
 	} `ymal:"log"`
 
 	Kvdb struct {

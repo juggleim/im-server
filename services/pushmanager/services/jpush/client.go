@@ -3,6 +3,7 @@ package jpush
 import (
 	"errors"
 	"fmt"
+	"im-server/services/commonservices"
 	"net/http"
 	"strings"
 
@@ -19,13 +20,15 @@ type JpushClient struct {
 	host         string
 	appKey       string
 	masterSecret string
+	Options      *commonservices.JPushOptions
 }
 
-func NewJpushClient(appKey, appSecret string) *JpushClient {
+func NewJpushClient(appKey, appSecret string, options *commonservices.JPushOptions) *JpushClient {
 	return &JpushClient{
 		host:         PushHost,
 		appKey:       appKey,
 		masterSecret: appSecret,
+		Options:      options,
 		Session: grequests.NewSession(&grequests.RequestOptions{
 			UserAgent: "go-jpush/v0.1.2",
 			Auth:      []string{appKey, appSecret},
@@ -36,8 +39,8 @@ func NewJpushClient(appKey, appSecret string) *JpushClient {
 	}
 }
 
-func New(appKey, appSecret string) *JpushClient {
-	return NewJpushClient(appKey, appSecret)
+func New(appKey, appSecret string, options *commonservices.JPushOptions) *JpushClient {
+	return NewJpushClient(appKey, appSecret, options)
 }
 
 func (j *JpushClient) Url(path string) string {
