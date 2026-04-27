@@ -53,8 +53,8 @@ func ClientLogNtf(ctx *gin.Context) {
 		Description: req.Description,
 		Platform:    req.Platform,
 	}
-	ctx.Set(apiService.CtxKey_AppKey, req.AppKey)
-	ctx.Set(apiService.CtxKey_Session, traceId)
+	ctx.Set(string(bases.CtxKey_AppKey), req.AppKey)
+	ctx.Set(string(bases.CtxKey_Session), traceId)
 
 	logCmd := &LogCmd{
 		Start:    req.Start,

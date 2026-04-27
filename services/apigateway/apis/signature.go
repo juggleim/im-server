@@ -3,9 +3,9 @@ package apis
 import (
 	"fmt"
 
+	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/tools"
-	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +23,7 @@ const (
 func Signature(ctx *gin.Context) {
 	session := fmt.Sprintf("api_%s", tools.GenerateUUIDShort11())
 	ctx.Header(Header_RequestId, session)
-	ctx.Set(services.CtxKey_Session, session)
+	ctx.Set(string(bases.CtxKey_Session), session)
 
 	appKey := ctx.Request.Header.Get(Header_AppKey)
 	nonce := ctx.Request.Header.Get(Header_Nonce)
@@ -54,7 +54,7 @@ func Signature(ctx *gin.Context) {
 		str := fmt.Sprintf("%s%s%s", appInfo.AppSecret, nonce, tsStr)
 		sig := tools.SHA1(str)
 		if sig == signature {
-			ctx.Set(services.CtxKey_AppKey, appKey)
+			ctx.Set(string(bases.CtxKey_AppKey), appKey)
 		} else {
 			tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_SIGNATURE_FAIL)
 			ctx.Abort()

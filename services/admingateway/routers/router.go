@@ -1,8 +1,8 @@
 package routers
 
 import (
+	"im-server/commons/bases"
 	"im-server/services/admingateway/apis"
-	"im-server/services/admingateway/ctxs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -105,7 +105,7 @@ func CorsHandler() gin.HandlerFunc {
 func InjectCtx() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		appKey := ctx.Request.Header.Get("appkey")
-		ctx.Set(string(ctxs.CtxKey_AppKey), appKey)
+		ctx.Set(string(bases.CtxKey_AppKey), appKey)
 		ctx.Next()
 	}
 }

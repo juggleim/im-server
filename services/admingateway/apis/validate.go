@@ -2,6 +2,7 @@ package apis
 
 import (
 	"fmt"
+	"im-server/commons/bases"
 	"im-server/commons/configures"
 	"im-server/commons/tools"
 	"im-server/services/admingateway/ctxs"
@@ -25,7 +26,7 @@ const (
 func Validate(ctx *gin.Context) {
 	session := fmt.Sprintf("admin_%s", tools.GenerateUUIDShort11())
 	ctx.Header(Header_RequestId, session)
-	ctx.Set(string(ctxs.CtxKey_Session), session)
+	ctx.Set(string(bases.CtxKey_Session), session)
 
 	urlPath := ctx.Request.URL.Path
 	if strings.HasSuffix(urlPath, "/login") || strings.HasSuffix(urlPath, "/apps/create") {
