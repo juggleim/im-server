@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"bytes"
 	"fmt"
 	"im-server/commons/dbcommons"
 	"im-server/commons/pbdefines/pbobjs"
@@ -24,13 +25,34 @@ func (utag *UserConverTagDao) TableName() string {
 }
 
 func (utag *UserConverTagDao) Upsert(item models.UserConverTag) error {
-	if item.TagName != "" {
-		sql := fmt.Sprintf("INSERT INTO %s (app_key,user_id,tag,tag_name,tag_order) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE tag_name=?,tag_order=?", utag.TableName())
-		return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.Tag, item.TagName, item.TagOrder, item.TagName, item.TagOrder).Error
-	} else {
-		sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,user_id,tag,tag_order) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE tag_order=?", utag.TableName())
-		return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.Tag, item.TagOrder, item.TagOrder).Error
+	sql := fmt.Sprintf(
+		"INSERT INTO %s (app_key,user_id,tag,tag_name,tag_order) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE tag_name=IF(VALUES(tag_name)='',tag_name,VALUES(tag_name)),tag_order=VALUES(tag_order)",
+		utag.TableName(),
+	)
+	return dbcommons.GetDb().Exec(sql, item.AppKey, item.UserId, item.Tag, item.TagName, item.TagOrder).Error
+}
+
+func (utag *UserConverTagDao) BatchUpsert(items []models.UserConverTag) error {
+	if len(items) == 0 {
+		return nil
 	}
+	var buffer bytes.Buffer
+	sql := fmt.Sprintf(
+		"INSERT INTO %s (app_key,user_id,tag,tag_name,tag_order) VALUES ",
+		utag.TableName(),
+	)
+	buffer.WriteString(sql)
+	params := make([]interface{}, 0, len(items)*5)
+	for i, item := range items {
+		if i == len(items)-1 {
+			buffer.WriteString("(?,?,?,?,?) ")
+		} else {
+			buffer.WriteString("(?,?,?,?,?),")
+		}
+		params = append(params, item.AppKey, item.UserId, item.Tag, item.TagName, item.TagOrder)
+	}
+	buffer.WriteString("ON DUPLICATE KEY UPDATE tag_name=IF(VALUES(tag_name)='',tag_name,VALUES(tag_name)),tag_order=VALUES(tag_order)")
+	return dbcommons.GetDb().Exec(buffer.String(), params...).Error
 }
 
 func (utag *UserConverTagDao) Delete(appkey, userId, tag string) error {

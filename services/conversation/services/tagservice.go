@@ -18,37 +18,48 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	userConverTags := GetUserConverTags(appkey, userId)
-	cmdmsg := &CmdMsg_CreateConverTags{
-		Tags: []*ConverTag{},
+	maxUserConverTags := 100
+	if appinfo, exist := commonservices.GetAppInfo(appkey); exist {
+		maxUserConverTags = appinfo.MaxUserConverTags
 	}
+	tags := []models.UserConverTag{}
+	curr := time.Now().UnixMilli()
 	for _, tag := range req.Tags {
-		curr := time.Now().UnixMilli()
-		newTag := &models.UserConverTag{
+		tags = append(tags, models.UserConverTag{
 			AppKey:      appkey,
 			UserId:      userId,
 			Tag:         tag.Tag,
 			TagName:     tag.TagName,
 			TagOrder:    int(tag.TagOrder),
 			CreatedTime: curr,
+		})
+	}
+	changed, backup, code := userConverTags.AddTagsWithBackup(tags, maxUserConverTags)
+	if code != errs.IMErrorCode_SUCCESS {
+		return code
+	}
+	if len(changed) > 0 {
+		storage := storages.NewUserConverTagStorage()
+		err := storage.BatchUpsert(changed)
+		if err != nil {
+			logs.WithContext(ctx).Errorf("create user conver tag fail. err:%v", err)
+			userConverTags.RollbackTags(backup)
+			return errs.IMErrorCode_CONVER_ADDTAGFAIL
 		}
-		succ := userConverTags.AddTag(newTag)
-		if succ {
-			storage := storages.NewUserConverTagStorage()
-			err := storage.Upsert(*newTag)
-			if err != nil {
-				logs.WithContext(ctx).Errorf("create user conver tag fail. err:%v", err)
-			}
+		cmdmsg := &CmdMsg_CreateConverTags{
+			Tags: []*ConverTag{},
+		}
+		for _, tag := range changed {
 			cmdmsg.Tags = append(cmdmsg.Tags, &ConverTag{
 				Tag:         tag.Tag,
 				TagName:     tag.TagName,
 				TagOrder:    int32(tag.TagOrder),
 				TagType:     int32(pbobjs.ConverTagType_UserConverTag),
-				CreatedTime: curr,
+				CreatedTime: tag.CreatedTime,
+				IsAdd:       tag.IsAdd,
 			})
 		}
-	}
-	// ntf other device
-	if len(cmdmsg.Tags) > 0 {
+		// ntf other device
 		flag := msgdefines.SetCmdMsg(0)
 		bs, _ := json.Marshal(cmdmsg)
 		commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
@@ -248,4 +259,5 @@ type ConverTag struct {
 	TagOrder    int32  `json:"tag_order,omitempty"`
 	TagType     int32  `json:"tag_type,omitempty"`
 	CreatedTime int64  `json:"created_time,omitempty"`
+	IsAdd       bool   `json:"is_add,omitempty"`
 }

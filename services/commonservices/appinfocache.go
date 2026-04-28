@@ -51,6 +51,8 @@ type AppInfo struct {
 	GlobalPrivateMute     bool   `default:"false"`
 	GlobalGroupMute       bool   `default:"false"`
 
+	MaxUserConverTags int `default:"100"`
+
 	//connect
 	CheckUserDevice bool `default:"false"`
 

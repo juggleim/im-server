@@ -9,10 +9,13 @@ type UserConverTag struct {
 	TagOrder    int
 	CreatedTime int64
 	AppKey      string
+
+	IsAdd bool
 }
 
 type IUserConverTagStorage interface {
 	Upsert(item UserConverTag) error
+	BatchUpsert(items []UserConverTag) error
 	Delete(appkey, userId, tag string) error
 	QryTags(appkey, userId string) ([]*UserConverTag, error)
 	QryTagsByConver(appkey, userId, targetId string, channelType pbobjs.ChannelType) ([]*UserConverTag, error)
