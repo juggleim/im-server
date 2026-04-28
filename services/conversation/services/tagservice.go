@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.IMErrorCode {
+func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) (errs.IMErrorCode, *pbobjs.UserConverTags) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	userConverTags := GetUserConverTags(appkey, userId)
@@ -36,7 +36,10 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.
 	}
 	changed, backup, code := userConverTags.AddTagsWithBackup(tags, maxUserConverTags)
 	if code != errs.IMErrorCode_SUCCESS {
-		return code
+		return code, nil
+	}
+	resp := &pbobjs.UserConverTags{
+		Tags: []*pbobjs.ConverTag{},
 	}
 	if len(changed) > 0 {
 		storage := storages.NewUserConverTagStorage()
@@ -44,7 +47,7 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.
 		if err != nil {
 			logs.WithContext(ctx).Errorf("create user conver tag fail. err:%v", err)
 			userConverTags.RollbackTags(backup)
-			return errs.IMErrorCode_CONVER_ADDTAGFAIL
+			return errs.IMErrorCode_CONVER_ADDTAGFAIL, nil
 		}
 		cmdmsg := &CmdMsg_CreateConverTags{
 			Tags: []*ConverTag{},
@@ -58,6 +61,10 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.
 				CreatedTime: tag.CreatedTime,
 				IsAdd:       tag.IsAdd,
 			})
+			resp.Tags = append(resp.Tags, &pbobjs.ConverTag{
+				Tag:   tag.Tag,
+				IsAdd: tag.IsAdd,
+			})
 		}
 		// ntf other device
 		flag := msgdefines.SetCmdMsg(0)
@@ -68,7 +75,7 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.
 			Flags:      flag,
 		})
 	}
-	return errs.IMErrorCode_SUCCESS
+	return errs.IMErrorCode_SUCCESS, resp
 }
 
 func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode {

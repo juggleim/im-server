@@ -18,8 +18,8 @@ type CreateUserConverTagsActor struct {
 func (actor *CreateUserConverTagsActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.UserConverTags); ok {
 		logs.WithContext(ctx).Infof("user_id:%s\t:tags:%v", bases.GetRequesterIdFromCtx(ctx), req.Tags)
-		code := services.CreateUserConverTags(ctx, req)
-		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
+		code, resp := services.CreateUserConverTags(ctx, req)
+		qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)
 	} else {
 		logs.WithContext(ctx).Error("input is illegal")
