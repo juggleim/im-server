@@ -14,39 +14,6 @@ import (
 	"time"
 )
 
-var (
-	SystemConverTag_All       string = "jg_all"
-	SystemConverTag_Unread    string = "jg_unread"
-	SystemConverTag_MentionMe string = "jg_mentionme"
-	SystemConverTag_Private   string = "jg_private"
-	SystemConverTag_Group     string = "jg_group"
-)
-
-var systemConverTags []*pbobjs.ConverTag
-
-func init() {
-	systemConverTags = append(systemConverTags, &pbobjs.ConverTag{
-		Tag:     SystemConverTag_All,
-		TagType: pbobjs.ConverTagType_SystemConverTag,
-	})
-	systemConverTags = append(systemConverTags, &pbobjs.ConverTag{
-		Tag:     SystemConverTag_Unread,
-		TagType: pbobjs.ConverTagType_SystemConverTag,
-	})
-	systemConverTags = append(systemConverTags, &pbobjs.ConverTag{
-		Tag:     SystemConverTag_MentionMe,
-		TagType: pbobjs.ConverTagType_SystemConverTag,
-	})
-	systemConverTags = append(systemConverTags, &pbobjs.ConverTag{
-		Tag:     SystemConverTag_Private,
-		TagType: pbobjs.ConverTagType_SystemConverTag,
-	})
-	systemConverTags = append(systemConverTags, &pbobjs.ConverTag{
-		Tag:     SystemConverTag_Group,
-		TagType: pbobjs.ConverTagType_SystemConverTag,
-	})
-}
-
 func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
@@ -75,6 +42,7 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.
 				Tag:         tag.Tag,
 				TagName:     tag.TagName,
 				TagOrder:    int32(tag.TagOrder),
+				TagType:     int32(pbobjs.ConverTagType_UserConverTag),
 				CreatedTime: curr,
 			})
 		}
@@ -213,20 +181,18 @@ func TagDelConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 func QryUserConverTags(ctx context.Context) (*pbobjs.UserConverTags, errs.IMErrorCode) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	storage := storages.NewUserConverTagStorage()
-	tags, err := storage.QryTags(appkey, userId)
-	if err != nil {
-		logs.WithContext(ctx).Errorf("err:%v", err)
-	}
+
+	userConverTags := GetUserConverTags(appkey, userId)
+	tags := userConverTags.QryTags()
 	ret := &pbobjs.UserConverTags{
 		Tags: []*pbobjs.ConverTag{},
 	}
-	//add system conver tags
-	ret.Tags = append(ret.Tags, systemConverTags...)
 	for _, tag := range tags {
 		ret.Tags = append(ret.Tags, &pbobjs.ConverTag{
-			Tag:     tag.Tag,
-			TagName: tag.TagName,
+			Tag:      tag.Tag,
+			TagName:  tag.TagName,
+			TagType:  pbobjs.ConverTagType_UserConverTag,
+			TagOrder: int32(tag.TagOrder),
 		})
 	}
 	return ret, errs.IMErrorCode_SUCCESS
@@ -280,5 +246,6 @@ type ConverTag struct {
 	Tag         string `json:"tag"`
 	TagName     string `json:"tag_name,omitempty"`
 	TagOrder    int32  `json:"tag_order,omitempty"`
+	TagType     int32  `json:"tag_type,omitempty"`
 	CreatedTime int64  `json:"created_time,omitempty"`
 }

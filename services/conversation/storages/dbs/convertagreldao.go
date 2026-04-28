@@ -81,5 +81,5 @@ func (utag *ConverTagRelDao) BatchDelete(appkey, userId, tag string, convers []m
 }
 
 func (utag *ConverTagRelDao) DeleteByTag(appkey, userId, tag string) error {
-	return dbcommons.GetDb().Where("app_key=? and user_id=? and tag=?").Delete(&ConverTagRelDao{}).Error
+	return dbcommons.GetDb().Where("app_key=? and user_id=? and tag=?", appkey, userId, tag).Delete(&ConverTagRelDao{}).Error
 }
