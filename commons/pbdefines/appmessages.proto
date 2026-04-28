@@ -1112,3 +1112,15 @@ message TransItem{
   string key = 1;
   string content = 2;
 }
+
+message BindDevice{
+  string deviceId = 1;
+  string platform = 2;
+  string deviceCompany = 3;
+  string deviceModel = 4;
+  int64 createdTime = 5;
+}
+
+message BindDevices{
+  repeated BindDevice devices = 1;
+}

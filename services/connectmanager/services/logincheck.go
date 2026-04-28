@@ -67,6 +67,15 @@ func CheckLogin(ctx imcontext.WsHandleContext, msg *codec.ConnectMsgBody) (int32
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_DeviceID, msg.DeviceId)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_UserType, token.UserType)
 
+	//check bind device
+	if appinfo.CheckUserDevice {
+		if msg.Platform != string(commonservices.Platform_Web) {
+			if !CheckBindDevice(appkey, token.UserId, msg.DeviceId) {
+				return int32(errs.IMErrorCode_CONNECT_UNBINDDEVICE), ""
+			}
+		}
+	}
+
 	//check ban user
 	banUser, exist := GetBanUserFromCache(appkey, token.UserId)
 	if exist {

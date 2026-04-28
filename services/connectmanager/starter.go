@@ -33,6 +33,15 @@ func (ser *ConnectManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("kick_user", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.KickUserActor{}, serviceName)
 	})
+	register.RegisterActor("add_bind_device", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.AddBindDeviceActor{}, serviceName)
+	})
+	register.RegisterActor("del_bind_device", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.DelBindDeviceActor{}, serviceName)
+	})
+	register.RegisterActor("qry_bind_devices", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryBindDevicesActor{}, serviceName)
+	})
 }
 func (ser *ConnectManager) Startup(args map[string]interface{}) {
 	wsPort := configures.Config.ConnectManager.WsPort

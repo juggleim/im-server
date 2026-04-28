@@ -51,6 +51,9 @@ type AppInfo struct {
 	GlobalPrivateMute     bool   `default:"false"`
 	GlobalGroupMute       bool   `default:"false"`
 
+	//connect
+	CheckUserDevice bool `default:"false"`
+
 	//group
 	IsHideMsgBeforeJoinGroup bool `default:"false"`
 	HideGrpMsg               bool `default:"false"`

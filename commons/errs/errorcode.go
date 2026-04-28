@@ -66,6 +66,7 @@ var (
 	IMErrorCode_CONNECT_UNSECURITYDOMAIN        IMErrorCode = 11020
 	IMErrorCode_CONNECT_FUNCTIONDISABLED        IMErrorCode = 11021
 	IMErrorCode_CONNECT_KICKED_BY_SELF          IMErrorCode = 11022
+	IMErrorCode_CONNECT_UNBINDDEVICE            IMErrorCode = 11023
 )
 
 // msg errorcode
