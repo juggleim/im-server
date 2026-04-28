@@ -11,6 +11,7 @@ import (
 	"im-server/services/commonservices/msgdefines"
 	"im-server/services/conversation/storages"
 	"im-server/services/conversation/storages/models"
+	"time"
 )
 
 var (
@@ -46,23 +47,60 @@ func init() {
 	})
 }
 
+func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	userConverTags := GetUserConverTags(appkey, userId)
+	cmdmsg := &CmdMsg_CreateConverTags{
+		Tags: []*ConverTag{},
+	}
+	for _, tag := range req.Tags {
+		curr := time.Now().UnixMilli()
+		newTag := &models.UserConverTag{
+			AppKey:      appkey,
+			UserId:      userId,
+			Tag:         tag.Tag,
+			TagName:     tag.TagName,
+			TagOrder:    int(tag.TagOrder),
+			CreatedTime: curr,
+		}
+		succ := userConverTags.AddTag(newTag)
+		if succ {
+			storage := storages.NewUserConverTagStorage()
+			err := storage.Upsert(*newTag)
+			if err != nil {
+				logs.WithContext(ctx).Errorf("create user conver tag fail. err:%v", err)
+			}
+			cmdmsg.Tags = append(cmdmsg.Tags, &ConverTag{
+				Tag:         tag.Tag,
+				TagName:     tag.TagName,
+				TagOrder:    int32(tag.TagOrder),
+				CreatedTime: curr,
+			})
+		}
+	}
+	// ntf other device
+	if len(cmdmsg.Tags) > 0 {
+		flag := msgdefines.SetCmdMsg(0)
+		bs, _ := json.Marshal(cmdmsg)
+		commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
+			MsgType:    msgdefines.CmdMsgType_CreateConverTags,
+			MsgContent: bs,
+			Flags:      flag,
+		})
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
 func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
-	storage := storages.NewUserConverTagStorage()
 	cmdmsg := &CmdMsg_TagConvers{
-		Tag:     req.Tag,
-		TagName: req.TagName,
+		Tag: req.Tag,
 	}
-	err := storage.Upsert(models.UserConverTag{
-		AppKey:  appkey,
-		UserId:  userId,
-		Tag:     req.Tag,
-		TagName: req.TagName,
-	})
-	if err != nil {
-		logs.WithContext(ctx).Errorf("create user conver tag fail. err:%v", err)
-		return errs.IMErrorCode_CONVER_ADDTAGFAIL
+	userConverTags := GetUserConverTags(appkey, userId)
+	if !userConverTags.ContainsTag(req.Tag) {
+		return errs.IMErrorCode_CONVER_TAGNOTEXIST
 	}
 	if len(req.Convers) > 0 {
 		cmdmsg.Convers = []*SimpleConver{}
@@ -81,7 +119,7 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 				ChannelType: int32(conver.ChannelType),
 			})
 		}
-		err = relStorage.BatchCreate(rels)
+		err := relStorage.BatchCreate(rels)
 		if err != nil {
 			logs.WithContext(ctx).Errorf("tag add convers fail. err:%v", err)
 			return errs.IMErrorCode_CONVER_TAGADDCONVERFAIL
@@ -108,12 +146,15 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 	return errs.IMErrorCode_SUCCESS
 }
 
+type CmdMsg_CreateConverTags struct {
+	Tags []*ConverTag `json:"tags"`
+}
+
 var CmdMsgType_TagAddConvers string = msgdefines.CmdMsgType_TagAddConvers
 var CmdMsgType_TagDelConvers string = msgdefines.CmdMsgType_TagDelConvers
 
 type CmdMsg_TagConvers struct {
 	Tag     string          `json:"tag"`
-	TagName string          `json:"tag_name,omitempty"`
 	Convers []*SimpleConver `json:"convers,omitempty"`
 }
 
@@ -202,21 +243,31 @@ func DelUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) errs.IME
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	storage := storages.NewUserConverTagStorage()
 	relStorage := storages.NewConverTagRelStorage()
+	userConverTags := GetUserConverTags(appkey, userId)
 	for _, tag := range req.Tags {
-		storage.Delete(appkey, userId, tag.Tag)
-		relStorage.DeleteByTag(appkey, userId, tag.Tag)
-		cmdmsg.Tags = append(cmdmsg.Tags, &ConverTag{
-			Tag: tag.Tag,
-		})
+		if userConverTags.ContainsTag(tag.Tag) {
+			if userConverTags.DelTag(tag.Tag) {
+				storage.Delete(appkey, userId, tag.Tag)
+				err := relStorage.DeleteByTag(appkey, userId, tag.Tag)
+				if err != nil {
+					logs.WithContext(ctx).Error(err.Error())
+				}
+				cmdmsg.Tags = append(cmdmsg.Tags, &ConverTag{
+					Tag: tag.Tag,
+				})
+			}
+		}
 	}
 	// ntf other device
-	flag := msgdefines.SetCmdMsg(0)
-	bs, _ := json.Marshal(cmdmsg)
-	commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
-		MsgType:    CmdMsgType_DelConverTags,
-		MsgContent: bs,
-		Flags:      flag,
-	})
+	if len(cmdmsg.Tags) > 0 {
+		flag := msgdefines.SetCmdMsg(0)
+		bs, _ := json.Marshal(cmdmsg)
+		commonservices.AsyncPrivateMsg(ctx, userId, userId, &pbobjs.UpMsg{
+			MsgType:    CmdMsgType_DelConverTags,
+			MsgContent: bs,
+			Flags:      flag,
+		})
+	}
 	return errs.IMErrorCode_SUCCESS
 }
 
@@ -226,5 +277,8 @@ type CmdMsg_DelUserConverTags struct {
 	Tags []*ConverTag `json:"tags"`
 }
 type ConverTag struct {
-	Tag string `json:"tag"`
+	Tag         string `json:"tag"`
+	TagName     string `json:"tag_name,omitempty"`
+	TagOrder    int32  `json:"tag_order,omitempty"`
+	CreatedTime int64  `json:"created_time,omitempty"`
 }

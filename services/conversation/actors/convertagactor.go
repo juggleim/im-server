@@ -11,6 +11,25 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+type CreateUserConverTagsActor struct {
+	bases.BaseActor
+}
+
+func (actor *CreateUserConverTagsActor) OnReceive(ctx context.Context, input proto.Message) {
+	if req, ok := input.(*pbobjs.UserConverTags); ok {
+		logs.WithContext(ctx).Infof("user_id:%s\t:tags:%v", bases.GetRequesterIdFromCtx(ctx), req.Tags)
+		code := services.CreateUserConverTags(ctx, req)
+		qryAck := bases.CreateQueryAckWraper(ctx, code, nil)
+		actor.Sender.Tell(qryAck, actorsystem.NoSender)
+	} else {
+		logs.WithContext(ctx).Error("input is illegal")
+	}
+}
+
+func (actor *CreateUserConverTagsActor) CreateInputObj() proto.Message {
+	return &pbobjs.UserConverTags{}
+}
+
 type TagAddConversActor struct {
 	bases.BaseActor
 }

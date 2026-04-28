@@ -64,6 +64,9 @@ func (manager *ConversationManager) RegisterActors(register gmicro.IActorRegiste
 	register.RegisterActor("qry_mention_msgs", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryMentionMsgsActor{}, serviceName)
 	})
+	register.RegisterActor("create_user_conver_tags", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.CreateUserConverTagsActor{}, serviceName)
+	})
 	register.RegisterActor("tag_add_convers", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.TagAddConversActor{}, serviceName)
 	})

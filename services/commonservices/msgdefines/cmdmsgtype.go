@@ -9,6 +9,7 @@ var (
 	CmdMsgType_TopConvers       string = "jg:topconvers"
 	CmdMsgType_Undisturb        string = "jg:undisturb"
 	CmdMsgType_ClearTotalUnread string = "jg:cleartotalunread"
+	CmdMsgType_CreateConverTags string = "jg:createconvertags"
 	CmdMsgType_TagAddConvers    string = "jg:tagaddconvers"
 	CmdMsgType_TagDelConvers    string = "jg:tagdelconvers"
 	CmdMsgType_DelConverTags    string = "jg:delconvertags"

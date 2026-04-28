@@ -6,6 +6,7 @@ type UserConverTag struct {
 	UserId      string
 	Tag         string
 	TagName     string
+	TagOrder    int
 	CreatedTime int64
 	AppKey      string
 }

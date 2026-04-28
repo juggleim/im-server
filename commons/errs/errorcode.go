@@ -90,6 +90,7 @@ var (
 var (
 	IMErrorCode_CONVER_ADDTAGFAIL       IMErrorCode = 12101
 	IMErrorCode_CONVER_TAGADDCONVERFAIL IMErrorCode = 12102
+	IMErrorCode_CONVER_TAGNOTEXIST      IMErrorCode = 12103
 )
 
 // group errorcode

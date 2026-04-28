@@ -200,11 +200,13 @@ CREATE TABLE IF NOT EXISTS `userconvertags` (
   `user_id` VARCHAR(32) NULL COMMENT '用户id',
   `tag` VARCHAR(50) NULL COMMENT 'tag',
   `tag_name` VARCHAR(50) NULL COMMENT '分组名称',
+  `tag_order` INT NULL DEFAULT 0,
   `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `app_key` VARCHAR(20) NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `uniq_tag` (`app_key`, `user_id`, `tag`)
+  UNIQUE INDEX `uniq_tag` (`app_key`, `user_id`, `tag`),
+  INDEX `idx_tag` (`app_key`, `user_id`, `tag_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '会话-分组';
 
 CREATE TABLE IF NOT EXISTS `convertagrels` (

@@ -708,6 +708,7 @@ message ConverTag{
   string tag = 1;
   string tagName = 2;
   ConverTagType tagType = 3;
+  int32 tagOrder = 4;
 }
 
 message ConverExts {

@@ -1,3 +1,7 @@
+ALTER TABLE `userconvertags` 
+ADD COLUMN `tag_order` INT NULL DEFAULT 0 AFTER `tag_name`,
+ADD INDEX `idx_tag` (`app_key`, `user_id`, `tag_order`);
+
 CREATE TABLE IF NOT EXISTS `binddevices` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `app_key` varchar(20) DEFAULT '',
