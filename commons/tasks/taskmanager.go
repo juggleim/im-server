@@ -1,19 +1,16 @@
 package tasks
 
 import (
+	"im-server/commons/logs"
+	"im-server/commons/taskpools"
 	"sync"
 	"time"
-
-	"github.com/Jeffail/tunny"
 )
 
-var pool *tunny.Pool
+var pool *taskpools.AsyncTaskPool
 
-// var taskCache *sync.Map
 var taskCache map[string]*TaskItem
 var taskLock *sync.Mutex
-var taskChan chan *TaskItem
-var stopChan chan struct{}
 var stopped bool
 var stopOnce sync.Once
 
@@ -25,78 +22,74 @@ type TaskItem struct {
 }
 
 func init() {
-	pool = tunny.NewCallback(64)
+	var err error
+	pool, err = taskpools.NewAsyncTaskPool(64, 10000)
+	if err != nil {
+		panic("tasks: NewAsyncTaskPool: " + err.Error())
+	}
 	taskCache = make(map[string]*TaskItem)
 	taskLock = &sync.Mutex{}
-	taskChan = make(chan *TaskItem, 1000)
-	stopChan = make(chan struct{})
-}
-
-func StartTaskExecute() {
-	go func() {
-		for {
-			select {
-			case task, ok := <-taskChan:
-				if !ok {
-					return
-				}
-				if task != nil && task.f != nil {
-					go pool.Process(task.f)
-				}
-			case <-stopChan:
-				return
-			}
-		}
-	}()
 }
 
 func StopTaskExecute() {
 	stopOnce.Do(func() {
 		taskLock.Lock()
 		stopped = true
-		close(stopChan)
-		close(taskChan)
 		taskLock.Unlock()
-		pool.Close()
+		pool.Release()
 	})
+}
+
+func resetPending(key string) {
+	taskLock.Lock()
+	if v, ok := taskCache[key]; ok && v != nil {
+		v.pending = false
+	}
+	taskLock.Unlock()
 }
 
 func TaskExecute(key string, interval int64, f func()) {
 	taskLock.Lock()
-	defer taskLock.Unlock()
-
 	if stopped {
+		taskLock.Unlock()
 		return
 	}
 
 	curr := time.Now().UnixMilli()
-	if val, exist := taskCache[key]; exist && val != nil {
-		if val.pending || val.latestExecuteTime+interval >= curr {
-			return
-		}
-		val.pending = true
-		val.f = f
-		wrapped := func() {
-			defer func() {
-				taskLock.Lock()
-				defer taskLock.Unlock()
-				if v, ok := taskCache[key]; ok && v != nil {
-					v.latestExecuteTime = time.Now().UnixMilli()
-					v.pending = false
-				}
-			}()
-			f()
-		}
-		select {
-		case taskChan <- &TaskItem{key: key, f: wrapped}:
-		default:
-			val.pending = false
-		}
-	} else {
-		taskCache[key] = &TaskItem{
-			key:               key,
-			latestExecuteTime: curr,
-			pending:           false,
-		}
+	val := taskCache[key]
+	if val == nil {
+		val = &TaskItem{key: key, latestExecuteTime: 0}
+		taskCache[key] = val
+	}
+	if val.pending || val.latestExecuteTime+interval >= curr {
+		taskLock.Unlock()
+		return
+	}
+
+	val.pending = true
+	val.f = f
+	wrapped := func() {
+		defer func() {
+			taskLock.Lock()
+			defer taskLock.Unlock()
+			if v, ok := taskCache[key]; ok && v != nil {
+				v.latestExecuteTime = time.Now().UnixMilli()
+				v.pending = false
+			}
+		}()
+		f()
+	}
+
+	stoppedNow := stopped
+	taskLock.Unlock()
+
+	if stoppedNow {
+		resetPending(key)
+		return
+	}
+
+	if err := pool.Submit(wrapped); err != nil {
+		logs.Error(err)
+		resetPending(key)
 	}
 }

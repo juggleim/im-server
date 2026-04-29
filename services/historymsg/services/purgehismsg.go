@@ -10,7 +10,7 @@ import (
 )
 
 func PurgePrivateHisMsg(appkey string, msgTime int64) {
-	taskKey := "purge_private_msg"
+	taskKey := fmt.Sprintf("%s_purge_private_msg", appkey)
 	if canPurgeMsg(taskKey) {
 		appinfo, exist := commonservices.GetAppInfo(appkey)
 		if exist && appinfo != nil && appinfo.HisMsgSaveDay > 0 {
@@ -34,7 +34,7 @@ func PurgePrivateHisMsg(appkey string, msgTime int64) {
 }
 
 func PurgeGroupHisMsg(appkey string, msgTime int64) {
-	taskKey := "purge_group_msg"
+	taskKey := fmt.Sprintf("%s_purge_group_msg", appkey)
 	if canPurgeMsg(taskKey) {
 		appinfo, exist := commonservices.GetAppInfo(appkey)
 		if exist && appinfo != nil && appinfo.HisMsgSaveDay > 0 {

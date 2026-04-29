@@ -89,9 +89,6 @@ func main() {
 		}
 	}
 
-	//start task executor
-	tasks.StartTaskExecute()
-
 	//init cluster
 	exts := map[string]string{}
 	exts[bases.NodeTag_Nav] = tools.ToJson(bases.HttpNodeExt{
