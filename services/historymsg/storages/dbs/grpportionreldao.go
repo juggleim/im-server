@@ -45,7 +45,10 @@ func (rel GroupPortionRelDao) BatchUpsert(items []models.GroupPortionRel) error 
 }
 
 func (rel GroupPortionRelDao) Delete(item models.GroupPortionRel) error {
-	return dbcommons.GetDb().Where("app_key=? and conver_id=? and channel_type=? and sub_channel=? and user_id=? and msg_id=?", item.AppKey, item.ConverId, item.ChannelType, item.SubChannel, item.UserId, item.MsgId).Error
+	return dbcommons.GetDb().
+		Where("app_key=? and conver_id=? and channel_type=? and sub_channel=? and user_id=? and msg_id=?",
+			item.AppKey, item.ConverId, item.ChannelType, item.SubChannel, item.UserId, item.MsgId).
+		Delete(&GroupPortionRelDao{}).Error
 }
 
 func (rel GroupPortionRelDao) QryPortionMsgs(appkey, userId, converId, subChannel string, startTime int64, count int32, isPositive bool, cleanTime int64) ([]*models.GroupHisMsg, error) {
