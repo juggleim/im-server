@@ -298,7 +298,8 @@ func (msg GroupHisMsgDao) DelMsgsByIds(ids []int64) error {
 }
 
 func (msg GroupHisMsgDao) DelMsgsBaseTime(appkey string, expiredTime int64) error {
-	for {
+	maxRetried := 20
+	for range maxRetried {
 		var ids []int64
 		err := dbcommons.GetDb().Model(&GroupHisMsgDao{}).Where("app_key=? and send_time<?", appkey, expiredTime).
 			Limit(1000).Pluck("id", &ids).Error

@@ -94,7 +94,8 @@ func (rel GroupPortionRelDao) DelRelsByIds(ids []int64) error {
 }
 
 func (rel GroupPortionRelDao) DelRelsBaseTime(appkey string, expiredTime int64) error {
-	for {
+	maxRetried := 20
+	for range maxRetried {
 		var ids []int64
 		err := dbcommons.GetDb().Model(&GroupPortionRelDao{}).Where("app_key=? and msg_time<?", appkey, expiredTime).
 			Limit(1000).Pluck("id", &ids).Error
