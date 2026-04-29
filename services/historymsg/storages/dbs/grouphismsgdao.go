@@ -135,7 +135,12 @@ func (msg GroupHisMsgDao) QryHisMsgsExcludeDel(appkey, converId, subChannel, use
 	// sql = sql + " and his.is_delete=0 and his.is_portion=0 and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
 	sql = sql + " and his.is_delete=0 and (his.is_portion=0 or rel.msg_id is not null) and (his.destroy_time=0 or his.destroy_time>?) and delhis.msg_id is null"
 	params = append(params, curr)
-	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(int(count)).Find(&items).Error
+	sql = sql + " ORDER BY " + orderStr
+	if count > 0 {
+		sql = sql + " LIMIT ?"
+		params = append(params, count)
+	}
+	err := dbcommons.GetDb().Raw(sql, params...).Find(&items).Error
 	if !isPositiveOrder {
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].SendTime < items[j].SendTime
@@ -190,8 +195,12 @@ func (msg GroupHisMsgDao) QryHisMsgs(appkey, converId, subChannel, userId string
 	}
 	sql = sql + " and his.is_delete=0 and (his.is_portion=0 or rel.msg_id is not null) and (his.destroy_time=0 or his.destroy_time>?)"
 	params = append(params, curr)
-
-	err := dbcommons.GetDb().Raw(sql, params...).Order(orderStr).Limit(int(count)).Table(msg.TableName()).Find(&items).Error
+	sql = sql + " ORDER BY " + orderStr
+	if count > 0 {
+		sql = sql + " LIMIT ?"
+		params = append(params, count)
+	}
+	err := dbcommons.GetDb().Raw(sql, params...).Table(msg.TableName()).Find(&items).Error
 	if !isPositive {
 		sort.Slice(items, func(i, j int) bool {
 			return items[i].SendTime < items[j].SendTime
