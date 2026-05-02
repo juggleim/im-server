@@ -14,16 +14,33 @@ import (
 	"time"
 )
 
+func applyUserConverTagDeltas(ctx context.Context, userConverTags *UserConverTags, tags []models.UserConverTag) (changed []models.UserConverTag, code errs.IMErrorCode) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	maxUserTagLimit := 100
+	if appinfo, ok := commonservices.GetAppInfo(appkey); ok {
+		maxUserTagLimit = appinfo.MaxUserConverTags
+	}
+	changed, backup, code := userConverTags.AddTagsWithBackup(tags, maxUserTagLimit)
+	if code != errs.IMErrorCode_SUCCESS {
+		return nil, code
+	}
+	if len(changed) == 0 {
+		return nil, errs.IMErrorCode_SUCCESS
+	}
+	if err := storages.NewUserConverTagStorage().BatchUpsert(changed); err != nil {
+		logs.WithContext(ctx).Errorf("upsert user conver tags fail. err:%v", err)
+		userConverTags.RollbackTags(backup)
+		return nil, errs.IMErrorCode_CONVER_ADDTAGFAIL
+	}
+	return changed, errs.IMErrorCode_SUCCESS
+}
+
 func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) (errs.IMErrorCode, *pbobjs.UserConverTags) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	userConverTags := GetUserConverTags(appkey, userId)
-	maxUserConverTags := 100
-	if appinfo, exist := commonservices.GetAppInfo(appkey); exist {
-		maxUserConverTags = appinfo.MaxUserConverTags
-	}
-	tags := []models.UserConverTag{}
 	curr := time.Now().UnixMilli()
+	tags := make([]models.UserConverTag, 0, len(req.Tags))
 	for _, tag := range req.Tags {
 		tags = append(tags, models.UserConverTag{
 			AppKey:      appkey,
@@ -34,7 +51,7 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) (errs
 			CreatedTime: curr,
 		})
 	}
-	changed, backup, code := userConverTags.AddTagsWithBackup(tags, maxUserConverTags)
+	changed, code := applyUserConverTagDeltas(ctx, userConverTags, tags)
 	if code != errs.IMErrorCode_SUCCESS {
 		return code, nil
 	}
@@ -42,13 +59,6 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) (errs
 		Tags: []*pbobjs.ConverTag{},
 	}
 	if len(changed) > 0 {
-		storage := storages.NewUserConverTagStorage()
-		err := storage.BatchUpsert(changed)
-		if err != nil {
-			logs.WithContext(ctx).Errorf("create user conver tag fail. err:%v", err)
-			userConverTags.RollbackTags(backup)
-			return errs.IMErrorCode_CONVER_ADDTAGFAIL, nil
-		}
 		cmdmsg := &CmdMsg_CreateConverTags{
 			Tags: []*ConverTag{},
 		}
@@ -78,6 +88,20 @@ func CreateUserConverTags(ctx context.Context, req *pbobjs.UserConverTags) (errs
 	return errs.IMErrorCode_SUCCESS, resp
 }
 
+// createUserConverTagIfMissing persists a new user tag and updates cache, without CreateConverTags multi-device sync.
+func createUserConverTagIfMissing(ctx context.Context, appkey, userId string, userConverTags *UserConverTags, req *pbobjs.TagConvers) errs.IMErrorCode {
+	_, code := applyUserConverTagDeltas(ctx, userConverTags, []models.UserConverTag{
+		{
+			AppKey:      appkey,
+			UserId:      userId,
+			Tag:         req.Tag,
+			TagName:     req.TagName,
+			CreatedTime: time.Now().UnixMilli(),
+		},
+	})
+	return code
+}
+
 func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
@@ -86,7 +110,9 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 	}
 	userConverTags := GetUserConverTags(appkey, userId)
 	if !userConverTags.ContainsTag(req.Tag) {
-		return errs.IMErrorCode_CONVER_TAGNOTEXIST
+		if code := createUserConverTagIfMissing(ctx, appkey, userId, userConverTags, req); code != errs.IMErrorCode_SUCCESS {
+			return code
+		}
 	}
 	if len(req.Convers) > 0 {
 		cmdmsg.Convers = []*SimpleConver{}
