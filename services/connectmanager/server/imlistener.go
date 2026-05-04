@@ -51,10 +51,10 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 		imcontext.SetContextAttr(ctx, imcontext.StateKey_InstanceId, msg.InstanceId)
 	}
 	clientIp := imcontext.GetContextAttrString(ctx, imcontext.StateKey_ClientIp)
-	if msg.ClientIp != "" {
-		clientIp = msg.ClientIp
-		imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientIp, msg.ClientIp)
-	}
+	// if msg.ClientIp != "" {
+	// 	clientIp = msg.ClientIp
+	// 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientIp, msg.ClientIp)
+	// }
 	ucLog := &pbobjs.UserConnectLog{
 		AppKey:   msg.Appkey,
 		UserId:   msg.Token,
