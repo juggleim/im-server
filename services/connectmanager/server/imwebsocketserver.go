@@ -56,10 +56,13 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 	if referer == "" {
 		referer = strings.TrimSpace(r.Header.Get("Referer"))
 	}
-	clientIp := conn.RemoteAddr().String()
-	realIp := strings.TrimSpace(r.Header.Get("X-Real-Ip"))
-	if realIp != "" {
-		clientIp = realIp
+	clientIp := strings.TrimSpace(r.Header.Get("X-Real-Ip"))
+	if clientIp == "" {
+		clientIp = conn.RemoteAddr().String()
+	}
+	clientHost := strings.TrimSpace(r.Header.Get("X-Forwarded-Host"))
+	if clientHost == "" {
+		clientHost = strings.TrimSpace(r.Host)
 	}
 	child := &ImWebsocketChild{
 		stopChan:         make(chan bool, 1),
@@ -69,7 +72,7 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 		latestActiveTime: time.Now().UnixMilli(),
 	}
 	utils.SafeGo(func() {
-		child.startWsListener(referer, clientIp)
+		child.startWsListener(referer, clientIp, clientHost)
 	})
 }
 func (server *ImWebsocketServer) Stop() {
@@ -85,7 +88,7 @@ type ImWebsocketChild struct {
 	ticker           *time.Ticker
 }
 
-func (child *ImWebsocketChild) startWsListener(referer, clientIp string) {
+func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost string) {
 	handler := IMWebsocketMsgHandler{child.messageListener}
 	ctx := &WsHandleContextImpl{
 		conn:       child.wsConn,
@@ -99,6 +102,7 @@ func (child *ImWebsocketChild) startWsListener(referer, clientIp string) {
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Limiter, rate.NewLimiter(100, 10))
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_Referer, referer)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientIp, clientIp)
+	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientHost, clientHost)
 
 	//start ticker
 	child.startTicker(ctx, handler)

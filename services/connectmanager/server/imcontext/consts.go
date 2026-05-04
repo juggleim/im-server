@@ -38,6 +38,7 @@ const (
 	StateKey_ClientIp             string = "state.client_ip"
 	StateKey_Limiter              string = "state.limiter"
 	StateKey_Referer              string = "state.referer"
+	StateKey_ClientHost           string = "state.client_host" // Host used by client
 	// StateKey_Extra                string = "state.extra"
 	StateKey_InstanceId string = "state.instance_id"
 	StateKey_UserType   string = "state.user_type"

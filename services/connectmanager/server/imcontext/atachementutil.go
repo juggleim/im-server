@@ -82,6 +82,10 @@ func GetReferer(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_Referer)
 }
 
+func GetClientHost(ctx WsHandleContext) string {
+	return GetContextAttrString(ctx, StateKey_ClientHost)
+}
+
 func GetInstanceId(ctx WsHandleContext) string {
 	return GetContextAttrString(ctx, StateKey_InstanceId)
 }
