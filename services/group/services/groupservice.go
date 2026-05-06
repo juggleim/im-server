@@ -169,6 +169,16 @@ func getGroupInfoFromDb(appkey, groupId string) *GroupInfo {
 			}
 			groupInfo.SettingFields = settingValMap
 			commonservices.FillObjField(groupInfo.Settings, settingValMap)
+			// init group limiter
+			if groupInfo.Settings.GrpMsgSecondLimiterObj == nil && groupInfo.Settings.GrpMsgSecondLimiter > 0 {
+				groupInfo.Settings.GrpMsgSecondLimiterObj = tools.NewPerSecondLimiter(groupInfo.Settings.GrpMsgSecondLimiter)
+			}
+			if groupInfo.Settings.GrpMsgMinuteLimiterObj == nil && groupInfo.Settings.GrpMsgMinuteLimiter > 0 {
+				groupInfo.Settings.GrpMsgMinuteLimiterObj = tools.NewPerMinuteLimiter(groupInfo.Settings.GrpMsgMinuteLimiter)
+			}
+			if groupInfo.Settings.GrpMsgHourLimiterObj == nil && groupInfo.Settings.GrpMsgHourLimiter > 0 {
+				groupInfo.Settings.GrpMsgHourLimiterObj = tools.NewPerHourLimiter(groupInfo.Settings.GrpMsgHourLimiter)
+			}
 		}
 		return groupInfo
 	}

@@ -25,12 +25,15 @@ const (
 	BotConnectType_Websocket BotConnectType = 1
 
 	//setting keys of group or group_members
-	AttItemKey_HideGrpMsg        AttItemKey = "hide_grp_msg"
-	AttItemKey_GrpCreator        AttItemKey = "grp_creator"
-	AttItemKey_GrpAnnouncement   AttItemKey = "grp_announcement"
-	AttItemKey_GrpVerifyType     AttItemKey = "grp_verify_type"
-	AttItemKey_GrpAdministrators AttItemKey = "grp_administrators"
-	AttItemKey_GrpDisplayName    AttItemKey = "grp_display_name"
+	AttItemKey_HideGrpMsg          AttItemKey = "hide_grp_msg"
+	AttItemKey_GrpCreator          AttItemKey = "grp_creator"
+	AttItemKey_GrpAnnouncement     AttItemKey = "grp_announcement"
+	AttItemKey_GrpVerifyType       AttItemKey = "grp_verify_type"
+	AttItemKey_GrpAdministrators   AttItemKey = "grp_administrators"
+	AttItemKey_GrpDisplayName      AttItemKey = "grp_display_name"
+	AttItemKey_GrpMsgSecondLimiter AttItemKey = "grp_msg_second_limiter"
+	AttItemKey_GrpMsgMinuteLimiter AttItemKey = "grp_msg_minute_limiter"
+	AttItemKey_GrpMsgHourLimiter   AttItemKey = "grp_msg_hour_limiter"
 
 	//setting keys of users
 	AttItemKey_Language      AttItemKey = "language"
@@ -48,6 +51,15 @@ const (
 type GroupSettings struct {
 	HideGrpMsg          bool `default:"false"`
 	HasField_HideGrpMsg bool
+
+	GrpMsgSecondLimiter    int `default:"0"`
+	GrpMsgSecondLimiterObj *rate.Limiter
+
+	GrpMsgMinuteLimiter    int `default:"0"`
+	GrpMsgMinuteLimiterObj *rate.Limiter
+
+	GrpMsgHourLimiter    int `default:"0"`
+	GrpMsgHourLimiterObj *rate.Limiter
 }
 
 type GrpMemberSettings struct {
@@ -77,6 +89,9 @@ var UserSettingKeys map[AttItemKey]bool
 func init() {
 	GroupSettingKeys = make(map[AttItemKey]bool)
 	GroupSettingKeys[AttItemKey_HideGrpMsg] = true
+	GroupSettingKeys[AttItemKey_GrpMsgSecondLimiter] = true
+	GroupSettingKeys[AttItemKey_GrpMsgMinuteLimiter] = true
+	GroupSettingKeys[AttItemKey_GrpMsgHourLimiter] = true
 
 	GrpMemberSettingKeys = make(map[AttItemKey]bool)
 	GrpMemberSettingKeys[AttItemKey_HideGrpMsg] = true
