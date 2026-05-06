@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 type AttItemType int
@@ -51,6 +53,15 @@ type GroupSettings struct {
 type GrpMemberSettings struct {
 	HideGrpMsg          bool `default:"false"`
 	HasField_HideGrpMsg bool
+
+	GrpMsgSecondLimiter    int `default:"0"`
+	GrpMsgSecondLimiterObj *rate.Limiter
+
+	GrpMsgMinuteLimiter    int `default:"0"`
+	GrpMsgMinuteLimiterObj *rate.Limiter
+
+	GrpMsgHourLimiter    int `default:"0"`
+	GrpMsgHourLimiterObj *rate.Limiter
 }
 
 type UserSettings struct {

@@ -61,6 +61,7 @@ func Route(eng *gin.Engine, prefix string) {
 	group.POST("/groups/groupmute/set", apis.GroupMute)
 	group.POST("/groups/groupmembermute/set", apis.GroupMemberMute)
 	group.POST("/groups/groupmemberallow/set", apis.GroupMemberAllow)
+	group.POST("/groups/members/settings/set", apis.SetGroupMemberSettings)
 
 	group.GET("/sensitivewords/list", apis.QrySensitiveWords)
 	group.POST("/sensitivewords/import", apis.ImportSensitiveWords)

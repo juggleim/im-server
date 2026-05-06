@@ -8,6 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
 	"im-server/services/group/dbs"
 	"time"
 )
@@ -311,16 +312,16 @@ func SetGroupMemberAllow(ctx context.Context, req *pbobjs.GroupMemberAllowReq) e
 func SetGroupMemberSettings(ctx context.Context, groupId string, req *pbobjs.GroupMember) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	dao := dbs.GroupMemberExtDao{}
-	memberAtts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, req.MemberId)
-	if memberAtts != nil {
-		for _, setting := range req.Settings {
-			memberAtts.SetMemberSetting(setting.Key, setting.Value)
-			dao.Upsert(appkey, groupId, req.MemberId, setting.Key, setting.Value, int(commonservices.AttItemType_Setting))
+	rvCache := false
+	for _, setting := range req.Settings {
+		err := dao.Upsert(appkey, groupId, req.MemberId, setting.Key, setting.Value, int(commonservices.AttItemType_Setting))
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
 		}
-		for _, ext := range req.ExtFields {
-			memberAtts.SetMemberExt(ext.Key, ext.Value)
-			dao.Upsert(appkey, groupId, req.MemberId, ext.Key, ext.Value, int(commonservices.AttItemType_Att))
-		}
+		rvCache = rvCache || true
+	}
+	if rvCache {
+		RemoveGrpMemberAttsFromCache(ctx, appkey, groupId, req.MemberId)
 	}
 	return errs.IMErrorCode_SUCCESS
 }

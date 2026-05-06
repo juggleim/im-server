@@ -36,13 +36,18 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 			msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
 			return errs.IMErrorCode_GROUP_GROUPMEMBERMUTE, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 		}
-		//check group mute
-		if checkGroupIsMute(ctx, groupId) {
-			//check group member allow
-			if !checkGroupMemberIsAllow(ctx, groupId, senderId) {
+		if !checkGroupMemberIsAllow(ctx, groupId, senderId) {
+			//check group mute
+			if checkGroupIsMute(ctx, groupId) {
 				sendTime := time.Now().UnixMilli()
 				msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
 				return errs.IMErrorCode_GROUP_GROUPMUTE, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
+			}
+			// check group member msg limiter
+			if !checkGroupMemberMsgLimitAllow(ctx, groupId, senderId) {
+				sendTime := time.Now().UnixMilli()
+				msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
+				return errs.IMErrorCode_GROUP_EXCEEDLIMITED, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 			}
 		}
 	}
@@ -309,6 +314,25 @@ func checkGroupMemberIsAllow(ctx context.Context, groupId, memberId string) bool
 		}
 	}
 	return false
+}
+
+func checkGroupMemberMsgLimitAllow(ctx context.Context, groupId, senderId string) bool {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	atts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, senderId)
+	if atts != nil && atts.Settings != nil {
+		allow := true
+		if allow && atts.Settings.GrpMsgSecondLimiterObj != nil {
+			allow = allow && atts.Settings.GrpMsgSecondLimiterObj.Allow()
+		}
+		if allow && atts.Settings.GrpMsgMinuteLimiterObj != nil {
+			allow = allow && atts.Settings.GrpMsgMinuteLimiterObj.Allow()
+		}
+		if allow && atts.Settings.GrpMsgHourLimiterObj != nil {
+			allow = allow && atts.Settings.GrpMsgHourLimiterObj.Allow()
+		}
+		return allow
+	}
+	return true
 }
 
 func getMembersExceptMe(ctx context.Context, groupId string) []string {

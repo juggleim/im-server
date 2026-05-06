@@ -36,6 +36,16 @@ func (member *MemberAtts) SetMemberSetting(itemKey, itemValue string) {
 	member.SettingFields[itemKey] = itemValue
 }
 
+func (member *MemberAtts) SetMemberSettings(settings map[string]string) {
+	key := getGrpMemberKey(member.AppKey, member.GroupId, member.MemberId)
+	lock := memberLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	for k, v := range settings {
+		member.SettingFields[k] = v
+	}
+}
+
 func (member *MemberAtts) GetMemberSettings() map[string]string {
 	key := getGrpMemberKey(member.AppKey, member.GroupId, member.MemberId)
 	lock := memberLocks.GetLocks(key)
@@ -94,6 +104,11 @@ func GetGrpMemberAttsFromCache(ctx context.Context, appkey, groupId, memberId st
 	}
 }
 
+func RemoveGrpMemberAttsFromCache(ctx context.Context, appkey, groupId, memberId string) {
+	key := getGrpMemberKey(appkey, groupId, memberId)
+	memberAttCache.Remove(key)
+}
+
 func getGrpMemberAttsFromDb(ctx context.Context, appkey, groupId, memberId string) *MemberAtts {
 	ret := &MemberAtts{
 		AppKey:        appkey,
@@ -128,6 +143,16 @@ func getGrpMemberAttsFromDb(ctx context.Context, appkey, groupId, memberId strin
 			}
 		}
 		commonservices.FillObjField(ret.Settings, valMap)
+		//init group member limiter
+		if ret.Settings.GrpMsgSecondLimiterObj == nil && ret.Settings.GrpMsgSecondLimiter > 0 {
+			ret.Settings.GrpMsgSecondLimiterObj = tools.NewPerSecondLimiter(ret.Settings.GrpMsgSecondLimiter)
+		}
+		if ret.Settings.GrpMsgMinuteLimiterObj == nil && ret.Settings.GrpMsgMinuteLimiter > 0 {
+			ret.Settings.GrpMsgMinuteLimiterObj = tools.NewPerMinuteLimiter(ret.Settings.GrpMsgMinuteLimiter)
+		}
+		if ret.Settings.GrpMsgHourLimiterObj == nil && ret.Settings.GrpMsgHourLimiter > 0 {
+			ret.Settings.GrpMsgHourLimiterObj = tools.NewPerHourLimiter(ret.Settings.GrpMsgHourLimiter)
+		}
 	}
 	return ret
 }

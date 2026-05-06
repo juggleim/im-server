@@ -103,6 +103,7 @@ var (
 	IMErrorCode_GROUP_GROUPMEMBERMUTE        IMErrorCode = 13004
 	IMErrorCode_GROUP_GROUPMEMBERCOUNTEXCEED IMErrorCode = 13005
 	IMErrorCode_GROUP_NOSNAPSHOT             IMErrorCode = 13006
+	IMErrorCode_GROUP_EXCEEDLIMITED          IMErrorCode = 13007
 )
 
 // chatroom errorcode

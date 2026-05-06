@@ -12,7 +12,14 @@ type GroupInfo struct {
 	IsMute        int               `json:"is_mute"`
 	UpdatedTime   int64             `json:"updated_time"`
 	ExtFields     map[string]string `json:"ext_fields"`
-	Settings      map[string]string `json:"settings"`
+	// Settings      map[string]string `json:"settings"`
+}
+
+type GroupSettings struct {
+	HideGrpMsg          int `json:"hide_grp_msg"`
+	GrpMsgSecondLimiter int `json:"grp_msg_second_limiter"`
+	GrpMsgMinuteLimiter int `json:"grp_msg_minute_limiter"`
+	GrpMsgHourLimiter   int `json:"grp_msg_hour_limiter"`
 }
 
 type GroupMembersReq struct {
@@ -31,11 +38,19 @@ type GroupMemberUpdateReq struct {
 }
 
 type GroupMember struct {
-	MemberId       string            `json:"member_id"`
-	IsMute         int               `json:"is_mute"`
-	IsAllow        int               `json:"is_allow"`
-	GrpDisplayName string            `json:"grp_display_name"`
-	ExtFields      map[string]string `json:"ext_fields"`
+	MemberId       string               `json:"member_id"`
+	IsMute         int                  `json:"is_mute"`
+	IsAllow        int                  `json:"is_allow"`
+	GrpDisplayName string               `json:"grp_display_name"`
+	ExtFields      map[string]string    `json:"ext_fields"`
+	Settings       *GroupMemberSettings `json:"settings,omitempty"`
+}
+
+type GroupMemberSettings struct {
+	HideGrpMsg          *int64 `json:"hide_grp_msg"`
+	GrpMsgSecondLimiter *int64 `json:"grp_msg_second_limiter"`
+	GrpMsgMinuteLimiter *int64 `json:"grp_msg_minute_limiter"`
+	GrpMsgHourLimiter   *int64 `json:"grp_msg_hour_limiter"`
 }
 
 type GroupMembersResp struct {
@@ -59,4 +74,10 @@ type GroupMemberAllowReq struct {
 type SetGroupSettingReq struct {
 	GroupId  string                 `json:"group_id"`
 	Settings map[string]interface{} `json:"settings"`
+}
+
+type SetGroupMemberSettingReq struct {
+	GroupId  string               `json:"group_id"`
+	MemberId string               `json:"member_id"`
+	Settings *GroupMemberSettings `json:"settings"`
 }

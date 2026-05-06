@@ -60,6 +60,38 @@ func GetGroupSettings(ctx *gin.Context) {
 	tools.SuccessHttpResp(ctx, groupInfo)
 }
 
+func SetGroupMemberSettings(ctx *gin.Context) {
+	var req models.SetGroupMemberSettingReq
+	if err := ctx.BindJSON(&req); err != nil || req.GroupId == "" || req.MemberId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	kvMap := make(map[string]string)
+	if req.Settings != nil {
+		if req.Settings.HideGrpMsg != nil {
+			kvMap["hide_grp_msg"] = tools.Int642String(*req.Settings.HideGrpMsg)
+		}
+		if req.Settings.GrpMsgSecondLimiter != nil {
+			kvMap["grp_msg_second_limiter"] = tools.Int642String(*req.Settings.GrpMsgSecondLimiter)
+		}
+		if req.Settings.GrpMsgMinuteLimiter != nil {
+			kvMap["grp_msg_minute_limiter"] = tools.Int642String(*req.Settings.GrpMsgMinuteLimiter)
+		}
+		if req.Settings.GrpMsgHourLimiter != nil {
+			kvMap["grp_msg_hour_limiter"] = tools.Int642String(*req.Settings.GrpMsgHourLimiter)
+		}
+	}
+	if len(kvMap) <= 0 {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "set_grp_member_setting", req.GroupId, &pbobjs.GroupMember{
+		MemberId: req.MemberId,
+		Settings: commonservices.Map2KvItems(kvMap),
+	})
+	tools.SuccessHttpResp(ctx, nil)
+}
+
 func GroupAddMembers(ctx *gin.Context) {
 	var addMemberReq models.GroupMembersReq
 	if err := ctx.BindJSON(&addMemberReq); err != nil {
