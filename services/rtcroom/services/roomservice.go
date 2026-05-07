@@ -525,7 +525,7 @@ func JoinRtcRoom(ctx context.Context, req *pbobjs.RtcRoomReq) (errs.IMErrorCode,
 			EventTime: curr,
 		})
 	})
-	if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
+	if container.ConverId != nil && *container.ConverId != "" {
 		syncMsg2Conver(ctx, container)
 	}
 	return errs.IMErrorCode_SUCCESS, room

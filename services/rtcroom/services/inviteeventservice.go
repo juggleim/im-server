@@ -273,7 +273,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			})
 		})
 		//notify target conver
-		if req.AttachedConver != nil && req.AttachedConver.TargetId != "" && req.AttachedConver.ChannelType == pbobjs.ChannelType_Group {
+		if req.AttachedConver != nil && req.AttachedConver.TargetId != "" {
 			syncMsg2Conver(ctx, container)
 		}
 	}
@@ -281,7 +281,7 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 }
 
 func syncMsg2Conver(ctx context.Context, container *RtcRoomContainer) {
-	if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
+	if container.ConverId != nil && *container.ConverId != "" {
 		userId := bases.GetRequesterIdFromCtx(ctx)
 		activedCallMsg := &msgdefines.ActivedCallMsg{
 			RoomType:     int32(container.RoomType),
@@ -323,7 +323,11 @@ func syncMsg2Conver(ctx context.Context, container *RtcRoomContainer) {
 			Flags:      flag,
 			LifeTime:   10 * 60 * 1000,
 		}
-		commonservices.AsyncGroupMsg(ctx, userId, *container.ConverId, upMsg, &bases.ReGenerateSessionOption{})
+		if container.ChannelType == pbobjs.ChannelType_Private {
+			commonservices.AsyncPrivateMsg(ctx, userId, *container.ConverId, upMsg, &bases.ReGenerateSessionOption{})
+		} else if container.ChannelType == pbobjs.ChannelType_Group {
+			commonservices.AsyncGroupMsg(ctx, userId, *container.ConverId, upMsg, &bases.ReGenerateSessionOption{})
+		}
 	}
 }
 
@@ -489,7 +493,7 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 			rtcroomCache.Remove(getRoomKey(appkey, roomId))
 		}
 		//send msg
-		if container.ConverId != nil && *container.ConverId != "" && container.ChannelType == pbobjs.ChannelType_Group {
+		if container.ConverId != nil && *container.ConverId != "" {
 			syncMsg2Conver(ctx, container)
 		}
 	}
