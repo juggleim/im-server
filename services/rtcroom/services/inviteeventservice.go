@@ -486,6 +486,17 @@ func RtcHangup(ctx context.Context) errs.IMErrorCode {
 			})
 		})
 		if container.MemberCount() <= 0 || needDestroy {
+			container.ForeachMembers(func(member *models.RtcRoomMember) {
+				SendRoomEvent(ctx, member.MemberId, &pbobjs.RtcRoomEvent{
+					RoomEventType: pbobjs.RtcRoomEventType_RtcDestroy,
+					Room: &pbobjs.RtcRoom{
+						RoomType: container.RoomType,
+						RoomId:   container.RoomId,
+						Owner:    container.Owner,
+					},
+					EventTime: eventTime,
+				})
+			})
 			container.CleanMembers()
 			//destroy room
 			roomStorage := storages.NewRtcRoomStorage()
