@@ -27,7 +27,7 @@ func HttpDo(method, url string, header map[string]string, body string) (string, 
 }
 
 func HttpDoBytes(method, url string, header map[string]string, body string) ([]byte, int, error) {
-	return HttpDoBytesWithTimeout(method, url, header, body, 5*time.Second)
+	return HttpDoBytesWithTimeout(method, url, header, body, 3*time.Second)
 }
 
 func HttpDoBytesWithTimeout(method, url string, header map[string]string, body string, timeout time.Duration) ([]byte, int, error) {
