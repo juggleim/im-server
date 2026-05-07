@@ -143,16 +143,6 @@ func getGrpMemberAttsFromDb(ctx context.Context, appkey, groupId, memberId strin
 			}
 		}
 		commonservices.FillObjField(ret.Settings, valMap)
-		//init group member limiter
-		if ret.Settings.GrpMsgSecondLimiterObj == nil && ret.Settings.GrpMsgSecondLimiter > 0 {
-			ret.Settings.GrpMsgSecondLimiterObj = tools.NewPerSecondLimiter(ret.Settings.GrpMsgSecondLimiter)
-		}
-		if ret.Settings.GrpMsgMinuteLimiterObj == nil && ret.Settings.GrpMsgMinuteLimiter > 0 {
-			ret.Settings.GrpMsgMinuteLimiterObj = tools.NewPerMinuteLimiter(ret.Settings.GrpMsgMinuteLimiter)
-		}
-		if ret.Settings.GrpMsgHourLimiterObj == nil && ret.Settings.GrpMsgHourLimiter > 0 {
-			ret.Settings.GrpMsgHourLimiterObj = tools.NewPerHourLimiter(ret.Settings.GrpMsgHourLimiter)
-		}
 	}
 	return ret
 }

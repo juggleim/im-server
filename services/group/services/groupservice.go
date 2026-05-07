@@ -54,6 +54,35 @@ func (grp *GroupInfo) SetExt(itemKey, itemValue string) {
 	grp.ExtFields[itemKey] = itemValue
 }
 
+func (grp *GroupInfo) GetMemberLimiter(memberId string) *commonservices.GrpMemberLimiter {
+	key := getGroupKey(grp.AppKey, grp.GroupId)
+	lock := groupLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	if grp.Settings != nil && (grp.Settings.GrpMsgSecondLimiter > 0 || grp.Settings.GrpMsgMinuteLimiter > 0 || grp.Settings.GrpMsgHourLimiter > 0) {
+		if grp.Settings.MemberLimiterMap == nil {
+			grp.Settings.MemberLimiterMap = make(map[string]*commonservices.GrpMemberLimiter)
+		}
+		if limiter, exist := grp.Settings.MemberLimiterMap[memberId]; exist {
+			return limiter
+		} else {
+			limiter := &commonservices.GrpMemberLimiter{}
+			if grp.Settings.GrpMsgSecondLimiter > 0 {
+				limiter.GrpMsgSecondLimiter = tools.NewPerSecondLimiter(grp.Settings.GrpMsgSecondLimiter)
+			}
+			if grp.Settings.GrpMsgMinuteLimiter > 0 {
+				limiter.GrpMsgMinuteLimiter = tools.NewPerMinuteLimiter(grp.Settings.GrpMsgMinuteLimiter)
+			}
+			if grp.Settings.GrpMsgHourLimiter > 0 {
+				limiter.GrpMsgHourLimiter = tools.NewPerHourLimiter(grp.Settings.GrpMsgHourLimiter)
+			}
+			grp.Settings.MemberLimiterMap[memberId] = limiter
+			return limiter
+		}
+	}
+	return nil
+}
+
 var notExistGroup GroupInfo = GroupInfo{
 	ExtFields:     make(map[string]string),
 	Settings:      &commonservices.GroupSettings{},
@@ -169,16 +198,6 @@ func getGroupInfoFromDb(appkey, groupId string) *GroupInfo {
 			}
 			groupInfo.SettingFields = settingValMap
 			commonservices.FillObjField(groupInfo.Settings, settingValMap)
-			// init group limiter
-			if groupInfo.Settings.GrpMsgSecondLimiterObj == nil && groupInfo.Settings.GrpMsgSecondLimiter > 0 {
-				groupInfo.Settings.GrpMsgSecondLimiterObj = tools.NewPerSecondLimiter(groupInfo.Settings.GrpMsgSecondLimiter)
-			}
-			if groupInfo.Settings.GrpMsgMinuteLimiterObj == nil && groupInfo.Settings.GrpMsgMinuteLimiter > 0 {
-				groupInfo.Settings.GrpMsgMinuteLimiterObj = tools.NewPerMinuteLimiter(groupInfo.Settings.GrpMsgMinuteLimiter)
-			}
-			if groupInfo.Settings.GrpMsgHourLimiterObj == nil && groupInfo.Settings.GrpMsgHourLimiter > 0 {
-				groupInfo.Settings.GrpMsgHourLimiterObj = tools.NewPerHourLimiter(groupInfo.Settings.GrpMsgHourLimiter)
-			}
 		}
 		return groupInfo
 	}

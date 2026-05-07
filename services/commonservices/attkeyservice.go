@@ -52,28 +52,22 @@ type GroupSettings struct {
 	HideGrpMsg          bool `default:"false"`
 	HasField_HideGrpMsg bool
 
-	GrpMsgSecondLimiter    int `default:"0"`
-	GrpMsgSecondLimiterObj *rate.Limiter
+	GrpMsgSecondLimiter int `default:"0"`
+	GrpMsgMinuteLimiter int `default:"0"`
+	GrpMsgHourLimiter   int `default:"0"`
 
-	GrpMsgMinuteLimiter    int `default:"0"`
-	GrpMsgMinuteLimiterObj *rate.Limiter
+	MemberLimiterMap map[string]*GrpMemberLimiter
+}
 
-	GrpMsgHourLimiter    int `default:"0"`
-	GrpMsgHourLimiterObj *rate.Limiter
+type GrpMemberLimiter struct {
+	GrpMsgSecondLimiter *rate.Limiter
+	GrpMsgMinuteLimiter *rate.Limiter
+	GrpMsgHourLimiter   *rate.Limiter
 }
 
 type GrpMemberSettings struct {
 	HideGrpMsg          bool `default:"false"`
 	HasField_HideGrpMsg bool
-
-	GrpMsgSecondLimiter    int `default:"0"`
-	GrpMsgSecondLimiterObj *rate.Limiter
-
-	GrpMsgMinuteLimiter    int `default:"0"`
-	GrpMsgMinuteLimiterObj *rate.Limiter
-
-	GrpMsgHourLimiter    int `default:"0"`
-	GrpMsgHourLimiterObj *rate.Limiter
 }
 
 type UserSettings struct {

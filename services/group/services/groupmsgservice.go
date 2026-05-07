@@ -43,14 +43,8 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 				msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
 				return errs.IMErrorCode_GROUP_GROUPMUTE, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
 			}
-			// check group msg limiter
-			if !checkGroupMsgLimitAllow(ctx, groupId) {
-				sendTime := time.Now().UnixMilli()
-				msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
-				return errs.IMErrorCode_GROUP_EXCEEDLIMITED, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
-			}
 			// check group member msg limiter
-			if !checkGroupMemberMsgLimitAllow(ctx, groupId, senderId) {
+			if !checkGroupMsgLimitAllow(ctx, groupId, senderId) {
 				sendTime := time.Now().UnixMilli()
 				msgId := tools.GenerateMsgId(sendTime, int32(pbobjs.ChannelType_Group), groupId)
 				return errs.IMErrorCode_GROUP_EXCEEDLIMITED, msgId, sendTime, 0, upMsg.ClientUid, 0, nil
@@ -322,40 +316,24 @@ func checkGroupMemberIsAllow(ctx context.Context, groupId, memberId string) bool
 	return false
 }
 
-func checkGroupMsgLimitAllow(ctx context.Context, groupId string) bool {
+func checkGroupMsgLimitAllow(ctx context.Context, groupId, memberId string) bool {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	groupInfo, exist := GetGroupInfoFromCache(ctx, appkey, groupId)
-	if exist && groupInfo.Settings != nil {
-		allow := true
-		if allow && groupInfo.Settings.GrpMsgSecondLimiterObj != nil {
-			allow = allow && groupInfo.Settings.GrpMsgSecondLimiterObj.Allow()
+	if exist && groupInfo != nil {
+		limiter := groupInfo.GetMemberLimiter(memberId)
+		if limiter != nil {
+			allow := true
+			if allow && limiter.GrpMsgSecondLimiter != nil {
+				allow = allow && limiter.GrpMsgSecondLimiter.Allow()
+			}
+			if allow && limiter.GrpMsgMinuteLimiter != nil {
+				allow = allow && limiter.GrpMsgMinuteLimiter.Allow()
+			}
+			if allow && limiter.GrpMsgHourLimiter != nil {
+				allow = allow && limiter.GrpMsgHourLimiter.Allow()
+			}
+			return allow
 		}
-		if allow && groupInfo.Settings.GrpMsgMinuteLimiterObj != nil {
-			allow = allow && groupInfo.Settings.GrpMsgMinuteLimiterObj.Allow()
-		}
-		if allow && groupInfo.Settings.GrpMsgHourLimiterObj != nil {
-			allow = allow && groupInfo.Settings.GrpMsgHourLimiterObj.Allow()
-		}
-		return allow
-	}
-	return true
-}
-
-func checkGroupMemberMsgLimitAllow(ctx context.Context, groupId, senderId string) bool {
-	appkey := bases.GetAppKeyFromCtx(ctx)
-	atts := GetGrpMemberAttsFromCache(ctx, appkey, groupId, senderId)
-	if atts != nil && atts.Settings != nil {
-		allow := true
-		if allow && atts.Settings.GrpMsgSecondLimiterObj != nil {
-			allow = allow && atts.Settings.GrpMsgSecondLimiterObj.Allow()
-		}
-		if allow && atts.Settings.GrpMsgMinuteLimiterObj != nil {
-			allow = allow && atts.Settings.GrpMsgMinuteLimiterObj.Allow()
-		}
-		if allow && atts.Settings.GrpMsgHourLimiterObj != nil {
-			allow = allow && atts.Settings.GrpMsgHourLimiterObj.Allow()
-		}
-		return allow
 	}
 	return true
 }

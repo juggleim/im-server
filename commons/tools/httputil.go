@@ -12,8 +12,8 @@ import (
 var defaultHTTPTransport = &http.Transport{
 	TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 	MaxIdleConns:        512,
-	MaxIdleConnsPerHost: 128,
-	MaxConnsPerHost:     256,
+	MaxIdleConnsPerHost: 256,
+	MaxConnsPerHost:     1024,
 	IdleConnTimeout:     90 * time.Second,
 }
 

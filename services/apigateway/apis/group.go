@@ -1,7 +1,6 @@
 package apis
 
 import (
-	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
@@ -9,6 +8,8 @@ import (
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,15 +18,22 @@ import (
 
 func SetGroupSettings(ctx *gin.Context) {
 	var req models.SetGroupSettingReq
-	if err := ctx.BindJSON(&req); err != nil || req.GroupId == "" {
+	if err := ctx.BindJSON(&req); err != nil || req.GroupId == "" || req.Settings == nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
 	kvMap := make(map[string]string)
-	for k, v := range req.Settings {
-		if commonservices.CheckGroupSettingKey(k) {
-			kvMap[k] = fmt.Sprintf("%v", v)
-		}
+	if req.Settings.HideGrpMsg != nil {
+		kvMap["hide_grp_msg"] = tools.Int642String(*req.Settings.HideGrpMsg)
+	}
+	if req.Settings.GrpMsgSecondLimiter != nil {
+		kvMap["grp_msg_second_limiter"] = tools.Int642String(*req.Settings.GrpMsgSecondLimiter)
+	}
+	if req.Settings.GrpMsgMinuteLimiter != nil {
+		kvMap["grp_msg_minute_limiter"] = tools.Int642String(*req.Settings.GrpMsgMinuteLimiter)
+	}
+	if req.Settings.GrpMsgHourLimiter != nil {
+		kvMap["grp_msg_hour_limiter"] = tools.Int642String(*req.Settings.GrpMsgHourLimiter)
 	}
 	if len(kvMap) <= 0 {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
@@ -40,12 +48,9 @@ func SetGroupSettings(ctx *gin.Context) {
 
 func GetGroupSettings(ctx *gin.Context) {
 	groupId := ctx.Query("group_id")
-
-	groupReq := &pbobjs.GroupInfoReq{
-		GroupId:    groupId,
-		CareFields: []string{},
-	}
-	code, groupInfo, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "get_grp_setting", groupId, groupReq, func() proto.Message {
+	code, groupInfo, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_group_info", groupId, &pbobjs.GroupInfoReq{
+		GroupId: groupId,
+	}, func() proto.Message {
 		return &pbobjs.GroupInfo{}
 	})
 	if err != nil {
@@ -56,8 +61,12 @@ func GetGroupSettings(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
-
-	tools.SuccessHttpResp(ctx, groupInfo)
+	info := groupInfo.(*pbobjs.GroupInfo)
+	retGrpInfo := &models.GroupInfo{
+		GroupId:  info.GroupId,
+		Settings: groupSettingsFromKvItems(info.Settings),
+	}
+	tools.SuccessHttpResp(ctx, retGrpInfo)
 }
 
 func SetGroupMemberSettings(ctx *gin.Context) {
@@ -70,15 +79,6 @@ func SetGroupMemberSettings(ctx *gin.Context) {
 	if req.Settings != nil {
 		if req.Settings.HideGrpMsg != nil {
 			kvMap["hide_grp_msg"] = tools.Int642String(*req.Settings.HideGrpMsg)
-		}
-		if req.Settings.GrpMsgSecondLimiter != nil {
-			kvMap["grp_msg_second_limiter"] = tools.Int642String(*req.Settings.GrpMsgSecondLimiter)
-		}
-		if req.Settings.GrpMsgMinuteLimiter != nil {
-			kvMap["grp_msg_minute_limiter"] = tools.Int642String(*req.Settings.GrpMsgMinuteLimiter)
-		}
-		if req.Settings.GrpMsgHourLimiter != nil {
-			kvMap["grp_msg_hour_limiter"] = tools.Int642String(*req.Settings.GrpMsgHourLimiter)
 		}
 	}
 	if len(kvMap) <= 0 {
@@ -506,4 +506,53 @@ func QryGroupGlobalMuteMembers(ctx *gin.Context) {
 		}
 	}
 	tools.SuccessHttpResp(ctx, ret)
+}
+
+func groupSettingsFromKvItems(items []*pbobjs.KvItem) *models.GroupSettings {
+	if len(items) == 0 {
+		return nil
+	}
+	m := make(map[string]string, len(items))
+	for _, it := range items {
+		if it == nil {
+			continue
+		}
+		m[it.Key] = it.Value
+	}
+	if len(m) == 0 {
+		return nil
+	}
+	s := &models.GroupSettings{}
+	objVal := reflect.ValueOf(s).Elem()
+	var has bool
+	for i := 0; i < objVal.NumField(); i++ {
+		fieldName := objVal.Type().Field(i).Name
+		if strings.HasPrefix(fieldName, "HasField_") {
+			continue
+		}
+		snake := tools.CamelToSnake(fieldName)
+		mapVal, ok := m[snake]
+		if !ok {
+			continue
+		}
+		afterTrim := strings.TrimSpace(mapVal)
+		if afterTrim == "" {
+			continue
+		}
+		n, err := tools.String2Int64(afterTrim)
+		if err != nil {
+			continue
+		}
+		field := objVal.Field(i)
+		if field.Kind() == reflect.Ptr && field.Type().Elem().Kind() == reflect.Int64 {
+			ptr := reflect.New(field.Type().Elem())
+			ptr.Elem().SetInt(n)
+			field.Set(ptr)
+			has = true
+		}
+	}
+	if !has {
+		return nil
+	}
+	return s
 }
