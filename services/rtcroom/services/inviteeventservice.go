@@ -146,13 +146,14 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			InviteType: pbobjs.InviteType_RtcInvite,
 			User:       commonservices.GetTargetDisplayUserInfo(ctx, userId),
 			Room: &pbobjs.RtcRoom{
-				RoomType:     container.RoomType,
-				RoomId:       container.RoomId,
-				Owner:        container.Owner,
-				RtcChannel:   container.RtcChannel,
-				RtcMediaType: container.RtcMediaType,
-				Ext:          container.Ext,
-				Members:      members,
+				RoomType:       container.RoomType,
+				RoomId:         container.RoomId,
+				Owner:          container.Owner,
+				RtcChannel:     container.RtcChannel,
+				RtcMediaType:   container.RtcMediaType,
+				Ext:            container.Ext,
+				Members:        members,
+				AttachedConver: req.AttachedConver,
 			},
 			TargetUsers: []*pbobjs.UserInfo{
 				commonservices.GetTargetDisplayUserInfo(ctx, targetId),
@@ -248,13 +249,14 @@ func RtcInvite(ctx context.Context, req *pbobjs.RtcInviteReq) (errs.IMErrorCode,
 			bases.UnicastRouteWithNoSender(msg)
 		}
 		rtcRoom := &pbobjs.RtcRoom{
-			RoomType:     container.RoomType,
-			RoomId:       container.RoomId,
-			Owner:        container.Owner,
-			RtcChannel:   container.RtcChannel,
-			RtcMediaType: container.RtcMediaType,
-			Ext:          container.Ext,
-			Members:      []*pbobjs.RtcMember{},
+			RoomType:       container.RoomType,
+			RoomId:         container.RoomId,
+			Owner:          container.Owner,
+			RtcChannel:     container.RtcChannel,
+			RtcMediaType:   container.RtcMediaType,
+			Ext:            container.Ext,
+			Members:        []*pbobjs.RtcMember{},
+			AttachedConver: req.AttachedConver,
 		}
 		container.ForeachMembers(func(member *models.RtcRoomMember) {
 			rtcRoom.Members = append(rtcRoom.Members, &pbobjs.RtcMember{
