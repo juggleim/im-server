@@ -124,9 +124,7 @@ func (conf *ConverConfItem) GetActivedRtcRoom(ctx context.Context) *pbobjs.Activ
 
 func RtcConverBind(ctx context.Context, req *pbobjs.RtcConverBindReq) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
-	userId := bases.GetRequesterIdFromCtx(ctx)
-	converId := commonservices.GetConversationId(userId, req.ConverId, req.ChannelType)
-	converConf := GetConverConf(appkey, converId, req.ChannelType, req.SubChannel)
+	converConf := GetConverConf(appkey, req.ConverId, req.ChannelType, req.SubChannel)
 	if converConf != nil {
 		if req.Action == pbobjs.RtcConverBindAction_RtcBind {
 			succ := converConf.SetRtcRoomId(req.RtcRoomId)
