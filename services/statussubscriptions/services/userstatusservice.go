@@ -77,21 +77,10 @@ func QryUserStatusList(ctx context.Context, userIds []string) *pbobjs.UserStatus
 }
 
 // QryUserStatus 仅查询给定 userIds 的在线状态（不读写订阅关系），内部聚合 connectmanager 的 qry_online_status。
-func QryUserStatus(ctx context.Context, req *pbobjs.UserOnlineStatusReq) (errs.IMErrorCode, *pbobjs.UserOnlineStatusResp) {
+func QryUserStatus(ctx context.Context, req *pbobjs.UserOnlineStatusReq) (errs.IMErrorCode, *pbobjs.UserStatusList) {
 	if req == nil || len(req.UserIds) == 0 {
-		return errs.IMErrorCode_SUCCESS, &pbobjs.UserOnlineStatusResp{}
+		return errs.IMErrorCode_SUCCESS, &pbobjs.UserStatusList{}
 	}
 	list := QryUserStatusList(ctx, req.UserIds)
-	resp := &pbobjs.UserOnlineStatusResp{Items: make([]*pbobjs.UserOnlineItem, 0, len(list.Items))}
-	for _, it := range list.Items {
-		if it == nil {
-			continue
-		}
-		if it.OnlineStatus != nil {
-			resp.Items = append(resp.Items, it.OnlineStatus)
-		} else {
-			resp.Items = append(resp.Items, &pbobjs.UserOnlineItem{UserId: it.UserId, IsOnline: false})
-		}
-	}
-	return errs.IMErrorCode_SUCCESS, resp
+	return errs.IMErrorCode_SUCCESS, list
 }

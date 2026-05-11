@@ -186,20 +186,20 @@ func PublishUserStatus(ctx context.Context, upMsg *pbobjs.UpMsg) errs.IMErrorCod
 		Flags:       upMsg.Flags,
 	}
 	userSubscribers := GetUserSubscribers(appkey, userId)
-	if len(userSubscribers.Subscribers) == 0 {
-		return errs.IMErrorCode_SUCCESS
-	}
-	memberIds := make([]string, 0, len(userSubscribers.Subscribers))
-	for sid := range userSubscribers.Subscribers {
-		if sid != "" {
-			memberIds = append(memberIds, sid)
+	var memberIds []string
+	if len(userSubscribers.Subscribers) > 0 {
+		memberIds := make([]string, 0, len(userSubscribers.Subscribers))
+		for sid := range userSubscribers.Subscribers {
+			if sid != "" {
+				memberIds = append(memberIds, sid)
+			}
+		}
+		if len(memberIds) > 0 {
+			Dispatch2Message(ctx, downMsg, memberIds)
 		}
 	}
-	if len(memberIds) > 0 {
-		Dispatch2Message(ctx, downMsg, memberIds)
-	}
 	if appinfo, exist := commonservices.GetAppInfo(appkey); exist && appinfo != nil && appinfo.OpenFriendStatusSub {
-		bases.AsyncRpcCall(ctx, "", userId, &pbobjs.UserStatusFriDispatch{
+		bases.AsyncRpcCall(ctx, "dispatch_user_status", userId, &pbobjs.UserStatusFriDispatch{
 			Msg:             downMsg,
 			ExcludedUserIds: memberIds,
 		})

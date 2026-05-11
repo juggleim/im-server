@@ -13,20 +13,18 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-const MethodQryUserStatus = "qry_user_status"
-
 type QryUserStatusActor struct {
 	bases.BaseActor
 }
 
 func (actor *QryUserStatusActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.UserOnlineStatusReq); ok {
-		logs.WithContext(ctx).Infof("method:%s\tuser_ids:%v", MethodQryUserStatus, req.UserIds)
+		logs.WithContext(ctx).Infof("user_ids:%v", req.UserIds)
 		code, resp := services.QryUserStatus(ctx, req)
 		queryAck := bases.CreateQueryAckWraper(ctx, code, resp)
 		actor.Sender.Tell(queryAck, actorsystem.NoSender)
 	} else {
-		logs.WithContext(ctx).Errorf("method:%s\tinput is illegal", MethodQryUserStatus)
+		logs.WithContext(ctx).Errorf("input is illegal")
 		ack := bases.CreateQueryAckWraper(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL, nil)
 		actor.Sender.Tell(ack, actorsystem.NoSender)
 	}
