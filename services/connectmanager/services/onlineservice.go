@@ -163,7 +163,7 @@ func PubUserOnlineStatus(ctx context.Context, afterOnline bool) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
 	appinfo, exist := commonservices.GetAppInfo(appkey)
-	if !exist || appinfo == nil || !appinfo.OpenStatusSubscribe {
+	if !exist || appinfo == nil || !appinfo.OpenStatusSub {
 		return
 	}
 	n := GetConnectCountByUser(appkey, userId)

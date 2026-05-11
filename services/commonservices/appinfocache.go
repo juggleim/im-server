@@ -51,7 +51,7 @@ type AppInfo struct {
 	GlobalPrivateMute     bool   `default:"false"`
 	GlobalGroupMute       bool   `default:"false"`
 	MsgQueueMaxCount      int    `default:"100"`
-	OpenStatusSubscribe   bool   `default:"false"`
+	OpenStatusSub         bool   `default:"false"`
 	OpenFriendStatusSub   bool   `default:"false"`
 
 	MaxUserConverTags int `default:"100"`
