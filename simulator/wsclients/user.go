@@ -24,7 +24,7 @@ func (client *WsImClient) QryUserInfo(req *pbobjs.UserIdReq) (utils.ClientErrorC
 // SubUsers 调用 Query「sub_users」，成功时解析 Ack 中的 UserStatusList（含在线状态）。
 func (client *WsImClient) SubUsers(req *pbobjs.SubUsersReq) (utils.ClientErrorCode, *pbobjs.UserStatusList) {
 	data, _ := tools.PbMarshal(req)
-	code, qryAck := client.Query("sub_users", client.UserId, data)
+	code, qryAck := client.Query("sub_user_status", client.UserId, data)
 	if code != utils.ClientErrorCode_Success || qryAck == nil {
 		return code, nil
 	}

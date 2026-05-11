@@ -12,8 +12,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-const MethodSubUsers = "sub_users"
-
 type SubUsersActor struct {
 	bases.BaseActor
 }

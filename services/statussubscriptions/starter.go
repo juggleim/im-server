@@ -13,13 +13,13 @@ var serviceName string = "statussubscriptions"
 type StatusSubscriptionsManager struct{}
 
 func (manager *StatusSubscriptionsManager) RegisterActors(register gmicro.IActorRegister) {
-	register.RegisterActor("sub_users", func() actorsystem.IUntypedActor {
+	register.RegisterActor("sub_user_status", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SubUsersActor{}, serviceName)
 	})
 	register.RegisterActor("qry_user_status", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryUserStatusActor{}, serviceName)
 	})
-	register.RegisterActor("unsub_users", func() actorsystem.IUntypedActor {
+	register.RegisterActor("unsub_user_status", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.UnSubUsersActor{}, serviceName)
 	})
 	register.RegisterActor("pub_user_status", func() actorsystem.IUntypedActor {
