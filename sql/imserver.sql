@@ -688,16 +688,6 @@ CREATE TABLE IF NOT EXISTS `sensitivewords` (
   KEY `idx_appkey` (`app_key`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT = '敏感词';
 
-CREATE TABLE IF NOT EXISTS `subrelations` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
-  `subscriber` varchar(32) DEFAULT NULL COMMENT '订阅者',
-  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
-  `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_sub` (`app_key`,`user_id`,`subscriber`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE IF NOT EXISTS `usercleantimes` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
@@ -896,5 +886,17 @@ CREATE TABLE IF NOT EXISTS `binddevices` (
   UNIQUE KEY `uniq_deviceid` (`app_key`,`user_id`,`device_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260427');
+CREATE TABLE IF NOT EXISTS `usersubrels` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT '',
+  `subscriber_id` varchar(32) DEFAULT '',
+  `subscriber_device_id` varchar(50) DEFAULT '',
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `app_key` varchar(20) DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_subscriber` (`app_key`,`user_id`,`subscriber_id`,`subscriber_device_id`),
+  KEY `idx_user` (`app_key`,`subscriber_id`,`subscriber_device_id`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260508');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

@@ -31,6 +31,9 @@ func AddFriends(ctx context.Context, req *pbobjs.FriendMembersReq) errs.IMErrorC
 	if err != nil {
 		logs.WithContext(ctx).Error(err.Error())
 	}
+
+	container := GetFriendContainer(ctx, appkey, userId)
+	container.AddFriends(friendIds)
 	//sync to cache
 	syncFriendRels(ctx, userId, friendIds)
 	return errs.IMErrorCode_SUCCESS
@@ -44,6 +47,8 @@ func DelFriends(ctx context.Context, req *pbobjs.FriendIdsReq) errs.IMErrorCode 
 	if err != nil {
 		logs.WithContext(ctx).Error(err.Error())
 	}
+	container := GetFriendContainer(ctx, appkey, userId)
+	container.DelFriends(req.FriendIds)
 	//sync to cache
 	syncFriendRels(ctx, userId, req.FriendIds)
 	return errs.IMErrorCode_SUCCESS
@@ -99,18 +104,16 @@ func QryFriendsWithPage(ctx context.Context, req *pbobjs.QryFriendsWithPageReq) 
 }
 
 func CheckFriends(ctx context.Context, req *pbobjs.CheckFriendsReq) (errs.IMErrorCode, *pbobjs.CheckFriendsResp) {
-	// appkey := bases.GetAppKeyFromCtx(ctx)
-	// userId := bases.GetTargetIdFromCtx(ctx)
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetTargetIdFromCtx(ctx)
 	ret := &pbobjs.CheckFriendsResp{
 		CheckResults: make(map[string]bool),
 	}
-	// if len(req.FriendIds) <= 0 {
-	// 	return errs.IMErrorCode_SUCCESS, ret
-	// }
-	// for _, friendId := range req.FriendIds {
-	// 	status := GetFriendStatus(appkey, userId, friendId)
-	// 	ret.CheckResults[friendId] = status.IsFriend
-	// }
+	if len(req.FriendIds) <= 0 {
+		return errs.IMErrorCode_SUCCESS, ret
+	}
+	container := GetFriendContainer(ctx, appkey, userId)
+	ret.CheckResults = container.BatchCheckFriends(req.FriendIds)
 	return errs.IMErrorCode_SUCCESS, ret
 }
 

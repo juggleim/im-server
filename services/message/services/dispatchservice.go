@@ -58,6 +58,21 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 				})
 			}
 		}
+	} else if downMsg.ChannelType == pbobjs.ChannelType_SubStatus {
+		memberIds := bases.GetTargetIdsFromCtx(ctx)
+		ctx = bases.SetTargetIds2Ctx(ctx, []string{})
+		for _, receiverId := range memberIds {
+			receId := receiverId
+			if UserStatusCacheContains(appkey, receId) {
+				userStatus := GetUserStatus(appkey, receId)
+				if userStatus.OnlineStatus {
+					newDownMsg := commonservices.CopyDownMsg(downMsg, receiverId)
+					MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
+						dispatchStatusSubMsgs(ctx, receId, newDownMsg)
+					})
+				}
+			}
+		}
 	}
 }
 
@@ -104,7 +119,7 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 				commonservices.SaveConversation(ctx, receiverId, msg)
 				SaveMsg2Inbox(appkey, receiverId, msg)
 				//send to client
-				MsgOrNtf(ctx, receiverId, msg)
+				MsgOrNtfWithPush(ctx, receiverId, msg)
 			}
 		}
 	}
@@ -168,4 +183,11 @@ func UserPush(ctx context.Context, msg *pbobjs.DownMsg) {
 			}
 		}
 	}
+}
+
+func dispatchStatusSubMsgs(ctx context.Context, receiverId string, msg *pbobjs.DownMsg) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	sendTime := RegenateSendTime(appkey, receiverId, msg.MsgTime)
+	msg.MsgTime = sendTime
+	MsgOrNtf(ctx, receiverId, msg, true)
 }

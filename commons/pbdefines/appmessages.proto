@@ -219,6 +219,7 @@ enum ChannelType {
   System = 4;
   GroupCast = 5;
   BroadCast = 6;
+  SubStatus = 8;
 }
 message Notify{
   NotifyType type = 1;
@@ -1125,4 +1126,31 @@ message BindDevice{
 
 message BindDevices{
   repeated BindDevice devices = 1;
+}
+
+message SubUsersReq{
+  repeated string userIds = 1;
+}
+
+enum StatusSubBusType{
+  UserStatus = 0;
+}
+
+message SubRelChangeReq{
+  StatusSubBusType busType = 1;
+  bool isAdd = 2;
+}
+
+message UserStatusList{
+  repeated UserStatusItem items = 1;
+}
+
+message UserStatusItem{
+  string userId = 1;
+  UserOnlineItem onlineStatus = 2;
+}
+
+message UserStatusFriDispatch{
+  DownMsg msg = 1;
+  repeated string excludedUserIds = 2;
 }

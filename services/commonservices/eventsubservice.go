@@ -52,15 +52,19 @@ func SubGroupMsg(ctx context.Context, targetId string, msg *pbobjs.DownMsg) {
 func SubOnlineEvent(ctx context.Context, targetId string, msg *pbobjs.OnlineOfflineMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, ok := GetAppInfo(appkey)
-	if ok && appInfo.EventSubSwitchObj != nil && appInfo.EventSubSwitchObj.OnlineSubSwitch > 0 {
-		bases.AsyncRpcCall(ctx, "online_offline_sub", targetId, msg)
+	if ok && appInfo != nil {
+		if appInfo.EventSubSwitchObj != nil && appInfo.EventSubSwitchObj.OnlineSubSwitch > 0 {
+			bases.AsyncRpcCall(ctx, "online_offline_sub", targetId, msg)
+		}
 	}
 }
 
 func SubOfflineEvent(ctx context.Context, targetId string, msg *pbobjs.OnlineOfflineMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	appInfo, ok := GetAppInfo(appkey)
-	if ok && appInfo.EventSubSwitchObj != nil && appInfo.EventSubSwitchObj.OfflineSubSwitch > 0 {
-		bases.AsyncRpcCall(ctx, "online_offline_sub", targetId, msg)
+	if ok && appInfo != nil {
+		if appInfo.EventSubSwitchObj != nil && appInfo.EventSubSwitchObj.OfflineSubSwitch > 0 {
+			bases.AsyncRpcCall(ctx, "online_offline_sub", targetId, msg)
+		}
 	}
 }

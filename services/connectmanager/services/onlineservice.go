@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
@@ -121,6 +122,7 @@ func Online(ctx imcontext.WsHandleContext, ext, language string, isBackend bool)
 			Switch: pushSwitch,
 		})
 	}
+	PubUserOnlineStatus(imcontext.GetRpcContext(ctx), true)
 }
 
 func Offline(ctx imcontext.WsHandleContext, code errs.IMErrorCode) {
@@ -151,5 +153,33 @@ func Offline(ctx imcontext.WsHandleContext, code errs.IMErrorCode) {
 	//quit rtc room
 	if code == errs.IMErrorCode_CONNECT_KICKED_OFF {
 		bases.AsyncRpcCall(rpcCtx, "rtc_sync_user_quit", userId, &pbobjs.Nil{})
+	}
+	PubUserOnlineStatus(imcontext.GetRpcContext(ctx), false)
+}
+
+// PubUserOnlineStatus 在 OpenStatusSubscribe 下：上线且当前仅 1 条会话时发 is_online:true；下线且缓存中已无会话时发 is_online:false；其余不发送。
+// 要求 Offline 调用前本会话已从连接缓存移除。
+func PubUserOnlineStatus(ctx context.Context, afterOnline bool) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	userId := bases.GetRequesterIdFromCtx(ctx)
+	appinfo, exist := commonservices.GetAppInfo(appkey)
+	if !exist || appinfo == nil || !appinfo.OpenStatusSubscribe {
+		return
+	}
+	n := GetConnectCountByUser(appkey, userId)
+	if afterOnline {
+		if n == 1 {
+			bases.AsyncRpcCall(ctx, "pub_user_status", userId, &pbobjs.UpMsg{
+				MsgType:    "jg:onlinechg",
+				MsgContent: []byte(`{"is_online":true}`),
+			})
+		}
+		return
+	}
+	if n == 0 {
+		bases.AsyncRpcCall(ctx, "pub_user_status", userId, &pbobjs.UpMsg{
+			MsgType:    "jg:onlinechg",
+			MsgContent: []byte(`{"is_online":false}`),
+		})
 	}
 }

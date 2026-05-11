@@ -656,16 +656,6 @@ CREATE TABLE IF NOT EXISTS `sensitivewords` (
   KEY `idx_appkey` (`app_key`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT = '敏感词';
 
-CREATE TABLE IF NOT EXISTS `subrelations` (
-  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
-  `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',
-  `subscriber` varchar(32) DEFAULT NULL COMMENT '订阅者',
-  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
-  `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_sub` (`app_key`,`user_id`,`subscriber`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE IF NOT EXISTS `usercleantimes` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) DEFAULT NULL COMMENT '用户id',

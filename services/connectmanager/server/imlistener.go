@@ -36,9 +36,8 @@ func (listener *ImListenerImpl) ExceptionCaught(ctx imcontext.WsHandleContext, c
 		WithField("action", imcontext.Action_Disconnect).
 		WithField("code", code).
 		WithField("err", e).Info("")
-	services.Offline(ctx, code)
-
 	services.RemoveFromContextCache(ctx)
+	services.Offline(ctx, code)
 }
 
 func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imcontext.WsHandleContext) {
@@ -140,20 +139,20 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 func (listener *ImListenerImpl) Diconnected(msg *codec.DisconnectMsgBody, ctx imcontext.WsHandleContext) {
 	if msg == nil {
 		logs.NewLogEntity().Error("disconnect body is nil")
-		return
+		msg = &codec.DisconnectMsgBody{}
 	}
 	logs.NewLogEntity().WithField("service_name", imcontext.ServiceName).
 		WithField("session", imcontext.GetConnSession(ctx)).
 		WithField("action", imcontext.Action_Disconnect).
 		WithField("code", msg.Code).Info("")
 
+	services.RemoveFromContextCache(ctx)
 	services.Offline(ctx, errs.IMErrorCode(msg.Code))
 	if msg.Code == 1 || msg.Code == int32(errs.IMErrorCode_CONNECT_LOGOUT) {
 		services.RemovePushToken(ctx)
 	}
 
 	ctx.Close(fmt.Errorf("dissconnect"))
-	services.RemoveFromContextCache(ctx)
 }
 
 func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx imcontext.WsHandleContext) {

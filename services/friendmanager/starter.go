@@ -28,6 +28,10 @@ func (manager *FriendManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("check_friends", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.CheckFriendActor{}, serviceName)
 	})
+
+	register.RegisterActor("dispatch_user_status", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.UserStatusDispatchActor{}, serviceName)
+	})
 }
 
 func (manager *FriendManager) Startup(args map[string]interface{}) {}

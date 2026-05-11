@@ -9,8 +9,8 @@ import (
 	"im-server/services/logmanager"
 	"im-server/services/rtcroom"
 	sensitivemanager "im-server/services/sensitivemanager"
+	"im-server/services/statussubscriptions"
 	"im-server/services/subscriptions"
-	"im-server/services/userstatussub"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -126,7 +126,7 @@ func main() {
 	imstarters.Loaded(&broadcast.BroadcastManager{})
 	imstarters.Loaded(&logmanager.LogManager{})
 	imstarters.Loaded(&sensitivemanager.SensitiveManager{})
-	imstarters.Loaded(&userstatussub.UserStatusSubManager{})
+	imstarters.Loaded(&statussubscriptions.StatusSubscriptionsManager{})
 	imstarters.Loaded(&botmsg.BotMsgManager{})
 	imstarters.Loaded(&rtcroom.RtcRoomManager{})
 

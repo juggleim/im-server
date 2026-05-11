@@ -100,6 +100,7 @@ func PutInContextCache(ctx imcontext.WsHandleContext) {
 						})
 						kickCtx.Write(disconnectMsg)
 						logs.Infof("session:%s\taction:%s\tcode:%d", imcontext.GetConnSession(kickCtx), imcontext.Action_Disconnect, disconnectMsg.MsgBody.Code)
+						RemoveFromContextCache(kickCtx)
 						Offline(kickCtx, code)
 						time.Sleep(time.Millisecond * 50)
 						kickCtx.Close(errors.New("kick off by other login"))

@@ -191,52 +191,56 @@ func dispatchMsg(ctx context.Context, receiverId string, msg *pbobjs.DownMsg) {
 	})
 }
 
-func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
+func MsgOrNtfWithPush(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userStatus := GetUserStatus(appkey, targetId)
 	if userStatus.IsOnline() {
-		isNtf := GetUserStatus(appkey, targetId).CheckNtfWithSwitch()
 		hasPush := false
 		if userStatus.OpenPushSwitch() {
 			hasPush = true
 			SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg)
 		}
-		if isNtf { //发送通知
-			logs.WithContext(ctx).Infof("ntf target_id:%s", targetId)
-			rpcNtf := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "ntf", &pbobjs.Notify{
-				Type:     pbobjs.NotifyType_Msg,
-				SyncTime: downMsg.MsgTime,
-			})
-			rpcNtf.Qos = 0
-			bases.UnicastRouteWithNoSender(rpcNtf)
-			bases.UnicastRouteWithCallback(rpcNtf, &SendMsgAckActor{
-				appkey:      appkey,
-				senderId:    bases.GetRequesterIdFromCtx(ctx),
-				targetId:    targetId,
-				channelType: downMsg.ChannelType,
-				Msg:         downMsg,
-				ctx:         ctx,
-				IsNotify:    isNtf,
-				HasPush:     hasPush,
-			}, 5*time.Second)
-		} else {
-			logs.WithContext(ctx).Infof("msg target_id:%s", targetId)
-			rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "msg", downMsg)
-			rpcMsg.MsgId = downMsg.MsgId
-			rpcMsg.MsgSendTime = downMsg.MsgTime
-			bases.UnicastRouteWithCallback(rpcMsg, &SendMsgAckActor{
-				appkey:      appkey,
-				senderId:    bases.GetRequesterIdFromCtx(ctx),
-				targetId:    targetId,
-				channelType: downMsg.ChannelType,
-				Msg:         downMsg,
-				ctx:         ctx,
-				IsNotify:    isNtf,
-				HasPush:     hasPush,
-			}, 5*time.Second)
-		}
+		MsgOrNtf(ctx, targetId, downMsg, hasPush)
 	} else { //for push
 		SendPush(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, downMsg)
+	}
+}
+
+func MsgOrNtf(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg, hasPush bool) {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	isNtf := GetUserStatus(appkey, targetId).CheckNtfWithSwitch()
+	if isNtf { //发送通知
+		logs.WithContext(ctx).Infof("ntf target_id:%s", targetId)
+		rpcNtf := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "ntf", &pbobjs.Notify{
+			Type:     pbobjs.NotifyType_Msg,
+			SyncTime: downMsg.MsgTime,
+		})
+		rpcNtf.Qos = 0
+		bases.UnicastRouteWithCallback(rpcNtf, &SendMsgAckActor{
+			appkey:      appkey,
+			senderId:    bases.GetRequesterIdFromCtx(ctx),
+			targetId:    targetId,
+			channelType: downMsg.ChannelType,
+			Msg:         downMsg,
+			ctx:         ctx,
+			IsNotify:    isNtf,
+			HasPush:     hasPush,
+		}, 5*time.Second)
+	} else {
+		logs.WithContext(ctx).Infof("msg target_id:%s", targetId)
+		rpcMsg := bases.CreateServerPubWraper(ctx, bases.GetRequesterIdFromCtx(ctx), targetId, "msg", downMsg)
+		rpcMsg.MsgId = downMsg.MsgId
+		rpcMsg.MsgSendTime = downMsg.MsgTime
+		bases.UnicastRouteWithCallback(rpcMsg, &SendMsgAckActor{
+			appkey:      appkey,
+			senderId:    bases.GetRequesterIdFromCtx(ctx),
+			targetId:    targetId,
+			channelType: downMsg.ChannelType,
+			Msg:         downMsg,
+			ctx:         ctx,
+			IsNotify:    isNtf,
+			HasPush:     hasPush,
+		}, 5*time.Second)
 	}
 }
 

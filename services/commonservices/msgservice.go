@@ -14,6 +14,7 @@ var (
 	PublishType_AllSession           PublishType = 0
 	PublishType_OnlineSelfSession    PublishType = 1
 	PublishType_AllSessionExceptSelf PublishType = 2
+	PublishType_SpecifyDeviceIds     PublishType = 3
 )
 
 func FillReferMsg(ctx context.Context, upMsg *pbobjs.UpMsg) *pbobjs.DownMsg {
@@ -193,6 +194,10 @@ func AsyncChatMsgOverUpstream(ctx context.Context, userId, chatId string, upMsg 
 	AsyncMsgOverUpstream(ctx, "c_msg", userId, chatId, upMsg, opts...)
 }
 
+func AsyncPublicChannelMsgOverUpstream(ctx context.Context, userId, channelId string, upMsg *pbobjs.UpMsg, opts ...bases.BaseActorOption) {
+	AsyncMsgOverUpstream(ctx, "pc_msg", userId, channelId, upMsg, opts...)
+}
+
 func IsMentionedMe(userId string, downMsg *pbobjs.DownMsg) bool {
 	if downMsg != nil && downMsg.MentionInfo != nil {
 		if downMsg.MentionInfo.MentionType == pbobjs.MentionType_All || downMsg.MentionInfo.MentionType == pbobjs.MentionType_AllAndSomeone {
@@ -220,4 +225,46 @@ func IsDirectMentionedMe(userId string, downMsg *pbobjs.DownMsg) bool {
 		}
 	}
 	return false
+}
+
+func CopyDownMsg(msg *pbobjs.DownMsg, receiverId string) *pbobjs.DownMsg {
+	referMsg := msg.ReferMsg
+	if referMsg != nil {
+		if referMsg.SenderId == receiverId {
+			referMsg.IsSend = true
+		} else {
+			referMsg.IsSend = false
+		}
+	}
+	return &pbobjs.DownMsg{
+		TargetId:          msg.TargetId,
+		ChannelType:       msg.ChannelType,
+		MsgType:           msg.MsgType,
+		SenderId:          msg.SenderId,
+		MsgId:             msg.MsgId,
+		MsgSeqNo:          msg.MsgSeqNo,
+		MsgContent:        msg.MsgContent,
+		MsgTime:           msg.MsgTime,
+		Flags:             msg.Flags,
+		IsSend:            msg.IsSend,
+		Platform:          msg.Platform,
+		ClientUid:         msg.ClientUid,
+		PushData:          msg.PushData,
+		MentionInfo:       msg.MentionInfo,
+		IsRead:            msg.IsRead,
+		ReferMsg:          referMsg,
+		TargetUserInfo:    msg.TargetUserInfo,
+		SenderInfo:        msg.SenderInfo,
+		GroupInfo:         msg.GroupInfo,
+		MergedMsgs:        msg.MergedMsgs,
+		UndisturbType:     msg.UndisturbType,
+		MemberCount:       msg.MemberCount,
+		ReadCount:         msg.ReadCount,
+		UnreadIndex:       msg.UnreadIndex,
+		SearchText:        msg.SearchText,
+		GrpMemberInfo:     msg.GrpMemberInfo,
+		DestroyTime:       msg.DestroyTime,
+		LifeTimeAfterRead: msg.LifeTimeAfterRead,
+		SubChannel:        msg.SubChannel,
+	}
 }
