@@ -230,7 +230,7 @@ func SubUsers(ctx context.Context, req *pbobjs.SubUsersReq) (errs.IMErrorCode, *
 			}
 		}
 	}
-	return errs.IMErrorCode_SUCCESS, QryUserStatus(ctx, req.UserIds)
+	return errs.IMErrorCode_SUCCESS, QryUserStatusList(ctx, req.UserIds)
 }
 
 func UnSubUsers(ctx context.Context, req *pbobjs.SubUsersReq) errs.IMErrorCode {

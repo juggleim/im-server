@@ -16,6 +16,9 @@ func (manager *StatusSubscriptionsManager) RegisterActors(register gmicro.IActor
 	register.RegisterActor("sub_users", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.SubUsersActor{}, serviceName)
 	})
+	register.RegisterActor("qry_user_status", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryUserStatusActor{}, serviceName)
+	})
 	register.RegisterActor("unsub_users", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.UnSubUsersActor{}, serviceName)
 	})

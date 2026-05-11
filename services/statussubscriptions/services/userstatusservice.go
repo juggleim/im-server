@@ -6,12 +6,13 @@ import (
 	"sync"
 
 	"im-server/commons/bases"
+	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 
 	"google.golang.org/protobuf/proto"
 )
 
-func QryUserStatus(ctx context.Context, userIds []string) *pbobjs.UserStatusList {
+func QryUserStatusList(ctx context.Context, userIds []string) *pbobjs.UserStatusList {
 	ret := &pbobjs.UserStatusList{
 		Items: []*pbobjs.UserStatusItem{},
 	}
@@ -73,4 +74,24 @@ func QryUserStatus(ctx context.Context, userIds []string) *pbobjs.UserStatusList
 		ret.Items = append(ret.Items, it)
 	}
 	return ret
+}
+
+// QryUserStatus 仅查询给定 userIds 的在线状态（不读写订阅关系），内部聚合 connectmanager 的 qry_online_status。
+func QryUserStatus(ctx context.Context, req *pbobjs.UserOnlineStatusReq) (errs.IMErrorCode, *pbobjs.UserOnlineStatusResp) {
+	if req == nil || len(req.UserIds) == 0 {
+		return errs.IMErrorCode_SUCCESS, &pbobjs.UserOnlineStatusResp{}
+	}
+	list := QryUserStatusList(ctx, req.UserIds)
+	resp := &pbobjs.UserOnlineStatusResp{Items: make([]*pbobjs.UserOnlineItem, 0, len(list.Items))}
+	for _, it := range list.Items {
+		if it == nil {
+			continue
+		}
+		if it.OnlineStatus != nil {
+			resp.Items = append(resp.Items, it.OnlineStatus)
+		} else {
+			resp.Items = append(resp.Items, &pbobjs.UserOnlineItem{UserId: it.UserId, IsOnline: false})
+		}
+	}
+	return errs.IMErrorCode_SUCCESS, resp
 }
