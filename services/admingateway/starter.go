@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	jimAdminRouters "github.com/juggleim/jugglechat-server/admins/routers"
 )
 
 type AdminGateway struct {
@@ -28,7 +29,8 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 	})
 	loadAdminWeb(ser.httpServer)
 
-	routers.Route(ser.httpServer, "admingateway")
+	group := routers.Route(ser.httpServer, "admingateway")
+	jimAdminRouters.Route(group)
 
 	httpPort := configures.Config.AdminGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
