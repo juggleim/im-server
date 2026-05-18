@@ -47,6 +47,7 @@ func (ser *ConnectManager) Startup(args map[string]interface{}) {
 	wsPort := configures.Config.ConnectManager.WsPort
 	ser.wsServer = &server.ImWebsocketServer{
 		MessageListener: &server.ImListenerImpl{},
+		BotMsgListener:  &server.ImBotListenerImpl{},
 	}
 	ser.wsServer.AsyncStart(wsPort)
 	fmt.Println("Start", serviceName, "with port:", wsPort)

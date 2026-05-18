@@ -9,7 +9,6 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/botmsg/services/botengines"
 	"im-server/services/commonservices"
-	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
 	userStorages "im-server/services/usermanager/storages"
 	"strings"
@@ -66,16 +65,14 @@ func GetBotInfo(ctx context.Context, botId string) *BotInfo {
 					botConf = botConfExt.ItemValue
 				}
 				switch botInfo.BotType {
-				case commonservices.BotType_Default:
-					defaultBot := &botengines.DefaultEngine{}
-					err = tools.JsonUnMarshal([]byte(botConf), defaultBot)
-					if err == nil && defaultBot.Webhook != "" {
-						botInfo.BotEngine = defaultBot
-					}
-				case commonservices.BotType_Custom:
+				case commonservices.BotType_Default, commonservices.BotType_Custom:
 					customBot := &botengines.CustomBotEngine{}
-					err = tools.JsonUnMarshal([]byte(botConf), customBot)
-					if err == nil && customBot.Url != "" {
+					botConfObj := &commonservices.BotConf{}
+					err = tools.JsonUnMarshal([]byte(botConf), botConfObj)
+					if err == nil && botConfObj.Url != "" {
+						customBot.Url = botConfObj.Url
+						customBot.ApiKey = botConfObj.ApiKey
+						customBot.IsStream = botConfObj.IsStream
 						botInfo.BotEngine = customBot
 					}
 				case commonservices.BotType_Dify:
@@ -161,106 +158,104 @@ func (combiner *Combiner) GetSubSeq() int64 {
 }
 
 func HandleBotMsg(ctx context.Context, msg *pbobjs.DownMsg) {
-	if msg.MsgType != msgdefines.InnerMsgType_Text || (msg.ChannelType != pbobjs.ChannelType_Private && msg.ChannelType != pbobjs.ChannelType_Group) {
-		return
-	}
-	txtMsg := &msgdefines.TextMsg{}
-	err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
-	if err != nil {
-		logs.WithContext(ctx).Errorf("text msg illigal. content:%s", string(msg.MsgContent))
+	if msg.ChannelType != pbobjs.ChannelType_Private && msg.ChannelType != pbobjs.ChannelType_Group {
 		return
 	}
 	botId := bases.GetTargetIdFromCtx(ctx)
 	botInfo := GetBotInfo(ctx, botId)
 	if botInfo.BotEngine != nil {
-		msgFlag := msgdefines.SetStoreMsg(0)
-		msgFlag = msgdefines.SetCountMsg(msgFlag)
-
-		var combiner *Combiner
-		botUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, botId)
-		botInfo.BotEngine.StreamChat(ctx, msg.SenderId, botId, msg.ChannelType, txtMsg.Content, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
-			if sectionStart {
-				curr := time.Now().UnixMilli()
-				streamFlag := msgdefines.SetStreamMsg(0)
-				streamFlag = msgdefines.SetStateMsg(streamFlag)
-				combiner = &Combiner{
-					interval: 50,
-					StreamMsg: &pbobjs.DownMsg{
-						TargetId:       botId,
-						ChannelType:    msg.ChannelType,
-						MsgType:        "jgs:text",
-						SenderId:       botId,
-						Flags:          streamFlag,
-						ClientUid:      tools.GenerateUUIDShort22(),
-						TargetUserInfo: botUserInfo,
-						SenderInfo:     botUserInfo,
-						MsgTime:        curr,
-						MsgId:          tools.GenerateMsgId(curr, int32(msg.ChannelType), msg.TargetId),
-						StreamMsgParts: []*pbobjs.StreamMsgItem{},
-					},
+		if botInfo.BotEngine.IsStreamChat() {
+			msgFlag := msgdefines.SetStoreMsg(0)
+			msgFlag = msgdefines.SetCountMsg(msgFlag)
+			var combiner *Combiner
+			botUserInfo := commonservices.GetTargetDisplayUserInfo(ctx, botId)
+			botInfo.BotEngine.StreamChat(ctx, msg.SenderId, botId, msg, func(answerPart string, sectionStart, sectionEnd, isEnd bool) {
+				if sectionStart {
+					curr := time.Now().UnixMilli()
+					streamFlag := msgdefines.SetStreamMsg(0)
+					streamFlag = msgdefines.SetStateMsg(streamFlag)
+					combiner = &Combiner{
+						interval: 50,
+						StreamMsg: &pbobjs.DownMsg{
+							TargetId:       botId,
+							ChannelType:    msg.ChannelType,
+							MsgType:        "jgs:text",
+							SenderId:       botId,
+							Flags:          streamFlag,
+							ClientUid:      tools.GenerateUUIDShort22(),
+							TargetUserInfo: botUserInfo,
+							SenderInfo:     botUserInfo,
+							MsgTime:        curr,
+							MsgId:          tools.GenerateMsgId(curr, int32(msg.ChannelType), msg.TargetId),
+							StreamMsgParts: []*pbobjs.StreamMsgItem{},
+						},
+					}
 				}
-			}
-			if isEnd || sectionEnd {
-				if combiner != nil {
-					streamMsg := combiner.StreamMsg
-					if msg.ChannelType == pbobjs.ChannelType_Private {
-						part := combiner.GetLeft()
+				if isEnd || sectionEnd {
+					if combiner != nil {
+						streamMsg := combiner.StreamMsg
+						if msg.ChannelType == pbobjs.ChannelType_Private {
+							streamMsg.StreamMsgParts = []*pbobjs.StreamMsgItem{}
+							part := combiner.GetLeft()
+							if part != "" {
+								streamMsg.MsgSeqNo = combiner.GetSubSeq()
+								streamMsg.MsgContent = tools.ToJsonBs(&StreamMsg{
+									Content:     part,
+									StreamMsgId: streamMsg.MsgId,
+								})
+								ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
+								MsgDirect(ctx, msg.SenderId, streamMsg)
+							}
+						}
+						finalContent := combiner.GetFinal()
+						if finalContent != "" {
+							if msg.ChannelType == pbobjs.ChannelType_Private {
+								commonservices.SyncPrivateMsgOverUpstream(ctx, botId, msg.SenderId, &pbobjs.UpMsg{
+									MsgType: msgdefines.InnerMsgType_Text,
+									MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
+										Content: combiner.GetFinal(),
+										Extra: tools.ToJson(&StreamMsg{
+											StreamMsgId: streamMsg.MsgId,
+										}),
+									}),
+									Flags: msgFlag,
+								})
+							} else if msg.ChannelType == pbobjs.ChannelType_Group {
+								commonservices.SyncGroupMsgOverUpstream(ctx, botId, msg.TargetId, &pbobjs.UpMsg{
+									MsgType: msgdefines.InnerMsgType_Text,
+									MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
+										Content: combiner.GetFinal(),
+										Extra: tools.ToJson(&StreamMsg{
+											StreamMsgId: streamMsg.MsgId,
+										}),
+									}),
+									Flags: msgFlag,
+								})
+							}
+						}
+						combiner = nil
+					}
+				} else {
+					if combiner != nil {
+						part := combiner.Append(answerPart)
 						if part != "" {
-							streamMsg.MsgSeqNo = combiner.GetSubSeq()
-							streamMsg.MsgContent = tools.ToJsonBs(&StreamMsg{
-								Content:     part,
-								StreamMsgId: streamMsg.MsgId,
-							})
-							ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
-							MsgDirect(ctx, msg.SenderId, streamMsg)
-						}
-					}
-					finalContent := combiner.GetFinal()
-					if finalContent != "" {
-						if msg.ChannelType == pbobjs.ChannelType_Private {
-							commonservices.SyncPrivateMsgOverUpstream(ctx, botId, msg.SenderId, &pbobjs.UpMsg{
-								MsgType: msgdefines.InnerMsgType_Text,
-								MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
-									Content: combiner.GetFinal(),
-									Extra: tools.ToJson(&StreamMsg{
-										StreamMsgId: streamMsg.MsgId,
-									}),
-								}),
-								Flags: msgFlag,
-							})
-						} else if msg.ChannelType == pbobjs.ChannelType_Group {
-							commonservices.SyncGroupMsgOverUpstream(ctx, botId, msg.TargetId, &pbobjs.UpMsg{
-								MsgType: msgdefines.InnerMsgType_Text,
-								MsgContent: tools.ToJsonBs(&msgdefines.TextMsg{
-									Content: combiner.GetFinal(),
-									Extra: tools.ToJson(&StreamMsg{
-										StreamMsgId: streamMsg.MsgId,
-									}),
-								}),
-								Flags: msgFlag,
-							})
-						}
-					}
-					combiner = nil
-				}
-			} else {
-				if combiner != nil {
-					part := combiner.Append(answerPart)
-					if part != "" {
-						if msg.ChannelType == pbobjs.ChannelType_Private {
-							streamMsg := combiner.StreamMsg
-							streamMsg.MsgContent = tools.ToJsonBs(&StreamMsg{
-								Content:     part,
-								StreamMsgId: combiner.StreamMsg.MsgId,
-							})
-							streamMsg.MsgSeqNo = combiner.GetSubSeq()
-							ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
-							MsgDirect(ctx, msg.SenderId, streamMsg)
+							if msg.ChannelType == pbobjs.ChannelType_Private {
+								streamMsg := combiner.StreamMsg
+								streamMsg.MsgContent = tools.ToJsonBs(&StreamMsg{
+									Content:     part,
+									StreamMsgId: combiner.StreamMsg.MsgId,
+								})
+								streamMsg.MsgSeqNo = combiner.GetSubSeq()
+								ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, botId)
+								MsgDirect(ctx, msg.SenderId, streamMsg)
+							}
 						}
 					}
 				}
-			}
-		})
+			})
+		} else {
+			botInfo.BotEngine.Chat(ctx, msg.SenderId, botId, msg)
+		}
 	}
 }
 

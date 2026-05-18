@@ -6,10 +6,8 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/utils"
 	"im-server/commons/tools"
-	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
-	"im-server/services/connectmanager/server/imhttpmsghandlers"
 	"net/http"
 	"strings"
 	"sync"
@@ -19,44 +17,11 @@ import (
 	"golang.org/x/time/rate"
 )
 
-type ImWebsocketServer struct {
-	MessageListener ImListener
-	BotMsgListener  ImListener
-}
-
-func (server *ImWebsocketServer) AsyncStart(port int) {
-	var mux *http.ServeMux = commonservices.GetDefaultHttpServeMux()
-	mux.HandleFunc("/im", server.ImWsServer)
-	mux.HandleFunc("/imbot", server.ImBotServer)
-	mux.HandleFunc("/im/publish", imhttpmsghandlers.ImHttpPubHandler)
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, `{"status":"ok"}`)
-	})
-	go http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  4196,
-	WriteBufferSize: 1124,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Request) {
+func (server *ImWebsocketServer) ImBotServer(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("Error during connect upgrade:", err)
 		return
-	}
-	referer := strings.TrimSpace(r.Header.Get("Origin"))
-	if referer == "" {
-		referer = strings.TrimSpace(r.Header.Get("Referer"))
 	}
 	clientIp := strings.TrimSpace(r.Header.Get("X-Real-Ip"))
 	if clientIp == "" {
@@ -66,22 +31,19 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 	if clientHost == "" {
 		clientHost = strings.TrimSpace(r.Host)
 	}
-	child := &ImWebsocketChild{
+	child := &ImBotWebsocketChild{
 		stopChan:         make(chan bool, 1),
 		wsConn:           conn,
 		isActive:         true,
-		messageListener:  server.MessageListener,
+		messageListener:  server.BotMsgListener,
 		latestActiveTime: time.Now().UnixMilli(),
 	}
 	utils.SafeGo(func() {
-		child.startWsListener(referer, clientIp, clientHost)
+		child.startWsListener(clientIp, clientHost)
 	})
 }
-func (server *ImWebsocketServer) Stop() {
 
-}
-
-type ImWebsocketChild struct {
+type ImBotWebsocketChild struct {
 	stopChan         chan bool
 	wsConn           *websocket.Conn
 	isActive         bool
@@ -90,9 +52,9 @@ type ImWebsocketChild struct {
 	ticker           *time.Ticker
 }
 
-func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost string) {
-	handler := IMWebsocketMsgHandler{child.messageListener}
-	ctx := &WsHandleContextImpl{
+func (child *ImBotWebsocketChild) startWsListener(clientIp, clientHost string) {
+	handler := ImBotWebsocketMsgHandler{child.messageListener}
+	ctx := &BotWsHandleContextImpl{
 		conn:       child.wsConn,
 		wsChild:    child,
 		lock:       &sync.RWMutex{},
@@ -101,17 +63,14 @@ func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost str
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ConnectSession, tools.GenerateUUIDShort11())
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ConnectCreateTime, time.Now().UnixMilli())
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_CtxLocker, &sync.Mutex{})
-	imcontext.SetContextAttr(ctx, imcontext.StateKey_Limiter, rate.NewLimiter(100, 10))
-	imcontext.SetContextAttr(ctx, imcontext.StateKey_Referer, referer)
+	imcontext.SetContextAttr(ctx, imcontext.StateKey_Limiter, rate.NewLimiter(100, 100))
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientIp, clientIp)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientHost, clientHost)
 
-	//start ticker
 	child.startTicker(ctx, handler)
 
 	for child.isActive {
 		_, message, err := child.wsConn.ReadMessage()
-		//record
 		child.latestActiveTime = time.Now().UnixMilli()
 
 		if err != nil {
@@ -122,7 +81,6 @@ func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost str
 			break
 		}
 
-		//decode
 		wsMsg := &codec.ImWebsocketMsg{}
 		err = tools.PbUnMarshal(message, wsMsg)
 		if err != nil {
@@ -132,14 +90,11 @@ func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost str
 			break
 		}
 
-		//decrypt
-		wsMsg.Decrypt(ctx)
-
 		handler.HandleRead(ctx, wsMsg)
 	}
 }
 
-func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handler IMWebsocketMsgHandler) {
+func (child *ImBotWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handler ImBotWebsocketMsgHandler) {
 	if child.ticker == nil {
 		child.ticker = time.NewTicker(5 * time.Second)
 	} else {
@@ -154,7 +109,7 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 				interval := current - child.latestActiveTime
 				if interval > 300*1000 {
 					child.Stop()
-					handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT, errors.New("user inactive more than 5min"))
+					handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT, errors.New("bot inactive more than 5min"))
 					return
 				}
 			case <-child.stopChan:
@@ -164,7 +119,7 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 	}(child.ticker)
 }
 
-func (child *ImWebsocketChild) Stop() {
+func (child *ImBotWebsocketChild) Stop() {
 	if child.isActive {
 		child.isActive = false
 		child.stopChan <- true
@@ -175,28 +130,23 @@ func (child *ImWebsocketChild) Stop() {
 	}
 }
 
-type WsHandleContextImpl struct {
-	wsChild    *ImWebsocketChild
+type BotWsHandleContextImpl struct {
+	wsChild    *ImBotWebsocketChild
 	conn       *websocket.Conn
 	attachment interface{}
 	lock       *sync.RWMutex
 }
 
-func (ctx *WsHandleContextImpl) Write(message interface{}) {
+func (ctx *BotWsHandleContextImpl) Write(message interface{}) {
 	imMsg, ok := message.(codec.IMessage)
 	if ok {
 		wsImMsg := imMsg.ToImWebsocketMsg()
-		//encrypt
-		wsImMsg.Encrypt(ctx)
 		bs, err := tools.PbMarshal(wsImMsg)
 		if err == nil {
 			ctx.lock.Lock()
 			defer ctx.lock.Unlock()
 			_ = ctx.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
-			err = ctx.conn.WriteMessage(websocket.BinaryMessage, bs)
-			if err != nil {
-				fmt.Println("write result:", err)
-			}
+			ctx.conn.WriteMessage(websocket.BinaryMessage, bs)
 		} else {
 			fmt.Println(err)
 		}
@@ -205,24 +155,27 @@ func (ctx *WsHandleContextImpl) Write(message interface{}) {
 	}
 }
 
-func (ctx *WsHandleContextImpl) Close(err error) {
+func (ctx *BotWsHandleContextImpl) Close(err error) {
 	if ctx.wsChild != nil {
 		ctx.wsChild.Stop()
 	}
 }
-func (ctx *WsHandleContextImpl) Attachment() imcontext.Attachment {
+
+func (ctx *BotWsHandleContextImpl) Attachment() imcontext.Attachment {
 	return ctx.attachment
 }
-func (ctx *WsHandleContextImpl) SetAttachment(attachment imcontext.Attachment) {
+
+func (ctx *BotWsHandleContextImpl) SetAttachment(attachment imcontext.Attachment) {
 	ctx.attachment = attachment
 }
-func (ctx *WsHandleContextImpl) IsActive() bool {
+
+func (ctx *BotWsHandleContextImpl) IsActive() bool {
 	return ctx.wsChild.isActive
 }
-func (ctx *WsHandleContextImpl) RemoteAddr() string {
+
+func (ctx *BotWsHandleContextImpl) RemoteAddr() string {
 	if ctx.conn != nil {
 		return ctx.conn.RemoteAddr().String()
-	} else {
-		return ""
 	}
+	return ""
 }

@@ -6,6 +6,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgdefines"
 	"net/http"
 	"strings"
 )
@@ -15,14 +16,23 @@ type DifyBotEngine struct {
 	Url    string `json:"url"`
 }
 
-func (engine *DifyBotEngine) Chat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string) string {
-	return ""
+func (engine *DifyBotEngine) IsStreamChat() bool {
+	return true
 }
 
-func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string, f func(answerPart string, sectionStart, sectionEnd, isEnd bool)) {
+func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, targetId string, msg *pbobjs.DownMsg, f func(answerPart string, sectionStart, sectionEnd, isEnd bool)) {
+	if msg.MsgType != msgdefines.InnerMsgType_Text {
+		return
+	}
+	txtMsg := &msgdefines.TextMsg{}
+	err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
+	if err != nil {
+		logs.WithContext(ctx).Errorf("text msg illigal. content:%s", string(msg.MsgContent))
+		return
+	}
 	req := &DifyChatMsgReq{
 		Inputs:         map[string]string{},
-		Query:          question,
+		Query:          txtMsg.Content,
 		ResponseMode:   "streaming",
 		ConversationId: "",
 		User:           senderId,
@@ -58,6 +68,10 @@ func (engine *DifyBotEngine) StreamChat(ctx context.Context, senderId, targetId 
 			return
 		}
 	}
+}
+
+func (engine *DifyBotEngine) Chat(ctx context.Context, senderId, converKey string, msg *pbobjs.DownMsg) string {
+	return ""
 }
 
 type DifyChatMsgReq struct {

@@ -117,6 +117,9 @@ type TargetUserInfo struct {
 	Settings       *UserSettings
 	SettingsFields []*pbobjs.KvItem
 	UserType       pbobjs.UserType
+
+	HasBotConf  bool
+	BotSettings *BotSettings
 }
 
 func init() {
@@ -147,12 +150,28 @@ func GetTargetUserInfo(ctx context.Context, userId string) *TargetUserInfo {
 				SettingsFields: uInfo.Settings,
 				UserType:       uInfo.UserType,
 			}
-			FillObjField(targetUserInfo.Settings, Kvitems2Map(uInfo.Settings))
+			settingsMap := Kvitems2Map(uInfo.Settings)
+			FillObjField(targetUserInfo.Settings, settingsMap)
 			if targetUserInfo.Settings.Undisturb != "" {
 				var userUndisturb UserUndisturb
 				err := tools.JsonUnMarshal([]byte(targetUserInfo.Settings.Undisturb), &userUndisturb)
 				if err == nil {
 					targetUserInfo.Settings.UndisturbObj = &userUndisturb
+				}
+			}
+			if targetUserInfo.UserType == pbobjs.UserType_Bot {
+				targetUserInfo.BotSettings = &BotSettings{OnlyMentioned: true}
+				//bot conf
+				if _, exist := settingsMap[string(AttItemKey_Bot_BotConf)]; exist {
+					targetUserInfo.HasBotConf = true
+				}
+				//bot settings
+				if str, exist := settingsMap[string(AttItemKey_Bot_Settings)]; exist && str != "" {
+					settings := &BotSettings{}
+					err := tools.JsonUnMarshal([]byte(str), settings)
+					if err == nil {
+						targetUserInfo.BotSettings = settings
+					}
 				}
 			}
 			targetUserCache.Add(key, targetUserInfo)

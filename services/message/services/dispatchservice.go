@@ -99,8 +99,28 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 	HandleDownMsgByConver(ctx, receiverId, msg.TargetId, msg.SubChannel, msg.ChannelType, msg)
 	targetUserInfo := commonservices.GetTargetUserInfo(ctx, receiverId)
 	if targetUserInfo.UserType == pbobjs.UserType_Bot {
-		if msg.ChannelType == pbobjs.ChannelType_Private || (msg.ChannelType == pbobjs.ChannelType_Group && commonservices.IsDirectMentionedMe(targetUserInfo.UserId, msg)) {
+		if msg.ChannelType != pbobjs.ChannelType_Private && msg.ChannelType != pbobjs.ChannelType_Group {
+			return
+		}
+		if msg.ChannelType == pbobjs.ChannelType_Group {
+			onlyMentioned := true
+			if targetUserInfo.BotSettings != nil {
+				onlyMentioned = targetUserInfo.BotSettings.OnlyMentioned
+			}
+			if onlyMentioned && !commonservices.IsDirectMentionedMe(targetUserInfo.UserId, msg) {
+				return
+			}
+		}
+		if targetUserInfo.HasBotConf {
 			botclient.SendMsg2Bot(ctx, receiverId, msg)
+		}
+		if msgdefines.IsStateMsg(msg.Flags) {
+			MsgDirect(ctx, receiverId, msg)
+		} else {
+			commonservices.SaveConversation(ctx, receiverId, msg)
+			SaveMsg2Inbox(appkey, receiverId, msg)
+			//send to client
+			MsgOrNtf(ctx, receiverId, msg, true)
 		}
 	} else {
 		if closeOffline {

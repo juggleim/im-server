@@ -6,6 +6,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgdefines"
 	"net/http"
 	"strings"
 )
@@ -16,7 +17,20 @@ type SiliconFlowEngine struct {
 	Model  string `json:"model"`
 }
 
-func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string, f func(part string, sectionStart, sectionend, isFinish bool)) {
+func (engine *SiliconFlowEngine) IsStreamChat() bool {
+	return true
+}
+
+func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, targetId string, msg *pbobjs.DownMsg, f func(part string, sectionStart, sectionend, isFinish bool)) {
+	if msg.MsgType != msgdefines.InnerMsgType_Text {
+		return
+	}
+	txtMsg := &msgdefines.TextMsg{}
+	err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
+	if err != nil {
+		logs.WithContext(ctx).Errorf("text msg illigal. content:%s", string(msg.MsgContent))
+		return
+	}
 	headers := map[string]string{}
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", engine.ApiKey)
 	headers["Content-Type"] = "application/json"
@@ -25,7 +39,7 @@ func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, targe
 		Messages: []*SiliconFlowChatMsg{
 			{
 				Role:    "user",
-				Content: question,
+				Content: txtMsg.Content,
 			},
 		},
 		Stream:    true,
@@ -63,12 +77,20 @@ func (engine *SiliconFlowEngine) StreamChat(ctx context.Context, senderId, targe
 					}
 				}
 			}
-			fmt.Println("x:", line)
 		}
 	}
 }
 
-func (engine *SiliconFlowEngine) Chat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string) string {
+func (engine *SiliconFlowEngine) Chat(ctx context.Context, senderId, targetId string, msg *pbobjs.DownMsg) string {
+	if msg.MsgType != msgdefines.InnerMsgType_Text {
+		return ""
+	}
+	txtMsg := &msgdefines.TextMsg{}
+	err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
+	if err != nil {
+		logs.WithContext(ctx).Errorf("text msg illigal. content:%s", string(msg.MsgContent))
+		return ""
+	}
 	headers := map[string]string{}
 	headers["Authorization"] = fmt.Sprintf("Bearer %s", engine.ApiKey)
 	headers["Content-Type"] = "application/json"
@@ -77,7 +99,7 @@ func (engine *SiliconFlowEngine) Chat(ctx context.Context, senderId, targetId st
 		Messages: []*SiliconFlowChatMsg{
 			{
 				Role:    "user",
-				Content: question,
+				Content: txtMsg.Content,
 			},
 		},
 		Stream:    false,

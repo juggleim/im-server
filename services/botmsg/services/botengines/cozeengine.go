@@ -11,6 +11,7 @@ import (
 	"im-server/services/botmsg/storages/models"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/msgdefines"
 	"net/http"
 	"strings"
 	"time"
@@ -22,16 +23,25 @@ type CozeBotEngine struct {
 	BotId string `json:"bot_id"`
 }
 
-func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converKey string, channelType pbobjs.ChannelType, question string) string {
-	return ""
+func (engine *CozeBotEngine) IsStreamChat() bool {
+	return true
 }
 
-func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, targetId string, channelType pbobjs.ChannelType, question string, f func(part string, sectionStart, sectionEnd, isEnd bool)) {
+func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, targetId string, msg *pbobjs.DownMsg, f func(part string, sectionStart, sectionEnd, isFinish bool)) {
+	if msg.MsgType != msgdefines.InnerMsgType_Text {
+		return
+	}
+	txtMsg := &msgdefines.TextMsg{}
+	err := tools.JsonUnMarshal(msg.MsgContent, txtMsg)
+	if err != nil {
+		logs.WithContext(ctx).Errorf("text msg illigal. content:%s", string(msg.MsgContent))
+		return
+	}
 	converKey := ""
-	if channelType == pbobjs.ChannelType_Private {
+	if msg.ChannelType == pbobjs.ChannelType_Private {
 		converKey = commonservices.GetConversationId(senderId, targetId, pbobjs.ChannelType_Private)
 		converKey = fmt.Sprintf("%s_%d", converKey, pbobjs.ChannelType_Private)
-	} else if channelType == pbobjs.ChannelType_Group {
+	} else if msg.ChannelType == pbobjs.ChannelType_Group {
 		converKey = commonservices.GetConversationId(senderId, targetId, pbobjs.ChannelType_Group)
 		converKey = fmt.Sprintf("%s_%d", converKey, pbobjs.ChannelType_Group)
 	}
@@ -46,7 +56,7 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, targetId 
 		Stream: true,
 		AdditionalMessages: []*CozeChatMsgItem{
 			{
-				Content:     question,
+				Content:     txtMsg.Content,
 				ContentType: "text",
 				Role:        "user",
 				Name:        senderId,
@@ -67,10 +77,7 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, targetId 
 	for {
 		line, err := stream.Receive()
 		if err != nil {
-			f("", false, false, true)
-			return
-		}
-		if strings.TrimSpace(string(line)) == "\"[DONE]\"" {
+			fmt.Println("receive_err:", err)
 			f("", false, false, true)
 			return
 		}
@@ -82,10 +89,10 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, targetId 
 		item := CozeChatMsgRespItem{}
 		err = tools.JsonUnMarshal([]byte(line), &item)
 		if err != nil {
-			fmt.Println("unmarshal_err:", err, string(line))
+			fmt.Println("unmarshal_err:", err)
 			continue
 		}
-		if item.Type == "answer" && item.CreatedAt == 0 {
+		if item.Type == "answer" {
 			if event == "conversation.message.delta" {
 				f(item.Content, sectionStart, false, false)
 				sectionStart = false
@@ -95,6 +102,10 @@ func (engine *CozeBotEngine) StreamChat(ctx context.Context, senderId, targetId 
 			}
 		}
 	}
+}
+
+func (engine *CozeBotEngine) Chat(ctx context.Context, senderId, converKey string, msg *pbobjs.DownMsg) string {
+	return ""
 }
 
 type CozeChatMsgReq struct {

@@ -12,6 +12,7 @@ const (
 	Platform_PC      Platform = "PC"
 	Platform_Harmony Platform = "Harmony"
 	Platform_Server  Platform = "Server"
+	Platform_Bot     Platform = "Bot"
 
 	PushChannel_Apple  PushChannel = "Apple"
 	PushChannel_Huawei PushChannel = "Huawei"

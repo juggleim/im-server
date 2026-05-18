@@ -43,7 +43,6 @@ func Register(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
-
 	rpcResp, ok := resp.(*pbobjs.UserRegResp)
 	if !ok {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_RESP_FAIL)

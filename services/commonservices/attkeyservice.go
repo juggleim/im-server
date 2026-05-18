@@ -42,10 +42,9 @@ const (
 	AttItemKey_GrpGlobalMute AttItemKey = "grp_global_mute"
 
 	//setting keys of bots
-	AttItemKey_Bot_Type    AttItemKey = "bot_type"
-	AttItemKey_Bot_WebHook AttItemKey = "bot_webhook"
-	AttItemKey_Bot_ApiKey  AttItemKey = "bot_api_key"
-	AttItemKey_Bot_BotConf AttItemKey = "bot_conf"
+	AttItemKey_Bot_Type     AttItemKey = "bot_type"
+	AttItemKey_Bot_BotConf  AttItemKey = "bot_conf"
+	AttItemKey_Bot_Settings AttItemKey = "bot_settings"
 )
 
 type GroupSettings struct {
@@ -74,6 +73,17 @@ type UserSettings struct {
 	Language     string `default:""`
 	Undisturb    string `default:""`
 	UndisturbObj *UserUndisturb
+}
+
+type BotConf struct {
+	BotId    string `json:"bot_id,omitempty"`
+	Url      string `json:"url,omitempty"`
+	ApiKey   string `json:"api_key,omitempty"`
+	IsStream bool   `json:"is_stream"`
+}
+
+type BotSettings struct {
+	OnlyMentioned bool `json:"only_mentioned"`
 }
 
 var GrpMemberSettingKeys map[AttItemKey]bool

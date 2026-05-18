@@ -21,6 +21,7 @@ func (manager *BotMsgManager) RegisterActors(register gmicro.IActorRegister) {
 func (manager *BotMsgManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup", serviceName)
 }
+
 func (manager *BotMsgManager) Shutdown(force bool) {
 	fmt.Println("Shutdown", serviceName)
 }
