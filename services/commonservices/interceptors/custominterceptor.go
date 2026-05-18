@@ -43,6 +43,7 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 		ChannelType: int(channelType),
 		MsgType:     msg.MsgType,
 		MsgContent:  string(msg.MsgContent),
+		MentionInfo: toMentionInfo(msg),
 	}
 	body := tools.ToJson(msgEvent)
 	respBs, code, err := tools.HttpDoBytes("POST", inter.RequestUrl, headers, body)
@@ -82,6 +83,10 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 				msg.MsgContent = []byte(resp.MsgContent)
 				msg.Flags = msgdefines.SetModifiedMsg(msg.Flags)
 			}
+			if resp.MentionInfo != nil {
+				msg.MentionInfo = toMentionPb(resp.MentionInfo)
+				msg.Flags = msgdefines.SetModifiedMsg(msg.Flags)
+			}
 			return InterceptorResult_Replace, customCode
 		}
 		return InterceptorResult_Pass, customCode
@@ -95,18 +100,60 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 }
 
 type CustomInterceptorResp struct {
-	Result     string `json:"result"`
-	MsgType    string `json:"msg_type"`
-	MsgContent string `json:"msg_content"`
-	CustomCode int64  `json:"custom_code"`
-	LifeTime   int64  `json:"life_time"`
+	Result      string       `json:"result"`
+	MsgType     string       `json:"msg_type"`
+	MsgContent  string       `json:"msg_content"`
+	MentionInfo *MentionInfo `json:"mention_info"`
+
+	CustomCode int64 `json:"custom_code"`
+	LifeTime   int64 `json:"life_time"`
 }
 
 type MsgEvent struct {
-	Platform    string `json:"platform"`
-	Sender      string `json:"sender"`
-	Receiver    string `json:"receiver"`
-	ChannelType int    `json:"channel_type"`
-	MsgType     string `json:"msg_type"`
-	MsgContent  string `json:"msg_content"`
+	Platform    string       `json:"platform"`
+	Sender      string       `json:"sender"`
+	Receiver    string       `json:"receiver"`
+	ChannelType int          `json:"channel_type"`
+	MsgType     string       `json:"msg_type"`
+	MsgContent  string       `json:"msg_content"`
+	MentionInfo *MentionInfo `json:"mention_info"`
+}
+
+type MentionInfo struct {
+	MentionType   string   `json:"mention_type"`
+	TargetUserIds []string `json:"target_user_ids"`
+}
+
+func toMentionInfo(upMsg *pbobjs.UpMsg) *MentionInfo {
+	if upMsg == nil || upMsg.MentionInfo == nil {
+		return nil
+	}
+	mInfo := &MentionInfo{
+		MentionType: msgdefines.ToMentionTypeStr(upMsg.MentionInfo.MentionType),
+	}
+	if len(upMsg.MentionInfo.TargetUsers) > 0 {
+		mInfo.TargetUserIds = make([]string, 0, len(upMsg.MentionInfo.TargetUsers))
+		for _, tUser := range upMsg.MentionInfo.TargetUsers {
+			mInfo.TargetUserIds = append(mInfo.TargetUserIds, tUser.UserId)
+		}
+	}
+	return mInfo
+}
+
+func toMentionPb(mInfo *MentionInfo) *pbobjs.MentionInfo {
+	if mInfo == nil || mInfo.MentionType == "" {
+		return nil
+	}
+	mention := &pbobjs.MentionInfo{
+		MentionType: msgdefines.ToMentionTypePb(mInfo.MentionType),
+	}
+	if len(mInfo.TargetUserIds) > 0 {
+		mention.TargetUsers = make([]*pbobjs.UserInfo, 0, len(mInfo.TargetUserIds))
+		for _, uId := range mInfo.TargetUserIds {
+			mention.TargetUsers = append(mention.TargetUsers, &pbobjs.UserInfo{
+				UserId: uId,
+			})
+		}
+	}
+	return mention
 }

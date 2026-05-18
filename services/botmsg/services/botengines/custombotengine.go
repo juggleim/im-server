@@ -161,7 +161,7 @@ func convertMentionInfo(mentionInfo *pbobjs.MentionInfo) *MentionInfo {
 	if mentionInfo == nil {
 		return nil
 	}
-	mentionType := convertMentionType(mentionInfo.MentionType)
+	mentionType := msgdefines.ToMentionTypeStr(mentionInfo.MentionType)
 	targetUserIds := make([]string, 0, len(mentionInfo.TargetUsers))
 	for _, user := range mentionInfo.TargetUsers {
 		if user != nil && user.UserId != "" {
@@ -174,19 +174,6 @@ func convertMentionInfo(mentionInfo *pbobjs.MentionInfo) *MentionInfo {
 	return &MentionInfo{
 		MentionType:   mentionType,
 		TargetUserIds: targetUserIds,
-	}
-}
-
-func convertMentionType(mentionType pbobjs.MentionType) string {
-	switch mentionType {
-	case pbobjs.MentionType_All:
-		return "mention_all"
-	case pbobjs.MentionType_Someone:
-		return "mention_someone"
-	case pbobjs.MentionType_AllAndSomeone:
-		return "mention_all_someone"
-	default:
-		return ""
 	}
 }
 

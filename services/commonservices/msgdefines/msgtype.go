@@ -1,5 +1,7 @@
 package msgdefines
 
+import "im-server/commons/pbdefines/pbobjs"
+
 const (
 	MentionType_All        string = "mention_all"
 	MentionType_Someone    string = "mention_someone"
@@ -84,4 +86,30 @@ func (msg *StreamAppendMsg) GetStreamId() string {
 
 func (msg *StreamAppendMsg) GetMsgType() string {
 	return msg.msgType
+}
+
+func ToMentionTypeStr(mentionType pbobjs.MentionType) string {
+	switch mentionType {
+	case pbobjs.MentionType_All:
+		return MentionType_All
+	case pbobjs.MentionType_Someone:
+		return MentionType_Someone
+	case pbobjs.MentionType_AllAndSomeone:
+		return MentionType_AllSomeone
+	default:
+		return ""
+	}
+}
+
+func ToMentionTypePb(mentionTypeStr string) pbobjs.MentionType {
+	switch mentionTypeStr {
+	case MentionType_All:
+		return pbobjs.MentionType_All
+	case MentionType_Someone:
+		return pbobjs.MentionType_Someone
+	case MentionType_AllSomeone:
+		return pbobjs.MentionType_AllAndSomeone
+	default:
+		return pbobjs.MentionType_MentionDefault
+	}
 }

@@ -65,8 +65,9 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		}
 	} else if result == interceptors.InterceptorResult_Replace {
 		modifiedMsg = &pbobjs.DownMsg{
-			MsgType:    upMsg.MsgType,
-			MsgContent: upMsg.MsgContent,
+			MsgType:     upMsg.MsgType,
+			MsgContent:  upMsg.MsgContent,
+			MentionInfo: upMsg.MentionInfo,
 		}
 	} else if result == interceptors.InterceptorResult_Silent {
 		sendTime := time.Now().UnixMilli()
