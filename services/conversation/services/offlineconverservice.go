@@ -11,7 +11,7 @@ import (
 var offlineUserConverCache *caches.EphemeralCache
 
 func init() {
-	offlineUserConverCache = caches.NewEphemeralCache(time.Second, 5*time.Second, func(key, value interface{}) {
+	offlineUserConverCache = caches.NewEphemeralCache(time.Second, 300*time.Second, func(key, value interface{}) {
 		conver, ok := value.(*ConversationCacheItem)
 		if ok && conver != nil {
 			converStorage := storages.NewConversationStorage()

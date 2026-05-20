@@ -19,6 +19,9 @@ var userConverCache *caches.LruCache
 var userLocks *tools.SegmentatedLocks
 
 var persistCache *caches.EphemeralCache
+var persistSem chan struct{}
+
+const persistWorkerCount = 32
 
 type ConverPersistIndex struct {
 	Appkey      string
@@ -32,7 +35,8 @@ func init() {
 	userConverCache = caches.NewLruCacheWithReadTimeout("userconver_cache", 100000, nil, time.Hour)
 	userLocks = tools.NewSegmentatedLocks(512)
 
-	persistCache = caches.NewEphemeralCache(time.Second, 5*time.Second, func(key, value interface{}) {
+	persistSem = make(chan struct{}, persistWorkerCount)
+	persistCache = caches.NewEphemeralCache(time.Second, 60*time.Second, func(key, value interface{}) {
 		persistIndex, ok := value.(*ConverPersistIndex)
 		if ok && persistIndex != nil {
 			userConvers := getUserConvers(persistIndex.Appkey, persistIndex.UserId)
@@ -64,11 +68,17 @@ func init() {
 					ConverExts: item.ConverExts,
 					IsDeleted:  item.IsDeleted,
 				}
+				persistSem <- struct{}{}
 				storage := storages.NewConversationStorage()
-				err := storage.Upsert(conversation)
-				if err != nil {
-					fmt.Println("save conver err:", err)
-				}
+				go func() {
+					defer func() {
+						<-persistSem
+					}()
+					err := storage.Upsert(conversation)
+					if err != nil {
+						fmt.Println("save conver err:", err)
+					}
+				}()
 			}
 		}
 	})
