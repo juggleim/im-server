@@ -24,7 +24,7 @@ func GetDb() *gorm.DB {
 func InitMysql() error {
 	var err error
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?collation=utf8mb4_general_ci&parseTime=True&loc=Local",
 		configures.Config.Mysql.User,
 		configures.Config.Mysql.Password,
 		configures.Config.Mysql.Address,
@@ -60,7 +60,8 @@ func InitMysql() error {
 	}
 	sqlDB.SetMaxIdleConns(20)
 	sqlDB.SetMaxOpenConns(500)
-	sqlDB.SetConnMaxLifetime(time.Second * 9) // mysql连接默认10s断开
+	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetConnMaxIdleTime(30 * time.Minute)
 	return nil
 }
 
