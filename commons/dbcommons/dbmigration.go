@@ -1,10 +1,10 @@
 package dbcommons
 
 import (
-	"bufio"
 	"embed"
 	"fmt"
 	"im-server/commons/tools"
+	"io"
 	"sort"
 	"strings"
 )
@@ -82,10 +82,15 @@ func executeSqlFile(fileName string) error {
 	}
 	defer sqlFile.Close()
 
-	scanner := bufio.NewScanner(sqlFile)
+	content, err := io.ReadAll(sqlFile)
+	if err != nil {
+		fmt.Println("[DbMigration_Err]Read sql file content err:", err, "file_name:", fileName)
+		return err
+	}
+
 	var queryBuilder strings.Builder
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
+	for _, rawLine := range strings.Split(string(content), "\n") {
+		line := strings.TrimSpace(rawLine)
 		if strings.HasPrefix(line, "--") {
 			continue
 		}
