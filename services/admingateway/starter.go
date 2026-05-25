@@ -1,16 +1,16 @@
 package admingateway
 
 import (
-	"embed"
 	"fmt"
 	"im-server/commons/configures"
 	"im-server/commons/gmicro"
-	"im-server/services/admingateway/routers"
-	"net/http"
-	"strings"
-	"sync"
+	"im-server/commons/logs"
 
 	"github.com/gin-gonic/gin"
+	consoleConfigures "github.com/juggleim/imserver-console/commons/configures"
+	consoleDb "github.com/juggleim/imserver-console/commons/dbcommons"
+	consoleLogger "github.com/juggleim/imserver-console/commons/logs"
+	consoleRouters "github.com/juggleim/imserver-console/routers"
 	jimAdminRouters "github.com/juggleim/jugglechat-server/admins/routers"
 )
 
@@ -23,13 +23,23 @@ func (ser *AdminGateway) RegisterActors(register gmicro.IActorRegister) {
 }
 
 func (ser *AdminGateway) Startup(args map[string]interface{}) {
-	ser.httpServer = gin.Default()
-	ser.httpServer.HEAD("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, nil)
-	})
-	loadAdminWeb(ser.httpServer)
+	if err := consoleConfigures.InitConfigures(); err != nil {
+		fmt.Println("Init Console Configures failed", err)
+		return
+	}
+	consoleConfigures.Config.ImApiDomain = fmt.Sprintf("http://127.0.0.1:%d", configures.Config.GetApiPort())
+	consoleConfigures.Config.ImAdminDomain = fmt.Sprintf("http://127.0.0.1:%d", configures.Config.AdminGateway.HttpPort)
+	consoleConfigures.Config.AdminSecret = configures.Config.AdminSecret
+	consoleLogger.SetLogger(logs.GetInfoLogger(), logs.GetErrorLogger())
+	if err := consoleDb.InitMysql(); err != nil {
+		fmt.Println("Init Console Mysql failed", err)
+		return
+	}
+	consoleDb.Upgrade()
 
-	group := routers.Route(ser.httpServer, "admingateway")
+	ser.httpServer = gin.Default()
+	group := consoleRouters.Route(ser.httpServer, "admingateway")
+	consoleRouters.LoadJuggleChatAdminWeb(ser.httpServer)
 	jimAdminRouters.Route(group)
 
 	httpPort := configures.Config.AdminGateway.HttpPort
@@ -39,87 +49,4 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 
 func (ser *AdminGateway) Shutdown(force bool) {
 
-}
-
-//go:embed admin/*
-var adminFiles embed.FS
-
-func TestFile() {
-	files, err := adminFiles.ReadDir("admin/assets")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	for _, f := range files {
-		if !f.IsDir() {
-			fmt.Println(f.Name())
-		}
-	}
-}
-
-func loadAdminWeb(httpServer *gin.Engine) {
-	files, err := adminFiles.ReadDir("admin/assets")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	for _, f := range files {
-		if !f.IsDir() {
-			httpServer.GET("/assets/"+f.Name(), assetsFile)
-		}
-	}
-
-	httpServer.GET("/", dashboardPage)
-	httpServer.GET("/dashboard", dashboardPage)
-	httpServer.GET("/login", dashboardPage)
-	// httpServer.GET("/:param1", dashboardPage)
-	// httpServer.GET("/:param1/:param2", dashboardPage)
-	// httpServer.GET("/:param1/:param2/:param3", dashboardPage)
-}
-
-func dashboardPage(ctx *gin.Context) {
-	ctx.Writer.Header().Add("Content-Type", "text/html; charset=utf-8")
-
-	var body string
-	cacheBody, ok := htmlCache.Load("index.html")
-	if ok {
-		body = cacheBody.(string)
-	} else {
-		body = ReadFromFile("admin/index.html")
-		htmlCache.Store("index.html", body)
-	}
-	ctx.String(200, body)
-}
-
-var htmlCache sync.Map
-
-func assetsFile(ctx *gin.Context) {
-	filePath := ctx.Request.URL.Path
-	if strings.HasSuffix(filePath, ".js") {
-		ctx.Writer.Header().Add("Content-Type", "application/javascript")
-	} else if strings.HasSuffix(filePath, ".css") {
-		ctx.Writer.Header().Add("Content-Type", "text/css")
-	} else if strings.HasSuffix(filePath, ".png") {
-		ctx.Writer.Header().Add("Content-Type", "image/png")
-	} else if strings.HasSuffix(filePath, ".ico") {
-		ctx.Writer.Header().Add("Content-Type", "image/x-icon")
-	}
-	var body string
-	if cacheBody, ok := htmlCache.Load(filePath); ok {
-		body = cacheBody.(string)
-	} else {
-		body = ReadFromFile("admin" + filePath)
-		htmlCache.Store(filePath, body)
-	}
-	ctx.String(200, body)
-}
-
-func ReadFromFile(path string) string {
-	// bs, err := os.ReadFile(path)
-	bs, err := adminFiles.ReadFile(path)
-	if err != nil {
-		fmt.Println("read file failed:", err)
-		return ""
-	}
-	return string(bs)
 }
