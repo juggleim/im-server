@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -67,27 +68,28 @@ func (server *ImWebsocketServer) ImWsServer(w http.ResponseWriter, r *http.Reque
 		clientHost = strings.TrimSpace(r.Host)
 	}
 	child := &ImWebsocketChild{
-		stopChan:         make(chan bool, 1),
-		wsConn:           conn,
-		isActive:         true,
-		messageListener:  server.MessageListener,
-		latestActiveTime: time.Now().UnixMilli(),
+		stopChan:        make(chan struct{}),
+		wsConn:          conn,
+		messageListener: server.MessageListener,
 	}
+	child.isActive.Store(true)
+	child.latestActiveTime.Store(time.Now().UnixMilli())
+
 	utils.SafeGo(func() {
 		child.startWsListener(referer, clientIp, clientHost)
 	})
 }
-func (server *ImWebsocketServer) Stop() {
 
-}
+func (server *ImWebsocketServer) Stop() {}
 
 type ImWebsocketChild struct {
-	stopChan         chan bool
+	stopChan         chan struct{}
 	wsConn           *websocket.Conn
-	isActive         bool
+	isActive         atomic.Bool
 	messageListener  ImListener
-	latestActiveTime int64
+	latestActiveTime atomic.Int64
 	ticker           *time.Ticker
+	stopOnce         sync.Once
 }
 
 func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost string) {
@@ -106,23 +108,34 @@ func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost str
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientIp, clientIp)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientHost, clientHost)
 
-	//start ticker
+	// 设置读超时，防止半开连接永久阻塞
+	child.wsConn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	child.wsConn.SetPongHandler(func(string) error {
+		child.wsConn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		child.latestActiveTime.Store(time.Now().UnixMilli())
+		return nil
+	})
+
+	// start ticker
 	child.startTicker(ctx, handler)
 
-	for child.isActive {
+	for child.isActive.Load() {
 		_, message, err := child.wsConn.ReadMessage()
-		//record
-		child.latestActiveTime = time.Now().UnixMilli()
+		// record
+		child.latestActiveTime.Store(time.Now().UnixMilli())
 
 		if err != nil {
-			if child.isActive {
+			if child.isActive.Load() {
 				child.Stop()
 				handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_NET_ERR, err)
 			}
 			break
 		}
 
-		//decode
+		// 重置读超时，防止下一次 ReadMessage 因 deadline 过期立即报错
+		child.wsConn.SetReadDeadline(time.Now().Add(60 * time.Second))
+
+		// decode
 		wsMsg := &codec.ImWebsocketMsg{}
 		err = tools.PbUnMarshal(message, wsMsg)
 		if err != nil {
@@ -132,7 +145,7 @@ func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost str
 			break
 		}
 
-		//decrypt
+		// decrypt
 		wsMsg.Decrypt(ctx)
 
 		handler.HandleRead(ctx, wsMsg)
@@ -150,8 +163,17 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 		for {
 			select {
 			case <-ticker.C:
+				if !child.isActive.Load() {
+					return
+				}
+				// 发送 Ping 检测连接是否存活
+				if err := child.wsConn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(5*time.Second)); err != nil {
+					child.Stop()
+					handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT, err)
+					return
+				}
 				current := time.Now().UnixMilli()
-				interval := current - child.latestActiveTime
+				interval := current - child.latestActiveTime.Load()
 				if interval > 300*1000 {
 					child.Stop()
 					handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT, errors.New("user inactive more than 5min"))
@@ -165,14 +187,13 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 }
 
 func (child *ImWebsocketChild) Stop() {
-	if child.isActive {
-		child.isActive = false
-		child.stopChan <- true
+	child.stopOnce.Do(func() {
+		child.isActive.Store(false)
 		if child.wsConn != nil {
 			child.wsConn.Close()
 		}
 		close(child.stopChan)
-	}
+	})
 }
 
 type WsHandleContextImpl struct {
@@ -186,7 +207,7 @@ func (ctx *WsHandleContextImpl) Write(message interface{}) {
 	imMsg, ok := message.(codec.IMessage)
 	if ok {
 		wsImMsg := imMsg.ToImWebsocketMsg()
-		//encrypt
+		// encrypt
 		wsImMsg.Encrypt(ctx)
 		bs, err := tools.PbMarshal(wsImMsg)
 		if err == nil {
@@ -217,12 +238,11 @@ func (ctx *WsHandleContextImpl) SetAttachment(attachment imcontext.Attachment) {
 	ctx.attachment = attachment
 }
 func (ctx *WsHandleContextImpl) IsActive() bool {
-	return ctx.wsChild.isActive
+	return ctx.wsChild.isActive.Load()
 }
 func (ctx *WsHandleContextImpl) RemoteAddr() string {
 	if ctx.conn != nil {
 		return ctx.conn.RemoteAddr().String()
-	} else {
-		return ""
 	}
+	return ""
 }
