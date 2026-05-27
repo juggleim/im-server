@@ -90,6 +90,7 @@ type ImWebsocketChild struct {
 	latestActiveTime atomic.Int64
 	ticker           *time.Ticker
 	stopOnce         sync.Once
+	writeLock        sync.Mutex
 }
 
 func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost string) {
@@ -97,7 +98,6 @@ func (child *ImWebsocketChild) startWsListener(referer, clientIp, clientHost str
 	ctx := &WsHandleContextImpl{
 		conn:       child.wsConn,
 		wsChild:    child,
-		lock:       &sync.RWMutex{},
 		attachment: &sync.Map{},
 	}
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ConnectSession, tools.GenerateUUIDShort11())
@@ -166,8 +166,11 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 				if !child.isActive.Load() {
 					return
 				}
-				// 发送 Ping 检测连接是否存活
-				if err := child.wsConn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(5*time.Second)); err != nil {
+				// 发送 Ping 检测连接是否存活（与业务写共用 writeLock，满足 gorilla 串行写要求）
+				child.writeLock.Lock()
+				err := child.wsConn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(5*time.Second))
+				child.writeLock.Unlock()
+				if err != nil {
 					child.Stop()
 					handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT, err)
 					return
@@ -200,7 +203,6 @@ type WsHandleContextImpl struct {
 	wsChild    *ImWebsocketChild
 	conn       *websocket.Conn
 	attachment interface{}
-	lock       *sync.RWMutex
 }
 
 func (ctx *WsHandleContextImpl) Write(message interface{}) {
@@ -211,8 +213,8 @@ func (ctx *WsHandleContextImpl) Write(message interface{}) {
 		wsImMsg.Encrypt(ctx)
 		bs, err := tools.PbMarshal(wsImMsg)
 		if err == nil {
-			ctx.lock.Lock()
-			defer ctx.lock.Unlock()
+			ctx.wsChild.writeLock.Lock()
+			defer ctx.wsChild.writeLock.Unlock()
 			_ = ctx.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 			err = ctx.conn.WriteMessage(websocket.BinaryMessage, bs)
 			if err != nil {

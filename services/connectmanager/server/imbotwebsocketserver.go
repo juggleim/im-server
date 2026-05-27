@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -32,24 +33,27 @@ func (server *ImWebsocketServer) ImBotServer(w http.ResponseWriter, r *http.Requ
 		clientHost = strings.TrimSpace(r.Host)
 	}
 	child := &ImBotWebsocketChild{
-		stopChan:         make(chan bool, 1),
-		wsConn:           conn,
-		isActive:         true,
-		messageListener:  server.BotMsgListener,
-		latestActiveTime: time.Now().UnixMilli(),
+		stopChan:        make(chan struct{}),
+		wsConn:          conn,
+		messageListener: server.BotMsgListener,
 	}
+	child.isActive.Store(true)
+	child.latestActiveTime.Store(time.Now().UnixMilli())
+
 	utils.SafeGo(func() {
 		child.startWsListener(clientIp, clientHost)
 	})
 }
 
 type ImBotWebsocketChild struct {
-	stopChan         chan bool
+	stopChan         chan struct{}
 	wsConn           *websocket.Conn
-	isActive         bool
+	isActive         atomic.Bool
 	messageListener  ImListener
-	latestActiveTime int64
+	latestActiveTime atomic.Int64
 	ticker           *time.Ticker
+	stopOnce         sync.Once
+	writeLock        sync.Mutex
 }
 
 func (child *ImBotWebsocketChild) startWsListener(clientIp, clientHost string) {
@@ -57,7 +61,6 @@ func (child *ImBotWebsocketChild) startWsListener(clientIp, clientHost string) {
 	ctx := &BotWsHandleContextImpl{
 		conn:       child.wsConn,
 		wsChild:    child,
-		lock:       &sync.RWMutex{},
 		attachment: &sync.Map{},
 	}
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ConnectSession, tools.GenerateUUIDShort11())
@@ -67,19 +70,28 @@ func (child *ImBotWebsocketChild) startWsListener(clientIp, clientHost string) {
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientIp, clientIp)
 	imcontext.SetContextAttr(ctx, imcontext.StateKey_ClientHost, clientHost)
 
+	child.wsConn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	child.wsConn.SetPongHandler(func(string) error {
+		child.wsConn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		child.latestActiveTime.Store(time.Now().UnixMilli())
+		return nil
+	})
+
 	child.startTicker(ctx, handler)
 
-	for child.isActive {
+	for child.isActive.Load() {
 		_, message, err := child.wsConn.ReadMessage()
-		child.latestActiveTime = time.Now().UnixMilli()
+		child.latestActiveTime.Store(time.Now().UnixMilli())
 
 		if err != nil {
-			if child.isActive {
+			if child.isActive.Load() {
 				child.Stop()
 				handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_NET_ERR, err)
 			}
 			break
 		}
+
+		child.wsConn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
 		wsMsg := &codec.ImWebsocketMsg{}
 		err = tools.PbUnMarshal(message, wsMsg)
@@ -105,8 +117,19 @@ func (child *ImBotWebsocketChild) startTicker(ctx imcontext.WsHandleContext, han
 		for {
 			select {
 			case <-ticker.C:
+				if !child.isActive.Load() {
+					return
+				}
+				child.writeLock.Lock()
+				err := child.wsConn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(5*time.Second))
+				child.writeLock.Unlock()
+				if err != nil {
+					child.Stop()
+					handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT, err)
+					return
+				}
 				current := time.Now().UnixMilli()
-				interval := current - child.latestActiveTime
+				interval := current - child.latestActiveTime.Load()
 				if interval > 300*1000 {
 					child.Stop()
 					handler.HandleException(ctx, errs.IMErrorCode_CONNECT_CLOSE_HEARTBEAT_TIMEOUT, errors.New("bot inactive more than 5min"))
@@ -120,21 +143,19 @@ func (child *ImBotWebsocketChild) startTicker(ctx imcontext.WsHandleContext, han
 }
 
 func (child *ImBotWebsocketChild) Stop() {
-	if child.isActive {
-		child.isActive = false
-		child.stopChan <- true
+	child.stopOnce.Do(func() {
+		child.isActive.Store(false)
 		if child.wsConn != nil {
 			child.wsConn.Close()
 		}
 		close(child.stopChan)
-	}
+	})
 }
 
 type BotWsHandleContextImpl struct {
 	wsChild    *ImBotWebsocketChild
 	conn       *websocket.Conn
 	attachment interface{}
-	lock       *sync.RWMutex
 }
 
 func (ctx *BotWsHandleContextImpl) Write(message interface{}) {
@@ -143,8 +164,8 @@ func (ctx *BotWsHandleContextImpl) Write(message interface{}) {
 		wsImMsg := imMsg.ToImWebsocketMsg()
 		bs, err := tools.PbMarshal(wsImMsg)
 		if err == nil {
-			ctx.lock.Lock()
-			defer ctx.lock.Unlock()
+			ctx.wsChild.writeLock.Lock()
+			defer ctx.wsChild.writeLock.Unlock()
 			_ = ctx.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 			ctx.conn.WriteMessage(websocket.BinaryMessage, bs)
 		} else {
@@ -170,7 +191,7 @@ func (ctx *BotWsHandleContextImpl) SetAttachment(attachment imcontext.Attachment
 }
 
 func (ctx *BotWsHandleContextImpl) IsActive() bool {
-	return ctx.wsChild.isActive
+	return ctx.wsChild.isActive.Load()
 }
 
 func (ctx *BotWsHandleContextImpl) RemoteAddr() string {
