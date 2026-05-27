@@ -10,12 +10,10 @@ type SinglePools struct {
 	lock      *sync.RWMutex
 	isBlocked bool
 }
-
 type SinglePool struct {
 	taskChan  chan func()
 	isActived atomic.Bool
-	isBlocked bool
-	done      chan struct{}
+	isBlocked atomic.Bool
 }
 
 func NewSinglePools(count int, isBlocked bool) *SinglePools {
@@ -36,10 +34,10 @@ func (pools *SinglePools) GetPool(key string) *SinglePool {
 		pool = pools.pools[index]
 		if pool == nil {
 			pool = &SinglePool{
-				taskChan:  make(chan func(), 100),
-				isBlocked: pools.isBlocked,
+				taskChan: make(chan func(), 100),
 			}
 			pool.isActived.Store(true)
+			pool.isBlocked.Store(pools.isBlocked)
 			pools.pools[index] = pool
 			pool.Start()
 		}
@@ -48,40 +46,32 @@ func (pools *SinglePools) GetPool(key string) *SinglePool {
 }
 
 func (pool *SinglePool) Start() {
-	pool.done = make(chan struct{})
 	go func() {
-		for {
-			select {
-			case task := <-pool.taskChan:
+		for pool.isActived.Load() {
+			task := <-pool.taskChan
+			func() {
+				defer func() {
+					recover()
+				}()
 				task()
-			case <-pool.done:
-				// 把队列里剩余任务消费完再退出
-				for task := range pool.taskChan {
-					task()
-				}
-				return
-			}
+			}()
 		}
+		close(pool.taskChan)
 	}()
-}
-
-func (pool *SinglePool) Stop() {
-	if pool.isActived.CompareAndSwap(true, false) {
-		close(pool.done)
-	}
 }
 
 func (pool *SinglePool) Submit(task func()) bool {
 	if pool.isActived.Load() {
-		if pool.isBlocked {
+		if pool.isBlocked.Load() {
 			pool.taskChan <- task
 			return true
-		}
-		select {
-		case pool.taskChan <- task:
-			return true
-		default:
-			return false
+		} else {
+			select {
+			case pool.taskChan <- task:
+				return true
+			default:
+				return false
+			}
 		}
 	}
 	return false
