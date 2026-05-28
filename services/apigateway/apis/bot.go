@@ -8,6 +8,8 @@ import (
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/tokens"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/proto"
@@ -30,47 +32,56 @@ func RegisterBot(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	settings := []*pbobjs.KvItem{}
-	settings = append(settings, &pbobjs.KvItem{
-		Key:   string(commonservices.AttItemKey_Bot_Type),
-		Value: tools.Int642String(int64(commonservices.BotType_Default)),
-	})
-	if botInfo.BotConf != nil {
+	appkey := services.GetAppkeyFromCtx(ctx)
+	appinfo, exist := commonservices.GetAppInfo(appkey)
+	if exist && appinfo != nil {
+		settings := []*pbobjs.KvItem{}
 		settings = append(settings, &pbobjs.KvItem{
-			Key:   string(commonservices.AttItemKey_Bot_BotConf),
-			Value: tools.ToJson(botInfo.BotConf),
+			Key:   string(commonservices.AttItemKey_Bot_Type),
+			Value: tools.Int642String(int64(commonservices.BotType_Default)),
 		})
-	}
-	if botInfo.BotSettings != nil {
-		settings = append(settings, &pbobjs.KvItem{
-			Key:   string(commonservices.AttItemKey_Bot_Settings),
-			Value: tools.ToJson(botInfo.BotSettings),
+		if botInfo.BotConf != nil {
+			settings = append(settings, &pbobjs.KvItem{
+				Key:   string(commonservices.AttItemKey_Bot_BotConf),
+				Value: tools.ToJson(botInfo.BotConf),
+			})
+		}
+		if botInfo.BotSettings != nil {
+			settings = append(settings, &pbobjs.KvItem{
+				Key:   string(commonservices.AttItemKey_Bot_Settings),
+				Value: tools.ToJson(botInfo.BotSettings),
+			})
+		}
+		code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "add_bot", botInfo.BotId, &pbobjs.UserInfo{
+			UserId:       botInfo.BotId,
+			Nickname:     botInfo.Nickname,
+			UserPortrait: botInfo.Portrait,
+			ExtFields:    commonservices.Map2KvItems(botInfo.ExtFields),
+			Settings:     settings,
+		}, func() proto.Message {
+			return &pbobjs.UserRegResp{}
 		})
+		if err != nil {
+			tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+			return
+		}
+		if code > 0 {
+			tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+			return
+		}
+		token := tokens.ImToken{
+			AppKey:    appkey,
+			UserId:    botInfo.BotId,
+			DeviceId:  "",
+			TokenTime: time.Now().UnixMilli(),
+			UserType:  pbobjs.UserType_Bot,
+		}
+		tokenStr, _ := token.ToTokenString([]byte(appinfo.AppSecureKey))
+		tools.SuccessHttpResp(ctx, models.UserRegResp{
+			UserId: botInfo.BotId,
+			Token:  tokenStr,
+		})
+	} else {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_APP_NOT_EXISTED)
 	}
-	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "add_bot", botInfo.BotId, &pbobjs.UserInfo{
-		UserId:       botInfo.BotId,
-		Nickname:     botInfo.Nickname,
-		UserPortrait: botInfo.Portrait,
-		ExtFields:    commonservices.Map2KvItems(botInfo.ExtFields),
-		Settings:     settings,
-	}, func() proto.Message {
-		return &pbobjs.UserRegResp{}
-	})
-	if err != nil {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
-		return
-	}
-	if code > 0 {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
-		return
-	}
-	rpcResp, ok := resp.(*pbobjs.UserRegResp)
-	if !ok {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_RESP_FAIL)
-		return
-	}
-	tools.SuccessHttpResp(ctx, models.UserRegResp{
-		UserId: botInfo.BotId,
-		Token:  rpcResp.Token,
-	})
 }
