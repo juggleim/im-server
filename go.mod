@@ -9,7 +9,7 @@ require (
 	github.com/avast/retry-go/v4 v4.5.1
 	github.com/aws/aws-sdk-go v1.55.7
 	github.com/google/uuid v1.6.0
-	github.com/juggleim/imserver-console v1.0.4
+	github.com/juggleim/imserver-console v1.0.5
 	github.com/levigross/grequests v0.0.0-20231203190023-9c307ef1f48d
 	github.com/minio/minio-go/v7 v7.0.93
 	github.com/qiniu/go-sdk/v7 v7.25.4
