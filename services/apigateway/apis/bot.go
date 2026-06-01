@@ -85,3 +85,32 @@ func RegisterBot(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_APP_NOT_EXISTED)
 	}
 }
+
+func UpdateBot(ctx *gin.Context) {
+	var botInfo models.BotInfo
+	if err := ctx.BindJSON(&botInfo); err != nil || botInfo.BotId == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	settings := []*pbobjs.KvItem{}
+	if botInfo.BotConf != nil {
+		settings = append(settings, &pbobjs.KvItem{
+			Key:   string(commonservices.AttItemKey_Bot_BotConf),
+			Value: tools.ToJson(botInfo.BotConf),
+		})
+	}
+	if botInfo.BotSettings != nil {
+		settings = append(settings, &pbobjs.KvItem{
+			Key:   string(commonservices.AttItemKey_Bot_Settings),
+			Value: tools.ToJson(botInfo.BotSettings),
+		})
+	}
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, ""), "upd_user_info", botInfo.BotId, &pbobjs.UserInfo{
+		UserId:       botInfo.BotId,
+		Nickname:     botInfo.Nickname,
+		UserPortrait: botInfo.Portrait,
+		ExtFields:    commonservices.Map2KvItems(botInfo.ExtFields),
+		Settings:     settings,
+	})
+	tools.SuccessHttpResp(ctx, nil)
+}

@@ -24,6 +24,7 @@ func Route(eng *gin.Engine, prefix string) {
 	group.GET("/users/blockusers/query", apis.QryBlockUsers)
 
 	group.POST("/bots/register", apis.RegisterBot)
+	group.POST("/bots/update", apis.UpdateBot)
 
 	group.POST("/messages/private/send", apis.SendPrivateMsg)
 	group.POST("/messages/system/send", apis.SendSystemMsg)
