@@ -115,7 +115,7 @@ func QryFriends(ctx *gin.Context) {
 
 func SetFriendDisplayName(ctx *gin.Context) {
 	var req models.FriendItem
-	if err := ctx.BindJSON(&req); err != nil || req.UserId == "" || req.FriendId == "" || req.DisplayName == "" {
+	if err := ctx.BindJSON(&req); err != nil || req.UserId == "" || req.FriendId == "" {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
