@@ -41,7 +41,8 @@ func InitMysql() error {
 			NameReplacer:  nil,
 			TablePrefix:   "",
 		},
-		Logger: &dbLogger{logLevel: logLevel},
+		Logger:                 &dbLogger{logLevel: logLevel},
+		SkipDefaultTransaction: true,
 	})
 
 	if err != nil {
