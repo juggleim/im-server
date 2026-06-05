@@ -102,6 +102,9 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 		if msg.ChannelType != pbobjs.ChannelType_Private && msg.ChannelType != pbobjs.ChannelType_Group {
 			return
 		}
+		if msgdefines.IsStateMsg(msg.Flags) || msgdefines.IsCmdMsg(msg.Flags) {
+			return
+		}
 		if msg.ChannelType == pbobjs.ChannelType_Group {
 			onlyMentioned := true
 			if targetUserInfo.BotSettings != nil {

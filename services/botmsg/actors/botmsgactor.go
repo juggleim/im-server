@@ -17,7 +17,7 @@ type BotMsgActor struct {
 func (actor *BotMsgActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.DownMsg); ok {
 		botId := bases.GetTargetIdFromCtx(ctx)
-		logs.WithContext(ctx).Infof("sender_id:%s\tgroup_id:%s\tbot_id:%s\tchannel_type:%d\tmsg_id:%s", req.SenderId, req.TargetId, botId, req.ChannelType, req.MsgId)
+		logs.WithContext(ctx).Infof("sender_id:%s\ttarget_id:%s\tbot_id:%s\tchannel_type:%d\tmsg_id:%s\tmsg_type:%s", req.SenderId, req.TargetId, botId, req.ChannelType, req.MsgId, req.MsgType)
 		services.HandleBotMsg(ctx, req)
 	} else {
 		logs.WithContext(ctx).Errorf("input is illigal.")
