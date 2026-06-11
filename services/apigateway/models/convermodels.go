@@ -35,3 +35,10 @@ type TagConversReq struct {
 
 	Convers []*Conversation `json:"convers"`
 }
+
+type CreateConverTagReq struct {
+	UserId   string `json:"user_id"`
+	Tag      string `json:"tag"`
+	TagName  string `json:"tag_name"`
+	TagOrder int32  `json:"tag_order"`
+}

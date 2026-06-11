@@ -266,6 +266,35 @@ func QryGlobalConvers(ctx *gin.Context) {
 	tools.SuccessHttpResp(ctx, ret)
 }
 
+func CreateConverTag(ctx *gin.Context) {
+	var req models.CreateConverTagReq
+	if err := ctx.BindJSON(&req); err != nil || req.UserId == "" || req.Tag == "" {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, req.UserId), "create_user_conver_tags", req.UserId, &pbobjs.UserConverTags{
+		Tags: []*pbobjs.ConverTag{
+			{
+				Tag:      req.Tag,
+				TagName:  req.TagName,
+				TagType:  pbobjs.ConverTagType_UserConverTag,
+				TagOrder: req.TagOrder,
+			},
+		},
+	}, func() proto.Message {
+		return &pbobjs.UserConverTags{}
+	})
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_RESP_FAIL)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, code)
+		return
+	}
+	tools.SuccessHttpResp(ctx, nil)
+}
+
 func TagConvers(ctx *gin.Context) {
 	var tagConvers models.TagConversReq
 	if err := ctx.BindJSON(&tagConvers); err != nil || len(tagConvers.Convers) <= 0 || tagConvers.UserId == "" || tagConvers.Tag == "" {
