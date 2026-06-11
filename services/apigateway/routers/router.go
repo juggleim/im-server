@@ -75,9 +75,9 @@ func Route(eng *gin.Engine, prefix string) {
 	group.POST("/convers/clearunread", apis.ClearConverUnread)
 	group.POST("/convers/top", apis.TopConversations)
 	group.GET("/convers/query", apis.QryConvers)
+	group.POST("/convers/tags/create", apis.CreateConverTag)
 	group.POST("/convers/tags/add", apis.TagConvers)
 	group.POST("/convers/tags/del", apis.UnTagConvers)
-
 	group.GET("/globalconvers/query", apis.QryGlobalConvers)
 
 	group.GET("/usertags/query", apis.QryUserTags)
