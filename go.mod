@@ -231,5 +231,3 @@ require (
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.1
 )
-
-replace github.com/juggleim/jugglechat-server v1.1.19 => ../jugglechat-server
