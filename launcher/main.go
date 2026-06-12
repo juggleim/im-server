@@ -169,6 +169,8 @@ func RouteJuggleChat(mux *http.ServeMux) {
 
 	ginEngine := gin.Default()
 	jimRouters.Route(ginEngine, "jim")
+	jimRouters.LoadWebIM(ginEngine)
 
+	mux.Handle("/", ginEngine)
 	mux.Handle("/jim/", ginEngine)
 }

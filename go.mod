@@ -213,7 +213,7 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/juggleim/imserver-sdk-go v1.0.14 // indirect
-	github.com/juggleim/jugglechat-server v1.1.18
+	github.com/juggleim/jugglechat-server v1.1.19
 	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/livekit/protocol v1.39.3
@@ -231,3 +231,5 @@ require (
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.1
 )
+
+replace github.com/juggleim/jugglechat-server v1.1.19 => ../jugglechat-server

@@ -20,7 +20,7 @@ func (ser *ApiGateway) RegisterActors(register gmicro.IActorRegister) {
 }
 
 func (ser *ApiGateway) Startup(args map[string]interface{}) {
-	if configures.Config.ApiGateway.HttpPort > 0 {
+	if configures.Config.GetApiPort() > 0 {
 		ser.httpServer = gin.Default()
 		ser.httpServer.GET("/", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, "ok-ok")
@@ -30,7 +30,7 @@ func (ser *ApiGateway) Startup(args map[string]interface{}) {
 		})
 		routers.Route(ser.httpServer, "apigateway")
 
-		httpPort := configures.Config.ApiGateway.HttpPort
+		httpPort := configures.Config.GetApiPort()
 		go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
 		fmt.Println("Startup apigateway with port:", httpPort)
 	}

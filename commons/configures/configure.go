@@ -20,7 +20,6 @@ const (
 )
 
 type ImConfig struct {
-	DefaultPort    int    `yaml:"defaultPort"`
 	NodeName       string `yaml:"nodeName"`
 	NodeHost       string `yaml:"nodeHost"`
 	MsgStoreEngine string `yaml:"msgStoreEngine"`
@@ -74,11 +73,7 @@ type ImConfig struct {
 }
 
 func (conf ImConfig) GetApiPort() int {
-	apiPort := conf.ApiGateway.HttpPort
-	if apiPort <= 0 {
-		apiPort = conf.ConnectManager.WsPort
-	}
-	return apiPort
+	return conf.ApiGateway.HttpPort
 }
 
 var Config ImConfig
@@ -101,8 +96,8 @@ func InitConfigures() error {
 		if Config.MsgStoreEngine == "" {
 			Config.MsgStoreEngine = MsgStoreEngine_MySQL
 		}
-		if Config.ConnectManager.WsPort <= 0 {
-			Config.ConnectManager.WsPort = Config.DefaultPort
+		if Config.ApiGateway.HttpPort <= 0 {
+			Config.ApiGateway.HttpPort = 9001
 		}
 		if Config.ConnectManager.WsPort <= 0 {
 			Config.ConnectManager.WsPort = 9003

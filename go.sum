@@ -322,6 +322,8 @@ github.com/juggleim/imserver-sdk-go v1.0.14 h1:S9NHMHFW7GvpsPw/A+8XhBy9d7uHE6YQd
 github.com/juggleim/imserver-sdk-go v1.0.14/go.mod h1:lHWG8Xl6/SvuH7mT+nnz1prkMzrkX96oHjyguvVthUI=
 github.com/juggleim/jugglechat-server v1.1.18 h1:MMIsWQLb5cnVl5V6Ftv4Az4WugovkN2MSyhTLTez7kY=
 github.com/juggleim/jugglechat-server v1.1.18/go.mod h1:sSiJa1EoETaA2OJgGEuZpA25Gt0ilY+yPmcay5SZUVk=
+github.com/juggleim/jugglechat-server v1.1.19 h1:9d9iXJk2YZamVOQJ1jyFA9S4E3efrsc8PZRjxO8KDho=
+github.com/juggleim/jugglechat-server v1.1.19/go.mod h1:sSiJa1EoETaA2OJgGEuZpA25Gt0ilY+yPmcay5SZUVk=
 github.com/jxskiss/base62 v1.1.0 h1:A5zbF8v8WXx2xixnAKD2w+abC+sIzYJX+nxmhA6HWFw=
 github.com/jxskiss/base62 v1.1.0/go.mod h1:HhWAlUXvxKThfOlZbcuFzsqwtF5TcqS9ru3y5GfjWAc=
 github.com/kataras/i18n v0.0.8 h1:thiDRqq4fN2sQOK5CwR5Yh1yT7swP6B3wnadILhqjhk=
