@@ -1,6 +1,7 @@
 package commonservices
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -16,6 +17,26 @@ func InitDefaultHttpServer() {
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"version":"%s"}`, "1.8.6")
+	})
+	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Content-Type", "application/json")
+
+		data, err := CollectPerformanceMetricsSnapshot()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"code": 500,
+				"msg":  err.Error(),
+			})
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(data)
 	})
 }
 

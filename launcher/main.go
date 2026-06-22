@@ -130,7 +130,9 @@ func main() {
 	imstarters.Loaded(&botmsg.BotMsgManager{})
 	imstarters.Loaded(&rtcroom.RtcRoomManager{})
 
+	commonservices.StartPerformanceMetricsCollect()
 	imstarters.Startup()
+	commonservices.StartUserActivityCleanupTask()
 	fmt.Println("expand:", time.Since(start))
 
 	closeChan := make(chan struct{})
@@ -140,6 +142,7 @@ func main() {
 		<-sigChan
 		imstarters.Shutdown(true)
 		signal.Stop(sigChan)
+		commonservices.StopUserActivityCleanupTask()
 		tasks.StopTaskExecute()
 		close(closeChan)
 	}()

@@ -6,6 +6,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices/dbs"
+	"im-server/services/commonservices/logs"
 	"im-server/services/usermanager/storages"
 	"sync/atomic"
 	"time"
@@ -15,9 +16,10 @@ type StatType int
 type ConnectType int
 
 var (
-	statCache           *caches.LruCache
-	userActivitiesCache *caches.LruCache
-	statLocks           *tools.SegmentatedLocks
+	statCache            *caches.LruCache
+	realtimeMsgStatCache *caches.LruCache
+	userActivitiesCache  *caches.LruCache
+	statLocks            *tools.SegmentatedLocks
 
 	StatType_Up       StatType = 1
 	StatType_Dispatch StatType = 2
@@ -33,6 +35,14 @@ func init() {
 		dao := dbs.MsgStatDao{}
 		dao.IncrByStep(counter.Appkey, int(counter.StateType), int(counter.ChannelType), getDbTimeMark(), counter.Count)
 	}, 10*time.Minute, 10*time.Minute)
+	realtimeMsgStatCache = caches.NewLruCacheWithAddReadTimeout("realtime_msgstat_cache", 1000, func(key, value interface{}) {
+		counter := value.(*Counter)
+		dao := dbs.MsgRealtimeStatDao{}
+		err := dao.IncrByStep(counter.Appkey, int(counter.StateType), int(counter.ChannelType), getRealtimeDbTimeMark(), counter.Count)
+		if err != nil {
+			logs.NewLogEntity().Error(err.Error())
+		}
+	}, 30*time.Second, 30*time.Second)
 	userActivitiesCache = caches.NewLruCacheWithAddReadTimeout("useractivity_cache", 10000, func(key, value interface{}) {
 		counter := value.(*UserActivityCounter)
 		dao := dbs.UserActivityDao{}
@@ -160,16 +170,28 @@ func ReportUserLogin(appkey string, userId string) {
 func ReportUpMsg(appkey string, channelType pbobjs.ChannelType, step int64) {
 	counter := getCounter(appkey, StatType_Up, channelType)
 	counter.IncrByStep(step)
+	if isOpenRealTimeMsgStatistic(appkey) {
+		realtimeCounter := getRealtimeMsgStatCounter(appkey, StatType_Up, channelType)
+		realtimeCounter.IncrByStep(step)
+	}
 }
 
 func ReportDispatchMsg(appkey string, channelType pbobjs.ChannelType, step int64) {
 	counter := getCounter(appkey, StatType_Dispatch, channelType)
 	counter.IncrByStep(step)
+	if isOpenRealTimeMsgStatistic(appkey) {
+		realtimeCounter := getRealtimeMsgStatCounter(appkey, StatType_Dispatch, channelType)
+		realtimeCounter.IncrByStep(step)
+	}
 }
 
 func ReportDownMsg(appkey string, channelType pbobjs.ChannelType, step int64) {
 	counter := getCounter(appkey, StatType_Down, channelType)
 	counter.IncrByStep(step)
+	if isOpenRealTimeMsgStatistic(appkey) {
+		realtimeCounter := getRealtimeMsgStatCounter(appkey, StatType_Down, channelType)
+		realtimeCounter.IncrByStep(step)
+	}
 }
 
 func getCounter(appkey string, statType StatType, channelType pbobjs.ChannelType) *Counter {
@@ -191,6 +213,32 @@ func getCounter(appkey string, statType StatType, channelType pbobjs.ChannelType
 			return counter
 		}
 	}
+}
+
+func getRealtimeMsgStatCounter(appkey string, statType StatType, channelType pbobjs.ChannelType) *Counter {
+	key := fmt.Sprintf("%s_%d_%d", appkey, channelType, statType)
+	if counterObj, exist := realtimeMsgStatCache.Get(key); exist {
+		counter := counterObj.(*Counter)
+		return counter
+	} else {
+		lock := statLocks.GetLocks(key)
+		lock.Lock()
+		defer lock.Unlock()
+
+		if counterObj, exist := realtimeMsgStatCache.Get(key); exist {
+			counter := counterObj.(*Counter)
+			return counter
+		} else {
+			counter := NewCounter(appkey, int64(statType), int64(channelType))
+			realtimeMsgStatCache.Add(key, counter)
+			return counter
+		}
+	}
+}
+
+func isOpenRealTimeMsgStatistic(appkey string) bool {
+	appInfo, exist := GetAppInfo(appkey)
+	return exist && appInfo != nil && appInfo.OpenRealTimeMsgStatistic
 }
 
 func getUserActivityCounter(appkey, userId string) *UserActivityCounter {
@@ -244,6 +292,11 @@ func getDbTimeMark() int64 {
 	current := time.Now().Unix()
 	var day int64 = 24 * 60 * 60
 	return current / day * day
+}
+
+func getRealtimeDbTimeMark() int64 {
+	current := time.Now().UnixMilli()
+	return current / 30000 * 30000
 }
 
 type UserActivityCounter struct {

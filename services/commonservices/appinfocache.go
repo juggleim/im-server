@@ -73,6 +73,9 @@ type AppInfo struct {
 	BigGrpThreshold          int  `default:"1000"`
 	ClosePushGrpThreshold    int  `default:"0"`
 
+	//real-time statistic
+	OpenRealTimeMsgStatistic bool `default:"false"`
+
 	EventSubConfig  string `default:""`
 	EventSubSwitch  string `default:""`
 	SecurityDomains string `default:""`

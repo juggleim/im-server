@@ -44,10 +44,7 @@ func Upgrade() {
 	if err == nil {
 		neededVers := []int64{}
 		for _, sqlFile := range sqlFiles {
-			fileName := sqlFile.Name()
-			if len(fileName) == 12 {
-				fileName = fileName[:8]
-			}
+			fileName := strings.TrimSuffix(sqlFile.Name(), ".sql")
 			ver, err := tools.String2Int64(fileName)
 			if err == nil && ver > 0 {
 				neededVers = append(neededVers, ver)

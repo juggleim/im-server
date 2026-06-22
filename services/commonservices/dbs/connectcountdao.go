@@ -39,3 +39,19 @@ func (count ConnectCountDao) MaxByTime(appkey string, connectType int, start, en
 	}
 	return &item
 }
+
+func (count ConnectCountDao) ScanByTimeRangeAfterCursor(start, end, lastTimeMark, lastID int64, limit int) ([]ConnectCountDao, error) {
+	items := []ConnectCountDao{}
+	sql := fmt.Sprintf("select id,connect_type,time_mark,count,app_key from %s where time_mark>=? and time_mark<? and (time_mark>? or (time_mark=? and id>?)) order by time_mark asc,id asc limit ?", count.TableName())
+	err := dbcommons.GetDb().Raw(sql, start, end, lastTimeMark, lastTimeMark, lastID, limit).Scan(&items).Error
+	return items, err
+}
+
+func (count ConnectCountDao) DeleteByTimeRangeExceptKeepersBatch(start, end int64, keeperIDs []int64, limit int) (int64, error) {
+	if len(keeperIDs) == 0 {
+		return 0, nil
+	}
+	sql := fmt.Sprintf("delete from %s where time_mark>=? and time_mark<? and id not in (?) limit ?", count.TableName())
+	tx := dbcommons.GetDb().Exec(sql, start, end, keeperIDs, limit)
+	return tx.RowsAffected, tx.Error
+}

@@ -70,6 +70,10 @@ type ImConfig struct {
 		HttpPort int `yaml:"httpPort"`
 	} `yaml:"adminGateway"`
 	AdminSecret string `yaml:"adminSecret"`
+
+	PerformanceMetrics struct {
+		IsOpen bool `yaml:"isOpen"`
+	} `yaml:"performanceMetrics"`
 }
 
 func (conf ImConfig) GetApiPort() int {

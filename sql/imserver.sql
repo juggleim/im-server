@@ -234,6 +234,28 @@ CREATE TABLE IF NOT EXISTS `msgstats` (
   UNIQUE INDEX `uniq_mark` (`app_key` ASC, `stat_type` ASC, `channel_type` ASC, `time_mark` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-消息统计';
 
+CREATE TABLE IF NOT EXISTS `msgrealtimestats` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `stat_type` tinyint DEFAULT '0' COMMENT '统计类型 1上行消息，2分发，3下行消息',
+  `channel_type` tinyint DEFAULT '0' COMMENT '会话类型 1单聊, 2群聊，3聊天室，4系统，5群公告，6广播',
+  `time_mark` bigint DEFAULT '0' COMMENT '30秒时间标记',
+  `count` int DEFAULT '0' COMMENT '数量',
+  `app_key` varchar(20) DEFAULT '' COMMENT '应用key',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_mark` (`app_key`,`stat_type`,`channel_type`,`time_mark`),
+  KEY `idx_time_mark_id` (`time_mark`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-实时消息统计';
+
+CREATE TABLE IF NOT EXISTS `dailyactivities` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `time_mark` BIGINT NULL COMMENT '日期时间标记',
+  `count` INT NULL COMMENT '数量',
+  `app_key` VARCHAR(20) NULL COMMENT '应用key',
+  `created_time` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `uniq_mark` (`app_key` ASC, `time_mark` ASC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-每日活跃用户统计';
+
 CREATE TABLE IF NOT EXISTS `useractivities` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` VARCHAR(32) NULL COMMENT '用户id',
@@ -242,7 +264,8 @@ CREATE TABLE IF NOT EXISTS `useractivities` (
   `count` INT NULL COMMENT '数量',
   `app_key` VARCHAR(20) NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `uniq_userid` (`app_key` ASC, `time_mark` ASC, `user_id` ASC)
+  UNIQUE INDEX `uniq_userid` (`app_key` ASC, `time_mark` ASC, `user_id` ASC),
+  KEY `idx_time_mark_id` (`time_mark`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-用户活跃统计';
 
 CREATE TABLE IF NOT EXISTS `connectcounts` (
@@ -252,7 +275,8 @@ CREATE TABLE IF NOT EXISTS `connectcounts` (
   `count` INT NULL,
   `app_key` VARCHAR(20) NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `uniq_mark` (`app_key`, `connect_type`, `time_mark`)
+  UNIQUE INDEX `uniq_mark` (`app_key`, `connect_type`, `time_mark`),
+  KEY `idx_time_mark_id` (`time_mark`,`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `fileconfs` (
@@ -898,5 +922,17 @@ CREATE TABLE IF NOT EXISTS `usersubrels` (
   KEY `idx_user` (`app_key`,`subscriber_id`,`subscriber_device_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260508');
+CREATE TABLE IF NOT EXISTS `performance_metrics` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
+  `node_name` varchar(128) NOT NULL DEFAULT '' COMMENT '节点名称',
+  `collect_time` bigint NOT NULL DEFAULT 0 COMMENT '采集时间',
+  `metric_type` varchar(128) NOT NULL DEFAULT '' COMMENT '指标类型',
+  `metric_value` double NOT NULL DEFAULT 0 COMMENT '指标值',
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_node_collect_time` (`node_name`,`collect_time`),
+  KEY `idx_metric_type_collect_time` (`metric_type`,`collect_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-性能指标';
+
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260617');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
