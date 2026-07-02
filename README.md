@@ -1,174 +1,189 @@
+<div align="center">
+
+<img height="120" src="./docs/logo.png" alt="JuggleIM Logo">
+
 # JuggleIM
 
-一个高性能，可扩展的开源 IM 即时通讯系统。
+**A high-performance, scalable open-source instant messaging (IM) system.**
 
-<p align="center">
-<img align="left" height="110" src="./docs/logo.png">
-<ul>
-<li><strong>官网</strong>: https://www.juggle.im</li>
-<li><strong>提问</strong>: https://github.com/juggleim/im-server/issues</li>
-<li><strong>文档</strong>: https://www.juggle.im/docs/guide/intro/</li>
-</ul>
-</p>
+[![License](https://img.shields.io/github/license/juggleim/im-server?color=yellow&style=flat-square)](./LICENSE)
+[![Go](https://img.shields.io/badge/go-%3E%3D1.20-30dff3?style=flat-square&logo=go)](https://github.com/juggleim/im-server)
+[![Release](https://img.shields.io/github/v/release/juggleim/im-server?style=flat-square&color=brightgreen)](https://github.com/juggleim/im-server/releases)
+[![Stars](https://img.shields.io/github/stars/juggleim/im-server?style=flat-square&color=orange)](https://github.com/juggleim/im-server/stargazers)
+[![Forks](https://img.shields.io/github/forks/juggleim/im-server?style=flat-square)](https://github.com/juggleim/im-server/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/juggleim/im-server?style=flat-square)](https://github.com/juggleim/im-server/commits)
 
-[![](https://img.shields.io/github/license/juggleim/im-server?color=yellow&style=flat-square)](./LICENSE)
-[![](https://img.shields.io/badge/go-%3E%3D1.20-30dff3?style=flat-square&logo=go)](https://github.com/juggleim/im-server)
+**[简体中文](./README_zh.md)** | **English**
 
-## 社群讨论
+**[Website](https://www.juggle.im)** ·
+**[Docs](https://www.juggle.im/docs/guide/intro/)** ·
+**[Quick Deploy](https://www.juggle.im/docs/guide/deploy/quickdeploy/)** ·
+**[API Reference](https://www.juggle.im/docs/server/api/)** ·
+**[Ask a Question](https://github.com/juggleim/im-server/issues)**
 
-如果对 IM 感兴趣、有集成问题讨论的朋友，非常欢迎加入社群讨论～
+If this project helps you, please give it a ⭐ **Star** — it keeps the project easy to find and motivates us to keep building!
 
-[Telegram 中文群](https://t.me/juggleim_zh)
+</div>
 
-## 特性
+---
 
-* 灵活的部署模式，支持公有云，私有云，托管云等部署形态。
-* Protobuf+Websocket 实现长连接，低流量，高性能，且在网络不佳的环境下具备较好的连通性。
-* 性能强大，专业版支持集群部署，无限横向扩展，能支撑亿级日活应用。
-* 协议及数据全链路加密，无数据泄露风险。
-* 提供方便的运维工具和管理后台，简单好维护。
-* 支持Android，iOS，Web，PC 等多平台 SDK，提供快捷集成的Demo和文档。
-* 支持多端同时在线和消息多端同步，确保状态多端一致。
-* 支持全球链路加速，可服务全球级应用。
-* 提供丰富的API和WebHook，可方便的与现有系统集成。
-* 支持万人，十万人大群，轻松沟通，不丢消息。
-* 支持无上限直播聊天室。
-* 具备 AI 机器人对接能力，可轻松对接大模型。
+## 📖 What is JuggleIM
 
-## JuggleIM 项目说明
+JuggleIM is a **ready-to-use, self-hostable** instant messaging (IM) backend. Built on a Protobuf + WebSocket long-connection protocol, it focuses on efficient message delivery and reliable storage, letting you add chat capabilities to your app, website, or business system in minutes.
 
-对接文档：[https://juggle.im/docs/client/import](https://juggle.im/docs/client/import/)
+Whether you are building a social product, a customer-service system, IoT device communication, live-stream chat, or AI bot conversations, JuggleIM serves as a solid messaging foundation. It is **multi-tenant** by design — a single deployment can host multiple fully isolated applications — and the professional edition scales horizontally to support **hundreds of millions of daily active users**.
 
-|  仓库地址 | 说明 |
-| :--------- | :----- |
-| [im-server](https://github.com/juggleim/im-server/) | 底层 IM 核心服务，负责消息分发，存储等IM相关业务 |
-| [jugglechat-server](https://github.com/juggleim/jugglechat-server) | Demo的业务服务，负责处理用户注册/登录，创建群组，添加好友等业务，可以在这个基础上二开自己特色的业务能力 |
-| [jugglechat-server-java](https://github.com/juggleim/jugglechat-server-java)| Demo 业务服务的 Java 版本 | 
-| [imserver-console](https://github.com/juggleim/imserver-console) | IM 服务的管理后台，用于操作IM相关配置，监控IM业务量 |
-| [imsdk-android](https://github.com/juggleim/imsdk-android) | 安卓端 imsdk，内含一个 UI Demo，可用于二开 |
-| [imsdk-ios](https://github.com/juggleim/imsdk-ios) | iOS 端 imsdk，内含一个 UI Demo，可用于二开|
-| [imsdk-web](https://github.com/juggleim/imsdk-web) | web 端 imsdk |
-| imsdk-pc | 桌面端 imsdk，暂未开源，可联系客服了解 |
-| [imsdk-flutter](https://github.com/juggleim/imsdk-flutter)| imsdk 的 flutter 版本 |
-| [imsdk-harmony](https://github.com/juggleim/imsdk-harmony) | 鸿蒙版本 imsdk，内含一个 UI Demo，可用于二开 |
-| [jugglechat-web](https://github.com/juggleim/jugglechat-web) | 集成 imsdk-web 的 web 版 Demo，可用于二开 |
-| [jugglechat-desktop](https://github.com/juggleim/jugglechat-desktop) | 集成 imsdk-pc 的桌面版 Demo，可用于二开 |
-| [jugglelive-web](https://github.com/juggleim/jugglelive-web)| 集成 imsdk-web 的一个聊天室场景Demo，可用于二开 |
+> Want to try it right away? Check the [official docs](https://www.juggle.im/docs/guide/intro/) or jump to [Quick Deploy](#-quick-deploy) below.
 
-其他：
-| 仓库地址 | 说明 |
-| :------ | :----- |
-| [bot-connector](https://github.com/juggleim/bot-connector) | 机器人对接服务，用于打通 im-server 和 三方机器人 | 
-| [imserver-sdk-go](https://github.com/juggleim/imserver-sdk-go) | 封装 im-server 服务端 API 的 SDK，供业务方集成到自己业务系统中 |
-| [imserver-sdk-java](https://github.com/juggleim/imserver-sdk-java) | imserver-sdk 的 java 版本|
+## ✨ Key Features
 
+**🚀 High Performance & High Availability**
+- Protobuf + WebSocket long connections — low bandwidth, high throughput, and reliable connectivity even on poor networks
+- Professional edition supports clustered deployment with unlimited horizontal scaling, powering apps with hundreds of millions of DAU
+- Handles large groups of 10,000–100,000 members without losing messages, plus unlimited-size live chat rooms
 
+**🔒 Secure & Reliable**
+- End-to-end encryption of protocol and data — no leakage risk
+- Multi-device online presence and message sync keep state consistent across all endpoints
 
-## 快速部署体验
+**🌍 Flexible Deployment & Global Reach**
+- Supports public cloud, private cloud, and managed cloud deployment models
+- Global link acceleration for worldwide-scale applications
 
-部署文档(https://www.juggle.im/docs/guide/deploy/quickdeploy/)
+**🧩 Easy to Integrate & Extend**
+- SDKs for Android, iOS, Web, PC, Flutter, and HarmonyOS, each with a demo and docs
+- Rich REST APIs and WebHooks for integrating with your existing systems
+- Built-in AI bot connectivity — easily plug in large language models
+- Comes with ops tooling and an admin console for simple maintenance
 
-## 手动部署
+## 🗂 Table of Contents
 
-### 1. 安装并初始化 MySQL
+- [Ecosystem](#-ecosystem)
+- [Quick Deploy](#-quick-deploy)
+- [Manual Deployment](#-manual-deployment)
+- [Create an Application (Tenant)](#-create-an-application-tenant)
+- [Integration](#-business-server--client-integration)
+- [Community](#-community)
+- [Star History](#-star-history)
 
-#### 1) 安装 MySQL
-略
+## 🧬 Ecosystem
 
-#### 2) 创建DB实例
+JuggleIM follows a layered architecture — "core service + business service + multi-platform SDKs + demos" — with clearly separated repositories that can be composed and customized as needed.
+
+| Repository | Description |
+| :--- | :--- |
+| **[im-server](https://github.com/juggleim/im-server/)** | Core IM service handling message delivery, storage, and related IM logic (this repo) |
+| [jugglechat-server](https://github.com/juggleim/jugglechat-server) | Demo business service handling user registration/login, group creation, friends, etc. — a base for your own development |
+| [jugglechat-server-java](https://github.com/juggleim/jugglechat-server-java) | Java version of the demo business service |
+| [imserver-console](https://github.com/juggleim/imserver-console) | Admin console for IM configuration and business metrics |
+| [imsdk-android](https://github.com/juggleim/imsdk-android) | Android imsdk with a UI demo, ready for customization |
+| [imsdk-ios](https://github.com/juggleim/imsdk-ios) | iOS imsdk with a UI demo, ready for customization |
+| [imsdk-web](https://github.com/juggleim/imsdk-web) | Web imsdk |
+| [imsdk-flutter](https://github.com/juggleim/imsdk-flutter) | Flutter version of imsdk |
+| [imsdk-harmony](https://github.com/juggleim/imsdk-harmony) | HarmonyOS imsdk with a UI demo, ready for customization |
+| [jugglechat-web](https://github.com/juggleim/jugglechat-web) | Web demo integrating imsdk-web, ready for customization |
+| [jugglechat-desktop](https://github.com/juggleim/jugglechat-desktop) | Desktop demo integrating imsdk-pc, ready for customization |
+| [jugglelive-web](https://github.com/juggleim/jugglelive-web) | Live chat-room demo integrating imsdk-web, ready for customization |
+| [bot-connector](https://github.com/juggleim/bot-connector) | Bot connector service bridging im-server and third-party bots |
+| [imserver-sdk-go](https://github.com/juggleim/imserver-sdk-go) | SDK wrapping the im-server server-side API for easy integration |
+| [imserver-sdk-java](https://github.com/juggleim/imserver-sdk-java) | Java version of imserver-sdk |
+
+> The desktop imsdk-pc is not yet open-sourced — contact support for details.
+
+## 🚀 Quick Deploy
+
+For the fastest experience, follow the official one-click deployment guide:
+
+👉 **[One-Click Deployment Guide](https://www.juggle.im/docs/guide/deploy/quickdeploy/)**
+
+## 🛠 Manual Deployment
+
+<details>
+<summary>Click to expand the full manual deployment steps</summary>
+
+### 1. Install and Initialize MySQL
+
+Create the database schema:
+```sql
+CREATE SCHEMA `jim_db`;
 ```
-CREATE SCHEMA `jim_db` ;
+
+Initialize the table structure (the SQL file lives at `sql/imserver.sql`):
+```bash
+mysql -u{db_user} -p{db_password} jim_db < sql/imserver.sql
 ```
 
-#### 3) 初始化表结构
-初始化表结构的sql文件在  im-server/docs/jim.sql , 导入命令如下：
-```
-mysql -u{db_user} -p{db_password} jim_db < jim.sql
-```
+### 2. Install MongoDB (optional)
 
-### 2. 安装MongoDB(可选)
-略
+Only required when using MongoDB to store message data (`msgStoreEngine: mongo`).
 
-### 3. 启动im-server
+### 3. Start im-server
 
-#### 1) 运行目录
-运行目录为 im-server/launcher，其中 conf 目录下存放的是配置文件，logs目录下是服务的运行日志目录。
+The working directory is `im-server/launcher`, where `conf` holds config files and `logs` is the runtime log directory.
 
-#### 2) 编辑配置文件
-
-配置文件位置：im-server/launcher/conf/config.yml
-```
-defaultPort: 9003       # im-server 默认监听端口
-nodeName: testNode      # im-server 的节点名称
-nodeHost: 127.0.0.1     # im-server 的节点IP
-msgStoreEngine: mysql   # 配置用什么存储来存消息数据，有两种存储引擎可选。mysql：使用mysql存储消息数据(默认)；mongo：使用MongoDB存储消息数据
+**Edit the config file** `im-server/launcher/conf/config.yml`:
+```yaml
+defaultPort: 9003       # im-server default listening port
+nodeName: testNode      # node name
+nodeHost: 127.0.0.1     # node IP
+msgStoreEngine: mysql   # message store engine: mysql (default) or mongo
 
 log:
-  logPath: ./logs       # 运行日志所在目录
-  logName: jim-info     # 运行日志的前缀名
-  visual: false         # 是否开启可视化日志。开启后，会同步将日志数据写入一个 KV 数据库，在管理后台”开发工具->连接排查“处，可界面化查询日志；
+  logPath: ./logs       # runtime log directory
+  logName: jim-info     # runtime log filename prefix
+  visual: false         # enable visual logs (write to a KV store, queryable in the admin console)
 
-mysql:                  # im-server 所用的MySQL相关配置
+mysql:                  # MySQL configuration
   user: root
   password: 123456
   address: 127.0.0.1:3306
   name: im_db
 
-# mongodb:                # im-server 所用的MongoDB相关配置，用于存储消息数据。该配置为可选，在 msgStoreEngine 配置为 "mongo" 时生效；
+# mongodb:              # MongoDB config, active when msgStoreEngine is "mongo"
 #   address: 127.0.0.1:27017
-#   name: jim_msgs        # mongodb 表空间名称，im-server启动后，会自动在这个空间下初始化collection；
+#   name: jim_msgs
 
-# apiGateway:             # im-server 的服务端 API 端口, 供业务APP的服务端调用；非必填项，默认复用 defaultPort 作为默认端口
+# apiGateway:           # server-side API port for business app servers; defaults to defaultPort
 #   httpPort: 9001
 
-# connectManager:         # im-server 长连接端口；非必填项，默认复用 defaultPort 作为默认端口
+# connectManager:       # long-connection port; defaults to defaultPort
 #   wsPort: 9003
 
-adminGateway:           # im-server 自带的管理后台地址，默认账号密码是：admin/123456
+adminGateway:           # built-in admin console, default credentials admin/123456
   httpPort: 8090
 ```
 
-#### 3) 启动im-server
-
-在 im-server/launcher 目录下，执行如下命令：
-```
+**Start the service** from the `im-server/launcher` directory:
+```bash
 go run main.go
 ```
 
-#### 4) 配置外网访问地址(域名/IP)
+### 4. Configure Public Access Addresses
 
-需要配置外网地址的端口列表：
-| 端口 | 协议类型 | 说明 | 
-| ----:|:-----:|:----|
-| 9003| http | 服务端 API 服务监听端口，用于业务服务器，例如 jugglechat-server 配置文件中需要配置这个地址；|
-| 9003| websocket | IM 长连接监听端口，用于客户端SDK与IM 服务建立长连接(websocket) |
-| 8090| http | IM 服务的管理后台监听端口，默认账号和密码：admin/123456 |
+Ports that need to be exposed:
 
-配置外网地址的方法，这里不详细描述，大家可以根据自身环境来灵活配置(常用方式: 挂公网ip，nginx反向代理，负载均衡等).
+| Port | Protocol | Description |
+| ---: | :---: | :--- |
+| 9003 | http | Server-side API port, called by business servers (e.g. jugglechat-server) |
+| 9003 | websocket | IM long-connection port for client SDKs |
+| 8090 | http | Admin console port, default credentials admin/123456 |
 
-注： 如果仅内网调试使用，可以不配置外网IP/域名，仅使用内网IP即可
+Configure exposure however suits your environment (public IP, Nginx reverse proxy, load balancer, etc.). For local testing, an intranet IP is enough.
 
-#### 5) 将长连接地址配置到IM系统中
-
-配置方式很简单，在数据库中插入一条配置数据即可：
-
+**Register the long-connection address** by inserting a config row into the database:
+```sql
+insert into globalconfs (conf_key, conf_value) values ('connect_address', '{"default":["127.0.0.1:9002"]}');
 ```
-insert into globalconfs (conf_key, conf_value)values('connect_address', '{"default":["127.0.0.1:9002"]}')
-```
-其中，将 127.0.0.1 替换成该机器的内网IP，或对外的公网IP/域名，这个是客户端SDK的长连接地址，将有导航服务(8081)下发给客户端SDK；
+Replace `127.0.0.1` with your machine's intranet IP or public IP/domain. This address is delivered to client SDKs by the navigator service.
 
-### 4. 创建应用(租户)
-JuggleIM 本身是一套多租户的系统，可以在一套服务中创建多个appkey(租户)，租户之间的数据相互隔离，互不影响。
+</details>
 
-#### 方式一：登录管理后台，创建租户
-待完善
+## 🏢 Create an Application (Tenant)
 
-#### 方式二：通过管理API，创建租户
+JuggleIM is a **multi-tenant** system — a single deployment can host multiple appkeys (tenants) with fully isolated data.
 
-其中，app_key 用于指定租户的标识，可自定义，要求在系统内唯一；app_name为租户的名称，可自定义； 
-注：这里用的是IM服务管理后台(8090)的地址，127.0.0.1 替换成im服务的内网IP，或公网IP/域名。
-
-```
+**Create a tenant via the admin API** (`app_key` is the tenant identifier and must be unique):
+```bash
 curl --request POST \
   --url http://127.0.0.1:8090/admingateway/apps/create \
   --data '{
@@ -177,44 +192,59 @@ curl --request POST \
 }'
 ```
 
-响应数据示例：
-
-```
+Example response:
+```json
 {
-	"code": 0,
-	"msg": "success",
-	"data": {
-		"app_name": "appname",
-		"app_key": "appkey",
-		"app_secret": "hciKcc6sXRDjYUQp"
-	}
+    "code": 0,
+    "msg": "success",
+    "data": {
+        "app_name": "appname",
+        "app_key": "appkey",
+        "app_secret": "hciKcc6sXRDjYUQp"
+    }
 }
 ```
-### 5. 登入管理后台
 
-管理后台地址：http://127.0.0.1:8090    默认账号/密码： admin/123456
+You can also log in to the admin console at `http://127.0.0.1:8090` (default credentials `admin/123456`) to view and manage your applications.
 
-登入管理后台后，即可看到创建的应用列表，点击其中一个应用，可以对其配置进行修改和维护。
+## 🔌 Business Server / Client Integration
 
-### 6. 业务服务器/客户端集成
+**1) Business Server Integration**
 
-这里汇总下业务集成所需的各项配置：
+| Item | Example | Notes |
+| ---: | :---: | :--- |
+| IM server-side API address | `http://127.0.0.1:9003` | Used by your business server to call IM APIs (register users, create groups, send system messages, etc.). See the [API Reference](https://www.juggle.im/docs/server/api/) |
+| app_key | `appkey1` | Tenant identifier, unique within the system |
+| app_secret | `hciKcc6sXRDjYUQp` | Auth secret generated on app creation (must be 16 chars if custom). **Use only on the business server — never expose it to clients** |
 
-1) 业务服务器集成
+**2) Client SDK Integration**
 
-| 配置项 | 示例|备注 | 
-| ----: |:-----:|:----|
-|IM 服务端 API 地址 |  http://127.0.0.1:9003 | 供业务服务器访问IM服务的API接口地址，使用该接口可以注册IM用户，创建群，发送系统消息等，接口文档参考：https://www.juggle.im/docs/server/api/|
-|app_key | appkey1 |应用的租户标识，在第4步中创建，可自定义，但要保证在系统内唯一 |
-|app_secret| hciKcc6sXRDjYUQp | 应用对应的鉴权秘钥，创建应用时自动生成。如果想自定义的话，确保配置为16位的字符串。注意：确保该秘钥仅在业务服务器端使用，不要泄露到客户端。 |
+| Item | Example | Notes |
+| ---: | :---: | :--- |
+| IM connection address | `ws://127.0.0.1:9003` | Passed to the client SDK on init. See [Quick Start](https://www.juggle.im/docs/client/quickstart/android/) |
+| app_key | `appkey1` | Must match the value used on the business server |
 
-2) 客户端SDK集成
+## 💬 Community
 
-| 配置项 | 示例|备注 | 
-| ----: |:-----:|:----|
-|IM 服务的连接地址| ws://127.0.0.1:9003| IM 的连接地址，客户端SDK初始化时需要传入，参考文档：https://www.juggle.im/docs/client/quickstart/android/ |
-|app_key|appkey1|应用的租户标识，确保与业务服务器端配置的保持一致。|
+Interested in IM or have integration questions? Join the community and let's chat 👇
 
-## Star History
+- [Telegram Group (Chinese)](https://t.me/juggleim_zh)
+- [Open an Issue](https://github.com/juggleim/im-server/issues)
+
+## 🤝 Contributing
+
+Contributions of all kinds are welcome! You can:
+
+- Open an [Issue](https://github.com/juggleim/im-server/issues) to report bugs or request features
+- Submit a Pull Request to improve the code or docs
+- Share the projects you build on top of JuggleIM
+
+## ⭐ Star History
+
+If JuggleIM has helped you, please give us a Star — your support drives our continued development!
 
 [![Star History Chart](https://api.star-history.com/svg?repos=juggleim/im-server&type=Date)](https://star-history.com/#juggleim/im-server&Date)
+
+## 📄 License
+
+This project is released under the [LICENSE](./LICENSE).
