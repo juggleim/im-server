@@ -8,3 +8,5 @@ launcher/uploads/
 **/client-logs
 ./launcher/build/imserver
 **/.DS_Store
+CLAUDE.md
+.claude/
