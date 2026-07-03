@@ -1,0 +1,22 @@
+# VCS / IDE
+.git
+.gitignore
+.idea
+.vscode
+
+# Build artifacts & logs
+launcher/build
+**/logs
+**/local_logs
+**/client-logs
+launcher/uploads
+
+# Local config (rendered at runtime from env vars)
+launcher/conf/config.yml
+testmain/conf
+
+# Docs / meta that don't affect the build
+docs
+*.md
+CLAUDE.md
+.DS_Store

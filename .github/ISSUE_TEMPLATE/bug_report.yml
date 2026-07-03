@@ -1,0 +1,82 @@
+name: 🐛 Bug Report
+description: Report a reproducible problem in im-server
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report! Please search existing issues first to avoid duplicates.
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps for us to reproduce the behavior.
+      placeholder: |
+        1. Start the server with '...'
+        2. Send request '...'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior & logs
+      description: What actually happened? Paste relevant logs (from `launcher/logs`) or stack traces.
+      render: shell
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: How are you running im-server?
+      options:
+        - Docker Compose
+        - From source (go run / go build)
+        - Prebuilt binary
+        - Other (describe below)
+    validations:
+      required: true
+  - type: dropdown
+    id: store-engine
+    attributes:
+      label: Message store engine
+      options:
+        - mysql
+        - mongo
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: Release tag or `git rev-parse --short HEAD`.
+      placeholder: "v1.0.0 or 03f17c4"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Go version (if building from source), MySQL/MongoDB version.
+      placeholder: "Ubuntu 22.04, Go 1.25, MySQL 8.0"
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: I can reproduce this on the latest commit of the default branch.

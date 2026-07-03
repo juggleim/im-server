@@ -1,0 +1,72 @@
+# One-command local stack for JuggleIM.
+#
+#   docker compose up -d
+#
+# Then:
+#   - IM WebSocket (client SDKs):   ws://127.0.0.1:9003
+#   - Server-side API:              http://127.0.0.1:9001
+#   - Admin console:                http://127.0.0.1:8090   (admin / 123456)
+#
+# Create your first app (tenant) once the stack is up:
+#   curl -X POST http://127.0.0.1:8090/admingateway/apps/create \
+#        --data '{"app_key":"appkey","app_name":"appname"}'
+#
+# Override the MySQL password by exporting MYSQL_ROOT_PASSWORD before `up`.
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: juggleim-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-juggleim}
+      MYSQL_DATABASE: jim_db
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # Schema is created on first init; auto-migration (Upgrade()) tops it up on startup.
+      - ./sql/imserver.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./docker/mysql-init/02-connect-address.sql:/docker-entrypoint-initdb.d/02-connect-address.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-juggleim}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  im-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: juggleim/im-server:local
+    container_name: juggleim-server
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      POD_NAME: jim-node-1
+      POD_IP: 127.0.0.1
+      MSG_STORE_ENGINE: mysql
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-juggleim}
+      MYSQL_ADDR: mysql:3306
+      MYSQL_DB_NAME: jim_db
+      # Unused in mysql mode, but run.sh (set -e) requires every templated var to be present.
+      MONGODB_ADDR: mongo
+      MONGODB_ROOT_PASSWORD: unused
+      WS_PORT: 9003
+      API_HTTP_PORT: 9001
+      NAV_HTTP_PORT: 9002
+      ADMIN_HTTP_PORT: 8090
+    ports:
+      - "9003:9003"   # WebSocket long connections
+      - "9001:9001"   # Server-side HTTP API
+      - "9002:9002"   # Navigator
+      - "8090:8090"   # Admin console
+      - "6060:6060"   # pprof
+
+volumes:
+  mysql-data:

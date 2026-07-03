@@ -1,0 +1,40 @@
+name: 💡 Feature Request
+description: Suggest an idea or enhancement for im-server
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve JuggleIM! Please search existing issues and discussions first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What problem are you trying to solve? What's the use case?
+      placeholder: "I'm building ... and I need ... because ..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe what you'd like to happen. API shape, config, behavior, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or alternative approaches you've thought about.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, references to other IM systems, mockups, or anything else.
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to help implement this feature.

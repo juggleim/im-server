@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://www.juggle.im/docs/guide/intro/
+    about: Deployment, client SDK, and server API guides — most "how do I ...?" questions are answered here.
+  - name: 💬 Community (Telegram)
+    url: https://t.me/juggleim_zh
+    about: Ask questions and discuss integration with the community.
+  - name: 🔐 Report a security vulnerability
+    url: https://github.com/juggleim/im-server/security/advisories/new
+    about: Please report vulnerabilities privately — do not open a public issue.
