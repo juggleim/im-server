@@ -7,6 +7,8 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/pushmanager/services/getuipush"
+	"im-server/services/pushmanager/services/honorpush"
 	"im-server/services/pushmanager/services/hwpush"
 	"im-server/services/pushmanager/services/jpush"
 	"im-server/services/pushmanager/services/oppopush"
@@ -65,6 +67,25 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 				switch pushToken.PushChannel {
 				case pbobjs.PushChannel_Huawei:
 					if androidPushConf.HwPushClient != nil {
+						hwNotification := &hwpush.AndroidNotification{
+							Title:        req.Title,
+							Body:         req.PushText,
+							DefaultSound: true,
+							ClickAction: &hwpush.ClickAction{
+								Type: 3,
+							},
+						}
+						// 华为角标依赖入口 Activity 全类名（badge.class），未配置时不下发角标
+						if badgeClass := androidPushConf.HwPushClient.BadgeClass; badgeClass != "" {
+							hwNotification.Badge = &hwpush.BadgeNotification{
+								Class: badgeClass,
+							}
+							if req.Badge > 0 {
+								hwNotification.Badge.SetNum = int(req.Badge)
+							} else {
+								hwNotification.Badge.AddNum = 1
+							}
+						}
 						_, err := androidPushConf.HwPushClient.SendMessage(ctx, &hwpush.MessageRequest{
 							Message: &hwpush.Message{
 								Notification: &hwpush.Notification{
@@ -72,14 +93,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 									Body:  req.PushText,
 								},
 								Android: &hwpush.AndroidConfig{
-									Notification: &hwpush.AndroidNotification{
-										Title:        req.Title,
-										Body:         req.PushText,
-										DefaultSound: true,
-										ClickAction: &hwpush.ClickAction{
-											Type: 3,
-										},
-									},
+									Notification: hwNotification,
 								},
 								Token: []string{pushToken.PushToken},
 							},
@@ -153,19 +167,28 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					}
 				case pbobjs.PushChannel_JPush:
 					if androidPushConf.JpushClient != nil {
+						androidNotification := &jpush.AndroidNotification{
+							Alert:  req.PushText,
+							Title:  req.Title,
+							Extras: transfer2Exts(req),
+							Intent: map[string]interface{}{
+								"url": "intent:#Intent;action=com.j.im.intent.MESSAGE_CLICK;end",
+							},
+						}
+						if req.Badge > 0 {
+							androidNotification.BadgeSetNum = int(req.Badge)
+						} else {
+							androidNotification.BadgeAddNum = 1
+						}
+						if jpushOptions := androidPushConf.JpushClient.Options; jpushOptions != nil {
+							androidNotification.BadgeClass = jpushOptions.BadgeClass
+						}
 						jPushPayload := &jpush.Payload{
 							Platform: jpush.NewPlatform().All(),
 							Audience: jpush.NewAudience().SetRegistrationId(pushToken.PushToken),
 							Notification: &jpush.Notification{
-								Alert: req.Title,
-								Android: &jpush.AndroidNotification{
-									Alert:  req.PushText,
-									Title:  req.Title,
-									Extras: transfer2Exts(req),
-									Intent: map[string]interface{}{
-										"url": "intent:#Intent;action=com.j.im.intent.MESSAGE_CLICK;end",
-									},
-								},
+								Alert:   req.Title,
+								Android: androidNotification,
 							},
 							Options: handleJPushOptions(androidPushConf.JpushClient.Options),
 						}
@@ -188,6 +211,62 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 						}
 					} else {
 						logs.WithContext(ctx).Infof("[FCM_FAIL]have no init fcm push client")
+					}
+				case pbobjs.PushChannel_Honor:
+					if androidPushConf.HonorPushClient != nil {
+						honorNotification := &honorpush.PushAndroidNotification{
+							Title: req.Title,
+							Body:  req.PushText,
+							ClickAction: &honorpush.PushAndroidClickAction{
+								ActionType: honorpush.ClickActionTypeLaunchApp,
+							},
+						}
+						// 荣耀角标依赖入口 Activity 全类名（badge.badgeClass），未配置时不下发角标
+						if badgeClass := androidPushConf.HonorPushClient.BadgeClass; badgeClass != "" {
+							honorNotification.Badge = &honorpush.PushBadge{
+								BadgeClass: badgeClass,
+							}
+							if req.Badge > 0 {
+								honorNotification.Badge.SetNum = uint16(req.Badge)
+							} else {
+								honorNotification.Badge.AddNum = 1
+							}
+						}
+						_, err := androidPushConf.HonorPushClient.SendMessage(&honorpush.SendMessageReq{
+							Token: []string{pushToken.PushToken},
+							Android: &honorpush.PushAndroidConfig{
+								Notification: honorNotification,
+							},
+						})
+						if err != nil {
+							logs.WithContext(ctx).Infof("[Honor_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						} else {
+							logs.WithContext(ctx).Infof("[Honor_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+						}
+					} else {
+						logs.WithContext(ctx).Infof("[Honor_FAIL]have no init honor push client")
+					}
+				case pbobjs.PushChannel_Getui:
+					if androidPushConf.GetuiPushClient != nil {
+						_, err := androidPushConf.GetuiPushClient.ToSingleCIDWithContext(ctx, &getuipush.ToSingleCIDReq{
+							RequestID: strconv.FormatInt(time.Now().UnixNano(), 10),
+							Audience: &getuipush.AudienceCID{
+								CID: []string{pushToken.PushToken},
+							},
+							PushMessage: &getuipush.PushMessage{
+								Notification: &getuipush.Notification{
+									Title: req.Title,
+									Body:  req.PushText,
+								},
+							},
+						})
+						if err != nil {
+							logs.WithContext(ctx).Infof("[Getui_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						} else {
+							logs.WithContext(ctx).Infof("[Getui_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+						}
+					} else {
+						logs.WithContext(ctx).Infof("[Getui_FAIL]have no init getui push client")
 					}
 				default:
 					logs.WithContext(ctx).Infof("unknown push type %s", pushToken.PushChannel)

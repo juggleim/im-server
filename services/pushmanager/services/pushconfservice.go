@@ -8,6 +8,8 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/pushmanager/services/fcmpush"
+	"im-server/services/pushmanager/services/getuipush"
+	"im-server/services/pushmanager/services/honorpush"
 	"im-server/services/pushmanager/services/hwpush"
 	"im-server/services/pushmanager/services/jpush"
 	"im-server/services/pushmanager/services/oppopush"
@@ -48,6 +50,8 @@ type AndroidPushConf struct {
 	VivoPushClient   *vivopush.VivoPushClient
 	JpushClient      *jpush.JpushClient
 	FcmPushClient    *fcmpush.FcmPushClient
+	HonorPushClient  *honorpush.HonorPushClient
+	GetuiPushClient  *getuipush.GetuiPushClient
 }
 
 func GetIosPushConf(ctx context.Context, appkey, packageName string) *IosPushConf {
@@ -188,6 +192,7 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 				if err == nil && pushConf.Valid() {
 					hwPushClient, err := hwpush.NewHwPushClient(pushConf.AppId, pushConf.AppSecret)
 					if err == nil {
+						hwPushClient.BadgeClass = pushConf.BadgeClass
 						androidPushConf.HwPushClient = hwPushClient
 					} else {
 						logs.WithContext(ctx).Errorf("init huawei push client failed. %v", err)
@@ -235,6 +240,24 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 					} else {
 						logs.WithContext(ctx).Errorf("fcm conf is illegal %v", err)
 					}
+				}
+			case string(commonservices.PushChannel_HONOR):
+				var pushConf = &commonservices.HonorPushConf{}
+				err = json.Unmarshal([]byte(dbPushConf.PushConf), pushConf)
+				if err == nil && pushConf.Valid() {
+					honorPushClient := honorpush.NewHonorPushClient(pushConf.AppId, pushConf.AppKey, pushConf.AppSecret)
+					honorPushClient.BadgeClass = pushConf.BadgeClass
+					androidPushConf.HonorPushClient = honorPushClient
+				} else {
+					logs.WithContext(ctx).Errorf("honor push conf is illegal %v", err)
+				}
+			case string(commonservices.PushChannel_Getui):
+				var pushConf = &commonservices.GetuiPushConf{}
+				err = json.Unmarshal([]byte(dbPushConf.PushConf), pushConf)
+				if err == nil && pushConf.Valid() {
+					androidPushConf.GetuiPushClient = getuipush.NewGetuiPushClient(pushConf.AppId, pushConf.AppKey, pushConf.MasterSecret)
+				} else {
+					logs.WithContext(ctx).Errorf("getui push conf is illegal %v", err)
 				}
 			default:
 			}

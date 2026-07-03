@@ -18,8 +18,11 @@ type AndroidNotification struct {
 	BigText    string                 `json:"big_text,omitempty"`
 	Inbox      map[string]interface{} `json:"inbox,omitempty"`
 	BigPicPath string                 `json:"big_pic_path,omitempty"`
-	Extras     map[string]interface{} `json:"extras,omitempty"`
-	Intent     map[string]interface{} `json:"intent,omitempty"`
+	Extras      map[string]interface{} `json:"extras,omitempty"`
+	Intent      map[string]interface{} `json:"intent,omitempty"`
+	BadgeAddNum int                    `json:"badge_add_num,omitempty"`
+	BadgeSetNum int                    `json:"badge_set_num,omitempty"`
+	BadgeClass  string                 `json:"badge_class,omitempty"`
 }
 
 type IosNotification struct {

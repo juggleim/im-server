@@ -21,6 +21,9 @@ const (
 	PushChannel_VIVO   PushChannel = "Vivo"
 	PushChannel_Jpush  PushChannel = "Jpush"
 	PushChannel_FCM    PushChannel = "FCM"
+	PushChannel_Meizu  PushChannel = "Meizu"
+	PushChannel_HONOR  PushChannel = "Honor"
+	PushChannel_Getui  PushChannel = "Getui"
 )
 
 type AndroidPushConf struct {
@@ -30,8 +33,9 @@ type AndroidPushConf struct {
 	Extra       map[string]any `json:"extra"`
 }
 type HuaweiPushConf struct {
-	AppId     string `json:"app_id"`
-	AppSecret string `json:"app_secret"`
+	AppId      string `json:"app_id"`
+	AppSecret  string `json:"app_secret"`
+	BadgeClass string `json:"badge_class,omitempty"`
 }
 
 func (conf *HuaweiPushConf) Valid() bool {
@@ -75,6 +79,7 @@ type JPushConf struct {
 
 type JPushOptions struct {
 	Classification    int                     `json:"classification,omitempty"`
+	BadgeClass        string                  `json:"badge_class,omitempty"`
 	ThirdPartyChannel *JPushThirdPartyChannel `json:"third_party_channel,omitempty"`
 }
 
@@ -119,6 +124,27 @@ func (conf *JPushConf) Valid() bool {
 	return conf.AppKey != "" && conf.MasterSecret != ""
 }
 
+type HonorPushConf struct {
+	AppId      string `json:"app_id"`
+	AppKey     string `json:"app_key"`
+	AppSecret  string `json:"app_secret"`
+	BadgeClass string `json:"badge_class,omitempty"`
+}
+
+func (conf *HonorPushConf) Valid() bool {
+	return conf.AppId != "" && conf.AppKey != "" && conf.AppSecret != ""
+}
+
+type GetuiPushConf struct {
+	AppId        string `json:"app_id"`
+	AppKey       string `json:"app_key"`
+	MasterSecret string `json:"master_secret"`
+}
+
+func (conf *GetuiPushConf) Valid() bool {
+	return conf.AppId != "" && conf.AppKey != "" && conf.MasterSecret != ""
+}
+
 func Str2PushChannel(str string) pbobjs.PushChannel {
 	switch str {
 	case string(PushChannel_Apple):
@@ -135,6 +161,12 @@ func Str2PushChannel(str string) pbobjs.PushChannel {
 		return pbobjs.PushChannel_JPush
 	case string(PushChannel_FCM):
 		return pbobjs.PushChannel_FCM
+	case string(PushChannel_Meizu):
+		return pbobjs.PushChannel_Meizhu
+	case string(PushChannel_HONOR):
+		return pbobjs.PushChannel_Honor
+	case string(PushChannel_Getui):
+		return pbobjs.PushChannel_Getui
 
 	default:
 		return pbobjs.PushChannel_DefaultChannel
@@ -157,6 +189,12 @@ func PushChannel2Str(pushChannel pbobjs.PushChannel) string {
 		return string(PushChannel_Jpush)
 	case pbobjs.PushChannel_FCM:
 		return string(PushChannel_FCM)
+	case pbobjs.PushChannel_Meizhu:
+		return string(PushChannel_Meizu)
+	case pbobjs.PushChannel_Honor:
+		return string(PushChannel_HONOR)
+	case pbobjs.PushChannel_Getui:
+		return string(PushChannel_Getui)
 	default:
 		return ""
 	}

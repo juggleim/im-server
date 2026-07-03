@@ -29,6 +29,8 @@ type HwPushClient struct {
 	token      string
 	authClient *AuthClient
 	client     *HTTPClient
+	// BadgeClass 桌面角标对应的入口 Activity 全类名，华为要求设置角标时必须携带该字段
+	BadgeClass string
 }
 
 func NewHwPushClient(appId, appSecret string) (*HwPushClient, error) {

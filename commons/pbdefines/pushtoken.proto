@@ -19,6 +19,9 @@ enum PushChannel{
     Vivo = 5;
     FCM = 6;
     JPush = 7;
+    Meizhu = 8;
+    Honor = 9;
+    Getui = 10;
 }
 
 message RegPushTokenReq{
