@@ -398,7 +398,7 @@ func (uc *UserConversations) QryConver(targetId, subChannel string, channelType 
 	return nil
 }
 
-func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive bool, targetId string, channelType pbobjs.ChannelType, tag string) []*models.Conversation {
+func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive bool, targetId string, channelType pbobjs.ChannelType, tag, exceptTag string) []*models.Conversation {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.RLock()
@@ -417,7 +417,7 @@ func (uc *UserConversations) QryConvers(startTime int64, count int32, isPositive
 			if channelType != pbobjs.ChannelType_Unknown && conver.ChannelType != channelType {
 				continue
 			}
-			if tag != "" && (conver.ConverExts == nil || len(conver.ConverExts.ConverTags) <= 0 || !conver.ConverExts.ConverTags[tag]) {
+			if !converMatchedTag(conver, tag, exceptTag) {
 				continue
 			}
 
@@ -509,6 +509,16 @@ func (uc *UserConversations) QryTopConvers(startTime int64, count int32, sortTyp
 	return resp
 }
 
+func converMatchedTag(conver *models.Conversation, tag, exceptTag string) bool {
+	if tag != "" {
+		return conver.ConverExts != nil && len(conver.ConverExts.ConverTags) > 0 && conver.ConverExts.ConverTags[tag]
+	}
+	if exceptTag != "" {
+		return conver.ConverExts == nil || len(conver.ConverExts.ConverTags) <= 0 || !conver.ConverExts.ConverTags[exceptTag]
+	}
+	return true
+}
+
 func (uc *UserConversations) ClearTotalUnread() {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
@@ -525,14 +535,70 @@ func (uc *UserConversations) ClearTotalUnread() {
 	}
 }
 
-func (uc *UserConversations) TotalUnreadCount() int64 {
+func buildConverFilterSet(convers []*pbobjs.SimpleConversation) map[string]struct{} {
+	if len(convers) <= 0 {
+		return nil
+	}
+	ret := make(map[string]struct{}, len(convers))
+	for _, conver := range convers {
+		if conver == nil {
+			continue
+		}
+		ret[getConverItemKey(conver.TargetId, conver.SubChannel, conver.ChannelType)] = struct{}{}
+	}
+	return ret
+}
+
+func converMatchedTotalUnreadFilter(conver *models.Conversation, filter *pbobjs.ConverFilter, channelTypes map[pbobjs.ChannelType]struct{}, includeConvers, excludeConvers map[string]struct{}) bool {
+	if filter == nil {
+		return true
+	}
+	if len(channelTypes) > 0 {
+		if _, exist := channelTypes[conver.ChannelType]; !exist {
+			return false
+		}
+	}
+
+	itemKey := getConverItemKey(conver.TargetId, conver.SubChannel, conver.ChannelType)
+	if len(filter.IncludeConvers) > 0 {
+		if _, exist := includeConvers[itemKey]; !exist {
+			return false
+		}
+	} else if len(excludeConvers) > 0 {
+		if _, exist := excludeConvers[itemKey]; exist {
+			return false
+		}
+	}
+
+	return converMatchedTag(conver, filter.Tag, filter.ExceptTag)
+}
+
+func (uc *UserConversations) TotalUnreadCount(filter *pbobjs.ConverFilter) int64 {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.RLock()
 	defer lock.RUnlock()
 	var count int64 = 0
+	var channelTypes map[pbobjs.ChannelType]struct{}
+	var includeConvers map[string]struct{}
+	var excludeConvers map[string]struct{}
+	if filter != nil {
+		if len(filter.ChannelTypes) > 0 {
+			channelTypes = make(map[pbobjs.ChannelType]struct{}, len(filter.ChannelTypes))
+			for _, channelType := range filter.ChannelTypes {
+				channelTypes[channelType] = struct{}{}
+			}
+		}
+		includeConvers = buildConverFilterSet(filter.IncludeConvers)
+		if len(filter.IncludeConvers) <= 0 {
+			excludeConvers = buildConverFilterSet(filter.ExcludeConvers)
+		}
+	}
 	for _, conver := range uc.ConverItemMap {
 		if conver.IsDeleted == 0 {
+			if !converMatchedTotalUnreadFilter(conver, filter, channelTypes, includeConvers, excludeConvers) {
+				continue
+			}
 			c := conver.LatestUnreadMsgIndex - conver.LatestReadMsgIndex
 			if c == 0 && conver.UnreadTag == 1 {
 				count = count + 1

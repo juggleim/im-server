@@ -245,7 +245,7 @@ func QryConversationsV2(ctx context.Context, req *pbobjs.QryConversationsReq) *p
 		Conversations: []*pbobjs.Conversation{},
 	}
 	userConvers := getUserConvers(appkey, userId)
-	convers := userConvers.QryConvers(startTime, count+1, isPositiveOrder, req.TargetId, req.ChannelType, req.Tag)
+	convers := userConvers.QryConvers(startTime, count+1, isPositiveOrder, req.TargetId, req.ChannelType, req.Tag, req.ExceptTag)
 	if len(convers) > int(count) {
 		convers = convers[:count]
 	} else {
@@ -470,7 +470,7 @@ func QryTotalUnreadCountV2(ctx context.Context, userId string, req *pbobjs.QryTo
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userConvers := getUserConvers(appkey, userId)
 	return &pbobjs.QryTotalUnreadCountResp{
-		TotalCount: userConvers.TotalUnreadCount(),
+		TotalCount: userConvers.TotalUnreadCount(req.Filter),
 	}
 }
 

@@ -509,6 +509,7 @@ message QryConversationsReq{
   string targetId = 5;
   ChannelType channelType = 6;
   string tag = 7;
+  string exceptTag = 8;
 
   bool onlyConver = 51;
 }
@@ -608,6 +609,7 @@ message ConverFilter{
   repeated SimpleConversation excludeConvers = 2;
   repeated SimpleConversation includeConvers = 3;
   string tag = 4;
+  string exceptTag = 5;
 }
 
 message QryTotalUnreadCountResp{
