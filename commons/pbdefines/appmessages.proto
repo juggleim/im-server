@@ -112,6 +112,8 @@ message PushData{
   int32 rtcMediaType = 58;
   bool isMentioned = 59;
   MentionType mentionType = 60;
+  string senderName = 61;
+  string groupName = 62;
 }
 
 enum PushLevel{

@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -24,6 +25,13 @@ import (
 func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 	if req.PushText == "" {
 		return
+	}
+	params := map[string]string{
+		"senderName": req.SenderName,
+		"pushText":   req.PushText,
+	}
+	if req.GroupName != "" {
+		params["groupName"] = req.GroupName
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	pushToken := GetPushToken(appkey, userId)
@@ -167,12 +175,18 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					}
 				case pbobjs.PushChannel_JPush:
 					if androidPushConf.JpushClient != nil {
+						intentUrl := "intent:#Intent;action=com.j.im.intent.MESSAGE_CLICK;%send"
+						intentComponent := ""
+						if androidPushConf.Package != "" && androidPushConf.JpushClient.Options != nil && androidPushConf.JpushClient.Options.BadgeClass != "" {
+							intentComponent = fmt.Sprintf("component=%s/%s;", androidPushConf.Package, androidPushConf.JpushClient.Options.BadgeClass)
+						}
+						intentUrl = fmt.Sprintf(intentUrl, intentComponent)
 						androidNotification := &jpush.AndroidNotification{
 							Alert:  req.PushText,
 							Title:  req.Title,
 							Extras: transfer2Exts(req),
 							Intent: map[string]interface{}{
-								"url": "intent:#Intent;action=com.j.im.intent.MESSAGE_CLICK;end",
+								"url": intentUrl,
 							},
 						}
 						if req.Badge > 0 {
@@ -190,7 +204,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 								Alert:   req.Title,
 								Android: androidNotification,
 							},
-							Options: handleJPushOptions(androidPushConf.JpushClient.Options),
+							Options: handleJPushOptions(androidPushConf.JpushClient.Options, params),
 						}
 						_, err := androidPushConf.JpushClient.Push(jPushPayload)
 						if err != nil {
@@ -332,7 +346,7 @@ func iosPushPayload(req *pbobjs.PushData) interface{} {
 	return iosPayload
 }
 
-func handleJPushOptions(jpushOptions *commonservices.JPushOptions) *jpush.Options {
+func handleJPushOptions(jpushOptions *commonservices.JPushOptions, params map[string]string) *jpush.Options {
 	if jpushOptions != nil {
 		options := &jpush.Options{
 			Classification: jpushOptions.Classification,
@@ -345,6 +359,9 @@ func handleJPushOptions(jpushOptions *commonservices.JPushOptions) *jpush.Option
 				Oppo:   jpushOptions.ThirdPartyChannel.Oppo,
 				Vivo:   jpushOptions.ThirdPartyChannel.Vivo,
 				Meizu:  jpushOptions.ThirdPartyChannel.Meizu,
+			}
+			if options.ThirdPartyChannel.Xiaomi != nil && options.ThirdPartyChannel.Xiaomi.MiTemplateParam != "" {
+				options.ThirdPartyChannel.Xiaomi.MiTemplateParam = tools.ReplaceTemplateParams(options.ThirdPartyChannel.Xiaomi.MiTemplateParam, params)
 			}
 		}
 		return options

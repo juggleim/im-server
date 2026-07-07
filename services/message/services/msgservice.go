@@ -362,6 +362,10 @@ func GetPushData(ctx context.Context, msg *pbobjs.DownMsg, pushLanguage string) 
 	retPushData.SenderId = msg.SenderId
 	retPushData.ConverId = msg.TargetId
 	retPushData.ChannelType = msg.ChannelType
+	retPushData.SenderName = msg.TargetUserInfo.GetNickname()
+	if msg.GroupInfo != nil && msg.GroupInfo.GroupName != "" {
+		retPushData.GroupName = msg.GroupInfo.GroupName
+	}
 	return retPushData
 }
 

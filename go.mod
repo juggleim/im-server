@@ -19,6 +19,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4
 	github.com/syndtr/goleveldb v0.0.0-20181127023241-353a9fca669c
 	github.com/tidwall/gjson v1.17.1
+	github.com/valyala/fasttemplate v1.2.2
 	github.com/zeromicro/go-zero v1.6.4
 	go.mongodb.org/mongo-driver v1.13.1
 	go.uber.org/atomic v1.11.0
@@ -141,6 +142,7 @@ require (
 	github.com/tinylib/msgp v1.3.0 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/twitchtv/twirp v8.1.3+incompatible // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.5.0 // indirect

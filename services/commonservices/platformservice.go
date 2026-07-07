@@ -98,7 +98,9 @@ type JPushHuaweiChannel struct {
 }
 
 type JPushXiaomiChannel struct {
-	ChannelId string `json:"channel_id,omitempty"`
+	ChannelId       string `json:"channel_id,omitempty"`
+	MiTemplateId    string `json:"mi_template_id"`
+	MiTemplateParam string `json:"mi_template_param"`
 }
 
 type JPushHonorChannel struct {
