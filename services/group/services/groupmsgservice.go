@@ -145,6 +145,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
 		SubChannel:        upMsg.SubChannel,
 		ToUserIds:         upMsg.ToUserIds,
+		ConverTags:        msgConverCache.ToConverTags(),
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 	msglogs.LogMsg(ctx, downMsg4Sendbox)
@@ -178,6 +179,7 @@ func SendGroupMsg(ctx context.Context, upMsg *pbobjs.UpMsg) (errs.IMErrorCode, s
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
 		SubChannel:        upMsg.SubChannel,
 		ToUserIds:         upMsg.ToUserIds,
+		ConverTags:        msgConverCache.ToConverTags(),
 	}
 
 	commonservices.SubGroupMsg(ctx, msgId, downMsg4Sendbox)

@@ -215,7 +215,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru v1.0.2
-	github.com/juggleim/imserver-sdk-go v1.0.14 // indirect
+	github.com/juggleim/imserver-sdk-go v1.0.14
 	github.com/juggleim/jugglechat-server v1.1.19
 	github.com/kataras/i18n v0.0.8
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible

@@ -45,6 +45,9 @@ const (
 	AttItemKey_Bot_Type     AttItemKey = "bot_type"
 	AttItemKey_Bot_BotConf  AttItemKey = "bot_conf"
 	AttItemKey_Bot_Settings AttItemKey = "bot_settings"
+
+	//setting keys of global conver conf
+	AttItemKey_GlobalConverConf_GlobalConverTags AttItemKey = "global_conver_tags"
 )
 
 type GroupSettings struct {

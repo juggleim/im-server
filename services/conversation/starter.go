@@ -85,6 +85,12 @@ func (manager *ConversationManager) RegisterActors(register gmicro.IActorRegiste
 	register.RegisterActor("qry_conver_conf", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryUserConverConfActor{}, serviceName)
 	})
+	register.RegisterActor("qry_g_conver_conf", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.QryGlobalConverConfActor{}, serviceName)
+	})
+	register.RegisterActor("set_g_conver_conf", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.SetGlobalConverConfActor{}, serviceName)
+	})
 }
 
 func (manager *ConversationManager) Startup(args map[string]interface{}) {

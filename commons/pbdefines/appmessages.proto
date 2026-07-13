@@ -719,6 +719,7 @@ message ConverTag{
 
 message ConverExts {
   map<string,bool> converTags = 1;
+  map<string,bool> globalConverTags = 2;
 }
 
 enum ConverTagType{

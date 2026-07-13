@@ -19,18 +19,20 @@ func init() {
 				UserId:               conver.UserId,
 				TargetId:             conver.TargetId,
 				ChannelType:          conver.ChannelType,
+				SubChannel:           conver.SubChannel,
 				SortTime:             conver.SortTime,
 				LatestMsgId:          conver.LatestMsgId,
 				LatestUnreadMsgIndex: conver.UnReadIndex,
 				SyncTime:             conver.SyncTime,
 				AppKey:               conver.Appkey,
+				ConverExts:           conver.ConverExts,
 			})
 		}
 	})
 }
 
 func UpsertOfflineConversation(item *ConversationCacheItem) {
-	key := fmt.Sprintf("%s_%s_%s_%d", item.Appkey, item.UserId, item.TargetId, item.ChannelType)
+	key := fmt.Sprintf("%s_%s_%s_%s_%d", item.Appkey, item.UserId, item.TargetId, item.SubChannel, item.ChannelType)
 	offlineUserConverCache.Upsert(key, func(oldVal interface{}) interface{} {
 		var converItem *ConversationCacheItem
 		if oldVal != nil {
@@ -45,6 +47,7 @@ func UpsertOfflineConversation(item *ConversationCacheItem) {
 			if item.SyncTime > converItem.SyncTime {
 				converItem.SyncTime = item.SyncTime
 			}
+			converItem.ConverExts = item.ConverExts
 		} else {
 			converItem = item
 		}

@@ -6,13 +6,14 @@ type GroupMuteReq struct {
 }
 
 type GroupInfo struct {
-	GroupId       string            `json:"group_id"`
-	GroupName     string            `json:"group_name"`
-	GroupPortrait string            `json:"group_portrait"`
-	IsMute        int               `json:"is_mute"`
-	UpdatedTime   int64             `json:"updated_time"`
-	ExtFields     map[string]string `json:"ext_fields"`
-	Settings      *GroupSettings    `json:"settings"`
+	GroupId          string            `json:"group_id"`
+	GroupName        string            `json:"group_name"`
+	GroupPortrait    string            `json:"group_portrait"`
+	IsMute           int               `json:"is_mute"`
+	UpdatedTime      int64             `json:"updated_time"`
+	ExtFields        map[string]string `json:"ext_fields"`
+	Settings         *GroupSettings    `json:"settings"`
+	GlobalConverTags *[]string         `json:"global_conver_tags"`
 }
 
 type GroupSettings struct {
@@ -23,11 +24,12 @@ type GroupSettings struct {
 }
 
 type GroupMembersReq struct {
-	GroupId       string            `json:"group_id"`
-	GroupName     string            `json:"group_name"`
-	GroupPortrait string            `json:"group_portrait"`
-	ExtFields     map[string]string `json:"ext_fields"`
-	MemberIds     []string          `json:"member_ids"`
+	GroupId          string            `json:"group_id"`
+	GroupName        string            `json:"group_name"`
+	GroupPortrait    string            `json:"group_portrait"`
+	ExtFields        map[string]string `json:"ext_fields"`
+	MemberIds        []string          `json:"member_ids"`
+	GlobalConverTags *[]string         `json:"global_conver_tags"`
 }
 
 type GroupMemberUpdateReq struct {

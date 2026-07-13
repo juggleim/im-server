@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"encoding/json"
 	"im-server/commons/bases"
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
@@ -9,6 +10,7 @@ import (
 	"im-server/services/apigateway/services"
 	"im-server/services/commonservices"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -115,6 +117,17 @@ func GroupAddMembers(ctx *gin.Context) {
 	if code != errs.IMErrorCode_SUCCESS {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
+	}
+	if addMemberReq.GlobalConverTags != nil {
+		code, _, err = bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "set_g_conver_conf", addMemberReq.GroupId, newGlobalConverTagsReq(addMemberReq.GroupId, *addMemberReq.GlobalConverTags), nil)
+		if err != nil {
+			tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+			return
+		}
+		if code != errs.IMErrorCode_SUCCESS {
+			tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+			return
+		}
 	}
 
 	tools.SuccessHttpResp(ctx, nil)
@@ -238,14 +251,38 @@ func QryGroupInfo(ctx *gin.Context) {
 		return
 	}
 	info := groupInfo.(*pbobjs.GroupInfo)
+	code, converConfResp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_g_conver_conf", groupId, &pbobjs.ConverConfReq{
+		ConverId:    groupId,
+		ChannelType: pbobjs.ChannelType_Group,
+	}, func() proto.Message {
+		return &pbobjs.ConverConf{}
+	})
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+		return
+	}
+	globalConverTags := make([]string, 0)
+	if converConf, ok := converConfResp.(*pbobjs.ConverConf); ok {
+		for tag, enabled := range converConf.GlobalConverTags {
+			if enabled {
+				globalConverTags = append(globalConverTags, tag)
+			}
+		}
+		sort.Strings(globalConverTags)
+	}
 
 	tools.SuccessHttpResp(ctx, &models.GroupInfo{
-		GroupId:       info.GroupId,
-		GroupName:     info.GroupName,
-		GroupPortrait: info.GroupPortrait,
-		IsMute:        int(info.IsMute),
-		UpdatedTime:   info.UpdatedTime,
-		ExtFields:     commonservices.Kvitems2Map(info.ExtFields),
+		GroupId:          info.GroupId,
+		GroupName:        info.GroupName,
+		GroupPortrait:    info.GroupPortrait,
+		IsMute:           int(info.IsMute),
+		UpdatedTime:      info.UpdatedTime,
+		ExtFields:        commonservices.Kvitems2Map(info.ExtFields),
+		GlobalConverTags: &globalConverTags,
 	})
 }
 
@@ -269,7 +306,35 @@ func UpdateGroup(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
 		return
 	}
+	if req.GlobalConverTags != nil {
+		code, _, err = bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "set_g_conver_conf", req.GroupId, newGlobalConverTagsReq(req.GroupId, *req.GlobalConverTags), nil)
+		if err != nil {
+			tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+			return
+		}
+		if code != errs.IMErrorCode_SUCCESS {
+			tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+			return
+		}
+	}
 	tools.SuccessHttpResp(ctx, nil)
+}
+
+func newGlobalConverTagsReq(converId string, tags []string) *pbobjs.SetConverConfReq {
+	globalConverTags := make(map[string]bool, len(tags))
+	for _, tag := range tags {
+		if tag != "" {
+			globalConverTags[tag] = true
+		}
+	}
+	itemValue, _ := json.Marshal(globalConverTags)
+	return &pbobjs.SetConverConfReq{
+		ConverId:    converId,
+		ChannelType: pbobjs.ChannelType_Group,
+		ItemType:    int32(commonservices.AttItemType_Setting),
+		ItemKey:     string(commonservices.AttItemKey_GlobalConverConf_GlobalConverTags),
+		ItemValue:   string(itemValue),
+	}
 }
 
 func GroupMemberMute(ctx *gin.Context) {

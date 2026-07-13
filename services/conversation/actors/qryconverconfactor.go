@@ -29,3 +29,20 @@ func (actor *QryUserConverConfActor) OnReceive(ctx context.Context, input proto.
 func (actor *QryUserConverConfActor) CreateInputObj() proto.Message {
 	return &pbobjs.ConverIndex{}
 }
+
+type QryGlobalConverConfActor struct {
+	bases.BaseActor
+}
+
+func (actor *QryGlobalConverConfActor) OnReceive(ctx context.Context, input proto.Message) {
+	if req, ok := input.(*pbobjs.ConverConfReq); ok {
+		logs.WithContext(ctx).Infof("user_id:%s\tconver_id:%s\tchannel_type:%v\tsub_channel:%s", bases.GetRequesterIdFromCtx(ctx), req.ConverId, req.ChannelType, req.SubChannel)
+		code, resp := services.QryGlobalConverConf(ctx, req)
+		qryAck := bases.CreateQueryAckWraper(ctx, code, resp)
+		actor.Sender.Tell(qryAck, actorsystem.NoSender)
+	}
+}
+
+func (actor *QryGlobalConverConfActor) CreateInputObj() proto.Message {
+	return &pbobjs.ConverConfReq{}
+}

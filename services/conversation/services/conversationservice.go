@@ -41,12 +41,15 @@ type ConversationCacheItem struct {
 	UserId      string
 	TargetId    string
 	ChannelType pbobjs.ChannelType
+	SubChannel  string
 
 	LatestMsgId string
 	LatestMsg   *pbobjs.DownMsg
 	SortTime    int64
 	SyncTime    int64
 	UnReadIndex int64
+
+	ConverExts *pbobjs.ConverExts
 }
 
 func getGlobalConverCacheKey(appkey, converId string, channelType pbobjs.ChannelType) string {

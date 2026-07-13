@@ -120,6 +120,12 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) *models.Co
 			uc.SyncTimeIndex.Add(float64(conver.SyncTime), itemKey)
 		}
 		cacheConver.IsDeleted = 0
+		if conver.ConverExts != nil {
+			if cacheConver.ConverExts == nil {
+				cacheConver.ConverExts = &pbobjs.ConverExts{}
+			}
+			cacheConver.ConverExts.GlobalConverTags = conver.ConverExts.GlobalConverTags
+		}
 		result = cacheConver
 	} else {
 		item := &models.Conversation{
@@ -132,6 +138,7 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) *models.Co
 			LatestUnreadMsgIndex: conver.LatestUnreadMsgIndex,
 			SortTime:             conver.SortTime,
 			SyncTime:             conver.SyncTime,
+			ConverExts:           conver.ConverExts,
 		}
 		uc.ConverItemMap[itemKey] = item
 		uc.SyncTimeIndex.Add(float64(item.SyncTime), itemKey)
@@ -511,12 +518,19 @@ func (uc *UserConversations) QryTopConvers(startTime int64, count int32, sortTyp
 
 func converMatchedTag(conver *models.Conversation, tag, exceptTag string) bool {
 	if tag != "" {
-		return conver.ConverExts != nil && len(conver.ConverExts.ConverTags) > 0 && conver.ConverExts.ConverTags[tag]
+		return converContainsTag(conver, tag)
 	}
 	if exceptTag != "" {
-		return conver.ConverExts == nil || len(conver.ConverExts.ConverTags) <= 0 || !conver.ConverExts.ConverTags[exceptTag]
+		return !converContainsTag(conver, exceptTag)
 	}
 	return true
+}
+
+func converContainsTag(conver *models.Conversation, tag string) bool {
+	if conver == nil || conver.ConverExts == nil {
+		return false
+	}
+	return conver.ConverExts.ConverTags[tag] || conver.ConverExts.GlobalConverTags[tag]
 }
 
 func (uc *UserConversations) ClearTotalUnread() {

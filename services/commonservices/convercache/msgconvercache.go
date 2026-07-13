@@ -2,13 +2,16 @@ package convercache
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
+	converStorage "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 	"time"
 )
@@ -22,9 +25,21 @@ func init() {
 }
 
 type MsgConverItem struct {
-	cacheKey      string
-	LatestMsgSeq  int64
-	LatestMsgTime int64
+	cacheKey         string
+	LatestMsgSeq     int64
+	LatestMsgTime    int64
+	GlobalConverTags map[string]bool
+}
+
+func (item *MsgConverItem) ToConverTags() []*pbobjs.ConverTag {
+	ret := []*pbobjs.ConverTag{}
+	for tag := range item.GlobalConverTags {
+		ret = append(ret, &pbobjs.ConverTag{
+			Tag:     tag,
+			TagType: pbobjs.ConverTagType_GlobalConverTag,
+		})
+	}
+	return ret
 }
 
 func (item *MsgConverItem) GetMsgSeqWithIncr(msgFlag int32) int64 {
@@ -81,17 +96,57 @@ func GetMsgConverCache(ctx context.Context, converId, subChannel string, channel
 	} else {
 		msgTime, msgSeq := GetLatestMsgTimeSeq(ctx, appkey, converId, subChannel, channelType)
 		item := &MsgConverItem{
-			cacheKey:      cacheKey,
-			LatestMsgTime: msgTime,
-			LatestMsgSeq:  msgSeq,
+			cacheKey:         cacheKey,
+			LatestMsgTime:    msgTime,
+			LatestMsgSeq:     msgSeq,
+			GlobalConverTags: getGlobalConverTags(ctx, appkey, converId, subChannel, channelType),
 		}
 		msgConverCache.Add(cacheKey, item)
 		return item
 	}
 }
 
+func getGlobalConverTags(ctx context.Context, appkey, converId, subChannel string, channelType pbobjs.ChannelType) map[string]bool {
+	if channelType != pbobjs.ChannelType_Private && channelType != pbobjs.ChannelType_Group {
+		return nil
+	}
+
+	itemKey := string(commonservices.AttItemKey_GlobalConverConf_GlobalConverTags)
+	confMap, err := converStorage.NewConverConfStorage().QryConfsByItemKeys(
+		appkey,
+		converId,
+		channelType,
+		subChannel,
+		[]string{itemKey},
+	)
+	if err != nil {
+		logs.WithContext(ctx).Error(err.Error())
+		return nil
+	}
+
+	conf := confMap[itemKey]
+	if conf == nil || conf.ItemType != int(commonservices.AttItemType_Setting) || conf.ItemValue == "" {
+		return nil
+	}
+
+	globalConverTags := map[string]bool{}
+	if err := json.Unmarshal([]byte(conf.ItemValue), &globalConverTags); err != nil {
+		logs.WithContext(ctx).Error(err.Error())
+		return nil
+	}
+	return globalConverTags
+}
+
 func getMsgConverCacheKey(appkey, converId, subChannel string, channelType pbobjs.ChannelType) string {
 	return fmt.Sprintf("%s_%d_%s_%s", appkey, channelType, converId, subChannel)
+}
+
+func RemoveMsgConverCache(appkey, converId, subChannel string, channelType pbobjs.ChannelType) {
+	cacheKey := getMsgConverCacheKey(appkey, converId, subChannel, channelType)
+	lock := msgConverLocks.GetLocks(cacheKey)
+	lock.Lock()
+	defer lock.Unlock()
+	msgConverCache.Remove(cacheKey)
 }
 
 func GetLatestMsgTimeSeq(ctx context.Context, appkey, converId, subChannel string, channelType pbobjs.ChannelType) (int64, int64) {

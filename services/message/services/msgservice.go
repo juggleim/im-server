@@ -118,6 +118,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		DestroyTime:       destroyTime,
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
 		SubChannel:        upMsg.SubChannel,
+		ConverTags:        msgConverCache.ToConverTags(),
 	}
 	commonservices.Save2Sendbox(ctx, downMsg4Sendbox)
 	msglogs.LogMsg(ctx, downMsg4Sendbox)
@@ -149,6 +150,7 @@ func SendPrivateMsg(ctx context.Context, senderId, receiverId string, upMsg *pbo
 		DestroyTime:       destroyTime,
 		LifeTimeAfterRead: upMsg.LifeTimeAfterRead,
 		SubChannel:        upMsg.SubChannel,
+		ConverTags:        msgConverCache.ToConverTags(),
 
 		ReceiverInfo:     commonservices.GetTargetDisplayUserInfo(ctx, receiverId),
 		SenderFriendInfo: bases.GetSenderFriendInfoFromCtx(ctx),

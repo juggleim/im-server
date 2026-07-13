@@ -266,5 +266,6 @@ func CopyDownMsg(msg *pbobjs.DownMsg, receiverId string) *pbobjs.DownMsg {
 		DestroyTime:       msg.DestroyTime,
 		LifeTimeAfterRead: msg.LifeTimeAfterRead,
 		SubChannel:        msg.SubChannel,
+		ConverTags:        msg.ConverTags,
 	}
 }

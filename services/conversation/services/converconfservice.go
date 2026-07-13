@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
@@ -9,6 +10,9 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/convercache"
+	converStorage "im-server/services/conversation/storages"
+	"im-server/services/conversation/storages/models"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -24,6 +28,8 @@ type ConverConfItem struct {
 	RtcRoomId                 string
 	ActivedRtcRoom            *pbobjs.ActivedRtcRoom
 	LatestActivedRtcRoomCheck int64
+
+	GlobalConverTags map[string]bool
 }
 
 var converConfCache *caches.LruCache
@@ -55,6 +61,21 @@ func GetConverConf(appkey, converId string, channelType pbobjs.ChannelType, subC
 				ChannelType: channelType,
 				SubChannel:  subChannel,
 			}
+			globalConverTagsConf, err := converStorage.NewConverConfStorage().Find(
+				appkey,
+				converId,
+				channelType,
+				subChannel,
+				string(commonservices.AttItemKey_GlobalConverConf_GlobalConverTags),
+			)
+			if err == nil && globalConverTagsConf != nil &&
+				globalConverTagsConf.ItemType == int(commonservices.AttItemType_Setting) &&
+				globalConverTagsConf.ItemValue != "" {
+				globalConverTags := map[string]bool{}
+				if err := json.Unmarshal([]byte(globalConverTagsConf.ItemValue), &globalConverTags); err == nil {
+					item.GlobalConverTags = globalConverTags
+				}
+			}
 			converConfCache.Add(key, item)
 			return item
 		}
@@ -79,6 +100,87 @@ func (conf *ConverConfItem) ClearRtcRoomId() {
 	conf.RtcRoomId = ""
 	conf.ActivedRtcRoom = nil
 	conf.LatestActivedRtcRoomCheck = 0
+}
+
+func (conf *ConverConfItem) SetGlobalConverTagsIfChanged(globalConverTags map[string]bool, persist func() error) error {
+	l := converConfLocks.GetLocks(getConverConfCacheKey(conf.AppKey, conf.ConverId, conf.ChannelType, conf.SubChannel))
+	l.Lock()
+	defer l.Unlock()
+
+	if globalConverTagsEqual(conf.GlobalConverTags, globalConverTags) {
+		return nil
+	}
+	if err := persist(); err != nil {
+		return err
+	}
+	conf.GlobalConverTags = make(map[string]bool, len(globalConverTags))
+	for tag, enabled := range globalConverTags {
+		conf.GlobalConverTags[tag] = enabled
+	}
+	return nil
+}
+
+func (conf *ConverConfItem) GetGlobalConverTags() map[string]bool {
+	l := converConfLocks.GetLocks(getConverConfCacheKey(conf.AppKey, conf.ConverId, conf.ChannelType, conf.SubChannel))
+	l.RLock()
+	defer l.RUnlock()
+
+	ret := make(map[string]bool, len(conf.GlobalConverTags))
+	for tag, enabled := range conf.GlobalConverTags {
+		ret[tag] = enabled
+	}
+	return ret
+}
+
+func globalConverTagsEqual(left, right map[string]bool) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for tag, enabled := range left {
+		if rightEnabled, exists := right[tag]; !exists || rightEnabled != enabled {
+			return false
+		}
+	}
+	return true
+}
+
+func SetGlobalConverConf(ctx context.Context, req *pbobjs.SetConverConfReq) errs.IMErrorCode {
+	if req == nil || req.ConverId == "" || req.ChannelType == pbobjs.ChannelType_Unknown || req.ItemKey == "" {
+		return errs.IMErrorCode_MSG_PARAM_ILLEGAL
+	}
+	if req.ItemKey != string(commonservices.AttItemKey_GlobalConverConf_GlobalConverTags) {
+		return errs.IMErrorCode_SUCCESS
+	}
+	if req.ItemType != int32(commonservices.AttItemType_Setting) {
+		return errs.IMErrorCode_MSG_PARAM_ILLEGAL
+	}
+	globalConverTags := map[string]bool{}
+	if err := json.Unmarshal([]byte(req.ItemValue), &globalConverTags); err != nil || globalConverTags == nil {
+		return errs.IMErrorCode_MSG_PARAM_ILLEGAL
+	}
+
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	storage := converStorage.NewConverConfStorage()
+	confModel := models.ConverConf{
+		AppKey:     appkey,
+		ConverId:   req.ConverId,
+		ConverType: req.ChannelType,
+		SubChannel: req.SubChannel,
+		ItemKey:    req.ItemKey,
+		ItemValue:  req.ItemValue,
+		ItemType:   int(req.ItemType),
+	}
+	converConf := GetConverConf(appkey, req.ConverId, req.ChannelType, req.SubChannel)
+	if converConf == nil {
+		return errs.IMErrorCode_DEFAULT
+	}
+	if err := converConf.SetGlobalConverTagsIfChanged(globalConverTags, func() error {
+		return storage.Upsert(confModel)
+	}); err != nil {
+		return errs.IMErrorCode_DEFAULT
+	}
+	convercache.RemoveMsgConverCache(appkey, req.ConverId, req.SubChannel, req.ChannelType)
+	return errs.IMErrorCode_SUCCESS
 }
 
 func (conf *ConverConfItem) GetActivedRtcRoom(ctx context.Context) *pbobjs.ActivedRtcRoom {
@@ -146,6 +248,20 @@ func QryConverConf(ctx context.Context, req *pbobjs.ConverIndex) (errs.IMErrorCo
 	converConf := GetConverConf(appkey, converId, req.ChannelType, req.SubChannel)
 	if converConf != nil {
 		ret.ActivedRtcRoom = converConf.GetActivedRtcRoom(ctx)
+	}
+	return errs.IMErrorCode_SUCCESS, ret
+}
+
+func QryGlobalConverConf(ctx context.Context, req *pbobjs.ConverConfReq) (errs.IMErrorCode, *pbobjs.ConverConf) {
+	ret := req.ConverConf
+	if ret == nil {
+		ret = &pbobjs.ConverConf{}
+	}
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	converConf := GetConverConf(appkey, req.ConverId, req.ChannelType, req.SubChannel)
+	if converConf != nil {
+		ret.ActivedRtcRoom = converConf.GetActivedRtcRoom(ctx)
+		ret.GlobalConverTags = converConf.GetGlobalConverTags()
 	}
 	return errs.IMErrorCode_SUCCESS, ret
 }

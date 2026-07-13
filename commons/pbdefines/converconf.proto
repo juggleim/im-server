@@ -6,6 +6,7 @@ import "commons/pbdefines/rtcroom.proto";
 
 message ConverConf{
     ActivedRtcRoom activedRtcRoom = 1;
+    map<string,bool> globalConverTags = 2;
 }
 
 message ActivedRtcRoom{
@@ -24,4 +25,13 @@ message ConverConfReq {
     ChannelType channelType = 2;
     string subChannel = 3;
     ConverConf converConf = 4;
+}
+
+message SetConverConfReq {
+    string converId = 1;
+    ChannelType channelType = 2;
+    string subChannel = 3;
+    int32 itemType = 4;
+    string itemKey = 5;
+    string itemValue = 6;
 }

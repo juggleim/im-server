@@ -57,6 +57,9 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 				SortTime:             sortTime,
 				SyncTime:             msg.MsgTime,
 				LatestUnreadMsgIndex: unreadIndex,
+				ConverExts: &pbobjs.ConverExts{
+					GlobalConverTags: toGlobalConverTags(msg.ConverTags),
+				},
 			})
 			if !msg.IsSend {
 				HandleMentionedMsg(appkey, userId, msg, userConvers)
@@ -69,16 +72,41 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 				UserId:      userId,
 				TargetId:    msg.TargetId,
 				ChannelType: msg.ChannelType,
+				SubChannel:  msg.SubChannel,
 				LatestMsgId: msg.MsgId,
 				SortTime:    sortTime,
 				SyncTime:    msg.MsgTime,
 				UnReadIndex: unreadIndex,
+				ConverExts: &pbobjs.ConverExts{
+					ConverTags:       toUserConverTags(msg.ConverTags),
+					GlobalConverTags: toGlobalConverTags(msg.ConverTags),
+				},
 			})
 			if !msg.IsSend {
 				HandleMentionedMsg(appkey, userId, msg, nil)
 			}
 		}
 	}
+}
+
+func toGlobalConverTags(tags []*pbobjs.ConverTag) map[string]bool {
+	m := make(map[string]bool)
+	for _, tag := range tags {
+		if tag.TagType == pbobjs.ConverTagType_GlobalConverTag {
+			m[tag.Tag] = true
+		}
+	}
+	return m
+}
+
+func toUserConverTags(tags []*pbobjs.ConverTag) map[string]bool {
+	m := make(map[string]bool)
+	for _, tag := range tags {
+		if tag.TagType == pbobjs.ConverTagType_UserConverTag {
+			m[tag.Tag] = true
+		}
+	}
+	return m
 }
 
 func SaveNilConversationV2(ctx context.Context, appkey string, userId string, targetId, subChannel string, channelType pbobjs.ChannelType) (errs.IMErrorCode, *pbobjs.Conversation) {
@@ -626,14 +654,20 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 				}
 			}
 			//conver tags
-			if conver.ConverExts != nil && len(conver.ConverExts.ConverTags) > 0 {
-				tagList := []*pbobjs.ConverTag{}
+			if conver.ConverExts != nil {
+				conversation.ConverTags = []*pbobjs.ConverTag{}
 				for tag := range conver.ConverExts.ConverTags {
-					tagList = append(tagList, &pbobjs.ConverTag{
-						Tag: tag,
+					conversation.ConverTags = append(conversation.ConverTags, &pbobjs.ConverTag{
+						Tag:     tag,
+						TagType: pbobjs.ConverTagType_UserConverTag,
 					})
 				}
-				conversation.ConverTags = tagList
+				for tag := range conver.ConverExts.GlobalConverTags {
+					conversation.ConverTags = append(conversation.ConverTags, &pbobjs.ConverTag{
+						Tag:     tag,
+						TagType: pbobjs.ConverTagType_GlobalConverTag,
+					})
+				}
 			}
 		}
 		retConvers = append(retConvers, conversation)

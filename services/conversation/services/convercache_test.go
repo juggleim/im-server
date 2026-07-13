@@ -22,7 +22,8 @@ func TestTotalUnreadCountFilter(t *testing.T) {
 		LatestUnreadMsgIndex: 4,
 		LatestReadMsgIndex:   1,
 		ConverExts: &pbobjs.ConverExts{
-			ConverTags: map[string]bool{"team": true},
+			ConverTags:       map[string]bool{"team": true},
+			GlobalConverTags: map[string]bool{"global_team": true},
 		},
 	}
 	chatroomConver := &models.Conversation{
@@ -104,6 +105,13 @@ func TestTotalUnreadCountFilter(t *testing.T) {
 			want: 3,
 		},
 		{
+			name: "tag keeps conversations containing global tag",
+			filter: &pbobjs.ConverFilter{
+				Tag: "global_team",
+			},
+			want: 3,
+		},
+		{
 			name: "tag overrides except tag",
 			filter: &pbobjs.ConverFilter{
 				Tag:       "team",
@@ -117,6 +125,13 @@ func TestTotalUnreadCountFilter(t *testing.T) {
 				ExceptTag: "muted",
 			},
 			want: 6,
+		},
+		{
+			name: "except global tag applies when tag is empty",
+			filter: &pbobjs.ConverFilter{
+				ExceptTag: "global_team",
+			},
+			want: 4,
 		},
 	}
 
