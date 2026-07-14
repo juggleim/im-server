@@ -24,7 +24,7 @@ func (ext GroupMemberExtDao) TableName() string {
 
 func (ext GroupMemberExtDao) BatchCreate(items []GroupMemberExtDao) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("insert into %s (`app_key`,`group_id`,`member_id`,`item_key`,`item_value`,`item_type`)values", ext.TableName())
+	sql := fmt.Sprintf("insert ignore into %s (`app_key`,`group_id`,`member_id`,`item_key`,`item_value`,`item_type`)values", ext.TableName())
 	params := []interface{}{}
 
 	buffer.WriteString(sql)

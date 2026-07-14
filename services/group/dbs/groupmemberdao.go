@@ -39,7 +39,7 @@ func (member GroupMemberDao) Find(appkey, groupId, memberId string) (*GroupMembe
 
 func (member GroupMemberDao) BatchCreate(items []GroupMemberDao) error {
 	var buffer bytes.Buffer
-	sql := fmt.Sprintf("insert into %s (`group_id`,`member_id`,`app_key`)values", member.TableName())
+	sql := fmt.Sprintf("insert ignore into %s (`group_id`,`member_id`,`app_key`)values", member.TableName())
 
 	buffer.WriteString(sql)
 	params := []interface{}{}

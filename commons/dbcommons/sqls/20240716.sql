@@ -593,7 +593,8 @@ CREATE TABLE IF NOT EXISTS `pushtokens` (
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user_id` (`app_key`,`user_id`)
+  UNIQUE KEY `idx_user_id` (`app_key`,`user_id`),
+  KEY `idx_device_id` (`app_key`,`device_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '推送token';
 
 CREATE TABLE IF NOT EXISTS `readinfos` (
