@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"encoding/json"
 	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/errs"
@@ -8,10 +9,84 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/apigateway/models"
 	"im-server/services/apigateway/services"
+	"im-server/services/commonservices"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/proto"
 )
+
+func SetGlobalConverTags(ctx *gin.Context) {
+	var req models.GlobalConverTagsReq
+	if err := ctx.BindJSON(&req); err != nil || req.ConverId == "" || req.ChannelType == int(pbobjs.ChannelType_Unknown) || req.GlobalConverTags == nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+
+	globalConverTags := make(map[string]bool, len(*req.GlobalConverTags))
+	for _, tag := range *req.GlobalConverTags {
+		if tag != "" {
+			globalConverTags[tag] = true
+		}
+	}
+	itemValue, err := json.Marshal(globalConverTags)
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "set_g_conver_conf", req.ConverId, &pbobjs.SetConverConfReq{
+		ConverId:    req.ConverId,
+		ChannelType: pbobjs.ChannelType(req.ChannelType),
+		SubChannel:  req.SubChannel,
+		ItemType:    int32(commonservices.AttItemType_Setting),
+		ItemKey:     string(commonservices.AttItemKey_GlobalConverConf_GlobalConverTags),
+		ItemValue:   string(itemValue),
+	}, nil)
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+		return
+	}
+	tools.SuccessHttpResp(ctx, nil)
+}
+
+func GetGlobalConverTags(ctx *gin.Context) {
+	var req models.GlobalConverTagsReq
+	if err := ctx.BindJSON(&req); err != nil || req.ConverId == "" || req.ChannelType == int(pbobjs.ChannelType_Unknown) {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
+		return
+	}
+
+	code, resp, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "qry_g_conver_conf", req.ConverId, &pbobjs.ConverConfReq{
+		ConverId:    req.ConverId,
+		ChannelType: pbobjs.ChannelType(req.ChannelType),
+		SubChannel:  req.SubChannel,
+	}, func() proto.Message {
+		return &pbobjs.ConverConf{}
+	})
+	if err != nil {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
+		return
+	}
+	if code != errs.IMErrorCode_SUCCESS {
+		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
+		return
+	}
+
+	tags := make([]string, 0)
+	if converConf, ok := resp.(*pbobjs.ConverConf); ok {
+		for tag, enabled := range converConf.GlobalConverTags {
+			if enabled {
+				tags = append(tags, tag)
+			}
+		}
+	}
+	sort.Strings(tags)
+	tools.SuccessHttpResp(ctx, models.GlobalConverTagsResp{GlobalConverTags: tags})
+}
 
 func AddConversation(ctx *gin.Context) {
 	var req models.Conversation
