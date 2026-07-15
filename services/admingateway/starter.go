@@ -11,6 +11,7 @@ import (
 	consoleDb "github.com/juggleim/imserver-console/commons/dbcommons"
 	consoleLogger "github.com/juggleim/imserver-console/commons/logs"
 	consoleRouters "github.com/juggleim/imserver-console/routers"
+	consoleWeb "github.com/juggleim/imserver-console/webconsole"
 )
 
 type AdminGateway struct {
@@ -38,7 +39,7 @@ func (ser *AdminGateway) Startup(args map[string]interface{}) {
 
 	ser.httpServer = gin.Default()
 	consoleRouters.Route(ser.httpServer, "admingateway")
-	consoleRouters.LoadJuggleChatAdminWeb(ser.httpServer)
+	consoleWeb.LoadAdminWeb(ser.httpServer)
 
 	httpPort := configures.Config.AdminGateway.HttpPort
 	go ser.httpServer.Run(fmt.Sprintf(":%d", httpPort))
