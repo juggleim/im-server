@@ -158,3 +158,34 @@ func TestConverFilterExceptTagProtoRoundTrip(t *testing.T) {
 		t.Fatalf("ExceptTag = %q, want muted", filter.ExceptTag)
 	}
 }
+
+func TestTagAddConversInitializesNilUserTagMap(t *testing.T) {
+	conver := &models.Conversation{
+		TargetId:    "group",
+		ChannelType: pbobjs.ChannelType_Group,
+		ConverExts: &pbobjs.ConverExts{
+			GlobalConverTags: map[string]bool{"global_team": true},
+		},
+	}
+	userConvers := &UserConversations{
+		Appkey: "app",
+		UserId: "user",
+		ConverItemMap: map[string]*models.Conversation{
+			getConverItemKey(conver.TargetId, conver.SubChannel, conver.ChannelType): conver,
+		},
+	}
+
+	affected := userConvers.TagAddConvers("team", []*pbobjs.SimpleConversation{
+		{TargetId: conver.TargetId, ChannelType: conver.ChannelType},
+	})
+
+	if !affected {
+		t.Fatal("TagAddConvers() affected = false, want true")
+	}
+	if !conver.ConverExts.ConverTags["team"] {
+		t.Fatal("TagAddConvers() did not add the user conversation tag")
+	}
+	if !conver.ConverExts.GlobalConverTags["global_team"] {
+		t.Fatal("TagAddConvers() removed the existing global conversation tag")
+	}
+}

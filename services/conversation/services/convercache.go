@@ -750,9 +750,10 @@ func (uc *UserConversations) TagAddConvers(tag string, convers []*pbobjs.SimpleC
 		itemKey := getConverItemKey(conver.TargetId, conver.SubChannel, conver.ChannelType)
 		if item, exist := uc.ConverItemMap[itemKey]; exist {
 			if item.ConverExts == nil {
-				item.ConverExts = &pbobjs.ConverExts{
-					ConverTags: make(map[string]bool),
-				}
+				item.ConverExts = &pbobjs.ConverExts{}
+			}
+			if item.ConverExts.ConverTags == nil {
+				item.ConverExts.ConverTags = make(map[string]bool)
 			}
 			if _, exist := item.ConverExts.ConverTags[tag]; !exist {
 				item.ConverExts.ConverTags[tag] = true
