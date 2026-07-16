@@ -229,7 +229,7 @@ fi
 
 printf '%s\n' '{}' >"$tmp_dir/community.json"
 if [ -n "$COMMUNITY_FILE" ]; then
-  jq -e 'type == "object"' "$COMMUNITY_FILE" >"$tmp_dir/community.json" || {
+  jq -e 'select(type == "object")' "$COMMUNITY_FILE" >"$tmp_dir/community.json" || {
     echo "Community file must contain a JSON object: $COMMUNITY_FILE" >&2
     exit 1
   }
@@ -321,7 +321,8 @@ jq -e '
   (.github.organization.total_stars | type == "number") and
   (.github.primary_repository.stars | type == "number") and
   ((.github.primary_repository.star_growth.last_30d | type) == "number" or
-   .github.primary_repository.star_growth.last_30d == null)
+   .github.primary_repository.star_growth.last_30d == null) and
+  (.community | type == "object")
 ' "$tmp_dir/snapshot.json" >/dev/null
 
 if [ -n "$OUTPUT" ]; then

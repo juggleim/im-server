@@ -73,6 +73,13 @@ create_snapshot() {
 create_snapshot "2026-07-16T06:05:11Z" 3802 3584 363 240 79 160 0 0 "$tmp_dir/before.json"
 create_snapshot "2026-07-17T06:05:11Z" 3805 3586 364 241 84 162 1 2 "$tmp_dir/after.json"
 
+jq -n '{reddit: [{community: "r/selfhosted", status: "published"}]}' \
+  >"$tmp_dir/community.json"
+jq -e 'select(type == "object")' "$tmp_dir/community.json" \
+  >"$tmp_dir/community-normalized.json"
+jq -e '.reddit[0].community == "r/selfhosted"' \
+  "$tmp_dir/community-normalized.json" >/dev/null
+
 "$script_dir/compare-promotion-metrics.sh" "$tmp_dir/before.json" "$tmp_dir/after.json" \
   | tee "$tmp_dir/comparison.json" \
   | jq -e '
