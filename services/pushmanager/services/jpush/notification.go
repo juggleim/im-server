@@ -8,16 +8,16 @@ type Notification struct {
 }
 
 type AndroidNotification struct {
-	Alert      string                 `json:"alert"`
-	Title      string                 `json:"title,omitempty"`
-	BuilderId  int                    `json:"builder_id,omitempty"`
-	Priority   int                    `json:"priority,omitempty"`
-	Category   string                 `json:"category,omitempty"`
-	Style      int                    `json:"style,omitempty"`
-	AlertType  int                    `json:"alert_type,omitempty"`
-	BigText    string                 `json:"big_text,omitempty"`
-	Inbox      map[string]interface{} `json:"inbox,omitempty"`
-	BigPicPath string                 `json:"big_pic_path,omitempty"`
+	Alert       string                 `json:"alert"`
+	Title       string                 `json:"title,omitempty"`
+	BuilderId   int                    `json:"builder_id,omitempty"`
+	Priority    int                    `json:"priority,omitempty"`
+	Category    string                 `json:"category,omitempty"`
+	Style       int                    `json:"style,omitempty"`
+	AlertType   int                    `json:"alert_type,omitempty"`
+	BigText     string                 `json:"big_text,omitempty"`
+	Inbox       map[string]interface{} `json:"inbox,omitempty"`
+	BigPicPath  string                 `json:"big_pic_path,omitempty"`
 	Extras      map[string]interface{} `json:"extras,omitempty"`
 	Intent      map[string]interface{} `json:"intent,omitempty"`
 	BadgeAddNum int                    `json:"badge_add_num,omitempty"`

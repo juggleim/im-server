@@ -10,6 +10,7 @@
 
 [![License](https://img.shields.io/github/license/juggleim/im-server?color=yellow&style=flat-square)](./LICENSE)
 [![Go](https://img.shields.io/badge/go-1.25.12-30dff3?style=flat-square&logo=go)](https://github.com/juggleim/im-server)
+[![CI](https://github.com/juggleim/im-server/actions/workflows/ci.yml/badge.svg)](https://github.com/juggleim/im-server/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/juggleim/im-server?style=flat-square&color=brightgreen)](https://github.com/juggleim/im-server/releases)
 [![Stars](https://img.shields.io/github/stars/juggleim/im-server?style=flat-square&color=orange)](https://github.com/juggleim/im-server/stargazers)
 [![Forks](https://img.shields.io/github/forks/juggleim/im-server?style=flat-square)](https://github.com/juggleim/im-server/network/members)

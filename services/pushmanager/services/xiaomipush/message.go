@@ -23,7 +23,7 @@ type SendReq struct {
 	TimeToSend            int64       `json:"time_to_send,omitempty"`            // 可选项。定时发送消息。用自1970年1月1日以来00:00:00.0 UTC时间表示（以毫秒为单位的时间）。注：仅支持七天内的定时消息。
 	NotifyID              int64       `json:"notify_id,omitempty"`               // 可选项。默认情况下，通知栏只显示一条推送消息。如果通知栏要显示多条推送消息，需要针对不同的消息设置不同的notify_id（相同notify_id的通知栏消息会覆盖之前的）。
 	Extra                 *Extra      `json:"extra,omitempty"`                   // 可选项，对app提供一些扩展的功能，请参考2.2。除了这些扩展功能，开发者还可以通过 ExtraCustom 定义一些key和value来控制客户端的行为。注：key和value的字符数不能超过1024，至多可以设置10个key-value键值对。
-	ExtraCustom           interface{} `json:"extra,omitempty"`                   // 可选项，对app提供一些扩展的功能，请参考2.2。开发者自己定义的一些key和value来控制客户端的行为。传入类型应该为结构体指针，参考 *Extra。
+	ExtraCustom           interface{} `json:"-" form:"extra,omitempty"`          // 可选项，对app提供一些扩展的功能，请参考2.2。开发者自己定义的一些key和value来控制客户端的行为。传入类型应该为结构体指针，参考 *Extra。
 
 	RegistrationId string `json:"registration_id,omitempty"` // 根据registration_id，发送消息到指定设备上。可以提供多个registration_id，发送给一组设备，不同的registration_id之间用“,”分割。参数仅适用于“/message/regid”HTTP API。（注意：需要对payload字符串做urlencode处理）
 	Alias          string `json:"alias,omitempty"`           // 根据alias，发送消息到指定的设备。可以提供多个alias，发送给一组设备，不同的alias之间用“,”分割。参数仅适用于“/message/alias”HTTP API。

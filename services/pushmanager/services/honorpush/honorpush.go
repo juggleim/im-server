@@ -16,11 +16,11 @@ import (
 // appId：应用 ID（控制台）；clientId / clientSecret：OAuth 客户端凭证，通常对应控制台 Client ID / Client Secret。
 // 与 commonservices.HonorPushConf 对应关系：AppId→appId，AppKey→clientId，AppSecret→clientSecret（以控制台实际字段为准）。
 type HonorPushClient struct {
-	httpClient *http.Client
-	iamHost    string
-	pushHost   string
-	appID      string
-	clientID   string
+	httpClient   *http.Client
+	iamHost      string
+	pushHost     string
+	appID        string
+	clientID     string
 	clientSecret string
 
 	accessToken   string
