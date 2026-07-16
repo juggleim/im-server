@@ -7,7 +7,7 @@
 **A high-performance, scalable open-source instant messaging (IM) system.**
 
 [![License](https://img.shields.io/github/license/juggleim/im-server?color=yellow&style=flat-square)](./LICENSE)
-[![Go](https://img.shields.io/badge/go-%3E%3D1.20-30dff3?style=flat-square&logo=go)](https://github.com/juggleim/im-server)
+[![Go](https://img.shields.io/badge/go-1.25.12-30dff3?style=flat-square&logo=go)](https://github.com/juggleim/im-server)
 [![Release](https://img.shields.io/github/v/release/juggleim/im-server?style=flat-square&color=brightgreen)](https://github.com/juggleim/im-server/releases)
 [![Stars](https://img.shields.io/github/stars/juggleim/im-server?style=flat-square&color=orange)](https://github.com/juggleim/im-server/stargazers)
 [![Forks](https://img.shields.io/github/forks/juggleim/im-server?style=flat-square)](https://github.com/juggleim/im-server/network/members)
@@ -19,7 +19,7 @@
 **[Docs](https://www.juggle.im/docs/guide/intro/)** ·
 **[Quick Deploy](https://www.juggle.im/docs/guide/deploy/quickdeploy/)** ·
 **[API Reference](https://www.juggle.im/docs/server/api/)** ·
-**[Ask a Question](https://github.com/juggleim/im-server/issues)**
+**[Ask a Question](https://github.com/juggleim/im-server/discussions/categories/q-a)**
 
 If this project helps you, please give it a ⭐ **Star** — it keeps the project easy to find and motivates us to keep building!
 
@@ -33,7 +33,7 @@ JuggleIM is a **ready-to-use, self-hostable** instant messaging (IM) backend. Bu
 
 Whether you are building a social product, a customer-service system, IoT device communication, live-stream chat, or AI bot conversations, JuggleIM serves as a solid messaging foundation. It is **multi-tenant** by design — a single deployment can host multiple fully isolated applications — and the professional edition scales horizontally to support **hundreds of millions of daily active users**.
 
-> Want to try it right away? Check the [official docs](https://www.juggle.im/docs/guide/intro/) or jump to [Quick Deploy](#-quick-deploy) below.
+> Want to try it right away? Jump to the [Docker Quick Start](#-quick-start-with-docker) below.
 
 ## ✨ Key Features
 
@@ -43,7 +43,7 @@ Whether you are building a social product, a customer-service system, IoT device
 - Handles large groups of 10,000–100,000 members without losing messages, plus unlimited-size live chat rooms
 
 **🔒 Secure & Reliable**
-- End-to-end encryption of protocol and data — no leakage risk
+- Tenant-scoped credentials and token-based client authentication, with HTTPS/WSS recommended for production transport security
 - Multi-device online presence and message sync keep state consistent across all endpoints
 
 **🌍 Flexible Deployment & Global Reach**
@@ -59,7 +59,8 @@ Whether you are building a social product, a customer-service system, IoT device
 ## 🗂 Table of Contents
 
 - [Ecosystem](#-ecosystem)
-- [Quick Deploy](#-quick-deploy)
+- [Architecture](#-architecture)
+- [Quick Start with Docker](#-quick-start-with-docker)
 - [Manual Deployment](#-manual-deployment)
 - [Create an Application (Tenant)](#-create-an-application-tenant)
 - [Integration](#-business-server--client-integration)
@@ -90,11 +91,45 @@ JuggleIM follows a layered architecture — "core service + business service + m
 
 > The desktop imsdk-pc is not yet open-sourced — contact support for details.
 
-## 🚀 Quick Deploy
+## 🏗 Architecture
 
-For the fastest experience, follow the official one-click deployment guide:
+JuggleIM runs as a modular Go service: HTTP and WebSocket gateways route requests through an internal actor/RPC runtime to messaging, identity, conversation, history, push, file, bot, and RTC modules.
 
-👉 **[One-Click Deployment Guide](https://www.juggle.im/docs/guide/deploy/quickdeploy/)**
+[![JuggleIM system architecture](./docs/diagrams/system-overview.svg)](./docs/architecture.md)
+
+Read the **[architecture guide](./docs/architecture.md)** for component boundaries, data ownership, private and group message flows, security boundaries, and deployment constraints. [简体中文版](./docs/architecture_zh.md)
+
+## 🚀 Quick Start with Docker
+
+Run a complete local JuggleIM stack with MySQL and the admin console:
+
+```bash
+git clone https://github.com/juggleim/im-server.git
+cd im-server
+docker compose up -d
+```
+
+Once the containers are healthy, the local services are available at:
+
+| Service | Address | Purpose |
+| :--- | :--- | :--- |
+| Server API | `http://127.0.0.1:9001` | Called by your business server |
+| Navigator | `http://127.0.0.1:9002` | Returns the client connection address |
+| WebSocket | `ws://127.0.0.1:9003` | Used by client SDKs for long connections |
+| Admin console | `http://127.0.0.1:8090` | Manage applications; default login: `admin` / `123456` |
+
+Create your first application (tenant):
+
+```bash
+curl --request POST \
+  --url http://127.0.0.1:8090/admingateway/apps/create \
+  --header 'Content-Type: application/json' \
+  --data '{"app_key":"appkey","app_name":"My App"}'
+```
+
+Stop the local stack with `docker compose down`. To remove its MySQL data as well, use `docker compose down -v`.
+
+For production, clustering, and managed deployment options, see the **[Deployment Guide](https://www.juggle.im/docs/guide/deploy/quickdeploy/)**.
 
 ## 🛠 Manual Deployment
 
@@ -143,11 +178,14 @@ mysql:                  # MySQL configuration
 #   address: 127.0.0.1:27017
 #   name: jim_msgs
 
-# apiGateway:           # server-side API port for business app servers; defaults to defaultPort
-#   httpPort: 9001
+apiGateway:             # server-side API port for business app servers
+  httpPort: 9001
 
-# connectManager:       # long-connection port; defaults to defaultPort
-#   wsPort: 9003
+navGateway:             # navigator endpoint used by client SDKs
+  httpPort: 9002
+
+connectManager:         # WebSocket long-connection port
+  wsPort: 9003
 
 adminGateway:           # built-in admin console, default credentials admin/123456
   httpPort: 8090
@@ -164,7 +202,8 @@ Ports that need to be exposed:
 
 | Port | Protocol | Description |
 | ---: | :---: | :--- |
-| 9003 | http | Server-side API port, called by business servers (e.g. jugglechat-server) |
+| 9001 | http | Server-side API port, called by business servers (e.g. jugglechat-server) |
+| 9002 | http | Navigator port, used to discover the WebSocket connection address |
 | 9003 | websocket | IM long-connection port for client SDKs |
 | 8090 | http | Admin console port, default credentials admin/123456 |
 
@@ -172,7 +211,7 @@ Configure exposure however suits your environment (public IP, Nginx reverse prox
 
 **Register the long-connection address** by inserting a config row into the database:
 ```sql
-insert into globalconfs (conf_key, conf_value) values ('connect_address', '{"default":["127.0.0.1:9002"]}');
+insert into globalconfs (conf_key, conf_value) values ('connect_address', '{"default":["127.0.0.1:9003"]}');
 ```
 Replace `127.0.0.1` with your machine's intranet IP or public IP/domain. This address is delivered to client SDKs by the navigator service.
 
@@ -213,7 +252,7 @@ You can also log in to the admin console at `http://127.0.0.1:8090` (default cre
 
 | Item | Example | Notes |
 | ---: | :---: | :--- |
-| IM server-side API address | `http://127.0.0.1:9003` | Used by your business server to call IM APIs (register users, create groups, send system messages, etc.). See the [API Reference](https://www.juggle.im/docs/server/api/) |
+| IM server-side API address | `http://127.0.0.1:9001` | Used by your business server to call IM APIs (register users, create groups, send system messages, etc.). See the [API Reference](https://www.juggle.im/docs/server/api/) |
 | app_key | `appkey1` | Tenant identifier, unique within the system |
 | app_secret | `hciKcc6sXRDjYUQp` | Auth secret generated on app creation (must be 16 chars if custom). **Use only on the business server — never expose it to clients** |
 
@@ -229,7 +268,8 @@ You can also log in to the admin console at `http://127.0.0.1:8090` (default cre
 Interested in IM or have integration questions? Join the community and let's chat 👇
 
 - [Telegram Group (Chinese)](https://t.me/juggleim_zh)
-- [Open an Issue](https://github.com/juggleim/im-server/issues)
+- [GitHub Discussions](https://github.com/juggleim/im-server/discussions) for questions, ideas, and project showcases
+- [GitHub Issues](https://github.com/juggleim/im-server/issues) for reproducible bugs and scoped feature requests
 
 ## 🤝 Contributing
 

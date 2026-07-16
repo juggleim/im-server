@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    participant A as Sender Client
+    participant WS as Connect Manager
+    participant RPC as Actor Runtime
+    participant PM as Private Message Actor
+    participant Store as Message Storage
+    participant Dispatch as Message Dispatch
+    participant Push as Push Manager
+    participant B as Receiver Client
+
+    A->>WS: Publish message over WebSocket
+    WS->>RPC: Route p_msg by target ID
+    RPC->>PM: Process UpMsg
+    PM->>PM: Tenant, interceptor, block and friend checks
+    PM->>Store: Save sendbox and history
+    PM->>Dispatch: Dispatch message to receiver
+
+    alt Receiver is online
+        Dispatch->>WS: Route msg or ntf
+        WS->>B: Deliver over WebSocket
+        B-->>WS: Delivery ACK
+    else Receiver is offline
+        Dispatch->>Push: Request offline push
+        Push-->>B: APNs / FCM / vendor push
+    end
+
+    PM-->>WS: Sender publish ACK
+    WS-->>A: Message ID, sequence and timestamp
