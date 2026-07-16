@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"im-server/commons/bases"
+	"im-server/services/commonservices"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,7 @@ func ToRpcCtx(ginCtx *gin.Context, requestId string) context.Context {
 	ctx = context.WithValue(ctx, bases.CtxKey_AppKey, GetCtxString(ginCtx, string(bases.CtxKey_AppKey)))
 	ctx = context.WithValue(ctx, bases.CtxKey_Session, GetCtxString(ginCtx, string(bases.CtxKey_Session)))
 	ctx = context.WithValue(ctx, bases.CtxKey_IsFromApi, true)
+	ctx = context.WithValue(ctx, bases.CtxKey_Platform, string(commonservices.Platform_Server))
 	if requestId != "" {
 		ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, requestId)
 	}
