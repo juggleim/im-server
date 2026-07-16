@@ -6,7 +6,8 @@
 
 # Build artifacts & logs
 launcher/build
-**/logs
+launcher/logs
+**/*.log
 **/local_logs
 **/client-logs
 launcher/uploads
