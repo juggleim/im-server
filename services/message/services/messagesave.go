@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"im-server/commons/bases"
 	"im-server/commons/caches"
 	"im-server/commons/configures"
@@ -22,6 +23,11 @@ var taskCache *caches.LruCache
 
 // TODO save immediately when user online, other wise, use async queue.
 func SaveMsg2Inbox(appkey, receiverId string, msg *pbobjs.DownMsg) error {
+	if appkey == "" {
+		err := fmt.Errorf("refuse to store inbox message with empty appkey, receiver_id:%s msg_id:%s", receiverId, msg.MsgId)
+		logs.NewLogEntity().Error(err.Error())
+		return err
+	}
 	var err error
 	msgBs, _ := tools.PbMarshal(msg)
 	message := models.Msg{
@@ -64,6 +70,11 @@ func SaveMsg2Inbox(appkey, receiverId string, msg *pbobjs.DownMsg) error {
 }
 
 func SaveMsg2Sendbox(ctx context.Context, appkey, senderId string, msg *pbobjs.DownMsg) error {
+	if appkey == "" {
+		err := fmt.Errorf("refuse to store sendbox message with empty appkey, sender_id:%s msg_id:%s", senderId, msg.MsgId)
+		logs.NewLogEntity().Error(err.Error())
+		return err
+	}
 	//save to sendbox
 	msgBs, _ := tools.PbMarshal(msg)
 	var err error
@@ -111,7 +122,7 @@ func SaveMsg2Sendbox(ctx context.Context, appkey, senderId string, msg *pbobjs.D
 		})
 	}
 	if err != nil {
-		logs.NewLogEntity().Errorf("failed to store inbox. err:%v", err)
+		logs.NewLogEntity().Errorf("failed to store sendbox. err:%v", err)
 	}
 	return err
 }

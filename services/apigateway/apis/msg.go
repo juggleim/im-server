@@ -50,6 +50,7 @@ func SendPrivateMsg(ctx *gin.Context) {
 		})
 		msgIdMap[targetId] = msgId
 	}
+	rpcCtx := services.ToRpcCtx(ctx, sendMsgReq.SenderId)
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
 			msgId := msgIdMap[targetId]
@@ -60,7 +61,7 @@ func SendPrivateMsg(ctx *gin.Context) {
 			opts = append(opts, &bases.WithMsgIdOption{
 				MsgId: msgId,
 			})
-			commonservices.AsyncPrivateMsgOverUpstream(services.ToRpcCtx(ctx, sendMsgReq.SenderId), sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
+			commonservices.AsyncPrivateMsgOverUpstream(rpcCtx, sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:           sendMsgReq.MsgType,
 				MsgContent:        []byte(sendMsgReq.MsgContent),
 				Flags:             handleFlag(sendMsgReq),
@@ -104,10 +105,11 @@ func SendSystemMsg(ctx *gin.Context) {
 		})
 		msgIdMap[targetId] = msgId
 	}
+	rpcCtx := services.ToRpcCtx(ctx, sendMsgReq.SenderId)
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
 			msgId := msgIdMap[targetId]
-			commonservices.AsyncSystemMsgOverUpstream(services.ToRpcCtx(ctx, sendMsgReq.SenderId), sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
+			commonservices.AsyncSystemMsgOverUpstream(rpcCtx, sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:    sendMsgReq.MsgType,
 				MsgContent: []byte(sendMsgReq.MsgContent),
 				Flags:      handleFlag(sendMsgReq),
@@ -149,6 +151,7 @@ func SendGroupMsg(ctx *gin.Context) {
 		})
 		msgIdMap[targetId] = msgId
 	}
+	rpcCtx := services.ToRpcCtx(ctx, sendMsgReq.SenderId)
 	utils.SafeGo(func() {
 		for _, targetId := range targetIds {
 			msgId := msgIdMap[targetId]
@@ -159,7 +162,7 @@ func SendGroupMsg(ctx *gin.Context) {
 			opts = append(opts, &bases.WithMsgIdOption{
 				MsgId: msgId,
 			})
-			commonservices.AsyncGroupMsgOverUpstream(services.ToRpcCtx(ctx, sendMsgReq.SenderId), sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
+			commonservices.AsyncGroupMsgOverUpstream(rpcCtx, sendMsgReq.SenderId, targetId, &pbobjs.UpMsg{
 				MsgType:           sendMsgReq.MsgType,
 				MsgContent:        []byte(sendMsgReq.MsgContent),
 				Flags:             handleFlag(sendMsgReq),
@@ -191,6 +194,7 @@ func SendGroupCastMsg(ctx *gin.Context) {
 		})
 	}
 	//dispatch for target conversations
+	rpcCtx := services.ToRpcCtx(ctx, req.SenderId)
 	utils.SafeGo(func() {
 		flag := msgdefines.SetStoreMsg(0)
 		flag = msgdefines.SetCountMsg(flag)
@@ -202,9 +206,9 @@ func SendGroupCastMsg(ctx *gin.Context) {
 		}
 		for _, conver := range req.TargetConvers {
 			if conver.ChannelType == int(pbobjs.ChannelType_Private) {
-				commonservices.AsyncPrivateMsgOverUpstream(services.ToRpcCtx(ctx, req.SenderId), req.SenderId, conver.TargetId, upMsg, &bases.NoNotifySenderOption{})
+				commonservices.AsyncPrivateMsgOverUpstream(rpcCtx, req.SenderId, conver.TargetId, upMsg, &bases.NoNotifySenderOption{})
 			} else if conver.ChannelType == int(pbobjs.ChannelType_Group) {
-				commonservices.AsyncGroupMsgOverUpstream(services.ToRpcCtx(ctx, req.SenderId), req.SenderId, conver.TargetId, upMsg, &bases.NoNotifySenderOption{})
+				commonservices.AsyncGroupMsgOverUpstream(rpcCtx, req.SenderId, conver.TargetId, upMsg, &bases.NoNotifySenderOption{})
 			}
 			time.Sleep(50 * time.Millisecond)
 		}

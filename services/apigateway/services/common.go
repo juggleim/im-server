@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ToRpcCtx snapshots request-scoped values into a goroutine-safe context.
+// Call it before the Gin handler returns; *gin.Context may be reused afterwards.
 func ToRpcCtx(ginCtx *gin.Context, requestId string) context.Context {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, bases.CtxKey_AppKey, GetCtxString(ginCtx, string(bases.CtxKey_AppKey)))
