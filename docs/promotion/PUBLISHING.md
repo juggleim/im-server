@@ -119,6 +119,8 @@ Record metrics immediately before launch, then after 24 hours, 7 days, and 30 da
 | New contributors / PRs       |          |          |        |         |
 
 GitHub traffic data is available to repository maintainers under Insights → Traffic or through the traffic API.
+Use [`METRICS.md`](./METRICS.md) and `scripts/collect-promotion-metrics.sh` to retain comparable
+local snapshots, including the rolling traffic window and optional Reddit/LinkedIn analytics.
 
 ## Response principles
 

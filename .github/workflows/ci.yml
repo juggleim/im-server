@@ -46,6 +46,9 @@ jobs:
             exit 1
           fi
 
+      - name: Test promotion metrics tooling
+        run: scripts/test-promotion-metrics.sh
+
       - name: Vet packages
         # The MongoDB driver intentionally uses unkeyed bson.D literals.
         run: go vet -composites=false ./...
