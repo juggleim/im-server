@@ -284,7 +284,7 @@ Contributions of all kinds are welcome! You can:
 
 If JuggleIM has helped you, please give us a Star — your support drives our continued development!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=juggleim/im-server&type=Date)](https://star-history.com/#juggleim/im-server&Date)
+[![Star History Chart](docs/assets/star-history.svg)](https://www.star-history.com/#juggleim/im-server&Date)
 
 ## 📄 License
 

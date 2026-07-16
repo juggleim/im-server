@@ -286,7 +286,7 @@ curl --request POST \
 
 如果 JuggleIM 帮到了你，别忘了给我们一个 Star，你的支持是我们持续迭代的动力！
 
-[![Star History Chart](https://api.star-history.com/svg?repos=juggleim/im-server&type=Date)](https://star-history.com/#juggleim/im-server&Date)
+[![Star History Chart](docs/assets/star-history.svg)](https://www.star-history.com/#juggleim/im-server&Date)
 
 ## 📄 License
 
