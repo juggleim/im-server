@@ -69,6 +69,9 @@ type BatchExecutor struct {
 	batchSize     int
 	checkTimer    *time.Ticker
 	checkDuration time.Duration
+	done          chan struct{}
+	stopOnce      sync.Once
+	wg            sync.WaitGroup
 
 	executeFun func(tasks []interface{})
 }
@@ -78,11 +81,19 @@ func (executor *BatchExecutor) start() {
 		executor.checkTimer.Stop()
 	}
 	executor.checkTimer = time.NewTicker(executor.checkDuration)
+	executor.done = make(chan struct{})
+	executor.wg.Add(1)
 	go func() {
-		for range executor.checkTimer.C {
-			tasks := executor.featchTasks()
-			if len(tasks) > 0 && executor.executeFun != nil {
-				executor.executeFun(tasks)
+		defer executor.wg.Done()
+		for {
+			select {
+			case <-executor.checkTimer.C:
+				tasks := executor.featchTasks()
+				if len(tasks) > 0 && executor.executeFun != nil {
+					executor.executeFun(tasks)
+				}
+			case <-executor.done:
+				return
 			}
 		}
 	}()
@@ -123,7 +134,11 @@ func (executor *BatchExecutor) featchTasks() []interface{} {
 }
 
 func (executor *BatchExecutor) Stop() {
-	if executor.checkTimer != nil {
-		executor.checkTimer.Stop()
-	}
+	executor.stopOnce.Do(func() {
+		if executor.checkTimer != nil {
+			executor.checkTimer.Stop()
+		}
+		close(executor.done)
+		executor.wg.Wait()
+	})
 }

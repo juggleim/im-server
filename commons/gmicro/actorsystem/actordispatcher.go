@@ -2,6 +2,8 @@ package actorsystem
 
 import (
 	"context"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -13,7 +15,14 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-const buffersize int = 8192
+const (
+	// buffersize is the admission queue capacity. It is deliberately separate
+	// from worker concurrency: using it for both previously prestarted 24,576
+	// goroutines for every actor system.
+	buffersize                    = 8192
+	defaultCallbackPoolSize       = 256
+	defaultExecutorCommonPoolSize = 1024
+)
 
 type ActorDispatcher struct {
 	dispatchMap        sync.Map
@@ -23,7 +32,8 @@ type ActorDispatcher struct {
 	callbackPool       *tunny.Pool
 	callbackWraperChan chan wraper
 
-	executorCommonPool *tunny.Pool
+	executorCommonPool  *tunny.Pool
+	executorCommonSlots chan struct{}
 }
 
 func NewActorDispatcher(sender *MsgSender) *ActorDispatcher {
@@ -31,16 +41,27 @@ func NewActorDispatcher(sender *MsgSender) *ActorDispatcher {
 	if err != nil {
 		logs.Error("error when start timewheel of dispatcher")
 	}
+	callbackPoolSize := configuredPoolSize("IM_ACTOR_CALLBACK_WORKERS", defaultCallbackPoolSize)
+	executorPoolSize := configuredPoolSize("IM_ACTOR_EXECUTOR_WORKERS", defaultExecutorCommonPoolSize)
 	dispatcher := &ActorDispatcher{
-		msgSender:          sender,
-		timer:              timer,
-		callbackPool:       tunny.NewCallback(buffersize),
-		callbackWraperChan: make(chan wraper, buffersize),
-		executorCommonPool: tunny.NewCallback(2 * buffersize),
+		msgSender:           sender,
+		timer:               timer,
+		callbackPool:        tunny.NewCallback(callbackPoolSize),
+		callbackWraperChan:  make(chan wraper, buffersize),
+		executorCommonPool:  tunny.NewCallback(executorPoolSize),
+		executorCommonSlots: make(chan struct{}, executorPoolSize),
 	}
 	timer.Start()
-	go callbackActorExecute(dispatcher.callbackPool, dispatcher.callbackWraperChan)
+	go callbackActorExecute(dispatcher.callbackPool, make(chan struct{}, callbackPoolSize), dispatcher.callbackWraperChan)
 	return dispatcher
+}
+
+func configuredPoolSize(name string, fallback int) int {
+	value, err := strconv.Atoi(os.Getenv(name))
+	if err == nil && value > 0 {
+		return value
+	}
+	return fallback
 }
 
 func (dispatcher *ActorDispatcher) Dispatch(req *MessageRequest) {
@@ -77,7 +98,7 @@ func (dispatcher *ActorDispatcher) Destroy() {
 }
 
 func (dispatcher *ActorDispatcher) RegisterActor(method string, actorCreateFun func() IUntypedActor) {
-	executor := NewActorExecutorWithDefaultPool(dispatcher.executorCommonPool, actorCreateFun)
+	executor := newActorExecutor(dispatcher.executorCommonPool, dispatcher.executorCommonSlots, actorCreateFun)
 	dispatcher.dispatchMap.Store(method, executor)
 }
 
@@ -86,13 +107,13 @@ func (dispatcher *ActorDispatcher) RegisterStandaloneActor(method string, actorC
 	if concurrentCount > 0 {
 		executor = NewActorExecutor(concurrentCount, actorCreateFun)
 	} else {
-		executor = NewActorExecutorWithDefaultPool(dispatcher.executorCommonPool, actorCreateFun)
+		executor = newActorExecutor(dispatcher.executorCommonPool, dispatcher.executorCommonSlots, actorCreateFun)
 	}
 	dispatcher.dispatchMap.Store(method, executor)
 }
 
 func (dispatcher *ActorDispatcher) RegisterMultiMethodActor(methods []string, actorCreateFun func() IUntypedActor) {
-	executor := NewActorExecutorWithDefaultPool(dispatcher.executorCommonPool, actorCreateFun)
+	executor := newActorExecutor(dispatcher.executorCommonPool, dispatcher.executorCommonSlots, actorCreateFun)
 	for _, method := range methods {
 		dispatcher.dispatchMap.Store(method, executor)
 	}
@@ -103,7 +124,7 @@ func (dispatcher *ActorDispatcher) RegisterStandaloneMultiMethodActor(methods []
 	if concurrentCount > 0 {
 		executor = NewActorExecutor(concurrentCount, actorCreateFun)
 	} else {
-		executor = NewActorExecutorWithDefaultPool(dispatcher.executorCommonPool, actorCreateFun)
+		executor = newActorExecutor(dispatcher.executorCommonPool, dispatcher.executorCommonSlots, actorCreateFun)
 	}
 	for _, method := range methods {
 		dispatcher.dispatchMap.Store(method, executor)
@@ -165,20 +186,24 @@ type wraper struct {
 	actor  IUntypedActor
 }
 
-func callbackActorExecute(pool *tunny.Pool, callbackWraperChan chan wraper) {
+func callbackActorExecute(pool *tunny.Pool, processSlots chan struct{}, callbackWraperChan chan wraper) {
 	for {
 		wrapper := <-callbackWraperChan
-		go pool.Process(func() {
-			actor := wrapper.actor
+		processSlots <- struct{}{}
+		go func(wrapper wraper) {
+			defer func() { <-processSlots }()
+			pool.Process(func() {
+				actor := wrapper.actor
 
-			senderHandler, ok := actor.(ISenderHandler)
-			if ok {
-				senderHandler.SetSender(wrapper.sender)
-			}
-			receiveHandler, ok := actor.(IReceiveHandler)
-			if ok {
-				receiveHandler.OnReceive(context.Background(), wrapper.msg)
-			}
-		})
+				senderHandler, ok := actor.(ISenderHandler)
+				if ok {
+					senderHandler.SetSender(wrapper.sender)
+				}
+				receiveHandler, ok := actor.(IReceiveHandler)
+				if ok {
+					receiveHandler.OnReceive(context.Background(), wrapper.msg)
+				}
+			})
+		}(wrapper)
 	}
 }
