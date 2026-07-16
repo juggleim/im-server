@@ -96,6 +96,18 @@ grep -F '| im-server Stars | 3586 |' "$tmp_dir/summary.md" >/dev/null
 grep -F '| im-server Stars | +2 |' "$tmp_dir/summary.md" >/dev/null
 grep -F -- '- Human pull requests: 1' "$tmp_dir/summary.md" >/dev/null
 
+jq '.github.primary_repository.star_growth |= {
+  available: false,
+  last_24h: null,
+  last_7d: null,
+  last_30d: null,
+  daily_30d: []
+}' "$tmp_dir/after.json" >"$tmp_dir/no-star-history.json"
+
+"$script_dir/render-promotion-summary.sh" \
+  "$tmp_dir/no-star-history.json" >"$tmp_dir/no-star-history.md"
+grep -F '| Stars, last 24 hours | n/a |' "$tmp_dir/no-star-history.md" >/dev/null
+
 bash -n \
   "$script_dir/collect-promotion-metrics.sh" \
   "$script_dir/compare-promotion-metrics.sh" \

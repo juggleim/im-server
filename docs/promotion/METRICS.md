@@ -26,6 +26,11 @@ Maintainer-only GitHub traffic and logged-in Reddit/LinkedIn analytics remain in
 snapshots. If the repository has a `DEV_API_KEY` Actions secret, the daily artifact also includes
 the article owner's page-view count; the secret itself is never written to the artifact.
 
+GitHub may withhold timestamped stargazer identities from the workflow token. In that case the
+snapshot still records the authoritative Star total and daily comparisons, while the rolling
+24-hour/7-day/30-day Star fields are `null`. Local maintainer snapshots continue to include those
+rolling fields when the authenticated account has access.
+
 Compare any two retained snapshots:
 
 ```bash

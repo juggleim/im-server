@@ -96,11 +96,17 @@ gh api "repos/${ORG}/${REPO}" >"$tmp_dir/primary.json"
 star_total="$(jq -r '.stargazers_count' "$tmp_dir/primary.json")"
 last_star_page=$(((star_total + 99) / 100))
 star_page="$last_star_page"
+star_history_available=true
 
 while [ "$star_page" -ge 1 ]; do
   star_file="$tmp_dir/stars-${star_page}.json"
-  gh api -H 'Accept: application/vnd.github.star+json' \
-    "repos/${ORG}/${REPO}/stargazers?per_page=100&page=${star_page}" >"$star_file"
+  if ! gh api -H 'Accept: application/vnd.github.star+json' \
+    "repos/${ORG}/${REPO}/stargazers?per_page=100&page=${star_page}" \
+    >"$star_file" 2>"$tmp_dir/stargazers.err"; then
+    star_history_available=false
+    echo "Warning: timestamped GitHub stargazer data were unavailable; rolling Star growth will be null" >&2
+    break
+  fi
 
   oldest_is_before_cutoff="$(jq --argjson cutoff "$cutoff_30d" \
     'if length == 0 then true else (.[0].starred_at | fromdateiso8601) <= $cutoff end' \
@@ -111,17 +117,23 @@ while [ "$star_page" -ge 1 ]; do
   star_page=$((star_page - 1))
 done
 
-jq -s 'add' "$tmp_dir"/stars-*.json >"$tmp_dir/recent-stars.json"
-jq --argjson cutoff_24h "$cutoff_24h" \
-  --argjson cutoff_7d "$cutoff_7d" \
-  --argjson cutoff_30d "$cutoff_30d" '
-  {
-    last_24h: ([.[] | select((.starred_at | fromdateiso8601) >= $cutoff_24h)] | length),
-    last_7d: ([.[] | select((.starred_at | fromdateiso8601) >= $cutoff_7d)] | length),
-    last_30d: ([.[] | select((.starred_at | fromdateiso8601) >= $cutoff_30d)] | length),
-    daily_30d: ([.[] | select((.starred_at | fromdateiso8601) >= $cutoff_30d) | .starred_at[0:10]]
-      | group_by(.) | map({date: .[0], stars: length}))
-  }' "$tmp_dir/recent-stars.json" >"$tmp_dir/star-growth.json"
+if [ "$star_history_available" = true ]; then
+  jq -s 'add' "$tmp_dir"/stars-*.json >"$tmp_dir/recent-stars.json"
+  jq --argjson cutoff_24h "$cutoff_24h" \
+    --argjson cutoff_7d "$cutoff_7d" \
+    --argjson cutoff_30d "$cutoff_30d" '
+    {
+      available: true,
+      last_24h: ([.[] | select((.starred_at | fromdateiso8601) >= $cutoff_24h)] | length),
+      last_7d: ([.[] | select((.starred_at | fromdateiso8601) >= $cutoff_7d)] | length),
+      last_30d: ([.[] | select((.starred_at | fromdateiso8601) >= $cutoff_30d)] | length),
+      daily_30d: ([.[] | select((.starred_at | fromdateiso8601) >= $cutoff_30d) | .starred_at[0:10]]
+        | group_by(.) | map({date: .[0], stars: length}))
+    }' "$tmp_dir/recent-stars.json" >"$tmp_dir/star-growth.json"
+else
+  jq -n '{available: false, last_24h: null, last_7d: null, last_30d: null, daily_30d: []}' \
+    >"$tmp_dir/star-growth.json"
+fi
 
 gh api "repos/${ORG}/${REPO}/issues?state=all&since=${CAMPAIGN_PUBLISHED_AT}&per_page=100" --paginate \
   | jq -s --arg published "$CAMPAIGN_PUBLISHED_AT" '
@@ -308,7 +320,8 @@ jq -e '
   (.captured_at | fromdateiso8601 | type == "number") and
   (.github.organization.total_stars | type == "number") and
   (.github.primary_repository.stars | type == "number") and
-  (.github.primary_repository.star_growth.last_30d | type == "number")
+  ((.github.primary_repository.star_growth.last_30d | type) == "number" or
+   .github.primary_repository.star_growth.last_30d == null)
 ' "$tmp_dir/snapshot.json" >/dev/null
 
 if [ -n "$OUTPUT" ]; then
