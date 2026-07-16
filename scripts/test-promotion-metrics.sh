@@ -74,6 +74,7 @@ create_snapshot "2026-07-16T06:05:11Z" 3802 3584 363 240 79 160 0 0 "$tmp_dir/be
 create_snapshot "2026-07-17T06:05:11Z" 3805 3586 364 241 84 162 1 2 "$tmp_dir/after.json"
 
 "$script_dir/compare-promotion-metrics.sh" "$tmp_dir/before.json" "$tmp_dir/after.json" \
+  | tee "$tmp_dir/comparison.json" \
   | jq -e '
       .github.organization_stars.delta == 3 and
       .github.organization_metadata.changes.complete == 0 and
@@ -87,5 +88,16 @@ create_snapshot "2026-07-17T06:05:11Z" 3805 3586 364 241 84 162 1 2 "$tmp_dir/af
       .dev.page_views.delta == null
     ' >/dev/null
 
-bash -n "$script_dir/collect-promotion-metrics.sh" "$script_dir/compare-promotion-metrics.sh"
+"$script_dir/render-promotion-summary.sh" \
+  "$tmp_dir/after.json" \
+  "$tmp_dir/comparison.json" >"$tmp_dir/summary.md"
+
+grep -F '| im-server Stars | 3586 |' "$tmp_dir/summary.md" >/dev/null
+grep -F '| im-server Stars | +2 |' "$tmp_dir/summary.md" >/dev/null
+grep -F -- '- Human pull requests: 1' "$tmp_dir/summary.md" >/dev/null
+
+bash -n \
+  "$script_dir/collect-promotion-metrics.sh" \
+  "$script_dir/compare-promotion-metrics.sh" \
+  "$script_dir/render-promotion-summary.sh"
 echo "promotion metrics tests passed"

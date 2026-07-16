@@ -1,0 +1,99 @@
+name: Promotion Metrics
+
+on:
+  schedule:
+    # 14:20 Asia/Shanghai, shortly after the campaign-relative daily checkpoint.
+    - cron: "20 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: promotion-metrics
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    name: Capture public growth metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Capture snapshot
+        env:
+          DEV_API_KEY: ${{ secrets.DEV_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p metrics
+          scripts/collect-promotion-metrics.sh \
+            --public-only \
+            --output metrics/snapshot.json
+
+      - name: Find previous automated snapshot
+        id: previous
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous_run_id="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/promotion-metrics.yml/runs?status=success&per_page=1" \
+            --jq '.workflow_runs[0].id // empty')"
+
+          if [[ -z "${previous_run_id}" ]]; then
+            echo "found=false" >> "${GITHUB_OUTPUT}"
+            echo "No previous successful snapshot is available yet."
+            exit 0
+          fi
+
+          mkdir -p metrics/previous
+          if ! gh run download "${previous_run_id}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern 'promotion-metrics-*' \
+            --dir metrics/previous; then
+            echo "found=false" >> "${GITHUB_OUTPUT}"
+            echo "The previous run has no downloadable snapshot artifact."
+            exit 0
+          fi
+
+          previous_snapshot="$(find metrics/previous -type f -name snapshot.json -print -quit)"
+          if [[ -z "${previous_snapshot}" ]]; then
+            echo "found=false" >> "${GITHUB_OUTPUT}"
+            echo "The previous artifact did not contain snapshot.json."
+            exit 0
+          fi
+
+          cp "${previous_snapshot}" metrics/previous.json
+          echo "found=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Compare with previous snapshot
+        if: steps.previous.outputs.found == 'true'
+        run: |
+          scripts/compare-promotion-metrics.sh \
+            metrics/previous.json \
+            metrics/snapshot.json > metrics/comparison.json
+
+      - name: Write job summary
+        run: |
+          if [[ -f metrics/comparison.json ]]; then
+            scripts/render-promotion-summary.sh \
+              metrics/snapshot.json \
+              metrics/comparison.json > metrics/summary.md
+          else
+            scripts/render-promotion-summary.sh \
+              metrics/snapshot.json > metrics/summary.md
+          fi
+          sed -n '1,240p' metrics/summary.md >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload snapshot artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: promotion-metrics-${{ github.run_id }}
+          path: |
+            metrics/snapshot.json
+            metrics/comparison.json
+            metrics/summary.md
+          if-no-files-found: error
+          retention-days: 90

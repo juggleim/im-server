@@ -14,12 +14,32 @@ authenticated GitHub account has repository access, includes the rolling 14-day 
 The `.promotion-metrics/` directory is intentionally ignored by Git. Repository traffic is useful
 for campaign decisions, but it does not need to be published in source control.
 
+## Automated daily snapshots
+
+The [`Promotion Metrics`](../../.github/workflows/promotion-metrics.yml) workflow runs every day at
+14:20 Asia/Shanghai and can also be started manually. It captures public GitHub and DEV metrics,
+compares them with the preceding successful automated run, writes a compact Actions job summary,
+and retains the JSON snapshot, comparison, and Markdown summary as a workflow artifact for 90 days.
+
+The automated workflow intentionally uses read-only repository permissions and `--public-only`.
+Maintainer-only GitHub traffic and logged-in Reddit/LinkedIn analytics remain in local combined
+snapshots. If the repository has a `DEV_API_KEY` Actions secret, the daily artifact also includes
+the article owner's page-view count; the secret itself is never written to the artifact.
+
 Compare any two retained snapshots:
 
 ```bash
 ./scripts/compare-promotion-metrics.sh \
   .promotion-metrics/launch.json \
   .promotion-metrics/24-hours.json
+```
+
+Render a snapshot and optional comparison as Markdown:
+
+```bash
+./scripts/render-promotion-summary.sh \
+  .promotion-metrics/24-hours.json \
+  .promotion-metrics/24-hours-vs-launch.json
 ```
 
 The comparison separates human pull requests from bot pull requests, so Dependabot updates are not
