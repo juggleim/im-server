@@ -140,6 +140,38 @@ gh api "repos/${ORG}/${REPO}/pulls?state=all&sort=created&direction=desc&per_pag
         }
     ' >"$tmp_dir/pulls.json"
 
+gh api graphql \
+  -f owner="$ORG" \
+  -f name="$REPO" \
+  -f query='query($owner:String!,$name:String!){
+    repository(owner:$owner,name:$name){
+      discussions(first:100,orderBy:{field:UPDATED_AT,direction:DESC}){
+        totalCount
+        nodes{
+          number
+          title
+          url
+          createdAt
+          updatedAt
+          comments{totalCount}
+        }
+      }
+    }
+  }' \
+  | jq --arg published "$CAMPAIGN_PUBLISHED_AT" '
+      .data.repository.discussions as $discussions |
+      {
+        total: $discussions.totalCount,
+        comments_total: ($discussions.nodes | map(.comments.totalCount) | add // 0),
+        created_since_campaign: ($discussions.nodes
+          | map(select(.createdAt >= $published))
+          | map({number, title, url, created_at: .createdAt})),
+        updated_since_campaign: ($discussions.nodes
+          | map(select(.updatedAt >= $published))
+          | map({number, title, url, updated_at: .updatedAt, comments: .comments.totalCount}))
+      }
+    ' >"$tmp_dir/discussions.json"
+
 dev_public_url="https://dev.to/api/articles/${DEV_USERNAME}/${DEV_ARTICLE_SLUG}"
 if curl --fail --silent --show-error --max-time 30 "$dev_public_url" >"$tmp_dir/dev-public.json"; then
   dev_available=true
@@ -205,6 +237,7 @@ jq -n \
   --slurpfile growth "$tmp_dir/star-growth.json" \
   --slurpfile issues "$tmp_dir/issues.json" \
   --slurpfile pulls "$tmp_dir/pulls.json" \
+  --slurpfile discussions "$tmp_dir/discussions.json" \
   --slurpfile dev_public "$tmp_dir/dev-public.json" \
   --slurpfile dev_owner "$tmp_dir/dev-owner.json" \
   --slurpfile views "$tmp_dir/traffic-views.json" \
@@ -232,7 +265,11 @@ jq -n \
         open_issues_and_pull_requests: $primary[0].open_issues_count,
         watchers: $primary[0].subscribers_count,
         star_growth: $growth[0],
-        campaign_activity: {issues: $issues[0], pull_requests: $pulls[0]},
+        campaign_activity: {
+          issues: $issues[0],
+          pull_requests: $pulls[0],
+          discussions: $discussions[0]
+        },
         traffic: {
           available: $traffic_available,
           views_14d: $views[0],

@@ -40,7 +40,13 @@ create_snapshot() {
           star_growth: {last_24h: 2, last_7d: 4, last_30d: 14, daily_30d: []},
           campaign_activity: {
             issues: {created: 0, items: []},
-            pull_requests: {created: 1, human_created: 1, bot_created: 0, items: []}
+            pull_requests: {created: 1, human_created: 1, bot_created: 0, items: []},
+            discussions: {
+              total: 5,
+              comments_total: $comments,
+              created_since_campaign: [],
+              updated_since_campaign: []
+            }
           },
           traffic: {
             views_14d: {uniques: $visitors},
