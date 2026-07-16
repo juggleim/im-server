@@ -35,6 +35,7 @@ import (
 	"im-server/services/group"
 	"im-server/services/historymsg"
 	"im-server/services/message"
+	"im-server/services/navigator"
 	push "im-server/services/pushmanager"
 	"im-server/services/usermanager"
 
@@ -101,7 +102,7 @@ func main() {
 		WsPort: configures.Config.ConnectManager.WsPort,
 	})
 	exts[bases.NodeTag_Admin] = tools.ToJson(bases.HttpNodeExt{
-		Port: configures.Config.ConnectManager.WsPort,
+		Port: configures.Config.AdminGateway.HttpPort,
 	})
 	if err := bases.InitImServer(exts); err != nil {
 		logs.Error("Init Cluster failed.", err)
@@ -113,6 +114,7 @@ func main() {
 
 	imstarters.Loaded(&admingateway.AdminGateway{})
 	imstarters.Loaded(&apigateway.ApiGateway{})
+	imstarters.Loaded(&navigator.Navigator{})
 	imstarters.Loaded(&connectmanager.ConnectManager{})
 	imstarters.Loaded(&message.MessageManager{})
 	imstarters.Loaded(&friendmanager.FriendManager{})

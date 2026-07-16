@@ -43,7 +43,7 @@ Whether you are building a social product, a customer-service system, IoT device
 - Handles large groups of 10,000–100,000 members without losing messages, plus unlimited-size live chat rooms
 
 **🔒 Secure & Reliable**
-- End-to-end encryption of protocol and data — no leakage risk
+- Tenant-scoped credentials and token-based client authentication, with HTTPS/WSS recommended for production transport security
 - Multi-device online presence and message sync keep state consistent across all endpoints
 
 **🌍 Flexible Deployment & Global Reach**
@@ -59,6 +59,7 @@ Whether you are building a social product, a customer-service system, IoT device
 ## 🗂 Table of Contents
 
 - [Ecosystem](#-ecosystem)
+- [Architecture](#-architecture)
 - [Quick Start with Docker](#-quick-start-with-docker)
 - [Manual Deployment](#-manual-deployment)
 - [Create an Application (Tenant)](#-create-an-application-tenant)
@@ -89,6 +90,14 @@ JuggleIM follows a layered architecture — "core service + business service + m
 | [imserver-sdk-java](https://github.com/juggleim/imserver-sdk-java) | Java version of imserver-sdk |
 
 > The desktop imsdk-pc is not yet open-sourced — contact support for details.
+
+## 🏗 Architecture
+
+JuggleIM runs as a modular Go service: HTTP and WebSocket gateways route requests through an internal actor/RPC runtime to messaging, identity, conversation, history, push, file, bot, and RTC modules.
+
+[![JuggleIM system architecture](./docs/diagrams/system-overview.svg)](./docs/architecture.md)
+
+Read the **[architecture guide](./docs/architecture.md)** for component boundaries, data ownership, private and group message flows, security boundaries, and deployment constraints. [简体中文版](./docs/architecture_zh.md)
 
 ## 🚀 Quick Start with Docker
 

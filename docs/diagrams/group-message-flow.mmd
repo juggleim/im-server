@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    participant A as Sender Client
+    participant WS as Connect Manager
+    participant RPC as Actor Runtime
+    participant GM as Group Message Actor
+    participant Group as Group Service
+    participant Store as Message Storage
+    participant Dispatch as Message Dispatch
+    participant Members as Online Members
+    participant Push as Push Manager
+
+    A->>WS: Publish group message
+    WS->>RPC: Route g_msg by group ID
+    RPC->>GM: Process UpMsg
+    GM->>Group: Check group and sender membership
+    Group-->>GM: Group snapshot and member settings
+    GM->>GM: Apply mute, allow-list and interceptor rules
+    GM->>Store: Persist group history and sendbox state
+    GM->>Dispatch: Fan out by member IDs
+    Dispatch->>Members: Deliver msg or ntf over WebSocket
+    Dispatch->>Push: Push to eligible offline members
+    GM-->>WS: Sender publish ACK
+    WS-->>A: Message ID, sequence and timestamp

@@ -1,0 +1,63 @@
+flowchart LR
+    subgraph Clients["Clients and Integrators"]
+        Client["Mobile / Web / Desktop SDKs"]
+        Backend["Business Backend"]
+        Operator["Operator"]
+    end
+
+    subgraph Access["Access Layer"]
+        Nav["Navigator<br/>HTTP :9002"]
+        Connect["Connect Manager<br/>WebSocket :9003"]
+        API["Server API Gateway<br/>HTTP :9001"]
+        Admin["Admin Console<br/>HTTP :8090"]
+    end
+
+    subgraph Runtime["Single Go Process - Modular Actor Runtime"]
+        Actor["gmicro Actor and RPC Runtime"]
+        Messaging["Message<br/>Broadcast / Bot"]
+        Identity["User / Friend<br/>Presence"]
+        Conversation["Conversation / Group<br/>History"]
+        Extensions["Push / File / RTC<br/>Subscriptions / Moderation"]
+    end
+
+    subgraph Data["Data and External Services"]
+        MySQL["MySQL 8<br/>Required"]
+        Mongo["MongoDB<br/>Optional message store"]
+        KV["Local KVDB<br/>Optional"]
+        Objects["Object Storage<br/>S3 / MinIO / OSS / Qiniu"]
+        Push["Push Providers<br/>APNs / FCM / vendor channels"]
+    end
+
+    Client -->|"discover endpoint"| Nav
+    Client -->|"Protobuf over WebSocket"| Connect
+    Backend -->|"REST API"| API
+    Operator -->|"browser"| Admin
+
+    Nav --> Actor
+    Connect --> Actor
+    API --> Actor
+    Admin --> Actor
+
+    Actor --> Messaging
+    Actor --> Identity
+    Actor --> Conversation
+    Actor --> Extensions
+
+    Messaging --> MySQL
+    Identity --> MySQL
+    Conversation --> MySQL
+    Extensions --> MySQL
+    Messaging -. "when configured" .-> Mongo
+    Conversation -. "when configured" .-> Mongo
+    Actor -. "when enabled" .-> KV
+    Extensions --> Objects
+    Extensions --> Push
+
+    classDef client fill:#eaf3ff,stroke:#2f81f7,color:#0b1f33;
+    classDef access fill:#dbeafe,stroke:#1d4ed8,color:#0b1f33;
+    classDef runtime fill:#0c1b2e,stroke:#2f81f7,color:#ffffff;
+    classDef data fill:#f3f4f6,stroke:#64748b,color:#111827;
+    class Client,Backend,Operator client;
+    class Nav,Connect,API,Admin access;
+    class Actor,Messaging,Identity,Conversation,Extensions runtime;
+    class MySQL,Mongo,KV,Objects,Push data;
