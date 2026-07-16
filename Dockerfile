@@ -2,7 +2,7 @@
 
 # ---- Build stage ----
 # Compiles the im-server binary from source (mirrors launcher/build.sh).
-FROM golang:1.25.12-alpine AS builder
+FROM golang:1.26.5-alpine AS builder
 
 # git is needed to fetch the jugglechat-server / imserver-console module deps.
 RUN apk add --no-cache git
