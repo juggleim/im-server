@@ -94,8 +94,14 @@ func StructToUrlValues(intf interface{}) (values url.Values) {
 		fieldValue := iValue.Field(i)
 		structField := iType.Field(i)
 
-		tag := structField.Tag.Get("json")
+		tag := structField.Tag.Get("form")
+		if tag == "" {
+			tag = structField.Tag.Get("json")
+		}
 		name, opts := parseTag(tag)
+		if name == "-" {
+			continue
+		}
 		if !isValidTag(name) {
 			name = ""
 		}

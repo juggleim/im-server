@@ -2,7 +2,10 @@ package httputil_test
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"im-server/services/pushmanager/services/httputil"
@@ -21,6 +24,8 @@ type TestType1 struct {
 	FieldStringMapNil map[string]string `json:"field_string_map_nil"`
 	TestType2         *TestType2        `json:"test_type_2"`
 	TestType2Nil      *TestType2        `json:"test_type_2_nil"`
+	FormField         string            `json:"json_field" form:"form_field"`
+	IgnoredField      string            `json:"-"`
 }
 type TestType2 struct {
 	FieldInt       int               `json:"field_int"`
@@ -45,6 +50,8 @@ func TestStructToUrlValues(t *testing.T) {
 		FieldBytes:      []byte("test bytes"),
 		FieldString:     "test string",
 		FieldWithoutTag: "field without tag",
+		FormField:       "form value",
+		IgnoredField:    "ignored value",
 		FieldStringMap: map[string]string{
 			"key1": "value1",
 		},
@@ -61,13 +68,72 @@ func TestStructToUrlValues(t *testing.T) {
 			},
 		},
 	}
-	_ = httputil.StructToUrlValues(v)
+	values := httputil.StructToUrlValues(v)
+	if got := values.Get("form_field"); got != "form value" {
+		t.Fatalf("form tag was not respected: got %q", got)
+	}
+	if values.Has("json_field") {
+		t.Fatal("json tag should not be used when a form tag is present")
+	}
+	if values.Has("IgnoredField") || values.Has("-") {
+		t.Fatal("ignored field was encoded")
+	}
 }
 
 func TestPostJSON(t *testing.T) {
-	_, _, _ = httputil.PostJSON(context.Background(), &http.Client{}, "https://ipinfo.io/", &struct{}{}, &struct{}{}, nil)
+	type payload struct {
+		Message string `json:"message"`
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("Content-Type"); got != "application/json" {
+			t.Errorf("unexpected content type: %q", got)
+		}
+		var request payload
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			t.Errorf("decode request: %v", err)
+		}
+		if request.Message != "hello" {
+			t.Errorf("unexpected request message: %q", request.Message)
+		}
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{"message":"received"}`))
+	}))
+	defer server.Close()
+
+	var response payload
+	code, _, err := httputil.PostJSON(context.Background(), server.Client(), server.URL, &payload{Message: "hello"}, &response, nil)
+	if err != nil {
+		t.Fatalf("PostJSON failed: %v", err)
+	}
+	if code != http.StatusCreated || response.Message != "received" {
+		t.Fatalf("unexpected response: code=%d message=%q", code, response.Message)
+	}
 }
 
 func TestPostForm(t *testing.T) {
-	_, _, _ = httputil.PostForm(context.Background(), &http.Client{}, "https://ipinfo.io/", nil, &struct{}{}, nil)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("Content-Type"); got != "application/x-www-form-urlencoded" {
+			t.Errorf("unexpected content type: %q", got)
+		}
+		if err := r.ParseForm(); err != nil {
+			t.Errorf("parse form: %v", err)
+		}
+		if got := r.Form.Get("message"); got != "hello" {
+			t.Errorf("unexpected form value: %q", got)
+		}
+		_, _ = w.Write([]byte(`{"ok":true}`))
+	}))
+	defer server.Close()
+
+	var response struct {
+		OK bool `json:"ok"`
+	}
+	code, _, err := httputil.PostForm(context.Background(), server.Client(), server.URL, url.Values{"message": {"hello"}}, &response, nil)
+	if err != nil {
+		t.Fatalf("PostForm failed: %v", err)
+	}
+	if code != http.StatusOK || !response.OK {
+		t.Fatalf("unexpected response: code=%d ok=%v", code, response.OK)
+	}
 }

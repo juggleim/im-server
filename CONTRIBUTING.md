@@ -58,6 +58,7 @@ cd launcher && sh build.sh          # -> launcher/build/imserver (linux/amd64)
 # Run the self-contained unit tests
 go test ./services/commonservices/...
 go test ./commons/metrics/...
+go test ./services/pushmanager/services/httputil
 
 # Run a single test
 go test -run TestName ./path/to/pkg/
