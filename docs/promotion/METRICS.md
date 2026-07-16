@@ -115,6 +115,10 @@ GitHub Discussion activity, organization metadata coverage, community engagement
 new pull requests. GitHub traffic is a rolling window, so retain each local snapshot rather than
 expecting the API to provide long-term history.
 
+Discussion metrics separate maintainer, bot, and community comments so campaign prompts are not
+misreported as organic engagement. Set `JUGGLEIM_MAINTAINER_LOGINS` to a comma-separated list when
+more than the default `yuwnloyblog` account is posting maintainer responses.
+
 Channel decisions should be evidence-based:
 
 - Continue a channel when it produces qualified repository visits, Stars, useful comments, Issues,

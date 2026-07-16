@@ -8,6 +8,7 @@ CAMPAIGN="${JUGGLEIM_CAMPAIGN:-juggleim_oss_launch}"
 CAMPAIGN_PUBLISHED_AT="${JUGGLEIM_CAMPAIGN_PUBLISHED_AT:-2026-07-16T06:05:11Z}"
 DEV_ARTICLE_SLUG="${JUGGLEIM_DEV_ARTICLE_SLUG:-juggleim-an-open-source-self-hosted-messaging-backend-built-in-go-43nh}"
 DEV_USERNAME="${JUGGLEIM_DEV_USERNAME:-yuwnloyblog}"
+MAINTAINER_LOGINS="${JUGGLEIM_MAINTAINER_LOGINS:-yuwnloyblog}"
 
 OUTPUT=""
 COMMUNITY_FILE=""
@@ -34,6 +35,7 @@ Environment:
   JUGGLEIM_CAMPAIGN_PUBLISHED_AT Campaign publication time in ISO 8601 UTC.
   JUGGLEIM_DEV_USERNAME          DEV username.
   JUGGLEIM_DEV_ARTICLE_SLUG      DEV article slug.
+  JUGGLEIM_MAINTAINER_LOGINS     Comma-separated GitHub logins excluded from community comments.
 
 The script never writes credentials to the snapshot.
 EOF
@@ -165,16 +167,56 @@ gh api graphql \
           url
           createdAt
           updatedAt
-          comments{totalCount}
+          comments(first:100){
+            totalCount
+            nodes{
+              author{login __typename}
+              createdAt
+              url
+            }
+          }
         }
       }
     }
   }' \
-  | jq --arg published "$CAMPAIGN_PUBLISHED_AT" '
+  | jq --arg published "$CAMPAIGN_PUBLISHED_AT" \
+      --arg maintainers "$MAINTAINER_LOGINS" '
+      ($maintainers | split(",") | map(gsub("^\\s+|\\s+$"; "") | ascii_downcase)
+        | map(select(. != ""))) as $maintainer_logins |
       .data.repository.discussions as $discussions |
+      ($discussions.nodes | map(.comments.nodes[]) // []) as $all_comments |
+      ($all_comments | map(select(
+        ((.author.login // "") | ascii_downcase) as $login |
+        ($maintainer_logins | index($login)) != null
+      ))) as $maintainer_comments |
+      ($all_comments | map(select((.author.__typename // "") == "Bot"))) as $bot_comments |
+      ($all_comments | map(select(
+        ((.author.login // "") | ascii_downcase) as $login |
+        (($maintainer_logins | index($login)) == null) and
+        ((.author.__typename // "") != "Bot")
+      ))) as $community_comments |
       {
         total: $discussions.totalCount,
         comments_total: ($discussions.nodes | map(.comments.totalCount) | add // 0),
+        maintainer_comments_total: ($maintainer_comments | length),
+        bot_comments_total: ($bot_comments | length),
+        community_comments_total: ($community_comments | length),
+        community_comments_since_campaign: ($discussions.nodes | map(
+          .number as $number |
+          .title as $title |
+          .comments.nodes[] |
+          select(.createdAt >= $published) |
+          ((.author.login // "") | ascii_downcase) as $login |
+          select(($maintainer_logins | index($login)) == null) |
+          select((.author.__typename // "") != "Bot") |
+          {
+            discussion_number: $number,
+            discussion_title: $title,
+            author: .author.login,
+            url,
+            created_at: .createdAt
+          }
+        )),
         created_since_campaign: ($discussions.nodes
           | map(select(.createdAt >= $published))
           | map({number, title, url, created_at: .createdAt})),

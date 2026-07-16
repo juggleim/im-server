@@ -53,6 +53,10 @@ create_snapshot() {
             discussions: {
               total: 5,
               comments_total: $comments,
+              maintainer_comments_total: 1,
+              bot_comments_total: 0,
+              community_comments_total: $comments,
+              community_comments_since_campaign: [],
               created_since_campaign: [],
               updated_since_campaign: []
             }
@@ -101,6 +105,8 @@ jq -e '.reddit[0].community == "r/selfhosted"' \
 
 grep -F '| im-server Stars | 3586 |' "$tmp_dir/summary.md" >/dev/null
 grep -F '| im-server Stars | +2 |' "$tmp_dir/summary.md" >/dev/null
+grep -F '| Community discussion comments | 2 |' "$tmp_dir/summary.md" >/dev/null
+grep -F '| Maintainer discussion comments | 1 |' "$tmp_dir/summary.md" >/dev/null
 grep -F -- '- Human pull requests: 1' "$tmp_dir/summary.md" >/dev/null
 
 jq '.github.primary_repository.star_growth |= {
