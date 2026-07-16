@@ -33,6 +33,17 @@ jq -n --slurpfile before "$before" --slurpfile after "$after" '
         after: $a.github.organization.total_stars,
         delta: delta($b.github.organization.total_stars; $a.github.organization.total_stars)
       },
+      organization_metadata: {
+        before: $b.github.organization.metadata_coverage,
+        after: $a.github.organization.metadata_coverage,
+        changes: {
+          descriptions: delta($b.github.organization.metadata_coverage.descriptions; $a.github.organization.metadata_coverage.descriptions),
+          homepages: delta($b.github.organization.metadata_coverage.homepages; $a.github.organization.metadata_coverage.homepages),
+          topics: delta($b.github.organization.metadata_coverage.topics; $a.github.organization.metadata_coverage.topics),
+          detected_licenses: delta($b.github.organization.metadata_coverage.detected_licenses; $a.github.organization.metadata_coverage.detected_licenses),
+          complete: delta($b.github.organization.metadata_coverage.complete; $a.github.organization.metadata_coverage.complete)
+        }
+      },
       primary_repository: {
         stars: {
           before: $b.github.primary_repository.stars,

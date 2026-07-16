@@ -254,6 +254,18 @@ jq -n \
         login: $org,
         public_repositories: ($repos[0] | length),
         total_stars: ($repos[0] | map(.stargazers_count) | add),
+        metadata_coverage: {
+          descriptions: ($repos[0] | map(select((.description // "") != "")) | length),
+          homepages: ($repos[0] | map(select((.homepage // "") != "")) | length),
+          topics: ($repos[0] | map(select((.topics // []) | length > 0)) | length),
+          detected_licenses: ($repos[0] | map(select(.license != null)) | length),
+          complete: ($repos[0] | map(select(
+            ((.description // "") != "") and
+            ((.homepage // "") != "") and
+            (((.topics // []) | length) > 0) and
+            (.license != null)
+          )) | length)
+        },
         top_repositories: ($repos[0] | sort_by(-.stargazers_count) | .[0:10]
           | map({name, stars: .stargazers_count, forks: .forks_count, url: .html_url}))
       },

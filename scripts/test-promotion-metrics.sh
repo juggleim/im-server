@@ -32,7 +32,16 @@ create_snapshot() {
       schema_version: 1,
       captured_at: $captured_at,
       github: {
-        organization: {total_stars: $org_stars},
+        organization: {
+          total_stars: $org_stars,
+          metadata_coverage: {
+            descriptions: 30,
+            homepages: 24,
+            topics: 23,
+            detected_licenses: 29,
+            complete: 20
+          }
+        },
         primary_repository: {
           stars: $repo_stars,
           forks: $forks,
@@ -67,6 +76,7 @@ create_snapshot "2026-07-17T06:05:11Z" 3805 3586 364 241 84 162 1 2 "$tmp_dir/af
 "$script_dir/compare-promotion-metrics.sh" "$tmp_dir/before.json" "$tmp_dir/after.json" \
   | jq -e '
       .github.organization_stars.delta == 3 and
+      .github.organization_metadata.changes.complete == 0 and
       .github.primary_repository.stars.delta == 2 and
       .github.primary_repository.forks.delta == 1 and
       .github.primary_repository.watchers.delta == 1 and

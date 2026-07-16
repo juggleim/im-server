@@ -86,9 +86,9 @@ Capture snapshots at these campaign-relative checkpoints:
 - Weekly thereafter while promotion remains active
 
 Compare at least Stars, Forks, unique visitors, unique clones, DEV reactions/comments/views,
-GitHub Discussion activity, community engagement, new Issues, and new pull requests. GitHub traffic
-is a rolling window, so retain each local snapshot rather than expecting the API to provide
-long-term history.
+GitHub Discussion activity, organization metadata coverage, community engagement, new Issues, and
+new pull requests. GitHub traffic is a rolling window, so retain each local snapshot rather than
+expecting the API to provide long-term history.
 
 Channel decisions should be evidence-based:
 
