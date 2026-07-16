@@ -10,7 +10,9 @@ Nothing in this directory publishes content automatically. A maintainer must rev
 - Campaign: `juggleim_oss_launch`
 - Primary repository: `https://github.com/juggleim/im-server`
 
-The current article front matter is prepared for DEV Community and remains `published: false` until the final review.
+The article was published on DEV Community on 2026-07-16:
+
+https://dev.to/yuwnloyblog/juggleim-an-open-source-self-hosted-messaging-backend-built-in-go-43nh
 
 ## Assets
 
@@ -28,7 +30,7 @@ The covers are deterministic crops of the approved JuggleIM social preview. They
 Use one canonical source to avoid splitting search authority:
 
 1. If an official `juggle.im` blog is available, publish there first and set that URL as the canonical URL everywhere else.
-2. If the website has no blog, publish on DEV Community first and treat the DEV URL as the initial canonical source.
+2. The initial campaign uses DEV Community as the canonical source because no official blog URL was selected before publication.
 3. When syndicating to Hashnode or another platform, set its canonical URL to the primary article.
 4. Do not publish identical copies on several platforms without a canonical URL.
 
@@ -67,7 +69,7 @@ https://github.com/juggleim/im-server?utm_source=devto&utm_medium=article&utm_ca
 - [ ] Confirm the cover is not cropped around the logo or product name.
 - [ ] Confirm the architecture PNG loads without GitHub authentication.
 - [ ] Add the final canonical URL when applicable.
-- [ ] Keep `published: false` until the maintainer approves the final preview.
+- [x] Set `published: true` after maintainer approval.
 - [ ] Prepare at least one maintainer to answer comments for the first two hours.
 
 Update repository metrics with:

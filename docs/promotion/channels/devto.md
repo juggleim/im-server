@@ -8,13 +8,18 @@ Use [`../introducing-juggleim.md`](../introducing-juggleim.md) as the post body.
 - Description
 - Four DEV tags
 - DEV-sized cover image
-- `published: false`
+- The canonical DEV URL
+- `published: true`
+
+Published article:
+
+https://dev.to/yuwnloyblog/juggleim-an-open-source-self-hosted-messaging-backend-built-in-go-43nh
 
 ## Final settings
 
 - Organization: JuggleIM, if an organization profile has been created; otherwise use the maintainer account.
 - Series: leave empty for the first post.
-- Canonical URL: official JuggleIM blog URL if the article was published there first; otherwise leave empty.
+- Canonical URL: the current DEV article URL. Change it only if the article is later moved to an official JuggleIM blog.
 - Discussion prompt: keep the final request for concrete feedback.
 
 ## Preview checks

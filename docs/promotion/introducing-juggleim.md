@@ -3,10 +3,9 @@ title: "JuggleIM: An Open-Source, Self-Hosted Messaging Backend Built in Go"
 description: "Add private chat, groups, chatrooms, multi-device sync, push notifications, and real-time messaging to your product without building the infrastructure from scratch."
 tags: go, opensource, websocket, selfhosted
 cover_image: https://raw.githubusercontent.com/juggleim/im-server/master/docs/promotion/assets/juggleim-cover-devto.jpg
-published: false
+canonical_url: https://dev.to/yuwnloyblog/juggleim-an-open-source-self-hosted-messaging-backend-built-in-go-43nh
+published: true
 ---
-
-# JuggleIM: An Open-Source, Self-Hosted Messaging Backend Built in Go
 
 Real-time messaging looks simple until you try to build it.
 
