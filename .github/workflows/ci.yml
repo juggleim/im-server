@@ -67,6 +67,8 @@ jobs:
       - name: Run govulncheck
         uses: golang/govulncheck-action@v1
         with:
+          # Override the action's default "stable" value so setup-go reads go.mod.
+          go-version-input: ""
           go-version-file: go.mod
           go-package: ./...
           cache: true
