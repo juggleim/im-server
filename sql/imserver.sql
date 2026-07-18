@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `androidpushconfs` (
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_channel` (`app_key`,`push_channel`)
+  UNIQUE KEY `uniq_channel` (`app_key`,`push_channel`,`package`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'android推送配置';
 
 CREATE TABLE IF NOT EXISTS `appexts` (
@@ -543,7 +543,7 @@ CREATE TABLE IF NOT EXISTS `ioscertificates` (
   `voip_cert_path` varchar(255) DEFAULT NULL COMMENT 'voip cert path',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_package` (`app_key`)
+  UNIQUE KEY `uniq_package` (`app_key`,`package`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `mentionmsgs` (
