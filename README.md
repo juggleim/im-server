@@ -157,7 +157,9 @@ Only required when using MongoDB to store message data (`msgStoreEngine: mongo`)
 
 The working directory is `im-server/launcher`, where `conf` holds config files and `logs` is the runtime log directory.
 
-**Edit the config file** `im-server/launcher/conf/config.yml`:
+**Edit the config file** `im-server/launcher/conf/config.yml`. See the
+[Launcher configuration reference](docs/configuration.md) for every supported
+key, environment variable, fallback, and deployment difference:
 ```yaml
 defaultPort: 9003       # im-server default listening port
 nodeName: testNode      # node name
