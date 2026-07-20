@@ -130,6 +130,8 @@ curl --request POST \
 
 Stop the local stack with `docker compose down`. To remove its MySQL data as well, use `docker compose down -v`.
 
+If the stack does not become healthy, follow the **[Docker Compose troubleshooting guide](./docs/docker-troubleshooting.md)** for status checks, logs, port conflicts, MySQL health, and safe reset steps. [简体中文版](./docs/docker-troubleshooting_zh.md)
+
 For production, clustering, and managed deployment options, see the **[Deployment Guide](https://www.juggle.im/docs/guide/deploy/quickdeploy/)**.
 
 ## 🛠 Manual Deployment

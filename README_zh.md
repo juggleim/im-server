@@ -132,6 +132,8 @@ curl --request POST \
 
 使用 `docker compose down` 停止本地服务；如需同时删除 MySQL 数据卷，执行 `docker compose down -v`。
 
+如服务未能正常启动，请按照 **[Docker Compose 故障排查指南](./docs/docker-troubleshooting_zh.md)** 检查容器状态、日志、端口冲突、MySQL 健康状态和安全重置步骤。[English version](./docs/docker-troubleshooting.md)
+
 生产环境、集群及托管部署方式请查看 **[部署指南](https://www.juggle.im/docs/guide/deploy/quickdeploy/)**。
 
 ## 🛠 手动部署
