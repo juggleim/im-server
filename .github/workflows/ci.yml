@@ -58,6 +58,7 @@ jobs:
 
       - name: Run self-contained unit tests
         run: |
+          go test ./simulator/benchmark
           go test ./services/commonservices/...
           go test ./commons/metrics/...
           go test ./services/pushmanager/services/httputil

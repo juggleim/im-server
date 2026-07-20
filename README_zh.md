@@ -102,6 +102,8 @@ JuggleIM 以模块化 Go 服务运行：HTTP 和 WebSocket 网关通过内部 Ac
 
 完整的组件边界、数据职责、私聊与群聊链路、安全边界和部署约束，请阅读 **[架构文档](./docs/architecture_zh.md)**。[English version](./docs/architecture.md)
 
+可通过 **[可复现性能测试工具](./BENCHMARKS.md)** 分别评估连接建立、私聊和群聊的 ACK 与端到端投递吞吐，并生成包含 P50/P95/P99 延迟及运行环境的机器可读结果。
+
 ## 🚀 使用 Docker 快速开始
 
 通过 Docker Compose 一次启动 MySQL、JuggleIM 服务和管理后台：
