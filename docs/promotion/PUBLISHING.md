@@ -14,6 +14,10 @@ The article was published on DEV Community on 2026-07-16:
 
 https://dev.to/yuwnloyblog/juggleim-an-open-source-self-hosted-messaging-backend-built-in-go-43nh
 
+The benchmark methodology article was published on DEV Community on 2026-07-20:
+
+https://dev.to/yuwnloyblog/benchmarking-real-time-messaging-without-mixing-up-acks-deliveries-and-fan-out-1n6f
+
 ## Assets
 
 | Asset                                                                               |     Size | Use                                                                     |
