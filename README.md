@@ -100,6 +100,8 @@ JuggleIM runs as a modular Go service: HTTP and WebSocket gateways route request
 
 Read the **[architecture guide](./docs/architecture.md)** for component boundaries, data ownership, private and group message flows, security boundaries, and deployment constraints. [简体中文版](./docs/architecture_zh.md)
 
+Evaluate performance with the **[reproducible benchmark harness](./BENCHMARKS.md)**, which reports connection setup separately from private-chat and group-chat ACK and delivery throughput, including P50/P95/P99 latency and machine-readable results.
+
 ## 🚀 Quick Start with Docker
 
 Run a complete local JuggleIM stack with MySQL and the admin console:
