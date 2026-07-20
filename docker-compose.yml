@@ -30,7 +30,7 @@ services:
       - ./sql/imserver.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./docker/mysql-init/02-connect-address.sql:/docker-entrypoint-initdb.d/02-connect-address.sql:ro
     ports:
-      - "3306:3306"
+      - "${MYSQL_HOST_PORT:-3306}:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-juggleim}"]
       interval: 5s
@@ -62,11 +62,11 @@ services:
       NAV_HTTP_PORT: 9002
       ADMIN_HTTP_PORT: 8090
     ports:
-      - "9003:9003"   # WebSocket long connections
-      - "9001:9001"   # Server-side HTTP API
-      - "9002:9002"   # Navigator
-      - "8090:8090"   # Admin console
-      - "6060:6060"   # pprof
+      - "${WS_HOST_PORT:-9003}:9003"       # WebSocket long connections
+      - "${API_HOST_PORT:-9001}:9001"      # Server-side HTTP API
+      - "${NAV_HOST_PORT:-9002}:9002"      # Navigator
+      - "${ADMIN_HOST_PORT:-8090}:8090"    # Admin console
+      - "${PPROF_HOST_PORT:-6060}:6060"    # pprof
 
 volumes:
   mysql-data:

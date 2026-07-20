@@ -78,7 +78,13 @@ for port in 3306 9001 9002 9003 8090; do
 done
 ```
 
-Stop the conflicting local process or container. Alternatively, change only the host side of a mapping in `docker-compose.yml`. For example, use `"13306:3306"` to publish MySQL on host port `13306` while keeping its container port `3306`. The services communicate over the Compose network and should continue to use `mysql:3306` internally.
+Stop the conflicting local process or container. Alternatively, override only the conflicting host port. For example, publish MySQL on host port `13306` while keeping its container port `3306`:
+
+```bash
+MYSQL_HOST_PORT=13306 docker compose up -d
+```
+
+The available overrides are `MYSQL_HOST_PORT`, `API_HOST_PORT`, `NAV_HOST_PORT`, `WS_HOST_PORT`, `ADMIN_HOST_PORT`, and `PPROF_HOST_PORT`. The services communicate over the Compose network and continue to use their original container ports internally.
 
 ## 5. Confirm local reachability
 

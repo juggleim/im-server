@@ -119,14 +119,13 @@ Once the containers are healthy, the local services are available at:
 | WebSocket | `ws://127.0.0.1:9003` | Used by client SDKs for long connections |
 | Admin console | `http://127.0.0.1:8090` | Manage applications; default login: `admin` / `123456` |
 
-Create your first application (tenant):
+Create a local application, register two synthetic users, and send a private message with the verified server API example:
 
 ```bash
-curl --request POST \
-  --url http://127.0.0.1:8090/admingateway/apps/create \
-  --header 'Content-Type: application/json' \
-  --data '{"app_key":"appkey","app_name":"My App"}'
+bash examples/server-api-quickstart.sh
 ```
+
+The script keeps the generated application secret on the server side and prints the two temporary user tokens needed for local SDK testing. See the **[server API quick start](./docs/server-api-quickstart.md)** for the complete flow and security boundaries. [简体中文版](./docs/server-api-quickstart_zh.md)
 
 Stop the local stack with `docker compose down`. To remove its MySQL data as well, use `docker compose down -v`.
 

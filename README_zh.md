@@ -121,14 +121,13 @@ docker compose up -d
 | WebSocket | `ws://127.0.0.1:9003` | 供客户端 SDK 建立长连接 |
 | 管理后台 | `http://127.0.0.1:8090` | 管理应用；默认账号密码：`admin` / `123456` |
 
-创建第一个应用（租户）：
+通过已验证的服务端 API 示例创建本地应用、注册两个合成测试用户并发送一条私聊消息：
 
 ```bash
-curl --request POST \
-  --url http://127.0.0.1:8090/admingateway/apps/create \
-  --header 'Content-Type: application/json' \
-  --data '{"app_key":"appkey","app_name":"My App"}'
+bash examples/server-api-quickstart.sh
 ```
+
+脚本会将生成的应用密钥保留在服务端，仅输出本地 SDK 测试所需的两个临时用户 Token。完整流程和安全边界请查看 **[服务端 API 快速开始](./docs/server-api-quickstart_zh.md)**。[English version](./docs/server-api-quickstart.md)
 
 使用 `docker compose down` 停止本地服务；如需同时删除 MySQL 数据卷，执行 `docker compose down -v`。
 

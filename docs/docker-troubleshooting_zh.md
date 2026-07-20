@@ -78,7 +78,13 @@ for port in 3306 9001 9002 9003 8090; do
 done
 ```
 
-停止冲突的本地进程或容器。也可以只修改 `docker-compose.yml` 端口映射的宿主机一侧。例如使用 `"13306:3306"` 将 MySQL 发布到宿主机的 `13306`，同时保留容器端口 `3306`。服务之间通过 Compose 网络通信，内部地址应继续使用 `mysql:3306`。
+停止冲突的本地进程或容器。也可以只覆盖发生冲突的宿主机端口。例如将 MySQL 发布到宿主机的 `13306`，同时保留容器端口 `3306`：
+
+```bash
+MYSQL_HOST_PORT=13306 docker compose up -d
+```
+
+可用的覆盖变量包括 `MYSQL_HOST_PORT`、`API_HOST_PORT`、`NAV_HOST_PORT`、`WS_HOST_PORT`、`ADMIN_HOST_PORT` 和 `PPROF_HOST_PORT`。服务之间通过 Compose 网络通信，内部仍使用原来的容器端口。
 
 ## 5. 确认本地端口可访问
 

@@ -46,6 +46,21 @@ CREATE TABLE IF NOT EXISTS `appexts` (
   UNIQUE KEY `IDX_APPKEY_APPITEMKEY` (`app_key`,`app_item_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'app应用-补充配置';
 
+CREATE TABLE IF NOT EXISTS `appnavs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `app_key` varchar(50) DEFAULT NULL,
+  `alias_no` varchar(50) DEFAULT NULL,
+  `admin_url` varchar(200) DEFAULT NULL,
+  `api_url` varchar(200) DEFAULT NULL,
+  `ws_url` varchar(200) DEFAULT NULL,
+  `app_url` varchar(200) DEFAULT NULL,
+  `created_time` datetime(3) DEFAULT NULL,
+  `updated_time` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `app_key_UNIQUE` (`app_key`),
+  UNIQUE KEY `alias_no_UNIQUE` (`alias_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '应用访问地址与别名';
+
 CREATE TABLE IF NOT EXISTS `apps` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `app_key` varchar(45) NOT NULL COMMENT '应用key',
@@ -56,6 +71,7 @@ CREATE TABLE IF NOT EXISTS `apps` (
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   `app_type` tinyint DEFAULT '0' COMMENT '应用类型',
   `app_name` varchar(100) DEFAULT NULL COMMENT '应用名称',
+  `lic_conf` varchar(2048) DEFAULT NULL COMMENT '应用授权配置',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_appkey` (`app_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'app应用';
@@ -950,5 +966,5 @@ CREATE TABLE IF NOT EXISTS `performance_metrics` (
   KEY `idx_metric_type_collect_time` (`metric_type`,`collect_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-性能指标';
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260713');
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260720');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
