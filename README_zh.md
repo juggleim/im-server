@@ -160,7 +160,8 @@ mysql -u{db_user} -p{db_password} jim_db < sql/imserver.sql
 
 运行目录为 `im-server/launcher`，其中 `conf` 目录存放配置文件，`logs` 目录为运行日志目录。
 
-**编辑配置文件** `im-server/launcher/conf/config.yml`：
+**编辑配置文件** `im-server/launcher/conf/config.yml`。全部支持的配置项、环境变量、
+回退值及部署差异请查看 [Launcher 配置参考](docs/configuration_zh.md)：
 ```yaml
 defaultPort: 9003       # im-server 默认监听端口
 nodeName: testNode      # 节点名称
