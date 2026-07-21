@@ -16,7 +16,7 @@ func InitDefaultHttpServer() {
 		w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `{"version":"%s"}`, "1.8.14")
+		fmt.Fprintf(w, `{"version":"%s"}`, "1.8.15")
 	})
 	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
