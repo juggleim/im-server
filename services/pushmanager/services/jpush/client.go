@@ -20,14 +20,16 @@ type JpushClient struct {
 	host         string
 	appKey       string
 	masterSecret string
+	BadgeClass   string
 	Options      *commonservices.JPushOptions
 }
 
-func NewJpushClient(appKey, appSecret string, options *commonservices.JPushOptions) *JpushClient {
+func NewJpushClient(appKey, appSecret, badgeClass string, options *commonservices.JPushOptions) *JpushClient {
 	return &JpushClient{
 		host:         PushHost,
 		appKey:       appKey,
 		masterSecret: appSecret,
+		BadgeClass:   badgeClass,
 		Options:      options,
 		Session: grequests.NewSession(&grequests.RequestOptions{
 			UserAgent: "go-jpush/v0.1.2",
@@ -39,8 +41,8 @@ func NewJpushClient(appKey, appSecret string, options *commonservices.JPushOptio
 	}
 }
 
-func New(appKey, appSecret string, options *commonservices.JPushOptions) *JpushClient {
-	return NewJpushClient(appKey, appSecret, options)
+func New(appKey, appSecret, badgeClass string, options *commonservices.JPushOptions) *JpushClient {
+	return NewJpushClient(appKey, appSecret, badgeClass, options)
 }
 
 func (j *JpushClient) Url(path string) string {

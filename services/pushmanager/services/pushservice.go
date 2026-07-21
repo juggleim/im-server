@@ -177,8 +177,8 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 					if androidPushConf.JpushClient != nil {
 						intentUrl := "intent:#Intent;action=com.j.im.intent.MESSAGE_CLICK;%send"
 						intentComponent := ""
-						if androidPushConf.Package != "" && androidPushConf.JpushClient.Options != nil && androidPushConf.JpushClient.Options.BadgeClass != "" {
-							intentComponent = fmt.Sprintf("component=%s/%s;", androidPushConf.Package, androidPushConf.JpushClient.Options.BadgeClass)
+						if androidPushConf.Package != "" && androidPushConf.JpushClient.BadgeClass != "" {
+							intentComponent = fmt.Sprintf("component=%s/%s;", androidPushConf.Package, androidPushConf.JpushClient.BadgeClass)
 						}
 						intentUrl = fmt.Sprintf(intentUrl, intentComponent)
 						androidNotification := &jpush.AndroidNotification{
@@ -194,9 +194,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 						} else {
 							androidNotification.BadgeAddNum = 1
 						}
-						if jpushOptions := androidPushConf.JpushClient.Options; jpushOptions != nil {
-							androidNotification.BadgeClass = jpushOptions.BadgeClass
-						}
+						androidNotification.BadgeClass = androidPushConf.JpushClient.BadgeClass
 						jPushPayload := &jpush.Payload{
 							Platform: jpush.NewPlatform().All(),
 							Audience: jpush.NewAudience().SetRegistrationId(pushToken.PushToken),
@@ -204,7 +202,12 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 								Alert:   req.Title,
 								Android: androidNotification,
 							},
-							Options: handleJPushOptions(androidPushConf.JpushClient.Options, params),
+						}
+						if req.JPushOptions != "" {
+							jPushPayload.Options = &jpush.Options{}
+							tools.JsonUnMarshal([]byte(req.JPushOptions), jPushPayload.Options)
+						} else {
+							jPushPayload.Options = handleJPushOptions(androidPushConf.JpushClient.Options, params)
 						}
 						_, err := androidPushConf.JpushClient.Push(jPushPayload)
 						if err != nil {

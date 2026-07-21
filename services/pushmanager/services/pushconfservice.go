@@ -228,7 +228,7 @@ func initAndroidPushConf(ctx context.Context, appkey, packageName string) *Andro
 				var pushConf = &commonservices.JPushConf{}
 				err = json.Unmarshal([]byte(dbPushConf.PushConf), pushConf)
 				if err == nil && pushConf.Valid() {
-					androidPushConf.JpushClient = jpush.NewJpushClient(pushConf.AppKey, pushConf.MasterSecret, pushConf.Options)
+					androidPushConf.JpushClient = jpush.NewJpushClient(pushConf.AppKey, pushConf.MasterSecret, pushConf.BadgeClass, pushConf.Options)
 				} else {
 					logs.WithContext(ctx).Errorf("jiguang push conf is illegal %v", err)
 				}
