@@ -90,39 +90,126 @@ type JPushThirdPartyChannel struct {
 	Oppo   *JPushOppoChannel   `json:"oppo,omitempty"`
 	Vivo   *JPushVivoChannel   `json:"vivo,omitempty"`
 	Meizu  *JPushMeizuChannel  `json:"meizu,omitempty"`
+	Fcm    *JPushFcmChannel    `json:"fcm,omitempty"`
+	Nio    *JPushNioChannel    `json:"nio,omitempty"`
+	Asus   *JPushAsusChannel   `json:"asus,omitempty"`
+	Hmos   *JPushHmosChannel   `json:"hmos,omitempty"`
 }
 
 type JPushHuaweiChannel struct {
-	Importance string `json:"importance,omitempty"`
-	Category   string `json:"category,omitempty"`
+	Distribution          string                 `json:"distribution,omitempty"`
+	DistributionFcm       string                 `json:"distribution_fcm,omitempty"`
+	DistributionCustomize string                 `json:"distribution_customize,omitempty"`
+	ChannelId             string                 `json:"channel_id,omitempty"`
+	Importance            string                 `json:"importance,omitempty"`
+	Category              string                 `json:"category,omitempty"`
+	Sound                 string                 `json:"sound,omitempty"`
+	DefaultSound          *bool                  `json:"default_sound,omitempty"`
+	Urgency               string                 `json:"urgency,omitempty"`
+	ReceiptId             string                 `json:"receipt_id,omitempty"`
+	TargetUserType        *int                   `json:"target_user_type,omitempty"`
+	LargeIcon             string                 `json:"large_icon,omitempty"`
+	SmallIconUri          string                 `json:"small_icon_uri,omitempty"`
+	Style                 int                    `json:"style,omitempty"`
+	BigText               string                 `json:"big_text,omitempty"`
+	Inbox                 map[string]interface{} `json:"inbox,omitempty"`
+	OnlyUseVendorStyle    *bool                  `json:"only_use_vendor_style,omitempty"`
+	AuditResponse         map[string]interface{} `json:"auditResponse,omitempty"`
+	HwPushType            int                    `json:"hw_push_type,omitempty"`
+	HwLivePayload         map[string]interface{} `json:"hw_live_payload,omitempty"`
 }
 
 type JPushXiaomiChannel struct {
-	ChannelId       string `json:"channel_id,omitempty"`
-	MiTemplateId    string `json:"mi_template_id"`
-	MiTemplateParam string `json:"mi_template_param"`
+	Distribution       string `json:"distribution,omitempty"`
+	DistributionFcm    string `json:"distribution_fcm,omitempty"`
+	ChannelId          string `json:"channel_id,omitempty"`
+	SkipQuota          *bool  `json:"skip_quota,omitempty"`
+	SmallIconColor     string `json:"small_icon_color,omitempty"`
+	Style              int    `json:"style,omitempty"`
+	BigText            string `json:"big_text,omitempty"`
+	OnlyUseVendorStyle *bool  `json:"only_use_vendor_style,omitempty"`
+	MiTemplateId       string `json:"mi_template_id,omitempty"`
+	MiTemplateParam    string `json:"mi_template_param,omitempty"`
+	MiPushType         int    `json:"mi_push_type,omitempty"`
+	VoipExtraData      string `json:"voip_extraData,omitempty"`
 }
 
 type JPushHonorChannel struct {
-	Importance string `json:"importance,omitempty"`
+	Distribution          string `json:"distribution,omitempty"`
+	DistributionFcm       string `json:"distribution_fcm,omitempty"`
+	DistributionCustomize string `json:"distribution_customize,omitempty"`
+	Importance            string `json:"importance,omitempty"`
+	TargetUserType        *int   `json:"target_user_type,omitempty"`
+	LargeIcon             string `json:"large_icon,omitempty"`
+	SmallIconUri          string `json:"small_icon_uri,omitempty"`
+	Style                 int    `json:"style,omitempty"`
+	BigText               string `json:"big_text,omitempty"`
+	OnlyUseVendorStyle    *bool  `json:"only_use_vendor_style,omitempty"`
+	HonorPushType         int    `json:"honor_push_type,omitempty"`
+	VoipExtraData         string `json:"voip_extraData,omitempty"`
 }
 
 type JPushOppoChannel struct {
-	BadgeOperationType       int               `json:"badge_operation_type"`
-	ChannelId                string            `json:"channel_id,omitempty"`
-	Category                 string            `json:"category,omitempty"`
-	NotifyLevel              int               `json:"notify_level,omitempty"`
-	PrivateContentParameters map[string]string `json:"private_content_parameters"`
-	PrivateMsgTemplateId     string            `json:"private_msg_template_id"`
-	PrivateTitleParameters   map[string]string `json:"private_title_parameters"`
+	Distribution             string                 `json:"distribution,omitempty"`
+	DistributionFcm          string                 `json:"distribution_fcm,omitempty"`
+	BadgeOperationType       *int                   `json:"badge_operation_type,omitempty"`
+	ChannelId                string                 `json:"channel_id,omitempty"`
+	Category                 string                 `json:"category,omitempty"`
+	NotifyLevel              int                    `json:"notify_level,omitempty"`
+	PrivateContentParameters map[string]string      `json:"private_content_parameters,omitempty"`
+	PrivateMsgTemplateId     string                 `json:"private_msg_template_id,omitempty"`
+	PrivateTitleParameters   map[string]string      `json:"private_title_parameters,omitempty"`
+	SkipQuota                *bool                  `json:"skip_quota,omitempty"`
+	LargeIcon                string                 `json:"large_icon,omitempty"`
+	Style                    int                    `json:"style,omitempty"`
+	BigText                  string                 `json:"big_text,omitempty"`
+	BigPicPath               string                 `json:"big_pic_path,omitempty"`
+	OnlyUseVendorStyle       *bool                  `json:"only_use_vendor_style,omitempty"`
+	AuditResponse            map[string]interface{} `json:"auditResponse,omitempty"`
+	BadgeMessageCount        *int                   `json:"badge_message_count,omitempty"`
+	OpPushType               int                    `json:"op_push_type,omitempty"`
+	OpIntelligentIntent      map[string]interface{} `json:"op_intelligent_intent,omitempty"`
+	OpDeleteIntentData       map[string]interface{} `json:"op_delete_intent_data,omitempty"`
+	VoipExtraData            string                 `json:"voip_extraData,omitempty"`
 }
 
 type JPushVivoChannel struct {
-	Distribution string `json:"distribution,omitempty"`
-	Category     string `json:"category,omitempty"`
+	Distribution        string                 `json:"distribution,omitempty"`
+	DistributionFcm     string                 `json:"distribution_fcm,omitempty"`
+	Classification      *int                   `json:"classification,omitempty"`
+	PushMode            *int                   `json:"push_mode,omitempty"`
+	Category            string                 `json:"category,omitempty"`
+	CallbackId          string                 `json:"callback_id,omitempty"`
+	AuditResponse       map[string]interface{} `json:"auditResponse,omitempty"`
+	AddBadge            bool                   `json:"add_badge,omitempty"`
+	VivoPushType        int                    `json:"vivo_push_type,omitempty"`
+	VivoInappMsg        map[string]interface{} `json:"vivo_inapp_msg,omitempty"`
+	VoipExtraData       string                 `json:"voip_extraData,omitempty"`
+	ExtensionExpireShow *bool                  `json:"extensionExpireShow,omitempty"`
 }
 
 type JPushMeizuChannel struct {
+	Distribution    string `json:"distribution,omitempty"`
+	DistributionFcm string `json:"distribution_fcm,omitempty"`
+}
+
+type JPushFcmChannel struct {
+	Distribution    string `json:"distribution,omitempty"`
+	DistributionFcm string `json:"distribution_fcm,omitempty"`
+}
+
+type JPushNioChannel struct {
+	Distribution    string `json:"distribution,omitempty"`
+	DistributionFcm string `json:"distribution_fcm,omitempty"`
+	ChannelId       string `json:"channel_id,omitempty"`
+}
+
+type JPushAsusChannel struct {
+	Distribution    string `json:"distribution,omitempty"`
+	DistributionFcm string `json:"distribution_fcm,omitempty"`
+}
+
+type JPushHmosChannel struct {
 	Distribution string `json:"distribution,omitempty"`
 }
 

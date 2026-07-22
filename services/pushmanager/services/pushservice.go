@@ -362,9 +362,25 @@ func handleJPushOptions(jpushOptions *commonservices.JPushOptions, params map[st
 				Oppo:   jpushOptions.ThirdPartyChannel.Oppo,
 				Vivo:   jpushOptions.ThirdPartyChannel.Vivo,
 				Meizu:  jpushOptions.ThirdPartyChannel.Meizu,
+				Fcm:    jpushOptions.ThirdPartyChannel.Fcm,
+				Nio:    jpushOptions.ThirdPartyChannel.Nio,
+				Asus:   jpushOptions.ThirdPartyChannel.Asus,
+				Hmos:   jpushOptions.ThirdPartyChannel.Hmos,
 			}
 			if options.ThirdPartyChannel.Xiaomi != nil && options.ThirdPartyChannel.Xiaomi.MiTemplateParam != "" {
 				options.ThirdPartyChannel.Xiaomi.MiTemplateParam = tools.ReplaceTemplateParams(options.ThirdPartyChannel.Xiaomi.MiTemplateParam, params)
+			}
+			if options.ThirdPartyChannel.Oppo != nil {
+				if len(options.ThirdPartyChannel.Oppo.PrivateContentParameters) > 0 {
+					for k, v := range options.ThirdPartyChannel.Oppo.PrivateContentParameters {
+						options.ThirdPartyChannel.Oppo.PrivateContentParameters[k] = tools.ReplaceTemplateParams(v, params)
+					}
+				}
+				if len(options.ThirdPartyChannel.Oppo.PrivateTitleParameters) > 0 {
+					for k, v := range options.ThirdPartyChannel.Oppo.PrivateTitleParameters {
+						options.ThirdPartyChannel.Oppo.PrivateTitleParameters[k] = tools.ReplaceTemplateParams(v, params)
+					}
+				}
 			}
 		}
 		return options
