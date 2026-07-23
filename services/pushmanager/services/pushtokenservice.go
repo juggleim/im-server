@@ -8,6 +8,7 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
 	"im-server/services/pushmanager/storages/dbs"
 	"strings"
 	"time"
@@ -55,6 +56,7 @@ func getUserPushTokenKey(appkey, userId string) string {
 
 func AddPushToken(appkey, userId string, userPushToken *UserPushToken) {
 	cachePushToken := GetPushToken(appkey, userId)
+	dao := dbs.PushTokenDao{}
 	if !cachePushToken.IsSame(userPushToken) {
 		cachePushToken.DeviceId = userPushToken.DeviceId
 		cachePushToken.Platform = userPushToken.Platform
@@ -67,8 +69,7 @@ func AddPushToken(appkey, userId string, userPushToken *UserPushToken) {
 			cachePushToken.VoipPushToken = userPushToken.VoipPushToken
 		}
 		//save to db
-		dao := dbs.PushTokenDao{}
-		dao.Upsert(dbs.PushTokenDao{
+		err := dao.Upsert(dbs.PushTokenDao{
 			AppKey:      appkey,
 			UserId:      userId,
 			DeviceId:    cachePushToken.DeviceId,
@@ -78,16 +79,51 @@ func AddPushToken(appkey, userId string, userPushToken *UserPushToken) {
 			PushToken:   cachePushToken.PushToken,
 			VoipToken:   cachePushToken.VoipPushToken,
 		})
-		//清除之前的用户缓存（同一设备先登录A，退出A登录B， A不应该收到推送消息）
-		items, err := dao.QueryByDeviceId(appkey, userPushToken.DeviceId)
-		if err == nil {
-			for _, item := range items {
-				key := getUserPushTokenKey(appkey, item.UserId)
-				pushTokenCache.Remove(key)
+		if err != nil {
+			logs.NewLogEntity().Error(err.Error())
+		}
+	}
+
+	// 清除之前的用户缓存（同一设备或 push token 先绑定 A，之后绑定 B，A 不应该收到推送消息）
+	oldUsers := map[int64]string{}
+	collectOldUsers := func(items []*dbs.PushTokenDao) {
+		for _, item := range items {
+			if item.UserId != userId {
+				oldUsers[item.ID] = item.UserId
 			}
 		}
-		//clearn other user for this device
-		dao.DeleteByDeviceId(appkey, userPushToken.DeviceId, userId)
+	}
+
+	items, err := dao.QueryByDeviceId(appkey, userPushToken.DeviceId)
+	if err == nil {
+		collectOldUsers(items)
+	} else {
+		logs.NewLogEntity().Error(err.Error())
+	}
+
+	if cachePushToken.PushToken != "" {
+		items, err = dao.QueryByPushToken(appkey, cachePushToken.PushToken)
+		if err == nil {
+			collectOldUsers(items)
+		} else {
+			logs.NewLogEntity().Error(err.Error())
+		}
+	}
+
+	ids := make([]int64, 0, len(oldUsers))
+	for id := range oldUsers {
+		ids = append(ids, id)
+	}
+	// 清除同一设备或 push token 绑定的其他用户
+	err = dao.DeleteByIds(ids)
+	if err != nil {
+		logs.NewLogEntity().Error(err.Error())
+		return
+	}
+
+	// 单机版直接清除本地缓存，无需调用 remove_push_token。
+	for _, oldUserId := range oldUsers {
+		pushTokenCache.Remove(getUserPushTokenKey(appkey, oldUserId))
 	}
 }
 

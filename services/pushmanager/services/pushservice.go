@@ -29,9 +29,7 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 	params := map[string]string{
 		"senderName": req.SenderName,
 		"pushText":   req.PushText,
-	}
-	if req.GroupName != "" {
-		params["groupName"] = req.GroupName
+		"groupName":  req.GroupName,
 	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	pushToken := GetPushToken(appkey, userId)

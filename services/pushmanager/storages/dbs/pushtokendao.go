@@ -5,6 +5,7 @@ import (
 )
 
 type PushTokenDao struct {
+	ID          int64  `gorm:"primary_key"`
 	UserId      string `gorm:"user_id"`
 	DeviceId    string `gorm:"device_id"`
 	Platform    string `gorm:"platform"`
@@ -55,6 +56,19 @@ func (token PushTokenDao) QueryByDeviceId(appkey, deviceId string) ([]*PushToken
 	return items, err
 }
 
+func (token PushTokenDao) QueryByPushToken(appkey, pushToken string) ([]*PushTokenDao, error) {
+	var items []*PushTokenDao
+	err := dbcommons.GetDb().Where("app_key=? and push_token=?", appkey, pushToken).Find(&items).Error
+	return items, err
+}
+
 func (token PushTokenDao) DeleteByUserId(appkey, userId string) error {
 	return dbcommons.GetDb().Where("app_key=? and user_id=?", appkey, userId).Delete(&PushTokenDao{}).Error
+}
+
+func (token PushTokenDao) DeleteByIds(ids []int64) error {
+	if len(ids) <= 0 {
+		return nil
+	}
+	return dbcommons.GetDb().Where("id in (?)", ids).Delete(&PushTokenDao{}).Error
 }

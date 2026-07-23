@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `androidpushconfs` (
   `app_key` varchar(20) DEFAULT NULL COMMENT 'appKey',
   `push_channel` varchar(10) DEFAULT NULL COMMENT '推送渠道',
   `package` varchar(100) DEFAULT NULL COMMENT 'package',
-  `push_conf` varchar(500) DEFAULT NULL COMMENT '配置参数',
+  `push_conf` varchar(5000) DEFAULT NULL COMMENT '配置参数',
   `push_ext` MEDIUMBLOB DEFAULT NULL COMMENT '其他配置',
   `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
@@ -665,7 +665,8 @@ CREATE TABLE IF NOT EXISTS `pushtokens` (
   `app_key` varchar(20) DEFAULT NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_user_id` (`app_key`,`user_id`),
-  KEY `idx_device_id` (`app_key`,`device_id`)
+  KEY `idx_device_id` (`app_key`,`device_id`),
+  KEY `idx_pushtoken` (`app_key`,`push_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '推送token';
 
 CREATE TABLE IF NOT EXISTS `readinfos` (
