@@ -353,11 +353,13 @@ func handleJPushOptions(jpushOptions *commonservices.JPushOptions, params map[st
 			Classification: jpushOptions.Classification,
 		}
 		if jpushOptions.ThirdPartyChannel != nil {
+			xiaomi := cloneJPushXiaomiChannel(jpushOptions.ThirdPartyChannel.Xiaomi)
+			oppo := cloneJPushOppoChannel(jpushOptions.ThirdPartyChannel.Oppo)
 			options.ThirdPartyChannel = &jpush.ThirdPartyChannel{
 				Huawei: jpushOptions.ThirdPartyChannel.Huawei,
-				Xiaomi: jpushOptions.ThirdPartyChannel.Xiaomi,
+				Xiaomi: xiaomi,
 				Honor:  jpushOptions.ThirdPartyChannel.Honor,
-				Oppo:   jpushOptions.ThirdPartyChannel.Oppo,
+				Oppo:   oppo,
 				Vivo:   jpushOptions.ThirdPartyChannel.Vivo,
 				Meizu:  jpushOptions.ThirdPartyChannel.Meizu,
 				Fcm:    jpushOptions.ThirdPartyChannel.Fcm,
@@ -384,4 +386,76 @@ func handleJPushOptions(jpushOptions *commonservices.JPushOptions, params map[st
 		return options
 	}
 	return nil
+}
+
+func cloneJPushXiaomiChannel(source *commonservices.JPushXiaomiChannel) *commonservices.JPushXiaomiChannel {
+	if source == nil {
+		return nil
+	}
+	cloned := *source
+	cloned.SkipQuota = cloneJPushOptionPtr(source.SkipQuota)
+	cloned.OnlyUseVendorStyle = cloneJPushOptionPtr(source.OnlyUseVendorStyle)
+	return &cloned
+}
+
+func cloneJPushOppoChannel(source *commonservices.JPushOppoChannel) *commonservices.JPushOppoChannel {
+	if source == nil {
+		return nil
+	}
+	cloned := *source
+	cloned.BadgeOperationType = cloneJPushOptionPtr(source.BadgeOperationType)
+	cloned.PrivateContentParameters = cloneJPushStringMap(source.PrivateContentParameters)
+	cloned.PrivateTitleParameters = cloneJPushStringMap(source.PrivateTitleParameters)
+	cloned.SkipQuota = cloneJPushOptionPtr(source.SkipQuota)
+	cloned.OnlyUseVendorStyle = cloneJPushOptionPtr(source.OnlyUseVendorStyle)
+	cloned.AuditResponse = cloneJPushJSONMap(source.AuditResponse)
+	cloned.BadgeMessageCount = cloneJPushOptionPtr(source.BadgeMessageCount)
+	cloned.OpIntelligentIntent = cloneJPushJSONMap(source.OpIntelligentIntent)
+	cloned.OpDeleteIntentData = cloneJPushJSONMap(source.OpDeleteIntentData)
+	return &cloned
+}
+
+func cloneJPushOptionPtr[T any](source *T) *T {
+	if source == nil {
+		return nil
+	}
+	cloned := *source
+	return &cloned
+}
+
+func cloneJPushStringMap(source map[string]string) map[string]string {
+	if source == nil {
+		return nil
+	}
+	cloned := make(map[string]string, len(source))
+	for key, value := range source {
+		cloned[key] = value
+	}
+	return cloned
+}
+
+func cloneJPushJSONMap(source map[string]interface{}) map[string]interface{} {
+	if source == nil {
+		return nil
+	}
+	cloned := make(map[string]interface{}, len(source))
+	for key, value := range source {
+		cloned[key] = cloneJPushJSONValue(value)
+	}
+	return cloned
+}
+
+func cloneJPushJSONValue(source interface{}) interface{} {
+	switch value := source.(type) {
+	case map[string]interface{}:
+		return cloneJPushJSONMap(value)
+	case []interface{}:
+		cloned := make([]interface{}, len(value))
+		for i, item := range value {
+			cloned[i] = cloneJPushJSONValue(item)
+		}
+		return cloned
+	default:
+		return value
+	}
 }
