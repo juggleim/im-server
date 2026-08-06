@@ -19,7 +19,7 @@ type SetGrpMemberSettingActor struct {
 func (actor *SetGrpMemberSettingActor) OnReceive(ctx context.Context, input proto.Message) {
 	if req, ok := input.(*pbobjs.GroupMember); ok {
 		grpId := bases.GetTargetIdFromCtx(ctx)
-		logs.WithContext(ctx).Infof("group_id:%s\tmember_id:%s\tsettings%s", grpId, req.MemberId, tools.ToJson(req.Settings))
+		logs.WithContext(ctx).Infof("group_id:%s\tmember_id:%s\tsettings:%s\texts:%s", grpId, req.MemberId, tools.ToJson(req.Settings), tools.ToJson(req.ExtFields))
 		code := services.SetGroupMemberSettings(ctx, grpId, req)
 		ack := bases.CreateQueryAckWraper(ctx, code, nil)
 		actor.Sender.Tell(ack, actorsystem.NoSender)

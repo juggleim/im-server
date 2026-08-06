@@ -387,6 +387,7 @@ CREATE TABLE IF NOT EXISTS `groupmembers` (
   `is_mute` tinyint DEFAULT '0' COMMENT '是否全局禁言，0：否；1：是；',
   `is_allow` tinyint DEFAULT '0' COMMENT '是否白名单 0:非白名单用户；1:白名单用户；',
   `mute_end_at` bigint DEFAULT '0' COMMENT '禁言结束时间戳',
+  `grp_display_name` varchar(100) DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_appkey_grpid_memid` (`app_key`,`group_id`,`member_id`),
   KEY `idx_memberid` (`app_key`,`member_id`,`group_id`)

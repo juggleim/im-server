@@ -320,6 +320,13 @@ func SetGroupMemberSettings(ctx context.Context, groupId string, req *pbobjs.Gro
 		}
 		rvCache = rvCache || true
 	}
+	for _, extField := range req.ExtFields {
+		err := dao.Upsert(appkey, groupId, req.MemberId, extField.Key, extField.Value, int(commonservices.AttItemType_Att))
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
+		rvCache = rvCache || true
+	}
 	if rvCache {
 		RemoveGrpMemberAttsFromCache(ctx, appkey, groupId, req.MemberId)
 	}
