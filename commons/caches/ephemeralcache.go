@@ -58,17 +58,21 @@ func (c *EphemeralCache) AddTimeoutAfterCreate(checkInterval, maxLife time.Durat
 	return c
 }
 func (c *EphemeralCache) cleanOldestByCreatedTime(timeLine int64) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	for {
 		ele := c.evictList.Back()
-		if ele != nil {
-			kv := ele.Value.(*EphemeralCacheItem)
-			if kv.addedTime < timeLine {
-				c.Remove(kv.key)
-			} else {
-				break
-			}
-		} else {
+		if ele == nil {
 			break
+		}
+		kv := ele.Value.(*EphemeralCacheItem)
+		if kv.addedTime >= timeLine {
+			break
+		}
+		c.evictList.Remove(ele)
+		delete(c.items, kv.key)
+		if c.onEvict != nil {
+			c.onEvict(kv.key, kv.value)
 		}
 	}
 }

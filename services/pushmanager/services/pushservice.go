@@ -207,11 +207,11 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 						} else {
 							jPushPayload.Options = handleJPushOptions(androidPushConf.JpushClient.Options, params)
 						}
-						_, err := androidPushConf.JpushClient.Push(jPushPayload)
+						jpushMsgId, err := androidPushConf.JpushClient.Push(jPushPayload)
 						if err != nil {
 							logs.WithContext(ctx).Infof("[JPush_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
 						} else {
-							logs.WithContext(ctx).Infof("[JPush_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+							logs.WithContext(ctx).Infof("[JPush_SUCC]user_id:%s\tmsg_id:%s\tjpush_id:%s", userId, req.MsgId, jpushMsgId)
 						}
 					} else {
 						logs.WithContext(ctx).Infof("[JPush_FAIL]have no init jpush client")

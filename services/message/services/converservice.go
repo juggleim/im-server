@@ -175,6 +175,19 @@ func HandleDownMsgByConver(ctx context.Context, userId, targetId, subChannel str
 		downMsg.UnreadIndex = conver.GetUnreadIndex()
 	}
 	downMsg.ConverTags = append(downMsg.ConverTags, conver.ConverTags...)
+	tagSet := make(map[string]struct{}, len(downMsg.ConverTags))
+	uniqueConverTags := downMsg.ConverTags[:0]
+	for _, converTag := range downMsg.ConverTags {
+		if converTag == nil {
+			continue
+		}
+		if _, exist := tagSet[converTag.Tag]; exist {
+			continue
+		}
+		tagSet[converTag.Tag] = struct{}{}
+		uniqueConverTags = append(uniqueConverTags, converTag)
+	}
+	downMsg.ConverTags = uniqueConverTags
 }
 
 type BatchConverItem struct {

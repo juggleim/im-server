@@ -200,18 +200,21 @@ func QryConverV2(ctx context.Context, userId string, req *pbobjs.QryConverReq) (
 	}
 	if req.IsInner {
 		converTags := []*pbobjs.ConverTag{}
-		//conver tag
-		tagStorage := storages.NewUserConverTagStorage()
-		tags, err := tagStorage.QryTagsByConver(appkey, userId, req.TargetId, req.ChannelType)
-		if err == nil {
-			for _, tag := range tags {
+		if conver.ConverExts != nil {
+			for tag := range conver.ConverExts.ConverTags {
 				converTags = append(converTags, &pbobjs.ConverTag{
-					Tag:     tag.Tag,
-					TagName: tag.TagName,
+					Tag:     tag,
 					TagType: pbobjs.ConverTagType_UserConverTag,
 				})
 			}
+			for tag := range conver.ConverExts.GlobalConverTags {
+				converTags = append(converTags, &pbobjs.ConverTag{
+					Tag:     tag,
+					TagType: pbobjs.ConverTagType_GlobalConverTag,
+				})
+			}
 		}
+
 		return errs.IMErrorCode_SUCCESS, &pbobjs.Conversation{
 			TargetId:          req.TargetId,
 			ChannelType:       req.ChannelType,

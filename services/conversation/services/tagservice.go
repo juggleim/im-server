@@ -154,7 +154,31 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 			userConvers.PersistConverV2(c)
 		}
 	}
+	notifyMessageUserConverCacheInvalidation(ctx, userId, req.Convers)
 	return errs.IMErrorCode_SUCCESS
+}
+
+func buildUserConverCacheInvalidation(convers []*pbobjs.SimpleConversation) *pbobjs.ConversationsReq {
+	items := make([]*pbobjs.Conversation, 0, len(convers))
+	for _, conver := range convers {
+		if conver == nil {
+			continue
+		}
+		items = append(items, &pbobjs.Conversation{
+			TargetId:    conver.TargetId,
+			ChannelType: conver.ChannelType,
+			SubChannel:  conver.SubChannel,
+		})
+	}
+	return &pbobjs.ConversationsReq{Conversations: items}
+}
+
+func notifyMessageUserConverCacheInvalidation(ctx context.Context, userId string, convers []*pbobjs.SimpleConversation) {
+	req := buildUserConverCacheInvalidation(convers)
+	if userId == "" || len(req.Conversations) == 0 {
+		return
+	}
+	bases.AsyncRpcCall(ctx, "del_conver_cache", userId, req)
 }
 
 type CmdMsg_CreateConverTags struct {
@@ -217,6 +241,7 @@ func TagDelConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 			userConvers.PersistConverV2(c)
 		}
 	}
+	notifyMessageUserConverCacheInvalidation(ctx, userId, req.Convers)
 	return errs.IMErrorCode_SUCCESS
 }
 

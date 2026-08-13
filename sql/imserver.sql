@@ -60,6 +60,21 @@ CREATE TABLE IF NOT EXISTS `apps` (
   UNIQUE KEY `uniq_appkey` (`app_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'app应用';
 
+CREATE TABLE IF NOT EXISTS `appnavs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `app_key` varchar(50) DEFAULT NULL,
+  `alias_no` varchar(50) DEFAULT NULL,
+  `api_url` varchar(500) DEFAULT NULL,
+  `ws_url` varchar(500) DEFAULT NULL,
+  `app_url` varchar(500) DEFAULT NULL,
+  `admin_url` varchar(500) DEFAULT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `app_key_UNIQUE` (`app_key`),
+  UNIQUE KEY `alias_no_UNIQUE` (`alias_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS `banusers` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `user_id` varchar(32) NOT NULL COMMENT '用户id',

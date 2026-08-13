@@ -38,11 +38,18 @@ func GetConnectCtxBySession(session string) imcontext.WsHandleContext {
 }
 func GetConnectCtxByUser(appkey, userid string) map[string]imcontext.WsHandleContext {
 	identifier := getUserIdentifier(appkey, userid)
+	lock := GetLock(identifier)
+	lock.Lock()
+	defer lock.Unlock()
+
+	ctxMapSnapshot := map[string]imcontext.WsHandleContext{}
 	if ctxMapObj, ok := OnlineUserConnectMap.Load(identifier); ok {
 		ctxMap := ctxMapObj.(map[string]imcontext.WsHandleContext)
-		return ctxMap
+		for session, ctx := range ctxMap {
+			ctxMapSnapshot[session] = ctx
+		}
 	}
-	return map[string]imcontext.WsHandleContext{}
+	return ctxMapSnapshot
 }
 func PutInContextCache(ctx imcontext.WsHandleContext) {
 	session := imcontext.GetConnSession(ctx)
@@ -140,6 +147,10 @@ func getUserIdentifier(appkey, userid string) string {
 
 func GetConnectCountByUser(appkey, userid string) int32 {
 	identifier := getUserIdentifier(appkey, userid)
+	lock := GetLock(identifier)
+	lock.Lock()
+	defer lock.Unlock()
+
 	if ctxMapObj, ok := OnlineUserConnectMap.Load(identifier); ok {
 		ctxMap := ctxMapObj.(map[string]imcontext.WsHandleContext)
 		return int32(len(ctxMap))
