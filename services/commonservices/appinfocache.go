@@ -54,7 +54,8 @@ type AppInfo struct {
 	OpenStatusSub         bool   `default:"false"`
 	OpenFriendStatusSub   bool   `default:"false"`
 
-	MaxUserConverTags int `default:"100"`
+	MaxUserConverTags      int `default:"100"`
+	UserPushUnactivatedDay int `default:"15"`
 
 	// statussubscriptions：每个 subscriber_device_id 最多订阅的不同 user_id 数量
 	MaxUserSubscriptionCount int `default:"1000"`

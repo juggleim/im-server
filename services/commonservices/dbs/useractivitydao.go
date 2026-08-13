@@ -7,7 +7,7 @@ import (
 
 type UserActivityDao struct {
 	ID       int64  `gorm:"primary_key"`
-	UserId   int    `gorm:"user_id"`
+	UserId   string `gorm:"user_id"`
 	TimeMark int64  `gorm:"time_mark"`
 	Count    int64  `gorm:"count"`
 	AppKey   string `gorm:"app_key"`
@@ -41,6 +41,15 @@ func (stat UserActivityDao) CountUserActivities(appkey string, timeMark int64) i
 		return count
 	}
 	return count
+}
+
+func (stat UserActivityDao) QryLatestUserActivity(appkey, userId string) (*UserActivityDao, error) {
+	var items []*UserActivityDao
+	err := dbcommons.GetDb().Where("app_key=? and user_id=?", appkey, userId).Order("time_mark desc").Limit(1).Table(stat.TableName()).Find(&items).Error
+	if err == nil && len(items) > 0 {
+		return items[0], nil
+	}
+	return nil, err
 }
 
 func (stat UserActivityDao) ScanByTimeMarkAfterID(timeMark, lastID int64, limit int) ([]UserActivityScanRow, error) {

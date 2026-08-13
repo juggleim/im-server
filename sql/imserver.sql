@@ -295,7 +295,8 @@ CREATE TABLE IF NOT EXISTS `useractivities` (
   `app_key` VARCHAR(20) NULL COMMENT '应用key',
   PRIMARY KEY (`id`),
   UNIQUE INDEX `uniq_userid` (`app_key` ASC, `time_mark` ASC, `user_id` ASC),
-  KEY `idx_time_mark_id` (`time_mark`,`id`)
+  INDEX `idx_time_mark_id` (`time_mark` ASC, `id` ASC),
+  INDEX `idx_app_key_userid` (`app_key` ASC, `user_id` ASC, `time_mark` ASC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-用户活跃统计';
 
 CREATE TABLE IF NOT EXISTS `connectcounts` (
@@ -967,5 +968,5 @@ CREATE TABLE IF NOT EXISTS `performance_metrics` (
   KEY `idx_metric_type_collect_time` (`metric_type`,`collect_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-性能指标';
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260713');
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260813');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

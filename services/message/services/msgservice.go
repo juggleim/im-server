@@ -399,6 +399,16 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 			pushLevel != pbobjs.PushLevel_IgnoreUndisturb {
 			return
 		}
+		//check user activity
+		if appInfo.UserPushUnactivatedDay > 0 && msg.ChannelType == pbobjs.ChannelType_Group {
+			activity := GetLatestUserActivity(appkey, receiverId)
+			if activity == nil || activity.LatestActivityTime <= 0 {
+				return
+			}
+			if activity.LatestActivityTime < msg.MsgTime-int64(appInfo.UserPushUnactivatedDay)*24*3600*1000 {
+				return
+			}
+		}
 		pushData := GetPushData(ctx, msg, getTargetUserLanguage(ctx, receiverId))
 		if pushData != nil {
 			if msg.MentionInfo != nil {
@@ -408,7 +418,7 @@ func SendPush(ctx context.Context, senderId, receiverId string, msg *pbobjs.Down
 			//badge
 			userStatus := GetUserStatus(appkey, receiverId)
 			pushData.Badge = userStatus.BadgeIncr()
-			if userStatus.CanPush > 0 {
+			if userStatus.CanPush() {
 				pushRpc := bases.CreateServerPubWraper(ctx, senderId, receiverId, "push", pushData)
 				bases.UnicastRouteWithNoSender(pushRpc)
 			}

@@ -65,7 +65,7 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 			receId := receiverId
 			if UserStatusCacheContains(appkey, receId) {
 				userStatus := GetUserStatus(appkey, receId)
-				if userStatus.OnlineStatus {
+				if userStatus.IsOnline() {
 					newDownMsg := commonservices.CopyDownMsg(downMsg, receiverId)
 					MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
 						dispatchStatusSubMsgs(ctx, receId, newDownMsg)

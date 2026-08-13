@@ -20,16 +20,16 @@ type UserStatus struct {
 	userId string
 	// LastSyncTime        *int64
 	// LastSendBoxSyncTime *int64
-	LatestMsgTime *int64 // latest msg time
+	latestMsgTime *int64 // latest msg time
 	// LatestSendMsgTime *int64
-	TerminalNum  int
-	OnlineStatus bool //online state
+	terminalNum  int
+	onlineStatus bool //online state
 
 	isNtf bool //is ntf
 
-	PushSwitch int32
-	PushBadge  int32
-	CanPush    int32
+	pushSwitch int32
+	pushBadge  int32
+	canPush    int32
 }
 
 var userOnlineStatusCache *caches.LruCache
@@ -49,40 +49,59 @@ func RecordUserOnlineStatus(appKey, userId string, onlineStatus bool, terminalNu
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
-	user.OnlineStatus = onlineStatus
-	user.TerminalNum = terminalNum
+	user.onlineStatus = onlineStatus
+	user.terminalNum = terminalNum
 }
 
 func (user *UserStatus) IsOnline() bool {
-	return user.OnlineStatus
+	key := getKey(user.appkey, user.userId)
+	lock := userLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+	return user.onlineStatus
 }
 
 func (user *UserStatus) SetPushStatus(canPush int32) {
-	atomic.StoreInt32(&user.CanPush, canPush)
+	atomic.StoreInt32(&user.canPush, canPush)
+}
+
+func (user *UserStatus) CanPush() bool {
+	return atomic.LoadInt32(&user.canPush) > 0
 }
 
 func (user *UserStatus) SetPushSwitch(pushSwitch int32) {
-	atomic.StoreInt32(&user.PushSwitch, pushSwitch)
+	atomic.StoreInt32(&user.pushSwitch, pushSwitch)
 }
 
 func (user *UserStatus) OpenPushSwitch() bool {
-	return user.PushSwitch > 0
+	return atomic.LoadInt32(&user.pushSwitch) > 0
 }
 
 func (user *UserStatus) SetBadge(badge int32) {
-	atomic.StoreInt32(&user.PushBadge, badge)
+	atomic.StoreInt32(&user.pushBadge, badge)
 }
 
 func (user *UserStatus) BadgeIncr() int32 {
-	atomic.AddInt32(&user.PushBadge, 1)
-	return user.PushBadge
+	atomic.AddInt32(&user.pushBadge, 1)
+	return atomic.LoadInt32(&user.pushBadge)
 }
 
-func (user *UserStatus) CheckNtfWithSwitch() bool {
-	if !user.OnlineStatus || user.TerminalNum > 1 {
+func (user *UserStatus) mustNtf() bool {
+	key := getKey(user.appkey, user.userId)
+	lock := userLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+	if !user.onlineStatus || user.terminalNum > 1 {
 		return true
 	}
 	if user.isNtf {
+		return true
+	}
+	return false
+}
+
+func (user *UserStatus) CheckNtfWithSwitch() bool {
+	if user.mustNtf() {
 		return true
 	} else {
 		key := getKey(user.appkey, user.userId)
@@ -112,7 +131,7 @@ func (user *UserStatus) CloseNtf(ackTime int64) {
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
-	if user.LatestMsgTime != nil && *user.LatestMsgTime == ackTime {
+	if user.latestMsgTime != nil && *user.latestMsgTime == ackTime {
 		user.isNtf = false
 	}
 }
@@ -122,9 +141,21 @@ func (user *UserStatus) SetLatestMsgTime(time int64) {
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
-	if user.LatestMsgTime == nil || *user.LatestMsgTime < time {
-		user.LatestMsgTime = &time
+	if user.latestMsgTime == nil || *user.latestMsgTime < time {
+		user.latestMsgTime = &time
 	}
+}
+
+func (user *UserStatus) GetLatestMsgTime() (int64, bool) {
+	key := getKey(user.appkey, user.userId)
+	lock := userLocks.GetLocks(key)
+	lock.RLock()
+	defer lock.RUnlock()
+
+	if user.latestMsgTime == nil {
+		return 0, false
+	}
+	return *user.latestMsgTime, true
 }
 
 func UserStatusCacheContains(appkey, userId string) bool {
@@ -181,8 +212,8 @@ func BatchInitUserStatus(ctx context.Context, appkey string, userIds []string) {
 						CacheUserStatus(appkey, item.UserId, &UserStatus{
 							appkey:       appkey,
 							userId:       item.UserId,
-							OnlineStatus: item.IsOnline,
-							CanPush:      1,
+							onlineStatus: item.IsOnline,
+							canPush:      1,
 						})
 					}
 				}
@@ -201,11 +232,11 @@ func RegenateSendTime(appkey, userId string, currentTime int64) int64 {
 	defer lock.Unlock()
 
 	ret := currentTime
-	if user.LatestMsgTime == nil || currentTime > *user.LatestMsgTime {
-		user.LatestMsgTime = &currentTime
+	if user.latestMsgTime == nil || currentTime > *user.latestMsgTime {
+		user.latestMsgTime = &currentTime
 	} else {
-		ret = *user.LatestMsgTime + 1
-		user.LatestMsgTime = &ret
+		ret = *user.latestMsgTime + 1
+		user.latestMsgTime = &ret
 	}
 	return ret
 }
@@ -218,7 +249,7 @@ func initUserStatus(appkey, userId string) *UserStatus {
 	return &UserStatus{
 		appkey:       appkey,
 		userId:       userId,
-		OnlineStatus: true,
-		CanPush:      1,
+		onlineStatus: true,
+		canPush:      1,
 	}
 }

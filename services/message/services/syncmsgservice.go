@@ -74,8 +74,9 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 	ret := &pbobjs.DownMsgSet{
 		Msgs: []*pbobjs.DownMsg{},
 	}
+	latestMsgTime, existLatestMsgTime := userStatus.GetLatestMsgTime()
 	//拉取收件箱
-	if userStatus.LatestMsgTime == nil || *userStatus.LatestMsgTime > syncTime || *userStatus.LatestMsgTime > cmdSyncTime {
+	if !existLatestMsgTime || latestMsgTime > syncTime || latestMsgTime > cmdSyncTime {
 		queueMsgs := SyncOfflineQueueMessages(appKey, userId, syncTime, msgSyncBatchCount)
 		ret.Msgs = append(ret.Msgs, queueMsgs...)
 
@@ -115,7 +116,7 @@ func SyncMessages(ctx context.Context, syncMsg *pbobjs.SyncMsgReq) (errs.IMError
 		ret.IsFinished = true
 		//变更通知拉取状态
 		GetUserStatus(appKey, userId).SetNtfStatus(false)
-		if userStatus.LatestMsgTime == nil {
+		if !existLatestMsgTime {
 			var maxMsgTime int64 = 0
 			for _, msg := range ret.Msgs {
 				if !msg.IsSend {
