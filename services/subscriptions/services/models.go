@@ -28,6 +28,17 @@ type MsgEvent struct {
 	MsgId       string       `json:"msg_id"`
 	MsgTime     int64        `json:"msg_time"`
 	MentionInfo *MentionInfo `json:"mention_info"`
+	ReferMsg    *ReferMsg    `json:"refer_msg"`
+}
+
+type ReferMsg struct {
+	MsgId       string `json:"msg_id"`
+	SenderId    string `json:"sender_id"`
+	TargetId    string `json:"target_id"`
+	ChannelType int    `json:"channel_type"`
+	MsgType     string `json:"msg_type"`
+	MsgTime     int64  `json:"msg_time"`
+	MsgContent  string `json:"msg_content"`
 }
 
 type MentionInfo struct {

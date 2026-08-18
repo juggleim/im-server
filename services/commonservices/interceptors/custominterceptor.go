@@ -44,6 +44,7 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 		MsgType:     msg.MsgType,
 		MsgContent:  string(msg.MsgContent),
 		MentionInfo: toMentionInfo(msg),
+		ReferMsg:    handleReferMsg(msg.ReferMsg),
 	}
 	body := tools.ToJson(msgEvent)
 	respBs, code, err := tools.HttpDoBytes("POST", inter.RequestUrl, headers, body)
@@ -117,6 +118,33 @@ type MsgEvent struct {
 	MsgType     string       `json:"msg_type"`
 	MsgContent  string       `json:"msg_content"`
 	MentionInfo *MentionInfo `json:"mention_info"`
+	ReferMsg    *ReferMsg    `json:"refer_msg"`
+}
+
+type ReferMsg struct {
+	MsgId       string `json:"msg_id"`
+	SenderId    string `json:"sender_id"`
+	TargetId    string `json:"target_id"`
+	ChannelType int    `json:"channel_type"`
+	MsgType     string `json:"msg_type"`
+	MsgTime     int64  `json:"msg_time"`
+	MsgContent  string `json:"msg_content"`
+}
+
+func handleReferMsg(referMsg *pbobjs.DownMsg) *ReferMsg {
+	if referMsg != nil {
+		refer := &ReferMsg{
+			MsgId:       referMsg.MsgId,
+			SenderId:    referMsg.SenderId,
+			TargetId:    referMsg.TargetId,
+			ChannelType: int(referMsg.ChannelType),
+			MsgType:     referMsg.MsgType,
+			MsgTime:     referMsg.MsgTime,
+			MsgContent:  string(referMsg.MsgContent),
+		}
+		return refer
+	}
+	return nil
 }
 
 type MentionInfo struct {

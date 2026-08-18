@@ -142,6 +142,7 @@ func createEvent(msg proto.Message) *SubEvent {
 				MsgId:       msg.Msg.MsgId,
 				MsgTime:     msg.Msg.MsgTime,
 				MentionInfo: transMentionInfo(msg.Msg.MentionInfo),
+				ReferMsg:    handleReferMsg(msg.Msg.ReferMsg),
 			})
 		}
 		return event
@@ -200,6 +201,22 @@ func transMentionInfo(mention *pbobjs.MentionInfo) *MentionInfo {
 			MentionType:   mentionType,
 			TargetUserIds: userIds,
 		}
+	}
+	return nil
+}
+
+func handleReferMsg(referMsg *pbobjs.DownMsg) *ReferMsg {
+	if referMsg != nil {
+		refer := &ReferMsg{
+			MsgId:       referMsg.MsgId,
+			SenderId:    referMsg.SenderId,
+			TargetId:    referMsg.TargetId,
+			ChannelType: int(referMsg.ChannelType),
+			MsgType:     referMsg.MsgType,
+			MsgTime:     referMsg.MsgTime,
+			MsgContent:  string(referMsg.MsgContent),
+		}
+		return refer
 	}
 	return nil
 }
