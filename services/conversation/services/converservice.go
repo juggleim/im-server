@@ -58,6 +58,7 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 				SyncTime:             msg.MsgTime,
 				LatestUnreadMsgIndex: unreadIndex,
 				ConverExts: &pbobjs.ConverExts{
+					ConverTags:       toUserConverTags(msg.ConverTags),
 					GlobalConverTags: toGlobalConverTags(msg.ConverTags),
 				},
 			})
