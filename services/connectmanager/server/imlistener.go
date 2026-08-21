@@ -128,10 +128,11 @@ func (listener *ImListenerImpl) Connected(msg *codec.ConnectMsgBody, ctx imconte
 	ucLog.Code = int32(errs.IMErrorCode_SUCCESS)
 	logmanager.WriteUserConnectLog(imcontext.GetRpcContext(ctx), ucLog)
 	msgAck := codec.NewConnectAckMessage(&codec.ConnectAckMsgBody{
-		Code:      int32(errs.IMErrorCode_SUCCESS),
-		UserId:    userId,
-		Session:   imcontext.GetConnSession(ctx),
-		Timestamp: time.Now().UnixMilli(),
+		Code:             int32(errs.IMErrorCode_SUCCESS),
+		UserId:           userId,
+		Session:          imcontext.GetConnSession(ctx),
+		Timestamp:        time.Now().UnixMilli(),
+		CleanMentionType: services.GetClearMentionType(msg.Appkey),
 	})
 	ctx.Write(msgAck)
 }

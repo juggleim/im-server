@@ -7,6 +7,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
 	mentionStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
@@ -85,7 +86,15 @@ func markReadGroupMsgs(ctx context.Context, req *pbobjs.MarkReadReq) errs.IMErro
 
 		//update mention msg's read state
 		mentionStorage := mentionStorages.NewMentionMsgStorage()
-		mentionStorage.MarkRead(appkey, userId, req.TargetId, req.SubChannel, req.ChannelType, msgIds)
+		affected, err := mentionStorage.MarkRead(appkey, userId, req.TargetId, req.SubChannel, req.ChannelType, msgIds)
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		} else if affected > 0 {
+			if appinfo, exist := commonservices.GetAppInfo(appkey); exist && appinfo != nil && appinfo.LoadMentionWayInConver > 0 {
+				//TODO update read status of mention msg from conver cache
+				bases.AsyncRpcCall(ctx, "mark_mention_read", userId, req)
+			}
+		}
 	}
 	return errs.IMErrorCode_SUCCESS
 }

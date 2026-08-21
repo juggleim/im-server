@@ -40,6 +40,9 @@ func (manager *ConversationManager) RegisterActors(register gmicro.IActorRegiste
 	register.RegisterActor("mark_unread", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.MarkUnreadActor{}, serviceName)
 	})
+	register.RegisterActor("mark_mention_read", func() actorsystem.IUntypedActor {
+		return bases.BaseProcessActor(&actors.MarkMentionReadActor{}, serviceName)
+	})
 	register.RegisterActor("clear_total_unread", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.ClearTotalUnreadActor{}, serviceName)
 	})

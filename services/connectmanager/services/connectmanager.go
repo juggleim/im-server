@@ -266,3 +266,11 @@ func resetOnlineConnectStateForTest() {
 	userConnectCount.Store(0)
 	sessionConnectCount.Store(0)
 }
+
+func GetClearMentionType(appkey string) int32 {
+	appinfo, exist := commonservices.GetAppInfo(appkey)
+	if exist && appinfo != nil {
+		return int32(appinfo.LoadMentionWayInConver)
+	}
+	return 0
+}

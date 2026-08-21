@@ -37,6 +37,7 @@ message ConnectAckMsgBody{
     int64 timestamp = 4;
     string ext = 5;
     ConnectConf conf = 6;
+    int32 cleanMentionType = 8;
 }
 
 message ConnectConf{

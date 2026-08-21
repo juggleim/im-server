@@ -590,6 +590,7 @@ message QryMentionMsgsReq{
   int32 order = 5;
   int64 latestReadIndex = 6;
   string subChannel = 7;
+  bool onlyUnread = 8;
 }
 
 message QryMentionMsgsResp{

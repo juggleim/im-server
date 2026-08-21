@@ -5,6 +5,7 @@ import (
 	"im-server/commons/caches"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+	"im-server/services/commonservices"
 	"im-server/services/conversation/storages"
 	"im-server/services/conversation/storages/models"
 	"math"
@@ -170,7 +171,18 @@ func (uc *UserConversations) AppendMention(targetId, subChannel string, channelT
 			}
 			//read from db
 			storage := storages.NewMentionMsgStorage()
-			mentionMsgs, err := storage.QryMentionSenderIdsBaseIndex(uc.Appkey, uc.UserId, targetId, subChannel, channelType, cacheConver.LatestReadMsgIndex, 100)
+			var mentionMsgs []*models.MentionMsg
+			var err error
+
+			onlyUnread := false
+			if appinfo, exist := commonservices.GetAppInfo(uc.Appkey); exist && appinfo != nil {
+				onlyUnread = appinfo.LoadMentionWayInConver > 0
+			}
+			if onlyUnread {
+				mentionMsgs, err = storage.QryMentionSenderIdsBaseUnread(uc.Appkey, uc.UserId, targetId, subChannel, channelType, 100)
+			} else {
+				mentionMsgs, err = storage.QryMentionSenderIdsBaseIndex(uc.Appkey, uc.UserId, targetId, subChannel, channelType, cacheConver.LatestReadMsgIndex, 100)
+			}
 			if err == nil {
 				mentionInfo.MentionMsgs = append(mentionInfo.MentionMsgs, mentionMsgs...)
 			}
@@ -229,6 +241,32 @@ func (uc *UserConversations) GetMentionInfo(targetId, subChannel string, channel
 	return &models.ConverMentionInfo{
 		SenderIds:   []string{},
 		MentionMsgs: []*models.MentionMsg{},
+	}
+}
+
+func (uc *UserConversations) MarkMentionRead(targetId, subChannel string, channelType pbobjs.ChannelType, msgIds map[string]bool) {
+	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
+	lock := userLocks.GetLocks(key)
+	lock.Lock()
+	defer lock.Unlock()
+	itemKey := getConverItemKey(targetId, subChannel, channelType)
+	if cacheConver, exist := uc.ConverItemMap[itemKey]; exist {
+		if cacheConver.MentionInfo != nil {
+			mentionMsgs := []*models.MentionMsg{}
+			senderIds := []string{}
+			for _, msg := range cacheConver.MentionInfo.MentionMsgs {
+				if _, exist := msgIds[msg.MsgId]; !exist {
+					mentionMsgs = append(mentionMsgs, msg)
+					senderIds = append(senderIds, msg.SenderId)
+				}
+			}
+			cacheConver.MentionInfo = &models.ConverMentionInfo{
+				IsMentioned:     len(mentionMsgs) > 0,
+				MentionMsgCount: len(mentionMsgs),
+				MentionMsgs:     mentionMsgs,
+				SenderIds:       senderIds,
+			}
+		}
 	}
 }
 
@@ -625,6 +663,10 @@ func (uc *UserConversations) TotalUnreadCount(filter *pbobjs.ConverFilter) int64
 }
 
 func (uc *UserConversations) ClearUnread(targetId, subChannel string, channelType pbobjs.ChannelType, readMsgIndex int64, readMsgId string, readMsgTime int64) bool {
+	isClearMentionMsgs := false
+	if appinfo, exist := commonservices.GetAppInfo(uc.Appkey); exist && appinfo != nil && appinfo.LoadMentionWayInConver == 0 {
+		isClearMentionMsgs = true
+	}
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
@@ -637,7 +679,9 @@ func (uc *UserConversations) ClearUnread(targetId, subChannel string, channelTyp
 			item.LatestReadMsgId = readMsgId
 			item.LatestReadMsgTime = readMsgTime
 			item.UnreadTag = 0
-			uc.innerClearMentionMsgs(item, readMsgIndex)
+			if isClearMentionMsgs {
+				uc.innerClearMentionMsgs(item, readMsgIndex)
+			}
 			return true
 		} else if item.UnreadTag > 0 {
 			item.UnreadTag = 0
@@ -648,6 +692,10 @@ func (uc *UserConversations) ClearUnread(targetId, subChannel string, channelTyp
 }
 
 func (uc *UserConversations) DefaultClearUnread(targetId, subChannel string, channelType pbobjs.ChannelType) bool {
+	isClearMentionMsgs := false
+	if appinfo, exist := commonservices.GetAppInfo(uc.Appkey); exist && appinfo != nil && appinfo.LoadMentionWayInConver == 0 {
+		isClearMentionMsgs = true
+	}
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
@@ -660,7 +708,9 @@ func (uc *UserConversations) DefaultClearUnread(targetId, subChannel string, cha
 			item.LatestReadMsgId = ""
 			item.LatestReadMsgTime = time.Now().UnixMilli()
 			item.UnreadTag = 0
-			uc.innerClearMentionMsgs(item, item.LatestUnreadMsgIndex)
+			if isClearMentionMsgs {
+				uc.innerClearMentionMsgs(item, item.LatestUnreadMsgIndex)
+			}
 			return true
 		} else if item.UnreadTag > 0 {
 			item.UnreadTag = 0

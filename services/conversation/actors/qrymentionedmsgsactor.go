@@ -18,7 +18,7 @@ type QryMentionMsgsActor struct {
 func (actor *QryMentionMsgsActor) OnReceive(ctx context.Context, input proto.Message) {
 	if qryMentionMsgReq, ok := input.(*pbobjs.QryMentionMsgsReq); ok {
 		userId := bases.GetRequesterIdFromCtx(ctx)
-		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tchannel_type:%v\tstart_time:%d\tcount:%d\torder:%d\tread_index:%d", userId, qryMentionMsgReq.TargetId, qryMentionMsgReq.ChannelType, qryMentionMsgReq.StartTime, qryMentionMsgReq.Count, qryMentionMsgReq.Order, qryMentionMsgReq.LatestReadIndex)
+		logs.WithContext(ctx).Infof("user_id:%s\ttarget_id:%s\tchannel_type:%v\tstart_time:%d\tcount:%d\torder:%d\tread_index:%d\tonly_unread:%v", userId, qryMentionMsgReq.TargetId, qryMentionMsgReq.ChannelType, qryMentionMsgReq.StartTime, qryMentionMsgReq.Count, qryMentionMsgReq.Order, qryMentionMsgReq.LatestReadIndex, qryMentionMsgReq.OnlyUnread)
 		resp := services.QryMentionedMsgs(ctx, userId, qryMentionMsgReq)
 		qryAck := bases.CreateQueryAckWraper(ctx, 0, resp)
 		actor.Sender.Tell(qryAck, actorsystem.NoSender)

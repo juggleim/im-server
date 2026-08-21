@@ -25,11 +25,10 @@ type ConverItem struct {
 
 type IMentionMsgStorage interface {
 	SaveMentionMsg(msg MentionMsg) error
-	QryMentionMsgs(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64, cleanTime int64) ([]*MentionMsg, error)
-	QryUnreadMentionMsgs(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, cleanTime int64) ([]*MentionMsg, error)
+	QryMentionMsgs(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, startTime int64, count int, isPositiveOrder bool, startIndex int64, cleanTime int64, onlyUnread bool) ([]*MentionMsg, error)
 	QryMentionSenderIdsBaseIndex(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, startIndex int64, count int) ([]*MentionMsg, error)
-	BatchQryMentionSenderIdsBaseIndex(appkey, userId string, convers []ConverItem) ([]*MentionMsg, error)
-	MarkRead(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgIds []string) error
+	QryMentionSenderIdsBaseUnread(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, count int) ([]*MentionMsg, error)
+	MarkRead(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgIds []string) (int64, error)
 	DelMentionMsgs(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgIds []string) error
 	DelMentionMsg(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgId string) error
 	CleanMentionMsgsBaseIndex(appkey, userId, targetId, subChannel string, channelType pbobjs.ChannelType, msgIndex int64) error

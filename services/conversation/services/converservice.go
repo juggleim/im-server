@@ -438,6 +438,19 @@ func MarkUnreadV2(ctx context.Context, userId string, req *pbobjs.ConversationsR
 	return errs.IMErrorCode_SUCCESS
 }
 
+func MarkMentionRead(ctx context.Context, userId string, req *pbobjs.MarkReadReq) errs.IMErrorCode {
+	appkey := bases.GetAppKeyFromCtx(ctx)
+	if len(req.Msgs) > 0 && UserConversContains(appkey, userId) {
+		userConvers := getUserConvers(appkey, userId)
+		msgIds := map[string]bool{}
+		for _, msg := range req.Msgs {
+			msgIds[msg.MsgId] = true
+		}
+		userConvers.MarkMentionRead(req.TargetId, req.SubChannel, req.ChannelType, msgIds)
+	}
+	return errs.IMErrorCode_SUCCESS
+}
+
 func SetTopConversV2(ctx context.Context, req *pbobjs.ConversationsReq) (errs.IMErrorCode, int64) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userId := bases.GetRequesterIdFromCtx(ctx)
