@@ -102,6 +102,8 @@ JuggleIM 以模块化 Go 服务运行：HTTP 和 WebSocket 网关通过内部 Ac
 
 完整的组件边界、数据职责、私聊与群聊链路、安全边界和部署约束，请阅读 **[架构文档](./docs/architecture_zh.md)**。[English version](./docs/architecture.md)
 
+可通过 **[可复现性能测试工具](./BENCHMARKS.md)** 分别评估连接建立、私聊和群聊的 ACK 与端到端投递吞吐，并生成包含 P50/P95/P99 延迟及运行环境的机器可读结果。
+
 ## 🚀 使用 Docker 快速开始
 
 通过 Docker Compose 一次启动 MySQL、JuggleIM 服务和管理后台：
@@ -121,16 +123,17 @@ docker compose up -d
 | WebSocket | `ws://127.0.0.1:9003` | 供客户端 SDK 建立长连接 |
 | 管理后台 | `http://127.0.0.1:8090` | 管理应用；默认账号密码：`admin` / `123456` |
 
-创建第一个应用（租户）：
+通过已验证的服务端 API 示例创建本地应用、注册两个合成测试用户并发送一条私聊消息：
 
 ```bash
-curl --request POST \
-  --url http://127.0.0.1:8090/admingateway/apps/create \
-  --header 'Content-Type: application/json' \
-  --data '{"app_key":"appkey","app_name":"My App"}'
+bash examples/server-api-quickstart.sh
 ```
 
+脚本会将生成的应用密钥保留在服务端，仅输出本地 SDK 测试所需的两个临时用户 Token。完整流程和安全边界请查看 **[服务端 API 快速开始](./docs/server-api-quickstart_zh.md)**。[English version](./docs/server-api-quickstart.md)
+
 使用 `docker compose down` 停止本地服务；如需同时删除 MySQL 数据卷，执行 `docker compose down -v`。
+
+如服务未能正常启动，请按照 **[Docker Compose 故障排查指南](./docs/docker-troubleshooting_zh.md)** 检查容器状态、日志、端口冲突、MySQL 健康状态和安全重置步骤。[English version](./docs/docker-troubleshooting.md)
 
 生产环境、集群及托管部署方式请查看 **[部署指南](https://www.juggle.im/docs/guide/deploy/quickdeploy/)**。
 

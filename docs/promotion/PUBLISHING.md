@@ -14,6 +14,10 @@ The article was published on DEV Community on 2026-07-16:
 
 https://dev.to/yuwnloyblog/juggleim-an-open-source-self-hosted-messaging-backend-built-in-go-43nh
 
+The benchmark methodology article was published on DEV Community on 2026-07-20:
+
+https://dev.to/yuwnloyblog/benchmarking-real-time-messaging-without-mixing-up-acks-deliveries-and-fan-out-1n6f
+
 ## Assets
 
 | Asset                                                                               |     Size | Use                                                                     |
@@ -119,6 +123,8 @@ Record metrics immediately before launch, then after 24 hours, 7 days, and 30 da
 | New contributors / PRs       |          |          |        |         |
 
 GitHub traffic data is available to repository maintainers under Insights → Traffic or through the traffic API.
+Use [`METRICS.md`](./METRICS.md) and `scripts/collect-promotion-metrics.sh` to retain comparable
+local snapshots, including the rolling traffic window and optional Reddit/LinkedIn analytics.
 
 ## Response principles
 

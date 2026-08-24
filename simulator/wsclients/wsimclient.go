@@ -28,6 +28,7 @@ type WsImClient struct {
 	DeviceOsVersion string
 	PushToken       string
 	VoipToken       string
+	Verbose         bool
 
 	DisconnectCallback  func(code utils.ClientErrorCode, disMsg *codec.DisconnectMsgBody)
 	OnMessageCallBack   func(msg *pbobjs.DownMsg)
@@ -63,6 +64,7 @@ func NewWsImClient(address, appkey, token string, onMessage func(msg *pbobjs.Dow
 		DisconnectCallback:  onDisconnect,
 		Platform:            "Web", // "Android",
 		DeviceId:            "testDevice",
+		Verbose:             true,
 		obfCode:             [8]byte{1, 2, 3, 4, 5, 6, 7, 8},
 		isEncrypt:           true,
 		lock:                &sync.RWMutex{},
@@ -183,7 +185,9 @@ func (client *WsImClient) startListener() {
 			client.state = utils.State_Disconnect
 		}
 	}
-	fmt.Println("Stop client listener.")
+	if client.Verbose {
+		fmt.Println("Stop client listener.")
+	}
 }
 
 func (client *WsImClient) startPing() {

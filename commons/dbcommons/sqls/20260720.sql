@@ -11,3 +11,6 @@ CHANGE COLUMN `push_conf` `push_conf` VARCHAR(5000) NULL DEFAULT NULL ;
 
 ALTER TABLE `pushtokens`
   ADD KEY `idx_pushtoken` (`app_key`,`push_token`);
+
+ALTER TABLE `appnavs`
+    ADD COLUMN `admin_url` varchar(200) DEFAULT NULL AFTER `alias_no`;
