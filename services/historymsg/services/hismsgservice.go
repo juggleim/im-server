@@ -1042,7 +1042,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 				})
 			}
 			//check permission
-			if !bases.GetIsFromApiFromCtx(ctx) {
+			if !bases.GetIsFromApiFromCtx(ctx) || (bases.GetIsFromApiFromCtx(ctx) && req.CheckPermission) {
 				delMsgs, err := pStorage.FindByIds(appkey, converId, req.SubChannel, delMsgIds, 0)
 				if err == nil {
 					for _, delMsg := range delMsgs {
@@ -1064,7 +1064,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 				})
 			}
 			//check permission
-			if !bases.GetIsFromApiFromCtx(ctx) {
+			if !bases.GetIsFromApiFromCtx(ctx) || (bases.GetIsFromApiFromCtx(ctx) && req.CheckPermission) {
 				delMsgs, err := gStorage.FindByIds(appkey, converId, req.SubChannel, delMsgIds, 0)
 				if err == nil {
 					for _, delMsg := range delMsgs {

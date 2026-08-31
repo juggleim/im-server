@@ -51,7 +51,7 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 		dbMsg, err := storage.FindById(appkey, converId, modifyReq.SubChannel, modifyReq.MsgId)
 		if err == nil {
 			//check permission
-			if !bases.GetIsFromApiFromCtx(ctx) && dbMsg.SenderId != fromUserId {
+			if (!bases.GetIsFromApiFromCtx(ctx) || (bases.GetIsFromApiFromCtx(ctx) && modifyReq.CheckPermission)) && dbMsg.SenderId != fromUserId {
 				return errs.IMErrorCode_MSG_NO_Permission
 			}
 			newDownMsg := &pbobjs.DownMsg{}
@@ -75,7 +75,7 @@ func ModifyMsg(ctx context.Context, modifyReq *pbobjs.ModifyMsgReq) errs.IMError
 		dbMsg, err := storage.FindById(appkey, converId, modifyReq.SubChannel, modifyReq.MsgId)
 		if err == nil {
 			//check permission
-			if !bases.GetIsFromApiFromCtx(ctx) && dbMsg.SenderId != fromUserId {
+			if (!bases.GetIsFromApiFromCtx(ctx) || (bases.GetIsFromApiFromCtx(ctx) && modifyReq.CheckPermission)) && dbMsg.SenderId != fromUserId {
 				return errs.IMErrorCode_MSG_NO_Permission
 			}
 			newDownMsg := &pbobjs.DownMsg{}

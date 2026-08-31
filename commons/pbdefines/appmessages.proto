@@ -297,6 +297,8 @@ message DelHisMsgsReq{
   repeated SimpleMsg msgs = 4;
   int32 delScope = 5;
   string subChannel = 6;
+
+  bool checkPermission = 101;
 }
 
 message QryLatestMsgReq{
@@ -344,6 +346,8 @@ message RecallMsgReq{
   int64 msgTime = 4;
   repeated KvItem exts = 5;
   string subChannel = 6;
+
+  bool checkPermission = 101;
 }
 
 message MarkReadReq{
@@ -391,6 +395,8 @@ message ModifyMsgReq{
   bytes msgContent = 6;
   string msgType = 7;
   string subChannel = 8;
+
+  bool checkPermission = 101;
 }
 
 message MergeMsgReq{

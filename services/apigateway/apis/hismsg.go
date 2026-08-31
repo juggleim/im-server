@@ -29,6 +29,8 @@ func ModifyHisMsg(ctx *gin.Context) {
 		MsgId:       req.MsgId,
 		MsgType:     req.MsgType,
 		MsgContent:  []byte(req.MsgContent),
+
+		CheckPermission: req.CheckPermission,
 	}, nil)
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
@@ -55,6 +57,8 @@ func RecallHisMsgs(ctx *gin.Context) {
 		MsgId:       req.MsgId,
 		MsgTime:     req.MsgTime,
 		Exts:        commonservices.Map2KvItems(req.Exts),
+
+		CheckPermission: req.CheckPermission,
 	}, nil)
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
@@ -112,6 +116,8 @@ func DelHisMsgs(ctx *gin.Context) {
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
 		Msgs:        msgs,
 		DelScope:    int32(req.DelScope),
+
+		CheckPermission: req.CheckPermission,
 	}, nil)
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
