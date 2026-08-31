@@ -111,6 +111,8 @@ type RecallHisMsgsReq struct {
 	MsgId       string            `json:"msg_id"`
 	MsgTime     int64             `json:"msg_time"`
 	Exts        map[string]string `json:"exts"`
+
+	CheckPermission bool `json:"check_permission"`
 }
 
 type ModifyHisMsgReq struct {
@@ -120,6 +122,8 @@ type ModifyHisMsgReq struct {
 	MsgId       string `json:"msg_id"`
 	MsgType     string `json:"msg_type"`
 	MsgContent  string `json:"msg_content"`
+
+	CheckPermission bool `json:"check_permission"`
 }
 
 type DelHisMsgsReq struct {
@@ -128,6 +132,8 @@ type DelHisMsgsReq struct {
 	ChannelType int32        `json:"channel_type"`
 	DelScope    int          `json:"del_scope"`
 	Msgs        []*SimpleMsg `json:"msgs"`
+
+	CheckPermission bool `json:"check_permission"`
 }
 type SimpleMsg struct {
 	MsgId        string `json:"msg_id"`
