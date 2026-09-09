@@ -41,6 +41,7 @@ type IosPushConf struct {
 	Package        string
 	ApnsClient     *apns2.Client
 	ApnsVoipClient *apns2.Client
+	IsP8           bool
 }
 type AndroidPushConf struct {
 	Package          string
@@ -102,6 +103,10 @@ func initIosPushConf(ctx context.Context, appkey, packageName string) *IosPushCo
 	if err == nil {
 		iosPushConf := &IosPushConf{
 			Package: packageName,
+		}
+		if iosDb.AuthType == "p8" {
+			iosPushConf.IsP8 = true
+			return iosPushConf
 		}
 		if len(iosDb.Certificate) > 0 {
 			cert, err := certificate.FromP12Bytes(iosDb.Certificate, iosDb.CertPwd)

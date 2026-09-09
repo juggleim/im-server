@@ -8,6 +8,7 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
+	"im-server/services/pushmanager/services/apnspush"
 	"im-server/services/pushmanager/services/getuipush"
 	"im-server/services/pushmanager/services/honorpush"
 	"im-server/services/pushmanager/services/hwpush"
@@ -38,31 +39,45 @@ func SendPush(ctx context.Context, userId string, req *pbobjs.PushData) {
 			iosPushConf := GetIosPushConf(ctx, appkey, pushToken.PackageName)
 			if iosPushConf != nil {
 				notification := &apns2.Notification{}
-				notification.DeviceToken = pushToken.PushToken
-				notification.Topic = pushToken.PackageName
 				notification.Payload = iosPushPayload(req)
-				var client *apns2.Client
-				if req.IsVoip && iosPushConf.ApnsVoipClient != nil && pushToken.VoipPushToken != "" {
-					client = iosPushConf.ApnsVoipClient
-					notification.Topic = notification.Topic + ".voip"
-					notification.DeviceToken = pushToken.VoipPushToken
-					notification.PushType = apns2.PushTypeVOIP
-				} else {
-					client = iosPushConf.ApnsClient
-				}
-				if client != nil {
-					resp, err := client.Push(notification)
-					if err != nil {
-						logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
-					} else {
-						if resp.StatusCode == 200 {
-							logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
-						} else {
-							logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
+				if iosPushConf.IsP8 {
+					resp, err := SendIosPush(ctx, appkey, pushToken.PackageName, notification, req.IsVoip, pushToken.PushToken, pushToken.VoipPushToken)
+					if class := apnspush.Classify(resp, err); class != "" {
+						// Diagnostic is static: never log raw transport/DB errors, JWTs or device tokens.
+						status := 0
+						if resp != nil {
+							status = resp.StatusCode
 						}
+						logs.WithContext(ctx).Infof("[IOS_FAIL]app_key:%s\tpackage:%s\tuser_id:%s\tmsg_id:%s\tclass:%s\tcode:%d\tdiagnostic:%s", appkey, pushToken.PackageName, userId, req.MsgId, class, status, apnspush.Diagnostic(resp, err))
+					} else {
+						logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
 					}
 				} else {
-					logs.WithContext(ctx).Infof("[IOS_ERR]user_id:%s\tnot init apns client")
+					notification.DeviceToken = pushToken.PushToken
+					notification.Topic = pushToken.PackageName
+					var client *apns2.Client
+					if req.IsVoip && iosPushConf.ApnsVoipClient != nil && pushToken.VoipPushToken != "" {
+						client = iosPushConf.ApnsVoipClient
+						notification.Topic = notification.Topic + ".voip"
+						notification.DeviceToken = pushToken.VoipPushToken
+						notification.PushType = apns2.PushTypeVOIP
+					} else {
+						client = iosPushConf.ApnsClient
+					}
+					if client != nil {
+						resp, err := client.Push(notification)
+						if err != nil {
+							logs.WithContext(ctx).Infof("[IOS_ERROR]user_id:%s\tmsg_id:%s\t%s", userId, req.MsgId, err.Error())
+						} else {
+							if resp.StatusCode == 200 {
+								logs.WithContext(ctx).Infof("[IOS_SUCC]user_id:%s\tmsg_id:%s", userId, req.MsgId)
+							} else {
+								logs.WithContext(ctx).Infof("[IOS_FAIL]user_id:%s\tmsg_id:%s\tcode:%d\treason:%s\tapns_id:%s", userId, req.MsgId, resp.StatusCode, resp.Reason, resp.ApnsID)
+							}
+						}
+					} else {
+						logs.WithContext(ctx).Infof("[IOS_ERR]user_id:%s\tnot init apns client")
+					}
 				}
 			} else {
 				logs.WithContext(ctx).Infof("[IOS_CONF_NIL]app_key=%s\tpackage:%s", appkey, pushToken.PackageName)

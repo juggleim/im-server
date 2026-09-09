@@ -6,6 +6,7 @@ import (
 	"im-server/commons/gmicro"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/services/pushmanager/actors"
+	"im-server/services/pushmanager/services"
 )
 
 var serviceName string = "pushmanager"
@@ -13,6 +14,8 @@ var serviceName string = "pushmanager"
 type PushManager struct{}
 
 func (manager *PushManager) RegisterActors(register gmicro.IActorRegister) {
+	// Initialize APNs before actor registration can expose push handling.
+	services.StartupIosPush()
 	register.RegisterActor("push", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.PushActor{}, serviceName)
 	})
@@ -40,8 +43,10 @@ func (manager *PushManager) RegisterActors(register gmicro.IActorRegister) {
 }
 
 func (manager *PushManager) Startup(args map[string]interface{}) {
+	services.StartupIosPush()
 	fmt.Println("Startup", serviceName)
 }
 func (manager *PushManager) Shutdown(force bool) {
+	services.ShutdownIosPush()
 	fmt.Println("Shutdown", serviceName)
 }

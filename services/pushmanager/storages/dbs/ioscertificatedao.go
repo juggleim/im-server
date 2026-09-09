@@ -1,6 +1,7 @@
 package dbs
 
 import (
+	"context"
 	"fmt"
 	"im-server/commons/dbcommons"
 )
@@ -13,9 +14,15 @@ type IosCertificateDao struct {
 	CertPwd     string `gorm:"cert_pwd" json:"cert_pwd"`
 	IsProduct   int    `gorm:"is_product" json:"is_product"`
 
-	VoipCert     []byte `gorm:"voip_cert" json:"voip_cert"`
-	VoipCertPwd  string `gorm:"voip_cert_pwd" json:"voip_cert_pwd"`
-	VoipCertPath string `gorm:"voip_cert_path" json:"voip_cert_path"`
+	VoipCert      []byte `gorm:"voip_cert" json:"voip_cert"`
+	VoipCertPwd   string `gorm:"voip_cert_pwd" json:"voip_cert_pwd"`
+	VoipCertPath  string `gorm:"voip_cert_path" json:"voip_cert_path"`
+	AuthType      string `gorm:"column:auth_type" json:"auth_type"`
+	P8KeyID       string `gorm:"column:p8_key_id" json:"p8_key_id"`
+	P8TeamID      string `gorm:"column:p8_team_id" json:"p8_team_id"`
+	P8PrivateKey  []byte `gorm:"column:p8_private_key" json:"-"`
+	P8KeyName     string `gorm:"column:p8_key_name" json:"p8_key_name"`
+	ConfigVersion int64  `gorm:"column:config_version" json:"config_version"`
 	// CreatedTime time.Time `gorm:"created_time"`
 }
 
@@ -24,8 +31,12 @@ func (cer IosCertificateDao) TableName() string {
 }
 
 func (cer IosCertificateDao) FindByPackage(appkey, packageName string) (*IosCertificateDao, error) {
+	return cer.FindByPackageWithContext(context.Background(), appkey, packageName)
+}
+
+func (cer IosCertificateDao) FindByPackageWithContext(ctx context.Context, appkey, packageName string) (*IosCertificateDao, error) {
 	var item IosCertificateDao
-	err := dbcommons.GetDb().Where("app_key=? and package=?", appkey, packageName).Take(&item).Error
+	err := dbcommons.GetDb().WithContext(ctx).Where("app_key=? and package=?", appkey, packageName).Take(&item).Error
 	return &item, err
 }
 

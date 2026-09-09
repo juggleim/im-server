@@ -574,6 +574,12 @@ CREATE TABLE IF NOT EXISTS `ioscertificates` (
   `voip_cert` mediumblob COMMENT 'voip certificate',
   `voip_cert_pwd` varchar(50) DEFAULT NULL COMMENT 'voip cert password',
   `voip_cert_path` varchar(255) DEFAULT NULL COMMENT 'voip cert path',
+  `auth_type` varchar(8) NOT NULL DEFAULT 'p12',
+  `p8_key_id` varchar(32) NOT NULL DEFAULT '',
+  `p8_team_id` varchar(32) NOT NULL DEFAULT '',
+  `p8_private_key` blob,
+  `p8_key_name` varchar(255) NOT NULL DEFAULT '',
+  `config_version` bigint NOT NULL DEFAULT '1',
   `updated_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_package` (`app_key`,`package`)
@@ -984,5 +990,5 @@ CREATE TABLE IF NOT EXISTS `performance_metrics` (
   KEY `idx_metric_type_collect_time` (`metric_type`,`collect_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-性能指标';
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260813');
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260908');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');
