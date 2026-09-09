@@ -325,6 +325,8 @@ github.com/juggleim/commons v1.0.18 h1:dQtxh0AZyniF1j8GW+5TUrI1sIa+Ca2JPS1+ez7Bj
 github.com/juggleim/commons v1.0.18/go.mod h1:1bp7TnNj4j6Bju2No+jPRUQKjOeC6Boopi5uDoJ0+Lo=
 github.com/juggleim/imserver-console v1.0.9 h1:GRO9fRDB125Iwjd4Unn25d60+3gtXo6NBLRbpk6dczs=
 github.com/juggleim/imserver-console v1.0.9/go.mod h1:+liPDeR4lTDT9uVjXgyiBIrVZkF3OkQQk+rD4jpVudw=
+github.com/juggleim/imserver-console v1.0.10 h1:F5xdK6nrX/qQbYYwPN8ujWcYrIC1uYKXATld4IiLP5U=
+github.com/juggleim/imserver-console v1.0.10/go.mod h1:+liPDeR4lTDT9uVjXgyiBIrVZkF3OkQQk+rD4jpVudw=
 github.com/juggleim/imserver-sdk-go v1.0.16 h1:A0bndQjhvRRTZJaWOlmvsywBkopXllij8xuTWBr1KVE=
 github.com/juggleim/imserver-sdk-go v1.0.16/go.mod h1:lHWG8Xl6/SvuH7mT+nnz1prkMzrkX96oHjyguvVthUI=
 github.com/juggleim/jugglechat-server v1.1.21 h1:qFoqHloYFpD1zBgSvNv+EBySneFqv0RFre80Gt5gh0o=
