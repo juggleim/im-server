@@ -98,6 +98,7 @@ func executeSqlFile(fileName string) error {
 			if query != "" {
 				if err := GetDb().Exec(query).Error; err != nil {
 					fmt.Println("[DbMigration_Err]Execute sql error:", err, query)
+					return err
 				}
 			}
 			queryBuilder.Reset()
