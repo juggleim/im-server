@@ -73,25 +73,7 @@ func (msg *CmdInboxMsgDao) DelByIds(ids []int64) error {
 }
 
 func (msg *CmdInboxMsgDao) DelMsgsBaseTime(appkey string, startTime int64) error {
-	for {
-		var ids []int64
-		err := dbcommons.GetDb().Model(&CmdInboxMsgDao{}).
-			Where("app_key=? AND send_time<?", appkey, startTime).
-			Limit(1000).Pluck("id", &ids).Error
-		if err != nil {
-			return err
-		}
-		if len(ids) == 0 {
-			break
-		}
-		if err = msg.DelByIds(ids); err != nil {
-			return err
-		}
-		if len(ids) < 1000 {
-			break
-		}
-	}
-	return nil
+	return delMsgsBaseTime("cmdinboxmsgs", appkey, startTime)
 }
 
 func (msg *CmdInboxMsgDao) QryBaseTime(limit, offset int64) ([]*CmdInboxMsgDao, error) {

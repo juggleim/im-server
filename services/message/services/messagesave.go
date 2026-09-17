@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"im-server/commons/bases"
-	"im-server/commons/caches"
 	"im-server/commons/configures"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
@@ -13,13 +12,20 @@ import (
 	"im-server/services/commonservices/msgdefines"
 	"im-server/services/message/storages"
 	"im-server/services/message/storages/models"
+	"sync"
 	"time"
-
-	"github.com/Jeffail/tunny"
 )
 
-var pool *tunny.Pool
-var taskCache *caches.LruCache
+const (
+	msgPurgeWorkerCount   = 8
+	msgPurgeQueueCapacity = 10000
+	msgPurgeInterval      = time.Minute
+)
+
+var (
+	msgPurgeOnce      sync.Once
+	msgPurgeScheduler *purgeScheduler
+)
 
 // TODO save immediately when user online, other wise, use async queue.
 func SaveMsg2Inbox(appkey, receiverId string, msg *pbobjs.DownMsg) error {
@@ -43,24 +49,20 @@ func SaveMsg2Inbox(appkey, receiverId string, msg *pbobjs.DownMsg) error {
 	if msgdefines.IsCmdMsg(msg.Flags) {
 		msgStorage := storages.NewCmdInboxMsgStorage()
 		err = msgStorage.SaveMsg(message)
-		purgeMsgs(appkey+"1", msg.MsgTime, func() {
-			cmdMsgExpired := configures.CmdMsgExpired
-			appinfo, exist := commonservices.GetAppInfo(appkey)
-			if exist && appinfo != nil {
-				cmdMsgExpired = int64(appinfo.OfflineCmdMsgSaveTime) * 60 * 1000
-			}
-			msgStorage.DelMsgsBaseTime(appkey, msg.MsgTime-cmdMsgExpired)
+		cmdMsgExpired := getMsgExpired(appkey, true)
+		purgeMsgs(appkey+":cmd_inbox", msg.MsgTime, msg.MsgTime-cmdMsgExpired, func(cutoff int64) error {
+			purgeErr := msgStorage.DelMsgsBaseTime(appkey, cutoff)
+			fmt.Println("clear offline cmd inbox msgs:", purgeErr, msg.MsgTime, cmdMsgExpired)
+			return purgeErr
 		})
 	} else {
 		msgStorage := storages.NewInboxMsgStorage()
 		err = msgStorage.SaveMsg(message)
-		purgeMsgs(appkey+"2", msg.MsgTime, func() {
-			msgExpired := configures.MsgExpired
-			appinfo, exist := commonservices.GetAppInfo(appkey)
-			if exist && appinfo != nil {
-				msgExpired = int64(appinfo.OfflineMsgSaveTime) * 60 * 1000
-			}
-			msgStorage.DelMsgsBaseTime(appkey, msg.MsgTime-msgExpired)
+		msgExpired := getMsgExpired(appkey, false)
+		purgeMsgs(appkey+":inbox", msg.MsgTime, msg.MsgTime-msgExpired, func(cutoff int64) error {
+			purgeErr := msgStorage.DelMsgsBaseTime(appkey, cutoff)
+			fmt.Println("clear offline inbox msgs:", purgeErr, msg.MsgTime, msgExpired)
+			return purgeErr
 		})
 	}
 	if err != nil {
@@ -101,24 +103,20 @@ func SaveMsg2Sendbox(ctx context.Context, appkey, senderId string, msg *pbobjs.D
 		} else {
 			err = storage.SaveMsg(message)
 		}
-		purgeMsgs(appkey+"3", msg.MsgTime, func() {
-			cmdMsgExpired := configures.CmdMsgExpired
-			appinfo, exist := commonservices.GetAppInfo(appkey)
-			if exist && appinfo != nil {
-				cmdMsgExpired = int64(appinfo.OfflineCmdMsgSaveTime) * 60 * 1000
-			}
-			storage.DelMsgsBaseTime(appkey, msg.MsgTime-cmdMsgExpired)
+		cmdMsgExpired := getMsgExpired(appkey, true)
+		purgeMsgs(appkey+":cmd_sendbox", msg.MsgTime, msg.MsgTime-cmdMsgExpired, func(cutoff int64) error {
+			purgeErr := storage.DelMsgsBaseTime(appkey, cutoff)
+			fmt.Println("clear offline cmd sendbox msgs:", purgeErr, msg.MsgTime, cmdMsgExpired)
+			return purgeErr
 		})
 	} else {
 		storage := storages.NewSendboxMsgStorage()
 		err = storage.SaveMsg(message)
-		purgeMsgs(appkey+"4", msg.MsgTime, func() {
-			msgExpired := configures.MsgExpired
-			appinfo, exist := commonservices.GetAppInfo(appkey)
-			if exist && appinfo != nil {
-				msgExpired = int64(appinfo.OfflineMsgSaveTime) * 60 * 1000
-			}
-			storage.DelMsgsBaseTime(appkey, msg.MsgTime-msgExpired)
+		msgExpired := getMsgExpired(appkey, false)
+		purgeMsgs(appkey+":sendbox", msg.MsgTime, msg.MsgTime-msgExpired, func(cutoff int64) error {
+			purgeErr := storage.DelMsgsBaseTime(appkey, cutoff)
+			fmt.Println("clear offline sendbox msgs:", purgeErr, msg.MsgTime, msgExpired)
+			return purgeErr
 		})
 	}
 	if err != nil {
@@ -136,20 +134,27 @@ func MsgDirect(ctx context.Context, targetId string, downMsg *pbobjs.DownMsg) {
 	bases.UnicastRouteWithNoSender(rpcMsg)
 }
 
-func purgeMsgs(key string, currentTime int64, f func()) {
+func purgeMsgs(key string, currentTime, cutoff int64, f purgeFunc) {
 	if configures.Config.MsgStoreEngine == "" || configures.Config.MsgStoreEngine == configures.MsgStoreEngine_MySQL {
-		if pool == nil || taskCache == nil {
-			pool = tunny.NewCallback(64)
-			taskCache = caches.NewLruCacheWithReadTimeout("msgpure_cache", 10000, nil, 30*time.Minute)
-		}
-		if val, exist := taskCache.Get(key); exist {
-			time := val.(int64)
-			if currentTime-time > 60*1000 {
-				go pool.Process(f)
-				taskCache.Add(key, currentTime)
-			}
-		} else {
-			taskCache.Add(key, currentTime)
-		}
+		msgPurgeOnce.Do(func() {
+			msgPurgeScheduler = newPurgeScheduler(msgPurgeWorkerCount, msgPurgeQueueCapacity, msgPurgeInterval)
+		})
+		msgPurgeScheduler.Submit(key, currentTime, cutoff, f)
+	} else {
+		fmt.Println(configures.Config.MsgStoreEngine, ":", configures.MsgStoreEngine_MySQL)
 	}
+}
+
+func getMsgExpired(appkey string, cmd bool) int64 {
+	expired := configures.MsgExpired
+	appinfo, exist := commonservices.GetAppInfo(appkey)
+	if cmd {
+		expired = configures.CmdMsgExpired
+		if exist && appinfo != nil {
+			expired = int64(appinfo.OfflineCmdMsgSaveTime) * 60 * 1000
+		}
+	} else if exist && appinfo != nil {
+		expired = int64(appinfo.OfflineMsgSaveTime) * 60 * 1000
+	}
+	return expired
 }
