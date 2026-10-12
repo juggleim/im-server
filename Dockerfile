@@ -18,7 +18,7 @@ RUN cd launcher \
     && cp -rf scripts/* /out/
 
 # ---- Runtime stage ----
-FROM alpine:3.20
+FROM alpine:3.24
 
 WORKDIR /opt
 RUN apk add --no-cache bash tzdata ca-certificates \
