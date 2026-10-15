@@ -47,7 +47,7 @@ func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderI
 		ReferMsg:    handleReferMsg(msg.ReferMsg),
 	}
 	body := tools.ToJson(msgEvent)
-	respBs, code, err := tools.HttpDoBytes("POST", inter.RequestUrl, headers, body)
+	respBs, code, err := tools.HttpDoBytesWithContext(ctx, "POST", inter.RequestUrl, headers, body)
 	if err != nil {
 		return InterceptorResult_Pass, 0
 	}

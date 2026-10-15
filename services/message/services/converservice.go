@@ -146,8 +146,12 @@ func QryConversation(ctx context.Context, userId, targetId, subChannel string, c
 			}
 		}
 	}
+	undisturb := UndisturbType_None
+	if channelType == pbobjs.ChannelType_Group {
+		undisturb = UndisturbType_Normal
+	}
 	return &UserConversationItem{
-		UndisturbType: 0,
+		UndisturbType: undisturb,
 		UnreadIndex:   0,
 	}
 }

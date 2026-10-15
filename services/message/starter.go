@@ -7,6 +7,7 @@ import (
 	"im-server/commons/gmicro"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/services/message/actors"
+	"im-server/services/message/services"
 )
 
 var serviceName string = "message"
@@ -72,7 +73,15 @@ func (manager *MessageManager) RegisterActors(register gmicro.IActorRegister) {
 
 func (manager *MessageManager) Startup(args map[string]interface{}) {
 	fmt.Println("Startup", serviceName)
+	services.StartInboxPartitionMaintenance()
+	services.StartSendboxPartitionMaintenance()
+	services.StartCmdInboxPartitionMaintenance()
+	services.StartCmdSendboxPartitionMaintenance()
 }
 func (manager *MessageManager) Shutdown(force bool) {
+	services.StopCmdSendboxPartitionMaintenance()
+	services.StopCmdInboxPartitionMaintenance()
+	services.StopSendboxPartitionMaintenance()
+	services.StopInboxPartitionMaintenance()
 	fmt.Println("Shutdown", serviceName)
 }

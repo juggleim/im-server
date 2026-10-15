@@ -553,6 +553,8 @@ message Conversation{
 
 message BatchAddConvers{
   repeated Conversation convers = 1;
+
+  bool userOnline = 51;
 }
 
 message UserMsgTimeItem{
@@ -953,6 +955,8 @@ message GroupMembersReq {
   repeated string memberIds = 4;
   repeated KvItem extFields = 5;
   repeated KvItem settings = 6;
+
+  int32 undisturbType = 51;
 }
 
 message GroupMuteReq {

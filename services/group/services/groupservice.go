@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	"errors"
+	"expvar"
 	"strconv"
-	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -15,15 +15,67 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
 	"im-server/services/group/dbs"
 )
 
 var groupInfoCache *caches.LruCache
 var groupLocks *tools.SegmentatedLocks
 
+const (
+	groupInfoCacheSoftTTL       = 10 * time.Minute
+	groupInfoCacheHardTTL       = time.Hour
+	groupInfoCacheRefreshJitter = time.Minute
+)
+
+// loadGroupInfoFromDB is a variable so cache-load concurrency can be tested
+// without depending on an external database.
+var loadGroupInfoFromDB = getGroupInfoFromDb
+
 func init() {
-	groupInfoCache = caches.NewLruCacheWithAddReadTimeout("groupinfo_cache", 10000, nil, 10*time.Minute, 10*time.Minute)
+	groupInfoCache = caches.NewLruCacheWithAddReadTimeout("groupinfo_cache", 10000, nil, groupInfoCacheSoftTTL, groupInfoCacheSoftTTL)
 	groupLocks = tools.NewSegmentatedLocks(128)
+	err := groupInfoCache.EnableStaleWhileRevalidate(caches.StaleWhileRevalidateOptions{
+		SoftTTL:            groupInfoCacheSoftTTL,
+		HardTTL:            groupInfoCacheHardTTL,
+		RefreshJitter:      groupInfoCacheRefreshJitter,
+		LoadTimeout:        10 * time.Second,
+		MaxConcurrentLoads: 8,
+		MaxPendingLoads:    64,
+		ServeStaleOnError:  true,
+		ApplyGuard: func(key interface{}) func() {
+			cacheKey := key.(groupCacheKey)
+			lock := groupLocks.GetLocks(cacheKey.appKey, cacheKey.groupID)
+			lock.Lock()
+			return lock.Unlock
+		},
+	}, func(ctx context.Context, key interface{}) (interface{}, bool, error) {
+		cacheKey := key.(groupCacheKey)
+		groupInfo := loadGroupInfoFromDB(cacheKey.appKey, cacheKey.groupID)
+		if groupInfo == nil {
+			return nil, false, errors.New("load group info from database failed")
+		}
+		return groupInfo, true, nil
+	})
+	if err != nil {
+		panic(err)
+	}
+	expvar.Publish("group_info_cache", expvar.Func(func() interface{} {
+		stats, _ := groupInfoCache.StaleWhileRevalidateStats()
+		return map[string]interface{}{
+			"cache_size":             groupInfoCache.Len(),
+			"stale_while_revalidate": stats,
+		}
+	}))
+}
+
+type groupCacheKey struct {
+	appKey  string
+	groupID string
+}
+
+func (key groupCacheKey) lockKey() string {
+	return strconv.Itoa(len(key.appKey)) + ":" + key.appKey + key.groupID
 }
 
 type GroupInfo struct {
@@ -38,25 +90,65 @@ type GroupInfo struct {
 	SettingFields map[string]string
 }
 
+func cloneGroupInfo(groupInfo *GroupInfo) *GroupInfo {
+	if groupInfo == nil {
+		return nil
+	}
+	cloned := *groupInfo
+	if groupInfo.ExtFields != nil {
+		cloned.ExtFields = make(map[string]string, len(groupInfo.ExtFields))
+		for key, value := range groupInfo.ExtFields {
+			cloned.ExtFields[key] = value
+		}
+	}
+	if groupInfo.SettingFields != nil {
+		cloned.SettingFields = make(map[string]string, len(groupInfo.SettingFields))
+		for key, value := range groupInfo.SettingFields {
+			cloned.SettingFields[key] = value
+		}
+	}
+	if groupInfo.Settings != nil {
+		settings := *groupInfo.Settings
+		cloned.Settings = &settings
+	}
+	return &cloned
+}
+
 func (grp *GroupInfo) SetSetting(itemKey, itemValue string) {
 	key := getGroupKey(grp.AppKey, grp.GroupId)
-	lock := groupLocks.GetLocks(key)
+	lock := groupLocks.GetLocks(key.appKey, key.groupID)
 	lock.Lock()
 	defer lock.Unlock()
+	if current, cached := currentGroupInfoFromCache(key); cached {
+		grp = current
+	}
+	grp = cloneGroupInfo(grp)
+	if grp.SettingFields == nil {
+		grp.SettingFields = make(map[string]string)
+	}
 	grp.SettingFields[itemKey] = itemValue
+	groupInfoCache.Add(key, grp)
 }
 
 func (grp *GroupInfo) SetExt(itemKey, itemValue string) {
 	key := getGroupKey(grp.AppKey, grp.GroupId)
-	lock := groupLocks.GetLocks(key)
+	lock := groupLocks.GetLocks(key.appKey, key.groupID)
 	lock.Lock()
 	defer lock.Unlock()
+	if current, cached := currentGroupInfoFromCache(key); cached {
+		grp = current
+	}
+	grp = cloneGroupInfo(grp)
+	if grp.ExtFields == nil {
+		grp.ExtFields = make(map[string]string)
+	}
 	grp.ExtFields[itemKey] = itemValue
+	groupInfoCache.Add(key, grp)
 }
 
 func (grp *GroupInfo) GetMemberLimiter(memberId string) *commonservices.GrpMemberLimiter {
 	key := getGroupKey(grp.AppKey, grp.GroupId)
-	lock := groupLocks.GetLocks(key)
+	lock := groupLocks.GetLocks(key.appKey, key.groupID)
 	lock.Lock()
 	defer lock.Unlock()
 	if grp.Settings != nil && (grp.Settings.GrpMsgSecondLimiter > 0 || grp.Settings.GrpMsgMinuteLimiter > 0 || grp.Settings.GrpMsgHourLimiter > 0) {
@@ -110,8 +202,8 @@ func DelGroupInfo(ctx context.Context, appkey, groupId string) {
 	groupInfoCache.Add(key, &notExistGroup)
 }
 
-func getGroupKey(appkey, groupId string) string {
-	return strings.Join([]string{appkey, groupId}, "_")
+func getGroupKey(appkey, groupId string) groupCacheKey {
+	return groupCacheKey{appKey: appkey, groupID: groupId}
 }
 func AddGroupInfo2Cache(ctx context.Context, appkey, groupId string, grpInfo *GroupInfo) {
 	key := getGroupKey(appkey, groupId)
@@ -119,38 +211,34 @@ func AddGroupInfo2Cache(ctx context.Context, appkey, groupId string, grpInfo *Gr
 }
 func GetGroupInfoFromCache(ctx context.Context, appkey, groupId string) (*GroupInfo, bool) {
 	key := getGroupKey(appkey, groupId)
-	if val, exist := groupInfoCache.Get(key); exist {
-		groupInfo := val.(*GroupInfo)
-		if groupInfo == &notExistGroup {
-			return nil, false
-		} else {
-			return groupInfo, true
-		}
-	} else {
-		l := groupLocks.GetLocks(key)
-		l.Lock()
-		defer l.Unlock()
-
-		if val, exist := groupInfoCache.Get(key); exist {
-			groupInfo := val.(*GroupInfo)
-			if groupInfo == &notExistGroup {
-				return nil, false
-			} else {
-				return groupInfo, true
-			}
-		} else {
-			groupInfo := getGroupInfoFromDb(appkey, groupId)
-			if groupInfo != nil {
-				groupInfoCache.Add(key, groupInfo)
-				if groupInfo == &notExistGroup {
-					return nil, false
-				} else {
-					return groupInfo, true
-				}
-			}
-			return nil, false
-		}
+	value, found, err := groupInfoCache.GetOrLoad(ctx, key)
+	if err != nil {
+		return nil, false
 	}
+	if !found || value == nil {
+		return nil, false
+	}
+	return resolveCachedGroupInfo(value)
+}
+
+func currentGroupInfoFromCache(key groupCacheKey) (*GroupInfo, bool) {
+	entries := groupInfoCache.SnapshotForKeys([]interface{}{key})
+	if len(entries) == 0 || !entries[0].Found || entries[0].Value == nil {
+		return nil, false
+	}
+	groupInfo := entries[0].Value.(*GroupInfo)
+	if groupInfo == &notExistGroup {
+		return nil, false
+	}
+	return groupInfo, true
+}
+
+func resolveCachedGroupInfo(value interface{}) (*GroupInfo, bool) {
+	groupInfo := value.(*GroupInfo)
+	if groupInfo == &notExistGroup {
+		return nil, false
+	}
+	return groupInfo, true
 }
 
 func getGroupInfoFromDb(appkey, groupId string) *GroupInfo {
@@ -210,10 +298,16 @@ func SetGroupMute(ctx context.Context, req *pbobjs.GroupMuteReq) errs.IMErrorCod
 	dao.UpdateGroupMuteStatus(appkey, req.GroupId, req.IsMute)
 
 	//update cache
-	groupInfo, exist := GetGroupInfoFromCache(ctx, appkey, req.GroupId)
-	if exist {
+	_, _ = GetGroupInfoFromCache(ctx, appkey, req.GroupId)
+	key := getGroupKey(appkey, req.GroupId)
+	lock := groupLocks.GetLocks(key.appKey, key.groupID)
+	lock.Lock()
+	if groupInfo, exist := currentGroupInfoFromCache(key); exist {
+		groupInfo = cloneGroupInfo(groupInfo)
 		groupInfo.IsMute = req.IsMute
+		groupInfoCache.Add(key, groupInfo)
 	}
+	lock.Unlock()
 	return errs.IMErrorCode_SUCCESS
 }
 
@@ -311,19 +405,38 @@ func SetGroupSettings(ctx context.Context, groupId string, settings []*pbobjs.Kv
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	dao := dbs.GroupExtDao{}
 
-	groupInfo, exist := GetGroupInfoFromCache(ctx, appkey, groupId)
+	_, exist := GetGroupInfoFromCache(ctx, appkey, groupId)
 	for _, setting := range settings {
-		dao.Upsert(dbs.GroupExtDao{
+		err := dao.Upsert(dbs.GroupExtDao{
 			AppKey:    appkey,
 			GroupId:   groupId,
 			ItemKey:   setting.Key,
 			ItemValue: setting.Value,
 			ItemType:  int(commonservices.AttItemType_Setting),
 		})
-		groupInfo.SetSetting(setting.Key, setting.Value)
+		if err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
 	}
 	if exist && len(settings) > 0 {
-		commonservices.FillObjFieldWithIgnore(groupInfo.Settings, groupInfo.SettingFields, true)
+		key := getGroupKey(appkey, groupId)
+		lock := groupLocks.GetLocks(key.appKey, key.groupID)
+		lock.Lock()
+		if groupInfo, cached := currentGroupInfoFromCache(key); cached {
+			groupInfo = cloneGroupInfo(groupInfo)
+			if groupInfo.SettingFields == nil {
+				groupInfo.SettingFields = make(map[string]string)
+			}
+			if groupInfo.Settings == nil {
+				groupInfo.Settings = &commonservices.GroupSettings{}
+			}
+			for _, setting := range settings {
+				groupInfo.SettingFields[setting.Key] = setting.Value
+			}
+			commonservices.FillObjFieldWithIgnore(groupInfo.Settings, groupInfo.SettingFields, true)
+			groupInfoCache.Add(key, groupInfo)
+		}
+		lock.Unlock()
 	}
 	return errs.IMErrorCode_SUCCESS
 }

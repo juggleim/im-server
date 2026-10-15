@@ -10,6 +10,7 @@ import (
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
 	"im-server/services/connectmanager/server/imhttpmsghandlers"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -192,10 +193,10 @@ func (child *ImWebsocketChild) startTicker(ctx imcontext.WsHandleContext, handle
 func (child *ImWebsocketChild) Stop() {
 	child.stopOnce.Do(func() {
 		child.isActive.Store(false)
-		if child.wsConn != nil {
-			child.wsConn.Close()
-		}
 		close(child.stopChan)
+		if child.wsConn != nil {
+			_ = child.wsConn.Close()
+		}
 	})
 }
 
@@ -206,6 +207,9 @@ type WsHandleContextImpl struct {
 }
 
 func (ctx *WsHandleContextImpl) Write(message interface{}) {
+	if ctx.wsChild == nil || !ctx.wsChild.isActive.Load() {
+		return
+	}
 	imMsg, ok := message.(codec.IMessage)
 	if ok {
 		wsImMsg := imMsg.ToImWebsocketMsg()
@@ -215,9 +219,12 @@ func (ctx *WsHandleContextImpl) Write(message interface{}) {
 		if err == nil {
 			ctx.wsChild.writeLock.Lock()
 			defer ctx.wsChild.writeLock.Unlock()
+			if !ctx.wsChild.isActive.Load() {
+				return
+			}
 			_ = ctx.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 			err = ctx.conn.WriteMessage(websocket.BinaryMessage, bs)
-			if err != nil {
+			if err != nil && ctx.wsChild.isActive.Load() && !isExpectedClosedConnError(err) {
 				fmt.Println("write result:", err)
 			}
 		} else {
@@ -226,6 +233,13 @@ func (ctx *WsHandleContextImpl) Write(message interface{}) {
 	} else {
 		fmt.Println("No IMessage to transfer to WebsocketMsg.")
 	}
+}
+
+func isExpectedClosedConnError(err error) bool {
+	if err == nil {
+		return false
+	}
+	return errors.Is(err, net.ErrClosed) || strings.Contains(err.Error(), "use of closed network connection")
 }
 
 func (ctx *WsHandleContextImpl) Close(err error) {
@@ -240,7 +254,7 @@ func (ctx *WsHandleContextImpl) SetAttachment(attachment imcontext.Attachment) {
 	ctx.attachment = attachment
 }
 func (ctx *WsHandleContextImpl) IsActive() bool {
-	return ctx.wsChild.isActive.Load()
+	return ctx.wsChild != nil && ctx.wsChild.isActive.Load()
 }
 func (ctx *WsHandleContextImpl) RemoteAddr() string {
 	if ctx.conn != nil {

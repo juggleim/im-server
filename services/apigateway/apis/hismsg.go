@@ -104,29 +104,20 @@ func DelHisMsgs(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	//del_hismsg
-	msgs := []*pbobjs.SimpleMsg{}
+	msgs := make([]*pbobjs.SimpleMsg, 0, len(req.Msgs))
 	for _, m := range req.Msgs {
 		msgs = append(msgs, &pbobjs.SimpleMsg{
 			MsgId: m.MsgId,
 		})
 	}
-	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, req.FromId), "del_msg", req.TargetId, &pbobjs.DelHisMsgsReq{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.FromId), "del_msg", req.TargetId, &pbobjs.DelHisMsgsReq{
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
 		Msgs:        msgs,
 		DelScope:    int32(req.DelScope),
 
 		CheckPermission: req.CheckPermission,
-	}, nil)
-	if err != nil {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
-		return
-	}
-	if code != errs.IMErrorCode_SUCCESS {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
-		return
-	}
+	})
 	tools.SuccessHttpResp(ctx, nil)
 }
 

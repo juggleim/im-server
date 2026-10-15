@@ -60,6 +60,7 @@ type AppInfo struct {
 
 	// statussubscriptions：每个 subscriber_device_id 最多订阅的不同 user_id 数量
 	MaxUserSubscriptionCount int `default:"1000"`
+	MaxUserConverCount       int `default:"3000"`
 
 	//connect
 	CheckUserDevice bool `default:"false"`

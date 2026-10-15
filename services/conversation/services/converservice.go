@@ -18,10 +18,11 @@ import (
 	"time"
 )
 
-func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *pbobjs.DownMsg, isOffline bool) {
-	if msg == nil {
+func SaveConversationV2(ctx context.Context, appkey string, userId string, conver *pbobjs.Conversation, isOffline bool) {
+	if conver == nil || conver.Msg == nil {
 		return
 	}
+	msg := conver.Msg
 	if msgdefines.IsStoreMsg(msg.Flags) {
 		var sortTime int64 = msg.MsgTime
 		var unreadIndex int64 = 0
@@ -46,6 +47,10 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 		}
 		if !isOffline || UserConversContains(appkey, userId) {
 			userConvers := getUserConvers(appkey, userId)
+			undisturbType := conver.UndisturbType
+			if undisturbType == 0 && msg.UndisturbType > 0 {
+				undisturbType = msg.UndisturbType
+			}
 			newConver := userConvers.UpsertCovner(models.Conversation{
 				AppKey:      appkey,
 				UserId:      userId,
@@ -61,12 +66,18 @@ func SaveConversationV2(ctx context.Context, appkey string, userId string, msg *
 					ConverTags:       toUserConverTags(msg.ConverTags),
 					GlobalConverTags: toGlobalConverTags(msg.ConverTags),
 				},
+				UndisturbType: undisturbType,
+				IsDeleted:     int(conver.IsDelete),
 			})
 			if !msg.IsSend {
 				HandleMentionedMsg(appkey, userId, msg, userConvers)
 			}
 			//save to db
-			userConvers.PersistConverV2(newConver)
+			fields := converPersistMessage | converPersistDeleted
+			if conver.UndisturbType > 0 {
+				fields |= converPersistUndisturb
+			}
+			userConvers.PersistConverFields(newConver, fields)
 		} else {
 			UpsertOfflineConversation(&ConversationCacheItem{
 				Appkey:      appkey,
@@ -194,9 +205,14 @@ func QryConverV2(ctx context.Context, userId string, req *pbobjs.QryConverReq) (
 	userConvers := getUserConvers(appkey, userId)
 	conver := userConvers.QryConver(req.TargetId, req.SubChannel, req.ChannelType)
 	if conver == nil {
+		undisturb := 0
+		if req.ChannelType == pbobjs.ChannelType_Group {
+			undisturb = 1
+		}
 		return errs.IMErrorCode_SUCCESS, &pbobjs.Conversation{
-			TargetId:    req.TargetId,
-			ChannelType: req.ChannelType,
+			TargetId:      req.TargetId,
+			ChannelType:   req.ChannelType,
+			UndisturbType: int32(undisturb),
 		}
 	}
 	if req.IsInner {
@@ -296,7 +312,10 @@ func QryConversationsV2(ctx context.Context, req *pbobjs.QryConversationsReq) *p
 func ClearTotalUnreadV2(ctx context.Context, userId string) errs.IMErrorCode {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	userConvers := getUserConvers(appkey, userId)
-	userConvers.ClearTotalUnread()
+	changedConvers := userConvers.ClearTotalUnread()
+	for _, conver := range changedConvers {
+		userConvers.MergePendingConverFields(conver, converPersistRead|converPersistUnreadTag)
+	}
 	storage := storages.NewConversationStorage()
 	storage.ClearTotalUnreadCount(appkey, userId)
 	//clear mention msgs
@@ -337,7 +356,7 @@ func ClearUnreadV2(ctx context.Context, userId string, convers []*pbobjs.Convers
 					affected = true
 					// userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 					newConver := userConvers.QryConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
-					userConvers.PersistConverV2(newConver)
+					userConvers.PersistConverFields(newConver, converPersistRead|converPersistUnreadTag)
 				}
 			} else {
 				//TODO
@@ -346,7 +365,7 @@ func ClearUnreadV2(ctx context.Context, userId string, convers []*pbobjs.Convers
 					affected = true
 					// userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 					newConver := userConvers.QryConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
-					userConvers.PersistConverV2(newConver)
+					userConvers.PersistConverFields(newConver, converPersistRead|converPersistUnreadTag)
 				}
 			}
 		}
@@ -384,7 +403,7 @@ func DelConversationV2(ctx context.Context, userId string, convers []*pbobjs.Con
 			if affected {
 				// userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 				newConver := userConvers.QryConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
-				userConvers.PersistConverV2(newConver)
+				userConvers.PersistConverFields(newConver, converPersistDeleted)
 			}
 		}
 		// bases.AsyncRpcCall(ctx, "del_conver_cache", userId, &pbobjs.ConversationsReq{
@@ -420,7 +439,7 @@ func MarkUnreadV2(ctx context.Context, userId string, req *pbobjs.ConversationsR
 			if rowsAffected {
 				// userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 				newConver := userConvers.QryConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
-				userConvers.PersistConverV2(newConver)
+				userConvers.PersistConverFields(newConver, converPersistUnreadTag)
 				affected = true
 			}
 		}
@@ -470,7 +489,7 @@ func SetTopConversV2(ctx context.Context, req *pbobjs.ConversationsReq) (errs.IM
 			if affected {
 				// userConvers.PersistConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
 				newConver := userConvers.QryConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
-				userConvers.PersistConverV2(newConver)
+				userConvers.PersistConverFields(newConver, converPersistTop)
 			}
 			topConvers.Conversations = append(topConvers.Conversations, &Conversation{
 				TargetId:      conver.TargetId,
@@ -532,7 +551,7 @@ func UndisturbConversV2(ctx context.Context, req *pbobjs.UndisturbConversReq) er
 		if affected {
 			// userConvers.PersistConver(item.TargetId, item.SubChannel, item.ChannelType)
 			newConver := userConvers.QryConver(item.TargetId, item.SubChannel, item.ChannelType)
-			userConvers.PersistConverV2(newConver)
+			userConvers.PersistConverFields(newConver, converPersistUndisturb)
 			needUnCacheConvers = append(needUnCacheConvers, &pbobjs.Conversation{
 				TargetId:    item.TargetId,
 				ChannelType: item.ChannelType,

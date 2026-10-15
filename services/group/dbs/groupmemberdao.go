@@ -62,6 +62,23 @@ func (member GroupMemberDao) QueryMembers(appkey, groupId string, startId, limit
 	return items, err
 }
 
+func (member GroupMemberDao) CountByGroupId(appkey, groupId string) (int, error) {
+	var count int64
+	err := dbcommons.GetDb().Model(&GroupMemberDao{}).Where("app_key=? and group_id=?", appkey, groupId).Count(&count).Error
+	return int(count), err
+}
+
+func (member GroupMemberDao) QueryExistingMemberIds(appkey, groupId string, memberIds []string) ([]string, error) {
+	if len(memberIds) == 0 {
+		return []string{}, nil
+	}
+	existing := []string{}
+	err := dbcommons.GetDb().Model(&GroupMemberDao{}).
+		Where("app_key=? and group_id=? and member_id in (?)", appkey, groupId, memberIds).
+		Pluck("member_id", &existing).Error
+	return existing, err
+}
+
 func (member GroupMemberDao) QueryGroupsByMemberId(appkey, memberId string, startId, limit int64) ([]*GroupMemberDao, error) {
 	var items []*GroupMemberDao
 	err := dbcommons.GetDb().Where("app_key=? and member_id=? and id>?", appkey, memberId, startId).Order("id asc").Limit(int(limit)).Find(&items).Error

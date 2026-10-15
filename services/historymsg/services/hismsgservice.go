@@ -10,7 +10,6 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
-	"im-server/services/conversation/convercallers"
 	converStorages "im-server/services/conversation/storages"
 	"im-server/services/historymsg/storages"
 	"im-server/services/historymsg/storages/models"
@@ -851,7 +850,6 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 		Flags:      flag,
 		SubChannel: req.SubChannel,
 	}
-	latestMsg := GetLatestMsg(ctx, commonservices.GetConversationId(userId, req.TargetId, req.ChannelType), req.SubChannel, channelType)
 	if req.CleanScope == 0 { //user clean time
 		storage := storages.NewHisMsgUserCleanTimeStorage()
 		dbClean, err := storage.FindOne(appkey, userId, targetId, req.SubChannel, channelType)
@@ -874,10 +872,6 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 			commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, cmdMsg, &bases.OnlySendboxOption{})
 		} else if channelType == pbobjs.ChannelType_Group {
 			commonservices.AsyncGroupMsg(ctx, userId, req.TargetId, cmdMsg, &bases.OnlySendboxOption{})
-		}
-		//del latest msg for conversation
-		if cleanTime >= latestMsg.LatestMsgTime {
-			convercallers.UpdLatestMsgBody(ctx, userId, req.TargetId, req.ChannelType, latestMsg.LatestMsgId, &pbobjs.DownMsg{})
 		}
 	} else if req.CleanScope == 1 { //conver clean time
 		if !bases.GetIsFromApiFromCtx(ctx) {
@@ -911,21 +905,8 @@ func CleanHisMsg(ctx context.Context, req *pbobjs.CleanHisMsgReq) errs.IMErrorCo
 		//notify other device to destroy msgs
 		if channelType == pbobjs.ChannelType_Private {
 			commonservices.AsyncPrivateMsg(ctx, userId, req.TargetId, cmdMsg)
-			if cleanTime >= latestMsg.LatestMsgTime {
-				convercallers.UpdLatestMsgBody(ctx, userId, req.TargetId, req.ChannelType, latestMsg.LatestMsgId, &pbobjs.DownMsg{})
-				convercallers.UpdLatestMsgBody(ctx, req.TargetId, userId, req.ChannelType, latestMsg.LatestMsgId, &pbobjs.DownMsg{})
-			}
 		} else if channelType == pbobjs.ChannelType_Group {
 			commonservices.AsyncGroupMsg(ctx, userId, req.TargetId, cmdMsg)
-			if cleanTime >= latestMsg.LatestMsgTime {
-				bases.AsyncRpcCall(ctx, "upd_grp_conver", req.TargetId, &pbobjs.UpdLatestMsgReq{
-					TargetId:    req.TargetId,
-					ChannelType: req.ChannelType,
-					LatestMsgId: latestMsg.LatestMsgId,
-					Action:      pbobjs.UpdLatestMsgAction_UpdMsg,
-					Msg:         &pbobjs.DownMsg{},
-				})
-			}
 		}
 	}
 
@@ -1021,13 +1002,6 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					Flags:      flag,
 				}, &bases.OnlySendboxOption{})
 			}
-			//if latest msg then update conversation
-			// for _, msg := range delMsgs.Msgs {
-			// 	if IsLatestMsg(ctx, converId, req.ChannelType, msg.MsgId, 0, 0) {
-			// 		convercallers.UpdLatestMsgBody(ctx, userId, req.TargetId, req.ChannelType, msg.MsgId, &pbobjs.DownMsg{})
-			// 		break
-			// 	}
-			// }
 			//delete mention msg
 			mentionStorage := converStorages.NewMentionMsgStorage()
 			mentionStorage.DelMentionMsgs(appkey, userId, req.TargetId, req.SubChannel, req.ChannelType, delMsgIds)

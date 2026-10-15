@@ -20,5 +20,8 @@ type IMsgStorage interface {
 	SaveMsg(msg Msg) error
 	UpsertMsg(item Msg) error
 	QryMsgsBaseTime(appkey, userId string, start int64, count int) ([]*Msg, error)
+}
+
+type IMsgPurgeStorage interface {
 	DelMsgsBaseTime(appkey string, start int64) error
 }

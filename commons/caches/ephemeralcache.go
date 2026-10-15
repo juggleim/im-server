@@ -58,23 +58,29 @@ func (c *EphemeralCache) AddTimeoutAfterCreate(checkInterval, maxLife time.Durat
 	return c
 }
 func (c *EphemeralCache) cleanOldestByCreatedTime(timeLine int64) {
+	for {
+		item := c.popOldestBefore(timeLine)
+		if item == nil {
+			return
+		}
+		c.evict(item)
+	}
+}
+
+func (c *EphemeralCache) popOldestBefore(timeLine int64) *EphemeralCacheItem {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	for {
-		ele := c.evictList.Back()
-		if ele == nil {
-			break
-		}
-		kv := ele.Value.(*EphemeralCacheItem)
-		if kv.addedTime >= timeLine {
-			break
-		}
-		c.evictList.Remove(ele)
-		delete(c.items, kv.key)
-		if c.onEvict != nil {
-			c.onEvict(kv.key, kv.value)
-		}
+	ele := c.evictList.Back()
+	if ele == nil {
+		return nil
 	}
+	item := ele.Value.(*EphemeralCacheItem)
+	if item.addedTime >= timeLine {
+		return nil
+	}
+	c.evictList.Remove(ele)
+	delete(c.items, item.key)
+	return item
 }
 
 func (c *EphemeralCache) Add(key, val interface{}) {
@@ -120,15 +126,48 @@ func (c *EphemeralCache) Upsert(key interface{}, f func(oldVal interface{}) inte
 	}
 }
 
+func (c *EphemeralCache) Clear() {
+	for {
+		item := c.popOldest()
+		if item == nil {
+			return
+		}
+		c.evict(item)
+	}
+}
+
+func (c *EphemeralCache) popOldest() *EphemeralCacheItem {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	ele := c.evictList.Back()
+	if ele == nil {
+		return nil
+	}
+	c.evictList.Remove(ele)
+	item := ele.Value.(*EphemeralCacheItem)
+	delete(c.items, item.key)
+	return item
+}
+
 func (c *EphemeralCache) Remove(key interface{}) {
+	item := c.remove(key)
+	c.evict(item)
+}
+
+func (c *EphemeralCache) remove(key interface{}) *EphemeralCacheItem {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	if ent, ok := c.items[key]; ok {
 		c.evictList.Remove(ent)
-		kv := ent.Value.(*EphemeralCacheItem)
-		delete(c.items, kv.key)
-		if c.onEvict != nil {
-			c.onEvict(kv.key, kv.value)
-		}
+		item := ent.Value.(*EphemeralCacheItem)
+		delete(c.items, item.key)
+		return item
+	}
+	return nil
+}
+
+func (c *EphemeralCache) evict(item *EphemeralCacheItem) {
+	if item != nil && c.onEvict != nil {
+		c.onEvict(item.key, item.value)
 	}
 }

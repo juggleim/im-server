@@ -55,9 +55,6 @@ func (manager *GroupManager) RegisterActors(register gmicro.IActorRegister) {
 	register.RegisterActor("qry_group_snapshot", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryGrpSnapshotActor{}, serviceName)
 	})
-	register.RegisterActor("upd_grp_conver", func() actorsystem.IUntypedActor {
-		return bases.BaseProcessActor(&actors.UpdGrpConverActor{}, serviceName)
-	})
 	//settings
 	register.RegisterActor("qry_grp_member_settings", func() actorsystem.IUntypedActor {
 		return bases.BaseProcessActor(&actors.QryMemberSettingsActor{}, serviceName)

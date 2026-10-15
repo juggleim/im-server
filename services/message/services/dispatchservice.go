@@ -8,26 +8,80 @@ import (
 	"im-server/commons/tools"
 	"im-server/services/botmsg/botclient"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
 	"im-server/services/commonservices/msgdefines"
+	"runtime/debug"
+	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 var MsgSinglePools *tools.SinglePools
 
+const (
+	msgDispatchFanoutWorkers         = 64
+	msgDispatchFanoutCapacity        = 512
+	msgDispatchLocalBatchSize        = 500
+	msgDispatchLocalBatchConcurrency = 4
+)
+
+var msgDispatchFanoutScheduler = newKeyedFanoutScheduler(msgDispatchFanoutWorkers, msgDispatchFanoutCapacity)
+
 func init() {
-	MsgSinglePools = tools.NewSinglePools(8192, true)
+	MsgSinglePools = tools.NewSinglePools(8192, 100, true)
 }
 
 func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
+	started := time.Now()
+	targetCount := len(bases.GetTargetIdsFromCtx(ctx))
+	if downMsg.ChannelType == pbobjs.ChannelType_Private || downMsg.ChannelType == pbobjs.ChannelType_System {
+		targetCount = 1
+	}
+	dispatchTargets.observe(targetCount)
+	if downMsg.ChannelType == pbobjs.ChannelType_Group {
+		fanoutKey := msgDispatchFanoutKey(ctx, downMsg)
+		fanoutSubmitDuration, blocked := msgDispatchFanoutScheduler.Submit(fanoutKey, func(queueWait time.Duration) {
+			dispatchTimings.fanoutQueueWait.observe(queueWait)
+			dispatchFanout(ctx, downMsg, targetCount)
+		})
+		dispatchTimings.fanoutSubmit.observe(fanoutSubmitDuration)
+		if blocked {
+			dispatchTimings.fanoutFullOnSubmit.Add(1)
+		}
+		dispatchTimings.actorSubmit.observe(time.Since(started))
+		return
+	}
+	dispatchFanout(ctx, downMsg, targetCount)
+	dispatchTimings.actorSubmit.observe(time.Since(started))
+}
+
+func msgDispatchFanoutKey(ctx context.Context, downMsg *pbobjs.DownMsg) string {
+	targetId := bases.GetGroupIdFromCtx(ctx)
+	if targetId == "" {
+		targetId = downMsg.TargetId
+	}
+	return strings.Join([]string{bases.GetAppKeyFromCtx(ctx), strconv.Itoa(int(downMsg.ChannelType)), targetId}, "_")
+}
+
+func dispatchFanout(ctx context.Context, downMsg *pbobjs.DownMsg, targetCount int) {
+	started := time.Now()
+	preheatDuration := time.Duration(0)
+	defer func() {
+		totalDuration := time.Since(started)
+		fanoutDuration := totalDuration - preheatDuration
+		dispatchTimings.fanoutTask.observe(totalDuration)
+		dispatchTimings.fanout.observe(fanoutDuration)
+	}()
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	if downMsg.ChannelType == pbobjs.ChannelType_Private || downMsg.ChannelType == pbobjs.ChannelType_System {
 		receiverId := bases.GetTargetIdFromCtx(ctx)
-		MsgSinglePools.GetPool(strings.Join([]string{appkey, receiverId}, "_")).Submit(func() {
+		submitDispatch(ctx, appkey, receiverId, func() {
 			doDispatch(ctx, receiverId, downMsg, false)
 		})
 	} else if downMsg.ChannelType == pbobjs.ChannelType_Group {
 		memberIds := bases.GetTargetIdsFromCtx(ctx)
-		bases.SetTargetIds2Ctx(ctx, []string{})
+		ctx = bases.SetTargetIds2Ctx(ctx, []string{})
 		threadhold := 1000
 		forceCloseOfflineMsg := false
 		appinfo, exist := commonservices.GetAppInfo(appkey)
@@ -36,27 +90,28 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 			forceCloseOfflineMsg = appinfo.ForceCloseOfflineMsg
 		}
 		if downMsg.MemberCount > int32(threadhold) {
+			preheatStarted := time.Now()
 			preheat(ctx, appkey, memberIds)
-			for _, receiverId := range memberIds {
-				newDownMsg := copyDownMsg(downMsg, receiverId)
-				receId := receiverId
+			preheatDuration = time.Since(preheatStarted)
+			dispatchTimings.preheat.observe(preheatDuration)
+			processDispatchMemberBatches(ctx, memberIds, func(receiverId string) {
+				newDownMsg := commonservices.CopyDownMsg(downMsg, receiverId)
 				closeOffline := forceCloseOfflineMsg
 				if !closeOffline {
-					userStatus := GetUserStatus(appkey, receId)
+					userStatus := GetUserStatus(appkey, receiverId)
 					closeOffline = (!userStatus.IsOnline())
 				}
-				MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
-					doDispatch(ctx, receId, newDownMsg, closeOffline)
+				submitDispatch(ctx, appkey, receiverId, func() {
+					doDispatch(ctx, receiverId, newDownMsg, closeOffline)
 				})
-			}
+			})
 		} else {
-			for _, receiverId := range memberIds {
-				newDownMsg := copyDownMsg(downMsg, receiverId)
-				receId := receiverId
-				MsgSinglePools.GetPool(strings.Join([]string{appkey, receId}, "_")).Submit(func() {
-					doDispatch(ctx, receId, newDownMsg, false)
+			processDispatchMemberBatches(ctx, memberIds, func(receiverId string) {
+				newDownMsg := commonservices.CopyDownMsg(downMsg, receiverId)
+				submitDispatch(ctx, appkey, receiverId, func() {
+					doDispatch(ctx, receiverId, newDownMsg, false)
 				})
-			}
+			})
 		}
 	} else if downMsg.ChannelType == pbobjs.ChannelType_SubStatus {
 		memberIds := bases.GetTargetIdsFromCtx(ctx)
@@ -74,6 +129,58 @@ func DispatchMsg(ctx context.Context, downMsg *pbobjs.DownMsg) {
 			}
 		}
 	}
+}
+
+func processDispatchMemberBatches(ctx context.Context, memberIds []string, process func(receiverId string)) {
+	if len(memberIds) <= msgDispatchLocalBatchSize {
+		for _, receiverId := range memberIds {
+			process(receiverId)
+		}
+		return
+	}
+	semaphore := make(chan struct{}, msgDispatchLocalBatchConcurrency)
+	var wg sync.WaitGroup
+	for start := 0; start < len(memberIds); start += msgDispatchLocalBatchSize {
+		end := start + msgDispatchLocalBatchSize
+		if end > len(memberIds) {
+			end = len(memberIds)
+		}
+		batch := memberIds[start:end]
+		semaphore <- struct{}{}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			defer func() {
+				<-semaphore
+				if err := recover(); err != nil {
+					logs.WithContext(ctx).Errorf("msg dispatch local batch panic:%v\n%s", err, debug.Stack())
+				}
+			}()
+			for _, receiverId := range batch {
+				process(receiverId)
+			}
+		}()
+	}
+	wg.Wait()
+}
+
+func submitDispatch(ctx context.Context, appkey, receiverId string, task func()) {
+	poolKey := strings.Join([]string{appkey, receiverId}, "_")
+	pool := MsgSinglePools.GetPool(poolKey)
+	queueLenOnSubmit := pool.QueueLen()
+	if queueLenOnSubmit == pool.QueueCapacity() {
+		dispatchTimings.queueFullOnSubmit.Add(1)
+	}
+	enqueued := time.Now()
+	pool.Submit(func() {
+		queueWait := time.Since(enqueued)
+		dispatchTimings.queueWait.observe(queueWait)
+		started := time.Now()
+		defer func() { dispatchTimings.task.observe(time.Since(started)) }()
+		task()
+	})
+	dispatchTimings.submit.observe(time.Since(enqueued))
+	observeDispatchQueueLen(pool.QueueLen())
 }
 
 func preheat(ctx context.Context, appkey string, memberIds []string) {
@@ -96,8 +203,12 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 	sendTime := RegenateSendTime(appkey, receiverId, msg.MsgTime)
 	msg.MsgTime = sendTime
 	//handle conversation check, such as undisturb, unread index
+	phaseStarted := time.Now()
 	HandleDownMsgByConver(ctx, receiverId, msg.TargetId, msg.SubChannel, msg.ChannelType, msg)
+	dispatchTimings.conversation.observe(time.Since(phaseStarted))
+	phaseStarted = time.Now()
 	targetUserInfo := commonservices.GetTargetUserInfo(ctx, receiverId)
+	dispatchTimings.userInfo.observe(time.Since(phaseStarted))
 	if targetUserInfo.UserType == pbobjs.UserType_Bot {
 		if msg.ChannelType != pbobjs.ChannelType_Private && msg.ChannelType != pbobjs.ChannelType_Group {
 			return
@@ -126,8 +237,20 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 			MsgOrNtf(ctx, receiverId, msg, true)
 		}
 	} else {
-		if closeOffline {
-			if !msgdefines.IsStateMsg(msg.Flags) {
+		if !msgdefines.IsStateMsg(msg.Flags) {
+			if !closeOffline {
+				phaseStarted = time.Now()
+				commonservices.SaveConversation(ctx, receiverId, msg)
+				dispatchTimings.downstream.observe(time.Since(phaseStarted))
+				phaseStarted = time.Now()
+				SaveMsg2Inbox(appkey, receiverId, msg)
+				dispatchTimings.inbox.observe(time.Since(phaseStarted))
+				// send to client
+				phaseStarted = time.Now()
+				MsgOrNtfWithPush(ctx, receiverId, msg)
+				dispatchTimings.downstream.observe(time.Since(phaseStarted))
+			} else {
+				phaseStarted = time.Now()
 				target := fmt.Sprintf("%s_%s_%d", appkey, msg.TargetId, msg.ChannelType)
 				batchExecutorPool.GetBatchExecutor(target).Append(fmt.Sprintf("%s_%s", target, receiverId), &BatchConverItem{
 					Appkey: appkey,
@@ -135,15 +258,8 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 					Msg:    msg,
 				})
 			}
-		} else {
-			if msgdefines.IsStateMsg(msg.Flags) {
-				MsgDirect(ctx, receiverId, msg)
-			} else {
-				commonservices.SaveConversation(ctx, receiverId, msg)
-				SaveMsg2Inbox(appkey, receiverId, msg)
-				//send to client
-				MsgOrNtfWithPush(ctx, receiverId, msg)
-			}
+		} else if !closeOffline {
+			MsgDirect(ctx, receiverId, msg)
 		}
 	}
 }

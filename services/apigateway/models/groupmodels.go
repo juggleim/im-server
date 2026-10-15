@@ -30,6 +30,7 @@ type GroupMembersReq struct {
 	ExtFields        map[string]string `json:"ext_fields"`
 	MemberIds        []string          `json:"member_ids"`
 	GlobalConverTags *[]string         `json:"global_conver_tags"`
+	UndisturbType    *int32            `json:"undisturb_type"`
 }
 
 type GroupMemberUpdateReq struct {
