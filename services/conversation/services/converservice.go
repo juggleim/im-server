@@ -723,6 +723,15 @@ func qryGrpMsgs(appkey, userId string, convers []hisModels.ConverItem) map[strin
 				if userId == downMsg.SenderId {
 					downMsg.IsSend = true
 				}
+				if downMsg.MsgSeqNo <= 0 {
+					downMsg.MsgSeqNo = msg.MsgSeqNo
+				}
+				if downMsg.MsgTime <= 0 {
+					downMsg.MsgTime = msg.SendTime
+				}
+				if downMsg.MsgId == "" {
+					downMsg.MsgId = msg.MsgId
+				}
 				ret[downMsg.MsgId] = &downMsg
 			}
 		}
@@ -744,6 +753,18 @@ func qryPriMsgs(appkey, userId string, convers []hisModels.ConverItem) map[strin
 					downMsg.TargetId = msg.ReceiverId
 				}
 				downMsg.IsRead = msg.IsRead > 0
+				if downMsg.IsRead {
+					downMsg.ReadTime = msg.ReadTime
+				}
+				if downMsg.MsgSeqNo <= 0 {
+					downMsg.MsgSeqNo = msg.MsgSeqNo
+				}
+				if downMsg.MsgId == "" {
+					downMsg.MsgId = msg.MsgId
+				}
+				if downMsg.MsgTime <= 0 {
+					downMsg.MsgTime = msg.SendTime
+				}
 				ret[downMsg.MsgId] = &downMsg
 			}
 		}
