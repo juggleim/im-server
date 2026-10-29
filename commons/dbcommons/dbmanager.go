@@ -59,7 +59,7 @@ func InitMysql() error {
 		log.Fatalf("get sql db err: %v", err)
 		return err
 	}
-	sqlDB.SetMaxIdleConns(20)
+	sqlDB.SetMaxIdleConns(300)
 	sqlDB.SetMaxOpenConns(500)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	sqlDB.SetConnMaxIdleTime(30 * time.Minute)
