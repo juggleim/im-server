@@ -29,6 +29,7 @@ var (
 	IMErrorCode_API_INTERNAL_RESP_FAIL IMErrorCode = 10009
 	IMErrorCode_API_PARAM_REQUIRED     IMErrorCode = 10010
 	IMErrorCode_API_PARAM_ILLEGAL      IMErrorCode = 10011
+	IMErrorCode_API_IP_FORBIDDEN       IMErrorCode = 10012
 )
 
 // user errorcode
@@ -213,6 +214,7 @@ var imCode2ApiErrorMap map[IMErrorCode]*ApiErrorMsg = map[IMErrorCode]*ApiErrorM
 	IMErrorCode_API_INTERNAL_TIMEOUT:   newApiErrorMsg(500, IMErrorCode_API_INTERNAL_TIMEOUT, "internal service timeout"),
 	IMErrorCode_API_INTERNAL_RESP_FAIL: newApiErrorMsg(500, IMErrorCode_API_INTERNAL_RESP_FAIL, "internal service error"),
 	IMErrorCode_API_PARAM_REQUIRED:     newApiErrorMsg(400, IMErrorCode_API_PARAM_REQUIRED, "required params missing."),
+	IMErrorCode_API_IP_FORBIDDEN:       newApiErrorMsg(403, IMErrorCode_API_IP_FORBIDDEN, "client ip is not allowed"),
 
 	//conn
 	IMErrorCode_CONNECT_DEFAULT:         newApiErrorMsg(200, IMErrorCode_CONNECT_DEFAULT, "default error"),

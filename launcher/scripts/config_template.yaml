@@ -24,6 +24,7 @@ connectManager:
 
 apiGateway:
   httpPort: {{ API_HTTP_PORT }}
+  ipWhitelist: []
 
 navGateway:
   httpPort: {{ NAV_HTTP_PORT }}
