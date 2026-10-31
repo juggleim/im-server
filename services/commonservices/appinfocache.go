@@ -33,26 +33,28 @@ type AppInfo struct {
 	LivekitConfigObj   *LivekitConfigObj  `default:"-"`
 	AgoraConfigObj     *AgoraConfigObj    `default:"-"`
 
-	TokenEffectiveMinute  int    `default:"0"`
-	OfflineMsgSaveTime    int    `default:"10"`
-	OfflineCmdMsgSaveTime int    `default:"10080"`
-	ForceCloseOfflineMsg  bool   `default:"false"`
-	IsSubApiMsg           bool   `default:"false"`
-	IsOpenPush            bool   `default:"true"`
-	PushLanguage          string `default:"en_US"`
-	KickMode              int    `default:"0"`
-	OpenVisualLog         bool   `default:"false"`
-	RecordGlobalConvers   bool   `default:"false"`
-	OpenSensitive         bool   `default:"false"`
-	RecordMsgLogs         bool   `default:"false"`
-	MsgFriendCheck        bool   `default:"false"`
-	OpenRemark            bool   `default:"false"`
-	HisMsgSaveDay         int    `default:"180"`
-	GlobalPrivateMute     bool   `default:"false"`
-	GlobalGroupMute       bool   `default:"false"`
-	MsgQueueMaxCount      int    `default:"100"`
-	OpenStatusSub         bool   `default:"false"`
-	OpenFriendStatusSub   bool   `default:"false"`
+	TokenEffectiveMinute  int  `default:"0"`
+	OfflineMsgSaveTime    int  `default:"10"`
+	OfflineCmdMsgSaveTime int  `default:"10080"`
+	ForceCloseOfflineMsg  bool `default:"false"`
+	IsSubApiMsg           bool `default:"false"`
+	// appexts.app_item_key: api_msg_pre_callback_user_whitelist
+	ApiMsgPreCallbackUserWhitelist string `default:""`
+	IsOpenPush                     bool   `default:"true"`
+	PushLanguage                   string `default:"en_US"`
+	KickMode                       int    `default:"0"`
+	OpenVisualLog                  bool   `default:"false"`
+	RecordGlobalConvers            bool   `default:"false"`
+	OpenSensitive                  bool   `default:"false"`
+	RecordMsgLogs                  bool   `default:"false"`
+	MsgFriendCheck                 bool   `default:"false"`
+	OpenRemark                     bool   `default:"false"`
+	HisMsgSaveDay                  int    `default:"180"`
+	GlobalPrivateMute              bool   `default:"false"`
+	GlobalGroupMute                bool   `default:"false"`
+	MsgQueueMaxCount               int    `default:"100"`
+	OpenStatusSub                  bool   `default:"false"`
+	OpenFriendStatusSub            bool   `default:"false"`
 
 	MaxUserConverTags      int `default:"100"`
 	LoadMentionWayInConver int `default:"0"` //0:by read index; 1: by unread status
@@ -98,6 +100,51 @@ type AppInfo struct {
 	TransEngine   transengines.ITransEngine `default:"-"`
 	SmsEngine     sms.ISmsEngine            `default:"-"`
 	I18nKeys      *i18n.I18n                `default:"-"`
+
+	apiMsgPreCallbackUserIDs map[string]struct{} `default:"-"`
+}
+
+func (app *AppInfo) loadApiMsgPreCallbackUserWhitelist() {
+	app.apiMsgPreCallbackUserIDs = parseUserIDWhitelist(app.ApiMsgPreCallbackUserWhitelist)
+}
+
+func (app *AppInfo) IsApiMsgPreCallbackUserAllowed(userID string) bool {
+	if strings.TrimSpace(app.ApiMsgPreCallbackUserWhitelist) == "" {
+		return true
+	}
+	userIDs := app.apiMsgPreCallbackUserIDs
+	if userIDs == nil {
+		userIDs = parseUserIDWhitelist(app.ApiMsgPreCallbackUserWhitelist)
+	}
+	_, ok := userIDs[strings.TrimSpace(userID)]
+	return ok
+}
+
+func parseUserIDWhitelist(value string) map[string]struct{} {
+	userIDs := map[string]struct{}{}
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return userIDs
+	}
+
+	var items []string
+	if strings.HasPrefix(value, "[") && json.Unmarshal([]byte(value), &items) == nil {
+		for _, item := range items {
+			if userID := strings.TrimSpace(item); userID != "" {
+				userIDs[userID] = struct{}{}
+			}
+		}
+		return userIDs
+	}
+
+	for _, item := range strings.FieldsFunc(value, func(r rune) bool {
+		return r == ',' || r == ';' || r == '\n' || r == '\r'
+	}) {
+		if userID := strings.TrimSpace(item); userID != "" {
+			userIDs[userID] = struct{}{}
+		}
+	}
+	return userIDs
 }
 
 var notExistAppInfo *AppInfo
@@ -130,6 +177,7 @@ func init() {
 				}
 			}
 			FillObjField(appInfo, extMap)
+			appInfo.loadApiMsgPreCallbackUserWhitelist()
 
 			//event subscription config
 			if appInfo.EventSubConfigObj == nil && appInfo.EventSubConfig != "" {
