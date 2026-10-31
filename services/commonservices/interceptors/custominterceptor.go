@@ -23,9 +23,6 @@ func (inter *CustomInterceptor) GetConditions() []*Condition {
 }
 
 func (inter *CustomInterceptor) CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, channelType pbobjs.ChannelType, msg *pbobjs.UpMsg) (InterceptorResult, int64) {
-	if bases.GetIsFromApiFromCtx(ctx) {
-		return InterceptorResult_Pass, 0
-	}
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	nonce := tools.RandStr(8)
 	tsStr := fmt.Sprintf("%d", time.Now().UnixMilli())
