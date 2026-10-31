@@ -2,7 +2,6 @@ package apis
 
 import (
 	"fmt"
-	"net"
 	"net/netip"
 	"strings"
 
@@ -28,7 +27,7 @@ func NewIPWhitelistMiddleware(entries []string) (gin.HandlerFunc, error) {
 			return
 		}
 
-		clientIP, ok := directClientIP(ctx.Request.RemoteAddr)
+		clientIP, ok := tools.ParseRemoteIP(ctx.Request.RemoteAddr)
 		if !ok || !whitelist.contains(clientIP) {
 			tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_IP_FORBIDDEN)
 			ctx.Abort()
@@ -59,18 +58,6 @@ func parseIPWhitelist(entries []string) (*ipWhitelist, error) {
 		whitelist.prefixes = append(whitelist.prefixes, prefix.Masked())
 	}
 	return whitelist, nil
-}
-
-func directClientIP(remoteAddress string) (netip.Addr, bool) {
-	host, _, err := net.SplitHostPort(remoteAddress)
-	if err != nil {
-		host = remoteAddress
-	}
-	address, err := netip.ParseAddr(strings.TrimSpace(host))
-	if err != nil {
-		return netip.Addr{}, false
-	}
-	return address.Unmap(), true
 }
 
 func (whitelist *ipWhitelist) contains(address netip.Addr) bool {

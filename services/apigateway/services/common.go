@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"im-server/commons/bases"
+	"im-server/commons/tools"
 	"im-server/services/commonservices"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,12 @@ func ToRpcCtx(ginCtx *gin.Context, requestId string) context.Context {
 	ctx = context.WithValue(ctx, bases.CtxKey_AppKey, GetCtxString(ginCtx, string(bases.CtxKey_AppKey)))
 	ctx = context.WithValue(ctx, bases.CtxKey_Session, GetCtxString(ginCtx, string(bases.CtxKey_Session)))
 	ctx = context.WithValue(ctx, bases.CtxKey_IsFromApi, true)
+	if clientIP, ok := tools.ParseRemoteIP(ginCtx.Request.RemoteAddr); ok {
+		ctx = context.WithValue(ctx, bases.CtxKey_Exts, map[string]string{
+			commonservices.RpcExtKey_ClientIP: clientIP.String(),
+		})
+	}
+	// messages sent from the server-side REST API default to the "Server" platform
 	ctx = context.WithValue(ctx, bases.CtxKey_Platform, string(commonservices.Platform_Server))
 	if requestId != "" {
 		ctx = context.WithValue(ctx, bases.CtxKey_RequesterId, requestId)

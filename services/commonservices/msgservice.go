@@ -19,6 +19,10 @@ var (
 	PublishType_SpecifyDeviceIds     PublishType = 3
 )
 
+func GetClientIPFromCtx(ctx context.Context) string {
+	return bases.GetExtsFromCtx(ctx)[RpcExtKey_ClientIP]
+}
+
 func FillReferMsg(ctx context.Context, upMsg *pbobjs.UpMsg) *pbobjs.DownMsg {
 	if upMsg.ReferMsg != nil {
 		if upMsg.ReferMsg.SenderId != "" {

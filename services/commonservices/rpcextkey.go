@@ -5,4 +5,5 @@ var (
 	// RpcExtKey_PriConverRedirect string = "pri_conver_redirect"
 	RpcExtKey_RealMethod   string = "real_method"
 	RpcExtKey_RealTargetId string = "real_targetid"
+	RpcExtKey_ClientIP     string = "client_ip"
 )

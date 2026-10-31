@@ -100,6 +100,9 @@ func (actor *UpstreamActor) OnReceive(ctx context.Context, input proto.Message) 
 		}
 
 		exts := map[string]string{}
+		if clientIP := rpcMsg.ExtParams[commonservices.RpcExtKey_ClientIP]; clientIP != "" {
+			exts[commonservices.RpcExtKey_ClientIP] = clientIP
+		}
 		if realMethod == "p_msg" || realMethod == "imp_pri_msg" {
 			exts[commonservices.RpcExtKey_RealTargetId] = targetId
 			targetId = commonservices.GetConversationId(userId, targetId, pbobjs.ChannelType_Private)

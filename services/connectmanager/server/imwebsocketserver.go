@@ -9,7 +9,6 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
-	"im-server/services/connectmanager/server/imhttpmsghandlers"
 	"net"
 	"net/http"
 	"strings"
@@ -30,7 +29,6 @@ func (server *ImWebsocketServer) AsyncStart(port int) {
 	var mux *http.ServeMux = commonservices.GetDefaultHttpServeMux()
 	mux.HandleFunc("/im", server.ImWsServer)
 	mux.HandleFunc("/imbot", server.ImBotServer)
-	mux.HandleFunc("/im/publish", imhttpmsghandlers.ImHttpPubHandler)
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
