@@ -77,7 +77,7 @@ func dispatchFanout(ctx context.Context, downMsg *pbobjs.DownMsg, targetCount in
 	if downMsg.ChannelType == pbobjs.ChannelType_Private || downMsg.ChannelType == pbobjs.ChannelType_System {
 		receiverId := bases.GetTargetIdFromCtx(ctx)
 		submitDispatch(ctx, appkey, receiverId, func() {
-			doDispatch(ctx, receiverId, downMsg, false)
+			doDispatch(ctx, receiverId, downMsg, false, false)
 		})
 	} else if downMsg.ChannelType == pbobjs.ChannelType_Group {
 		memberIds := bases.GetTargetIdsFromCtx(ctx)
@@ -96,20 +96,17 @@ func dispatchFanout(ctx context.Context, downMsg *pbobjs.DownMsg, targetCount in
 			dispatchTimings.preheat.observe(preheatDuration)
 			processDispatchMemberBatches(ctx, memberIds, func(receiverId string) {
 				newDownMsg := commonservices.CopyDownMsg(downMsg, receiverId)
-				closeOffline := forceCloseOfflineMsg
-				if !closeOffline {
-					userStatus := GetUserStatus(appkey, receiverId)
-					closeOffline = (!userStatus.IsOnline())
-				}
+				userStatus := GetUserStatus(appkey, receiverId)
+				closeOffline, skipUserInfo := largeGroupDispatchPolicy(forceCloseOfflineMsg, userStatus.IsOnline())
 				submitDispatch(ctx, appkey, receiverId, func() {
-					doDispatch(ctx, receiverId, newDownMsg, closeOffline)
+					doDispatch(ctx, receiverId, newDownMsg, closeOffline, skipUserInfo)
 				})
 			})
 		} else {
 			processDispatchMemberBatches(ctx, memberIds, func(receiverId string) {
 				newDownMsg := commonservices.CopyDownMsg(downMsg, receiverId)
 				submitDispatch(ctx, appkey, receiverId, func() {
-					doDispatch(ctx, receiverId, newDownMsg, false)
+					doDispatch(ctx, receiverId, newDownMsg, false, false)
 				})
 			})
 		}
@@ -129,6 +126,15 @@ func dispatchFanout(ctx context.Context, downMsg *pbobjs.DownMsg, targetCount in
 			}
 		}
 	}
+}
+
+func largeGroupDispatchPolicy(forceCloseOfflineMsg, isOnline bool) (closeOffline, skipUserInfo bool) {
+	isOffline := !isOnline
+	return forceCloseOfflineMsg || isOffline, skipUserInfoForDispatch(pbobjs.ChannelType_Group, isOffline)
+}
+
+func skipUserInfoForDispatch(channelType pbobjs.ChannelType, isOffline bool) bool {
+	return channelType == pbobjs.ChannelType_Group && isOffline
 }
 
 func processDispatchMemberBatches(ctx context.Context, memberIds []string, process func(receiverId string)) {
@@ -196,7 +202,7 @@ func preheat(ctx context.Context, appkey string, memberIds []string) {
 	}
 }
 
-func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, closeOffline bool) {
+func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, closeOffline, skipUserInfo bool) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	//TODO save imediately when user online, other wise, use async queue.
 	//TODO batch insert
@@ -204,12 +210,15 @@ func doDispatch(ctx context.Context, receiverId string, msg *pbobjs.DownMsg, clo
 	msg.MsgTime = sendTime
 	//handle conversation check, such as undisturb, unread index
 	phaseStarted := time.Now()
-	HandleDownMsgByConver(ctx, receiverId, msg.TargetId, msg.SubChannel, msg.ChannelType, msg)
+	HandleDownMsgByConver(ctx, receiverId, msg.TargetId, msg.SubChannel, msg.ChannelType, msg, skipUserInfo)
 	dispatchTimings.conversation.observe(time.Since(phaseStarted))
-	phaseStarted = time.Now()
-	targetUserInfo := commonservices.GetTargetUserInfo(ctx, receiverId)
-	dispatchTimings.userInfo.observe(time.Since(phaseStarted))
-	if targetUserInfo.UserType == pbobjs.UserType_Bot {
+	var targetUserInfo *commonservices.TargetUserInfo
+	if !skipUserInfo {
+		phaseStarted = time.Now()
+		targetUserInfo = commonservices.GetTargetUserInfo(ctx, receiverId)
+		dispatchTimings.userInfo.observe(time.Since(phaseStarted))
+	}
+	if targetUserInfo != nil && targetUserInfo.UserType == pbobjs.UserType_Bot {
 		if msg.ChannelType != pbobjs.ChannelType_Private && msg.ChannelType != pbobjs.ChannelType_Group {
 			return
 		}

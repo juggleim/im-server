@@ -606,6 +606,11 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 		}
 	}
 	priMsgs := qryPriMsgs(appkey, userId, priConvers)
+	privateTargetUserInfos := map[string]*pbobjs.UserInfo{}
+	privateTargetUserIds := collectPrivateTargetUserInfoIds(userId, convers, priMsgs)
+	if len(privateTargetUserIds) > 0 {
+		privateTargetUserInfos = commonservices.GetTargetDisplayUserInfosMap(ctx, privateTargetUserIds)
+	}
 	grpMsgs := qryGrpMsgs(appkey, userId, grpConvers)
 	for _, conver := range convers {
 		unreadCount := conver.LatestUnreadMsgIndex - conver.LatestReadMsgIndex
@@ -643,7 +648,10 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 				}
 			}
 			if conversation.TargetUserInfo == nil {
-				conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conver.TargetId)
+				conversation.TargetUserInfo = privateTargetUserInfos[conver.TargetId]
+				if conversation.TargetUserInfo == nil {
+					conversation.TargetUserInfo = commonservices.GetTargetDisplayUserInfo(ctx, conver.TargetId)
+				}
 			}
 		} else if conver.ChannelType == pbobjs.ChannelType_Group {
 			if msg, exist := grpMsgs[conver.LatestMsgId]; exist {
@@ -709,6 +717,25 @@ func fillConvers(ctx context.Context, userId string, convers []*models.Conversat
 		retConvers = append(retConvers, conversation)
 	}
 	return retConvers
+}
+
+func collectPrivateTargetUserInfoIds(userId string, convers []*models.Conversation, priMsgs map[string]*pbobjs.DownMsg) []string {
+	ids := make([]string, 0)
+	seen := make(map[string]struct{})
+	for _, conver := range convers {
+		if conver == nil || conver.ChannelType != pbobjs.ChannelType_Private || conver.TargetId == "" {
+			continue
+		}
+		if msg, exists := priMsgs[conver.LatestMsgId]; exists && msg != nil && msg.TargetUserInfo != nil && userId != msg.SenderId {
+			continue
+		}
+		if _, exists := seen[conver.TargetId]; exists {
+			continue
+		}
+		seen[conver.TargetId] = struct{}{}
+		ids = append(ids, conver.TargetId)
+	}
+	return ids
 }
 
 func qryGrpMsgs(appkey, userId string, convers []hisModels.ConverItem) map[string]*pbobjs.DownMsg {

@@ -158,14 +158,14 @@ func QryConversation(ctx context.Context, userId, targetId, subChannel string, c
 
 // handle conversation check, such as undisturb, unread index
 // userId is the receiver
-func HandleDownMsgByConver(ctx context.Context, userId, targetId, subChannel string, channelType pbobjs.ChannelType, downMsg *pbobjs.DownMsg) {
+func HandleDownMsgByConver(ctx context.Context, userId, targetId, subChannel string, channelType pbobjs.ChannelType, downMsg *pbobjs.DownMsg, skipUserSettings bool) {
 	conver := GetConversation(ctx, userId, targetId, subChannel, channelType)
 	if conver.UndisturbType == UndisturbType_Normal {
 		downMsg.UndisturbType = UndisturbType_Normal
 		if !commonservices.IsMentionedMe(userId, downMsg) {
 			downMsg.Flags = msgdefines.SetUndisturbMsg(downMsg.Flags)
 		}
-	} else {
+	} else if !skipUserSettings {
 		userSettings := commonservices.GetTargetUserSettings(ctx, userId)
 		if userSettings != nil && userSettings.UndisturbObj != nil {
 			if userSettings.UndisturbObj.CheckUndisturb(ctx, userId) {
