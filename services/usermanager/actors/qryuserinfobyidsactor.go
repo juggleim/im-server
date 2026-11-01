@@ -26,8 +26,9 @@ func (actor *QryUserInfoByIdsActor) OnReceive(ctx context.Context, input proto.M
 		ret := &pbobjs.UserInfosResp{
 			UserInfoMap: make(map[string]*pbobjs.UserInfo),
 		}
+		userInfoMap := services.BatchGetUserInfos(appkey, userIdsReq.UserIds)
 		for _, userId := range userIdsReq.UserIds {
-			userInfo, exist := services.GetUserInfo(appkey, userId)
+			userInfo, exist := userInfoMap[userId]
 			if exist && userInfo != nil {
 				pbUserInfo := &pbobjs.UserInfo{
 					UserId:   userId,

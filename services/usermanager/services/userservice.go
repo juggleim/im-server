@@ -21,6 +21,8 @@ var (
 	userLocks *tools.SegmentatedLocks
 )
 
+const batchGetUserInfoDBSize = 500
+
 type UserInfo struct {
 	AppKey       string
 	UserType     int
@@ -117,6 +119,129 @@ func init() {
 	notExistUser = &UserInfo{}
 	userCache = caches.NewLruCacheWithAddReadTimeout("user_cache", 100000, nil, 10*time.Minute, 10*time.Minute)
 	userLocks = tools.NewSegmentatedLocks(512)
+}
+
+func BatchGetUserInfos(appkey string, userIds []string) map[string]*UserInfo {
+	return batchGetUserInfos(appkey, userIds, userStorage.NewUserStorage(), userStorage.NewUserExtStorage())
+}
+
+func batchGetUserInfos(appkey string, userIds []string, storage models.IUserStorage, extStorage models.IUserExtStorage) map[string]*UserInfo {
+	ret := make(map[string]*UserInfo)
+	noCacheUserIds := make([]string, 0, len(userIds))
+	seen := make(map[string]struct{}, len(userIds))
+	for _, userId := range userIds {
+		if userId == "" {
+			continue
+		}
+		if _, exists := seen[userId]; exists {
+			continue
+		}
+		seen[userId] = struct{}{}
+		key := strings.Join([]string{appkey, userId}, "_")
+		if userObj, exists := userCache.Get(key); exists {
+			userInfo := userObj.(*UserInfo)
+			if userInfo != notExistUser {
+				ret[userId] = userInfo
+			}
+			continue
+		}
+		noCacheUserIds = append(noCacheUserIds, userId)
+	}
+
+	for start := 0; start < len(noCacheUserIds); start += batchGetUserInfoDBSize {
+		end := start + batchGetUserInfoDBSize
+		if end > len(noCacheUserIds) {
+			end = len(noCacheUserIds)
+		}
+		batch := noCacheUserIds[start:end]
+		users, err := storage.FindByUserIds(appkey, batch)
+		if err != nil {
+			logs.NewLogEntity().Error(err.Error())
+			continue
+		}
+		userInfoMap := userModelsToUserInfos(users)
+		foundUserIds := make([]string, 0, len(userInfoMap))
+		for userId := range userInfoMap {
+			foundUserIds = append(foundUserIds, userId)
+		}
+		if len(foundUserIds) > 0 {
+			userExts, extErr := extStorage.QryExtFieldsByUserIds(appkey, foundUserIds)
+			if extErr != nil {
+				logs.NewLogEntity().Error(extErr.Error())
+			} else {
+				applyUserExts(userInfoMap, userExts)
+			}
+		}
+
+		for _, userId := range batch {
+			key := strings.Join([]string{appkey, userId}, "_")
+			if userObj, exists := userCache.Get(key); exists {
+				userInfo := userObj.(*UserInfo)
+				if userInfo != notExistUser {
+					ret[userId] = userInfo
+				}
+				continue
+			}
+			if userInfo, exists := userInfoMap[userId]; exists {
+				userCache.Add(key, userInfo)
+				ret[userId] = userInfo
+			} else {
+				userCache.Add(key, notExistUser)
+			}
+		}
+	}
+	return ret
+}
+
+func userModelsToUserInfos(users []*models.User) map[string]*UserInfo {
+	ret := make(map[string]*UserInfo, len(users))
+	for _, user := range users {
+		if user == nil || user.UserId == "" {
+			continue
+		}
+		ret[user.UserId] = userModelToUserInfo(user)
+	}
+	return ret
+}
+
+func userModelToUserInfo(user *models.User) *UserInfo {
+	return &UserInfo{
+		AppKey:        user.AppKey,
+		UserId:        user.UserId,
+		UserType:      int(user.UserType),
+		Nickname:      user.Nickname,
+		UserPortrait:  user.UserPortrait,
+		ExtFields:     make(map[string]string),
+		SettingFields: make(map[string]string),
+		UpdatedTime:   user.UpdatedTime.UnixMilli(),
+		Statuses:      make(map[string]*StatusItem),
+	}
+}
+
+func applyUserExts(userInfoMap map[string]*UserInfo, userExts []*models.UserExt) {
+	for _, ext := range userExts {
+		if ext == nil {
+			continue
+		}
+		userInfo := userInfoMap[ext.UserId]
+		if userInfo == nil {
+			continue
+		}
+		if ext.ItemType == int(commonservices.AttItemType_Att) {
+			userInfo.ExtFields[ext.ItemKey] = ext.ItemValue
+			if updatedTime := ext.UpdatedTime.UnixMilli(); updatedTime > userInfo.UpdatedTime {
+				userInfo.UpdatedTime = updatedTime
+			}
+		} else if ext.ItemType == int(commonservices.AttItemType_Setting) {
+			userInfo.SettingFields[ext.ItemKey] = ext.ItemValue
+		} else if ext.ItemType == int(commonservices.AttItemType_Status) {
+			userInfo.Statuses[ext.ItemKey] = &StatusItem{
+				ItemKey:     ext.ItemKey,
+				ItemValue:   ext.ItemValue,
+				UpdatedTime: ext.UpdatedTime.UnixMilli(),
+			}
+		}
+	}
 }
 
 func AddUser(ctx context.Context, userId, nickname, userPortrait string, extFields []*pbobjs.KvItem, settings []*pbobjs.KvItem, userType pbobjs.UserType) errs.IMErrorCode {
@@ -235,36 +360,11 @@ func GetUserInfo(appkey, userId string) (*UserInfo, bool) {
 			storage := userStorage.NewUserStorage()
 			user, err := storage.FindByUserId(appkey, userId)
 			if err == nil && user != nil {
-				userInfo := &UserInfo{
-					UserId:        userId,
-					UserType:      int(user.UserType),
-					Nickname:      user.Nickname,
-					UserPortrait:  user.UserPortrait,
-					ExtFields:     make(map[string]string),
-					SettingFields: make(map[string]string),
-					UpdatedTime:   user.UpdatedTime.UnixMilli(),
-					Statuses:      make(map[string]*StatusItem),
-				}
+				userInfo := userModelToUserInfo(user)
 				//load extfields
 				userExts, err := dbs.UserExtDao{}.QryExtFields(appkey, userId)
 				if err == nil {
-					for _, ext := range userExts {
-						if ext.ItemType == 0 {
-							userInfo.ExtFields[ext.ItemKey] = ext.ItemValue
-							updTime := ext.UpdatedTime.UnixMilli()
-							if updTime > userInfo.UpdatedTime {
-								userInfo.UpdatedTime = updTime
-							}
-						} else if ext.ItemType == 1 { //setting
-							userInfo.SettingFields[ext.ItemKey] = ext.ItemValue
-						} else if ext.ItemType == 2 {
-							userInfo.Statuses[ext.ItemKey] = &StatusItem{
-								ItemKey:     ext.ItemKey,
-								ItemValue:   ext.ItemValue,
-								UpdatedTime: ext.UpdatedTime.UnixMilli(),
-							}
-						}
-					}
+					applyUserExts(map[string]*UserInfo{userInfo.UserId: userInfo}, userExts)
 				} else {
 					logs.NewLogEntity().Error(err.Error())
 				}

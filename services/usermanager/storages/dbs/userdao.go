@@ -51,6 +51,34 @@ func (user UserDao) FindByUserId(appkey, userId string) (*models.User, error) {
 	}, nil
 }
 
+func (user UserDao) FindByUserIds(appkey string, userIds []string) ([]*models.User, error) {
+	ret := []*models.User{}
+	if len(userIds) == 0 {
+		return ret, nil
+	}
+	var items []*UserDao
+	err := dbcommons.GetDb().Where("app_key=? and user_id in (?)", appkey, userIds).Find(&items).Error
+	if err != nil {
+		return ret, err
+	}
+	for _, item := range items {
+		ret = append(ret, &models.User{
+			ID:           item.ID,
+			UserId:       item.UserId,
+			Nickname:     item.Nickname,
+			UserPortrait: item.UserPortrait,
+			Pinyin:       item.Pinyin,
+			UserType:     pbobjs.UserType(item.UserType),
+			Phone:        item.Phone,
+			Email:        item.Email,
+			LoginAccount: item.LoginAccount,
+			UpdatedTime:  item.UpdatedTime,
+			AppKey:       item.AppKey,
+		})
+	}
+	return ret, nil
+}
+
 func (user UserDao) FindByPhone(appkey, phone string) (*models.User, error) {
 	var item UserDao
 	err := dbcommons.GetDb().Where("app_key=? and phone=?", appkey, phone).Take(&item).Error
