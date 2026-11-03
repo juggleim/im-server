@@ -104,6 +104,21 @@ CREATE TABLE IF NOT EXISTS `banusers` (
   UNIQUE KEY `uniq_appkey_userid` (`app_key`,`user_id`,`scope_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '禁用用户';
 
+CREATE TABLE IF NOT EXISTS `banuserrules` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) NOT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `end_time` bigint NOT NULL DEFAULT '0',
+  `scope_key` varchar(20) NOT NULL DEFAULT 'default',
+  `scope_value` varchar(1000) NOT NULL DEFAULT '',
+  `scope_value_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `ext` varchar(100) DEFAULT NULL,
+  `app_key` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_ban_rule` (`app_key`,`user_id`,`scope_key`,`scope_value_hash`),
+  KEY `idx_ban_rule_query` (`app_key`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS `bc_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) NOT NULL COMMENT '会话id',
@@ -1073,5 +1088,5 @@ PARTITION BY RANGE (`partition_day`) (
   PARTITION `p_future` VALUES LESS THAN MAXVALUE
 );
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260908');
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20261103');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

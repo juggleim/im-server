@@ -795,6 +795,7 @@ message UserOnlineStatusResp{
 message UserOnlineItem {
   string userId = 1;
   bool isOnline = 2;
+  repeated UserOnlineDevice devices = 3;
 }
 
 message BanUsersReq{
@@ -809,6 +810,7 @@ message BanUser {
   string scopeKey = 4;
   string scopeValue = 5;
   string ext = 6;
+  repeated string scopeValues = 7;
 }
 
 message QryBanUsersReq{
@@ -1170,4 +1172,9 @@ message UserStatusItem{
 message UserStatusFriDispatch{
   DownMsg msg = 1;
   repeated string excludedUserIds = 2;
+}
+
+message UserOnlineDevice {
+  string deviceId = 1;
+  string platform = 2;
 }

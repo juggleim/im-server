@@ -216,10 +216,18 @@ func QryUserOnlineStatus(ctx *gin.Context) {
 	wg.Wait()
 	tmpMap.Range(func(key, value any) bool {
 		item := value.(*pbobjs.UserOnlineItem)
-		ret.Items = append(ret.Items, &models.UserOnlineStatusItem{
+		statusItem := &models.UserOnlineStatusItem{
 			UserId:   item.UserId,
 			IsOnline: item.IsOnline,
-		})
+			Devices:  make([]*models.UserOnlineDevice, 0, len(item.Devices)),
+		}
+		for _, device := range item.Devices {
+			statusItem.Devices = append(statusItem.Devices, &models.UserOnlineDevice{
+				DeviceId: device.DeviceId,
+				Platform: device.Platform,
+			})
+		}
+		ret.Items = append(ret.Items, statusItem)
 		return true
 	})
 	tools.SuccessHttpResp(ctx, ret)
@@ -246,11 +254,12 @@ func UserBan(ctx *gin.Context) {
 				endTime = time.Now().UnixMilli() + user.EndTimeOffset
 			}
 			pbBanUser := &pbobjs.BanUser{
-				UserId:     user.UserId,
-				EndTime:    endTime,
-				ScopeKey:   user.ScopeKey,
-				ScopeValue: user.ScopeValue,
-				Ext:        user.Ext,
+				UserId:      user.UserId,
+				EndTime:     endTime,
+				ScopeKey:    user.ScopeKey,
+				ScopeValue:  user.ScopeValue,
+				ScopeValues: user.ScopeValues,
+				Ext:         user.Ext,
 			}
 			if arr, ok = groups[node.Name]; ok {
 				arr = append(arr, pbBanUser)
@@ -293,10 +302,11 @@ func UserUnBan(ctx *gin.Context) {
 			var arr []*pbobjs.BanUser
 			var ok bool
 			pbBanUser := &pbobjs.BanUser{
-				UserId:     user.UserId,
-				EndTime:    user.EndTime,
-				ScopeKey:   user.ScopeKey,
-				ScopeValue: user.ScopeValue,
+				UserId:      user.UserId,
+				EndTime:     user.EndTime,
+				ScopeKey:    user.ScopeKey,
+				ScopeValue:  user.ScopeValue,
+				ScopeValues: user.ScopeValues,
 			}
 			if arr, ok = groups[node.Name]; ok {
 				arr = append(arr, pbBanUser)
@@ -362,6 +372,7 @@ func QryBanUsers(ctx *gin.Context) {
 			EndTime:     u.EndTime,
 			ScopeKey:    u.ScopeKey,
 			ScopeValue:  u.ScopeValue,
+			ScopeValues: u.ScopeValues,
 			Ext:         u.Ext,
 		})
 	}

@@ -7,7 +7,6 @@ import (
 	"im-server/services/connectmanager/dbs"
 	"im-server/services/connectmanager/server/codec"
 	"im-server/services/connectmanager/server/imcontext"
-	"strings"
 	"time"
 )
 
@@ -80,25 +79,17 @@ func CheckLogin(ctx imcontext.WsHandleContext, msg *codec.ConnectMsgBody) (int32
 	banUser, exist := GetBanUserFromCache(appkey, token.UserId)
 	if exist {
 		currentTime := time.Now().UnixMilli()
-		if ban, exist := banUser.Items[string(dbs.UserBanScopeDefault)]; exist {
-			if ban.EndTime == 0 || ban.EndTime > currentTime {
-				return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
-			}
+		if ban, blocked := banUser.ActiveBan(string(dbs.UserBanScopeDefault), "", currentTime); blocked {
+			return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
 		}
-		if ban, exist := banUser.Items[string(dbs.UserBanScopePlatform)]; exist && strings.Contains(ban.ScopeValue, msg.Platform) {
-			if ban.EndTime == 0 || ban.EndTime > currentTime {
-				return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
-			}
+		if ban, blocked := banUser.ActiveBan(string(dbs.UserBanScopePlatform), msg.Platform, currentTime); blocked {
+			return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
 		}
-		if ban, exist := banUser.Items[string(dbs.UserBanScopeDevice)]; exist && strings.Contains(ban.ScopeValue, msg.DeviceId) {
-			if ban.EndTime == 0 || ban.EndTime > currentTime {
-				return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
-			}
+		if ban, blocked := banUser.ActiveBan(string(dbs.UserBanScopeDevice), msg.DeviceId, currentTime); blocked {
+			return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
 		}
-		if ban, exist := banUser.Items[string(dbs.UserBanScopeIp)]; exist && strings.Contains(ban.ScopeValue, msg.ClientIp) {
-			if ban.EndTime == 0 || ban.EndTime > currentTime {
-				return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
-			}
+		if ban, blocked := banUser.ActiveBan(string(dbs.UserBanScopeIp), msg.ClientIp, currentTime); blocked {
+			return int32(errs.IMErrorCode_CONNECT_USER_BLOCK), ban.Ext
 		}
 	}
 

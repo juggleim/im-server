@@ -7633,6 +7633,7 @@ type UserOnlineItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	IsOnline      bool                   `protobuf:"varint,2,opt,name=isOnline,proto3" json:"isOnline,omitempty"`
+	Devices       []*UserOnlineDevice    `protobuf:"bytes,3,rep,name=devices,proto3" json:"devices,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7679,6 +7680,13 @@ func (x *UserOnlineItem) GetIsOnline() bool {
 		return x.IsOnline
 	}
 	return false
+}
+
+func (x *UserOnlineItem) GetDevices() []*UserOnlineDevice {
+	if x != nil {
+		return x.Devices
+	}
+	return nil
 }
 
 type BanUsersReq struct {
@@ -7741,6 +7749,7 @@ type BanUser struct {
 	ScopeKey      string                 `protobuf:"bytes,4,opt,name=scopeKey,proto3" json:"scopeKey,omitempty"`
 	ScopeValue    string                 `protobuf:"bytes,5,opt,name=scopeValue,proto3" json:"scopeValue,omitempty"`
 	Ext           string                 `protobuf:"bytes,6,opt,name=ext,proto3" json:"ext,omitempty"`
+	ScopeValues   []string               `protobuf:"bytes,7,rep,name=scopeValues,proto3" json:"scopeValues,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7815,6 +7824,13 @@ func (x *BanUser) GetExt() string {
 		return x.Ext
 	}
 	return ""
+}
+
+func (x *BanUser) GetScopeValues() []string {
+	if x != nil {
+		return x.ScopeValues
+	}
+	return nil
 }
 
 type QryBanUsersReq struct {
@@ -11279,6 +11295,58 @@ func (x *UserStatusFriDispatch) GetExcludedUserIds() []string {
 	return nil
 }
 
+type UserOnlineDevice struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DeviceId      string                 `protobuf:"bytes,1,opt,name=deviceId,proto3" json:"deviceId,omitempty"`
+	Platform      string                 `protobuf:"bytes,2,opt,name=platform,proto3" json:"platform,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserOnlineDevice) Reset() {
+	*x = UserOnlineDevice{}
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[155]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserOnlineDevice) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserOnlineDevice) ProtoMessage() {}
+
+func (x *UserOnlineDevice) ProtoReflect() protoreflect.Message {
+	mi := &file_commons_pbdefines_appmessages_proto_msgTypes[155]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserOnlineDevice.ProtoReflect.Descriptor instead.
+func (*UserOnlineDevice) Descriptor() ([]byte, []int) {
+	return file_commons_pbdefines_appmessages_proto_rawDescGZIP(), []int{155}
+}
+
+func (x *UserOnlineDevice) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *UserOnlineDevice) GetPlatform() string {
+	if x != nil {
+		return x.Platform
+	}
+	return ""
+}
+
 var File_commons_pbdefines_appmessages_proto protoreflect.FileDescriptor
 
 const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
@@ -11975,13 +12043,14 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\x13UserOnlineStatusReq\x12\x18\n" +
 	"\auserIds\x18\x01 \x03(\tR\auserIds\"=\n" +
 	"\x14UserOnlineStatusResp\x12%\n" +
-	"\x05items\x18\x01 \x03(\v2\x0f.UserOnlineItemR\x05items\"D\n" +
+	"\x05items\x18\x01 \x03(\v2\x0f.UserOnlineItemR\x05items\"q\n" +
 	"\x0eUserOnlineItem\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x1a\n" +
-	"\bisOnline\x18\x02 \x01(\bR\bisOnline\"I\n" +
+	"\bisOnline\x18\x02 \x01(\bR\bisOnline\x12+\n" +
+	"\adevices\x18\x03 \x03(\v2\x11.UserOnlineDeviceR\adevices\"I\n" +
 	"\vBanUsersReq\x12$\n" +
 	"\bbanUsers\x18\x01 \x03(\v2\b.BanUserR\bbanUsers\x12\x14\n" +
-	"\x05isAdd\x18\x02 \x01(\bR\x05isAdd\"\xab\x01\n" +
+	"\x05isAdd\x18\x02 \x01(\bR\x05isAdd\"\xcd\x01\n" +
 	"\aBanUser\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
 	"\aendTime\x18\x02 \x01(\x03R\aendTime\x12 \n" +
@@ -11990,7 +12059,8 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\n" +
 	"scopeValue\x18\x05 \x01(\tR\n" +
 	"scopeValue\x12\x10\n" +
-	"\x03ext\x18\x06 \x01(\tR\x03ext\"X\n" +
+	"\x03ext\x18\x06 \x01(\tR\x03ext\x12 \n" +
+	"\vscopeValues\x18\a \x03(\tR\vscopeValues\"X\n" +
 	"\x0eQryBanUsersReq\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x03R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\tR\x06offset\x12\x18\n" +
@@ -12253,7 +12323,10 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\fonlineStatus\x18\x02 \x01(\v2\x0f.UserOnlineItemR\fonlineStatus\"]\n" +
 	"\x15UserStatusFriDispatch\x12\x1a\n" +
 	"\x03msg\x18\x01 \x01(\v2\b.DownMsgR\x03msg\x12(\n" +
-	"\x0fexcludedUserIds\x18\x02 \x03(\tR\x0fexcludedUserIds*x\n" +
+	"\x0fexcludedUserIds\x18\x02 \x03(\tR\x0fexcludedUserIds\"J\n" +
+	"\x10UserOnlineDevice\x12\x1a\n" +
+	"\bdeviceId\x18\x01 \x01(\tR\bdeviceId\x12\x1a\n" +
+	"\bplatform\x18\x02 \x01(\tR\bplatform*x\n" +
 	"\n" +
 	"RpcMsgType\x12\v\n" +
 	"\aUserPub\x10\x00\x12\x0e\n" +
@@ -12347,7 +12420,7 @@ func file_commons_pbdefines_appmessages_proto_rawDescGZIP() []byte {
 }
 
 var file_commons_pbdefines_appmessages_proto_enumTypes = make([]protoimpl.EnumInfo, 15)
-var file_commons_pbdefines_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 166)
+var file_commons_pbdefines_appmessages_proto_msgTypes = make([]protoimpl.MessageInfo, 167)
 var file_commons_pbdefines_appmessages_proto_goTypes = []any{
 	(RpcMsgType)(0),                  // 0: RpcMsgType
 	(MentionType)(0),                 // 1: MentionType
@@ -12519,21 +12592,22 @@ var file_commons_pbdefines_appmessages_proto_goTypes = []any{
 	(*UserStatusList)(nil),           // 167: UserStatusList
 	(*UserStatusItem)(nil),           // 168: UserStatusItem
 	(*UserStatusFriDispatch)(nil),    // 169: UserStatusFriDispatch
-	nil,                              // 170: RpcMessageWraper.ExtParamsEntry
-	nil,                              // 171: DownMsg.TransMsgMapEntry
-	nil,                              // 172: ConverExts.ConverTagsEntry
-	nil,                              // 173: ConverExts.GlobalConverTagsEntry
-	nil,                              // 174: UserInfosResp.UserInfoMapEntry
-	nil,                              // 175: CheckFriendsResp.CheckResultsEntry
-	nil,                              // 176: GroupInfosResp.GroupInfoMapEntry
-	nil,                              // 177: CheckGroupMembersResp.MemberIdMapEntry
-	nil,                              // 178: QryGrpMemberSettingsResp.GroupSettingsEntry
-	nil,                              // 179: QryGrpMemberSettingsResp.MemberSettingsEntry
-	nil,                              // 180: QryGrpMemberSettingsResp.MemberExtsEntry
+	(*UserOnlineDevice)(nil),         // 170: UserOnlineDevice
+	nil,                              // 171: RpcMessageWraper.ExtParamsEntry
+	nil,                              // 172: DownMsg.TransMsgMapEntry
+	nil,                              // 173: ConverExts.ConverTagsEntry
+	nil,                              // 174: ConverExts.GlobalConverTagsEntry
+	nil,                              // 175: UserInfosResp.UserInfoMapEntry
+	nil,                              // 176: CheckFriendsResp.CheckResultsEntry
+	nil,                              // 177: GroupInfosResp.GroupInfoMapEntry
+	nil,                              // 178: CheckGroupMembersResp.MemberIdMapEntry
+	nil,                              // 179: QryGrpMemberSettingsResp.GroupSettingsEntry
+	nil,                              // 180: QryGrpMemberSettingsResp.MemberSettingsEntry
+	nil,                              // 181: QryGrpMemberSettingsResp.MemberExtsEntry
 }
 var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	0,   // 0: RpcMessageWraper.rpcMsgType:type_name -> RpcMsgType
-	170, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
+	171, // 1: RpcMessageWraper.extParams:type_name -> RpcMessageWraper.ExtParamsEntry
 	21,  // 2: RpcMessageWraper.modifiedMsg:type_name -> DownMsg
 	100, // 3: RpcMessageWraper.senderInfo:type_name -> UserInfo
 	132, // 4: RpcMessageWraper.senderFriendInfo:type_name -> FriendInfo
@@ -12559,7 +12633,7 @@ var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	54,  // 24: DownMsg.msgExSet:type_name -> MsgExtItem
 	54,  // 25: DownMsg.msgExts:type_name -> MsgExtItem
 	98,  // 26: DownMsg.converTags:type_name -> ConverTag
-	171, // 27: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
+	172, // 27: DownMsg.transMsgMap:type_name -> DownMsg.TransMsgMapEntry
 	135, // 28: DownMsg.grpMemberInfo:type_name -> GrpMemberInfo
 	132, // 29: DownMsg.friendInfo:type_name -> FriendInfo
 	100, // 30: DownMsg.senderInfo:type_name -> UserInfo
@@ -12651,62 +12725,63 @@ var file_commons_pbdefines_appmessages_proto_depIdxs = []int32{
 	34,  // 116: TagConvers.convers:type_name -> SimpleConversation
 	98,  // 117: UserConverTags.tags:type_name -> ConverTag
 	8,   // 118: ConverTag.tagType:type_name -> ConverTagType
-	172, // 119: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
-	173, // 120: ConverExts.globalConverTags:type_name -> ConverExts.GlobalConverTagsEntry
+	173, // 119: ConverExts.converTags:type_name -> ConverExts.ConverTagsEntry
+	174, // 120: ConverExts.globalConverTags:type_name -> ConverExts.GlobalConverTagsEntry
 	31,  // 121: UserInfo.extFields:type_name -> KvItem
 	31,  // 122: UserInfo.settings:type_name -> KvItem
 	31,  // 123: UserInfo.statuses:type_name -> KvItem
 	9,   // 124: UserInfo.userType:type_name -> UserType
 	100, // 125: UserInfos.userInfos:type_name -> UserInfo
-	174, // 126: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
+	175, // 126: UserInfosResp.userInfoMap:type_name -> UserInfosResp.UserInfoMapEntry
 	31,  // 127: UserRegResp.extFields:type_name -> KvItem
 	108, // 128: UserOnlineStatusResp.items:type_name -> UserOnlineItem
-	110, // 129: BanUsersReq.banUsers:type_name -> BanUser
-	110, // 130: QryBanUsersResp.items:type_name -> BanUser
-	115, // 131: QryBlockUsersResp.items:type_name -> BlockUser
-	10,  // 132: OnlineStatus.type:type_name -> OnlineType
-	121, // 133: UserUndisturb.rules:type_name -> UserUndisturbItem
-	129, // 134: FriendMembersReq.friendMembers:type_name -> FriendMember
-	129, // 135: QryFriendsResp.items:type_name -> FriendMember
-	175, // 136: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
-	132, // 137: FriendInfos.items:type_name -> FriendInfo
-	31,  // 138: GroupInfo.extFields:type_name -> KvItem
-	31,  // 139: GroupInfo.settings:type_name -> KvItem
-	31,  // 140: GrpMemberInfo.extFields:type_name -> KvItem
-	31,  // 141: GroupMembersReq.extFields:type_name -> KvItem
-	31,  // 142: GroupMembersReq.settings:type_name -> KvItem
-	176, // 143: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
-	144, // 144: GroupMembersResp.items:type_name -> GroupMember
-	31,  // 145: GroupMember.extFields:type_name -> KvItem
-	31,  // 146: GroupMember.settings:type_name -> KvItem
-	9,   // 147: GroupMember.memberType:type_name -> UserType
-	177, // 148: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
-	178, // 149: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
-	179, // 150: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
-	180, // 151: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
-	11,  // 152: RtcConverBindReq.action:type_name -> RtcConverBindAction
-	4,   // 153: RtcConverBindReq.channelType:type_name -> ChannelType
-	12,  // 154: QryFileCredReq.file_type:type_name -> FileType
-	13,  // 155: QryFileCredResp.oss_type:type_name -> OssType
-	155, // 156: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
-	156, // 157: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
-	159, // 158: SubMsgs.subMsgs:type_name -> SubMsg
-	21,  // 159: SubMsg.msg:type_name -> DownMsg
-	10,  // 160: OnlineOfflineMsg.type:type_name -> OnlineType
-	162, // 161: TransReq.items:type_name -> TransItem
-	163, // 162: BindDevices.devices:type_name -> BindDevice
-	14,  // 163: SubRelChangeReq.busType:type_name -> StatusSubBusType
-	168, // 164: UserStatusList.items:type_name -> UserStatusItem
-	108, // 165: UserStatusItem.onlineStatus:type_name -> UserOnlineItem
-	21,  // 166: UserStatusFriDispatch.msg:type_name -> DownMsg
-	23,  // 167: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
-	100, // 168: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
-	134, // 169: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
-	170, // [170:170] is the sub-list for method output_type
-	170, // [170:170] is the sub-list for method input_type
-	170, // [170:170] is the sub-list for extension type_name
-	170, // [170:170] is the sub-list for extension extendee
-	0,   // [0:170] is the sub-list for field type_name
+	170, // 129: UserOnlineItem.devices:type_name -> UserOnlineDevice
+	110, // 130: BanUsersReq.banUsers:type_name -> BanUser
+	110, // 131: QryBanUsersResp.items:type_name -> BanUser
+	115, // 132: QryBlockUsersResp.items:type_name -> BlockUser
+	10,  // 133: OnlineStatus.type:type_name -> OnlineType
+	121, // 134: UserUndisturb.rules:type_name -> UserUndisturbItem
+	129, // 135: FriendMembersReq.friendMembers:type_name -> FriendMember
+	129, // 136: QryFriendsResp.items:type_name -> FriendMember
+	176, // 137: CheckFriendsResp.checkResults:type_name -> CheckFriendsResp.CheckResultsEntry
+	132, // 138: FriendInfos.items:type_name -> FriendInfo
+	31,  // 139: GroupInfo.extFields:type_name -> KvItem
+	31,  // 140: GroupInfo.settings:type_name -> KvItem
+	31,  // 141: GrpMemberInfo.extFields:type_name -> KvItem
+	31,  // 142: GroupMembersReq.extFields:type_name -> KvItem
+	31,  // 143: GroupMembersReq.settings:type_name -> KvItem
+	177, // 144: GroupInfosResp.groupInfoMap:type_name -> GroupInfosResp.GroupInfoMapEntry
+	144, // 145: GroupMembersResp.items:type_name -> GroupMember
+	31,  // 146: GroupMember.extFields:type_name -> KvItem
+	31,  // 147: GroupMember.settings:type_name -> KvItem
+	9,   // 148: GroupMember.memberType:type_name -> UserType
+	178, // 149: CheckGroupMembersResp.memberIdMap:type_name -> CheckGroupMembersResp.MemberIdMapEntry
+	179, // 150: QryGrpMemberSettingsResp.groupSettings:type_name -> QryGrpMemberSettingsResp.GroupSettingsEntry
+	180, // 151: QryGrpMemberSettingsResp.memberSettings:type_name -> QryGrpMemberSettingsResp.MemberSettingsEntry
+	181, // 152: QryGrpMemberSettingsResp.memberExts:type_name -> QryGrpMemberSettingsResp.MemberExtsEntry
+	11,  // 153: RtcConverBindReq.action:type_name -> RtcConverBindAction
+	4,   // 154: RtcConverBindReq.channelType:type_name -> ChannelType
+	12,  // 155: QryFileCredReq.file_type:type_name -> FileType
+	13,  // 156: QryFileCredResp.oss_type:type_name -> OssType
+	155, // 157: QryFileCredResp.qiniu_cred:type_name -> QiNiuCredResp
+	156, // 158: QryFileCredResp.pre_sign_resp:type_name -> PreSignResp
+	159, // 159: SubMsgs.subMsgs:type_name -> SubMsg
+	21,  // 160: SubMsg.msg:type_name -> DownMsg
+	10,  // 161: OnlineOfflineMsg.type:type_name -> OnlineType
+	162, // 162: TransReq.items:type_name -> TransItem
+	163, // 163: BindDevices.devices:type_name -> BindDevice
+	14,  // 164: SubRelChangeReq.busType:type_name -> StatusSubBusType
+	168, // 165: UserStatusList.items:type_name -> UserStatusItem
+	108, // 166: UserStatusItem.onlineStatus:type_name -> UserOnlineItem
+	21,  // 167: UserStatusFriDispatch.msg:type_name -> DownMsg
+	23,  // 168: DownMsg.TransMsgMapEntry.value:type_name -> TransMsgContent
+	100, // 169: UserInfosResp.UserInfoMapEntry.value:type_name -> UserInfo
+	134, // 170: GroupInfosResp.GroupInfoMapEntry.value:type_name -> GroupInfo
+	171, // [171:171] is the sub-list for method output_type
+	171, // [171:171] is the sub-list for method input_type
+	171, // [171:171] is the sub-list for extension type_name
+	171, // [171:171] is the sub-list for extension extendee
+	0,   // [0:171] is the sub-list for field type_name
 }
 
 func init() { file_commons_pbdefines_appmessages_proto_init() }
@@ -12724,7 +12799,7 @@ func file_commons_pbdefines_appmessages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_commons_pbdefines_appmessages_proto_rawDesc), len(file_commons_pbdefines_appmessages_proto_rawDesc)),
 			NumEnums:      15,
-			NumMessages:   166,
+			NumMessages:   167,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
