@@ -3,6 +3,7 @@ package tools
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"hash/crc32"
 	"im-server/commons/pbdefines/pbobjs"
 	"sync/atomic"
@@ -131,6 +132,24 @@ func ParseTimeFromMsgId(msgId string) int64 {
 	t = t << 2
 	t = t | intVal
 	return t
+}
+
+var ErrInvalidMsgId = errors.New("invalid msg id")
+
+func ParseTimeFromMsgIdStrict(msgId string) (int64, error) {
+	if len(msgId) != 16 {
+		return 0, ErrInvalidMsgId
+	}
+	for i := 0; i < len(msgId); i++ {
+		if _, ok := base32DecodeChars[msgId[i:i+1]]; !ok {
+			return 0, ErrInvalidMsgId
+		}
+	}
+	t := ParseTimeFromMsgId(msgId)
+	if t <= 0 {
+		return 0, ErrInvalidMsgId
+	}
+	return t, nil
 }
 
 func ParseChannelTypeFromMsgId(msgId string) pbobjs.ChannelType {

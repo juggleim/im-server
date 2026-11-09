@@ -46,7 +46,7 @@ func init() {
 	userActivitiesCache = caches.NewLruCacheWithAddReadTimeout("useractivity_cache", 10000, func(key, value interface{}) {
 		counter := value.(*UserActivityCounter)
 		dao := dbs.UserActivityDao{}
-		dao.IncrByStep(counter.Appkey, counter.UserId, getDbTimeMark(), counter.Count)
+		dao.IncrByStep(counter.Appkey, counter.UserId, getUserActivityTimeMark(), counter.Count)
 	}, 10*time.Minute, 10*time.Minute)
 	statLocks = tools.NewSegmentatedLocks(128)
 }
@@ -292,6 +292,10 @@ func getDbTimeMark() int64 {
 	current := time.Now().Unix()
 	var day int64 = 24 * 60 * 60
 	return current / day * day
+}
+
+func getUserActivityTimeMark() int64 {
+	return dayTimeMark(time.Now())
 }
 
 func getRealtimeDbTimeMark() int64 {

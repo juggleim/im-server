@@ -243,6 +243,7 @@ func AddGroupMembers(ctx context.Context, req *pbobjs.GroupMembersReq) (result e
 		needAddMemberIds, currentMemberCount, coldTrace, err = prepareColdGroupMemberAdd(appKey, groupId, memberIds)
 		phases.coldCountDB = coldTrace.countDB
 		phases.coldExistingDB = coldTrace.existingDB
+		phases.coldCountSkipped = coldTrace.countSkipped
 		if err != nil {
 			phases.coldPathFailed = true
 			logs.WithContext(ctx).Errorf("[G_ADD_MEMBERS_COLD_PATH_FAILED] group_id:%s\terr:%v", groupId, err)
@@ -250,6 +251,11 @@ func AddGroupMembers(ctx context.Context, req *pbobjs.GroupMembersReq) (result e
 		}
 	}
 	addedMemberCount = len(needAddMemberIds)
+	if phases.coldPath && addedMemberCount == 0 {
+		// An idempotent cold add needs neither a total count nor persistence.
+		groupMemberCount = -1
+		return errs.IMErrorCode_SUCCESS
+	}
 	groupMemberCount = currentMemberCount + addedMemberCount
 	//check group member count limit
 	if groupMemberCount > appInfo.MaxGrpMemberCount {

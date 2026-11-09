@@ -63,6 +63,7 @@ type groupAddPhaseDurations struct {
 	conversationSchedule  time.Duration
 	coldPath              bool
 	coldPathFailed        bool
+	coldCountSkipped      bool
 }
 
 var groupAddMetrics = struct {
@@ -88,6 +89,7 @@ var groupAddMetrics = struct {
 	memberCacheMisses     atomic.Uint64
 	coldPathRequests      atomic.Uint64
 	coldPathFailures      atomic.Uint64
+	coldCountSkipped      atomic.Uint64
 	snapshotRuns          atomic.Uint64
 	requestedMembers      atomic.Uint64
 	addedMembers          atomic.Uint64
@@ -147,6 +149,9 @@ func observeGroupAdd(
 	if phases.coldPathFailed {
 		groupAddMetrics.coldPathFailures.Add(1)
 	}
+	if phases.coldCountSkipped {
+		groupAddMetrics.coldCountSkipped.Add(1)
+	}
 	groupAddMetrics.cacheUpdate.observe(phases.cacheUpdate)
 	groupAddMetrics.memberDB.observe(phases.memberDB)
 	groupAddMetrics.postPersistSchedule.observe(phases.postPersistSchedule)
@@ -168,9 +173,9 @@ func observeGroupAdd(
 	}
 	groupAddMetrics.slowRequests.Add(1)
 	if groupAddSlowLogLimiter.Allow() {
-		logs.WithContext(ctx).Warnf("[G_ADD_MEMBERS_SLOW] group_id:%s\tresult:%d\tgroup_member_count:%d\trequest_member_count:%d\tadd_member_count:%d\tmember_cache_hit:%t\tcold_path:%t\ttotal:%v\tgroup_info:%v\tmember_cache:%v\tmember_cache_load:%v\tmember_cache_shared_wait:%v\tmember_state_lock_wait:%v\tmember_lock_wait:%v\tmember_filter:%v\tcold_count_db:%v\tcold_existing_db:%v\tcache_update:%v\tmember_db:%v\tpost_persist_schedule:%v\tconversation_schedule:%v",
+		logs.WithContext(ctx).Warnf("[G_ADD_MEMBERS_SLOW] group_id:%s\tresult:%d\tgroup_member_count:%d\trequest_member_count:%d\tadd_member_count:%d\tmember_cache_hit:%t\tcold_path:%t\tcold_count_skipped:%t\ttotal:%v\tgroup_info:%v\tmember_cache:%v\tmember_cache_load:%v\tmember_cache_shared_wait:%v\tmember_state_lock_wait:%v\tmember_lock_wait:%v\tmember_filter:%v\tcold_count_db:%v\tcold_existing_db:%v\tcache_update:%v\tmember_db:%v\tpost_persist_schedule:%v\tconversation_schedule:%v",
 			groupID, result, groupMemberCount, requestedMemberCount, addedMemberCount, cacheHit, phases.coldPath,
-			total, phases.groupInfo, phases.memberCache, phases.memberCacheLoad, phases.memberCacheSharedWait,
+			phases.coldCountSkipped, total, phases.groupInfo, phases.memberCache, phases.memberCacheLoad, phases.memberCacheSharedWait,
 			phases.memberStateLockWait, phases.memberLockWait, phases.memberFilter,
 			phases.coldCountDB, phases.coldExistingDB, phases.cacheUpdate,
 			phases.memberDB, phases.postPersistSchedule, phases.conversationSchedule)
@@ -202,6 +207,7 @@ func init() {
 			"member_cache_misses":      groupAddMetrics.memberCacheMisses.Load(),
 			"cold_path_requests":       groupAddMetrics.coldPathRequests.Load(),
 			"cold_path_failures":       groupAddMetrics.coldPathFailures.Load(),
+			"cold_count_skipped":       groupAddMetrics.coldCountSkipped.Load(),
 			"snapshot_runs":            groupAddMetrics.snapshotRuns.Load(),
 			"requested_members":        groupAddMetrics.requestedMembers.Load(),
 			"added_members":            groupAddMetrics.addedMembers.Load(),

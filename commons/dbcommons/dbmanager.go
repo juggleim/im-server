@@ -3,7 +3,6 @@ package dbcommons
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -46,8 +45,7 @@ func InitMysql() error {
 	})
 
 	if err != nil {
-		log.Fatalf("connect mysql err: %v", err)
-		return err
+		return fmt.Errorf("connect mysql: %w", err)
 	}
 
 	if configures.Config.Mysql.Debug {
@@ -56,8 +54,7 @@ func InitMysql() error {
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Fatalf("get sql db err: %v", err)
-		return err
+		return fmt.Errorf("get sql db: %w", err)
 	}
 	sqlDB.SetMaxIdleConns(300)
 	sqlDB.SetMaxOpenConns(500)

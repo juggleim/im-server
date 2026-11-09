@@ -60,15 +60,14 @@ func SavePrivateHisMsg(ctx context.Context, converId, senderId, receiverId strin
 }
 func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownMsg, groupMemberCount int) {
 	appkey := bases.GetAppKeyFromCtx(ctx)
+	defer PurgeGroupHisMsg(appkey, downMsg.MsgTime)
 	grpHisMsgStorage := storages.NewGroupHisMsgStorage()
 	msgBs, _ := tools.PbMarshal(downMsg)
 
 	isPortion := 0
+	rels := []models.GroupPortionRel{}
 	if len(downMsg.ToUserIds) > 0 {
 		isPortion = 1
-		//add portion msgs
-		portionStorage := storages.NewGroupPortionMsgStorage()
-		rels := []models.GroupPortionRel{}
 		containsSender := false
 		for _, toUserId := range downMsg.ToUserIds {
 			if toUserId == downMsg.SenderId {
@@ -95,12 +94,8 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 				AppKey:      appkey,
 			})
 		}
-		err := portionStorage.BatchUpsert(rels)
-		if err != nil {
-			logs.WithContext(ctx).Error(err.Error())
-		}
 	}
-	err := grpHisMsgStorage.SaveGroupHisMsg(models.GroupHisMsg{
+	groupHisMsg := models.GroupHisMsg{
 		HisMsg: models.HisMsg{
 			ConverId:          converId,
 			SubChannel:        downMsg.SubChannel,
@@ -118,30 +113,39 @@ func SaveGroupHisMsg(ctx context.Context, converId string, downMsg *pbobjs.DownM
 		},
 		MemberCount: groupMemberCount,
 		IsPortion:   isPortion,
-	})
-	if err != nil {
-		logs.WithContext(ctx).Errorf("msg_id:%s\terr:%v", downMsg.MsgId, err)
 	}
 	noSender := bases.GetNoSendboxFromCtx(ctx)
+	delMsgs := []models.GroupDelHisMsg{}
 	if noSender {
-		gDelStorage := storages.NewGroupDelHisMsgStorage()
-		err := gDelStorage.BatchCreate([]models.GroupDelHisMsg{
-			{
-				UserId:     downMsg.SenderId,
-				TargetId:   converId,
-				SubChannel: downMsg.SubChannel,
-				MsgId:      downMsg.MsgId,
-				MsgTime:    downMsg.MsgTime,
-				MsgSeq:     downMsg.MsgSeqNo,
-				AppKey:     appkey,
-			},
+		delMsgs = append(delMsgs, models.GroupDelHisMsg{
+			UserId:     downMsg.SenderId,
+			TargetId:   converId,
+			SubChannel: downMsg.SubChannel,
+			MsgId:      downMsg.MsgId,
+			MsgTime:    downMsg.MsgTime,
+			MsgSeq:     downMsg.MsgSeqNo,
+			AppKey:     appkey,
 		})
-		if err != nil {
+	}
+	if atomicStorage, ok := grpHisMsgStorage.(models.IGroupHisMsgAtomicStorage); ok {
+		if err := atomicStorage.SaveGroupHisMsgAtomic(groupHisMsg, rels, delMsgs); err != nil {
+			logs.WithContext(ctx).Errorf("msg_id:%s\terr:%v", downMsg.MsgId, err)
+		}
+		return
+	}
+	if len(rels) > 0 {
+		if err := storages.NewGroupPortionMsgStorage().BatchUpsert(rels); err != nil {
 			logs.WithContext(ctx).Error(err.Error())
 		}
 	}
-	//purge group history msg
-	PurgeGroupHisMsg(appkey, downMsg.MsgTime)
+	if err := grpHisMsgStorage.SaveGroupHisMsg(groupHisMsg); err != nil {
+		logs.WithContext(ctx).Errorf("msg_id:%s\terr:%v", downMsg.MsgId, err)
+	}
+	if len(delMsgs) > 0 {
+		if err := storages.NewGroupDelHisMsgStorage().BatchCreate(delMsgs); err != nil {
+			logs.WithContext(ctx).Error(err.Error())
+		}
+	}
 }
 
 func SaveSystemHisMsg(ctx context.Context, converId, senderId, receiverId string, downMsg *pbobjs.DownMsg) {
@@ -925,6 +929,7 @@ type CleanMsg struct {
 var delMsgsType string = msgdefines.CmdMsgType_DelMsgs
 
 type DelMsgs struct {
+	SubChannel  string    `json:"sub_channel"`
 	TargetId    string    `json:"target_id"`
 	ChannelType int32     `json:"channel_type"`
 	Msgs        []*DelMsg `json:"msgs"`
@@ -938,6 +943,7 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	delMsgIds := []string{}
 	delMsgs := &DelMsgs{
+		SubChannel:  req.SubChannel,
 		TargetId:    req.TargetId,
 		ChannelType: int32(req.ChannelType),
 		Msgs:        []*DelMsg{},
@@ -945,18 +951,19 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 	if len(req.Msgs) <= 0 {
 		return errs.IMErrorCode_SUCCESS
 	}
+	if err := normalizeDelMsgTimes(req.Msgs); err != nil {
+		logs.WithContext(ctx).Error(err.Error())
+		return errs.IMErrorCode_MSG_PARAM_ILLEGAL
+	}
 	converId := commonservices.GetConversationId(userId, req.TargetId, req.ChannelType)
 	if req.DelScope == 0 { //one-way
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			items := []models.PrivateDelHisMsg{}
 			for _, msg := range req.Msgs {
-				items = append(items, models.PrivateDelHisMsg{
-					UserId:   userId,
-					TargetId: req.TargetId,
-					MsgId:    msg.MsgId,
-					MsgTime:  msg.MsgTime,
-					AppKey:   appkey,
-				})
+				if msg == nil {
+					continue
+				}
+				items = append(items, newPrivateDelHisMsg(userId, req.TargetId, req.SubChannel, appkey, msg))
 				delMsgs.Msgs = append(delMsgs.Msgs, &DelMsg{
 					MsgId: msg.MsgId,
 				})
@@ -970,13 +977,10 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 			gDelStorage := storages.NewGroupDelHisMsgStorage()
 			items := []models.GroupDelHisMsg{}
 			for _, msg := range req.Msgs {
-				items = append(items, models.GroupDelHisMsg{
-					UserId:   userId,
-					TargetId: req.TargetId,
-					MsgId:    msg.MsgId,
-					MsgTime:  msg.MsgTime,
-					AppKey:   appkey,
-				})
+				if msg == nil {
+					continue
+				}
+				items = append(items, newGroupDelHisMsg(userId, req.TargetId, req.SubChannel, appkey, msg))
 				delMsgs.Msgs = append(delMsgs.Msgs, &DelMsg{
 					MsgId: msg.MsgId,
 				})
@@ -994,12 +998,14 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					MsgType:    delMsgsType,
 					MsgContent: bs,
 					Flags:      flag,
+					SubChannel: req.SubChannel,
 				}, &bases.OnlySendboxOption{})
 			} else if req.ChannelType == pbobjs.ChannelType_Group {
 				commonservices.AsyncGroupMsg(ctx, userId, req.TargetId, &pbobjs.UpMsg{
 					MsgType:    delMsgsType,
 					MsgContent: bs,
 					Flags:      flag,
+					SubChannel: req.SubChannel,
 				}, &bases.OnlySendboxOption{})
 			}
 			//delete mention msg
@@ -1010,6 +1016,9 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 		if req.ChannelType == pbobjs.ChannelType_Private {
 			pStorage := storages.NewPrivateHisMsgStorage()
 			for _, msg := range req.Msgs {
+				if msg == nil {
+					continue
+				}
 				delMsgIds = append(delMsgIds, msg.MsgId)
 				delMsgs.Msgs = append(delMsgs.Msgs, &DelMsg{
 					MsgId: msg.MsgId,
@@ -1032,6 +1041,9 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 		} else if req.ChannelType == pbobjs.ChannelType_Group {
 			gStorage := storages.NewGroupHisMsgStorage()
 			for _, msg := range req.Msgs {
+				if msg == nil {
+					continue
+				}
 				delMsgIds = append(delMsgIds, msg.MsgId)
 				delMsgs.Msgs = append(delMsgs.Msgs, &DelMsg{
 					MsgId: msg.MsgId,
@@ -1061,12 +1073,14 @@ func DelHisMsg(ctx context.Context, req *pbobjs.DelHisMsgsReq) errs.IMErrorCode 
 					MsgType:    delMsgsType,
 					MsgContent: bs,
 					Flags:      flag,
+					SubChannel: req.SubChannel,
 				})
 			} else if req.ChannelType == pbobjs.ChannelType_Group {
 				commonservices.AsyncGroupMsg(ctx, userId, req.TargetId, &pbobjs.UpMsg{
 					MsgType:    delMsgsType,
 					MsgContent: bs,
 					Flags:      flag,
+					SubChannel: req.SubChannel,
 				})
 			}
 			// for _, msg := range delMsgs.Msgs {

@@ -16,8 +16,9 @@ var queryExistingGroupMemberIDsForAdd = func(appKey, groupID string, memberIDs [
 }
 
 type groupMemberColdPathTrace struct {
-	countDB    time.Duration
-	existingDB time.Duration
+	countDB      time.Duration
+	existingDB   time.Duration
+	countSkipped bool
 }
 
 func prepareColdGroupMemberAdd(appKey, groupID string, requestedMemberIDs []string) ([]string, int, groupMemberColdPathTrace, error) {
@@ -28,13 +29,6 @@ func prepareColdGroupMemberAdd(appKey, groupID string, requestedMemberIDs []stri
 	}
 
 	started := time.Now()
-	currentCount, err := countGroupMembersForAdd(appKey, groupID)
-	trace.countDB = time.Since(started)
-	if err != nil {
-		return nil, 0, trace, err
-	}
-
-	started = time.Now()
 	existingMemberIDs, err := queryExistingGroupMemberIDsForAdd(appKey, groupID, requestedMemberIDs)
 	trace.existingDB = time.Since(started)
 	if err != nil {
@@ -54,6 +48,16 @@ func prepareColdGroupMemberAdd(appKey, groupID string, requestedMemberIDs []stri
 		if _, ok := existing[memberID]; !ok {
 			missing = append(missing, memberID)
 		}
+	}
+	if len(missing) == 0 {
+		trace.countSkipped = true
+		return missing, 0, trace, nil
+	}
+	started = time.Now()
+	currentCount, err := countGroupMembersForAdd(appKey, groupID)
+	trace.countDB = time.Since(started)
+	if err != nil {
+		return nil, 0, trace, err
 	}
 	return missing, currentCount, trace, nil
 }

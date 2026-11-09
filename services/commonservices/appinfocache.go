@@ -20,11 +20,12 @@ var appInfoCache *caches.LruCache
 var appLocks *tools.SegmentatedLocks
 
 type AppInfo struct {
-	AppKey       string    `default:"-"`
-	AppSecret    string    `default:"-"`
-	AppSecureKey string    `default:"-"`
-	AppStatus    int       `default:"-"`
-	CreatedTime  time.Time `default:"-"`
+	AppKey          string    `default:"-"`
+	AppSecret       string    `default:"-"`
+	TemporarySecret string    `default:""`
+	AppSecureKey    string    `default:"-"`
+	AppStatus       int       `default:"-"`
+	CreatedTime     time.Time `default:"-"`
 
 	EventSubConfigObj  *EventSubConfigObj `default:"-"`
 	EventSubSwitchObj  *EventSubSwitchObj `default:"-"`
@@ -170,12 +171,7 @@ func init() {
 
 			appExtTable := dbs.AppExtDao{}
 			appExtList := appExtTable.FindListByAppkey(key.(string))
-			extMap := make(map[string]string)
-			if len(appExtList) > 0 {
-				for _, appExt := range appExtList {
-					extMap[strings.ToLower(appExt.AppItemKey)] = appExt.AppItemValue
-				}
-			}
+			extMap := buildAppExtMap(appExtList)
 			FillObjField(appInfo, extMap)
 			appInfo.loadApiMsgPreCallbackUserWhitelist()
 
@@ -226,6 +222,26 @@ func init() {
 		}
 		return notExistAppInfo
 	})
+}
+
+func buildAppExtMap(appExtList []*dbs.AppExtDao) map[string]string {
+	extMap := make(map[string]string)
+	for _, appExt := range appExtList {
+		if appExt == nil || isProtectedAppInfoField(appExt.AppItemKey) {
+			continue
+		}
+		extMap[strings.ToLower(appExt.AppItemKey)] = appExt.AppItemValue
+	}
+	return extMap
+}
+
+func isProtectedAppInfoField(fieldName string) bool {
+	switch strings.ToLower(strings.TrimSpace(fieldName)) {
+	case "app_name", "app_key", "app_secret", "app_secure_key", "app_status", "app_type", "lic_conf", "created_time":
+		return true
+	default:
+		return false
+	}
 }
 
 func FillObjField(obj interface{}, valMap map[string]string) {

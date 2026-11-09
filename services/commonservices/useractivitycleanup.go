@@ -1,6 +1,7 @@
 package commonservices
 
 import (
+	"fmt"
 	"im-server/commons/bases"
 	"im-server/services/commonservices/dbs"
 	"im-server/services/commonservices/logs"
@@ -8,18 +9,16 @@ import (
 )
 
 const (
-	userActivityCleanupRouteMethod         = "connect"
-	userActivityCleanupGlobalRouteKey      = "useractivity-cleanup"
-	userActivityCleanupRetainDays          = 3
-	msgRealtimeStatCleanupRetainDays       = 3
-	userActivityCleanupScheduleHour        = 5
-	userActivityCleanupDeleteBatchSize     = 10000
-	userActivityCleanupAggregateBatchSize  = 10000
-	userActivityCleanupDeleteBatchPause    = 200 * time.Millisecond
-	userActivityCleanupAggregateBatchPause = 200 * time.Millisecond
-	connectCountCompactScanBatchSize       = 10000
-	connectCountCompactDeleteBatchSize     = 10000
-	connectCountCompactBatchPause          = 200 * time.Millisecond
+	userActivityCleanupRouteMethod      = "connect"
+	userActivityCleanupGlobalRouteKey   = "useractivity-cleanup"
+	userActivityCleanupRetainDays       = 3
+	msgRealtimeStatCleanupRetainDays    = 3
+	userActivityCleanupScheduleHour     = 5
+	userActivityCleanupDeleteBatchSize  = 10000
+	userActivityCleanupDeleteBatchPause = 200 * time.Millisecond
+	connectCountCompactScanBatchSize    = 10000
+	connectCountCompactDeleteBatchSize  = 10000
+	connectCountCompactBatchPause       = 200 * time.Millisecond
 )
 
 var (
@@ -60,99 +59,36 @@ func runUserActivityCleanupLoop(stop <-chan struct{}) {
 
 func cleanupExpiredUserActivities(now time.Time) {
 	userActivityDao := dbs.UserActivityDao{}
-	aggregatePreviousDayActivities(userActivityDao, now)
-	cleanupRetainedUserActivities(userActivityDao, now)
+	if canRunGlobalUserActivityMaintenance() {
+		if err := archiveUserActivityDays(userActivityDao, now); err != nil {
+			logs.NewLogEntity().Errorf("archive useractivities failed, err:%v", err)
+		}
+	}
 	cleanupRetainedMsgRealtimeStats(dbs.MsgRealtimeStatDao{}, now)
 	compactRetainedConnectCounts(dbs.ConnectCountDao{}, now)
 }
 
-func aggregatePreviousDayActivities(userActivityDao dbs.UserActivityDao, now time.Time) {
-	if !canRunGlobalUserActivityMaintenance() {
-		return
-	}
-	previousDayMark := userActivityPreviousDayTimeMark(now)
-	var lastID int64
-	for {
-		rows, err := userActivityDao.ScanByTimeMarkAfterID(previousDayMark, lastID, userActivityCleanupAggregateBatchSize)
-		if err != nil {
-			logs.NewLogEntity().Errorf("scan previous day useractivities failed, time_mark:%d, last_id:%d, err:%v", previousDayMark, lastID, err)
-			return
-		}
-		if len(rows) == 0 {
-			return
-		}
-
-		aggregates := aggregateUserActivityScanRows(rows)
-		if err := incrUpsertDailyActivityBuckets(aggregates); err != nil {
-			logs.NewLogEntity().Errorf("persist dailyactivities failed, time_mark:%d, last_id:%d, err:%v", previousDayMark, lastID, err)
-			return
-		}
-
-		lastID = rows[len(rows)-1].ID
-		if len(rows) < userActivityCleanupAggregateBatchSize {
-			return
-		}
-		time.Sleep(userActivityCleanupAggregateBatchPause)
-	}
+type userActivityArchive interface {
+	DaysBefore(today int64) ([]int64, error)
+	ArchiveDay(day int64, removeDetails bool) error
 }
 
-type dailyActivityBucketKey struct {
-	appKey   string
-	timeMark int64
-}
-
-func aggregateUserActivityScanRows(rows []dbs.UserActivityScanRow) map[dailyActivityBucketKey]int64 {
-	aggregates := map[dailyActivityBucketKey]int64{}
-	for _, row := range rows {
-		if row.AppKey == "" {
+func archiveUserActivityDays(storage userActivityArchive, now time.Time) error {
+	today := dayTimeMark(now)
+	days, err := storage.DaysBefore(today)
+	if err != nil {
+		return err
+	}
+	for _, day := range days {
+		// Only closed UTC days are eligible, regardless of malformed legacy data.
+		if day <= 0 || day >= today || day%oneDay != 0 {
 			continue
 		}
-		key := dailyActivityBucketKey{
-			appKey:   row.AppKey,
-			timeMark: row.TimeMark,
-		}
-		aggregates[key]++
-	}
-	return aggregates
-}
-
-func incrUpsertDailyActivityBuckets(aggregates map[dailyActivityBucketKey]int64) error {
-	if len(aggregates) == 0 {
-		return nil
-	}
-
-	dailyActivityDao := dbs.DailyActivityDao{}
-	for key, count := range aggregates {
-		if count <= 0 || key.appKey == "" {
-			continue
-		}
-		if err := dailyActivityDao.IncrUpsert(dbs.DailyActivityDao{
-			AppKey:   key.appKey,
-			TimeMark: key.timeMark,
-			Count:    count,
-		}); err != nil {
-			return err
+		if err := storage.ArchiveDay(day, day < userActivityRetentionCutoff(now)); err != nil {
+			return fmt.Errorf("archive activity day %d: %w", day, err)
 		}
 	}
 	return nil
-}
-
-func cleanupRetainedUserActivities(userActivityDao dbs.UserActivityDao, now time.Time) {
-	if !canRunGlobalUserActivityMaintenance() {
-		return
-	}
-	cutoff := userActivityRetentionCutoff(now)
-	for {
-		affected, err := userActivityDao.DeleteBeforeTimeMarkBatch(cutoff, userActivityCleanupDeleteBatchSize)
-		if err != nil {
-			logs.NewLogEntity().Errorf("cleanup useractivities failed, cutoff:%d, err:%v", cutoff, err)
-			return
-		}
-		if affected == 0 {
-			return
-		}
-		time.Sleep(userActivityCleanupDeleteBatchPause)
-	}
 }
 
 func cleanupRetainedMsgRealtimeStats(msgRealtimeStatDao dbs.MsgRealtimeStatDao, now time.Time) {

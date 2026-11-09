@@ -3,6 +3,7 @@ package dbs
 import (
 	"bytes"
 	"fmt"
+	"gorm.io/gorm"
 	"im-server/commons/dbcommons"
 	"im-server/services/historymsg/storages/models"
 )
@@ -39,6 +40,13 @@ func (msg GroupDelHisMsgDao) Create(item models.GroupDelHisMsg) error {
 }
 
 func (msg GroupDelHisMsgDao) BatchCreate(items []models.GroupDelHisMsg) error {
+	return msg.batchCreate(dbcommons.GetDb(), items)
+}
+
+func (msg GroupDelHisMsgDao) batchCreate(db *gorm.DB, items []models.GroupDelHisMsg) error {
+	if len(items) == 0 {
+		return nil
+	}
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("insert into %s (`user_id`,`target_id`,`sub_channel`,`msg_id`,`msg_time`,`msg_seq`,`effective_time`,`app_key`)values", msg.TableName())
 	params := []interface{}{}
@@ -53,7 +61,7 @@ func (msg GroupDelHisMsgDao) BatchCreate(items []models.GroupDelHisMsg) error {
 		params = append(params, item.UserId, item.TargetId, item.SubChannel, item.MsgId, item.MsgTime, item.MsgSeq, item.EffectiveTime, item.AppKey)
 	}
 
-	err := dbcommons.GetDb().Exec(buffer.String(), params...).Error
+	err := db.Exec(buffer.String(), params...).Error
 	return err
 }
 

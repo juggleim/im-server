@@ -127,6 +127,7 @@ type ModifyHisMsgReq struct {
 }
 
 type DelHisMsgsReq struct {
+	SubChannel  string       `json:"sub_channel"`
 	FromId      string       `json:"from_id"`
 	TargetId    string       `json:"target_id"`
 	ChannelType int32        `json:"channel_type"`

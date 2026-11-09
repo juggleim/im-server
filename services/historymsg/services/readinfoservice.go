@@ -41,6 +41,7 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 				AppKey:      appkey,
 				MsgId:       msgId,
 				ChannelType: req.ChannelType,
+				SubChannel:  req.SubChannel,
 				GroupId:     req.GroupId,
 				MemberId:    userId,
 				CreatedTime: addedTime.UnixMilli(),
@@ -52,6 +53,7 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 				grpDelMsgs = append(grpDelMsgs, models.GroupDelHisMsg{
 					UserId:        userId,
 					TargetId:      req.GroupId,
+					SubChannel:    req.SubChannel,
 					MsgId:         msgId,
 					MsgTime:       readInfo.MsgTime,
 					MsgSeq:        readInfo.MsgSeq,
@@ -75,6 +77,7 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 				MsgType:    GrpReadNtfType,
 				MsgContent: bs,
 				Flags:      msgdefines.SetCmdMsg(0),
+				SubChannel: req.SubChannel,
 				ToUserIds:  []string{readInfo.SenderId},
 			}, &bases.NoNotifySenderOption{}, &bases.MarkFromApiOption{})
 		}
@@ -89,6 +92,10 @@ func MarkGrpMsgRead(ctx context.Context, req *pbobjs.MarkGrpMsgReadReq) {
 }
 
 func DispatchGroupMsgMarkRead(ctx context.Context, groupId, memberId string, channelType pbobjs.ChannelType, msgIds []string) {
+	dispatchGroupMsgMarkReadWithSubChannel(ctx, groupId, memberId, "", channelType, msgIds)
+}
+
+func dispatchGroupMsgMarkReadWithSubChannel(ctx context.Context, groupId, memberId, subChannel string, channelType pbobjs.ChannelType, msgIds []string) {
 	if len(msgIds) > 0 {
 		method := "mark_grp_msg_read"
 		groups := bases.GroupTargets(method, msgIds)
@@ -97,6 +104,7 @@ func DispatchGroupMsgMarkRead(ctx context.Context, groupId, memberId string, cha
 				GroupId:     groupId,
 				ChannelType: channelType,
 				MsgIds:      ids,
+				SubChannel:  subChannel,
 			})
 		}
 	}

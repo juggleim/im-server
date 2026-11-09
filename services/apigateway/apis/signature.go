@@ -51,9 +51,7 @@ func Signature(ctx *gin.Context) {
 	}
 	appInfo, exist := commonservices.GetAppInfo(appKey)
 	if exist && appInfo != nil {
-		str := fmt.Sprintf("%s%s%s", appInfo.AppSecret, nonce, tsStr)
-		sig := tools.SHA1(str)
-		if sig == signature {
+		if isValidSignature(signature, nonce, tsStr, appInfo.AppSecret, appInfo.TemporarySecret) {
 			ctx.Set(string(bases.CtxKey_AppKey), appKey)
 		} else {
 			tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_SIGNATURE_FAIL)
@@ -65,6 +63,15 @@ func Signature(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
+}
+
+func isValidSignature(signature, nonce, timestamp string, secrets ...string) bool {
+	for _, secret := range secrets {
+		if secret != "" && tools.SHA1(fmt.Sprintf("%s%s%s", secret, nonce, timestamp)) == signature {
+			return true
+		}
+	}
+	return false
 }
 
 func TestSha1() {

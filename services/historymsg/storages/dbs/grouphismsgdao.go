@@ -42,6 +42,22 @@ func (msg GroupHisMsgDao) TableName() string {
 	return "g_hismsgs"
 }
 func (msg GroupHisMsgDao) SaveGroupHisMsg(item models.GroupHisMsg) error {
+	return msg.saveGroupHisMsg(dbcommons.GetDb(), item)
+}
+
+func (msg GroupHisMsgDao) SaveGroupHisMsgAtomic(item models.GroupHisMsg, portions []models.GroupPortionRel, delMsgs []models.GroupDelHisMsg) error {
+	return dbcommons.GetDb().Transaction(func(tx *gorm.DB) error {
+		if err := (GroupPortionRelDao{}).batchUpsert(tx, portions); err != nil {
+			return err
+		}
+		if err := msg.saveGroupHisMsg(tx, item); err != nil {
+			return err
+		}
+		return (GroupDelHisMsgDao{}).batchCreate(tx, delMsgs)
+	})
+}
+
+func (msg GroupHisMsgDao) saveGroupHisMsg(db *gorm.DB, item models.GroupHisMsg) error {
 	gMsg := GroupHisMsgDao{
 		ConverId:          item.ConverId,
 		SubChannel:        item.SubChannel,
@@ -65,7 +81,7 @@ func (msg GroupHisMsgDao) SaveGroupHisMsg(item models.GroupHisMsg) error {
 		LifeTimeAfterRead: item.LifeTimeAfterRead,
 		IsPortion:         item.IsPortion,
 	}
-	err := dbcommons.GetDb().Create(&gMsg).Error
+	err := db.Create(&gMsg).Error
 	return err
 }
 
