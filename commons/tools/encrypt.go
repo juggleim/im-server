@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"errors"
 )
 
 func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
@@ -45,9 +46,29 @@ func AesDecrypt(crypted, key []byte) ([]byte, error) {
 		return nil, err
 	}
 	blockSize := block.BlockSize()
+	// CBC panics on partial blocks. Tokens may contain untrusted ciphertext.
+	if len(crypted) == 0 || len(crypted)%blockSize != 0 {
+		return nil, errors.New("ciphertext is not a multiple of the block size")
+	}
 	blockMode := cipher.NewCBCDecrypter(block, key[:blockSize])
 	origData := make([]byte, len(crypted))
 	blockMode.CryptBlocks(origData, crypted)
-	origData = PKCS7UnPadding(origData)
-	return origData, nil
+	return pkcs7UnPaddingStrict(origData, blockSize)
+}
+
+func pkcs7UnPaddingStrict(data []byte, blockSize int) ([]byte, error) {
+	n := len(data)
+	if n == 0 {
+		return nil, errors.New("invalid padding")
+	}
+	p := int(data[n-1])
+	if p == 0 || p > blockSize || p > n {
+		return nil, errors.New("invalid padding")
+	}
+	for _, b := range data[n-p:] {
+		if int(b) != p {
+			return nil, errors.New("invalid padding")
+		}
+	}
+	return data[:n-p], nil
 }
