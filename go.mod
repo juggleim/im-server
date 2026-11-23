@@ -213,7 +213,7 @@ require (
 	github.com/bytedance/gopkg v0.1.3
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
-	github.com/gorilla/websocket v1.5.1
+	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/golang-lru v1.0.2
 	github.com/juggleim/imserver-sdk-go v1.0.16
 	github.com/juggleim/jugglechat-server v1.1.21
