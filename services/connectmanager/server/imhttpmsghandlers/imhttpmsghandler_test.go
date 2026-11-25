@@ -33,6 +33,7 @@ func TestHandlePublishClientTopic(t *testing.T) {
 	}{
 		{name: "unknown topic", topic: "test.unknown", target: targetID, wantCode: errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC},
 		{name: "server-only topic", topic: serverTopic, target: targetID, wantCode: errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC},
+		{name: "server-only profile update", topic: "upd_user_info", target: targetID, wantCode: errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC},
 		{name: "query-only topic", topic: "sync_msgs", target: targetID, wantCode: errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC},
 		{name: "client topic", topic: clientTopic, target: targetID, wantRoute: true},
 		{name: "invalid token", topic: serverTopic, target: targetID, tokenCode: errs.IMErrorCode_CONNECT_TOKEN_ILLEGAL, wantCode: errs.IMErrorCode_CONNECT_TOKEN_ILLEGAL},

@@ -35,7 +35,7 @@ func TestListenersRejectNonClientTopicsBeforeRouting(t *testing.T) {
 	const index = 7
 	for name, l := range map[string]listener{"user": &ImListenerImpl{}, "bot": &ImBotListenerImpl{}} {
 		t.Run(name, func(t *testing.T) {
-			for _, topic := range []string{"g_del_members", "unknown_client_topic"} {
+			for _, topic := range []string{"g_del_members", "upd_user_info", "unknown_client_topic"} {
 				t.Run(topic, func(t *testing.T) {
 					ctx := &topicTestContext{}
 					// The WebSocket admin type must not bypass the client policy.

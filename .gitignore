@@ -10,9 +10,7 @@ launcher/uploads/
 **/.DS_Store
 CLAUDE.md
 .claude/
-<<<<<<< HEAD
 opencode.jsonc
-=======
 .promotion-metrics/
 /benchmark-results/
->>>>>>> master
+.opencode/
