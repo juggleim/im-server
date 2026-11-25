@@ -23,18 +23,19 @@ func (actor *UserOnlineStatusActor) OnReceive(ctx context.Context, input proto.M
 		appkey := bases.GetAppKeyFromCtx(ctx)
 		if len(userOnlineReq.UserIds) > 0 {
 			for _, userid := range userOnlineReq.UserIds {
-				onlineCount := services.GetConnectCountByUser(appkey, userid)
-				if onlineCount > 0 {
-					onlineItems = append(onlineItems, &pbobjs.UserOnlineItem{
-						UserId:   userid,
-						IsOnline: true,
-					})
-				} else {
-					onlineItems = append(onlineItems, &pbobjs.UserOnlineItem{
-						UserId:   userid,
-						IsOnline: false,
+				onlineDevices := services.GetOnlineDevicesByUser(appkey, userid)
+				item := &pbobjs.UserOnlineItem{
+					UserId:   userid,
+					IsOnline: len(onlineDevices) > 0,
+					Devices:  make([]*pbobjs.UserOnlineDevice, 0, len(onlineDevices)),
+				}
+				for _, device := range onlineDevices {
+					item.Devices = append(item.Devices, &pbobjs.UserOnlineDevice{
+						DeviceId: device.DeviceId,
+						Platform: device.Platform,
 					})
 				}
+				onlineItems = append(onlineItems, item)
 			}
 		}
 	} else {

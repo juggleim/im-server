@@ -227,11 +227,11 @@ func (msg PrivateHisMsgDao) MarkReadByScope(appkey, converId, subChannel string,
 	upd := map[string]interface{}{}
 	upd["is_read"] = 1
 	upd["read_time"] = time.Now().UnixMilli()
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_index>=? and msg_index<=?", appkey, converId, subChannel, start, end).Updates(upd).Error
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_seq_no>=? and msg_seq_no<=?", appkey, converId, subChannel, start, end).Updates(upd).Error
 }
 
 func (msg PrivateHisMsgDao) UpdateDestroyTimeAfterReadByScope(appkey, converId, subChannel string, start, end int64) error {
-	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_index>=? and msg_index<=? and life_time_after_read>0", appkey, converId, subChannel, start, end).Update("destroy_time", gorm.Expr("(UNIX_TIMESTAMP(NOW(3))*1000)+life_time_after_read")).Error
+	return dbcommons.GetDb().Model(&msg).Where("app_key=? and conver_id=? and sub_channel=? and msg_seq_no>=? and msg_seq_no<=? and life_time_after_read>0", appkey, converId, subChannel, start, end).Update("destroy_time", gorm.Expr("(UNIX_TIMESTAMP(NOW(3))*1000)+life_time_after_read")).Error
 }
 
 func (msg PrivateHisMsgDao) FindByIds(appkey, converId, subChannel string, msgIds []string, cleanTime int64) ([]*models.PrivateHisMsg, error) {

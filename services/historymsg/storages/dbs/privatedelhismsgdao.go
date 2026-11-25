@@ -39,6 +39,9 @@ func (msg PrivateDelHisMsgDao) Create(item models.PrivateDelHisMsg) error {
 }
 
 func (msg PrivateDelHisMsgDao) BatchCreate(items []models.PrivateDelHisMsg) error {
+	if len(items) == 0 {
+		return nil
+	}
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("insert into %s (`user_id`,`target_id`,`sub_channel`,`msg_id`,`msg_time`,`msg_seq`,`effective_time`,`app_key`)values", msg.TableName())
 	params := []interface{}{}

@@ -104,29 +104,25 @@ func DelHisMsgs(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	//del_hismsg
-	msgs := []*pbobjs.SimpleMsg{}
+	msgs := make([]*pbobjs.SimpleMsg, 0, len(req.Msgs))
 	for _, m := range req.Msgs {
+		if m == nil {
+			continue
+		}
 		msgs = append(msgs, &pbobjs.SimpleMsg{
-			MsgId: m.MsgId,
+			MsgId:   m.MsgId,
+			MsgTime: m.MsgTime,
 		})
 	}
-	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, req.FromId), "del_msg", req.TargetId, &pbobjs.DelHisMsgsReq{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.FromId), "del_msg", req.TargetId, &pbobjs.DelHisMsgsReq{
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
 		Msgs:        msgs,
 		DelScope:    int32(req.DelScope),
+		SubChannel:  req.SubChannel,
 
 		CheckPermission: req.CheckPermission,
-	}, nil)
-	if err != nil {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
-		return
-	}
-	if code != errs.IMErrorCode_SUCCESS {
-		tools.ErrorHttpResp(ctx, errs.IMErrorCode(code))
-		return
-	}
+	})
 	tools.SuccessHttpResp(ctx, nil)
 }
 
@@ -226,11 +222,13 @@ func MarkRead(ctx *gin.Context) {
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
 		Msgs:        pbMsgs,
+		SubChannel:  req.SubChannel,
 	})
 	tools.SuccessHttpResp(ctx, nil)
 }
 
 type MarkReadReq struct {
+	SubChannel  string   `json:"sub_channel"`
 	UserId      string   `json:"user_id"`
 	TargetId    string   `json:"target_id"`
 	ChannelType int32    `json:"channel_type"`

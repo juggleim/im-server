@@ -68,6 +68,10 @@ type IGroupHisMsgStorage interface {
 	UpdateReadCount(appkey, converId, subChannel, msgId string, readCount int) error
 }
 
+type IGroupHisMsgAtomicStorage interface {
+	SaveGroupHisMsgAtomic(msg GroupHisMsg, portions []GroupPortionRel, delMsgs []GroupDelHisMsg) error
+}
+
 type GroupPortionRel struct {
 	ConverId    string
 	ChannelType pbobjs.ChannelType

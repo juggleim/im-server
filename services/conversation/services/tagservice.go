@@ -151,7 +151,7 @@ func TagAddConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 	if affected {
 		for _, conver := range req.Convers {
 			c := userConvers.QryConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
-			userConvers.PersistConverV2(c)
+			userConvers.PersistConverFields(c, converPersistExts)
 		}
 	}
 	notifyMessageUserConverCacheInvalidation(ctx, userId, req.Convers)
@@ -238,7 +238,7 @@ func TagDelConvers(ctx context.Context, req *pbobjs.TagConvers) errs.IMErrorCode
 	if affected {
 		for _, conver := range req.Convers {
 			c := userConvers.QryConver(conver.TargetId, conver.SubChannel, conver.ChannelType)
-			userConvers.PersistConverV2(c)
+			userConvers.PersistConverFields(c, converPersistExts)
 		}
 	}
 	notifyMessageUserConverCacheInvalidation(ctx, userId, req.Convers)

@@ -68,7 +68,7 @@ func (msg *InboxMsgDao) QryMsgsBaseTime(appkey, userId string, start int64, coun
 }
 
 func (msg *InboxMsgDao) DelMsgsBaseTime(appkey string, startTime int64) error {
-	return delMsgsBaseTime("inboxmsgs", appkey, startTime)
+	return delMsgsBaseTime(msg.TableName(), appkey, startTime)
 }
 
 func (msg *InboxMsgDao) QryBaseTime(limit, offset int64) ([]*InboxMsgDao, error) {

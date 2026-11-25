@@ -28,7 +28,9 @@ func NewBatchExecutorPool(count int, batchSize int, checkDuration time.Duration,
 func (pool *BatchExecutorPool) GetBatchExecutor(key string) *BatchExecutor {
 	hash := HashStr(key)
 	index := int(hash % uint32(len(pool.executors)))
+	pool.lock.RLock()
 	executor := pool.executors[index]
+	pool.lock.RUnlock()
 	if executor == nil {
 		pool.lock.Lock()
 		defer pool.lock.Unlock()
@@ -102,14 +104,14 @@ func (executor *BatchExecutor) start() {
 func (executor *BatchExecutor) innerAppend(uniqId string, task interface{}) []interface{} {
 	executor.lock.Lock()
 	defer executor.lock.Unlock()
-	if len(executor.taskBuffer) < executor.batchSize {
+	if _, exists := executor.taskBuffer[uniqId]; exists || len(executor.taskBuffer) < executor.batchSize {
 		executor.taskBuffer[uniqId] = task
 	} else {
 		tasks := []interface{}{}
 		for _, v := range executor.taskBuffer {
 			tasks = append(tasks, v)
 		}
-		executor.taskBuffer = make(map[string]interface{})
+		executor.taskBuffer = map[string]interface{}{uniqId: task}
 		return tasks
 	}
 	return nil

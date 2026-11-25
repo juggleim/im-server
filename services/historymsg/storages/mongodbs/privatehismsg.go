@@ -70,7 +70,7 @@ func (msg *PrivateHisMsgDao) IndexCreator() func(colName string) {
 					Keys: bson.M{"msg_id": 1},
 				},
 				{
-					Keys: bson.M{"msg_index": 1},
+					Keys: bson.M{"msg_seq_no": 1},
 				},
 				{
 					Keys: bson.M{"sender_id": 1},
@@ -316,7 +316,7 @@ func (msg *PrivateHisMsgDao) MarkReadByScope(appkey, converId, subChannel string
 	if collection == nil {
 		return errors.New("no mongo client")
 	}
-	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_index": bson.M{
+	filter := bson.M{"app_key": appkey, "conver_id": converId, "sub_channel": subChannel, "msg_seq_no": bson.M{
 		"$gte": start,
 		"$lte": end,
 	}}

@@ -104,6 +104,21 @@ CREATE TABLE IF NOT EXISTS `banusers` (
   UNIQUE KEY `uniq_appkey_userid` (`app_key`,`user_id`,`scope_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '禁用用户';
 
+CREATE TABLE IF NOT EXISTS `banuserrules` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) NOT NULL,
+  `created_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3),
+  `end_time` bigint NOT NULL DEFAULT '0',
+  `scope_key` varchar(20) NOT NULL DEFAULT 'default',
+  `scope_value` varchar(1000) NOT NULL DEFAULT '',
+  `scope_value_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `ext` varchar(100) DEFAULT NULL,
+  `app_key` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_ban_rule` (`app_key`,`user_id`,`scope_key`,`scope_value_hash`),
+  KEY `idx_ban_rule_query` (`app_key`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE IF NOT EXISTS `bc_hismsgs` (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `conver_id` varchar(100) NOT NULL COMMENT '会话id',
@@ -491,7 +506,8 @@ CREATE TABLE IF NOT EXISTS `groupmembers` (
   `grp_display_name` varchar(100) DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_appkey_grpid_memid` (`app_key`,`group_id`,`member_id`),
-  KEY `idx_memberid` (`app_key`,`member_id`,`group_id`)
+  KEY `idx_memberid` (`app_key`,`member_id`,`group_id`),
+  KEY `idx_appkey_groupid_id` (`app_key`, `group_id`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群成员';
 
 CREATE TABLE IF NOT EXISTS `grpassistantrels` (
@@ -990,5 +1006,87 @@ CREATE TABLE IF NOT EXISTS `performance_metrics` (
   KEY `idx_metric_type_collect_time` (`metric_type`,`collect_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '统计-性能指标';
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20260908');
++CREATE TABLE IF NOT EXISTS `inboxmsgs_split` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT NULL,
+  `send_time` bigint NOT NULL,
+  `msg_id` varchar(20) DEFAULT NULL,
+  `channel_type` tinyint DEFAULT NULL,
+  `msg_body` mediumblob,
+  `app_key` varchar(20) DEFAULT NULL,
+  `target_id` varchar(32) DEFAULT NULL,
+  `msg_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`,`send_time`),
+  KEY `IDX_USERID_MSG` (`app_key`,`user_id`,`send_time`),
+  KEY `idx_msg_id` (`app_key`,`user_id`,`msg_id`),
+  KEY `idx_appkey` (`app_key`,`send_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+PARTITION BY RANGE (`send_time`) (
+  PARTITION `p_future` VALUES LESS THAN MAXVALUE
+);
+
+CREATE TABLE IF NOT EXISTS `sendboxmsgs_split` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT NULL,
+  `send_time` bigint NOT NULL,
+  `msg_id` varchar(20) DEFAULT NULL,
+  `channel_type` tinyint DEFAULT NULL,
+  `msg_body` mediumblob,
+  `app_key` varchar(20) DEFAULT NULL,
+  `target_id` varchar(45) DEFAULT NULL,
+  `msg_type` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`,`send_time`),
+  KEY `idx_user_id_send_time` (`app_key`,`user_id`,`send_time`),
+  KEY `idx_msg_id` (`app_key`,`user_id`,`msg_id`),
+  KEY `idx_appkey` (`app_key`,`send_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+PARTITION BY RANGE (`send_time`) (
+  PARTITION `p_future` VALUES LESS THAN MAXVALUE
+);
+
+CREATE TABLE IF NOT EXISTS `cmdinboxmsgs_split` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT NULL,
+  `send_time` bigint NOT NULL,
+  `partition_day` bigint NOT NULL,
+  `msg_id` varchar(20) DEFAULT NULL,
+  `channel_type` tinyint DEFAULT NULL,
+  `msg_body` mediumblob,
+  `app_key` varchar(20) DEFAULT NULL,
+  `target_id` varchar(32) DEFAULT NULL,
+  `msg_type` varchar(50) DEFAULT NULL,
+  `uniq_tag` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`,`partition_day`),
+  UNIQUE KEY `uniq_tag` (`app_key`,`user_id`,`uniq_tag`,`partition_day`),
+  KEY `idx_appkey_time` (`app_key`,`user_id`,`send_time`),
+  KEY `idx_msg_id` (`app_key`,`user_id`,`msg_id`),
+  KEY `idx_appkey` (`app_key`,`send_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+PARTITION BY RANGE (`partition_day`) (
+  PARTITION `p_future` VALUES LESS THAN MAXVALUE
+);
+
+CREATE TABLE IF NOT EXISTS `cmdsendboxmsgs_split` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(32) DEFAULT NULL,
+  `send_time` bigint NOT NULL,
+  `partition_day` bigint NOT NULL,
+  `msg_id` varchar(20) DEFAULT NULL,
+  `channel_type` tinyint DEFAULT NULL,
+  `msg_body` mediumblob,
+  `app_key` varchar(20) DEFAULT NULL,
+  `target_id` varchar(32) DEFAULT NULL,
+  `msg_type` varchar(50) DEFAULT NULL,
+  `uniq_tag` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`,`partition_day`),
+  UNIQUE KEY `uniq_tag` (`app_key`,`user_id`,`uniq_tag`,`partition_day`),
+  KEY `idx_appkey_userid_time` (`app_key`,`user_id`,`send_time`),
+  KEY `idx_msg_id` (`app_key`,`user_id`,`msg_id`),
+  KEY `idx_appkey` (`app_key`,`send_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+PARTITION BY RANGE (`partition_day`) (
+  PARTITION `p_future` VALUES LESS THAN MAXVALUE
+);
+
+INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20261103');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

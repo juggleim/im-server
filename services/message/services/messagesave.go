@@ -49,21 +49,25 @@ func SaveMsg2Inbox(appkey, receiverId string, msg *pbobjs.DownMsg) error {
 	if msgdefines.IsCmdMsg(msg.Flags) {
 		msgStorage := storages.NewCmdInboxMsgStorage()
 		err = msgStorage.SaveMsg(message)
-		cmdMsgExpired := getMsgExpired(appkey, true)
-		purgeMsgs(appkey+":cmd_inbox", msg.MsgTime, msg.MsgTime-cmdMsgExpired, func(cutoff int64) error {
-			purgeErr := msgStorage.DelMsgsBaseTime(appkey, cutoff)
-			fmt.Println("clear offline cmd inbox msgs:", purgeErr, msg.MsgTime, cmdMsgExpired)
-			return purgeErr
-		})
+		if purgeStorage, ok := msgStorage.(models.IMsgPurgeStorage); ok {
+			cmdMsgExpired := getMsgExpired(appkey, true)
+			purgeMsgs(appkey+":cmd_inbox", msg.MsgTime, msg.MsgTime-cmdMsgExpired, func(cutoff int64) error {
+				purgeErr := purgeStorage.DelMsgsBaseTime(appkey, cutoff)
+				fmt.Println("clear offline cmd inbox msgs:", purgeErr, msg.MsgTime, cmdMsgExpired)
+				return purgeErr
+			})
+		}
 	} else {
 		msgStorage := storages.NewInboxMsgStorage()
 		err = msgStorage.SaveMsg(message)
-		msgExpired := getMsgExpired(appkey, false)
-		purgeMsgs(appkey+":inbox", msg.MsgTime, msg.MsgTime-msgExpired, func(cutoff int64) error {
-			purgeErr := msgStorage.DelMsgsBaseTime(appkey, cutoff)
-			fmt.Println("clear offline inbox msgs:", purgeErr, msg.MsgTime, msgExpired)
-			return purgeErr
-		})
+		if purgeStorage, ok := msgStorage.(models.IMsgPurgeStorage); ok {
+			msgExpired := getMsgExpired(appkey, false)
+			purgeMsgs(appkey+":inbox", msg.MsgTime, msg.MsgTime-msgExpired, func(cutoff int64) error {
+				purgeErr := purgeStorage.DelMsgsBaseTime(appkey, cutoff)
+				fmt.Println("clear offline inbox msgs:", purgeErr, msg.MsgTime, msgExpired)
+				return purgeErr
+			})
+		}
 	}
 	if err != nil {
 		logs.NewLogEntity().Errorf("failed to store inbox. err:%v", err)
@@ -103,21 +107,25 @@ func SaveMsg2Sendbox(ctx context.Context, appkey, senderId string, msg *pbobjs.D
 		} else {
 			err = storage.SaveMsg(message)
 		}
-		cmdMsgExpired := getMsgExpired(appkey, true)
-		purgeMsgs(appkey+":cmd_sendbox", msg.MsgTime, msg.MsgTime-cmdMsgExpired, func(cutoff int64) error {
-			purgeErr := storage.DelMsgsBaseTime(appkey, cutoff)
-			fmt.Println("clear offline cmd sendbox msgs:", purgeErr, msg.MsgTime, cmdMsgExpired)
-			return purgeErr
-		})
+		if purgeStorage, ok := storage.(models.IMsgPurgeStorage); ok {
+			cmdMsgExpired := getMsgExpired(appkey, true)
+			purgeMsgs(appkey+":cmd_sendbox", msg.MsgTime, msg.MsgTime-cmdMsgExpired, func(cutoff int64) error {
+				purgeErr := purgeStorage.DelMsgsBaseTime(appkey, cutoff)
+				fmt.Println("clear offline cmd sendbox msgs:", purgeErr, msg.MsgTime, cmdMsgExpired)
+				return purgeErr
+			})
+		}
 	} else {
 		storage := storages.NewSendboxMsgStorage()
 		err = storage.SaveMsg(message)
-		msgExpired := getMsgExpired(appkey, false)
-		purgeMsgs(appkey+":sendbox", msg.MsgTime, msg.MsgTime-msgExpired, func(cutoff int64) error {
-			purgeErr := storage.DelMsgsBaseTime(appkey, cutoff)
-			fmt.Println("clear offline sendbox msgs:", purgeErr, msg.MsgTime, msgExpired)
-			return purgeErr
-		})
+		if purgeStorage, ok := storage.(models.IMsgPurgeStorage); ok {
+			msgExpired := getMsgExpired(appkey, false)
+			purgeMsgs(appkey+":sendbox", msg.MsgTime, msg.MsgTime-msgExpired, func(cutoff int64) error {
+				purgeErr := purgeStorage.DelMsgsBaseTime(appkey, cutoff)
+				fmt.Println("clear offline sendbox msgs:", purgeErr, msg.MsgTime, msgExpired)
+				return purgeErr
+			})
+		}
 	}
 	if err != nil {
 		logs.NewLogEntity().Errorf("failed to store sendbox. err:%v", err)

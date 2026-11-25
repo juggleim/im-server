@@ -6,6 +6,8 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
+
+	"google.golang.org/protobuf/proto"
 )
 
 type PublishType int32
@@ -16,6 +18,10 @@ var (
 	PublishType_AllSessionExceptSelf PublishType = 2
 	PublishType_SpecifyDeviceIds     PublishType = 3
 )
+
+func GetClientIPFromCtx(ctx context.Context) string {
+	return bases.GetExtsFromCtx(ctx)[RpcExtKey_ClientIP]
+}
 
 func FillReferMsg(ctx context.Context, upMsg *pbobjs.UpMsg) *pbobjs.DownMsg {
 	if upMsg.ReferMsg != nil {
@@ -228,13 +234,11 @@ func IsDirectMentionedMe(userId string, downMsg *pbobjs.DownMsg) bool {
 }
 
 func CopyDownMsg(msg *pbobjs.DownMsg, receiverId string) *pbobjs.DownMsg {
-	referMsg := msg.ReferMsg
-	if referMsg != nil {
-		if referMsg.SenderId == receiverId {
-			referMsg.IsSend = true
-		} else {
-			referMsg.IsSend = false
-		}
+	var referMsg *pbobjs.DownMsg
+	if msg.ReferMsg != nil {
+		// ReferMsg.IsSend is receiver-specific; never mutate the source message.
+		referMsg = proto.Clone(msg.ReferMsg).(*pbobjs.DownMsg)
+		referMsg.IsSend = referMsg.SenderId == receiverId
 	}
 	return &pbobjs.DownMsg{
 		TargetId:          msg.TargetId,

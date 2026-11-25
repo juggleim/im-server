@@ -9,5 +9,3 @@ CREATE TABLE IF NOT EXISTS `accountapprels` (
 
 ALTER TABLE `accounts` 
 ADD COLUMN `role_type` TINYINT NULL DEFAULT 0;
-
-INSERT INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20250918') ON DUPLICATE KEY UPDATE conf_value=VALUES(conf_value);

@@ -405,7 +405,8 @@ CREATE TABLE IF NOT EXISTS `groupmembers` (
   `grp_display_name` varchar(100) DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_appkey_grpid_memid` (`app_key`,`group_id`,`member_id`),
-  KEY `idx_memberid` (`app_key`,`member_id`,`group_id`)
+  KEY `idx_memberid` (`app_key`,`member_id`,`group_id`),
+  KEY `idx_appkey_groupid_id` (`app_key`, `group_id`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '群成员';
 
 CREATE TABLE IF NOT EXISTS `grpassistantrels` (
@@ -858,5 +859,4 @@ CREATE TABLE IF NOT EXISTS `topmsgs` (
   UNIQUE KEY `idx_msg` (`app_key`,`conver_id`,`sub_channel`,`channel_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT IGNORE INTO `globalconfs` (`conf_key`,`conf_value`)VALUES('jimdb_version','20240716');
 INSERT IGNORE INTO `accounts`(`account`,`password`)VALUES('admin','7c4a8d09ca3762af61e59520943dc26494f8941b');

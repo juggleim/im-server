@@ -227,6 +227,13 @@ func BatchGetTargetUserInfo(ctx context.Context, userIds []string) map[string]*T
 
 func GetTargetDisplayUserInfo(ctx context.Context, userId string) *pbobjs.UserInfo {
 	tUserInfo := GetTargetUserInfo(ctx, userId)
+	return targetUserInfoToDisplayUserInfo(tUserInfo)
+}
+
+func targetUserInfoToDisplayUserInfo(tUserInfo *TargetUserInfo) *pbobjs.UserInfo {
+	if tUserInfo == nil {
+		return nil
+	}
 	return &pbobjs.UserInfo{
 		UserId:       tUserInfo.UserId,
 		Nickname:     tUserInfo.Nickname,
@@ -241,13 +248,7 @@ func GetTargetDisplayUserInfosMap(ctx context.Context, userIds []string) map[str
 	targetUserMap := BatchGetTargetUserInfo(ctx, userIds)
 	userMap := map[string]*pbobjs.UserInfo{}
 	for userId, tUserInfo := range targetUserMap {
-		userMap[userId] = &pbobjs.UserInfo{
-			UserId:       tUserInfo.UserId,
-			Nickname:     tUserInfo.Nickname,
-			UserPortrait: tUserInfo.UserPortrait,
-			ExtFields:    tUserInfo.ExtFields,
-			UpdatedTime:  tUserInfo.UpdatedTime,
-		}
+		userMap[userId] = targetUserInfoToDisplayUserInfo(tUserInfo)
 	}
 	return userMap
 }
@@ -256,13 +257,7 @@ func GetTargetDisplayUserInfos(ctx context.Context, userIds []string) []*pbobjs.
 	targetUserMap := BatchGetTargetUserInfo(ctx, userIds)
 	users := []*pbobjs.UserInfo{}
 	for _, userInfo := range targetUserMap {
-		users = append(users, &pbobjs.UserInfo{
-			UserId:       userInfo.UserId,
-			Nickname:     userInfo.Nickname,
-			UserPortrait: userInfo.UserPortrait,
-			ExtFields:    userInfo.ExtFields,
-			UpdatedTime:  userInfo.UpdatedTime,
-		})
+		users = append(users, targetUserInfoToDisplayUserInfo(userInfo))
 	}
 	return users
 }

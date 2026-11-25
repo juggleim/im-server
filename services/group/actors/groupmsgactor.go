@@ -6,6 +6,7 @@ import (
 	"im-server/commons/errs"
 	"im-server/commons/gmicro/actorsystem"
 	"im-server/commons/pbdefines/pbobjs"
+	"im-server/services/commonservices"
 	"im-server/services/commonservices/logs"
 	"im-server/services/group/services"
 	"time"
@@ -19,7 +20,11 @@ type GroupMsgActor struct {
 
 func (actor *GroupMsgActor) OnReceive(ctx context.Context, input proto.Message) {
 	if upMsg, ok := input.(*pbobjs.UpMsg); ok {
-		logs.WithContext(ctx).Infof("group_id:%s\tmsg_type:%s\tflag:%d", bases.GetTargetIdFromCtx(ctx), upMsg.MsgType, upMsg.Flags)
+		if clientIP := commonservices.GetClientIPFromCtx(ctx); clientIP != "" {
+			logs.WithContext(ctx).Infof("group_id:%s\tmsg_type:%s\tflag:%d\tclient_ip:%s", bases.GetTargetIdFromCtx(ctx), upMsg.MsgType, upMsg.Flags, clientIP)
+		} else {
+			logs.WithContext(ctx).Infof("group_id:%s\tmsg_type:%s\tflag:%d", bases.GetTargetIdFromCtx(ctx), upMsg.MsgType, upMsg.Flags)
+		}
 		code, msgId, sendTime, msgSeq, clientMsgId, memberCount, modifiedMsg := services.SendGroupMsg(ctx, upMsg)
 		userPubAck := bases.CreateGrpPubAckWraper(ctx, code, msgId, sendTime, msgSeq, clientMsgId, memberCount, modifiedMsg)
 		actor.Sender.Tell(userPubAck, actorsystem.NoSender)

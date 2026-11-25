@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"hash/crc32"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -156,6 +157,35 @@ func GetConnectCountByUser(appkey, userid string) int32 {
 		return int32(len(ctxMap))
 	}
 	return 0
+}
+
+type OnlineDeviceInfo struct {
+	DeviceId string
+	Platform string
+}
+
+func GetOnlineDevicesByUser(appkey, userid string) []OnlineDeviceInfo {
+	ctxMap := GetConnectCtxByUser(appkey, userid)
+	devices := make([]OnlineDeviceInfo, 0, len(ctxMap))
+	deviceSet := make(map[OnlineDeviceInfo]struct{}, len(ctxMap))
+	for _, ctx := range ctxMap {
+		device := OnlineDeviceInfo{
+			DeviceId: imcontext.GetDeviceId(ctx),
+			Platform: imcontext.GetPlatform(ctx),
+		}
+		if _, exists := deviceSet[device]; exists {
+			continue
+		}
+		deviceSet[device] = struct{}{}
+		devices = append(devices, device)
+	}
+	sort.Slice(devices, func(i, j int) bool {
+		if devices[i].DeviceId == devices[j].DeviceId {
+			return devices[i].Platform < devices[j].Platform
+		}
+		return devices[i].DeviceId < devices[j].DeviceId
+	})
+	return devices
 }
 
 func GetOnlineConnectMetrics() commonservices.ClientConnectMetrics {

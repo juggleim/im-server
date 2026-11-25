@@ -50,6 +50,7 @@ func KickUser(ctx context.Context, req *pbobjs.KickUserReq, code errs.IMErrorCod
 
 	for _, ctx := range ctxs {
 		tmpCtx := ctx
+		RemoveFromContextCache(tmpCtx)
 		msgAck := codec.NewDisconnectMessage(&codec.DisconnectMsgBody{
 			Code:      int32(code),
 			Timestamp: time.Now().UnixMilli(),

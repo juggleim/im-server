@@ -14,7 +14,7 @@ import (
 )
 
 func MarkRead(ctx context.Context, userId string, req *pbobjs.MarkReadReq) errs.IMErrorCode {
-	if len(req.Msgs) <= 0 {
+	if len(req.Msgs) <= 0 && len(req.IndexScopes) <= 0 {
 		return errs.IMErrorCode_SUCCESS
 	}
 	if userId == req.TargetId {
@@ -73,7 +73,7 @@ func markReadGroupMsgs(ctx context.Context, req *pbobjs.MarkReadReq) errs.IMErro
 			})
 		}
 
-		DispatchGroupMsgMarkRead(ctx, groupId, userId, req.ChannelType, msgIds)
+		dispatchGroupMsgMarkReadWithSubChannel(ctx, groupId, userId, req.SubChannel, req.ChannelType, msgIds)
 
 		flag := msgdefines.SetCmdMsg(0)
 		//notify for other device
@@ -82,6 +82,7 @@ func markReadGroupMsgs(ctx context.Context, req *pbobjs.MarkReadReq) errs.IMErro
 			MsgType:    ReadNtfType,
 			MsgContent: bs,
 			Flags:      flag,
+			SubChannel: req.SubChannel,
 		}, &bases.OnlySendboxOption{})
 
 		//update mention msg's read state
@@ -152,6 +153,7 @@ func markReadPrivateMsgs(ctx context.Context, userId string, req *pbobjs.MarkRea
 		MsgType:    ReadNtfType,
 		Flags:      flag,
 		MsgContent: bs,
+		SubChannel: req.SubChannel,
 	})
 
 	return errs.IMErrorCode_SUCCESS

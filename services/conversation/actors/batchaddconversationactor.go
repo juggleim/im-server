@@ -16,8 +16,9 @@ type BatchAddConversationActor struct {
 
 func (actor *BatchAddConversationActor) OnReceive(ctx context.Context, input proto.Message) {
 	if batchConvers, ok := input.(*pbobjs.BatchAddConvers); ok {
+		isOffline := !batchConvers.UserOnline
 		for _, conver := range batchConvers.Convers {
-			services.SaveConversationV2(ctx, bases.GetAppKeyFromCtx(ctx), conver.UserId, conver.Msg, true)
+			services.SaveConversationV2(ctx, bases.GetAppKeyFromCtx(ctx), conver.UserId, conver, isOffline)
 		}
 	} else {
 		logs.WithContext(ctx).Error("input is illigal.")

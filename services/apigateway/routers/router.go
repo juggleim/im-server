@@ -1,6 +1,9 @@
 package routers
 
 import (
+	"fmt"
+
+	"im-server/commons/configures"
 	"im-server/services/apigateway/apis"
 
 	"github.com/gin-gonic/gin"
@@ -8,7 +11,11 @@ import (
 
 func Route(eng *gin.Engine, prefix string) {
 	group := eng.Group("/" + prefix)
-	group.Use(apis.Signature)
+	ipWhitelist, err := apis.NewIPWhitelistMiddleware(configures.Config.ApiGateway.IPWhitelist)
+	if err != nil {
+		panic(fmt.Errorf("invalid api gateway IP whitelist: %w", err))
+	}
+	group.Use(ipWhitelist, apis.Signature)
 	group.POST("/users/register", apis.Register)
 	group.POST("/users/update", apis.UpdateUser)
 	group.POST("/users/settings/set", apis.SetUserSettings)

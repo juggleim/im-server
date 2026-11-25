@@ -20,11 +20,12 @@ var appInfoCache *caches.LruCache
 var appLocks *tools.SegmentatedLocks
 
 type AppInfo struct {
-	AppKey       string    `default:"-"`
-	AppSecret    string    `default:"-"`
-	AppSecureKey string    `default:"-"`
-	AppStatus    int       `default:"-"`
-	CreatedTime  time.Time `default:"-"`
+	AppKey          string    `default:"-"`
+	AppSecret       string    `default:"-"`
+	TemporarySecret string    `default:""`
+	AppSecureKey    string    `default:"-"`
+	AppStatus       int       `default:"-"`
+	CreatedTime     time.Time `default:"-"`
 
 	EventSubConfigObj  *EventSubConfigObj `default:"-"`
 	EventSubSwitchObj  *EventSubSwitchObj `default:"-"`
@@ -33,26 +34,28 @@ type AppInfo struct {
 	LivekitConfigObj   *LivekitConfigObj  `default:"-"`
 	AgoraConfigObj     *AgoraConfigObj    `default:"-"`
 
-	TokenEffectiveMinute  int    `default:"0"`
-	OfflineMsgSaveTime    int    `default:"10"`
-	OfflineCmdMsgSaveTime int    `default:"10080"`
-	ForceCloseOfflineMsg  bool   `default:"false"`
-	IsSubApiMsg           bool   `default:"false"`
-	IsOpenPush            bool   `default:"true"`
-	PushLanguage          string `default:"en_US"`
-	KickMode              int    `default:"0"`
-	OpenVisualLog         bool   `default:"false"`
-	RecordGlobalConvers   bool   `default:"false"`
-	OpenSensitive         bool   `default:"false"`
-	RecordMsgLogs         bool   `default:"false"`
-	MsgFriendCheck        bool   `default:"false"`
-	OpenRemark            bool   `default:"false"`
-	HisMsgSaveDay         int    `default:"180"`
-	GlobalPrivateMute     bool   `default:"false"`
-	GlobalGroupMute       bool   `default:"false"`
-	MsgQueueMaxCount      int    `default:"100"`
-	OpenStatusSub         bool   `default:"false"`
-	OpenFriendStatusSub   bool   `default:"false"`
+	TokenEffectiveMinute  int  `default:"0"`
+	OfflineMsgSaveTime    int  `default:"10"`
+	OfflineCmdMsgSaveTime int  `default:"10080"`
+	ForceCloseOfflineMsg  bool `default:"false"`
+	IsSubApiMsg           bool `default:"false"`
+	// appexts.app_item_key: api_msg_pre_callback_user_whitelist
+	ApiMsgPreCallbackUserWhitelist string `default:""`
+	IsOpenPush                     bool   `default:"true"`
+	PushLanguage                   string `default:"en_US"`
+	KickMode                       int    `default:"0"`
+	OpenVisualLog                  bool   `default:"false"`
+	RecordGlobalConvers            bool   `default:"false"`
+	OpenSensitive                  bool   `default:"false"`
+	RecordMsgLogs                  bool   `default:"false"`
+	MsgFriendCheck                 bool   `default:"false"`
+	OpenRemark                     bool   `default:"false"`
+	HisMsgSaveDay                  int    `default:"180"`
+	GlobalPrivateMute              bool   `default:"false"`
+	GlobalGroupMute                bool   `default:"false"`
+	MsgQueueMaxCount               int    `default:"100"`
+	OpenStatusSub                  bool   `default:"false"`
+	OpenFriendStatusSub            bool   `default:"false"`
 
 	MaxUserConverTags      int `default:"100"`
 	LoadMentionWayInConver int `default:"0"` //0:by read index; 1: by unread status
@@ -60,6 +63,7 @@ type AppInfo struct {
 
 	// statussubscriptions：每个 subscriber_device_id 最多订阅的不同 user_id 数量
 	MaxUserSubscriptionCount int `default:"1000"`
+	MaxUserConverCount       int `default:"3000"`
 
 	//connect
 	CheckUserDevice bool `default:"false"`
@@ -97,6 +101,51 @@ type AppInfo struct {
 	TransEngine   transengines.ITransEngine `default:"-"`
 	SmsEngine     sms.ISmsEngine            `default:"-"`
 	I18nKeys      *i18n.I18n                `default:"-"`
+
+	apiMsgPreCallbackUserIDs map[string]struct{} `default:"-"`
+}
+
+func (app *AppInfo) loadApiMsgPreCallbackUserWhitelist() {
+	app.apiMsgPreCallbackUserIDs = parseUserIDWhitelist(app.ApiMsgPreCallbackUserWhitelist)
+}
+
+func (app *AppInfo) IsApiMsgPreCallbackUserAllowed(userID string) bool {
+	if strings.TrimSpace(app.ApiMsgPreCallbackUserWhitelist) == "" {
+		return true
+	}
+	userIDs := app.apiMsgPreCallbackUserIDs
+	if userIDs == nil {
+		userIDs = parseUserIDWhitelist(app.ApiMsgPreCallbackUserWhitelist)
+	}
+	_, ok := userIDs[strings.TrimSpace(userID)]
+	return ok
+}
+
+func parseUserIDWhitelist(value string) map[string]struct{} {
+	userIDs := map[string]struct{}{}
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return userIDs
+	}
+
+	var items []string
+	if strings.HasPrefix(value, "[") && json.Unmarshal([]byte(value), &items) == nil {
+		for _, item := range items {
+			if userID := strings.TrimSpace(item); userID != "" {
+				userIDs[userID] = struct{}{}
+			}
+		}
+		return userIDs
+	}
+
+	for _, item := range strings.FieldsFunc(value, func(r rune) bool {
+		return r == ',' || r == ';' || r == '\n' || r == '\r'
+	}) {
+		if userID := strings.TrimSpace(item); userID != "" {
+			userIDs[userID] = struct{}{}
+		}
+	}
+	return userIDs
 }
 
 var notExistAppInfo *AppInfo
@@ -122,13 +171,9 @@ func init() {
 
 			appExtTable := dbs.AppExtDao{}
 			appExtList := appExtTable.FindListByAppkey(key.(string))
-			extMap := make(map[string]string)
-			if len(appExtList) > 0 {
-				for _, appExt := range appExtList {
-					extMap[strings.ToLower(appExt.AppItemKey)] = appExt.AppItemValue
-				}
-			}
+			extMap := buildAppExtMap(appExtList)
 			FillObjField(appInfo, extMap)
+			appInfo.loadApiMsgPreCallbackUserWhitelist()
 
 			//event subscription config
 			if appInfo.EventSubConfigObj == nil && appInfo.EventSubConfig != "" {
@@ -177,6 +222,26 @@ func init() {
 		}
 		return notExistAppInfo
 	})
+}
+
+func buildAppExtMap(appExtList []*dbs.AppExtDao) map[string]string {
+	extMap := make(map[string]string)
+	for _, appExt := range appExtList {
+		if appExt == nil || isProtectedAppInfoField(appExt.AppItemKey) {
+			continue
+		}
+		extMap[strings.ToLower(appExt.AppItemKey)] = appExt.AppItemValue
+	}
+	return extMap
+}
+
+func isProtectedAppInfoField(fieldName string) bool {
+	switch strings.ToLower(strings.TrimSpace(fieldName)) {
+	case "app_name", "app_key", "app_secret", "app_secure_key", "app_status", "app_type", "lic_conf", "created_time":
+		return true
+	default:
+		return false
+	}
 }
 
 func FillObjField(obj interface{}, valMap map[string]string) {

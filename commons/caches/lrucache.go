@@ -8,9 +8,11 @@ import (
 )
 
 type lruCacheItem struct {
-	value        interface{}
-	lastReadTime int64
-	addedTime    int64
+	value           interface{}
+	lastReadTime    int64
+	addedTime       int64
+	swrSoftExpireAt int64
+	swrHardExpireAt int64
 }
 
 type LruCache struct {
@@ -24,6 +26,13 @@ type LruCache struct {
 
 	batchEvict func(items []CacheItem)
 	batchSize  int
+
+	swrLock sync.RWMutex
+	swr     *staleWhileRevalidateState
+
+	// purgeEpoch prevents an in-flight load that started before Purge from
+	// repopulating the cache after the purge has completed.
+	purgeEpoch uint64
 }
 
 type CacheItem struct {
@@ -100,27 +109,29 @@ func (c *LruCache) AddTimeoutAfterRead(timeout time.Duration) *LruCache {
 func (c *LruCache) cleanOldestByReadTime(timeLine int64) {
 	cacheItems := []CacheItem{}
 	for {
+		c.lock.Lock()
 		itemKey, itemValue, ok := c.lru.GetOldest()
-		if ok {
-			valObj := itemValue.(*lruCacheItem)
-			lastReadTime := valObj.lastReadTime
-			if lastReadTime < timeLine {
-				c.Remove(itemKey)
-				if c.batchEvict != nil {
-					cacheItems = append(cacheItems, CacheItem{
-						Key:   itemKey,
-						Value: valObj.value,
-					})
-					if len(cacheItems) >= c.batchSize {
-						c.batchEvict(cacheItems)
-						cacheItems = []CacheItem{}
-					}
-				}
-			} else {
-				break
-			}
-		} else {
+		if !ok {
+			c.lock.Unlock()
 			break
+		}
+		valObj := itemValue.(*lruCacheItem)
+		if valObj.lastReadTime >= timeLine {
+			c.lock.Unlock()
+			break
+		}
+		c.lru.Remove(itemKey)
+		c.lock.Unlock()
+
+		if c.batchEvict != nil {
+			cacheItems = append(cacheItems, CacheItem{
+				Key:   itemKey,
+				Value: valObj.value,
+			})
+			if len(cacheItems) >= c.batchSize {
+				c.batchEvict(cacheItems)
+				cacheItems = []CacheItem{}
+			}
 		}
 	}
 	if c.batchEvict != nil && len(cacheItems) > 0 {
@@ -256,9 +267,33 @@ func (c *LruCache) Peek(key interface{}) (interface{}, bool) {
 	}
 }
 
+type CacheSnapshotEntry struct {
+	Key   interface{}
+	Value interface{}
+	Found bool
+}
+
+// SnapshotForKeys captures a bounded batch of entry pointers without changing
+// recency or expiring them. Callers synchronize access to mutable values.
+func (c *LruCache) SnapshotForKeys(keys []interface{}) []CacheSnapshotEntry {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	entries := make([]CacheSnapshotEntry, 0, len(keys))
+	for _, key := range keys {
+		item, ok := c.lru.Peek(key)
+		if ok {
+			entries = append(entries, CacheSnapshotEntry{Key: key, Value: item.(*lruCacheItem).value, Found: true})
+		} else {
+			entries = append(entries, CacheSnapshotEntry{Key: key})
+		}
+	}
+	return entries
+}
+
 func (c *LruCache) Purge() {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+	c.purgeEpoch++
 	c.lru.Purge()
 }
 

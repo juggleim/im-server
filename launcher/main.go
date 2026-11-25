@@ -54,10 +54,6 @@ import (
 
 func main() {
 	start := time.Now()
-	go func() {
-		fmt.Println(http.ListenAndServe(":6060", nil))
-	}()
-
 	//init configures
 	if err := configures.InitConfigures(); err != nil {
 		//logs.Error("Init Configures failed.", err)
@@ -69,10 +65,16 @@ func main() {
 	//init mysql
 	if err := dbcommons.InitMysql(); err != nil {
 		logs.Error("Init Mysql failed.", err)
-		return
+		os.Exit(1)
 	}
 	//upgrade mysql
-	dbcommons.Upgrade()
+	if err := dbcommons.Upgrade(); err != nil {
+		logs.Error("Upgrade Mysql failed.", err)
+		os.Exit(1)
+	}
+	go func() {
+		fmt.Println(http.ListenAndServe(":6060", nil))
+	}()
 	//init tsdb
 	if err := kvdbcommons.InitKvdb(); err != nil {
 		logs.Error("Init KvDB failed.", err)

@@ -3,6 +3,7 @@ package dbs
 import (
 	"bytes"
 	"fmt"
+	"gorm.io/gorm"
 	"im-server/commons/dbcommons"
 	"im-server/services/historymsg/storages/models"
 	"sort"
@@ -29,6 +30,13 @@ func (rel GroupPortionRelDao) Upsert(item models.GroupPortionRel) error {
 }
 
 func (rel GroupPortionRelDao) BatchUpsert(items []models.GroupPortionRel) error {
+	return rel.batchUpsert(dbcommons.GetDb(), items)
+}
+
+func (rel GroupPortionRelDao) batchUpsert(db *gorm.DB, items []models.GroupPortionRel) error {
+	if len(items) == 0 {
+		return nil
+	}
 	var buffer bytes.Buffer
 	sql := fmt.Sprintf("INSERT IGNORE INTO %s (app_key,conver_id,channel_type,sub_channel,user_id,msg_id,msg_time)VALUES", rel.TableName())
 	buffer.WriteString(sql)
@@ -41,7 +49,7 @@ func (rel GroupPortionRelDao) BatchUpsert(items []models.GroupPortionRel) error 
 		}
 		params = append(params, item.AppKey, item.ConverId, item.ChannelType, item.SubChannel, item.UserId, item.MsgId, item.MsgTime)
 	}
-	return dbcommons.GetDb().Exec(buffer.String(), params...).Error
+	return db.Exec(buffer.String(), params...).Error
 }
 
 func (rel GroupPortionRelDao) Delete(item models.GroupPortionRel) error {

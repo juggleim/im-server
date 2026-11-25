@@ -116,8 +116,8 @@ func (msg *GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId, subChannel
 			"$lt": startTime,
 		}
 	}
-	projection := bson.D{{"msg_id", 1}, {"sender_id", 1}, {"receiver_id", 1}, {"send_time", 1}, {"msg_seq_no", 1}, {"app_key", 1}}
-	cur, err := collection.Find(context.TODO(), filter, options.Find().SetProjection(projection), options.Find().SetSort(bson.D{{"msg_time", dbSort}}), options.Find().SetLimit(int64(count)))
+	projection := bson.D{{Key: "msg_id", Value: 1}, {Key: "sender_id", Value: 1}, {Key: "receiver_id", Value: 1}, {Key: "sub_channel", Value: 1}, {Key: "send_time", Value: 1}, {Key: "msg_seq_no", Value: 1}, {Key: "app_key", Value: 1}}
+	cur, err := collection.Find(context.TODO(), filter, options.Find().SetProjection(projection), options.Find().SetSort(bson.D{{Key: "send_time", Value: dbSort}}), options.Find().SetLimit(int64(count)))
 	defer func() {
 		if cur != nil {
 			cur.Close(context.TODO())
@@ -131,12 +131,13 @@ func (msg *GroupDelHisMsgDao) QryDelHisMsgs(appkey, userId, targetId, subChannel
 		err = cur.Decode(&item)
 		if err == nil {
 			retItems = append(retItems, &models.GroupDelHisMsg{
-				UserId:   userId,
-				TargetId: item.ReceiverId,
-				MsgId:    item.MsgId,
-				MsgTime:  item.SendTime,
-				MsgSeq:   item.MsgSeqNo,
-				AppKey:   item.AppKey,
+				UserId:     userId,
+				TargetId:   item.ReceiverId,
+				SubChannel: item.SubChannel,
+				MsgId:      item.MsgId,
+				MsgTime:    item.SendTime,
+				MsgSeq:     item.MsgSeqNo,
+				AppKey:     item.AppKey,
 			})
 		}
 	}

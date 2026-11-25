@@ -44,12 +44,29 @@ func CheckMsgInterceptor(ctx context.Context, senderId, receiverId string, chann
 	//other
 	msgInterceptors := GetMsgInterceptors(appkey)
 	for _, msgInterceptor := range msgInterceptors.Interceptors {
+		if shouldSkipApiMsgCallback(bases.GetIsFromApiFromCtx(ctx), senderId, appInfo, msgInterceptor) {
+			continue
+		}
 		result, code := msgInterceptor.CheckMsgInterceptor(ctx, senderId, receiverId, channelType, upMsg)
 		if result != interceptors.InterceptorResult_Pass {
 			return result, code
 		}
 	}
 	return interceptors.InterceptorResult_Pass, 0
+}
+
+func shouldSkipApiMsgCallback(isFromApi bool, senderID string, appInfo *AppInfo, msgInterceptor *interceptors.MsgInterceptor) bool {
+	if !isFromApi || msgInterceptor == nil {
+		return false
+	}
+	_, isCustomCallback := msgInterceptor.Interceptor.(*interceptors.CustomInterceptor)
+	if !isCustomCallback {
+		return false
+	}
+	if appInfo == nil || !appInfo.IsSubApiMsg {
+		return true
+	}
+	return !appInfo.IsApiMsgPreCallbackUserAllowed(senderID)
 }
 
 func GetMsgInterceptors(appkey string) *MsgInterceptors {

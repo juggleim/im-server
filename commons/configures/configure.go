@@ -59,7 +59,8 @@ type ImConfig struct {
 	} `yaml:"connectManager"`
 
 	ApiGateway struct {
-		HttpPort int `yaml:"httpPort"`
+		HttpPort    int      `yaml:"httpPort"`
+		IPWhitelist []string `yaml:"ipWhitelist"`
 	} `yaml:"apiGateway"`
 
 	NavGateway struct {

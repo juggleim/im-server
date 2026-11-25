@@ -6,6 +6,8 @@ import (
 	"im-server/commons/pbdefines/pbobjs"
 	"im-server/commons/tools"
 	"im-server/services/commonservices"
+	"im-server/services/commonservices/logs"
+	"im-server/services/commonservices/persistentqueues"
 	"im-server/services/conversation/storages"
 	"im-server/services/conversation/storages/models"
 	"math"
@@ -14,15 +16,19 @@ import (
 	"time"
 
 	"github.com/bytedance/gopkg/collection/zset"
+	"google.golang.org/protobuf/proto"
 )
 
 var userConverCache *caches.LruCache
 var userLocks *tools.SegmentatedLocks
 
 var persistCache *caches.EphemeralCache
-var persistSem chan struct{}
 
-const persistWorkerCount = 32
+const (
+	userConverLockSegments   = 8192
+	userConverPurgeTolerance = 100
+	userConverLoadPageSize   = 1000
+)
 
 type ConverPersistIndex struct {
 	Appkey      string
@@ -32,55 +38,37 @@ type ConverPersistIndex struct {
 	SubChannel  string
 }
 
+type converPersistFields uint32
+
+const (
+	converPersistMessage converPersistFields = 1 << iota
+	converPersistRead
+	converPersistTop
+	converPersistUndisturb
+	converPersistUnreadTag
+	converPersistExts
+	converPersistDeleted
+)
+
+type pendingConversation struct {
+	Conversation models.Conversation
+	Fields       converPersistFields
+}
+
 func init() {
-	userConverCache = caches.NewLruCacheWithReadTimeout("userconver_cache", 100000, nil, time.Hour)
-	userLocks = tools.NewSegmentatedLocks(512)
-
-	persistSem = make(chan struct{}, persistWorkerCount)
+	userConverCache = caches.NewLruCacheWithReadTimeout("userconver_cache", 50000, nil, time.Hour)
+	userLocks = tools.NewSegmentatedLocks(userConverLockSegments)
+	go scanUserConverCachePeriodically()
 	persistCache = caches.NewEphemeralCache(time.Second, 60*time.Second, func(key, value interface{}) {
-		persistIndex, ok := value.(*ConverPersistIndex)
-		if ok && persistIndex != nil {
-			userConvers := getUserConvers(persistIndex.Appkey, persistIndex.UserId)
-			item := userConvers.QryConver(persistIndex.TargetId, persistIndex.SubChannel, persistIndex.ChannelType)
-			if item != nil {
-				conversation := models.Conversation{
-					AppKey:      item.AppKey,
-					UserId:      item.UserId,
-					TargetId:    item.TargetId,
-					ChannelType: item.ChannelType,
-					SubChannel:  item.SubChannel,
-
-					SortTime: item.SortTime,
-					SyncTime: item.SyncTime,
-
-					LatestMsgId: item.LatestMsgId,
-					// LatestMsg:            item.LatestMsg,
-					LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
-
-					LatestReadMsgIndex: item.LatestReadMsgIndex,
-					LatestReadMsgId:    item.LatestReadMsgId,
-					LatestReadMsgTime:  item.LatestReadMsgTime,
-
-					IsTop:          item.IsTop,
-					TopUpdatedTime: item.TopUpdatedTime,
-					UndisturbType:  item.UndisturbType,
-
-					UnreadTag:  item.UnreadTag,
-					ConverExts: item.ConverExts,
-					IsDeleted:  item.IsDeleted,
-				}
-				persistSem <- struct{}{}
+		pending, ok := value.(*pendingConversation)
+		if ok && pending != nil {
+			conversation := cloneConversation(&pending.Conversation)
+			persistentqueues.DoPersistentWithTag(strings.Join([]string{conversation.UserId, conversation.TargetId}, "_"), func() {
 				storage := storages.NewConversationStorage()
-				go func() {
-					defer func() {
-						<-persistSem
-					}()
-					err := storage.Upsert(conversation)
-					if err != nil {
-						fmt.Println("save conver err:", err)
-					}
-				}()
-			}
+				if err := storage.Upsert(*conversation); err != nil {
+					logs.NewLogEntity().Error(err.Error())
+				}
+			})
 		}
 	})
 }
@@ -140,18 +128,28 @@ func (uc *UserConversations) UpsertCovner(conver models.Conversation) *models.Co
 			SortTime:             conver.SortTime,
 			SyncTime:             conver.SyncTime,
 			ConverExts:           conver.ConverExts,
+			UndisturbType:        conver.UndisturbType,
+			IsDeleted:            conver.IsDeleted,
 		}
 		uc.ConverItemMap[itemKey] = item
 		uc.SyncTimeIndex.Add(float64(item.SyncTime), itemKey)
 		uc.SortTimeIndex.Add(float64(item.SortTime), itemKey)
-		evictCount := len(uc.ConverItemMap) - 10000
-		if evictCount > 100 {
+
+		evictCount := len(uc.ConverItemMap) - getMaxUserCachedConvers(uc.Appkey)
+		if evictCount > userConverPurgeTolerance {
 			go uc.purge()
 		}
 		result = item
 	}
 	snapshot := *result
 	return &snapshot
+}
+
+func getMaxUserCachedConvers(appkey string) int {
+	if appinfo, exist := commonservices.GetAppInfo(appkey); exist && appinfo != nil && appinfo.MaxUserConverCount >= 1000 {
+		return appinfo.MaxUserConverCount
+	}
+	return 3000
 }
 
 func (uc *UserConversations) AppendMention(targetId, subChannel string, channelType pbobjs.ChannelType, mentionMsg *models.MentionMsg) {
@@ -308,14 +306,14 @@ func (uc *UserConversations) purge() {
 		lock.Lock()
 		defer lock.Unlock()
 
-		evictCount := len(uc.ConverItemMap) - 10000
-		if evictCount > 100 {
+		evictCount := len(uc.ConverItemMap) - getMaxUserCachedConvers(uc.Appkey)
+		if evictCount > userConverPurgeTolerance {
 			list := uc.SortTimeIndex.RangeByScore(0, float64(time.Now().UnixMilli()))
 			for i, item := range list {
 				uc.SortTimeIndex.Remove(item.Value)
 				uc.SyncTimeIndex.Remove(item.Value)
 				delete(uc.ConverItemMap, item.Value)
-				if i >= evictCount {
+				if i+1 >= evictCount {
 					break
 				}
 			}
@@ -335,34 +333,96 @@ func (uc *UserConversations) purge() {
 // 	})
 // }
 
-func (uc *UserConversations) PersistConverV2(item *models.Conversation) {
+func (uc *UserConversations) PersistConverFields(item *models.Conversation, fields converPersistFields) {
+	if item == nil {
+		return
+	}
 	key := fmt.Sprintf("%s_%s_%s_%s_%d", uc.Appkey, uc.UserId, item.TargetId, item.SubChannel, item.ChannelType)
-	persistCache.Add(key, &models.Conversation{
-		AppKey:      item.AppKey,
-		UserId:      item.UserId,
-		TargetId:    item.TargetId,
-		ChannelType: item.ChannelType,
-		SubChannel:  item.SubChannel,
-
-		SortTime: item.SortTime,
-		SyncTime: item.SyncTime,
-
-		LatestMsgId: item.LatestMsgId,
-		// LatestMsg:            item.LatestMsg,
-		LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
-
-		LatestReadMsgIndex: item.LatestReadMsgIndex,
-		LatestReadMsgId:    item.LatestReadMsgId,
-		LatestReadMsgTime:  item.LatestReadMsgTime,
-
-		IsTop:          item.IsTop,
-		TopUpdatedTime: item.TopUpdatedTime,
-		UndisturbType:  item.UndisturbType,
-
-		UnreadTag:  item.UnreadTag,
-		ConverExts: item.ConverExts,
-		IsDeleted:  item.IsDeleted,
+	persistCache.Upsert(key, func(oldVal interface{}) interface{} {
+		return mergePendingConversation(oldVal, item, fields, true)
 	})
+}
+
+func (uc *UserConversations) PersistConverV2(item *models.Conversation) {
+	uc.PersistConverFields(item, converPersistMessage|converPersistRead|converPersistTop|converPersistUndisturb|converPersistUnreadTag|converPersistExts|converPersistDeleted)
+}
+
+func (uc *UserConversations) MergePendingConverFields(item *models.Conversation, fields converPersistFields) {
+	if item == nil {
+		return
+	}
+	key := fmt.Sprintf("%s_%s_%s_%s_%d", uc.Appkey, uc.UserId, item.TargetId, item.SubChannel, item.ChannelType)
+	persistCache.Upsert(key, func(oldVal interface{}) interface{} {
+		return mergePendingConversation(oldVal, item, fields, false)
+	})
+}
+
+func mergePendingConversation(oldVal interface{}, item *models.Conversation, fields converPersistFields, create bool) interface{} {
+	if item == nil {
+		return oldVal
+	}
+	pending, _ := oldVal.(*pendingConversation)
+	if pending == nil {
+		if !create {
+			return nil
+		}
+		return &pendingConversation{
+			Conversation: *cloneConversation(item),
+			Fields:       fields,
+		}
+	}
+	if fields&converPersistMessage != 0 {
+		if item.SyncTime >= pending.Conversation.SyncTime {
+			pending.Conversation.SyncTime = item.SyncTime
+			pending.Conversation.LatestMsgId = item.LatestMsgId
+		}
+		if item.SortTime > pending.Conversation.SortTime {
+			pending.Conversation.SortTime = item.SortTime
+		}
+		if item.LatestUnreadMsgIndex > pending.Conversation.LatestUnreadMsgIndex {
+			pending.Conversation.LatestUnreadMsgIndex = item.LatestUnreadMsgIndex
+		}
+	}
+	if fields&converPersistRead != 0 {
+		pending.Conversation.LatestReadMsgIndex = item.LatestReadMsgIndex
+		pending.Conversation.LatestReadMsgId = item.LatestReadMsgId
+		pending.Conversation.LatestReadMsgTime = item.LatestReadMsgTime
+	}
+	if fields&converPersistTop != 0 {
+		pending.Conversation.IsTop = item.IsTop
+		pending.Conversation.TopUpdatedTime = item.TopUpdatedTime
+	}
+	if fields&converPersistUndisturb != 0 {
+		pending.Conversation.UndisturbType = item.UndisturbType
+	}
+	if fields&converPersistUnreadTag != 0 {
+		pending.Conversation.UnreadTag = item.UnreadTag
+	}
+	if fields&converPersistExts != 0 {
+		pending.Conversation.ConverExts = cloneConverExts(item.ConverExts)
+	}
+	if fields&converPersistDeleted != 0 {
+		pending.Conversation.IsDeleted = item.IsDeleted
+	}
+	pending.Fields |= fields
+	return pending
+}
+
+func cloneConversation(item *models.Conversation) *models.Conversation {
+	if item == nil {
+		return nil
+	}
+	ret := *item
+	ret.LatestMsg = append([]byte(nil), item.LatestMsg...)
+	ret.ConverExts = cloneConverExts(item.ConverExts)
+	return &ret
+}
+
+func cloneConverExts(exts *pbobjs.ConverExts) *pbobjs.ConverExts {
+	if exts == nil {
+		return nil
+	}
+	return proto.Clone(exts).(*pbobjs.ConverExts)
 }
 
 func (uc *UserConversations) SyncConvers(startTime int64, count int32) []*models.Conversation {
@@ -571,13 +631,17 @@ func converContainsTag(conver *models.Conversation, tag string) bool {
 	return conver.ConverExts.ConverTags[tag] || conver.ConverExts.GlobalConverTags[tag]
 }
 
-func (uc *UserConversations) ClearTotalUnread() {
+func (uc *UserConversations) ClearTotalUnread() []*models.Conversation {
 	key := getUserConverCacheKey(uc.Appkey, uc.UserId)
 	lock := userLocks.GetLocks(key)
 	lock.Lock()
 	defer lock.Unlock()
 
+	changed := make([]*models.Conversation, 0)
 	for _, conver := range uc.ConverItemMap {
+		if conver.LatestReadMsgIndex != conver.LatestUnreadMsgIndex || conver.UnreadTag != 0 {
+			changed = append(changed, cloneConversation(conver))
+		}
 		conver.LatestReadMsgIndex = conver.LatestUnreadMsgIndex
 		conver.UnreadTag = 0
 		conver.MentionInfo = &models.ConverMentionInfo{
@@ -585,6 +649,11 @@ func (uc *UserConversations) ClearTotalUnread() {
 			MentionMsgs: []*models.MentionMsg{},
 		}
 	}
+	for _, conver := range changed {
+		conver.LatestReadMsgIndex = conver.LatestUnreadMsgIndex
+		conver.UnreadTag = 0
+	}
+	return changed
 }
 
 func buildConverFilterSet(convers []*pbobjs.SimpleConversation) map[string]struct{} {
@@ -845,6 +914,7 @@ func getUserConvers(appkey, userId string) *UserConversations {
 	if obj, exist := userConverCache.Get(key); exist {
 		return obj.(*UserConversations)
 	} else {
+		maxUserCachedConvers := getMaxUserCachedConvers(appkey)
 		l := userLocks.GetLocks(key)
 		l.Lock()
 		defer l.Unlock()
@@ -864,7 +934,7 @@ func getUserConvers(appkey, userId string) *UserConversations {
 				TopIndexBaseTopTime:  zset.NewFloat64(),
 				TopIndexBaseSortTime: zset.NewFloat64(),
 			}
-			var count int32 = 1000
+			var count int32 = userConverLoadPageSize
 			index := 0
 			for {
 				dbConvers, err := storage.QryConvers(appkey, userId, startTime, count)
@@ -894,7 +964,7 @@ func getUserConvers(appkey, userId string) *UserConversations {
 					break
 				}
 				index++
-				if index >= 10 {
+				if index >= maxUserCachedConvers/userConverLoadPageSize {
 					break
 				}
 			}

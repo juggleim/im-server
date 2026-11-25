@@ -94,11 +94,11 @@ func AddConversation(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
-	bases.SyncRpcCall(services.ToRpcCtx(ctx, req.UserId), "add_conver", req.UserId, &pbobjs.Conversation{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, req.UserId), "add_conver", req.UserId, &pbobjs.Conversation{
 		UserId:      req.UserId,
 		TargetId:    req.TargetId,
 		ChannelType: pbobjs.ChannelType(req.ChannelType),
-	}, nil)
+	})
 	tools.SuccessHttpResp(ctx, nil)
 }
 
@@ -171,9 +171,9 @@ func UndisturbConvers(ctx *gin.Context) {
 			UndisturbType: reqItem.UndisturbType,
 		})
 	}
-	bases.SyncRpcCall(services.ToRpcCtx(ctx, undisturbConversReq.UserId), "undisturb_convers", undisturbConversReq.UserId, &pbobjs.UndisturbConversReq{
+	bases.AsyncRpcCall(services.ToRpcCtx(ctx, undisturbConversReq.UserId), "undisturb_convers", undisturbConversReq.UserId, &pbobjs.UndisturbConversReq{
 		Items: items,
-	}, nil)
+	})
 	tools.SuccessHttpResp(ctx, nil)
 }
 

@@ -100,12 +100,17 @@ func GroupAddMembers(ctx *gin.Context) {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_REQ_BODY_ILLEGAL)
 		return
 	}
+	var undisturbType int32
+	if addMemberReq.UndisturbType != nil {
+		undisturbType = *addMemberReq.UndisturbType
+	}
 	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "g_add_members", addMemberReq.GroupId, &pbobjs.GroupMembersReq{
 		GroupId:       addMemberReq.GroupId,
 		GroupName:     addMemberReq.GroupName,
 		GroupPortrait: addMemberReq.GroupPortrait,
 		MemberIds:     addMemberReq.MemberIds,
 		ExtFields:     commonservices.Map2KvItems(addMemberReq.ExtFields),
+		UndisturbType: undisturbType,
 	}, func() proto.Message {
 		return &pbobjs.GroupMembersResp{}
 	})

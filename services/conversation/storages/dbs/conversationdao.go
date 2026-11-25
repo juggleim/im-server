@@ -36,6 +36,8 @@ type ConversationDao struct {
 	IsDeleted  int    `gorm:"is_deleted"`
 }
 
+const conversationQueryColumns = "app_key,user_id,target_id,channel_type,sub_channel,sort_time,sync_time,latest_msg_id,latest_unread_msg_index,latest_read_msg_index,latest_read_msg_id,latest_read_msg_time,is_top,top_updated_time,undisturb_type,unread_tag,is_deleted,conver_exts"
+
 func (conver *ConversationDao) TableName() string {
 	return "conversations"
 }
@@ -128,7 +130,6 @@ func (conver *ConversationDao) QryConvers(appkey, userId string, startTime int64
 			ChannelType:          pbobjs.ChannelType(item.ChannelType),
 			SubChannel:           item.SubChannel,
 			LatestMsgId:          item.LatestMsgId,
-			LatestMsg:            item.LatestMsg,
 			LatestUnreadMsgIndex: item.LatestUnreadMsgIndex,
 			AppKey:               item.AppKey,
 			LatestReadMsgIndex:   item.LatestReadMsgIndex,

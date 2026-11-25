@@ -21,6 +21,41 @@ func newFakeWsContext(appkey, userid, session string) *fakeWsContext {
 	return ctx
 }
 
+func newFakeWsContextWithDevice(appkey, userid, session, deviceId, platform string) *fakeWsContext {
+	ctx := newFakeWsContext(appkey, userid, session)
+	imcontext.SetContextAttr(ctx, imcontext.StateKey_DeviceID, deviceId)
+	imcontext.SetContextAttr(ctx, imcontext.StateKey_Platform, platform)
+	return ctx
+}
+
+func putInContextCacheForTest(ctx imcontext.WsHandleContext) {
+	session := imcontext.GetConnSession(ctx)
+	storeOnlineSession(session, ctx)
+	appkey := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey)
+	userid := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
+	addUserSessionLocked(getUserIdentifier(appkey, userid), appkey, session, ctx)
+}
+
+func TestGetOnlineDevicesByUser(t *testing.T) {
+	resetOnlineConnectStateForTest()
+	putInContextCacheForTest(newFakeWsContextWithDevice("device-app", "u1", "s1", "device-b", "Web"))
+	putInContextCacheForTest(newFakeWsContextWithDevice("device-app", "u1", "s2", "device-a", "Android"))
+	putInContextCacheForTest(newFakeWsContextWithDevice("device-app", "u1", "s3", "device-a", "Android"))
+	devices := GetOnlineDevicesByUser("device-app", "u1")
+	want := []OnlineDeviceInfo{{DeviceId: "device-a", Platform: "Android"}, {DeviceId: "device-b", Platform: "Web"}}
+	if len(devices) != len(want) {
+		t.Fatalf("GetOnlineDevicesByUser returned %d devices, want %d: %+v", len(devices), len(want), devices)
+	}
+	for i := range want {
+		if devices[i] != want[i] {
+			t.Fatalf("GetOnlineDevicesByUser[%d] = %+v, want %+v", i, devices[i], want[i])
+		}
+	}
+	if offlineDevices := GetOnlineDevicesByUser("device-app", "offline-user"); len(offlineDevices) != 0 {
+		t.Fatalf("offline user returned devices: %+v", offlineDevices)
+	}
+}
+
 func (ctx *fakeWsContext) Write(message interface{}) {}
 
 func (ctx *fakeWsContext) Close(err error) {

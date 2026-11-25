@@ -10,44 +10,44 @@ import (
 func NewInboxMsgStorage() models.IMsgStorage {
 	switch configures.Config.MsgStoreEngine {
 	case configures.MsgStoreEngine_MySQL:
-		return &dbs.InboxMsgDao{}
+		return &dbs.InboxMsgSplitDao{}
 	case configures.MsgStoreEngine_Mongo:
 		return &mongodbs.InboxMsgDao{}
 	default:
-		return &dbs.InboxMsgDao{}
+		return &dbs.InboxMsgSplitDao{}
 	}
 }
 
 func NewSendboxMsgStorage() models.IMsgStorage {
 	switch configures.Config.MsgStoreEngine {
 	case configures.MsgStoreEngine_MySQL:
-		return &dbs.SendboxMsgDao{}
+		return &dbs.SendboxMsgSplitDao{}
 	case configures.MsgStoreEngine_Mongo:
 		return &mongodbs.SendboxMsgDao{}
 	default:
-		return &dbs.SendboxMsgDao{}
+		return &dbs.SendboxMsgSplitDao{}
 	}
 }
 
 func NewCmdInboxMsgStorage() models.IMsgStorage {
 	switch configures.Config.MsgStoreEngine {
 	case configures.MsgStoreEngine_MySQL:
-		return &dbs.CmdInboxMsgDao{}
+		return &dbs.CmdInboxMsgSplitDao{}
 	case configures.MsgStoreEngine_Mongo:
 		return &mongodbs.CmdInboxMsgDao{}
 	default:
-		return &dbs.CmdInboxMsgDao{}
+		return &dbs.CmdInboxMsgSplitDao{}
 	}
 }
 
 func NewCmdSendboxMsgStorage() models.IMsgStorage {
 	switch configures.Config.MsgStoreEngine {
 	case configures.MsgStoreEngine_MySQL:
-		return &dbs.CmdSendboxMsgDao{}
+		return &dbs.CmdSendboxMsgSplitDao{}
 	case configures.MsgStoreEngine_Mongo:
 		return &mongodbs.CmdSendboxMsgDao{}
 	default:
-		return &dbs.CmdSendboxMsgDao{}
+		return &dbs.CmdSendboxMsgSplitDao{}
 	}
 }
 

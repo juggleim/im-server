@@ -36,8 +36,14 @@ type UserOnlineStatusResp struct {
 }
 
 type UserOnlineStatusItem struct {
-	UserId   string `json:"user_id"`
-	IsOnline bool   `json:"is_online"`
+	UserId   string              `json:"user_id"`
+	IsOnline bool                `json:"is_online"`
+	Devices  []*UserOnlineDevice `json:"devices"`
+}
+
+type UserOnlineDevice struct {
+	DeviceId string `json:"device_id"`
+	Platform string `json:"platform"`
 }
 
 // user ban
@@ -51,13 +57,14 @@ type QryBanUsersResp struct {
 }
 
 type BanUser struct {
-	UserId        string `json:"user_id"`
-	CreatedTime   int64  `json:"created_time"`
-	EndTime       int64  `json:"end_time"`
-	EndTimeOffset int64  `json:"end_time_offset"`
-	ScopeKey      string `json:"scope_key"`
-	ScopeValue    string `json:"scope_value"`
-	Ext           string `json:"ext,omitempty"`
+	UserId        string   `json:"user_id"`
+	CreatedTime   int64    `json:"created_time"`
+	EndTime       int64    `json:"end_time"`
+	EndTimeOffset int64    `json:"end_time_offset"`
+	ScopeKey      string   `json:"scope_key"`
+	ScopeValue    string   `json:"scope_value"`
+	ScopeValues   []string `json:"scope_values,omitempty"`
+	Ext           string   `json:"ext,omitempty"`
 }
 
 func (user *BanUser) GetTargetId() string {

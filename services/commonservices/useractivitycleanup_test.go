@@ -1,7 +1,9 @@
 package commonservices
 
 import (
+	"errors"
 	"im-server/services/commonservices/dbs"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -166,22 +168,56 @@ func TestIsBetterConnectCountKeeper(t *testing.T) {
 	}
 }
 
-func TestAggregateUserActivityScanRows(t *testing.T) {
-	rows := []dbs.UserActivityScanRow{
-		{ID: 1, AppKey: "app1", TimeMark: 1000},
-		{ID: 2, AppKey: "app1", TimeMark: 1000},
-		{ID: 3, AppKey: "app2", TimeMark: 1000},
-		{ID: 4, AppKey: "", TimeMark: 1000},
-	}
+type activityArchiveCall struct {
+	day    int64
+	remove bool
+}
+type activityArchiveFake struct {
+	days  []int64
+	calls []activityArchiveCall
+	err   error
+	today int64
+}
 
-	got := aggregateUserActivityScanRows(rows)
-	if len(got) != 2 {
-		t.Fatalf("len(aggregates) = %d, want 2", len(got))
+func (f *activityArchiveFake) DaysBefore(today int64) ([]int64, error) {
+	f.today = today
+	return f.days, nil
+}
+func (f *activityArchiveFake) ArchiveDay(day int64, remove bool) error {
+	f.calls = append(f.calls, activityArchiveCall{day, remove})
+	return f.err
+}
+
+func TestActivityArchiveKeepsTodayAndRetentionBoundary(t *testing.T) {
+	now := time.Date(2026, 11, 9, 4, 0, 0, 0, time.FixedZone("UTC+8", 8*3600))
+	today := dayTimeMark(now)
+	fake := &activityArchiveFake{days: []int64{today - 4*oneDay, today - 2*oneDay, today - oneDay, today, today + oneDay, 1, -1}}
+	if err := archiveUserActivityDays(fake, now); err != nil {
+		t.Fatal(err)
 	}
-	if got[dailyActivityBucketKey{appKey: "app1", timeMark: 1000}] != 2 {
-		t.Fatalf("app1@1000 = %d, want 2", got[dailyActivityBucketKey{appKey: "app1", timeMark: 1000}])
+	want := []activityArchiveCall{{today - 4*oneDay, true}, {today - 2*oneDay, false}, {today - oneDay, false}}
+	if fake.today != today || !reflect.DeepEqual(fake.calls, want) {
+		t.Fatalf("today=%d calls=%v", fake.today, fake.calls)
 	}
-	if got[dailyActivityBucketKey{appKey: "app2", timeMark: 1000}] != 1 {
-		t.Fatalf("app2@1000 = %d, want 1", got[dailyActivityBucketKey{appKey: "app2", timeMark: 1000}])
+}
+
+func TestActivityArchiveStopsOnFailure(t *testing.T) {
+	now := time.Now()
+	today := dayTimeMark(now)
+	failure := errors.New("summary failed")
+	fake := &activityArchiveFake{days: []int64{today - 4*oneDay, today - 3*oneDay}, err: failure}
+	if err := archiveUserActivityDays(fake, now); !errors.Is(err, failure) || len(fake.calls) != 1 {
+		t.Fatalf("calls=%v err=%v", fake.calls, err)
+	}
+}
+
+func TestActivityDailyWriteUsesMillisecondsWithoutChangingMessageStats(t *testing.T) {
+	now := time.Now()
+	day := getUserActivityTimeMark()
+	if day != dayTimeMark(now) {
+		t.Fatalf("activity writer is not using UTC milliseconds: %d", day)
+	}
+	if day%oneDay != 0 || day/1000 != getDbTimeMark() {
+		t.Fatalf("activity day=%d msgstat day=%d", day, getDbTimeMark())
 	}
 }

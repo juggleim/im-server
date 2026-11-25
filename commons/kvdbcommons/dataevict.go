@@ -13,7 +13,7 @@ var metaPrefix []byte = []byte("kvdb_meta_")
 var evictTaskPools *tools.SinglePools
 
 func init() {
-	evictTaskPools = tools.NewSinglePools(32, true)
+	evictTaskPools = tools.NewSinglePools(32, 100, true)
 }
 
 func startEvictTask() {
