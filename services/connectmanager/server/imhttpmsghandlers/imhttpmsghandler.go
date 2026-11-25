@@ -8,12 +8,20 @@ import (
 	"im-server/services/commonservices"
 	"im-server/services/commonservices/tokens"
 	"im-server/services/connectmanager/server/codec"
+	"im-server/services/connectmanager/services"
 	"io"
 	"net/http"
 	"time"
 )
 
 func ImHttpPubHandler(w http.ResponseWriter, r *http.Request) {
+	handlePublish(w, r, parseToken, bases.SyncUnicastRoute)
+}
+
+func handlePublish(w http.ResponseWriter, r *http.Request,
+	validateToken func(appkey, token string) (string, errs.IMErrorCode),
+	route func(bases.IRoute, time.Duration) (*pbobjs.RpcMessageWraper, error),
+) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -64,7 +72,7 @@ func ImHttpPubHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//check token
-	userId, code := parseToken(appkey, tokenStr)
+	userId, code := validateToken(appkey, tokenStr)
 	if code != errs.IMErrorCode_SUCCESS {
 		responseAck(w, codec.NewUserPublishAckMessage(&codec.PublishAckMsgBody{
 			Index: pubMsgBody.Index,
@@ -81,7 +89,15 @@ func ImHttpPubHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := bases.SyncUnicastRoute(&pbobjs.RpcMessageWraper{
+	if !services.CheckClientTopic(pubMsgBody.Topic) {
+		responseAck(w, codec.NewUserPublishAckMessage(&codec.PublishAckMsgBody{
+			Index: pubMsgBody.Index,
+			Code:  int32(errs.IMErrorCode_CONNECT_UNSUPPORTEDTOPIC),
+		}))
+		return
+	}
+
+	resp, err := route(&pbobjs.RpcMessageWraper{
 		RpcMsgType:   pbobjs.RpcMsgType_UserPub,
 		AppKey:       appkey,
 		Session:      "im_" + tools.GenerateUUIDShort11(),

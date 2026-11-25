@@ -139,6 +139,9 @@ func (listener *ImBotListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos
 			WithField("code", errs.IMErrorCode_CONNECT_EXCEEDLIMITED).Info("")
 		return
 	}
+	if !allowClientPublish(ctx, msg) {
+		return
+	}
 	isFromApi := false
 	userType := imcontext.GetUserType(ctx)
 	if userType == pbobjs.UserType_Admin {
@@ -242,6 +245,9 @@ func (listener *ImBotListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imc
 	appkey := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey)
 	userid := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 
+	if !allowClientQuery(ctx, msg) {
+		return
+	}
 	//preprocess rtc room creation
 	services.PreProcessRtcCreate(msg)
 

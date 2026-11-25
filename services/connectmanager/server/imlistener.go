@@ -227,6 +227,9 @@ func (*ImListenerImpl) PublishArrived(msg *codec.PublishMsgBody, qos int, ctx im
 		})
 		return
 	}
+	if !allowClientPublish(ctx, msg) {
+		return
+	}
 	isFromApi := false
 	userType := imcontext.GetUserType(ctx)
 	if userType == pbobjs.UserType_Admin {
@@ -368,6 +371,9 @@ func (listener *ImListenerImpl) QueryArrived(msg *codec.QueryMsgBody, ctx imcont
 	appkey := imcontext.GetContextAttrString(ctx, imcontext.StateKey_Appkey)
 	userid := imcontext.GetContextAttrString(ctx, imcontext.StateKey_UserID)
 
+	if !allowClientQuery(ctx, msg) {
+		return
+	}
 	// preprocess rtc room creation
 	services.PreProcessRtcCreate(msg)
 
