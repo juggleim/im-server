@@ -68,15 +68,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Run govulncheck
-        uses: golang/govulncheck-action@v1
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
         with:
-          # Override the action's default "stable" value so setup-go reads go.mod.
-          go-version-input: ""
           go-version-file: go.mod
-          go-package: ./...
           cache: true
           cache-dependency-path: go.sum
+
+      - name: Run govulncheck
+        env:
+          GOTOOLCHAIN: local
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
 
   container-build:
     name: Container build

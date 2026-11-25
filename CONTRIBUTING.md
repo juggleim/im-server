@@ -29,7 +29,7 @@ Brings up MySQL + im-server. WebSocket on `:9003`, server API on `:9001`, admin 
 
 ### Option B — From source
 
-Prerequisites: **Go 1.25+** and a **MySQL 8** instance (MongoDB optional, only for
+Prerequisites: **Go 1.26.11+** and a **MySQL 8** instance (MongoDB optional, only for
 `msgStoreEngine: mongo`).
 
 ```bash
