@@ -13,6 +13,9 @@ import (
 )
 
 func KickUser(ctx context.Context, req *pbobjs.KickUserReq, code errs.IMErrorCode) {
+	cancelKickUserPush(ctx, req, func(ctx context.Context, userId string) {
+		bases.AsyncRpcCall(ctx, "remove_push_token", userId, &pbobjs.Nil{})
+	})
 	appkey := bases.GetAppKeyFromCtx(ctx)
 	ctxs := []imcontext.WsHandleContext{}
 	ctxMap := GetConnectCtxByUser(appkey, req.UserId)
@@ -64,5 +67,13 @@ func KickUser(ctx context.Context, req *pbobjs.KickUserReq, code errs.IMErrorCod
 			time.Sleep(time.Millisecond * 50)
 			tmpCtx.Close(errors.New("kick off"))
 		}()
+	}
+}
+
+// Push tokens are stored per user. Cancellation is independent of online
+// connections and of the platform/device filters used to kick connections.
+func cancelKickUserPush(ctx context.Context, req *pbobjs.KickUserReq, remove func(context.Context, string)) {
+	if req.CancelPush && req.UserId != "" {
+		remove(ctx, req.UserId)
 	}
 }

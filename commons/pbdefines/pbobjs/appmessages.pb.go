@@ -7750,6 +7750,7 @@ type BanUser struct {
 	ScopeValue    string                 `protobuf:"bytes,5,opt,name=scopeValue,proto3" json:"scopeValue,omitempty"`
 	Ext           string                 `protobuf:"bytes,6,opt,name=ext,proto3" json:"ext,omitempty"`
 	ScopeValues   []string               `protobuf:"bytes,7,rep,name=scopeValues,proto3" json:"scopeValues,omitempty"`
+	CancelPush    bool                   `protobuf:"varint,8,opt,name=cancelPush,proto3" json:"cancelPush,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7831,6 +7832,13 @@ func (x *BanUser) GetScopeValues() []string {
 		return x.ScopeValues
 	}
 	return nil
+}
+
+func (x *BanUser) GetCancelPush() bool {
+	if x != nil {
+		return x.CancelPush
+	}
+	return false
 }
 
 type QryBanUsersReq struct {
@@ -8280,6 +8288,7 @@ type KickUserReq struct {
 	Platforms     []string               `protobuf:"bytes,3,rep,name=platforms,proto3" json:"platforms,omitempty"`
 	DeviceIds     []string               `protobuf:"bytes,4,rep,name=deviceIds,proto3" json:"deviceIds,omitempty"`
 	Ips           []string               `protobuf:"bytes,5,rep,name=ips,proto3" json:"ips,omitempty"`
+	CancelPush    bool                   `protobuf:"varint,6,opt,name=cancelPush,proto3" json:"cancelPush,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8347,6 +8356,13 @@ func (x *KickUserReq) GetIps() []string {
 		return x.Ips
 	}
 	return nil
+}
+
+func (x *KickUserReq) GetCancelPush() bool {
+	if x != nil {
+		return x.CancelPush
+	}
+	return false
 }
 
 type UserUndisturb struct {
@@ -12050,7 +12066,7 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\adevices\x18\x03 \x03(\v2\x11.UserOnlineDeviceR\adevices\"I\n" +
 	"\vBanUsersReq\x12$\n" +
 	"\bbanUsers\x18\x01 \x03(\v2\b.BanUserR\bbanUsers\x12\x14\n" +
-	"\x05isAdd\x18\x02 \x01(\bR\x05isAdd\"\xcd\x01\n" +
+	"\x05isAdd\x18\x02 \x01(\bR\x05isAdd\"\xed\x01\n" +
 	"\aBanUser\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
 	"\aendTime\x18\x02 \x01(\x03R\aendTime\x12 \n" +
@@ -12060,7 +12076,10 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"scopeValue\x18\x05 \x01(\tR\n" +
 	"scopeValue\x12\x10\n" +
 	"\x03ext\x18\x06 \x01(\tR\x03ext\x12 \n" +
-	"\vscopeValues\x18\a \x03(\tR\vscopeValues\"X\n" +
+	"\vscopeValues\x18\a \x03(\tR\vscopeValues\x12\x1e\n" +
+	"\n" +
+	"cancelPush\x18\b \x01(\bR\n" +
+	"cancelPush\"X\n" +
 	"\x0eQryBanUsersReq\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\x03R\x05limit\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\tR\x06offset\x12\x18\n" +
@@ -12088,13 +12107,16 @@ const file_commons_pbdefines_appmessages_proto_rawDesc = "" +
 	"\x04type\x18\x01 \x01(\x0e2\v.OnlineTypeR\x04type\x12$\n" +
 	"\rtargetSession\x18\x02 \x01(\tR\rtargetSession\x12 \n" +
 	"\vtargetIndex\x18\x03 \x01(\x05R\vtargetIndex\x12\x1c\n" +
-	"\tplatforms\x18\x04 \x03(\tR\tplatforms\"\x85\x01\n" +
+	"\tplatforms\x18\x04 \x03(\tR\tplatforms\"\xa5\x01\n" +
 	"\vKickUserReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\tR\x06userId\x12\x10\n" +
 	"\x03ext\x18\x02 \x01(\tR\x03ext\x12\x1c\n" +
 	"\tplatforms\x18\x03 \x03(\tR\tplatforms\x12\x1c\n" +
 	"\tdeviceIds\x18\x04 \x03(\tR\tdeviceIds\x12\x10\n" +
-	"\x03ips\x18\x05 \x03(\tR\x03ips\"m\n" +
+	"\x03ips\x18\x05 \x03(\tR\x03ips\x12\x1e\n" +
+	"\n" +
+	"cancelPush\x18\x06 \x01(\bR\n" +
+	"cancelPush\"m\n" +
 	"\rUserUndisturb\x12\x16\n" +
 	"\x06switch\x18\x01 \x01(\bR\x06switch\x12\x1a\n" +
 	"\btimezone\x18\x02 \x01(\tR\btimezone\x12(\n" +

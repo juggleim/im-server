@@ -175,7 +175,8 @@ func BanUsers(ctx context.Context, banUsers []*pbobjs.BanUser) {
 
 		//kick user
 		kicReq := &pbobjs.KickUserReq{
-			Ext: user.Ext,
+			Ext:        user.Ext,
+			CancelPush: user.CancelPush,
 		}
 		if user.UserId != "" {
 			switch scopeKey {

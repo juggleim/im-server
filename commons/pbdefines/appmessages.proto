@@ -811,6 +811,7 @@ message BanUser {
   string scopeValue = 5;
   string ext = 6;
   repeated string scopeValues = 7;
+  bool cancelPush = 8;
 }
 
 message QryBanUsersReq{
@@ -861,6 +862,7 @@ message KickUserReq {
   repeated string platforms = 3;
   repeated string deviceIds = 4;
   repeated string ips = 5;
+  bool cancelPush = 6;
 }
 message UserUndisturb{
   bool switch = 1;

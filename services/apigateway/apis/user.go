@@ -160,10 +160,11 @@ func KickUsers(ctx *gin.Context) {
 		return
 	}
 	code, _, err := bases.SyncRpcCall(services.ToRpcCtx(ctx, ""), "kick_user", req.UserId, &pbobjs.KickUserReq{
-		UserId:    req.UserId,
-		Platforms: req.Platforms,
-		DeviceIds: req.DeviceIds,
-		Ext:       req.Ext,
+		UserId:     req.UserId,
+		Platforms:  req.Platforms,
+		DeviceIds:  req.DeviceIds,
+		Ext:        req.Ext,
+		CancelPush: req.CancelPush,
 	}, nil)
 	if err != nil {
 		tools.ErrorHttpResp(ctx, errs.IMErrorCode_API_INTERNAL_TIMEOUT)
@@ -260,6 +261,7 @@ func UserBan(ctx *gin.Context) {
 				ScopeValue:  user.ScopeValue,
 				ScopeValues: user.ScopeValues,
 				Ext:         user.Ext,
+				CancelPush:  user.CancelPush,
 			}
 			if arr, ok = groups[node.Name]; ok {
 				arr = append(arr, pbBanUser)

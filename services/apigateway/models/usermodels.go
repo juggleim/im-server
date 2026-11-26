@@ -16,10 +16,11 @@ type UserInfo struct {
 }
 
 type KickUserReq struct {
-	UserId    string   `json:"user_id"`
-	Platforms []string `json:"platforms"`
-	DeviceIds []string `json:"device_ids"`
-	Ext       string   `json:"ext"`
+	UserId     string   `json:"user_id"`
+	Platforms  []string `json:"platforms"`
+	DeviceIds  []string `json:"device_ids"`
+	Ext        string   `json:"ext"`
+	CancelPush bool     `json:"cancel_push"`
 }
 
 type UserIds struct {
@@ -65,6 +66,7 @@ type BanUser struct {
 	ScopeValue    string   `json:"scope_value"`
 	ScopeValues   []string `json:"scope_values,omitempty"`
 	Ext           string   `json:"ext,omitempty"`
+	CancelPush    bool     `json:"cancel_push"`
 }
 
 func (user *BanUser) GetTargetId() string {
