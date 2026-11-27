@@ -58,15 +58,25 @@ func AddPushToken(appkey, userId string, userPushToken *UserPushToken) {
 	cachePushToken := GetPushToken(appkey, userId)
 	dao := dbs.PushTokenDao{}
 	if !cachePushToken.IsSame(userPushToken) {
+		//设备发生变化时，旧设备的 token 不能保留，以本次请求为准（包括空值）
+		deviceChanged := cachePushToken.DeviceId != userPushToken.DeviceId ||
+			cachePushToken.Platform != userPushToken.Platform ||
+			cachePushToken.PushChannel != userPushToken.PushChannel ||
+			cachePushToken.PackageName != userPushToken.PackageName
 		cachePushToken.DeviceId = userPushToken.DeviceId
 		cachePushToken.Platform = userPushToken.Platform
 		cachePushToken.PushChannel = userPushToken.PushChannel
 		cachePushToken.PackageName = userPushToken.PackageName
-		if userPushToken.PushToken != "" {
+		if deviceChanged {
 			cachePushToken.PushToken = userPushToken.PushToken
-		}
-		if userPushToken.VoipPushToken != "" {
 			cachePushToken.VoipPushToken = userPushToken.VoipPushToken
+		} else {
+			if userPushToken.PushToken != "" {
+				cachePushToken.PushToken = userPushToken.PushToken
+			}
+			if userPushToken.VoipPushToken != "" {
+				cachePushToken.VoipPushToken = userPushToken.VoipPushToken
+			}
 		}
 		//save to db
 		err := dao.Upsert(dbs.PushTokenDao{
